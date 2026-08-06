@@ -1,0 +1,16 @@
+node_modules
+dist
+.DS_Store
+*.log
+
+# Claves y configuración local. El .env lleva la clave de Google Maps:
+# si se sube al repositorio, cualquiera puede usarla y la factura llega igual.
+.env
+.env.*
+!.env.example
+
+.vercel
+.env*
+
+# Grafo de conocimiento generado (se reconstruye con /graphify)
+graphify-out/

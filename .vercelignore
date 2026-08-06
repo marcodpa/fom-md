@@ -1,0 +1,12 @@
+# El repositorio de la app móvil vive aquí solo como referencia de diseño y
+# de modelo de datos. No forma parte del sitio y no debe subirse.
+control-flotas-main
+
+# Artefactos y material de trabajo
+node_modules
+dist
+.claude
+.agents
+skills-lock.json
+fom-fondo-3d.png
+*.log

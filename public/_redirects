@@ -1,0 +1,5 @@
+# Toda ruta la resuelve React Router en el cliente (/entrar, /panel/..., /plataforma...).
+# Sin esta regla, recargar dentro del panel devuelve 404 en hosting estático.
+# Formato de Netlify y Cloudflare Pages. En Vercel se usa vercel.json; en
+# Apache un .htaccess con FallbackResource; en Nginx try_files $uri /index.html.
+/*  /index.html  200
