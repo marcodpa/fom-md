@@ -8,8 +8,9 @@ import Benefits from '../components/Benefits'
 import CTA from '../components/CTA'
 import Footer from '../components/Footer'
 
-// Inicio: la intro cinematográfica 3D y el resumen de la plataforma. Cada
-// bloque enlaza a su página dedicada; aquí es la vista panorámica.
+// Inicio: la intro cinematográfica en video controlada por scroll y el resumen
+// de la plataforma. Cada bloque enlaza a su página dedicada; aquí es la vista
+// panorámica.
 export default function Home({ reduced }) {
   return (
     <main id="contenido">

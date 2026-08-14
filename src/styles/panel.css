@@ -1587,3 +1587,32 @@ button.pnl-kpi:active { transform: scale(var(--e-escala-press)); }
     var(--e-superficie-2);
 }
 .pnl-empresa.es-admin b { color: var(--e-primario); }
+
+/* Espera mientras se le pregunta al servidor si hay sesión abierta. */
+.pnl-cargando-sesion {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  color: var(--pnl-texto-2, #9aa4b2);
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+/* Dato que la fuente no puede afirmar todavía. No es cero ni vacío: es
+   desconocido, y se lee distinto de un valor real. */
+.pnl-sin-dato {
+  color: var(--pnl-texto-3, #6b7480);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mapa en tema oscuro.
+   Se usa el MISMO proveedor de teselas que en claro (OpenStreetMap) y el
+   aspecto nocturno se consigue con un filtro. El proveedor de teselas oscuras
+   que había antes no responde desde la red de operación y dejaba el mapa en
+   negro; una dependencia externa menos es una cosa menos que se puede caer.
+   El filtro va solo sobre las teselas: los marcadores, el trazado y los
+   controles conservan su color. */
+.pnl-mapa.oscuro .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.7);
+}

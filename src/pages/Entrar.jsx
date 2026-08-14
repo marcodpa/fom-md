@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CUENTAS_DEMO, iniciarSesion, sesionActual } from '../panel/auth'
+import { alCambiar, CONECTADO_A_BD, CUENTAS_DEMO, iniciarSesion, sesionActual } from '../panel/auth'
 import GloboCanvas from '../components/GloboCanvas'
 
 // ============================================================
@@ -57,30 +57,34 @@ export default function Entrar() {
 
   useEffect(() => {
     document.title = 'Inicia sesión — FOM'
+    // Contra la base real la sesión se resuelve preguntando al servidor, así
+    // que puede llegar después de pintar: hay que quedarse escuchando.
     if (sesionActual()) navegar('/panel', { replace: true })
+    const baja = alCambiar((s) => {
+      if (s) navegar('/panel', { replace: true })
+    })
     return () => {
+      baja()
       document.title = 'FOM — Control total de tu flota'
     }
   }, [navegar])
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     if (fase !== 'lista') return
     setError('')
     setFase('verificando')
     // Sin spinner: el emblema flotando es el único indicador de espera.
-    setTimeout(() => {
-      const r = iniciarSesion({ usuario, clave, recordar: true })
-      if (r.ok) {
-        // El formulario se desvanece, la escena queda quieta y la vista
-        // cambia detrás, sin bajón de luz.
-        setFase('saliendo')
-        setTimeout(() => navegar('/panel', { replace: true }), 660)
-      } else {
-        setFase('lista')
-        setError(r.error)
-      }
-    }, 420)
+    const r = await iniciarSesion({ usuario, clave, recordar: true })
+    if (r.ok) {
+      // El formulario se desvanece, la escena queda quieta y la vista
+      // cambia detrás, sin bajón de luz.
+      setFase('saliendo')
+      setTimeout(() => navegar('/panel', { replace: true }), 660)
+    } else {
+      setFase('lista')
+      setError(r.error)
+    }
   }
 
   const usarDemo = (cuenta) => {
@@ -163,6 +167,14 @@ export default function Entrar() {
           </div>
 
           <div className="lg-demos">
+            {CONECTADO_A_BD && (
+              <div className="lg-demo">
+                <div>
+                  <b>Conectado a la base real</b>
+                  <span>Entra con tu cuenta de FOM</span>
+                </div>
+              </div>
+            )}
             {CUENTAS_DEMO.map((c) => (
               <div className="lg-demo" key={c.usuario}>
                 <div>

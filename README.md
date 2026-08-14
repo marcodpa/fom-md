@@ -44,7 +44,7 @@ ODTs, índice de manejo seguro, documentos, reportes multi-empresa), productos
 
 ## Tecnologías
 
-React 18 · Vite 5 · Three.js · React Three Fiber · Drei · GSAP + ScrollTrigger · CSS moderno.
+React 18 · Vite 5 · GSAP + ScrollTrigger · video HTML5 con scrub por scroll · CSS moderno.
 
 ## Decisiones técnicas principales
 

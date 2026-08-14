@@ -7,7 +7,7 @@ import {
 } from '../comp/ui'
 import Mapa from '../comp/Mapa'
 import * as f from '../datos/formato'
-import { etiqueta } from '../datos/catalogos'
+import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 
 const ESTADOS = [
@@ -23,9 +23,14 @@ export default function CentroControl() {
   const [seleccionado, setSeleccionado] = useState(null)
 
   const areas = useDatos(() => repo.areas(), [])
+  // Seguimiento en vivo: se vuelve a preguntar por la flota cada 15 segundos.
+  // Los equipos reportan cada 1–5 minutos, así que consultar más seguido no
+  // adelanta nada; con este ritmo una posición nueva aparece sola en menos de
+  // 15 s desde que llega a la base, sin que nadie recargue.
   const flota = useDatos(
     () => repo.vehiculos.listar({ q, areaId, estado: estadoMarcha }),
-    [q, areaId, estadoMarcha]
+    [q, areaId, estadoMarcha],
+    15000
   )
   // El expediente trae el recorrido del día, que el mapa dibuja como trayecto.
   const detalle = useDatos(
@@ -52,9 +57,14 @@ export default function CentroControl() {
     setAreaId('')
   }
 
+  // Sin velocidad en la base no se puede contar cuántas van en marcha; lo que
+  // sí consta es cuántos equipos están reportando.
+  const sabeMarcha = lista.some((v) => v.estadoMarcha != null)
+  const reportando = lista.filter((v) => v.conectado).length
   const bajada =
     flota.estado === 'ok'
-      ? `${f.numero(lista.length)} ${lista.length === 1 ? 'unidad' : 'unidades'} · ${enMarcha} en marcha`
+      ? `${f.numero(lista.length)} ${lista.length === 1 ? 'unidad' : 'unidades'} · ` +
+        (sabeMarcha ? `${enMarcha} en marcha` : `${reportando} reportando`)
       : 'Dónde está cada unidad, en tiempo real.'
 
   const unidad = detalle.datos?.id === seleccionado ? detalle.datos : null
@@ -153,7 +163,15 @@ function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
                 {v.conductorNombre === 'Sin asignar' ? 'Sin conductor' : v.conductorNombre}
               </span>
             </div>
-            <em>{activa ? f.velocidad(v.velocidadKmh) : 'Detenida'}</em>
+            {/* Sin velocidad en la base no se puede decir «Detenida»: lo que
+                consta es cuándo reportó el equipo por última vez. */}
+            <em>
+              {v.estadoMarcha
+                ? activa
+                  ? f.velocidad(v.velocidadKmh)
+                  : 'Detenida'
+                : f.desde(v.ultimoReporte)}
+            </em>
           </div>
         )
       })}
@@ -183,31 +201,43 @@ function Telemetria({ unidad: v, estado, onReintentar }) {
     <Tarjeta
       titulo="Telemetría"
       accion={
-        <Tag color={v.estadoMarcha === 'en_marcha' ? 'verde' : 'gris'}>
-          {etiqueta('marcha_estado', v.estadoMarcha)}
-        </Tag>
+        v.estadoMarcha ? (
+          <Tag color={v.estadoMarcha === 'en_marcha' ? 'verde' : 'gris'}>
+            {etiqueta('marcha_estado', v.estadoMarcha)}
+          </Tag>
+        ) : (
+          <Tag color={color('conexion', v.conexion)}>{etiqueta('conexion', v.conexion)}</Tag>
+        )
       }
     >
       <div className="pnl-grid">
-        <div className="pnl-filas">
-          <div className="pnl-fila">
-            <div className="pnl-fila-txt">
-              <b>Aceite</b>
-              <span>{v.aceitePct}%</span>
-              <Barra valor={v.aceitePct / 100} tono={tonoNivel(v.aceitePct, 25, 45)} />
+        {/* El nivel de aceite solo existe si el equipo lo reporta. Los GPS
+            instalados hoy no lo hacen: se omite la barra en vez de dibujar
+            una vacía que se lee como «tanque en cero». */}
+        {v.aceitePct != null && (
+          <div className="pnl-filas">
+            <div className="pnl-fila">
+              <div className="pnl-fila-txt">
+                <b>Aceite</b>
+                <span>{v.aceitePct}%</span>
+                <Barra valor={v.aceitePct / 100} tono={tonoNivel(v.aceitePct, 25, 45)} />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <Datos
           items={[
-            { etiqueta: 'Temperatura del motor', valor: `${v.tempMotorC} °C` },
-            { etiqueta: 'Velocidad', valor: f.velocidad(v.velocidadKmh) },
+            { etiqueta: 'Temperatura del motor', valor: v.tempMotorC == null ? '—' : `${v.tempMotorC} °C` },
+            { etiqueta: 'Velocidad', valor: v.velocidadKmh == null ? '—' : f.velocidad(v.velocidadKmh) },
             { etiqueta: 'Odómetro', valor: f.km(v.km) },
             { etiqueta: 'Último reporte', valor: f.desde(v.ultimoReporte) },
-            { etiqueta: 'Ubicación', valor: v.ubicacionTexto },
+            { etiqueta: 'Ubicación', valor: v.ubicacionTexto || '—' },
             { etiqueta: 'Área', valor: v.areaNombre },
-          ]}
+          ].concat(
+            // Datos que sí existen en la base real y no tenían dónde verse.
+            v.gps?.imei ? [{ etiqueta: 'IMEI del equipo', valor: v.gps.imei }] : []
+          )}
         />
 
         <div>

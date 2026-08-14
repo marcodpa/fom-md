@@ -22,6 +22,10 @@ import { color, etiqueta } from '../datos/catalogos'
 
 /** Una unidad requiere atención si tiene papeles en riesgo o nadie a cargo. */
 function requiereAtencion(v) {
+  // Si la fuente no lleva documentos —hoy, la base real— no hay nada que
+  // afirmar. Marcar «requiere atención» a toda la flota por lo que no sabemos
+  // vuelve inútil el indicador justo cuando más debería significar algo.
+  if (v.docsVencidos == null) return false
   return v.docsVencidos > 0 || v.docsPorVencer > 0 || !v.conductorPrincipalId
 }
 
@@ -66,6 +70,9 @@ function coincide(v, q) {
 
 /** Celda de documentos: al día, por vencer o vencidos. */
 function TagDocumentos({ v }) {
+  // Con la base real todavía no hay documentos. Se dice que no se sabe, en
+  // vez de pintar un «Al día» que nadie ha comprobado.
+  if (v.docsVencidos == null) return <span className="pnl-sin-dato">—</span>
   if (v.docsVencidos > 0) {
     return (
       <Tag color="rojo">
@@ -172,6 +179,10 @@ export default function Flota() {
   ]
 
   const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
+  // ¿La fuente sabe distinguir marcha de parada? Con la base real todavía no:
+  // no se persiste la velocidad, solo la última vez que el equipo reportó.
+  const sabeMarcha = lista.some((v) => v.estadoMarcha != null)
+  const reportando = lista.filter((v) => v.conectado).length
   const atencion = lista.filter(requiereAtencion).length
   const sinConductor = lista.filter((v) => !v.conductorPrincipalId).length
 
@@ -222,13 +233,25 @@ export default function Flota() {
           <>
             <div className="pnl-grid k4">
               <Kpi titulo="Total de unidades" valor={lista.length} icono="camion" />
-              <Kpi
-                titulo="En marcha"
-                valor={enMarcha}
-                icono="velocidad"
-                tono="ok"
-                nota={`${lista.length - enMarcha} detenidas`}
-              />
+              {sabeMarcha ? (
+                <Kpi
+                  titulo="En marcha"
+                  valor={enMarcha}
+                  icono="velocidad"
+                  tono="ok"
+                  nota={`${lista.length - enMarcha} detenidas`}
+                />
+              ) : (
+                /* La base no guarda la velocidad: se informa cuántos equipos
+                   están reportando, que es lo que sí consta. */
+                <Kpi
+                  titulo="Reportando"
+                  valor={reportando}
+                  icono="velocidad"
+                  tono={reportando ? 'ok' : 'aviso'}
+                  nota={`${lista.length - reportando} sin señal`}
+                />
+              )}
               <Kpi
                 titulo="Requieren atención"
                 valor={atencion}
@@ -338,10 +361,25 @@ export default function Flota() {
                           <td>{nombreConductor(v)}</td>
                           <td>
                             <div className="pnl-doble">
-                              <Tag color={color('marcha_estado', v.estadoMarcha)}>
-                                {etiqueta('marcha_estado', v.estadoMarcha)}
-                              </Tag>
-                              {v.estadoMarcha === 'en_marcha' && <span>{f.velocidad(v.velocidadKmh)}</span>}
+                              {v.estadoMarcha ? (
+                                <>
+                                  <Tag color={color('marcha_estado', v.estadoMarcha)}>
+                                    {etiqueta('marcha_estado', v.estadoMarcha)}
+                                  </Tag>
+                                  {v.estadoMarcha === 'en_marcha' && (
+                                    <span>{f.velocidad(v.velocidadKmh)}</span>
+                                  )}
+                                </>
+                              ) : (
+                                /* Sin velocidad en la base no se puede afirmar
+                                   marcha ni parada; se informa la conexión. */
+                                <>
+                                  <Tag color={color('conexion', v.conexion)}>
+                                    {etiqueta('conexion', v.conexion)}
+                                  </Tag>
+                                  <span>{f.desde(v.ultimoReporte)}</span>
+                                </>
+                              )}
                             </div>
                           </td>
                           <td><TagDocumentos v={v} /></td>

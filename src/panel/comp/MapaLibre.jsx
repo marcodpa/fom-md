@@ -12,8 +12,17 @@ import 'leaflet/dist/leaflet.css'
 // siempre visible en la esquina del mapa.
 // ============================================================
 
-// Teselas claras: OpenStreetMap estándar.
-// Teselas oscuras: CARTO Dark Matter, también gratuitas y sin clave.
+// UN SOLO proveedor de teselas: OpenStreetMap, para los dos temas.
+//
+// Antes el tema oscuro usaba CARTO Dark Matter. Se retiró porque
+// `basemaps.cartocdn.com` no responde desde la red de operación: las teselas
+// no daban error, simplemente se colgaban hasta agotar el tiempo. Y como el
+// respaldo se disparaba con el evento `tileerror`, que un timeout nunca
+// dispara, el mapa se quedaba en negro sin avisar de nada.
+//
+// El aspecto oscuro se consigue ahora con un filtro CSS sobre las mismas
+// teselas (ver `.pnl-mapa.oscuro` en panel.css). Menos dependencias externas
+// y un modo menos que se puede romper por su cuenta.
 const TESELAS = {
   claro: {
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -21,12 +30,46 @@ const TESELAS = {
     maxZoom: 19,
   },
   oscuro: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    atribucion:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    maxZoom: 20,
-    subdominios: 'abcd',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    atribucion: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19,
   },
+}
+
+/**
+ * Lleva un marcador de su posición actual a la nueva deslizándose.
+ *
+ * Los equipos reportan cada uno a cinco minutos, así que sin esto el punto
+ * desaparece de un sitio y aparece en otro. Interpolando el trayecto durante
+ * poco más de un segundo se lee como un vehículo avanzando, que es lo que el
+ * supervisor espera de un rastreador.
+ *
+ * Devuelve una función para cancelar, porque si llega una posición todavía más
+ * nueva a mitad del recorrido hay que abandonar el anterior y salir hacia la
+ * última: si no, dos animaciones pelean por el mismo marcador.
+ */
+function deslizar(marcador, destino, ms = 1200) {
+  const origen = marcador.getLatLng()
+  const dLat = destino[0] - origen.lat
+  const dLng = destino[1] - origen.lng
+
+  // Salto enorme (primer dato, o el vehículo reapareció lejos): no se anima,
+  // se coloca. Un deslizamiento de kilómetros sería una mentira visual.
+  if (Math.abs(dLat) > 0.05 || Math.abs(dLng) > 0.05 || (dLat === 0 && dLng === 0)) {
+    marcador.setLatLng(destino)
+    return () => {}
+  }
+
+  let cuadro = 0
+  const inicio = performance.now()
+  const paso = (ahora) => {
+    const t = Math.min(1, (ahora - inicio) / ms)
+    const suave = 1 - Math.pow(1 - t, 3)
+    marcador.setLatLng([origen.lat + dLat * suave, origen.lng + dLng * suave])
+    if (t < 1) cuadro = requestAnimationFrame(paso)
+  }
+  cuadro = requestAnimationFrame(paso)
+  return () => cancelAnimationFrame(cuadro)
 }
 
 // Costa Oriental del Lago
@@ -67,6 +110,9 @@ export default function MapaLibre({
   const mapa = useRef(null)
   const capa = useRef(null)
   const marcadores = useRef(new Map())
+  // Cancelador de la animación en curso de cada unidad, para que dos
+  // posiciones seguidas no se peleen por mover el mismo marcador.
+  const animaciones = useRef(new Map())
   const linea = useRef(null)
   const encuadrado = useRef(false)
   const [sobre, setSobre] = useState(null)
@@ -83,7 +129,10 @@ export default function MapaLibre({
       zoomControl: true,
       attributionControl: true,
     })
+    const animacionesActivas = animaciones.current
     return () => {
+      animacionesActivas.forEach((cancelar) => cancelar())
+      animacionesActivas.clear()
       mapa.current?.remove()
       mapa.current = null
       marcadores.current.clear()
@@ -96,6 +145,7 @@ export default function MapaLibre({
     const t = TESELAS[esquema]
     if (capa.current) capa.current.remove()
     let fallos = 0
+    let cargoAlguna = false
     capa.current = L.tileLayer(t.url, {
       attribution: t.atribucion,
       maxZoom: t.maxZoom,
@@ -105,8 +155,19 @@ export default function MapaLibre({
       fallos += 1
       if (fallos > 6) setFallaTeselas(true)
     })
-    capa.current.on('tileload', () => setFallaTeselas(false))
+    capa.current.on('tileload', () => {
+      cargoAlguna = true
+      setFallaTeselas(false)
+    })
     capa.current.addTo(mapa.current)
+
+    // Un proveedor caído no siempre falla: a veces solo se cuelga, y entonces
+    // `tileerror` no llega nunca. Si a los 8 segundos no cargó ni una tesela,
+    // se avisa igual en vez de dejar un rectángulo vacío.
+    const vigilante = setTimeout(() => {
+      if (!cargoAlguna) setFallaTeselas(true)
+    }, 8000)
+    return () => clearTimeout(vigilante)
   }, [esquema])
 
   // Marcadores de las unidades
@@ -126,7 +187,15 @@ export default function MapaLibre({
             icon: iconoUnidad(v, sel, tokens),
             title: `${v.alias} · ${v.placa}`,
             keyboard: true,
-            alt: `${v.alias}, ${v.estadoMarcha === 'en_marcha' ? 'en marcha' : 'detenida'}`,
+            alt: `${v.alias}, ${
+              v.estadoMarcha
+                ? v.estadoMarcha === 'en_marcha'
+                  ? 'en marcha'
+                  : 'detenida'
+                : v.conectado
+                  ? 'reportando'
+                  : 'sin señal'
+            }`,
           })
           m.on('click', () => alSeleccionar?.(seleccionado === v.id ? null : v.id))
           m.on('mouseover', () => setSobre(v.id))
@@ -134,7 +203,11 @@ export default function MapaLibre({
           m.addTo(mapa.current)
           marcadores.current.set(v.id, m)
         } else {
-          m.setLatLng([v.lat, v.lng])
+          const previa = m.getLatLng()
+          if (previa.lat !== v.lat || previa.lng !== v.lng) {
+            animaciones.current.get(v.id)?.()
+            animaciones.current.set(v.id, deslizar(m, [v.lat, v.lng]))
+          }
           m.setIcon(iconoUnidad(v, sel, tokens))
         }
         m.setZIndexOffset(sel ? 1000 : 0)
@@ -187,9 +260,13 @@ export default function MapaLibre({
   const activo = sobre ?? seleccionado
   const v = vehiculos.find((x) => x.id === activo)
   const enMarcha = vehiculos.filter((x) => x.estadoMarcha === 'en_marcha').length
+  // La base real no guarda velocidad: no se puede contar cuántas van en
+  // marcha, solo cuántos equipos están reportando.
+  const sabeMarcha = vehiculos.some((x) => x.estadoMarcha != null)
+  const reportando = vehiculos.filter((x) => x.conectado).length
 
   return (
-    <div className="pnl-mapa" style={{ height: alto }}>
+    <div className={`pnl-mapa${esquema === 'oscuro' ? ' oscuro' : ''}`} style={{ height: alto }}>
       <div ref={contenedor} className="pnl-mapa-lienzo" />
 
       {fallaTeselas && (
@@ -205,14 +282,24 @@ export default function MapaLibre({
         </span>
         <span>{vehiculos.length} unidades</span>
         <span className="sep">·</span>
-        <span>{enMarcha} en marcha</span>
+        <span>{sabeMarcha ? `${enMarcha} en marcha` : `${reportando} reportando`}</span>
       </div>
 
       {v && (
         <div className="pnl-mapa-detalle">
           <div className="pnl-mapa-detalle-top">
-            <span className={`pnl-tag ${v.estadoMarcha === 'en_marcha' ? 'verde' : 'gris'}`}>
-              {v.estadoMarcha === 'en_marcha' ? 'En marcha' : 'Detenida'}
+            <span
+              className={`pnl-tag ${
+                (v.estadoMarcha ? v.estadoMarcha === 'en_marcha' : v.conectado) ? 'verde' : 'gris'
+              }`}
+            >
+              {v.estadoMarcha
+                ? v.estadoMarcha === 'en_marcha'
+                  ? 'En marcha'
+                  : 'Detenida'
+                : v.conectado
+                  ? 'Reportando'
+                  : 'Sin señal'}
             </span>
             {seleccionado === activo && (
               <button type="button" onClick={() => alSeleccionar?.(null)} aria-label="Cerrar detalle del vehículo">

@@ -14,3 +14,11 @@ dist
 
 # Grafo de conocimiento generado (se reconstruye con /graphify)
 graphify-out/
+
+# Infraestructura. Aquí viven llaves de WireGuard y de SSH, que son la puerta
+# a la red interna de FOM. La lista blanca es al revés a propósito: se ignora
+# TODO y solo se versiona la documentación. Enumerar extensiones prohibidas
+# falla en cuanto aparece un archivo sin extensión — una llave privada de SSH
+# se llama `fom-app`, sin punto, y se colaría.
+infra/*
+!infra/*.md

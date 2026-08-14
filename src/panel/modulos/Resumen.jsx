@@ -51,6 +51,14 @@ function Tablero({ resumen: r, vehiculos, odts, alertas }) {
   const ultimasAlertas = alertas.slice(0, 6)
   const inspeccionesHechas = r.inspeccionesHoy
 
+  // Con la base real, buena parte del dominio (ODT, inspecciones, documentos,
+  // personal) todavía no existe y llega como `null`. Interpolar eso en una
+  // frase produce "null en marcha · null detenidas". Estas dos ayudas
+  // devuelven la frase solo cuando hay con qué construirla.
+  const SIN_DATOS = 'Sin registro en la base todavía'
+  const frase = (texto, ...valores) =>
+    valores.every((v) => v !== null && v !== undefined) ? texto : SIN_DATOS
+
   return (
     <>
       <div className="pnl-grid k4">
@@ -58,7 +66,13 @@ function Tablero({ resumen: r, vehiculos, odts, alertas }) {
           titulo="Flota"
           valor={f.numero(r.totalVehiculos)}
           icono="camion"
-          nota={`${r.enMarcha} en marcha · ${r.detenidos} detenidas`}
+          nota={
+            r.enMarcha != null
+              ? `${r.enMarcha} en marcha · ${r.detenidos} detenidas`
+              : /* Sin velocidad en la base no hay marcha ni parada; lo que
+                   consta es qué equipos reportan. */
+                `${r.reportando ?? 0} reportando · ${r.sinSenal ?? 0} sin señal`
+          }
           a="/panel/flota"
         />
         <Kpi
@@ -66,7 +80,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas }) {
           valor={f.numero(r.odtAbiertas)}
           icono="llave"
           tono={r.odtAbiertas > 0 ? 'aviso' : 'ok'}
-          nota={`${r.odtEnRevision} en revisión · ${r.odtCerradas} cerradas`}
+          nota={frase(`${r.odtEnRevision} en revisión · ${r.odtCerradas} cerradas`, r.odtEnRevision, r.odtCerradas)}
           a="/panel/mantenimiento"
         />
         <Kpi
@@ -74,7 +88,13 @@ function Tablero({ resumen: r, vehiculos, odts, alertas }) {
           valor={f.numero(r.alertasSinLeer)}
           icono="campana"
           tono={r.alertasSinLeer > 0 ? 'aviso' : 'ok'}
-          nota={r.alertasSinLeer > 0 ? 'Requieren tu revisión' : 'Todo al día'}
+          nota={
+            r.alertasSinLeer == null
+              ? SIN_DATOS
+              : r.alertasSinLeer > 0
+                ? 'Requieren tu revisión'
+                : 'Todo al día'
+          }
           a="/panel/alertas"
         />
         <Kpi
@@ -90,13 +110,15 @@ function Tablero({ resumen: r, vehiculos, odts, alertas }) {
       <div className="pnl-grid k4">
         <Kpi
           titulo="Inspecciones de hoy"
-          valor={`${inspeccionesHechas} de ${r.totalVehiculos}`}
+          valor={inspeccionesHechas == null ? '—' : `${inspeccionesHechas} de ${r.totalVehiculos}`}
           icono="check"
           tono={r.inspeccionesPendientes > 0 ? 'aviso' : 'ok'}
           nota={
-            r.inspeccionesPendientes > 0
-              ? `${r.inspeccionesPendientes} sin hacer`
-              : 'Toda la flota revisada'
+            r.inspeccionesPendientes == null
+              ? SIN_DATOS
+              : r.inspeccionesPendientes > 0
+                ? `${r.inspeccionesPendientes} sin hacer`
+                : 'Toda la flota revisada'
           }
           a="/panel/inspecciones"
         />
@@ -105,7 +127,13 @@ function Tablero({ resumen: r, vehiculos, odts, alertas }) {
           valor={f.numero(r.unidadesBloqueadas)}
           icono="alerta"
           tono={r.unidadesBloqueadas > 0 ? 'malo' : 'ok'}
-          nota={r.unidadesBloqueadas > 0 ? 'No deben salir a ruta' : 'Ninguna bloqueada'}
+          nota={
+            r.unidadesBloqueadas == null
+              ? SIN_DATOS
+              : r.unidadesBloqueadas > 0
+                ? 'No deben salir a ruta'
+                : 'Ninguna bloqueada'
+          }
           a="/panel/inspecciones"
         />
         <Kpi
@@ -113,7 +141,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas }) {
           valor={f.numero(r.docsVencidos)}
           icono="documento"
           tono={r.docsVencidos > 0 ? 'malo' : 'ok'}
-          nota={`${r.docsPorVencer} por vencer`}
+          nota={frase(`${r.docsPorVencer} por vencer`, r.docsPorVencer)}
           a="/panel/documentos"
         />
         <Kpi
@@ -121,7 +149,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas }) {
           valor={f.numero(r.sinConductor)}
           icono="gente"
           tono={r.sinConductor > 0 ? 'aviso' : 'ok'}
-          nota={`${r.conductores} conductores activos`}
+          nota={frase(`${r.conductores} conductores activos`, r.conductores)}
           a="/panel/flota"
         />
       </div>

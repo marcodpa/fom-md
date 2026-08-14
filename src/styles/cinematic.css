@@ -17,9 +17,20 @@
   background: var(--bg);
 }
 
-.intro-canvas {
+/* El clip de la intro. `object-fit: cover` lo hace sangrar a pantalla
+   completa en cualquier proporción; el 16:9 nunca deja franjas negras. */
+.intro-video {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* El scroll mueve `currentTime`: el navegador debe tratarlo como una capa
+     propia o cada búsqueda repinta media página. */
+  will-change: transform;
+  transform: translateZ(0);
+  pointer-events: none;
+  background: var(--bg);
 }
 
 .intro-overlays {

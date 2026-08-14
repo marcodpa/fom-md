@@ -97,7 +97,11 @@ function Cifra({ valor }) {
       return undefined
     }
     const quieto = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    if (quieto) {
+    // En una pestaña de fondo el navegador congela requestAnimationFrame: la
+    // cuenta nunca arranca y el indicador se queda clavado en 0. Quien abre la
+    // consola en segundo plano vería toda la flota en cero. Sin animación que
+    // valga la pena, se muestra el número y ya.
+    if (quieto || document.hidden) {
       setMostrado(numero)
       return undefined
     }

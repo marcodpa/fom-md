@@ -178,6 +178,15 @@ export default function Consola() {
     }
   }, [])
 
+  // `undefined` = todavía se le está preguntando al servidor si hay sesión.
+  // Redirigir aquí mandaría a /entrar a quien sí tiene sesión abierta.
+  if (sesion === undefined) {
+    return (
+      <div className="pnl-cargando-sesion" role="status">
+        Comprobando tu sesión…
+      </div>
+    )
+  }
   if (!sesion) return <Navigate to="/entrar" replace />
 
   const { perfil } = sesion

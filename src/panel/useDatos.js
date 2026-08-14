@@ -7,7 +7,7 @@ import { alCambiarDatos } from './datos/repo'
  *
  * const { datos, estado, error, recargar } = useDatos(() => repo.vehiculos.listar({ q }), [q])
  */
-export function useDatos(cargar, deps = []) {
+export function useDatos(cargar, deps = [], refrescarCada = 0) {
   const [datos, setDatos] = useState(null)
   const [estado, setEstado] = useState('cargando') // cargando | ok | error
   const [error, setError] = useState(null)
@@ -44,6 +44,25 @@ export function useDatos(cargar, deps = []) {
 
   // Si otro módulo edita algo, refrescar sin parpadeo.
   useEffect(() => alCambiarDatos(() => ejecutar(true)), [ejecutar])
+
+  // Refresco periódico, para las pantallas que siguen algo vivo (la posición
+  // de la flota). Va en silencio: sin estado de carga, así la tabla no
+  // parpadea ni el mapa se reconstruye. Se detiene con la pestaña en segundo
+  // plano — nadie está mirando y son peticiones al servidor de balde.
+  useEffect(() => {
+    if (!refrescarCada) return undefined
+    const id = setInterval(() => {
+      if (!document.hidden) ejecutar(true)
+    }, refrescarCada)
+    const alVolver = () => {
+      if (!document.hidden) ejecutar(true)
+    }
+    document.addEventListener('visibilitychange', alVolver)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', alVolver)
+    }
+  }, [refrescarCada, ejecutar])
 
   return { datos, estado, error, recargar: () => ejecutar(true) }
 }

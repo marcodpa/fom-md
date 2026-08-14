@@ -1,23 +1,57 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
-import {
-  Bloom,
-  EffectComposer,
-  N8AO,
-  SMAA,
-  ToneMapping,
-  Vignette,
-} from '@react-three/postprocessing'
-import { ToneMappingMode } from 'postprocessing'
-import CityScene from '../scenes/CityScene'
-import StreetDetail from '../scenes/StreetDetail'
-import StreetLights from '../scenes/StreetLights'
-import VehicleScene from '../scenes/VehicleScene'
-import { CameraRig, ProgressSmoother } from '../scenes/CameraRig'
 import VehicleCard from './VehicleCard'
 import Telemetry, { TELEMETRY_ITEMS } from './Telemetry'
 import { ScrollTrigger, useScrollProgress } from '../hooks/useScrollProgress'
-import { fade, range, smooth, truckAdvance } from '../utils/stages'
+
+// ============================================================
+// INTRO CINEMATOGRÁFICA — video controlado por scroll
+// ------------------------------------------------------------
+// El scroll no reproduce el video: lo BUSCA. ScrollTrigger convierte la
+// posición de la página en un tiempo dentro del clip y un bucle de rAF lleva
+// `currentTime` hasta ese tiempo con suavizado. Por eso el movimiento
+// responde al instante al dedo o a la rueda, y hacia atrás también.
+//
+// El clip está reencodeado con un keyframe cada 2 cuadros (ver public/intro):
+// un mp4 normal solo puede saltar a sus keyframes, que van cada 2 segundos, y
+// el scrub se ve a tirones. Ese reencodeo es la mitad del truco.
+//
+// Los overlays (eslogan, área, ficha de la unidad, telemetría, cierre) siguen
+// siendo DOM y se cronometran contra el mismo progreso, así que caen sobre el
+// fotograma que les toca.
+// ============================================================
+
+const BASE = import.meta.env.BASE_URL || '/'
+const POSTER = `${BASE}intro/fom-intro-poster.jpg`
+
+// Tres calidades. El clip original es 1280x720: en una pantalla grande el
+// navegador lo estira y lo ablanda, así que para esas se sirve una copia ya
+// ampliada con lanczos y realce en el encode, que se ve más limpia que la
+// ampliación bilineal del navegador. Cada visitante baja UNA sola.
+//   ≥1440 px  fom-intro-1080.mp4   1920x1080   16,3 MB
+//   ≥768 px   fom-intro.mp4        1280x720    10,4 MB
+//   <768 px   fom-intro-movil.mp4   854x480     3,6 MB
+function elegirVideo() {
+  if (typeof window === 'undefined') return `${BASE}intro/fom-intro.mp4`
+  const w = window.innerWidth
+  if (w < 768) return `${BASE}intro/fom-intro-movil.mp4`
+  if (w >= 1440) return `${BASE}intro/fom-intro-1080.mp4`
+  return `${BASE}intro/fom-intro.mp4`
+}
+
+// --- Utilidades de cronometraje ------------------------------------------
+const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t)
+const smooth = (t) => {
+  const x = clamp01(t)
+  return x * x * (3 - 2 * x)
+}
+const range = (p, a, b) => clamp01((p - a) / (b - a))
+/** 0 antes de `a`, sube a→b, se mantiene en 1 entre b→c, baja c→d. */
+function fade(p, a, b, c, d) {
+  if (p <= a || p >= d) return 0
+  if (p < b) return smooth(range(p, a, b))
+  if (p > c) return 1 - smooth(range(p, c, d))
+  return 1
+}
 
 function getTier() {
   const w = window.innerWidth
@@ -26,19 +60,45 @@ function getTier() {
   return 'low'
 }
 
-const INTRO_VH = { high: 480, mid: 440, low: 380 }
+// Cuánto scroll ocupa la intro. Más alto = el video avanza más despacio.
+const INTRO_VH = { high: 420, mid: 380, low: 320 }
+
+// ============================================================
+// Momentos del clip (11,07 s), en progreso 0–1
+//   0.00–0.27  descenso aéreo sobre la ciudad
+//   0.27–0.45  baja por la avenida y alcanza la unidad
+//   0.45–0.72  lateral izquierdo, la puerta se abre
+//   0.72–1.00  entra a la cabina y se asienta
+// ============================================================
+const T = {
+  hero: [-1, 0, 0.1, 0.16],
+  scroll: [-1, 0, 0.05, 0.1],
+  area: [0.22, 0.28, 0.4, 0.45],
+  vehiculo: [0.44, 0.5, 0.62, 0.67],
+  // Ventana del tramo lateral: la telemetría se reparte dentro de ella.
+  lateral: [0.46, 0.8],
+  final: [0.9, 0.95, 2, 2],
+}
 
 export default function CinematicIntro({ reduced }) {
   const wrapRef = useRef(null)
   const stickyRef = useRef(null)
-  const smoothProgress = useRef(0)
+  const videoRef = useRef(null)
 
   const [tier, setTier] = useState(getTier)
   const [inView, setInView] = useState(true)
+  const [listo, setListo] = useState(false)
+
+  // Tiempo al que el scroll quiere llevar el video; el rAF lo persigue.
+  const tiempoObjetivo = useRef(0)
 
   // Refs de todos los overlays DOM animados por scroll
   const ov = useRef({})
   const teleRefs = useRef({ itemRefs: [], phraseRef: { current: null } })
+
+  // Se decide una vez al montar: cambiar el src a media reproducción reinicia
+  // la descarga y deja la intro en negro mientras rebuffea.
+  const src = useMemo(elegirVideo, [])
 
   useEffect(() => {
     let timer
@@ -59,7 +119,7 @@ export default function CinematicIntro({ reduced }) {
     ScrollTrigger.refresh()
   }, [tier])
 
-  // Pausa el render 3D cuando la intro sale del viewport
+  // Pausar la persecución de cuadros cuando la intro sale del viewport.
   useEffect(() => {
     const el = stickyRef.current
     if (!el) return undefined
@@ -70,7 +130,45 @@ export default function CinematicIntro({ reduced }) {
     return () => io.disconnect()
   }, [])
 
-  // Variante con desplazamiento en X, para las fichas que entran de los lados.
+  // El video nunca se reproduce solo: se busca. Pero Safari/iOS no permite
+  // mover `currentTime` de un video que jamás arrancó, así que se le da un
+  // play mudo y se pausa en el acto.
+  const prepararVideo = useCallback(() => {
+    const v = videoRef.current
+    if (!v) return
+    v.muted = true
+    const p = v.play()
+    if (p?.then) p.then(() => v.pause()).catch(() => {})
+    else v.pause()
+  }, [])
+
+  // --- Persecución del tiempo objetivo -------------------------------------
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v || reduced || !listo || !inView) return undefined
+
+    let vivo = true
+    let marco = 0
+    const paso = () => {
+      if (!vivo) return
+      const dur = v.duration
+      if (dur) {
+        const actual = v.currentTime
+        const delta = tiempoObjetivo.current - actual
+        // Salto grande (el usuario tiró del scroll): ir directo, sin arrastre.
+        if (Math.abs(delta) > 0.55) v.currentTime = tiempoObjetivo.current
+        else if (Math.abs(delta) > 1 / 60) v.currentTime = actual + delta * 0.22
+      }
+      marco = requestAnimationFrame(paso)
+    }
+    marco = requestAnimationFrame(paso)
+    return () => {
+      vivo = false
+      cancelAnimationFrame(marco)
+    }
+  }, [reduced, listo, inView])
+
+  // --- Overlays -------------------------------------------------------------
   const setFX = useCallback((el, opacity, x = 0) => {
     if (!el) return
     el.style.opacity = opacity.toFixed(3)
@@ -89,32 +187,40 @@ export default function CinematicIntro({ reduced }) {
     el.style.pointerEvents = opacity > 0.5 ? 'auto' : 'none'
   }, [])
 
-  const updateOverlays = useCallback(
+  const alDesplazar = useCallback(
     (p) => {
+      // 1) El video: el progreso del scroll ES el tiempo del clip.
+      const v = videoRef.current
+      if (v?.duration) tiempoObjetivo.current = p * v.duration
+
+      // 2) Los overlays, cronometrados contra ese mismo progreso.
       const o = ov.current
 
-      setF(o.hero, fade(p, -1, 0, 0.075, 0.125), -smooth(range(p, 0, 0.13)) * 70)
-      setF(o.scroll, fade(p, -1, 0, 0.04, 0.09))
-      setF(o.area, fade(p, 0.315, 0.35, 0.47, 0.51), (1 - fade(p, 0.315, 0.35, 2, 2)) * 22)
-      setF(o.vehicle, fade(p, 0.455, 0.49, 0.6, 0.635), (1 - fade(p, 0.455, 0.49, 2, 2)) * 26)
+      setF(o.hero, fade(p, ...T.hero), -smooth(range(p, 0, 0.13)) * 70)
+      setF(o.scroll, fade(p, ...T.scroll))
+      setF(o.area, fade(p, ...T.area), (1 - fade(p, T.area[0], T.area[1], 2, 2)) * 22)
+      setF(
+        o.vehicle,
+        fade(p, ...T.vehiculo),
+        (1 - fade(p, T.vehiculo[0], T.vehiculo[1], 2, 2)) * 26
+      )
 
-      // Telemetría enganchada al AVANCE de la unidad, no al scroll: cada dato
-      // entra cuando la camioneta ha recorrido su tramo, así que la cadencia
-      // acelera y frena con ella en vez de ir a ritmo constante.
-      const adv = truckAdvance(p)
+      // La telemetría se reparte a lo largo del tramo lateral, que es donde la
+      // unidad se ve entera y el cuadro tiene espacio libre a los lados.
+      const lat = range(p, T.lateral[0], T.lateral[1])
       teleRefs.current.itemRefs.forEach((el, i) => {
-        const at = 0.05 + i * 0.115
-        const o = fade(adv, at, at + 0.085, 0.8, 0.88)
+        const at = 0.06 + i * 0.115
+        const opacidad = fade(lat, at, at + 0.09, 0.82, 0.9)
         // entra deslizando desde su propio lado hacia el vehículo
-        const dir = TELEMETRY_ITEMS[i] && TELEMETRY_ITEMS[i].side === 'r' ? 1 : -1
-        setFX(el, o, (1 - fade(adv, at, at + 0.085, 2, 2)) * 64 * dir)
+        const dir = TELEMETRY_ITEMS[i]?.side === 'r' ? 1 : -1
+        setFX(el, opacidad, (1 - fade(lat, at, at + 0.09, 2, 2)) * 64 * dir)
       })
-      // sale de escena ANTES de que entre el mensaje final: al cruzar el
-      // parabrisas los dos textos se pisaban.
-      setF(teleRefs.current.phraseRef.current, fade(adv, 0.42, 0.52, 0.74, 0.83))
+      // Sale de escena ANTES de que entre el mensaje final: al cruzar la
+      // puerta los dos textos se pisaban.
+      setF(teleRefs.current.phraseRef.current, fade(lat, 0.44, 0.54, 0.76, 0.86))
 
-      // Cierre: la cámara retrocede levemente y entra el mensaje final
-      setF(o.final, fade(p, 0.885, 0.93, 2, 2))
+      // Cierre: ya dentro de la cabina, sobre el parabrisas.
+      setF(o.final, fade(p, ...T.final))
 
       // Botón saltar
       if (o.skip) {
@@ -126,12 +232,11 @@ export default function CinematicIntro({ reduced }) {
     [setF, setFX]
   )
 
-  const rawProgress = useScrollProgress(wrapRef, updateOverlays, !reduced)
+  useScrollProgress(wrapRef, alDesplazar, !reduced)
 
-  // Modo con movimiento reducido: escena fija + texto visible, sin scrub
+  // Modo con movimiento reducido: primer cuadro fijo y el eslogan visible.
   useEffect(() => {
     if (!reduced) return
-    smoothProgress.current = 0.34
     const o = ov.current
     if (o.hero) {
       o.hero.style.opacity = '1'
@@ -155,58 +260,6 @@ export default function CinematicIntro({ reduced }) {
     })
   }, [])
 
-  const canvas = useMemo(
-    () => (
-      <Canvas
-        className="intro-canvas"
-        dpr={[1, 1.75]}
-        frameloop={inView ? 'always' : 'never'}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-        camera={{ fov: 58, near: 0.1, far: 700, position: [12, 26, 62] }}
-      >
-        <color attach="background" args={['#0a1626']} />
-        <fog attach="fog" args={['#0a1626', 55, 225]} />
-        <ProgressSmoother
-          raw={rawProgress}
-          smooth={smoothProgress}
-          fixed={reduced ? 0.34 : null}
-        />
-        <CameraRig progress={smoothProgress} />
-        <CityScene progress={smoothProgress} tier={tier} />
-        <StreetDetail progress={smoothProgress} />
-        <StreetLights />
-        <VehicleScene progress={smoothProgress} />
-
-        {/* El postprocesado es lo que separa un render "de juguete" de una
-            imagen creíble: oclusión de contacto entre edificio y suelo, halo
-            en las ventanas y farolas encendidas, y viñeta de cine. */}
-        {tier !== 'low' && (
-          <EffectComposer multisampling={0} enableNormalPass={tier === 'high'}>
-            {tier === 'high' ? (
-              <N8AO aoRadius={2.2} intensity={2.4} distanceFalloff={1.4} quality="medium" />
-            ) : null}
-            {/* Umbral por encima de 1: el bloom actúa antes del tone mapping,
-                sobre valores lineales. Con un umbral <1 la carrocería roja de
-                la Hilux entra en el halo y baña de rojo toda la calzada. Sólo
-                deben brillar las fuentes que emiten en HDR (ver hdrGlow). */}
-            <Bloom
-              intensity={0.55}
-              luminanceThreshold={1.05}
-              luminanceSmoothing={0.1}
-              mipmapBlur
-            />
-            {/* El composer desactiva el tone mapping del renderer: sin esto
-                los valores lineales salen crudos y la escena se satura. */}
-            <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-            <Vignette offset={0.24} darkness={0.62} />
-            <SMAA />
-          </EffectComposer>
-        )}
-      </Canvas>
-    ),
-    [tier, inView, reduced, rawProgress]
-  )
-
   const reg = (name) => (el) => {
     ov.current[name] = el
   }
@@ -219,7 +272,20 @@ export default function CinematicIntro({ reduced }) {
       aria-label="Introducción cinematográfica de FOM"
     >
       <div ref={stickyRef} className="intro-sticky">
-        {canvas}
+        <video
+          ref={videoRef}
+          className="intro-video"
+          src={src}
+          poster={POSTER}
+          muted
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          aria-hidden="true"
+          tabIndex={-1}
+          onLoadedMetadata={prepararVideo}
+          onCanPlay={() => setListo(true)}
+        />
 
         <div className="intro-overlays">
           {/* Etapa 1 */}
@@ -261,7 +327,7 @@ export default function CinematicIntro({ reduced }) {
           {/* Etapa 6 */}
           <Telemetry ref={teleRefs} />
 
-          {/* Cierre sobre el plano del vehículo */}
+          {/* Cierre, ya dentro de la cabina */}
           <div ref={reg('final')} className="ov ov-final">
             <div className="ov-final-inner">
               <h2>

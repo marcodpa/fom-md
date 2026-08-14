@@ -6,7 +6,7 @@ import ProductPage from './pages/ProductPage'
 import { useReducedMotion } from './hooks/useReducedMotion'
 import { gsap, ScrollTrigger } from './hooks/useScrollProgress'
 
-// Home trae Three.js y la intro 3D: se separa del bundle para que las
+// Home trae la intro cinematográfica: se separa del bundle para que las
 // páginas de producto no paguen ese peso.
 const Home = lazy(() => import('./pages/Home'))
 
@@ -117,12 +117,20 @@ export default function App() {
   const esConsola = pathname === '/entrar' || pathname.startsWith('/panel')
   const [ready, setReady] = useState(!isHome)
 
-  // Pantalla de carga: solo el home espera la textura de la Hilux (3D).
-  // Las páginas de producto arrancan de inmediato.
+  // Pantalla de carga: solo el home espera. No espera el video entero (son
+  // varios MB y se transmite mientras se hace scroll), sino su primer cuadro
+  // —el póster, que es lo que se ve antes de que el usuario mueva nada— y la
+  // textura recortada de la Hilux que usa la ficha de la unidad.
   useEffect(() => {
     if (ready) return undefined
     let alive = true
+    const poster = new Promise((r) => {
+      const img = new Image()
+      img.onload = img.onerror = r
+      img.src = `${import.meta.env.BASE_URL || '/'}intro/fom-intro-poster.jpg`
+    })
     Promise.all([
+      poster,
       import('./utils/hiluxTexture').then((m) => m.loadHilux()).catch(() => null),
       new Promise((r) => setTimeout(r, 900)),
     ]).then(() => alive && setReady(true))
