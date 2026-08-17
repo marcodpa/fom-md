@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 
 // ============================================================
 // MAPA REAL Y GRATUITO (Leaflet + OpenStreetMap)
@@ -88,9 +89,12 @@ function leerTokens() {
 
 /** Marcador circular, del mismo lenguaje visual que el resto de la consola. */
 function iconoUnidad(v, seleccionado, tokens) {
-  const color = seleccionado ? tokens.primario : v.estadoMarcha === 'en_marcha' ? tokens.exito : tokens.tenue
+  // Un solo criterio de estado para el pin, la etiqueta y la ficha.
+  const estado = estadoUnidad(v)
+  const vivo = estado.color === 'verde'
+  const color = seleccionado ? tokens.primario : vivo ? tokens.exito : tokens.tenue
   const tam = seleccionado ? 20 : 16
-  const pulso = v.estadoMarcha === 'en_marcha' ? ' pulsa' : ''
+  const pulso = estado.clave === 'en_marcha' || estado.clave === 'reportando' ? ' pulsa' : ''
   return L.divIcon({
     className: 'pnl-marcador',
     html: `<i class="pnl-marcador-punto${pulso}" style="--c:${color};--b:${tokens.superficie};--t:${tam}px"></i>`,
@@ -187,15 +191,7 @@ export default function MapaLibre({
             icon: iconoUnidad(v, sel, tokens),
             title: `${v.alias} · ${v.placa}`,
             keyboard: true,
-            alt: `${v.alias}, ${
-              v.estadoMarcha
-                ? v.estadoMarcha === 'en_marcha'
-                  ? 'en marcha'
-                  : 'detenida'
-                : v.conectado
-                  ? 'reportando'
-                  : 'sin señal'
-            }`,
+            alt: `${v.alias || v.placa}, ${estadoUnidad(v).texto}`,
           })
           m.on('click', () => alSeleccionar?.(seleccionado === v.id ? null : v.id))
           m.on('mouseover', () => setSobre(v.id))
@@ -286,36 +282,11 @@ export default function MapaLibre({
       </div>
 
       {v && (
-        <div className="pnl-mapa-detalle">
-          <div className="pnl-mapa-detalle-top">
-            <span
-              className={`pnl-tag ${
-                (v.estadoMarcha ? v.estadoMarcha === 'en_marcha' : v.conectado) ? 'verde' : 'gris'
-              }`}
-            >
-              {v.estadoMarcha
-                ? v.estadoMarcha === 'en_marcha'
-                  ? 'En marcha'
-                  : 'Detenida'
-                : v.conectado
-                  ? 'Reportando'
-                  : 'Sin señal'}
-            </span>
-            {seleccionado === activo && (
-              <button type="button" onClick={() => alSeleccionar?.(null)} aria-label="Cerrar detalle del vehículo">
-                ✕
-              </button>
-            )}
-          </div>
-          <b>{v.alias}</b>
-          <span>
-            {v.marca} {v.modelo} · {v.placa}
-          </span>
-          <div className="pnl-mapa-detalle-pie">
-            <span>{v.conductorNombre ?? 'Sin conductor'}</span>
-            {v.estadoMarcha === 'en_marcha' && <em>{v.velocidadKmh} km/h</em>}
-          </div>
-        </div>
+        <FichaUnidad
+          unidad={v}
+          variante="flotante"
+          alCerrar={seleccionado === activo ? () => alSeleccionar?.(null) : undefined}
+        />
       )}
     </div>
   )

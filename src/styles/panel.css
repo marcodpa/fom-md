@@ -1616,3 +1616,190 @@ button.pnl-kpi:active { transform: scale(var(--e-escala-press)); }
 .pnl-mapa.oscuro .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.7);
 }
+
+/* ============================================================
+   FICHA DE UNIDAD
+   ------------------------------------------------------------
+   Un solo maquetado para el popup del mapa y la columna del Centro de
+   control. Ver src/panel/comp/FichaUnidad.jsx.
+   ============================================================ */
+.pnl-ficha {
+  --ficha-radio: var(--e-r-lg);
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+}
+
+/* Sobre el mapa: superficie de vidrio con filo interior, que es lo que separa
+   un panel flotante de un rectángulo pegado encima. */
+.pnl-ficha.flotante {
+  position: absolute;
+  z-index: var(--e-z-flotante, 500);
+  right: var(--e-md);
+  top: var(--e-md);
+  width: min(268px, calc(100% - var(--e-lg) * 2));
+  padding: var(--e-lg);
+  border-radius: var(--ficha-radio);
+  background: color-mix(in srgb, var(--e-sup) 86%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: var(--e-borde-fino) solid var(--e-borde);
+  /* Sombra teñida con el color del mapa, no negro genérico. */
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.5) inset,
+    0 12px 32px -8px rgb(16 32 56 / 0.28),
+    0 2px 8px -2px rgb(16 32 56 / 0.16);
+  animation: pnl-ficha-entra var(--e-d-base) var(--e-curva);
+}
+
+@keyframes pnl-ficha-entra {
+  from { opacity: 0; transform: translateY(-6px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pnl-ficha.flotante { animation: none; }
+}
+
+/* En la columna la ficha no flota: la tarjeta que la contiene ya la eleva. */
+.pnl-ficha.panel { padding: 0; }
+
+.pnl-ficha-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-sm);
+  margin-bottom: var(--e-md);
+}
+
+/* Estado con punto: el color solo no basta para quien no lo distingue. */
+.pnl-ficha-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--e-t-xs);
+  font-weight: 600;
+  letter-spacing: var(--e-track-amplio);
+  text-transform: uppercase;
+  color: var(--e-texto-2);
+}
+.pnl-ficha-estado i {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--e-r-pill);
+  background: currentColor;
+  flex: none;
+}
+.pnl-ficha-estado.verde { color: var(--e-exito); }
+.pnl-ficha-estado.verde i {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--e-exito) 22%, transparent);
+}
+.pnl-ficha-estado.gris { color: var(--e-texto-3); }
+
+.pnl-ficha-cerrar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: var(--e-r-sm);
+  color: var(--e-texto-3);
+  transition: color var(--e-d-rapido) var(--e-curva),
+              background var(--e-d-rapido) var(--e-curva);
+}
+.pnl-ficha-cerrar:hover { color: var(--e-texto); background: var(--e-sup-baja); }
+.pnl-ficha-cerrar:active { transform: scale(var(--e-escala-press)); }
+.pnl-ficha-cerrar:focus-visible {
+  outline: var(--e-borde-foco) solid var(--e-primario);
+  outline-offset: 2px;
+}
+
+/* La placa: cifras tabulares para que no baile entre unidades, y tracking
+   ajustado porque a este tamaño el espaciado por defecto se abre demasiado. */
+.pnl-ficha-placa {
+  margin: 0;
+  font-size: var(--e-t-lg);
+  line-height: var(--e-lh-lg);
+  font-weight: 600;
+  letter-spacing: var(--e-track-ajustado);
+  color: var(--e-texto);
+  font-variant-numeric: tabular-nums;
+}
+.pnl-ficha-sub {
+  margin: 2px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--e-sm);
+  font-size: var(--e-t-xs);
+  line-height: var(--e-lh-xs);
+  color: var(--e-texto-3);
+}
+.pnl-ficha-sub .alias {
+  color: var(--e-texto-2);
+  font-weight: 500;
+}
+.pnl-ficha-sub span + span::before {
+  content: '·';
+  margin-right: var(--e-sm);
+  color: var(--e-borde-fuerte);
+}
+
+/* Datos en dos columnas cuando hay ancho; en una sola si no cabe. La rejilla
+   se adapta al contenedor, no al viewport: la misma ficha vive en un popup
+   estrecho y en una columna ancha. */
+.pnl-ficha-datos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-md) var(--e-lg);
+  margin: var(--e-lg) 0 0;
+  padding-top: var(--e-md);
+  border-top: var(--e-borde-fino) solid var(--e-borde);
+}
+@container (min-width: 300px) {
+  .pnl-ficha-datos { grid-template-columns: 1fr 1fr; }
+}
+.pnl-ficha-datos dt {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 500;
+  letter-spacing: var(--e-track-amplio);
+  text-transform: uppercase;
+  color: var(--e-texto-3);
+}
+.pnl-ficha-datos dd {
+  margin: 3px 0 0;
+  font-size: var(--e-t-sm);
+  line-height: var(--e-lh-sm);
+  color: var(--e-texto);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.pnl-ficha-vacio {
+  margin: var(--e-lg) 0 0;
+  padding-top: var(--e-md);
+  border-top: var(--e-borde-fino) solid var(--e-borde);
+  font-size: var(--e-t-xs);
+  line-height: var(--e-lh-sm);
+  color: var(--e-texto-3);
+  text-wrap: pretty;
+}
+
+.pnl-ficha-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: var(--e-lg);
+  font-size: var(--e-t-sm);
+  font-weight: 500;
+  color: var(--e-primario);
+  border-radius: var(--e-r-sm);
+  transition: gap var(--e-d-rapido) var(--e-curva),
+              color var(--e-d-rapido) var(--e-curva);
+}
+.pnl-ficha-accion:hover { gap: 10px; color: var(--e-primario-fuerte, var(--e-primario)); }
+.pnl-ficha-accion:focus-visible {
+  outline: var(--e-borde-foco) solid var(--e-primario);
+  outline-offset: 3px;
+}

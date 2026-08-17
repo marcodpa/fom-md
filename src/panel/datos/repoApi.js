@@ -79,6 +79,14 @@ function comoUnidad(d, posicion = null) {
     docsVencidos: null,
     docsPorVencer: null,
 
+    // ENCENDIDO. Es el dato que la operación quiere ver en verde o gris, y el
+    // GPS Coban lo transmite en la línea de contacto. Hoy llega `undefined`
+    // porque `gps_positions` no tiene la columna `ignition`: es parte de la
+    // migración de telemetría pendiente. Se lee ya para que el día que entre
+    // funcione sin tocar nada; `?? null` mantiene la distinción entre «apagado»
+    // (false) y «no se sabe» (null), que no son lo mismo.
+    ignition: posicion?.ignition ?? null,
+
     // Lo que sí es real
     conexion: estadoConexion(d),
     conectado: Boolean(d.connected),

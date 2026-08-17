@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import {
-  Barra, Buscador, Cabecera, Cargando, Chips, Datos, ErrorCarga, Tag, Tarjeta, Vacio,
+  Buscador, Cabecera, Cargando, Chips, ErrorCarga, Tarjeta, Vacio,
 } from '../comp/ui'
 import Mapa from '../comp/Mapa'
+import { estadoUnidad } from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
-import { color, etiqueta } from '../datos/catalogos'
-import { Icono } from '../Iconos'
 
 const ESTADOS = [
   { v: '', t: 'Todas' },
@@ -32,7 +30,9 @@ export default function CentroControl() {
     [q, areaId, estadoMarcha],
     15000
   )
-  // El expediente trae el recorrido del día, que el mapa dibuja como trayecto.
+  // El expediente se sigue pidiendo por UNA sola razón: trae el recorrido del
+  // día, que el mapa dibuja como trayecto. La ficha de la unidad ya no se
+  // arma aquí — flota sobre el mapa y se alimenta de la lista.
   const detalle = useDatos(
     () => (seleccionado ? repo.vehiculos.obtener(seleccionado) : Promise.resolve(null)),
     [seleccionado]
@@ -109,23 +109,13 @@ export default function CentroControl() {
               />
             </Tarjeta>
 
-            <div className="pnl-grid">
-              <Tarjeta titulo="Unidades">
-                <ListaUnidades
-                  vehiculos={lista}
-                  seleccionado={seleccionado}
-                  alSeleccionar={setSeleccionado}
-                />
-              </Tarjeta>
-
-              {seleccionado && (
-                <Telemetria
-                  unidad={unidad}
-                  estado={detalle.estado}
-                  onReintentar={detalle.recargar}
-                />
-              )}
-            </div>
+            <Tarjeta titulo="Unidades">
+              <ListaUnidades
+                vehiculos={lista}
+                seleccionado={seleccionado}
+                alSeleccionar={setSeleccionado}
+              />
+            </Tarjeta>
           </div>
         )}
       </div>
@@ -137,7 +127,8 @@ function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
   return (
     <div className="pnl-filas">
       {vehiculos.map((v) => {
-        const activa = v.estadoMarcha === 'en_marcha'
+        const estado = estadoUnidad(v)
+        const viva = estado.color === 'verde'
         const abierta = seleccionado === v.id
         const alternar = () => alSeleccionar(abierta ? null : v.id)
         return (
@@ -155,7 +146,7 @@ function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
               }
             }}
           >
-            <i className={`pnl-punto ${activa ? 'on' : 'off'}`} />
+            <i className={`pnl-punto ${viva ? 'on' : 'off'}`} />
             <div className="pnl-fila-txt">
               <b>{v.alias}</b>
               <span>
@@ -163,90 +154,18 @@ function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
                 {v.conductorNombre === 'Sin asignar' ? 'Sin conductor' : v.conductorNombre}
               </span>
             </div>
-            {/* Sin velocidad en la base no se puede decir «Detenida»: lo que
+            {/* Con velocidad en la base se muestra; sin ella, lo único que
                 consta es cuándo reportó el equipo por última vez. */}
             <em>
-              {v.estadoMarcha
-                ? activa
-                  ? f.velocidad(v.velocidadKmh)
-                  : 'Detenida'
-                : f.desde(v.ultimoReporte)}
+              {v.velocidadKmh != null
+                ? f.velocidad(v.velocidadKmh)
+                : v.estadoMarcha === 'parada'
+                  ? 'Detenida'
+                  : f.desde(v.ultimoReporte)}
             </em>
           </div>
         )
       })}
     </div>
-  )
-}
-
-function Telemetria({ unidad: v, estado, onReintentar }) {
-  if (estado === 'error') {
-    return (
-      <Tarjeta titulo="Telemetría">
-        <ErrorCarga onReintentar={onReintentar} />
-      </Tarjeta>
-    )
-  }
-  if (!v) {
-    return (
-      <Tarjeta titulo="Telemetría">
-        <Cargando filas={4} />
-      </Tarjeta>
-    )
-  }
-
-  const tonoNivel = (pct, bajo, medio) => (pct < bajo ? 'malo' : pct < medio ? 'aviso' : '')
-
-  return (
-    <Tarjeta
-      titulo="Telemetría"
-      accion={
-        v.estadoMarcha ? (
-          <Tag color={v.estadoMarcha === 'en_marcha' ? 'verde' : 'gris'}>
-            {etiqueta('marcha_estado', v.estadoMarcha)}
-          </Tag>
-        ) : (
-          <Tag color={color('conexion', v.conexion)}>{etiqueta('conexion', v.conexion)}</Tag>
-        )
-      }
-    >
-      <div className="pnl-grid">
-        {/* El nivel de aceite solo existe si el equipo lo reporta. Los GPS
-            instalados hoy no lo hacen: se omite la barra en vez de dibujar
-            una vacía que se lee como «tanque en cero». */}
-        {v.aceitePct != null && (
-          <div className="pnl-filas">
-            <div className="pnl-fila">
-              <div className="pnl-fila-txt">
-                <b>Aceite</b>
-                <span>{v.aceitePct}%</span>
-                <Barra valor={v.aceitePct / 100} tono={tonoNivel(v.aceitePct, 25, 45)} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        <Datos
-          items={[
-            { etiqueta: 'Temperatura del motor', valor: v.tempMotorC == null ? '—' : `${v.tempMotorC} °C` },
-            { etiqueta: 'Velocidad', valor: v.velocidadKmh == null ? '—' : f.velocidad(v.velocidadKmh) },
-            { etiqueta: 'Odómetro', valor: f.km(v.km) },
-            { etiqueta: 'Último reporte', valor: f.desde(v.ultimoReporte) },
-            { etiqueta: 'Ubicación', valor: v.ubicacionTexto || '—' },
-            { etiqueta: 'Área', valor: v.areaNombre },
-          ].concat(
-            // Datos que sí existen en la base real y no tenían dónde verse.
-            v.gps?.imei ? [{ etiqueta: 'IMEI del equipo', valor: v.gps.imei }] : []
-          )}
-        />
-
-        <div>
-          <Link to={`/panel/flota/${v.id}`} className="pnl-btn primario">
-            <Icono nombre="camion" tam={16} />
-            Ver expediente
-          </Link>
-        </div>
-      </div>
-    </Tarjeta>
   )
 }

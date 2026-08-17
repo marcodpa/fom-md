@@ -86,7 +86,18 @@ function puenteFom(env) {
         respuesta.end(
           JSON.stringify({
             authenticated: true,
-            user: { email: actorDev, displayName: 'Modo desarrollo' },
+            user: {
+              email: actorDev,
+              displayName: 'Modo desarrollo',
+              // El rol de la sesión de desarrollo. `GET /auth/session` de la API
+              // interna no devuelve rol; el endpoint público
+              // `/api/v1/mobile/auth/me` sí (`tenant: { id, name, role }`), y es
+              // ahí donde la consola debe leerlo cuando se migre a esa puerta.
+              // Hasta entonces se declara aquí, del lado del servidor de
+              // desarrollo, para poder trabajar en el panel de administración.
+              // Se controla con FOM_DEV_ROL en el .env.
+              role: env.FOM_DEV_ROL || 'admin_fom',
+            },
           })
         )
         return false

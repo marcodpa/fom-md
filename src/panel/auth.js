@@ -24,6 +24,28 @@ import { iniciales as inicialesDe } from './datos/formato'
 
 const CLAVE_SESION = 'fom.panel.sesion'
 
+/**
+ * Traducción de los roles que existen hoy en producción al catálogo del
+ * producto. Mismo criterio que `fom.canonical_membership_role()` de la
+ * migración de identidad: primero el código entiende los dos juegos de
+ * valores, después se migran las filas, y solo al final se retiran los viejos.
+ */
+const ROL_CANONICO = {
+  owner: 'admin_fom',
+  administrator: 'supervisor',
+  fleet_manager: 'supervisor',
+  operator: 'conductor',
+  viewer: 'usuario',
+  admin: 'admin_fom',
+}
+
+const ETIQUETA_ROL = {
+  admin_fom: 'Administrador FOM',
+  supervisor: 'Supervisor',
+  conductor: 'Conductor',
+  usuario: 'Usuario',
+}
+
 // --- Cuentas de demostración (solo sin API) --------------------------------
 const CUENTAS = [
   {
@@ -117,20 +139,33 @@ function entrarDemo({ usuario, clave, recordar }) {
 /**
  * Arma el perfil que consume la consola.
  *
- * `GET /auth/session` solo devuelve correo y nombre: el rol y el ente viven en
- * `tenant_memberships` y la API todavía no los expone. Hasta que lo haga, el
- * rol queda `null` — y `esAdminFom` da false, así que la capa de
- * administración multiempresa no aparece. Inventar aquí un rol de
- * administrador sería abrir una puerta que el servidor no autorizó.
+ * El rol decide qué ve cada quien, incluida la capa de administración de FOM.
+ * De dónde sale, por orden de preferencia:
+ *
+ *   `GET /api/v1/mobile/auth/me` — la puerta PÚBLICA, la misma que usa la app
+ *   móvil. Devuelve `tenant: { id, name, role }` y no necesita token interno.
+ *   Es a donde debe migrar la consola.
+ *
+ *   `GET /auth/session` — la interna que se usa hoy. NO devuelve rol; en modo
+ *   de desarrollo lo declara el puente (ver `FOM_DEV_ROL` en vite.config.js).
+ *
+ * Si no llega ningún rol se queda en `null` y `esAdminFom` da false: sin dato,
+ * no se abre la administración. Inventar un rol aquí sería abrir una puerta que
+ * el servidor no autorizó.
  */
 function armarPerfil(usuario) {
   const nombre = usuario?.displayName || usuario?.email || 'Usuario'
+  // Rol canónico de FOM-02. Los valores que hoy existen en producción
+  // (`owner`, `administrator`, `fleet_manager`, `operator`, `viewer`) se
+  // traducen al catálogo del producto; ver `canonical_membership_role` en la
+  // migración de identidad, que hace lo mismo del lado de la base.
+  const rol = ROL_CANONICO[usuario?.role] ?? usuario?.role ?? null
   return {
     id: usuario?.email || 'desconocido',
     nombre,
     correo: usuario?.email || '',
-    rol: null,
-    rolNombre: 'Usuario de la consola',
+    rol,
+    rolNombre: rol ? (ETIQUETA_ROL[rol] ?? rol) : 'Usuario de la consola',
     empresa: 'FOM',
     empresaId: null,
     sede: 'Conectado a la base real',
@@ -208,7 +243,7 @@ export async function cerrarSesion() {
 
 /** ¿La sesión es del administrador de FOM? (rango 4, ve todo el sistema) */
 export function esAdminFom(perfil) {
-  return perfil?.rol === 'admin'
+  return perfil?.rol === 'admin_fom' || perfil?.rol === 'admin'
 }
 
 /** ¿El acceso está validando contra la base real? Lo muestra la pantalla de acceso. */
