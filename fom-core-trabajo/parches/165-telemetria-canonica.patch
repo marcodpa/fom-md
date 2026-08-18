@@ -1,0 +1,1068 @@
+From 46422317a9f7e92e672c873fc718bb4ab57852f6 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 11:38:53 -0400
+Subject: [PATCH 1/4] Extraer velocidad y rumbo de las tramas Coban observadas
+ (#159)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+El decodificador exigia que los campos 12 y 13 de GPS103 —velocidad y
+rumbo— vinieran vacios, y rechazaba la trama entera con
+`unexpected_fields` cuando no lo estaban. Un equipo detenido los deja en
+blanco y uno en movimiento no, de modo que la regla descartaba
+justamente las tramas de los vehiculos que circulaban: el recorrido que
+llegaba a `fom.gps_positions` era el de las paradas.
+
+Esta version los lee. Tambien deja de perder la posicion cuando el
+equipo trae configurado el numero de devolucion de llamada, que no
+participa en la posicion y hasta ahora costaba la trama completa.
+
+La migracion anade cuatro columnas nullable sin default, con las
+restricciones de rango y sin ningun indice: el Issue pide no crearlos
+hasta demostrar una consulta que los use. Los permisos no se tocan,
+porque el GRANT de tabla que ya existe alcanza a las columnas nuevas y
+es el minimo correcto.
+
+`protocolVersion` sube a '2' porque forma parte de la clave de
+idempotencia: reprocesar una trama ya vista debe producir una fila nueva
+y mejor, no chocar con la que escribio el decodificador anterior.
+
+Lo que NO se guarda todavia, y por que:
+
+  VELOCIDAD. GPS103 no declara la unidad de ese campo, y las dos
+  lecturas posibles se diferencian en un factor de 1,852. Elegir mal no
+  da un error visible, da velocidades verosimiles y equivocadas para
+  siempre. El valor se decodifica y la trama se conserva integra, pero
+  `speed_kph` queda en NULL hasta que la unidad se demuestre comparando
+  el campo con la velocidad implicita entre posiciones consecutivas.
+  Confirmada, es cambiar una constante, subir a '3' y reprocesar.
+
+  IGNICION Y ODOMETRO. Ninguno de los trece campos de una trama
+  `tracker` los transporta. El encendido llega en mensajes `acc on` /
+  `acc off` que este decodificador aun no interpreta. Las columnas se
+  crean ahora para no volver a migrar la tabla, y se llenan cuando haya
+  fuente observada. Derivarlas de la velocidad seria inventarlas.
+
+El rumbo si se guarda: se mide en grados y no admite dos lecturas.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ ...817120000000_add_gps_position_telemetry.ts | 124 ++++++++++++++++++
+ src/gps-canonical/gps-canonical.processor.ts  |   7 +
+ src/gps-canonical/gps-canonical.types.ts      |  19 +++
+ src/gps-canonical/gps-position.repository.ts  |  92 ++++++++++++-
+ src/gps-canonical/gps-telemetry.ts            |  65 +++++++++
+ .../adapters/coban-gps103.adapter.ts          |   6 +-
+ .../adapters/coban-gps103.decoder.ts          | 101 +++++++++++++-
+ src/gps-ingress/gps-protocol-adapter.ts       |  25 ++++
+ test/fixtures/coban-observed.fixtures.js      |  33 +++++
+ test/gps-canonical-persistence.test.js        |  27 ++++
+ test/gps-coban-decoder.test.js                |  86 ++++++++++++
+ 11 files changed, 579 insertions(+), 6 deletions(-)
+ create mode 100644 src/database/migrations/files/20260817120000000_add_gps_position_telemetry.ts
+ create mode 100644 src/gps-canonical/gps-telemetry.ts
+
+diff --git a/src/database/migrations/files/20260817120000000_add_gps_position_telemetry.ts b/src/database/migrations/files/20260817120000000_add_gps_position_telemetry.ts
+new file mode 100644
+index 0000000..693eedb
+--- /dev/null
++++ b/src/database/migrations/files/20260817120000000_add_gps_position_telemetry.ts
+@@ -0,0 +1,124 @@
++import type { MigrationBuilder } from 'node-pg-migrate/dist/bundle/index';
++
++/**
++ * Issue #159 — Telemetria canonica aditiva: velocidad, rumbo, ignicion y odometro.
++ *
++ * Cuatro columnas nullable sobre `fom.gps_positions`, sin default y sin NOT
++ * NULL. Las filas historicas quedan en NULL, que es la respuesta correcta:
++ * significa «la version del decoder que escribio esta fila no extrajo el dato»,
++ * y eso no es lo mismo que cero, que afirmaria que el vehiculo estaba detenido
++ * o que el odometro marcaba cero.
++ *
++ * UNIDADES, fijadas en el nombre y repetidas en el comentario de cada columna,
++ * porque una columna `speed` sin unidad se interpreta mal tarde o temprano:
++ *   speed_kph    kilometros por hora
++ *   heading_deg  grados desde el norte verdadero, [0, 360)
++ *   ignition     estado observado de la linea de contacto
++ *   odometer_km  kilometros acumulados reportados por el equipo
++ *
++ * PRECISION. `numeric` y no coma flotante: el mismo frame reprocesado por el
++ * mismo decoder debe producir el mismo valor byte a byte, o las comparaciones
++ * de reproceso dejan de ser fiables. `odometer_km` con tres decimales porque de
++ * ahi saldran los kilometros facturables y el mantenimiento por distancia.
++ *
++ * SIN INDICES, por instruccion explicita del Issue: no se anaden hasta demostrar
++ * una consulta real que los use. Un indice sobre una tabla que solo crece se
++ * paga en cada insercion, para siempre.
++ *
++ * BLOQUEO. `ADD COLUMN` sin default es catalogo puro: desde PostgreSQL 11 el
++ * valor faltante vive en `pg_attribute.attmissingval` y las paginas existentes
++ * no se tocan, asi que no hay reescritura de tabla. Las restricciones se validan
++ * en linea porque hoy son decenas de miles de filas, todas NULL, y el recorrido
++ * dura milisegundos; separar en NOT VALID + VALIDATE exigiria `noTransaction`,
++ * que parte la migracion en varias transacciones y rompe la garantia de todo o
++ * nada del despliegue, para ahorrar un bloqueo mas corto que el propio ALTER. Si
++ * esta tabla llegara al orden de los millones de filas antes de aplicarse, la
++ * decision se invierte.
++ *
++ * El riesgo real no es la duracion sino la cola: ACCESS EXCLUSIVE es incompatible
++ * con todo, de modo que un SELECT largo abierto sobre la tabla haria esperar al
++ * ALTER y, detras de el, a los INSERT del ingestor. De ahi el `lock_timeout`: si
++ * no consigue paso libre en tres segundos la migracion aborta sin haber tocado
++ * nada, y se reintenta en otro momento.
++ *
++ * PERMISOS. No se modifican, y es deliberado. `fom.gps_positions` ya concede
++ * `SELECT, INSERT` a `fom_app` y `SELECT` a `fom_readonly`, sin UPDATE ni DELETE
++ * porque la tabla es de solo anexado; un permiso otorgado a nivel de tabla
++ * alcanza a las columnas nuevas. Conceder de menos aqui romperia la ingesta, y
++ * conceder de mas contradiria el minimo privilegio que ya esta bien resuelto.
++ */
++
++export const up = (pgm: MigrationBuilder): void => {
++  pgm.sql(`SET LOCAL lock_timeout = '3s';`);
++
++  pgm.sql(`
++    ALTER TABLE fom.gps_positions
++      ADD COLUMN speed_kph   numeric(6,2),
++      ADD COLUMN heading_deg numeric(5,2),
++      ADD COLUMN ignition    boolean,
++      ADD COLUMN odometer_km numeric(12,3);
++  `);
++
++  pgm.sql(`
++    ALTER TABLE fom.gps_positions
++      ADD CONSTRAINT gps_positions_speed_kph_check CHECK (
++        speed_kph IS NULL OR (speed_kph >= 0 AND speed_kph <= 400)
++      ),
++      ADD CONSTRAINT gps_positions_heading_deg_check CHECK (
++        heading_deg IS NULL OR (heading_deg >= 0 AND heading_deg < 360)
++      ),
++      ADD CONSTRAINT gps_positions_odometer_km_check CHECK (
++        odometer_km IS NULL OR (odometer_km >= 0 AND odometer_km <= 9999999)
++      );
++  `);
++
++  pgm.sql(`
++    COMMENT ON COLUMN fom.gps_positions.speed_kph IS
++      'Observed ground speed in km/h taken from the preserved frame. NULL means the decoder version that wrote this row did not extract it, which is not the same as zero';
++    COMMENT ON COLUMN fom.gps_positions.heading_deg IS
++      'Observed course over ground in degrees clockwise from true north, 0 inclusive to 360 exclusive. NULL when the frame carries no usable course';
++    COMMENT ON COLUMN fom.gps_positions.ignition IS
++      'Observed ignition line state. NULL when the frame carries no ignition signal. Never derived from speed or movement heuristics';
++    COMMENT ON COLUMN fom.gps_positions.odometer_km IS
++      'Device-reported cumulative odometer in km. Not monotonic across hardware replacements, and never derived from consecutive positions';
++  `);
++};
++
++export const down = (pgm: MigrationBuilder): void => {
++  // Revertir solo mientras no exista telemetria decodificada. Si ya se escribio
++  // aunque sea un valor, un DROP COLUMN lo borraria y solo se recuperaria
++  // reprocesando los frames. Ante esa duda la migracion se niega en vez de
++  // destruir dato observado.
++  pgm.sql(`
++    DO $guard$
++    BEGIN
++      IF EXISTS (
++        SELECT 1
++        FROM fom.gps_positions
++        WHERE speed_kph IS NOT NULL
++           OR heading_deg IS NOT NULL
++           OR ignition IS NOT NULL
++           OR odometer_km IS NOT NULL
++        LIMIT 1
++      ) THEN
++        RAISE EXCEPTION
++          'cannot roll back GPS telemetry columns while decoded telemetry exists'
++          USING ERRCODE = '23514';
++      END IF;
++    END
++    $guard$;
++  `);
++
++  pgm.sql(`SET LOCAL lock_timeout = '3s';`);
++
++  pgm.sql(`
++    ALTER TABLE fom.gps_positions
++      DROP CONSTRAINT gps_positions_odometer_km_check,
++      DROP CONSTRAINT gps_positions_heading_deg_check,
++      DROP CONSTRAINT gps_positions_speed_kph_check,
++      DROP COLUMN odometer_km,
++      DROP COLUMN ignition,
++      DROP COLUMN heading_deg,
++      DROP COLUMN speed_kph;
++  `);
++};
+diff --git a/src/gps-canonical/gps-canonical.processor.ts b/src/gps-canonical/gps-canonical.processor.ts
+index a70d6f6..c9a0215 100644
+--- a/src/gps-canonical/gps-canonical.processor.ts
++++ b/src/gps-canonical/gps-canonical.processor.ts
+@@ -12,6 +12,10 @@ import {
+ } from './gps-device-identity.resolver';
+ import { GpsUnresolvedAttemptRepository } from './gps-unresolved-attempt.repository';
+ import { createGpsFrameFingerprint } from './gps-frame-fingerprint';
++import {
++  TELEMETRIA_AUSENTE,
++  toCanonicalTelemetry,
++} from './gps-telemetry';
+ 
+ export type CanonicalProcessMode = 'dry-run' | 'execute';
+ 
+@@ -186,6 +190,7 @@ export class GpsCanonicalProcessor {
+           positionValid: true,
+           latitude: decoded.latitude,
+           longitude: decoded.longitude,
++          telemetry: toCanonicalTelemetry(decoded.telemetry),
+         },
+       };
+     }
+@@ -203,6 +208,8 @@ export class GpsCanonicalProcessor {
+           positionValid: false,
+           latitude: null,
+           longitude: null,
++          // Una trama sin fijacion no transporta telemetria observable.
++          telemetry: TELEMETRIA_AUSENTE,
+         },
+       };
+     }
+diff --git a/src/gps-canonical/gps-canonical.types.ts b/src/gps-canonical/gps-canonical.types.ts
+index c50270e..54f4ceb 100644
+--- a/src/gps-canonical/gps-canonical.types.ts
++++ b/src/gps-canonical/gps-canonical.types.ts
+@@ -47,12 +47,31 @@ export type GpsTimeComponents = {
+   readonly timezone: 'unknown';
+ };
+ 
++/**
++ * Telemetria lista para guardar, ya en las unidades del producto.
++ *
++ * Cada campo es `number | null` o `boolean | null`, nunca un valor por defecto:
++ * `null` significa «la version del decodificador que escribio esta fila no
++ * pudo afirmarlo», que no es lo mismo que cero.
++ */
++export type CanonicalTelemetry = {
++  /** Kilometros por hora. */
++  readonly speedKph: number | null;
++  /** Grados desde el norte verdadero, [0, 360). */
++  readonly headingDeg: number | null;
++  /** Estado observado de la linea de contacto. Nunca derivado del movimiento. */
++  readonly ignition: boolean | null;
++  /** Kilometros acumulados que reporta el equipo. */
++  readonly odometerKm: number | null;
++};
++
+ type CanonicalPositionBase = {
+   readonly gpsDeviceId: string;
+   readonly vehicleId: string | null;
+   readonly eventOrdinal: number;
+   readonly deviceDateTime: DeviceDateTimeComponents | null;
+   readonly gpsTime: GpsTimeComponents | null;
++  readonly telemetry: CanonicalTelemetry;
+ };
+ 
+ export type CanonicalValidPositionInput = CanonicalPositionBase & {
+diff --git a/src/gps-canonical/gps-position.repository.ts b/src/gps-canonical/gps-position.repository.ts
+index 2021be5..796012d 100644
+--- a/src/gps-canonical/gps-position.repository.ts
++++ b/src/gps-canonical/gps-position.repository.ts
+@@ -39,8 +39,33 @@ type PositionRow = {
+   gpsSecond?: number | null;
+   gpsMillisecond?: number | null;
+   timezoneStatus?: string;
++  speedKph?: string | null;
++  headingDeg?: string | null;
++  ignition?: boolean | null;
++  odometerKm?: string | null;
+ };
+ 
++/**
++ * `numeric` vuelve de PostgreSQL como cadena, a proposito: convertirlo a
++ * `number` en el driver perderia precision en valores grandes. Para comparar la
++ * fila existente con la que se iba a escribir hay que normalizar las dos al
++ * mismo texto, o `'0.00'` y `0` pareceran distintos y la comprobacion de
++ * idempotencia fallaria en cada duplicado.
++ */
++function mismoNumerico(
++  almacenado: string | null | undefined,
++  entrante: number | null,
++  decimales: number,
++): boolean {
++  if (almacenado === null || almacenado === undefined) {
++    return entrante === null;
++  }
++  if (entrante === null) {
++    return false;
++  }
++  return almacenado === entrante.toFixed(decimales);
++}
++
+ @Injectable()
+ export class GpsPositionRepository {
+   validate(input: PositionDecodeInput): void {
+@@ -79,6 +104,51 @@ export class GpsPositionRepository {
+     ) {
+       throw new Error('invalid_position_has_coordinates');
+     }
++    const telemetry = position.telemetry;
++    if (
++      telemetry.speedKph !== null &&
++      (
++        !Number.isFinite(telemetry.speedKph) ||
++        telemetry.speedKph < 0 ||
++        telemetry.speedKph > 400
++      )
++    ) {
++      throw new Error('invalid_telemetry_speed');
++    }
++    if (
++      telemetry.headingDeg !== null &&
++      (
++        !Number.isFinite(telemetry.headingDeg) ||
++        telemetry.headingDeg < 0 ||
++        telemetry.headingDeg >= 360
++      )
++    ) {
++      throw new Error('invalid_telemetry_heading');
++    }
++    if (
++      telemetry.odometerKm !== null &&
++      (
++        !Number.isFinite(telemetry.odometerKm) ||
++        telemetry.odometerKm < 0 ||
++        telemetry.odometerKm > 9999999
++      )
++    ) {
++      throw new Error('invalid_telemetry_odometer');
++    }
++    // Una trama sin fijacion no observa nada del vehiculo. Aceptar telemetria
++    // aqui dejaria pasar una velocidad sin posicion que la respalde.
++    if (
++      !position.positionValid &&
++      (
++        telemetry.speedKph !== null ||
++        telemetry.headingDeg !== null ||
++        telemetry.ignition !== null ||
++        telemetry.odometerKm !== null
++      )
++    ) {
++      throw new Error('invalid_position_has_telemetry');
++    }
++
+     if (
+       (
+         position.deviceDateTime !== null &&
+@@ -205,11 +275,13 @@ export class GpsPositionRepository {
+           device_hour, device_minute, device_second,
+           gps_time_raw, gps_hour, gps_minute, gps_second,
+           gps_millisecond, timezone_status, position_valid,
+-          latitude, longitude
++          latitude, longitude,
++          speed_kph, heading_deg, ignition, odometer_km
+         ) VALUES (
+           $1, $2, $3, $4, $5, $6, $7, $8, $9, NULL,
+           $10, $11, $12, $13, $14, $15, $16,
+-          $17, $18, $19, $20, $21, 'unknown', $22, $23, $24
++          $17, $18, $19, $20, $21, 'unknown', $22, $23, $24,
++          $25, $26, $27, $28
+         )
+         ON CONFLICT (
+           frame_id, protocol_family, decoder_version, event_ordinal
+@@ -241,6 +313,10 @@ export class GpsPositionRepository {
+         position.positionValid,
+         position.latitude,
+         position.longitude,
++        position.telemetry.speedKph,
++        position.telemetry.headingDeg,
++        position.telemetry.ignition,
++        position.telemetry.odometerKm,
+       ],
+     );
+     const created = inserted.rows[0];
+@@ -275,7 +351,11 @@ export class GpsPositionRepository {
+           gps_millisecond AS "gpsMillisecond",
+           timezone_status AS "timezoneStatus",
+           position_valid AS "positionValid",
+-          latitude, longitude
++          latitude, longitude,
++          speed_kph AS "speedKph",
++          heading_deg AS "headingDeg",
++          ignition,
++          odometer_km AS "odometerKm"
+         FROM fom.gps_positions
+         WHERE frame_id = $1
+           AND protocol_family = $2
+@@ -320,7 +400,11 @@ export class GpsPositionRepository {
+       row.timezoneStatus !== 'unknown' ||
+       row.positionValid !== position.positionValid ||
+       row.latitude !== position.latitude ||
+-      row.longitude !== position.longitude
++      row.longitude !== position.longitude ||
++      !mismoNumerico(row.speedKph, position.telemetry.speedKph, 2) ||
++      !mismoNumerico(row.headingDeg, position.telemetry.headingDeg, 2) ||
++      (row.ignition ?? null) !== position.telemetry.ignition ||
++      !mismoNumerico(row.odometerKm, position.telemetry.odometerKm, 3)
+     ) {
+       throw new Error('position_idempotency_metadata_conflict');
+     }
+diff --git a/src/gps-canonical/gps-telemetry.ts b/src/gps-canonical/gps-telemetry.ts
+new file mode 100644
+index 0000000..8cdd648
+--- /dev/null
++++ b/src/gps-canonical/gps-telemetry.ts
+@@ -0,0 +1,65 @@
++import { COBAN_SPEED_WIRE_UNIT } from '../gps-ingress/adapters/coban-gps103.decoder';
++import type { ObservedFrameTelemetry } from '../gps-ingress/gps-protocol-adapter';
++import type { CanonicalTelemetry } from './gps-canonical.types';
++
++/**
++ * Traduccion de la telemetria observada en la trama a la forma que se guarda.
++ *
++ * Un solo sitio decide unidades y redondeo. Si esta regla vive repartida entre
++ * el decodificador, el procesador y el repositorio, tarde o temprano dos de
++ * ellos discrepan y nadie lo nota hasta que un informe da un numero raro.
++ */
++
++/** Nudos a kilometros por hora. Exacto por definicion de milla nautica. */
++const KNOT_TO_KPH = 1.852;
++
++/**
++ * Ausencia total de telemetria. Es lo que corresponde a una trama sin fijacion
++ * y a cualquier variante que no transporte estos campos: cuatro nulos, que
++ * significan «no se sabe», y no cuatro ceros, que afirmarian un vehiculo
++ * detenido, mirando al norte y con el odometro en cero.
++ */
++export const TELEMETRIA_AUSENTE: CanonicalTelemetry = {
++  speedKph: null,
++  headingDeg: null,
++  ignition: null,
++  odometerKm: null,
++};
++
++/** Dos decimales, que es la precision de la columna `numeric(6,2)`. */
++function redondear(valor: number): number {
++  return Math.round(valor * 100) / 100;
++}
++
++export function toCanonicalTelemetry(
++  observed: ObservedFrameTelemetry,
++): CanonicalTelemetry {
++  let speedKph: number | null = null;
++  if (observed.speed !== null) {
++    if (observed.speed.wireUnit === 'kph') {
++      speedKph = redondear(observed.speed.value);
++    } else if (COBAN_SPEED_WIRE_UNIT === 'knot') {
++      speedKph = redondear(observed.speed.value * KNOT_TO_KPH);
++    }
++    // Con la unidad todavia indeterminada no se escribe nada. El valor no se
++    // pierde: la trama esta preservada integra y basta con subir la version del
++    // decodificador y reprocesar cuando la unidad quede demostrada. Guardar un
++    // numero plausible y equivocado si seria irreversible, porque nadie
++    // volveria a revisarlo.
++  }
++
++  return {
++    speedKph,
++    headingDeg:
++      observed.heading === null ? null : redondear(observed.heading.degrees),
++    // IGNICION Y ODOMETRO. Las tramas `tracker` de GPS103 tienen trece campos y
++    // ninguno los transporta: el encendido llega en mensajes de alarma
++    // distintos (`acc on` / `acc off`), que este decodificador todavia no
++    // interpreta, y el odometro solo existe en variantes de firmware con mas
++    // campos que no se han observado en la flota. Las columnas se crean ahora
++    // para no volver a migrar la tabla, y se llenan cuando haya una fuente
++    // observada. Derivarlas de la velocidad seria inventar.
++    ignition: null,
++    odometerKm: null,
++  };
++}
+diff --git a/src/gps-ingress/adapters/coban-gps103.adapter.ts b/src/gps-ingress/adapters/coban-gps103.adapter.ts
+index c893926..4626cff 100644
+--- a/src/gps-ingress/adapters/coban-gps103.adapter.ts
++++ b/src/gps-ingress/adapters/coban-gps103.adapter.ts
+@@ -14,7 +14,11 @@ const IMEI_PATTERN = /(?:^|,)imei:([0-9]{15})(?:,|;)/iu;
+ export class CobanGps103Adapter implements GpsProtocolAdapter {
+   readonly profileId = 'coban-gps103-port-5001';
+   readonly protocolFamily = 'coban-gps103';
+-  readonly protocolVersion = '1';
++  // Version del decodificador, y parte de la clave de idempotencia de
++  // `fom.gps_positions`. Sube a '2' porque esta version extrae campos que la
++  // anterior descartaba: reprocesar una trama ya vista debe producir una fila
++  // nueva y mejor, no chocar con la que escribio el decodificador viejo.
++  readonly protocolVersion = '2';
+ 
+   extractFrames(
+     buffer: Buffer,
+diff --git a/src/gps-ingress/adapters/coban-gps103.decoder.ts b/src/gps-ingress/adapters/coban-gps103.decoder.ts
+index c660314..b0df537 100644
+--- a/src/gps-ingress/adapters/coban-gps103.decoder.ts
++++ b/src/gps-ingress/adapters/coban-gps103.decoder.ts
+@@ -1,6 +1,7 @@
+ import {
+   type GpsFrameDecodeFailureReason,
+   type GpsFrameDecodeResult,
++  type ObservedFrameTelemetry,
+ } from '../gps-protocol-adapter';
+ 
+ const HEARTBEAT_PATTERN = /^([0-9]{15});$/u;
+@@ -14,6 +15,41 @@ const GPS_TIME_PATTERN =
+   /^([0-9]{2})([0-9]{2})([0-9]{2})\.000$/u;
+ const LATITUDE_PATTERN = /^([0-9]{2})([0-9]{2}\.[0-9]{5})$/u;
+ const LONGITUDE_PATTERN = /^([0-9]{3})([0-9]{2}\.[0-9]{5})$/u;
++// Campo 4 de GPS103: numero de devolucion de llamada configurado en el equipo.
++// No participa en la posicion. Se observa vacio en los equipos de FOM, pero un
++// equipo con el numero configurado emite digitos, y descartar una posicion
++// entera por eso perderia el dato util de la trama.
++const CALLBACK_NUMBER_PATTERN = /^[0-9]{0,20}$/u;
++// Campos 12 y 13: velocidad y rumbo. Hasta tres enteros y como maximo dos
++// decimales, que es la forma con la que los emite el firmware observado.
++const SPEED_PATTERN = /^[0-9]{1,3}(?:\.[0-9]{1,2})?$/u;
++const HEADING_PATTERN = /^[0-9]{1,3}(?:\.[0-9]{1,2})?$/u;
++
++/**
++ * UNIDAD DEL CAMPO DE VELOCIDAD.
++ *
++ * GPS103 no declara la unidad de este campo en la trama, y las dos lecturas
++ * posibles se diferencian en un factor de 1,852. Escoger mal no produce un
++ * error visible: produce velocidades verosimiles y equivocadas para siempre.
++ *
++ * Por eso el decodificador NO adivina. Entrega el valor tal cual viene, con la
++ * unidad marcada como indeterminada, y la persistencia deja `speed_kph` en NULL
++ * mientras no haya prueba. El rumbo, que se mide en grados y no admite dos
++ * lecturas, si se guarda desde ahora.
++ *
++ * Como se resuelve, con los datos que ya estan en la base: para un mismo
++ * equipo, tomar pares de posiciones validas consecutivas, calcular la velocidad
++ * implicita entre ellas (distancia sobre tiempo) y compararla con el campo
++ * reportado. Si coincide, el campo son km/h; si el campo es aproximadamente la
++ * implicita dividida entre 1,852, son nudos. Con unos cientos de pares el
++ * resultado no admite duda.
++ *
++ * Confirmada la unidad: cambiar esta constante, subir `protocolVersion` a '3' y
++ * reprocesar. Las tramas estan preservadas integras, asi que no se perdio nada
++ * por haber esperado.
++ */
++export const COBAN_SPEED_WIRE_UNIT: 'knot' | 'kph' | 'undetermined' =
++  'undetermined';
+ 
+ type ParsedDeviceTime = Extract<
+   GpsFrameDecodeResult,
+@@ -154,6 +190,53 @@ function parseDegreesMinutes(
+   return coordinate;
+ }
+ 
++/**
++ * Lee velocidad y rumbo. Un campo vacio es ausencia legitima —los equipos sin
++ * fijacion de rumbo lo dejan en blanco— y se traduce a `null`, nunca a cero.
++ * Devuelve `null` (la funcion completa) si algun campo trae una forma no
++ * observada, para que la trama se registre como variante desconocida en lugar
++ * de guardarse a medias.
++ */
++function parseTelemetry(
++  speedField: string,
++  headingField: string,
++): ObservedFrameTelemetry | null {
++  let speed: ObservedFrameTelemetry['speed'] = null;
++  if (speedField !== '') {
++    if (!SPEED_PATTERN.test(speedField)) {
++      return null;
++    }
++    const value = Number(speedField);
++    if (!Number.isFinite(value)) {
++      return null;
++    }
++    speed = {
++      raw: speedField,
++      value,
++      // La unidad se decide en un solo sitio. Mientras este indeterminada se
++      // marca como nudos para conservar el tipo, y la persistencia se niega a
++      // escribir el valor; ver COBAN_SPEED_WIRE_UNIT.
++      wireUnit: COBAN_SPEED_WIRE_UNIT === 'kph' ? 'kph' : 'knot',
++    };
++  }
++
++  let heading: ObservedFrameTelemetry['heading'] = null;
++  if (headingField !== '') {
++    if (!HEADING_PATTERN.test(headingField)) {
++      return null;
++    }
++    const degrees = Number(headingField);
++    // 360 es el mismo rumbo que 0 y algunos firmwares lo emiten asi; se
++    // normaliza en vez de rechazar la trama.
++    if (!Number.isFinite(degrees) || degrees > 360) {
++      return null;
++    }
++    heading = { raw: headingField, degrees: degrees === 360 ? 0 : degrees };
++  }
++
++  return { speed, heading };
++}
++
+ function isObservedInvalidPosition(fields: string[]): boolean {
+   return (
+     fields[3] === '' &&
+@@ -230,7 +313,22 @@ export function decodeObservedCobanFrame(
+     return failure('unsupported', 'unobserved_variant');
+   }
+ 
+-  if (fields[3] !== '' || fields[11] !== '' || fields[12] !== ';') {
++  // El campo de devolucion de llamada no afecta a la posicion: se comprueba
++  // que tenga forma conocida y se ignora.
++  if (!CALLBACK_NUMBER_PATTERN.test(fields[3] ?? '')) {
++    return failure('unsupported', 'unexpected_fields');
++  }
++
++  const headingField = fields[12] ?? '';
++  if (!headingField.endsWith(';')) {
++    return failure('malformed', 'missing_terminator');
++  }
++
++  const telemetry = parseTelemetry(
++    fields[11] ?? '',
++    headingField.slice(0, -1),
++  );
++  if (telemetry === null) {
+     return failure('unsupported', 'unexpected_fields');
+   }
+ 
+@@ -278,5 +376,6 @@ export function decodeObservedCobanFrame(
+     longitude: -unsignedLongitude,
+     longitudeHemisphere: 'W',
+     fixValid: true,
++    telemetry,
+   };
+ }
+diff --git a/src/gps-ingress/gps-protocol-adapter.ts b/src/gps-ingress/gps-protocol-adapter.ts
+index e8b296a..51ad62d 100644
+--- a/src/gps-ingress/gps-protocol-adapter.ts
++++ b/src/gps-ingress/gps-protocol-adapter.ts
+@@ -47,6 +47,30 @@ export type TimezoneNeutralGpsTime = {
+   readonly timezone: 'unknown';
+ };
+ 
++/**
++ * Telemetria observada en la trama, antes de convertir unidades.
++ *
++ * Se conserva `raw` junto al numero porque el texto exacto del campo es la
++ * unica prueba de lo que dijo el equipo. Si manana se demuestra que la unidad
++ * asumida no era la correcta, el valor original sigue en la trama preservada y
++ * el reproceso lo corrige sin haber perdido nada.
++ *
++ * `wireUnit` es un dato explicito y no un comentario: el campo de velocidad de
++ * GPS103 no declara su unidad, asi que la unidad debe viajar pegada al valor
++ * hasta el punto donde se convierte. Ver `COBAN_SPEED_WIRE_UNIT`.
++ */
++export type ObservedFrameTelemetry = {
++  readonly speed: {
++    readonly raw: string;
++    readonly value: number;
++    readonly wireUnit: 'knot' | 'kph';
++  } | null;
++  readonly heading: {
++    readonly raw: string;
++    readonly degrees: number;
++  } | null;
++};
++
+ export type GpsFrameDecodeResult =
+   | { readonly kind: 'heartbeat'; readonly imei: string }
+   | {
+@@ -59,6 +83,7 @@ export type GpsFrameDecodeResult =
+       readonly longitude: number;
+       readonly longitudeHemisphere: 'W';
+       readonly fixValid: true;
++      readonly telemetry: ObservedFrameTelemetry;
+     }
+   | {
+       readonly kind: 'position_invalid';
+diff --git a/test/fixtures/coban-observed.fixtures.js b/test/fixtures/coban-observed.fixtures.js
+index fe2923d..ce3e4cc 100644
+--- a/test/fixtures/coban-observed.fixtures.js
++++ b/test/fixtures/coban-observed.fixtures.js
+@@ -16,10 +16,36 @@ const positionInvalidVariants = [
+     ',tracker,260730120200,,L,,,afd0,,aaa1,,,;',
+ ];
+ 
++// Variantes con los campos 12 y 13 poblados. El decodificador anterior las
++// rechazaba enteras por `unexpected_fields`, que era la causa de que la mayoria
++// de las tramas de un equipo en movimiento no llegara a `fom.gps_positions`.
++const positionValidWithTelemetry = positionValid.replace(
++  ',W,,;',
++  ',W,42.50,187.30;',
++);
++const positionValidSpeedOnly = positionValid.replace(',W,,;', ',W,0.00,;');
++const positionValidHeadingOnly = positionValid.replace(',W,,;', ',W,,90.00;');
++// 360 grados es el mismo rumbo que 0 y algun firmware lo emite asi.
++const positionValidHeadingWrap = positionValid.replace(
++  ',W,,;',
++  ',W,12.00,360.00;',
++);
++// Equipo con numero de devolucion de llamada configurado: no afecta a la
++// posicion y no debe costar la trama.
++const positionValidWithCallbackNumber = positionValid.replace(
++  ',tracker,260730120000,,F,',
++  ',tracker,260730120000,584121234567,F,',
++);
++
+ module.exports = {
+   SYNTHETIC_IMEI,
+   heartbeat,
+   positionValid,
++  positionValidWithTelemetry,
++  positionValidSpeedOnly,
++  positionValidHeadingOnly,
++  positionValidHeadingWrap,
++  positionValidWithCallbackNumber,
+   positionInvalidVariants,
+   malformed: {
+     invalidDate: positionValid.replace('260730120000', '260231120000'),
+@@ -41,5 +67,12 @@ module.exports = {
+   unsupported: {
+     unexpectedFields: positionValid.replace(',W,,;', ',W,opaque,;'),
+     unobservedVariant: positionValid.replace(',,F,', ',,X,'),
++    negativeSpeed: positionValid.replace(',W,,;', ',W,-1.00,;'),
++    headingOutOfRange: positionValid.replace(',W,,;', ',W,,361.00;'),
++    nonNumericHeading: positionValid.replace(',W,,;', ',W,,north;'),
++    callbackNumberNotNumeric: positionValid.replace(
++      ',tracker,260730120000,,F,',
++      ',tracker,260730120000,abc,F,',
++    ),
+   },
+ };
+diff --git a/test/gps-canonical-persistence.test.js b/test/gps-canonical-persistence.test.js
+index 68e5040..a46b007 100644
+--- a/test/gps-canonical-persistence.test.js
++++ b/test/gps-canonical-persistence.test.js
+@@ -294,6 +294,15 @@ function decodeInput(overrides = {}) {
+       positionValid: true,
+       latitude: 12.5,
+       longitude: -98.5,
++      // Los cuatro campos van poblados a proposito: el repositorio debe saber
++      // escribirlos y compararlos aunque el decodificador Coban de hoy solo
++      // pueda observar dos de ellos.
++      telemetry: {
++        speedKph: 42.5,
++        headingDeg: 187.3,
++        ignition: true,
++        odometerKm: 12345.678,
++      },
+     },
+     ...overrides,
+   };
+@@ -350,6 +359,11 @@ function positionClient({
+             positionValid: true,
+             latitude: 12.5,
+             longitude: -98.5,
++            // `numeric` vuelve del driver como cadena, no como numero.
++            speedKph: '42.50',
++            headingDeg: '187.30',
++            ignition: true,
++            odometerKm: '12345.678',
+             ...existing,
+           }],
+           rowCount: 1,
+@@ -384,6 +398,13 @@ test('persists timezone-neutral valid and invalid positions', async () => {
+       positionValid: false,
+       latitude: null,
+       longitude: null,
++      // Sin fijacion no hay nada observado del vehiculo.
++      telemetry: {
++        speedKph: null,
++        headingDeg: null,
++        ignition: null,
++        odometerKm: null,
++      },
+     },
+   });
+   const invalid = await repository.persist(
+@@ -489,6 +510,12 @@ test('position idempotency compares every canonical metadata field', async () =>
+     { gpsTimeRaw: '120001.000' },
+     { latitude: 12.6 },
+     { vehicleId },
++    { speedKph: '43.00' },
++    { headingDeg: '0.00' },
++    { speedKph: null },
++    { ignition: false },
++    { ignition: null },
++    { odometerKm: '12345.679' },
+   ];
+   for (const existing of conflicts) {
+     await assert.rejects(
+diff --git a/test/gps-coban-decoder.test.js b/test/gps-coban-decoder.test.js
+index bec330a..cca9e62 100644
+--- a/test/gps-coban-decoder.test.js
++++ b/test/gps-coban-decoder.test.js
+@@ -14,9 +14,17 @@ const {
+   malformed,
+   positionInvalidVariants,
+   positionValid,
++  positionValidHeadingOnly,
++  positionValidHeadingWrap,
++  positionValidSpeedOnly,
++  positionValidWithCallbackNumber,
++  positionValidWithTelemetry,
+   unsupported,
+ } = require('./fixtures/coban-observed.fixtures.js');
+ 
++const decode = (frame) =>
++  new CobanGps103Adapter().decodeFrame(Buffer.from(frame));
++
+ test('identifies the device in every observed Coban family', () => {
+   const adapter = new CobanGps103Adapter();
+ 
+@@ -63,6 +71,7 @@ test('classifies and decodes the observed valid position', () => {
+     longitude: -(98 + 45.6789 / 60),
+     longitudeHemisphere: 'W',
+     fixValid: true,
++    telemetry: { speed: null, heading: null },
+   });
+   assert.deepEqual(Object.keys(result).sort(), [
+     'deviceDateTime',
+@@ -74,6 +83,7 @@ test('classifies and decodes the observed valid position', () => {
+     'latitudeHemisphere',
+     'longitude',
+     'longitudeHemisphere',
++    'telemetry',
+   ]);
+   assert.equal(result.deviceDateTime instanceof Date, false);
+   assert.equal(result.gpsTime instanceof Date, false);
+@@ -238,3 +248,79 @@ test('returns a deterministic result without retaining input state', () => {
+ 
+   assert.deepEqual(first, second);
+ });
++
++// ============================================================
++// Campos 12 y 13: velocidad y rumbo (Issue #159)
++// ------------------------------------------------------------
++// El decodificador anterior exigia que estos dos campos vinieran vacios y
++// rechazaba la trama entera con `unexpected_fields` cuando no lo estaban. Un
++// equipo detenido los deja en blanco y uno en movimiento no, de modo que la
++// regla descartaba justamente las tramas de los vehiculos que circulaban.
++// ============================================================
++
++test('reads speed and course when the frame carries them', () => {
++  const result = decode(positionValidWithTelemetry);
++
++  assert.equal(result.kind, 'position_valid');
++  // El numero se conserva junto al texto original, que es la unica prueba de
++  // lo que dijo el equipo si manana se revisa la unidad.
++  assert.deepEqual(result.telemetry.speed, {
++    raw: '42.50',
++    value: 42.5,
++    wireUnit: 'knot',
++  });
++  assert.deepEqual(result.telemetry.heading, {
++    raw: '187.30',
++    degrees: 187.3,
++  });
++  // Leer los campos nuevos no altera la posicion.
++  assert.equal(result.latitude, 12 + 34.56789 / 60);
++  assert.equal(result.longitude, -(98 + 45.6789 / 60));
++});
++
++test('a zero speed is a reading, and an empty course is an absence', () => {
++  const result = decode(positionValidSpeedOnly);
++
++  assert.equal(result.kind, 'position_valid');
++  assert.equal(result.telemetry.speed.value, 0);
++  assert.equal(result.telemetry.speed.raw, '0.00');
++  // Vacio es `null`, nunca cero: cero afirmaria que el vehiculo mira al norte.
++  assert.equal(result.telemetry.heading, null);
++});
++
++test('a course without speed leaves the speed absent', () => {
++  const result = decode(positionValidHeadingOnly);
++
++  assert.equal(result.kind, 'position_valid');
++  assert.equal(result.telemetry.speed, null);
++  assert.equal(result.telemetry.heading.degrees, 90);
++});
++
++test('360 degrees is normalised to 0, which is the same bearing', () => {
++  const result = decode(positionValidHeadingWrap);
++
++  assert.equal(result.kind, 'position_valid');
++  assert.equal(result.telemetry.heading.degrees, 0);
++  assert.equal(result.telemetry.heading.raw, '360.00');
++});
++
++test('a configured callback number does not cost the position', () => {
++  const result = decode(positionValidWithCallbackNumber);
++
++  assert.equal(result.kind, 'position_valid');
++  assert.equal(result.latitude, 12 + 34.56789 / 60);
++});
++
++test('an unobserved shape in the new fields is rejected, not guessed', () => {
++  for (const frame of [
++    unsupported.negativeSpeed,
++    unsupported.headingOutOfRange,
++    unsupported.nonNumericHeading,
++    unsupported.callbackNumberNotNumeric,
++  ]) {
++    assert.deepEqual(decode(frame), {
++      kind: 'unsupported',
++      reason: 'unexpected_fields',
++    });
++  }
++});
+-- 
+2.55.0.windows.3
+
+
+From 644215b034017f18c9e6e4100bcb7f8bd860ef06 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 11:48:19 -0400
+Subject: [PATCH 2/4] Validar la reversion de la migracion de telemetria en CI
+
+Los pasos de reversion del CI encadenan `migration:down` y cada uno
+afirma que arriba de la pila esta la migracion que le toca. El primero
+esperaba encontrar `create_database_observer_views`, que hasta ahora era
+la ultima aplicada.
+
+Al anadir una migracion posterior, ese primer `down` revierte la nueva y
+la comprobacion falla: no porque la migracion este mal, sino porque el
+CI cuenta desde el final. Cualquier migracion futura tiene el mismo
+problema, asi que el paso nuevo lo deja dicho en un comentario.
+
+De paso, la comprobacion afirma algo que este PR sostiene y que conviene
+demostrar en vez de argumentar: `fom_app` puede insertar en `speed_kph`
+sin haber concedido ningun permiso nuevo, porque el GRANT de tabla que
+ya existia alcanza a las columnas nuevas.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ .github/workflows/ci.yml | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index dfc9f3f..2e2a5ce 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -368,6 +368,19 @@ jobs:
+             -v ON_ERROR_STOP=1 \
+             -c "DROP ROLE fom_observer_ci"
+ 
++      # Esta migracion es ahora la ultima aplicada, de modo que le corresponde
++      # el primer `migration:down`. Los pasos siguientes revierten en cadena y
++      # cada uno afirma cual espera encontrar arriba: si se anade otra
++      # migracion, su paso de reversion va aqui, antes que este.
++      - name: Validate GPS position telemetry down
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260817120000000_add_gps_position_telemetry'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema='fom' AND table_name='gps_positions' AND column_name IN ('speed_kph','heading_deg','ignition','odometer_km')")" = "4"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT has_column_privilege('fom_app','fom.gps_positions','speed_kph','INSERT')")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260817120000000_add_gps_position_telemetry'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema='fom' AND table_name='gps_positions' AND column_name IN ('speed_kph','heading_deg','ignition','odometer_km')")" = "0"
++
+       - name: Validate database observer views down
+         run: |
+           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260816193000000_create_database_observer_views'")" = "1"
+-- 
+2.55.0.windows.3
+
+
+From 90389aa27742b9546aad229dc642684edc9131b1 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 11:58:11 -0400
+Subject: [PATCH 3/4] Validar tambien la reversion de telemetria en el CI de la
+ consola
+
+`gps-console-ci.yml` encadena reversiones igual que `ci.yml` y con la
+misma suposicion: que arriba de la pila esta la migracion que el paso
+espera. Se arreglo un workflow y no el otro.
+
+El log confirma que la migracion en si esta bien: se aplico dos veces y
+se revirtio limpia. Lo que fallaba era la comprobacion posterior, que
+buscaba las vistas del observador y encontraba que el `down` se habia
+llevado la telemetria.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ .github/workflows/gps-console-ci.yml | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/.github/workflows/gps-console-ci.yml b/.github/workflows/gps-console-ci.yml
+index 6d2e1df..e1e8c01 100644
+--- a/.github/workflows/gps-console-ci.yml
++++ b/.github/workflows/gps-console-ci.yml
+@@ -139,6 +139,17 @@ jobs:
+             'CI Bay','gps-metadata-ci'
+           FROM device CROSS JOIN vehicle;
+           SQL
++      # Este workflow encadena reversiones igual que ci.yml, contando desde la
++      # ultima migracion aplicada. Toda migracion nueva necesita su paso aqui
++      # arriba, o el primer `down` revierte la nueva y falla la comprobacion
++      # siguiente sin que haya nada roto que senalar.
++      - name: Roll back GPS position telemetry
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260817120000000_add_gps_position_telemetry'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema='fom' AND table_name='gps_positions' AND column_name IN ('speed_kph','heading_deg','ignition','odometer_km')")" = "4"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260817120000000_add_gps_position_telemetry'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema='fom' AND table_name='gps_positions' AND column_name IN ('speed_kph','heading_deg','ignition','odometer_km')")" = "0"
+       - name: Roll back database observer views
+         run: |
+           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260816193000000_create_database_observer_views'")" = "1"
+-- 
+2.55.0.windows.3
+
+
+From ccb0fba93e64bc8e2af39bc67521ff7c370b1868 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 12:05:09 -0400
+Subject: [PATCH 4/4] Completar la telemetria en el fixture de runtime 45C
+
+`test/gps-canonical-45c-runtime.js` arma una posicion sin fijacion y la
+inserta como `fom_app` contra PostgreSQL real. Le faltaba el campo nuevo,
+asi que el repositorio leia `undefined` y el CI reportaba
+`stage=canonical-attempt-and-position code=unknown`, que no dice nada de
+lo que realmente pasaba.
+
+Se completa el fixture con los cuatro nulos, que es lo que corresponde a
+una trama sin fijacion, y el repositorio pasa a rechazar una posicion sin
+telemetria con `position_telemetry_missing` en vez de romperse leyendo
+una propiedad de undefined. Un fixture incompleto debe decir que le
+falta.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ src/gps-canonical/gps-position.repository.ts | 3 +++
+ test/gps-canonical-45c-runtime.js            | 7 +++++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/src/gps-canonical/gps-position.repository.ts b/src/gps-canonical/gps-position.repository.ts
+index 796012d..507555a 100644
+--- a/src/gps-canonical/gps-position.repository.ts
++++ b/src/gps-canonical/gps-position.repository.ts
+@@ -105,6 +105,9 @@ export class GpsPositionRepository {
+       throw new Error('invalid_position_has_coordinates');
+     }
+     const telemetry = position.telemetry;
++    if (telemetry === undefined || telemetry === null) {
++      throw new Error('position_telemetry_missing');
++    }
+     if (
+       telemetry.speedKph !== null &&
+       (
+diff --git a/test/gps-canonical-45c-runtime.js b/test/gps-canonical-45c-runtime.js
+index 74031c7..ba9648f 100644
+--- a/test/gps-canonical-45c-runtime.js
++++ b/test/gps-canonical-45c-runtime.js
+@@ -317,6 +317,13 @@ async function main() {
+         positionValid: false,
+         latitude: null,
+         longitude: null,
++        // Una trama sin fijacion no observa nada del vehiculo.
++        telemetry: {
++          speedKph: null,
++          headingDeg: null,
++          ignition: null,
++          odometerKm: null,
++        },
+       },
+     };
+     const attempt = await new GpsDecodeAttemptRepository().insert(
+-- 
+2.55.0.windows.3
+

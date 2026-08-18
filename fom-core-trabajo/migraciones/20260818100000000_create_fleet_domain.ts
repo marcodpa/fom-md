@@ -80,8 +80,16 @@ export const up = (pgm: MigrationBuilder): void => {
           USING ERRCODE = '23514';
       END IF;
 
-      IF NEW.pin_hash IS NOT NULL AND NEW.pin_hash IS DISTINCT FROM
-         CASE WHEN TG_OP = 'UPDATE' THEN OLD.pin_hash ELSE NULL END THEN
+      -- Sin CASE aqui dentro: PL/pgSQL corta la condicion de un IF en el
+      -- primer THEN que encuentra, y el THEN del CASE se lo comia, dejando
+      -- media expresion. La forma equivalente es explicita y no tiene trampa:
+      -- en un alta cualquier PIN es nuevo, y en una actualizacion solo cuenta
+      -- si cambia respecto al anterior.
+      IF NEW.pin_hash IS NOT NULL
+        AND (
+          TG_OP <> 'UPDATE'
+          OR NEW.pin_hash IS DISTINCT FROM OLD.pin_hash
+        ) THEN
         NEW.pin_set_at = clock_timestamp();
       END IF;
 

@@ -1,0 +1,3488 @@
+From 2e7b23d9389e2444eab4acae7ee43cc34799674c Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 11:47:38 -0400
+Subject: [PATCH 1/5] Presentar el esquema de dominio FOM-02 en cuatro
+ migraciones
+
+El paquete del rol pide que este diseno se presente en una rama y un PR
+antes de considerarlo implementado. Esto es esa presentacion.
+
+Son dieciocho tablas repartidas en cuatro bloques que se pueden revisar,
+migrar y aprovechar por separado, que es la condicion que fija el
+documento. Ninguno depende de los posteriores:
+
+  identidad y organizacion  tenant_relationships, user_profiles,
+                            user_credentials, y `category` en tenants
+  flota                     areas, vehicle_driver_assignments,
+                            vehicle_live_state
+  operacion                 work_orders, work_order_events y las cuatro
+                            tablas de inspecciones
+  cumplimiento y auditoria  documents, document_files, alert_rules,
+                            alert_rule_vehicles, notifications, audit_log
+
+Los cuatro archivos venian de un diseno previo y llevaban una marca de
+tiempo anterior a migraciones que ya estan en main, lo que habria
+desordenado el historial. Se renumeran despues de la ultima.
+
+Un comentario SQL usaba comillas invertidas alrededor de un nombre de
+columna, dentro de una plantilla de TypeScript. Eso cerraba la cadena a
+media migracion y el archivo no compilaba.
+
+CADENA DE REVERSION DEL CI. Los pasos de `migration:down` del workflow
+encadenan reversiones y cada uno afirma que arriba de la pila esta la
+migracion que le toca. Anadir migraciones al final hacia que el primer
+`down` revirtiera una nueva y fallara una comprobacion que no tenia nada
+roto que senalar. Se anaden los cuatro pasos correspondientes, en orden
+inverso, y un comentario que explica que cualquier migracion futura
+tiene que insertar el suyo arriba.
+
+Estas migraciones no se han ejecutado nunca contra PostgreSQL. El CI las
+aplica dos veces sobre PostgreSQL 17 con TimescaleDB y PostGIS, verifica
+el inventario completo y despues las revierte una por una: es ahi donde
+esta la prueba real, y por eso el PR va en borrador hasta que pase.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ .github/workflows/ci.yml                      |   67 ++
+ ...000000_create_identity_and_organization.ts |  708 ++++++++++++
+ .../20260818100000000_create_fleet_domain.ts  |  558 +++++++++
+ ...60818110000000_create_operations_domain.ts | 1014 +++++++++++++++++
+ ...0000_create_compliance_and_audit_domain.ts |  805 +++++++++++++
+ 5 files changed, 3152 insertions(+)
+ create mode 100644 src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
+ create mode 100644 src/database/migrations/files/20260818100000000_create_fleet_domain.ts
+ create mode 100644 src/database/migrations/files/20260818110000000_create_operations_domain.ts
+ create mode 100644 src/database/migrations/files/20260818120000000_create_compliance_and_audit_domain.ts
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index dfc9f3f..45656b6 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -368,6 +368,73 @@ jobs:
+             -v ON_ERROR_STOP=1 \
+             -c "DROP ROLE fom_observer_ci"
+ 
++      # CADENA DE REVERSION. Cada paso ejecuta un `migration:down`, que revierte
++      # la ultima migracion aplicada, y afirma cual esperaba encontrar. Por eso
++      # el orden es el inverso al de aplicacion y por eso una migracion nueva
++      # obliga a insertar su paso ARRIBA de todos: si no, revierte la suya y la
++      # comprobacion siguiente falla sin que nada este realmente roto.
++      - name: Validate compliance and audit domain down
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818120000000_create_compliance_and_audit_domain'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.documents') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.document_files') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.alert_rules') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.alert_rule_vehicles') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.notifications') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.audit_log') IS NOT NULL")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818120000000_create_compliance_and_audit_domain'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.documents') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.document_files') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.alert_rules') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.alert_rule_vehicles') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.notifications') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.audit_log') IS NOT NULL")" = "f"
++
++      - name: Validate operations domain down
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818110000000_create_operations_domain'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.work_orders') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.work_order_events') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_templates') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_template_items') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspections') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_answers') IS NOT NULL")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818110000000_create_operations_domain'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.work_orders') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.work_order_events') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_templates') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_template_items') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspections') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_answers') IS NOT NULL")" = "f"
++
++      - name: Validate fleet domain down
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818100000000_create_fleet_domain'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.areas') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.vehicle_driver_assignments') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.vehicle_live_state') IS NOT NULL")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818100000000_create_fleet_domain'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.areas') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.vehicle_driver_assignments') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.vehicle_live_state') IS NOT NULL")" = "f"
++
++      - name: Validate identity and organization down
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818090000000_create_identity_and_organization'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.tenant_relationships') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_profiles') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_credentials') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema='fom' AND table_name='tenants' AND column_name='category'")" = "1"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818090000000_create_identity_and_organization'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.tenant_relationships') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_profiles') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_credentials') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema='fom' AND table_name='tenants' AND column_name='category'")" = "0"
++
+       - name: Validate database observer views down
+         run: |
+           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260816193000000_create_database_observer_views'")" = "1"
+diff --git a/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts b/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
+new file mode 100644
+index 0000000..f171aca
+--- /dev/null
++++ b/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
+@@ -0,0 +1,708 @@
++import type { MigrationBuilder } from 'node-pg-migrate/dist/bundle/index';
++
++/**
++ * Categoría comercial del ente, relación compañía↔contratista, datos
++ * personales, credenciales de conducción y catálogo de roles.
++ *
++ * SOBRE `kind` Y `category`. `tenants.kind` ya distingue individual de
++ * organization, y `category` lo determina por completo (personal→individual,
++ * compania|contratista→organization). Es redundante, pero `kind` lleva meses
++ * en la tabla. En vez de borrarlo —lo que rompería lo que lo consulte— pasa a
++ * ser una PROYECCIÓN que mantiene el trigger a partir de `category`, con un
++ * CHECK que documenta el acoplamiento. Nadie lo escribe nunca más: ni siquiera
++ * la aplicación, que no recibe permiso sobre esa columna. Eliminarlo es una
++ * migración de contracción posterior.
++ *
++ * SOBRE EL ALCANCE DEL SUPERVISOR. La solución aparente para que un supervisor
++ * de compañía alcance a sus contratistas es darle una membresía en cada uno.
++ * Es la equivocada: multiplica membresías y denormaliza el grafo — al terminar
++ * el contrato habría que acordarse de revocar N membresías, y la que se olvide
++ * deja acceso vivo. El alcance es una propiedad de la RELACIÓN ENTRE ENTES, no
++ * de la persona. Por eso vive en `tenant_relationships` y se deriva en la
++ * vista `actor_tenant_scope`: cerrar la relación apaga el acceso en la misma
++ * transacción, sin tocar ninguna membresía.
++ *
++ * `user_profiles` y `user_credentials` NO llevan `tenant_id`, a diferencia del
++ * resto del esquema. La cédula y la licencia son de la persona, no del
++ * contratista; con `tenant_id` una misma persona tendría dos cédulas al
++ * cambiar de empleo. Hay precedente: `user_password_credentials` y
++ * `map_platform_administrators` también son de usuario y sin tenant.
++ */
++
++export const up = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    -- ═══════════════ 1 · tenants: categoría y contacto ═══════════════
++
++    ALTER TABLE fom.tenants
++      ADD COLUMN category varchar(20) NOT NULL DEFAULT 'contratista',
++      ADD COLUMN rif varchar(20),
++      ADD COLUMN phone varchar(20),
++      ADD COLUMN email varchar(320),
++      ADD COLUMN contact_name varchar(160),
++      ADD COLUMN brand_color varchar(7);
++
++    UPDATE fom.tenants SET category = 'personal' WHERE kind = 'individual';
++
++    ALTER TABLE fom.tenants ALTER COLUMN category DROP DEFAULT;
++
++    ALTER TABLE fom.tenants
++      ADD CONSTRAINT tenants_category_check CHECK (
++        category IN ('compania', 'contratista', 'personal')
++      ),
++      ADD CONSTRAINT tenants_category_kind_check CHECK (
++        (category = 'personal' AND kind = 'individual')
++        OR (category IN ('compania', 'contratista') AND kind = 'organization')
++      ),
++      ADD CONSTRAINT tenants_rif_format_check CHECK (
++        rif IS NULL OR rif ~ '^[vejpgc]-[0-9]{8,9}-[0-9]$'
++      ),
++      ADD CONSTRAINT tenants_phone_format_check CHECK (
++        phone IS NULL OR phone ~ '^[+][0-9]{7,15}$'
++      ),
++      ADD CONSTRAINT tenants_email_format_check CHECK (
++        email IS NULL OR (
++          email = lower(btrim(email))
++          AND char_length(email) BETWEEN 3 AND 320
++          AND email ~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$'
++        )
++      ),
++      ADD CONSTRAINT tenants_contact_name_check CHECK (
++        contact_name IS NULL OR (
++          contact_name = btrim(contact_name)
++          AND char_length(contact_name) BETWEEN 2 AND 160
++        )
++      ),
++      ADD CONSTRAINT tenants_brand_color_check CHECK (
++        brand_color IS NULL OR brand_color ~ '^#[0-9a-f]{6}$'
++      ),
++      -- Sostiene la clave foránea compuesta de tenant_relationships, que es
++      -- lo que hace imposible invertir el par compañía/contratista.
++      ADD CONSTRAINT tenants_id_category_unique UNIQUE (id, category);
++
++    CREATE UNIQUE INDEX tenants_rif_unique_idx
++      ON fom.tenants (rif) WHERE rif IS NOT NULL;
++    CREATE INDEX tenants_category_status_idx
++      ON fom.tenants (category, status);
++
++    CREATE OR REPLACE FUNCTION fom.maintain_tenant_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND NEW.code IS DISTINCT FROM OLD.code THEN
++        RAISE EXCEPTION 'tenant code is immutable' USING ERRCODE = '23514';
++      END IF;
++
++      IF NOT EXISTS (
++        SELECT 1 FROM pg_timezone_names WHERE name = NEW.timezone
++      ) THEN
++        RAISE EXCEPTION 'tenant timezone is not recognized: %', NEW.timezone
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.category = lower(btrim(NEW.category));
++      -- kind es proyección de category y no se acepta del cliente.
++      NEW.kind = CASE
++        WHEN NEW.category = 'personal' THEN 'individual'
++        ELSE 'organization'
++      END;
++      NEW.rif = CASE
++        WHEN NEW.rif IS NULL THEN NULL ELSE lower(btrim(NEW.rif)) END;
++      NEW.email = CASE
++        WHEN NEW.email IS NULL THEN NULL ELSE lower(btrim(NEW.email)) END;
++      NEW.phone = CASE
++        WHEN NEW.phone IS NULL THEN NULL
++        ELSE regexp_replace(btrim(NEW.phone), '[^0-9+]', '', 'g') END;
++      NEW.contact_name = CASE
++        WHEN NEW.contact_name IS NULL THEN NULL ELSE btrim(NEW.contact_name) END;
++      NEW.brand_color = CASE
++        WHEN NEW.brand_color IS NULL THEN NULL ELSE lower(btrim(NEW.brand_color)) END;
++
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    -- ═══════════════ 2 · tenant_relationships ═══════════════
++
++    CREATE FUNCTION fom.maintain_tenant_relationship_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.company_tenant_id IS DISTINCT FROM OLD.company_tenant_id
++        OR NEW.contractor_tenant_id IS DISTINCT FROM OLD.contractor_tenant_id
++        OR NEW.company_category IS DISTINCT FROM OLD.company_category
++        OR NEW.contractor_category IS DISTINCT FROM OLD.contractor_category
++        OR NEW.started_at IS DISTINCT FROM OLD.started_at
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'tenant relationship identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE'
++        AND OLD.ended_at IS NOT NULL AND NEW.ended_at IS NULL THEN
++        RAISE EXCEPTION 'a closed tenant relationship cannot be reopened'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    -- Sin tenant_id: la fila pertenece a DOS tenants y un tercero sería
++    -- ambiguo. El límite multi-tenant lo dan las dos claves foráneas.
++    CREATE TABLE fom.tenant_relationships (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      company_tenant_id uuid NOT NULL,
++      company_category varchar(20) NOT NULL DEFAULT 'compania',
++      contractor_tenant_id uuid NOT NULL,
++      contractor_category varchar(20) NOT NULL DEFAULT 'contratista',
++      started_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      ended_at timestamptz,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT tenant_relationships_company_fk
++        FOREIGN KEY (company_tenant_id, company_category)
++        REFERENCES fom.tenants (id, category)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT tenant_relationships_contractor_fk
++        FOREIGN KEY (contractor_tenant_id, contractor_category)
++        REFERENCES fom.tenants (id, category)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      -- Los discriminadores son constantes y la aplicación no puede
++      -- escribirlos: invertir el par es imposible sin un solo trigger.
++      CONSTRAINT tenant_relationships_company_category_check CHECK (
++        company_category = 'compania'
++      ),
++      CONSTRAINT tenant_relationships_contractor_category_check CHECK (
++        contractor_category = 'contratista'
++      ),
++      CONSTRAINT tenant_relationships_distinct_check CHECK (
++        company_tenant_id <> contractor_tenant_id
++      ),
++      CONSTRAINT tenant_relationships_lifecycle_check CHECK (
++        ended_at IS NULL OR ended_at >= started_at
++      ),
++      CONSTRAINT tenant_relationships_timestamps_check CHECK (
++        updated_at >= created_at
++      )
++    );
++
++    CREATE UNIQUE INDEX tenant_relationships_active_unique_idx
++      ON fom.tenant_relationships (company_tenant_id, contractor_tenant_id)
++      WHERE ended_at IS NULL;
++    CREATE INDEX tenant_relationships_company_idx
++      ON fom.tenant_relationships (company_tenant_id, started_at DESC);
++    CREATE INDEX tenant_relationships_contractor_idx
++      ON fom.tenant_relationships (contractor_tenant_id, started_at DESC);
++
++    CREATE TRIGGER tenant_relationships_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.tenant_relationships
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_tenant_relationship_record();
++
++    -- ═══════════════ 3 · user_profiles ═══════════════
++
++    CREATE FUNCTION fom.maintain_user_profile_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.user_id IS DISTINCT FROM OLD.user_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'user profile identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE'
++        AND OLD.profile_completed_at IS NOT NULL
++        AND NEW.profile_completed_at IS NULL THEN
++        RAISE EXCEPTION 'a completed user profile cannot be marked incomplete'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.national_id = CASE
++        WHEN NEW.national_id IS NULL THEN NULL
++        ELSE lower(btrim(NEW.national_id)) END;
++      NEW.phone = CASE
++        WHEN NEW.phone IS NULL THEN NULL
++        ELSE regexp_replace(btrim(NEW.phone), '[^0-9+]', '', 'g') END;
++      NEW.address = CASE
++        WHEN NEW.address IS NULL THEN NULL ELSE btrim(NEW.address) END;
++      NEW.photo_url = CASE
++        WHEN NEW.photo_url IS NULL THEN NULL ELSE btrim(NEW.photo_url) END;
++
++      IF NEW.birth_date IS NOT NULL AND NEW.birth_date > CURRENT_DATE THEN
++        RAISE EXCEPTION 'user birth date cannot be in the future: %', NEW.birth_date
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE TABLE fom.user_profiles (
++      user_id uuid PRIMARY KEY,
++      national_id varchar(20),
++      phone varchar(20),
++      address varchar(300),
++      birth_date date,
++      photo_url varchar(500),
++      profile_completed_at timestamptz,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT user_profiles_user_fk FOREIGN KEY (user_id)
++        REFERENCES fom.users (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT user_profiles_national_id_check CHECK (
++        national_id IS NULL OR national_id ~ '^[ve]-[0-9]{6,9}$'
++      ),
++      CONSTRAINT user_profiles_phone_check CHECK (
++        phone IS NULL OR phone ~ '^[+][0-9]{7,15}$'
++      ),
++      CONSTRAINT user_profiles_address_check CHECK (
++        address IS NULL OR (address = btrim(address) AND address <> '')
++      ),
++      CONSTRAINT user_profiles_birth_date_check CHECK (
++        birth_date IS NULL OR birth_date >= DATE '1900-01-01'
++      ),
++      CONSTRAINT user_profiles_photo_url_check CHECK (
++        photo_url IS NULL OR photo_url ~ '^https://[^[:space:]]{3,492}$'
++      ),
++      -- El perfil obligatorio del primer ingreso no se marca completo a medias.
++      CONSTRAINT user_profiles_completion_check CHECK (
++        profile_completed_at IS NULL
++        OR (
++          national_id IS NOT NULL AND phone IS NOT NULL
++          AND address IS NOT NULL AND birth_date IS NOT NULL
++        )
++      ),
++      CONSTRAINT user_profiles_timestamps_check CHECK (
++        updated_at >= created_at
++        AND (profile_completed_at IS NULL OR profile_completed_at >= created_at)
++      )
++    );
++
++    CREATE UNIQUE INDEX user_profiles_national_id_unique_idx
++      ON fom.user_profiles (national_id) WHERE national_id IS NOT NULL;
++    CREATE INDEX user_profiles_incomplete_idx
++      ON fom.user_profiles (created_at) WHERE profile_completed_at IS NULL;
++
++    CREATE TRIGGER user_profiles_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.user_profiles
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_user_profile_record();
++
++    -- ═══════════════ 4 · user_credentials ═══════════════
++
++    CREATE FUNCTION fom.maintain_user_credential_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.user_id IS DISTINCT FROM OLD.user_id
++        OR NEW.kind IS DISTINCT FROM OLD.kind
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'user credential identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE'
++        AND OLD.superseded_at IS NOT NULL AND NEW.superseded_at IS NULL THEN
++        RAISE EXCEPTION 'a superseded user credential cannot be reinstated'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.kind = lower(btrim(NEW.kind));
++      NEW.number = CASE
++        WHEN NEW.number IS NULL THEN NULL ELSE lower(btrim(NEW.number)) END;
++      NEW.category = CASE
++        WHEN NEW.category IS NULL THEN NULL ELSE lower(btrim(NEW.category)) END;
++
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    -- Licencia y certificado médico en UNA tabla: los dos son documentos con
++    -- vencimiento que inhabilitan a un conductor.
++    CREATE TABLE fom.user_credentials (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      user_id uuid NOT NULL,
++      kind varchar(30) NOT NULL,
++      number varchar(50),
++      category varchar(20),
++      issued_at date,
++      expires_at date NOT NULL,
++      superseded_at timestamptz,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT user_credentials_user_fk FOREIGN KEY (user_id)
++        REFERENCES fom.users (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT user_credentials_kind_check CHECK (
++        kind IN ('driver_license', 'medical_certificate')
++      ),
++      CONSTRAINT user_credentials_number_check CHECK (
++        number IS NULL OR number ~ '^[a-z0-9][a-z0-9.-]{0,49}$'
++      ),
++      CONSTRAINT user_credentials_category_check CHECK (
++        category IS NULL OR category ~ '^[a-z0-9][a-z0-9-]{0,19}$'
++      ),
++      CONSTRAINT user_credentials_shape_check CHECK (
++        (kind = 'driver_license' AND number IS NOT NULL AND category IS NOT NULL)
++        OR (kind = 'medical_certificate' AND category IS NULL)
++      ),
++      CONSTRAINT user_credentials_validity_check CHECK (
++        expires_at >= DATE '1900-01-01'
++        AND (
++          issued_at IS NULL
++          OR (issued_at >= DATE '1900-01-01' AND expires_at > issued_at)
++        )
++      ),
++      CONSTRAINT user_credentials_timestamps_check CHECK (
++        updated_at >= created_at
++        AND (superseded_at IS NULL OR superseded_at >= created_at)
++      )
++    );
++
++    -- Una vigente por persona y tipo; la renovada se conserva.
++    CREATE UNIQUE INDEX user_credentials_current_unique_idx
++      ON fom.user_credentials (user_id, kind) WHERE superseded_at IS NULL;
++    CREATE INDEX user_credentials_user_history_idx
++      ON fom.user_credentials (user_id, kind, expires_at DESC);
++    CREATE INDEX user_credentials_expiry_idx
++      ON fom.user_credentials (expires_at) WHERE superseded_at IS NULL;
++
++    CREATE TRIGGER user_credentials_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.user_credentials
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_user_credential_record();
++
++    -- ═══════════════ 5 · catálogo de roles (expandir sin romper) ═══════════════
++
++    CREATE FUNCTION fom.canonical_membership_role(membership_role varchar)
++    RETURNS varchar LANGUAGE sql IMMUTABLE PARALLEL SAFE
++    RETURNS NULL ON NULL INPUT AS $function$
++      SELECT CASE membership_role
++        WHEN 'owner' THEN 'supervisor'
++        WHEN 'administrator' THEN 'supervisor'
++        WHEN 'fleet_manager' THEN 'supervisor'
++        WHEN 'operator' THEN 'conductor'
++        WHEN 'viewer' THEN 'usuario'
++        ELSE membership_role
++      END::varchar(30)
++    $function$;
++
++    -- Los valores nuevos conviven con los antiguos: primero el código entiende
++    -- los dos, después se migran las filas, y solo entonces una migración de
++    -- contracción reduce el CHECK. Nada de lo que funciona hoy deja de hacerlo.
++    ALTER TABLE fom.tenant_memberships
++      DROP CONSTRAINT tenant_memberships_role_check;
++
++    ALTER TABLE fom.tenant_memberships
++      ADD CONSTRAINT tenant_memberships_role_check CHECK (
++        role IN (
++          'admin_fom', 'supervisor', 'conductor', 'usuario',
++          'owner', 'administrator', 'fleet_manager', 'operator', 'viewer'
++        )
++      );
++
++    CREATE INDEX tenant_memberships_canonical_role_idx
++      ON fom.tenant_memberships (tenant_id, fom.canonical_membership_role(role))
++      WHERE status = 'active';
++
++    CREATE OR REPLACE FUNCTION fom.maintain_tenant_membership_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    DECLARE
++      v_category varchar(20);
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.user_id IS DISTINCT FROM OLD.user_id
++      ) THEN
++        RAISE EXCEPTION 'membership tenant and user are immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.role = lower(btrim(NEW.role));
++
++      -- La compatibilidad rol↔categoría solo se exige a los valores nuevos,
++      -- para no invalidar ninguna fila existente.
++      IF NEW.role IN ('admin_fom', 'supervisor', 'conductor', 'usuario')
++        AND (TG_OP = 'INSERT' OR NEW.role IS DISTINCT FROM OLD.role) THEN
++        SELECT t.category INTO v_category
++          FROM fom.tenants t WHERE t.id = NEW.tenant_id;
++
++        IF NEW.role = 'conductor' AND v_category <> 'contratista' THEN
++          RAISE EXCEPTION
++            'role conductor is only valid in a contratista tenant, not %', v_category
++            USING ERRCODE = '23514';
++        END IF;
++
++        IF NEW.role = 'usuario' AND v_category <> 'personal' THEN
++          RAISE EXCEPTION
++            'role usuario is only valid in a personal tenant, not %', v_category
++            USING ERRCODE = '23514';
++        END IF;
++
++        IF v_category = 'personal' AND NEW.role NOT IN ('supervisor', 'usuario') THEN
++          RAISE EXCEPTION
++            'a personal tenant only admits supervisor and usuario roles'
++            USING ERRCODE = '23514';
++        END IF;
++      END IF;
++
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    -- ═══════════════ 6 · alcance del actor ═══════════════
++
++    -- El único sitio donde vive la regla de alcance. Repetirla en cinco
++    -- servicios es exactamente cómo se producen las fugas entre tenants.
++    CREATE VIEW fom.actor_tenant_scope WITH (security_invoker = true) AS
++    SELECT
++      membership.user_id,
++      membership.tenant_id AS home_tenant_id,
++      fom.canonical_membership_role(membership.role) AS role,
++      membership.tenant_id AS scope_tenant_id,
++      'home'::varchar(20) AS scope_kind
++    FROM fom.tenant_memberships membership
++    JOIN fom.tenants home ON home.id = membership.tenant_id
++    WHERE membership.status = 'active' AND home.status = 'active'
++    UNION ALL
++    SELECT
++      membership.user_id,
++      membership.tenant_id,
++      fom.canonical_membership_role(membership.role),
++      relationship.contractor_tenant_id,
++      'contractor'::varchar(20)
++    FROM fom.tenant_memberships membership
++    JOIN fom.tenants home ON home.id = membership.tenant_id
++    JOIN fom.tenant_relationships relationship
++      ON relationship.company_tenant_id = membership.tenant_id
++      AND relationship.ended_at IS NULL
++    JOIN fom.tenants contractor
++      ON contractor.id = relationship.contractor_tenant_id
++    WHERE membership.status = 'active'
++      AND home.status = 'active'
++      AND home.category = 'compania'
++      AND contractor.status = 'active'
++      AND fom.canonical_membership_role(membership.role)
++        IN ('admin_fom', 'supervisor');
++
++    -- ═══════════════ 7 · privilegios ═══════════════
++
++    REVOKE ALL ON TABLE
++      fom.tenant_relationships, fom.user_profiles, fom.user_credentials
++      FROM PUBLIC;
++    REVOKE ALL ON FUNCTION
++      fom.maintain_tenant_relationship_record(),
++      fom.maintain_user_profile_record(),
++      fom.maintain_user_credential_record(),
++      fom.canonical_membership_role(varchar)
++      FROM PUBLIC;
++
++    -- tenants: alta y contacto. Nunca code ni kind, que son derivados o
++    -- inmutables. category solo en el alta.
++    -- category también en UPDATE: el backfill deja a TODA organización
++    -- existente como 'contratista', y sin permiso de actualización ningún
++    -- ente podría promoverse a 'compania' desde la aplicación. La relación
++    -- compañía↔contratista quedaría inalcanzable sobre los datos actuales
++    -- hasta que alguien hiciera un UPDATE manual en la base.
++    GRANT INSERT (
++        code, name, category, timezone,
++        rif, phone, email, contact_name, brand_color
++      ),
++      UPDATE (
++        name, category, timezone, status, archived_at,
++        rif, phone, email, contact_name, brand_color
++      )
++      ON fom.tenants TO fom_app;
++
++    GRANT INSERT (email, display_name), UPDATE (display_name)
++      ON fom.users TO fom_app;
++
++    -- Sin DELETE: una membresía se revoca, no se borra.
++    GRANT INSERT (tenant_id, user_id, role, status, activated_at),
++      UPDATE (role, status, activated_at, suspended_at, revoked_at)
++      ON fom.tenant_memberships TO fom_app;
++
++    -- No puede escribir los discriminadores: le es imposible invertir el par.
++    GRANT SELECT (
++        id, company_tenant_id, contractor_tenant_id,
++        started_at, ended_at, created_at
++      ),
++      INSERT (company_tenant_id, contractor_tenant_id, started_at),
++      UPDATE (ended_at)
++      ON fom.tenant_relationships TO fom_app;
++
++    -- Sin DELETE: borrar datos personales es un procedimiento administrativo
++    -- con su propio permiso, no un endpoint.
++    GRANT SELECT (
++        user_id, national_id, phone, address, birth_date,
++        photo_url, profile_completed_at, created_at, updated_at
++      ),
++      INSERT (
++        user_id, national_id, phone, address, birth_date,
++        photo_url, profile_completed_at
++      ),
++      UPDATE (
++        national_id, phone, address, birth_date, photo_url, profile_completed_at
++      )
++      ON fom.user_profiles TO fom_app;
++
++    GRANT SELECT (
++        id, user_id, kind, number, category,
++        issued_at, expires_at, superseded_at, created_at
++      ),
++      INSERT (user_id, kind, number, category, issued_at, expires_at),
++      UPDATE (number, category, issued_at, expires_at, superseded_at)
++      ON fom.user_credentials TO fom_app;
++
++    GRANT SELECT ON fom.actor_tenant_scope TO fom_app;
++    GRANT EXECUTE ON FUNCTION fom.canonical_membership_role(varchar) TO fom_app;
++
++    -- ═══════════════ comentarios ═══════════════
++
++    COMMENT ON COLUMN fom.tenants.category IS
++      'Commercial classification driving product rules: compania, contratista or personal';
++    COMMENT ON COLUMN fom.tenants.kind IS
++      'DEPRECATED: maintained projection of category; do not write, it is derived by trigger';
++    COMMENT ON TABLE fom.tenant_relationships IS
++      'Dated N:M engagement between a compania tenant and a contratista tenant';
++    COMMENT ON COLUMN fom.tenant_relationships.company_category IS
++      'Constant discriminator pinned by composite foreign key so the pair cannot be inverted';
++    COMMENT ON TABLE fom.user_profiles IS
++      'Personal data of a global FOM user; deliberately tenant-free because a person keeps one identity across tenants';
++    COMMENT ON TABLE fom.user_credentials IS
++      'Expiring personal qualifications that gate driving: licence and medical certificate';
++    COMMENT ON COLUMN fom.user_credentials.superseded_at IS
++      'Timestamp closing a renewed credential; NULL denotes the current one, at most one per user and kind';
++    COMMENT ON VIEW fom.actor_tenant_scope IS
++      'Tenants an active member may READ: the home tenant, plus contractors currently engaged by a compania when the member is supervisor or admin_fom. Writes are only ever allowed on scope_kind = home';
++    COMMENT ON FUNCTION fom.canonical_membership_role(varchar) IS
++      'Maps legacy membership roles onto the canonical catalogue so read paths can migrate one at a time';
++  `);
++};
++
++export const down = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    DO $guard$ BEGIN
++      IF EXISTS (SELECT 1 FROM fom.tenant_relationships LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.user_profiles LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.user_credentials LIMIT 1) THEN
++        RAISE EXCEPTION
++          'cannot roll back the identity and organization foundation while data exists';
++      END IF;
++
++      IF EXISTS (
++        SELECT 1 FROM fom.tenant_memberships
++        WHERE role IN ('admin_fom', 'supervisor', 'conductor', 'usuario')
++        LIMIT 1
++      ) THEN
++        RAISE EXCEPTION
++          'cannot restore the legacy role catalogue while canonical roles are in use';
++      END IF;
++    END $guard$;
++
++    REVOKE EXECUTE ON FUNCTION fom.canonical_membership_role(varchar) FROM fom_app;
++    REVOKE SELECT ON fom.actor_tenant_scope FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.user_credentials FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.user_profiles FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.tenant_relationships FROM fom_app;
++    REVOKE INSERT (tenant_id, user_id, role, status, activated_at),
++      UPDATE (role, status, activated_at, suspended_at, revoked_at)
++      ON fom.tenant_memberships FROM fom_app;
++    -- Por columna, NO a nivel de tabla: un REVOKE de tabla se llevaría por
++    -- delante el UPDATE (last_login_at) que concedió
++    -- 20260808030000000_grant_authentication_runtime y dejaría el inicio de
++    -- sesión sin poder registrar el último ingreso.
++    REVOKE INSERT (email, display_name), UPDATE (display_name)
++      ON fom.users FROM fom_app;
++    REVOKE INSERT (
++        code, name, category, timezone,
++        rif, phone, email, contact_name, brand_color
++      ),
++      UPDATE (
++        name, category, timezone, status, archived_at,
++        rif, phone, email, contact_name, brand_color
++      )
++      ON fom.tenants FROM fom_app;
++
++    DROP VIEW fom.actor_tenant_scope;
++
++    CREATE OR REPLACE FUNCTION fom.maintain_tenant_membership_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.user_id IS DISTINCT FROM OLD.user_id
++      ) THEN
++        RAISE EXCEPTION 'membership tenant and user are immutable'
++          USING ERRCODE = '23514';
++      END IF;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    DROP INDEX fom.tenant_memberships_canonical_role_idx;
++
++    ALTER TABLE fom.tenant_memberships
++      DROP CONSTRAINT tenant_memberships_role_check;
++    ALTER TABLE fom.tenant_memberships
++      ADD CONSTRAINT tenant_memberships_role_check CHECK (
++        role IN ('owner', 'administrator', 'fleet_manager', 'operator', 'viewer')
++      );
++
++    DROP FUNCTION fom.canonical_membership_role(varchar);
++
++    DROP TABLE fom.user_credentials;
++    DROP TABLE fom.user_profiles;
++    DROP TABLE fom.tenant_relationships;
++
++    DROP FUNCTION fom.maintain_user_credential_record();
++    DROP FUNCTION fom.maintain_user_profile_record();
++    DROP FUNCTION fom.maintain_tenant_relationship_record();
++
++    CREATE OR REPLACE FUNCTION fom.maintain_tenant_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND NEW.code IS DISTINCT FROM OLD.code THEN
++        RAISE EXCEPTION 'tenant code is immutable' USING ERRCODE = '23514';
++      END IF;
++      IF NOT EXISTS (
++        SELECT 1 FROM pg_timezone_names WHERE name = NEW.timezone
++      ) THEN
++        RAISE EXCEPTION 'tenant timezone is not recognized: %', NEW.timezone
++          USING ERRCODE = '23514';
++      END IF;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    DROP INDEX fom.tenants_category_status_idx;
++    DROP INDEX fom.tenants_rif_unique_idx;
++
++    ALTER TABLE fom.tenants
++      DROP CONSTRAINT tenants_id_category_unique,
++      DROP CONSTRAINT tenants_brand_color_check,
++      DROP CONSTRAINT tenants_contact_name_check,
++      DROP CONSTRAINT tenants_email_format_check,
++      DROP CONSTRAINT tenants_phone_format_check,
++      DROP CONSTRAINT tenants_rif_format_check,
++      DROP CONSTRAINT tenants_category_kind_check,
++      DROP CONSTRAINT tenants_category_check,
++      DROP COLUMN brand_color,
++      DROP COLUMN contact_name,
++      DROP COLUMN email,
++      DROP COLUMN phone,
++      DROP COLUMN rif,
++      DROP COLUMN category;
++  `);
++};
+diff --git a/src/database/migrations/files/20260818100000000_create_fleet_domain.ts b/src/database/migrations/files/20260818100000000_create_fleet_domain.ts
+new file mode 100644
+index 0000000..3e819da
+--- /dev/null
++++ b/src/database/migrations/files/20260818100000000_create_fleet_domain.ts
+@@ -0,0 +1,558 @@
++import type { MigrationBuilder } from 'node-pg-migrate/dist/bundle/index';
++
++/**
++ * Áreas, clasificación de vehículos, titularidad de conductores y estado vivo.
++ *
++ * Sobre `fom.vehicle_live_state`: es una PROYECCIÓN del pipeline de telemetría,
++ * no columnas en `fom.vehicles`, por cuatro razones.
++ *
++ *   1. Contención. El estado se reescribe una vez por minuto y por vehículo.
++ *      En `vehicles` cada trama tomaría ROW EXCLUSIVE sobre el catálogo maestro
++ *      y tocaría sus cuatro índices, matando las actualizaciones HOT.
++ *   2. Bloat. A un minuto por unidad, `vehicles` acumularía ~1.440 versiones
++ *      muertas por vehículo y día. Aislada y con fillfactor bajo, esa presión
++ *      se queda donde no importa.
++ *   3. Permisos. Con columnas en `vehicles`, cualquiera que pueda editar el
++ *      alias podría escribir la velocidad. Separada, la regla es estructural.
++ *   4. Reconstruible. Se puede vaciar y regenerar con un DISTINCT ON sobre
++ *      `gps_positions`. Un estado escrito a mano no tiene fuente a la que
++ *      volver.
++ *
++ * `motion_state` es columna GENERADA: no admite escritura de nadie, ni siquiera
++ * del ingestor. La regla «nada de datos derivados escritos a mano» deja de
++ * depender de la disciplina de quien programe.
++ *
++ * NOTA DE ALCANCE. El diseño original separaba un rol `fom_ingest` y retiraba
++ * a `fom_app` la escritura sobre `fom.gps_positions`. No se incluye aquí: hoy
++ * el ingestor y la API comparten rol, y ese REVOKE detendría la ingesta en el
++ * instante de aplicarse. La separación de roles es un cambio operacional con
++ * su propia autorización y su propio Issue, y debe ir DESPUÉS de aprovisionar
++ * el rol del ingestor.
++ */
++
++export const up = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    CREATE FUNCTION fom.maintain_area_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'area identity is immutable' USING ERRCODE = '23514';
++      END IF;
++      NEW.name = btrim(NEW.name);
++      NEW.kind = lower(btrim(NEW.kind));
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_vehicle_driver_assignment_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id
++        OR NEW.user_id IS DISTINCT FROM OLD.user_id
++        OR NEW.role IS DISTINCT FROM OLD.role
++        OR NEW.valid_from IS DISTINCT FROM OLD.valid_from
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'vehicle driver assignment identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      -- Cerrar es irreversible: un período histórico no se reabre ni se mueve.
++      IF TG_OP = 'UPDATE'
++        AND OLD.valid_to IS NOT NULL
++        AND NEW.valid_to IS DISTINCT FROM OLD.valid_to THEN
++        RAISE EXCEPTION 'closed vehicle driver assignment cannot be reopened'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE'
++        AND OLD.valid_to IS NOT NULL
++        AND NEW.pin_hash IS DISTINCT FROM OLD.pin_hash THEN
++        RAISE EXCEPTION 'closed vehicle driver assignment cannot rotate its PIN'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF NEW.pin_hash IS NOT NULL AND NEW.pin_hash IS DISTINCT FROM
++         CASE WHEN TG_OP = 'UPDATE' THEN OLD.pin_hash ELSE NULL END THEN
++        NEW.pin_set_at = clock_timestamp();
++      END IF;
++
++      NEW.revocation_reason = CASE
++        WHEN NEW.revocation_reason IS NULL THEN NULL
++        ELSE lower(btrim(NEW.revocation_reason))
++      END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_vehicle_live_state_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    DECLARE
++      source_tenant_id uuid;
++      source_vehicle_id uuid;
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'vehicle live state identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      -- Las tramas GPS llegan desordenadas: la proyección nunca retrocede.
++      IF TG_OP = 'UPDATE' AND NEW.last_report_at < OLD.last_report_at THEN
++        RAISE EXCEPTION 'vehicle live state cannot move backwards in time'
++          USING ERRCODE = '23514';
++      END IF;
++      IF TG_OP = 'UPDATE'
++        AND NEW.last_position_at IS NOT NULL
++        AND OLD.last_position_at IS NOT NULL
++        AND NEW.last_position_at < OLD.last_position_at THEN
++        RAISE EXCEPTION 'vehicle live state position cannot move backwards in time'
++          USING ERRCODE = '23514';
++      END IF;
++
++      -- Sin clave foránea hacia gps_positions: esa tabla no tiene
++      -- UNIQUE (tenant_id, id) y crear ese índice en una serie temporal viva
++      -- cuesta un btree más en cada INSERT, para siempre. La pertenencia se
++      -- comprueba aquí, como ya hace validate_gps_position_attempt.
++      IF NEW.position_id IS NOT NULL THEN
++        SELECT tenant_id, vehicle_id
++          INTO source_tenant_id, source_vehicle_id
++          FROM fom.gps_positions
++         WHERE id = NEW.position_id;
++
++        IF NOT FOUND
++          OR source_tenant_id IS DISTINCT FROM NEW.tenant_id
++          OR source_vehicle_id IS DISTINCT FROM NEW.vehicle_id THEN
++          RAISE EXCEPTION
++            'vehicle live state must project a position of the same tenant and vehicle'
++            USING ERRCODE = '23514';
++        END IF;
++      END IF;
++
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    -- ─────────────────────────── fom.areas ───────────────────────────
++
++    CREATE TABLE fom.areas (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      name varchar(120) NOT NULL,
++      kind varchar(20) NOT NULL,
++      status varchar(20) NOT NULL DEFAULT 'active',
++      archived_at timestamptz,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT areas_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT areas_tenant_id_unique UNIQUE (tenant_id, id),
++      CONSTRAINT areas_name_check CHECK (
++        name = btrim(name) AND char_length(name) BETWEEN 1 AND 120
++      ),
++      CONSTRAINT areas_kind_check CHECK (
++        kind IN ('ubicacion', 'sector', 'contrato')
++      ),
++      CONSTRAINT areas_status_check CHECK (status IN ('active', 'archived')),
++      CONSTRAINT areas_archive_check CHECK (
++        (status = 'archived') = (archived_at IS NOT NULL)
++      ),
++      CONSTRAINT areas_timestamps_check CHECK (
++        updated_at >= created_at
++        AND (archived_at IS NULL OR archived_at >= created_at)
++      )
++    );
++
++    -- Lidera con tenant_id: sirve además de índice de su clave foránea.
++    CREATE UNIQUE INDEX areas_tenant_name_unique_idx
++      ON fom.areas (tenant_id, lower(name));
++    CREATE INDEX areas_tenant_kind_idx
++      ON fom.areas (tenant_id, kind) WHERE status = 'active';
++
++    -- ────────────────────── fom.vehicles (extensión) ──────────────────────
++
++    ALTER TABLE fom.vehicles
++      ADD COLUMN alias varchar(120),
++      ADD COLUMN vehicle_type varchar(20) NOT NULL DEFAULT 'otro',
++      ADD COLUMN area_id uuid,
++      ADD COLUMN fleet_number varchar(30);
++
++    ALTER TABLE fom.vehicles
++      ADD CONSTRAINT vehicles_area_fk
++        FOREIGN KEY (tenant_id, area_id)
++        REFERENCES fom.areas (tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      ADD CONSTRAINT vehicles_vehicle_type_check CHECK (
++        vehicle_type IN ('camioneta', 'camion', 'auto', 'otro')
++      ),
++      ADD CONSTRAINT vehicles_alias_check CHECK (
++        alias IS NULL OR (alias = btrim(alias) AND alias <> '')
++      ),
++      ADD CONSTRAINT vehicles_fleet_number_check CHECK (
++        fleet_number IS NULL OR fleet_number ~ '^[A-Z0-9][A-Z0-9._-]{0,29}$'
++      );
++
++    CREATE INDEX vehicles_tenant_area_idx
++      ON fom.vehicles (tenant_id, area_id) WHERE area_id IS NOT NULL;
++    CREATE UNIQUE INDEX vehicles_tenant_fleet_number_unique_idx
++      ON fom.vehicles (tenant_id, fleet_number) WHERE fleet_number IS NOT NULL;
++
++    -- El trigger existente pasa a normalizar las columnas nuevas.
++    CREATE OR REPLACE FUNCTION fom.maintain_vehicle_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (NEW.id IS DISTINCT FROM OLD.id OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id OR NEW.created_at IS DISTINCT FROM OLD.created_at) THEN
++        RAISE EXCEPTION 'vehicle identity is immutable' USING ERRCODE = '23514';
++      END IF;
++      NEW.code = lower(btrim(NEW.code));
++      NEW.plate = CASE WHEN NEW.plate IS NULL THEN NULL ELSE upper(btrim(NEW.plate)) END;
++      NEW.vin = CASE WHEN NEW.vin IS NULL THEN NULL ELSE upper(btrim(NEW.vin)) END;
++      NEW.make = CASE WHEN NEW.make IS NULL THEN NULL ELSE btrim(NEW.make) END;
++      NEW.model = CASE WHEN NEW.model IS NULL THEN NULL ELSE btrim(NEW.model) END;
++      NEW.alias = CASE WHEN NEW.alias IS NULL THEN NULL ELSE btrim(NEW.alias) END;
++      NEW.vehicle_type = lower(btrim(NEW.vehicle_type));
++      NEW.fleet_number = CASE WHEN NEW.fleet_number IS NULL THEN NULL ELSE upper(btrim(NEW.fleet_number)) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END $function$;
++
++    -- ──────────── fom.vehicle_driver_assignments (histórico) ────────────
++
++    CREATE TABLE fom.vehicle_driver_assignments (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      vehicle_id uuid NOT NULL,
++      user_id uuid NOT NULL,
++      role varchar(20) NOT NULL,
++      pin_hash varchar(1024),
++      pin_set_at timestamptz,
++      assigned_by_user_id uuid,
++      valid_from timestamptz NOT NULL DEFAULT clock_timestamp(),
++      valid_to timestamptz,
++      revocation_reason varchar(100),
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT vehicle_driver_assignments_tenant_fk
++        FOREIGN KEY (tenant_id) REFERENCES fom.tenants(id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT vehicle_driver_assignments_vehicle_fk
++        FOREIGN KEY (tenant_id, vehicle_id)
++        REFERENCES fom.vehicles (tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT vehicle_driver_assignments_driver_fk
++        FOREIGN KEY (tenant_id, user_id)
++        REFERENCES fom.tenant_memberships (tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT vehicle_driver_assignments_assigner_fk
++        FOREIGN KEY (tenant_id, assigned_by_user_id)
++        REFERENCES fom.tenant_memberships (tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT vehicle_driver_assignments_tenant_id_unique
++        UNIQUE (tenant_id, id),
++      CONSTRAINT vehicle_driver_assignments_role_check CHECK (
++        role IN ('principal', 'secundario')
++      ),
++      -- El PIN es del secundario y solo puede existir hasheado.
++      CONSTRAINT vehicle_driver_assignments_pin_policy_check CHECK (
++        (role = 'principal' AND pin_hash IS NULL AND pin_set_at IS NULL)
++        OR (role = 'secundario' AND pin_hash IS NOT NULL AND pin_set_at IS NOT NULL)
++      ),
++      -- El formato hace estructuralmente imposible guardar un PIN en claro:
++      -- ningún PIN de cuatro dígitos satisface esta expresión.
++      CONSTRAINT vehicle_driver_assignments_pin_format_check CHECK (
++        pin_hash IS NULL OR (
++          char_length(pin_hash) BETWEEN 32 AND 1024
++          AND pin_hash ~ '^[$]argon2id[$]v=19[$]'
++          AND pin_hash !~ '[[:space:]]'
++        )
++      ),
++      CONSTRAINT vehicle_driver_assignments_period_check CHECK (
++        valid_to IS NULL OR valid_to > valid_from
++      ),
++      CONSTRAINT vehicle_driver_assignments_revocation_check CHECK (
++        (valid_to IS NULL AND revocation_reason IS NULL)
++        OR (valid_to IS NOT NULL AND (
++          revocation_reason IS NULL
++          OR revocation_reason ~ '^[a-z0-9][a-z0-9._-]{0,99}$'
++        ))
++      ),
++      CONSTRAINT vehicle_driver_assignments_timestamps_check CHECK (
++        updated_at >= created_at
++        AND (pin_set_at IS NULL OR pin_set_at >= created_at)
++      )
++    );
++
++    -- Un solo conductor principal activo por vehículo, impuesto por la base.
++    CREATE UNIQUE INDEX vehicle_driver_assignments_active_principal_idx
++      ON fom.vehicle_driver_assignments (vehicle_id)
++      WHERE role = 'principal' AND valid_to IS NULL;
++
++    -- Una persona no tiene dos asignaciones abiertas al mismo vehículo.
++    CREATE UNIQUE INDEX vehicle_driver_assignments_active_member_idx
++      ON fom.vehicle_driver_assignments (vehicle_id, user_id)
++      WHERE valid_to IS NULL;
++
++    CREATE INDEX vehicle_driver_assignments_vehicle_history_idx
++      ON fom.vehicle_driver_assignments (tenant_id, vehicle_id, valid_from DESC);
++    CREATE INDEX vehicle_driver_assignments_member_history_idx
++      ON fom.vehicle_driver_assignments (tenant_id, user_id, valid_from DESC);
++    CREATE INDEX vehicle_driver_assignments_assigner_idx
++      ON fom.vehicle_driver_assignments (tenant_id, assigned_by_user_id)
++      WHERE assigned_by_user_id IS NOT NULL;
++
++    -- ─────────────────── fom.vehicle_live_state ───────────────────
++
++    CREATE TABLE fom.vehicle_live_state (
++      tenant_id uuid NOT NULL,
++      vehicle_id uuid NOT NULL,
++      gps_device_id uuid,
++      position_id bigint,
++      last_report_at timestamptz NOT NULL,
++      last_position_at timestamptz,
++      has_position boolean NOT NULL DEFAULT false,
++      latitude double precision,
++      longitude double precision,
++      speed_kph numeric(6,2),
++      heading_deg numeric(5,2),
++      ignition boolean,
++      odometer_km numeric(12,3),
++      motion_state varchar(20) GENERATED ALWAYS AS (
++        CASE
++          WHEN speed_kph IS NULL THEN 'unknown'
++          WHEN speed_kph >= 3 THEN 'en_marcha'
++          ELSE 'parada'
++        END
++      ) STORED,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT vehicle_live_state_pkey PRIMARY KEY (tenant_id, vehicle_id),
++      CONSTRAINT vehicle_live_state_tenant_fk
++        FOREIGN KEY (tenant_id) REFERENCES fom.tenants(id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT vehicle_live_state_vehicle_fk
++        FOREIGN KEY (tenant_id, vehicle_id)
++        REFERENCES fom.vehicles (tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT vehicle_live_state_device_fk
++        FOREIGN KEY (tenant_id, gps_device_id)
++        REFERENCES fom.gps_devices (tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT vehicle_live_state_position_check CHECK (
++        (
++          has_position
++          AND position_id IS NOT NULL
++          AND last_position_at IS NOT NULL
++          AND latitude BETWEEN -90 AND 90
++          AND longitude BETWEEN -180 AND 180
++        )
++        OR (
++          NOT has_position
++          AND position_id IS NULL
++          AND last_position_at IS NULL
++          AND latitude IS NULL
++          AND longitude IS NULL
++        )
++      ),
++      CONSTRAINT vehicle_live_state_speed_check CHECK (
++        speed_kph IS NULL OR (speed_kph >= 0 AND speed_kph <= 400)
++      ),
++      CONSTRAINT vehicle_live_state_heading_check CHECK (
++        heading_deg IS NULL OR (heading_deg >= 0 AND heading_deg < 360)
++      ),
++      CONSTRAINT vehicle_live_state_odometer_check CHECK (
++        odometer_km IS NULL OR (odometer_km >= 0 AND odometer_km <= 9999999)
++      ),
++      CONSTRAINT vehicle_live_state_timestamps_check CHECK (
++        updated_at >= created_at
++        AND (last_position_at IS NULL OR last_position_at <= last_report_at)
++      )
++    ) WITH (fillfactor = 70);
++
++    -- Único índice además de la clave primaria. No se indexa last_report_at a
++    -- propósito: hay una fila por vehículo, y el recorrido secuencial de unos
++    -- cientos de filas cuesta menos que perder las actualizaciones HOT en una
++    -- tabla que se reescribe cada minuto por unidad.
++    CREATE INDEX vehicle_live_state_device_idx
++      ON fom.vehicle_live_state (tenant_id, gps_device_id)
++      WHERE gps_device_id IS NOT NULL;
++
++    -- ─────────────────────────── triggers ───────────────────────────
++
++    CREATE TRIGGER areas_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.areas
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_area_record();
++
++    CREATE TRIGGER vehicle_driver_assignments_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.vehicle_driver_assignments
++      FOR EACH ROW
++      EXECUTE FUNCTION fom.maintain_vehicle_driver_assignment_record();
++
++    CREATE TRIGGER vehicle_live_state_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.vehicle_live_state
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_vehicle_live_state_record();
++
++    -- ─────────────────────────── permisos ───────────────────────────
++
++    REVOKE ALL ON TABLE
++      fom.areas,
++      fom.vehicle_driver_assignments,
++      fom.vehicle_live_state
++      FROM PUBLIC;
++    REVOKE ALL ON FUNCTION
++      fom.maintain_area_record(),
++      fom.maintain_vehicle_driver_assignment_record(),
++      fom.maintain_vehicle_live_state_record()
++      FROM PUBLIC;
++
++    GRANT SELECT (
++        id, tenant_id, name, kind, status, archived_at, created_at, updated_at
++      ),
++      INSERT (tenant_id, name, kind),
++      UPDATE (name, kind, status, archived_at)
++      ON fom.areas TO fom_app;
++
++    -- Las columnas nuevas de vehicles quedan bajo el GRANT de tabla que ya
++    -- tiene fom_app desde 20260725011500000. Convertir esa tabla a permisos
++    -- por columna es un cambio aparte: hay que verificar antes que la consola
++    -- no escriba id, created_at ni updated_at explícitamente.
++
++    GRANT SELECT (
++        id, tenant_id, vehicle_id, user_id, role, pin_hash, pin_set_at,
++        assigned_by_user_id, valid_from, valid_to, revocation_reason,
++        created_at, updated_at
++      ),
++      INSERT (
++        tenant_id, vehicle_id, user_id, role, pin_hash, pin_set_at,
++        assigned_by_user_id, valid_from
++      ),
++      UPDATE (pin_hash, valid_to, revocation_reason)
++      ON fom.vehicle_driver_assignments TO fom_app;
++
++    -- La asimetría es el punto entero de la tabla: la web LEE, el pipeline
++    -- de telemetría ESCRIBE. Hoy comparten rol; cuando el ingestor tenga el
++    -- suyo, el UPDATE y el INSERT se le retiran a fom_app aquí.
++    GRANT SELECT (
++        tenant_id, vehicle_id, gps_device_id, position_id,
++        last_report_at, last_position_at, has_position, latitude, longitude,
++        speed_kph, heading_deg, ignition, odometer_km, motion_state, updated_at
++      ),
++      INSERT (
++        tenant_id, vehicle_id, gps_device_id, position_id,
++        last_report_at, last_position_at, has_position, latitude, longitude,
++        speed_kph, heading_deg, ignition, odometer_km
++      ),
++      UPDATE (
++        gps_device_id, position_id,
++        last_report_at, last_position_at, has_position, latitude, longitude,
++        speed_kph, heading_deg, ignition, odometer_km
++      )
++      ON fom.vehicle_live_state TO fom_app;
++
++    -- ────────────────────────── comentarios ──────────────────────────
++
++    COMMENT ON TABLE fom.areas IS
++      'Tenant-defined groupings of vehicles by location, sector or contract';
++    COMMENT ON TABLE fom.vehicle_driver_assignments IS
++      'Immutable history of principal and secondary driver assignments per vehicle';
++    COMMENT ON COLUMN fom.vehicle_driver_assignments.valid_to IS
++      'Timestamp closing an assignment; NULL denotes the active assignment';
++    COMMENT ON COLUMN fom.vehicle_driver_assignments.pin_hash IS
++      'Argon2id hash of the secondary driver PIN; the plaintext PIN never reaches the database';
++    COMMENT ON TABLE fom.vehicle_live_state IS
++      'Projection of the last known telemetry per vehicle, owned by the ingestion pipeline';
++    COMMENT ON COLUMN fom.vehicle_live_state.last_report_at IS
++      'Last frame of any kind, including heartbeats without a fix';
++    COMMENT ON COLUMN fom.vehicle_live_state.motion_state IS
++      'Derived from speed_kph and never writable: en_marcha at 3 km/h or more';
++    COMMENT ON COLUMN fom.vehicles.vehicle_type IS
++      'Product taxonomy: camioneta, camion, auto or otro';
++    COMMENT ON COLUMN fom.vehicles.fleet_number IS
++      'Operator-facing fleet number, unique per tenant';
++  `);
++};
++
++export const down = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    DO $guard$ BEGIN
++      IF EXISTS (SELECT 1 FROM fom.vehicle_live_state LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.vehicle_driver_assignments LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.areas LIMIT 1)
++        OR EXISTS (
++          SELECT 1 FROM fom.vehicles
++          WHERE alias IS NOT NULL
++             OR area_id IS NOT NULL
++             OR fleet_number IS NOT NULL
++             OR vehicle_type <> 'otro'
++          LIMIT 1
++        ) THEN
++        RAISE EXCEPTION 'cannot roll back the fleet domain while data exists';
++      END IF;
++    END $guard$;
++
++    COMMENT ON COLUMN fom.vehicles.fleet_number IS NULL;
++    COMMENT ON COLUMN fom.vehicles.vehicle_type IS NULL;
++
++    REVOKE SELECT, INSERT, UPDATE ON TABLE fom.vehicle_live_state FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE
++      ON TABLE fom.vehicle_driver_assignments FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON TABLE fom.areas FROM fom_app;
++
++    DROP TRIGGER vehicle_live_state_maintain_record ON fom.vehicle_live_state;
++    DROP TRIGGER vehicle_driver_assignments_maintain_record
++      ON fom.vehicle_driver_assignments;
++    DROP TRIGGER areas_maintain_record ON fom.areas;
++
++    DROP TABLE fom.vehicle_live_state;
++    DROP TABLE fom.vehicle_driver_assignments;
++
++    DROP INDEX fom.vehicles_tenant_fleet_number_unique_idx;
++    DROP INDEX fom.vehicles_tenant_area_idx;
++    ALTER TABLE fom.vehicles
++      DROP CONSTRAINT vehicles_fleet_number_check,
++      DROP CONSTRAINT vehicles_alias_check,
++      DROP CONSTRAINT vehicles_vehicle_type_check,
++      DROP CONSTRAINT vehicles_area_fk,
++      DROP COLUMN fleet_number,
++      DROP COLUMN area_id,
++      DROP COLUMN vehicle_type,
++      DROP COLUMN alias;
++
++    DROP TABLE fom.areas;
++
++    -- Cuerpo original de 20260721160000000, byte a byte.
++    CREATE OR REPLACE FUNCTION fom.maintain_vehicle_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (NEW.id IS DISTINCT FROM OLD.id OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id OR NEW.created_at IS DISTINCT FROM OLD.created_at) THEN
++        RAISE EXCEPTION 'vehicle identity is immutable' USING ERRCODE = '23514';
++      END IF;
++      NEW.code = lower(btrim(NEW.code));
++      NEW.plate = CASE WHEN NEW.plate IS NULL THEN NULL ELSE upper(btrim(NEW.plate)) END;
++      NEW.vin = CASE WHEN NEW.vin IS NULL THEN NULL ELSE upper(btrim(NEW.vin)) END;
++      NEW.make = CASE WHEN NEW.make IS NULL THEN NULL ELSE btrim(NEW.make) END;
++      NEW.model = CASE WHEN NEW.model IS NULL THEN NULL ELSE btrim(NEW.model) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END $function$;
++
++    DROP FUNCTION fom.maintain_vehicle_live_state_record();
++    DROP FUNCTION fom.maintain_vehicle_driver_assignment_record();
++    DROP FUNCTION fom.maintain_area_record();
++  `);
++};
+diff --git a/src/database/migrations/files/20260818110000000_create_operations_domain.ts b/src/database/migrations/files/20260818110000000_create_operations_domain.ts
+new file mode 100644
+index 0000000..e650c80
+--- /dev/null
++++ b/src/database/migrations/files/20260818110000000_create_operations_domain.ts
+@@ -0,0 +1,1014 @@
++import type { MigrationBuilder } from 'node-pg-migrate/dist/bundle/index';
++
++/**
++ * Órdenes de trabajo (ODT) e inspección diaria.
++ *
++ * Dos decisiones estructurales que conviene entender antes de leer el SQL.
++ *
++ * HISTÓRICO EN VEZ DE COLUMNA DE CIERRE. La base provisional resolvía el
++ * cierre con un trigger sobre `resuelta_en`. Esa columna responde una sola
++ * pregunta —cuándo se cerró— y el supervisor hace otras cuatro: cuánto estuvo
++ * en revisión, quién la devolvió a abierta y por qué, cuántas veces se
++ * reabrió, y el tiempo medio de cierre por tipo de falla. Todas son la misma:
++ * la duración de cada tramo, que solo existe si se guardan sus dos extremos.
++ * `work_order_events` es append-only, la escribe un trigger —así ningún cambio
++ * de estado escapa sin rastro— y `fom_app` solo tiene SELECT sobre ella.
++ *
++ * PLANTILLAS VERSIONADAS E INMUTABLES. Si el checklist se edita en sitio, una
++ * inspección de marzo que decía «Extintor vigente: conforme» pasa a colgar de
++ * un ítem que hoy se llama otra cosa, o que hoy es crítico y entonces no lo
++ * era. El registro cambia de significado retroactivamente, y eso es
++ * inaceptable en un documento que se usa para deslindar responsabilidad tras
++ * un accidente. Editar significa publicar una versión nueva; la anterior queda
++ * congelada. La respuesta lleva `template_id` además de `template_item_id`,
++ * con dos claves foráneas compuestas, de modo que la base hace IMPOSIBLE
++ * responder un ítem que no pertenece a la versión que se está respondiendo.
++ *
++ * Las notificaciones NO se generan aquí. La decisión tomada es publicar un
++ * evento en RabbitMQ y que un consumidor las cree; `work_order_events` es el
++ * punto de enganche.
++ */
++
++export const up = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    CREATE FUNCTION fom.maintain_work_order_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id
++        OR NEW.created_by_user_id IS DISTINCT FROM OLD.created_by_user_id
++        OR NEW.author_via IS DISTINCT FROM OLD.author_via
++        OR NEW.kind IS DISTINCT FROM OLD.kind
++        OR NEW.alert_rule_id IS DISTINCT FROM OLD.alert_rule_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'work order identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'INSERT' AND NEW.status <> 'abierta' THEN
++        RAISE EXCEPTION 'a work order is always created in status abierta'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE' AND NEW.status IS DISTINCT FROM OLD.status THEN
++        -- Reabrir devuelve a revisión, nunca a abierta: el trabajo ya pasó por
++        -- el taller, y fingir lo contrario produciría un segundo tramo de
++        -- "abierta" que ensucia la métrica de primera respuesta.
++        IF NOT (
++          (OLD.status = 'abierta' AND NEW.status IN ('en_revision', 'cerrada'))
++          OR (OLD.status = 'en_revision' AND NEW.status IN ('abierta', 'cerrada'))
++          OR (OLD.status = 'cerrada' AND NEW.status = 'en_revision')
++        ) THEN
++          RAISE EXCEPTION 'invalid work order status transition: % to %',
++            OLD.status, NEW.status
++            USING ERRCODE = '23514';
++        END IF;
++        NEW.status_changed_at = clock_timestamp();
++      END IF;
++
++      -- Cerrar fija resuelta_en; reabrir lo limpia. Se conservan la nota y el
++      -- costo: el gasto ya incurrido no desaparece porque se reabra.
++      IF NEW.status = 'cerrada' THEN
++        NEW.resolved_at = coalesce(NEW.resolved_at, clock_timestamp());
++      ELSE
++        NEW.resolved_at = NULL;
++      END IF;
++
++      NEW.description = btrim(NEW.description);
++      NEW.failure_type = CASE
++        WHEN NEW.failure_type IS NULL THEN NULL
++        ELSE lower(btrim(NEW.failure_type)) END;
++      NEW.location = CASE
++        WHEN NEW.location IS NULL THEN NULL ELSE btrim(NEW.location) END;
++      NEW.resolution_note = CASE
++        WHEN NEW.resolution_note IS NULL THEN NULL
++        ELSE btrim(NEW.resolution_note) END;
++      NEW.last_status_note = CASE
++        WHEN NEW.last_status_note IS NULL THEN NULL
++        ELSE btrim(NEW.last_status_note) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    -- SECURITY DEFINER a propósito: es la única forma de que fom_app, que solo
++    -- tiene SELECT sobre el histórico, no pueda insertar historia falsa.
++    CREATE FUNCTION fom.record_work_order_event()
++    RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
++    SET search_path = pg_catalog AS $function$
++    DECLARE
++      next_sequence integer;
++    BEGIN
++      SELECT coalesce(max(event.sequence_number), 0) + 1
++        INTO next_sequence
++        FROM fom.work_order_events AS event
++        WHERE event.work_order_id = NEW.id;
++
++      INSERT INTO fom.work_order_events (
++        tenant_id, work_order_id, sequence_number,
++        actor_user_id, from_status, to_status, note, occurred_at
++      ) VALUES (
++        NEW.tenant_id,
++        NEW.id,
++        next_sequence,
++        NEW.last_status_actor_user_id,
++        CASE WHEN TG_OP = 'UPDATE' THEN OLD.status ELSE NULL END,
++        NEW.status,
++        NEW.last_status_note,
++        NEW.status_changed_at
++      );
++      RETURN NULL;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.reject_work_order_event_mutation()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      RAISE EXCEPTION 'work order history is append-only'
++        USING ERRCODE = '23514';
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_inspection_template_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.code IS DISTINCT FROM OLD.code
++        OR NEW.version IS DISTINCT FROM OLD.version
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'inspection template identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'INSERT' AND NEW.status <> 'borrador' THEN
++        RAISE EXCEPTION 'an inspection template is always created as borrador'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE' AND NEW.status IS DISTINCT FROM OLD.status THEN
++        IF NOT (
++          (OLD.status = 'borrador' AND NEW.status IN ('publicada', 'archivada'))
++          OR (OLD.status = 'publicada' AND NEW.status = 'archivada')
++        ) THEN
++          RAISE EXCEPTION 'invalid inspection template status transition: % to %',
++            OLD.status, NEW.status
++            USING ERRCODE = '23514';
++        END IF;
++      END IF;
++
++      -- Una versión publicada es inmutable salvo por su propio archivado.
++      IF TG_OP = 'UPDATE' AND OLD.status <> 'borrador' AND (
++        NEW.name IS DISTINCT FROM OLD.name
++        OR NEW.description IS DISTINCT FROM OLD.description
++        OR NEW.published_at IS DISTINCT FROM OLD.published_at
++      ) THEN
++        RAISE EXCEPTION 'a published inspection template version is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF NEW.status = 'publicada' AND NOT EXISTS (
++        SELECT 1 FROM fom.inspection_template_items AS item
++        WHERE item.template_id = NEW.id
++      ) THEN
++        RAISE EXCEPTION 'an inspection template cannot be published without items'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF NEW.status = 'borrador' THEN
++        NEW.published_at = NULL;
++        NEW.archived_at = NULL;
++      ELSIF NEW.status = 'publicada' THEN
++        NEW.published_at = coalesce(NEW.published_at, clock_timestamp());
++        NEW.archived_at = NULL;
++      ELSE
++        NEW.archived_at = coalesce(NEW.archived_at, clock_timestamp());
++      END IF;
++
++      NEW.code = lower(btrim(NEW.code));
++      NEW.name = btrim(NEW.name);
++      NEW.description = CASE
++        WHEN NEW.description IS NULL THEN NULL ELSE btrim(NEW.description) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.guard_inspection_template_item_mutation()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    DECLARE
++      template_status varchar(20);
++    BEGIN
++      SELECT template.status INTO template_status
++        FROM fom.inspection_templates AS template
++        WHERE template.id = CASE
++          WHEN TG_OP = 'DELETE' THEN OLD.template_id ELSE NEW.template_id END;
++
++      IF template_status IS DISTINCT FROM 'borrador' THEN
++        RAISE EXCEPTION 'items of a published inspection template are immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'DELETE' THEN
++        RETURN OLD;
++      END IF;
++
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.template_id IS DISTINCT FROM OLD.template_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'inspection template item identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.code = lower(btrim(NEW.code));
++      NEW.category = btrim(NEW.category);
++      NEW.name = btrim(NEW.name);
++      NEW.help_text = CASE
++        WHEN NEW.help_text IS NULL THEN NULL ELSE btrim(NEW.help_text) END;
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_inspection_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    DECLARE
++      template_status varchar(20);
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id
++        OR NEW.driver_user_id IS DISTINCT FROM OLD.driver_user_id
++        OR NEW.template_id IS DISTINCT FROM OLD.template_id
++        OR NEW.inspection_date IS DISTINCT FROM OLD.inspection_date
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'inspection identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'INSERT' THEN
++        IF NEW.result <> 'pendiente' THEN
++          RAISE EXCEPTION 'an inspection is always created as pendiente'
++            USING ERRCODE = '23514';
++        END IF;
++        SELECT template.status INTO template_status
++          FROM fom.inspection_templates AS template
++          WHERE template.id = NEW.template_id;
++        IF template_status IS DISTINCT FROM 'publicada' THEN
++          RAISE EXCEPTION 'an inspection must use a published template version'
++            USING ERRCODE = '23514';
++        END IF;
++      END IF;
++
++      -- Enviada es terminal: un error se corrige con una inspección nueva, no
++      -- reescribiendo la del día.
++      IF TG_OP = 'UPDATE'
++        AND OLD.result <> 'pendiente'
++        AND NEW.result IS DISTINCT FROM OLD.result
++      THEN
++        RAISE EXCEPTION 'invalid inspection result transition: % to %',
++          OLD.result, NEW.result
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF NEW.result <> 'pendiente' THEN
++        NEW.submitted_at = coalesce(NEW.submitted_at, clock_timestamp());
++      ELSE
++        NEW.submitted_at = NULL;
++      END IF;
++
++      -- Un ítem CRÍTICO en falla nunca produce una inspección aprobada, ni
++      -- siquiera "con observaciones": un camión sin frenos aprobado con
++      -- observaciones sale a la carretera igual.
++      IF NEW.result IN ('aprobada', 'aprobada_con_observaciones') AND EXISTS (
++        SELECT 1 FROM fom.inspection_answers AS answer
++        WHERE answer.inspection_id = NEW.id
++          AND answer.item_state = 'falla'
++          AND answer.is_critical
++      ) THEN
++        RAISE EXCEPTION
++          'inspection with a failed critical item cannot be approved'
++          USING ERRCODE = '23514';
++      END IF;
++
++      -- "Aprobada" a secas significa que no hubo nada que anotar; si hubo,
++      -- el estado que lo nombra ya existe.
++      IF NEW.result = 'aprobada' AND EXISTS (
++        SELECT 1 FROM fom.inspection_answers AS answer
++        WHERE answer.inspection_id = NEW.id
++          AND answer.item_state <> 'conforme'
++      ) THEN
++        RAISE EXCEPTION
++          'inspection with observations or failures must be recorded as aprobada_con_observaciones or bloqueada'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.location = CASE
++        WHEN NEW.location IS NULL THEN NULL ELSE btrim(NEW.location) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_inspection_answer_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    DECLARE
++      parent_result varchar(30);
++      item_is_critical boolean;
++    BEGIN
++      SELECT inspection.result INTO parent_result
++        FROM fom.inspections AS inspection
++        WHERE inspection.id = CASE
++          WHEN TG_OP = 'DELETE' THEN OLD.inspection_id ELSE NEW.inspection_id END;
++
++      IF parent_result IS DISTINCT FROM 'pendiente' THEN
++        RAISE EXCEPTION 'answers of a submitted inspection are immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'DELETE' THEN
++        RETURN OLD;
++      END IF;
++
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.inspection_id IS DISTINCT FROM OLD.inspection_id
++        OR NEW.template_id IS DISTINCT FROM OLD.template_id
++        OR NEW.template_item_id IS DISTINCT FROM OLD.template_item_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'inspection answer identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      SELECT item.is_critical INTO item_is_critical
++        FROM fom.inspection_template_items AS item
++        WHERE item.id = NEW.template_item_id;
++
++      NEW.is_critical = item_is_critical;
++      NEW.note = CASE WHEN NEW.note IS NULL THEN NULL ELSE btrim(NEW.note) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    -- ═══════════════════════════ ODT ═══════════════════════════
++
++    CREATE TABLE fom.work_orders (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      vehicle_id uuid NOT NULL,
++      created_by_user_id uuid,
++      author_via varchar(20),
++      kind varchar(20) NOT NULL DEFAULT 'correctiva',
++      status varchar(20) NOT NULL DEFAULT 'abierta',
++      description varchar(2000) NOT NULL,
++      failure_type varchar(30),
++      location varchar(200),
++      evidence_urls jsonb NOT NULL DEFAULT '[]'::jsonb,
++      resolution_note varchar(2000),
++      resolution_cost numeric(12,2),
++      resolution_evidence_urls jsonb NOT NULL DEFAULT '[]'::jsonb,
++      resolved_at timestamptz,
++      alert_rule_id uuid,
++      last_status_actor_user_id uuid,
++      last_status_note varchar(1000),
++      status_changed_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT work_orders_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT work_orders_vehicle_fk FOREIGN KEY (tenant_id, vehicle_id)
++        REFERENCES fom.vehicles(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT work_orders_author_fk
++        FOREIGN KEY (tenant_id, created_by_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT work_orders_status_actor_fk
++        FOREIGN KEY (tenant_id, last_status_actor_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT work_orders_tenant_id_unique UNIQUE (tenant_id, id),
++
++      CONSTRAINT work_orders_kind_check CHECK (
++        kind IN ('correctiva', 'preventiva')
++      ),
++      CONSTRAINT work_orders_status_check CHECK (
++        status IN ('abierta', 'en_revision', 'cerrada')
++      ),
++      CONSTRAINT work_orders_author_via_check CHECK (
++        author_via IS NULL OR author_via IN ('principal', 'secundario')
++      ),
++      CONSTRAINT work_orders_author_check CHECK (
++        created_by_user_id IS NOT NULL OR author_via IS NULL
++      ),
++      CONSTRAINT work_orders_description_check CHECK (
++        description = btrim(description)
++        AND char_length(description) BETWEEN 3 AND 2000
++      ),
++      CONSTRAINT work_orders_failure_type_check CHECK (
++        failure_type IS NULL OR failure_type IN (
++          'motor', 'frenos', 'neumaticos', 'electrico', 'carroceria', 'otro'
++        )
++      ),
++      CONSTRAINT work_orders_location_check CHECK (
++        location IS NULL OR (location = btrim(location) AND location <> '')
++      ),
++      CONSTRAINT work_orders_evidence_check CHECK (
++        jsonb_typeof(evidence_urls) = 'array'
++        AND jsonb_array_length(evidence_urls) <= 12
++        AND NOT evidence_urls @? '$[*] ? (@.type() != "string")'
++      ),
++      CONSTRAINT work_orders_resolution_evidence_check CHECK (
++        jsonb_typeof(resolution_evidence_urls) = 'array'
++        AND jsonb_array_length(resolution_evidence_urls) <= 12
++        AND NOT resolution_evidence_urls @? '$[*] ? (@.type() != "string")'
++      ),
++      CONSTRAINT work_orders_resolution_note_check CHECK (
++        resolution_note IS NULL OR (
++          resolution_note = btrim(resolution_note)
++          AND char_length(resolution_note) BETWEEN 3 AND 2000
++        )
++      ),
++      CONSTRAINT work_orders_resolution_cost_check CHECK (
++        resolution_cost IS NULL OR resolution_cost >= 0
++      ),
++      -- No se cierra vacía, y solo una ODT cerrada tiene resolved_at.
++      CONSTRAINT work_orders_closure_check CHECK (
++        (
++          status = 'cerrada'
++          AND resolved_at IS NOT NULL
++          AND resolution_note IS NOT NULL
++        )
++        OR (status <> 'cerrada' AND resolved_at IS NULL)
++      ),
++      CONSTRAINT work_orders_status_note_check CHECK (
++        last_status_note IS NULL OR (
++          last_status_note = btrim(last_status_note) AND last_status_note <> ''
++        )
++      ),
++      CONSTRAINT work_orders_timestamps_check CHECK (
++        updated_at >= created_at
++        AND status_changed_at >= created_at
++        AND (resolved_at IS NULL OR resolved_at >= created_at)
++      )
++    );
++
++    CREATE INDEX work_orders_tenant_open_idx
++      ON fom.work_orders (tenant_id, created_at DESC)
++      WHERE status <> 'cerrada';
++    CREATE INDEX work_orders_tenant_status_idx
++      ON fom.work_orders (tenant_id, status, created_at DESC);
++    CREATE INDEX work_orders_tenant_vehicle_idx
++      ON fom.work_orders (tenant_id, vehicle_id, created_at DESC);
++    CREATE INDEX work_orders_author_idx
++      ON fom.work_orders (tenant_id, created_by_user_id)
++      WHERE created_by_user_id IS NOT NULL;
++    CREATE INDEX work_orders_status_actor_idx
++      ON fom.work_orders (tenant_id, last_status_actor_user_id)
++      WHERE last_status_actor_user_id IS NOT NULL;
++    -- Compuesto y en este orden porque la clave foránea que añade el dominio
++    -- de cumplimiento es (tenant_id, alert_rule_id): un índice solo sobre
++    -- alert_rule_id no es prefijo izquierdo de ese par.
++    CREATE INDEX work_orders_alert_rule_idx
++      ON fom.work_orders (tenant_id, alert_rule_id)
++      WHERE alert_rule_id IS NOT NULL;
++    CREATE INDEX work_orders_tenant_resolved_idx
++      ON fom.work_orders (tenant_id, resolved_at DESC)
++      WHERE status = 'cerrada';
++
++    CREATE TABLE fom.work_order_events (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      work_order_id uuid NOT NULL,
++      sequence_number integer NOT NULL,
++      from_status varchar(20),
++      to_status varchar(20) NOT NULL,
++      actor_user_id uuid,
++      note varchar(1000),
++      occurred_at timestamptz NOT NULL,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT work_order_events_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT work_order_events_work_order_fk
++        FOREIGN KEY (tenant_id, work_order_id)
++        REFERENCES fom.work_orders(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT work_order_events_actor_fk
++        FOREIGN KEY (tenant_id, actor_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT work_order_events_sequence_unique
++        UNIQUE (work_order_id, sequence_number),
++      CONSTRAINT work_order_events_sequence_check CHECK (sequence_number > 0),
++      CONSTRAINT work_order_events_from_status_check CHECK (
++        from_status IS NULL
++        OR from_status IN ('abierta', 'en_revision', 'cerrada')
++      ),
++      CONSTRAINT work_order_events_to_status_check CHECK (
++        to_status IN ('abierta', 'en_revision', 'cerrada')
++      ),
++      CONSTRAINT work_order_events_change_check CHECK (
++        from_status IS DISTINCT FROM to_status
++      ),
++      -- El primer evento es la creación y no tiene estado anterior.
++      CONSTRAINT work_order_events_origin_check CHECK (
++        (sequence_number = 1) = (from_status IS NULL)
++      ),
++      CONSTRAINT work_order_events_note_check CHECK (
++        note IS NULL OR (note = btrim(note) AND note <> '')
++      ),
++      CONSTRAINT work_order_events_timestamps_check CHECK (
++        created_at >= occurred_at
++      )
++    );
++
++    CREATE INDEX work_order_events_timeline_idx
++      ON fom.work_order_events (tenant_id, work_order_id, sequence_number);
++    CREATE INDEX work_order_events_tenant_status_idx
++      ON fom.work_order_events (tenant_id, to_status, occurred_at DESC);
++    CREATE INDEX work_order_events_actor_idx
++      ON fom.work_order_events (tenant_id, actor_user_id)
++      WHERE actor_user_id IS NOT NULL;
++
++    -- ══════════════ PLANTILLAS DE INSPECCIÓN (versionadas) ══════════════
++
++    CREATE TABLE fom.inspection_templates (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      code varchar(50) NOT NULL,
++      version integer NOT NULL,
++      name varchar(120) NOT NULL,
++      description varchar(500),
++      status varchar(20) NOT NULL DEFAULT 'borrador',
++      published_at timestamptz,
++      archived_at timestamptz,
++      created_by_user_id uuid,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT inspection_templates_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspection_templates_author_fk
++        FOREIGN KEY (tenant_id, created_by_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspection_templates_tenant_id_unique UNIQUE (tenant_id, id),
++      CONSTRAINT inspection_templates_version_unique
++        UNIQUE (tenant_id, code, version),
++      CONSTRAINT inspection_templates_code_check CHECK (
++        code ~ '^[a-z0-9][a-z0-9._-]{0,49}$'
++      ),
++      CONSTRAINT inspection_templates_version_check CHECK (version > 0),
++      CONSTRAINT inspection_templates_name_check CHECK (
++        name = btrim(name) AND char_length(name) BETWEEN 2 AND 120
++      ),
++      CONSTRAINT inspection_templates_description_check CHECK (
++        description IS NULL
++        OR (description = btrim(description) AND description <> '')
++      ),
++      CONSTRAINT inspection_templates_status_check CHECK (
++        status IN ('borrador', 'publicada', 'archivada')
++      ),
++      CONSTRAINT inspection_templates_lifecycle_check CHECK (
++        (status = 'borrador' AND published_at IS NULL AND archived_at IS NULL)
++        OR (
++          status = 'publicada'
++          AND published_at IS NOT NULL
++          AND archived_at IS NULL
++        )
++        OR (
++          status = 'archivada'
++          AND archived_at IS NOT NULL
++          AND (published_at IS NULL OR archived_at >= published_at)
++        )
++      ),
++      CONSTRAINT inspection_templates_timestamps_check CHECK (
++        updated_at >= created_at
++        AND (published_at IS NULL OR published_at >= created_at)
++        AND (archived_at IS NULL OR archived_at >= created_at)
++      )
++    );
++
++    -- Una sola versión vigente por checklist y por tenant.
++    CREATE UNIQUE INDEX inspection_templates_published_unique_idx
++      ON fom.inspection_templates (tenant_id, code)
++      WHERE status = 'publicada';
++    CREATE INDEX inspection_templates_tenant_status_idx
++      ON fom.inspection_templates (tenant_id, status, code);
++    CREATE INDEX inspection_templates_author_idx
++      ON fom.inspection_templates (tenant_id, created_by_user_id)
++      WHERE created_by_user_id IS NOT NULL;
++
++    CREATE TABLE fom.inspection_template_items (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      template_id uuid NOT NULL,
++      code varchar(50) NOT NULL,
++      category varchar(60) NOT NULL,
++      name varchar(160) NOT NULL,
++      is_critical boolean NOT NULL DEFAULT false,
++      help_text varchar(500),
++      vehicle_types jsonb NOT NULL DEFAULT '[]'::jsonb,
++      display_order smallint NOT NULL,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT inspection_template_items_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspection_template_items_template_fk
++        FOREIGN KEY (tenant_id, template_id)
++        REFERENCES fom.inspection_templates(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspection_template_items_tenant_id_unique UNIQUE (tenant_id, id),
++      -- Permite que una respuesta ate su ítem a la versión exacta que responde.
++      CONSTRAINT inspection_template_items_template_id_unique
++        UNIQUE (tenant_id, template_id, id),
++      CONSTRAINT inspection_template_items_code_unique UNIQUE (template_id, code),
++      CONSTRAINT inspection_template_items_order_unique
++        UNIQUE (template_id, display_order),
++      CONSTRAINT inspection_template_items_code_check CHECK (
++        code ~ '^[a-z0-9][a-z0-9._-]{0,49}$'
++      ),
++      CONSTRAINT inspection_template_items_category_check CHECK (
++        category = btrim(category) AND char_length(category) BETWEEN 2 AND 60
++      ),
++      CONSTRAINT inspection_template_items_name_check CHECK (
++        name = btrim(name) AND char_length(name) BETWEEN 2 AND 160
++      ),
++      CONSTRAINT inspection_template_items_help_check CHECK (
++        help_text IS NULL OR (help_text = btrim(help_text) AND help_text <> '')
++      ),
++      -- '[]' = aplica a todos los tipos de vehículo.
++      CONSTRAINT inspection_template_items_vehicle_types_check CHECK (
++        jsonb_typeof(vehicle_types) = 'array'
++        AND vehicle_types <@ '["camioneta","camion","auto","otro"]'::jsonb
++      ),
++      CONSTRAINT inspection_template_items_order_check CHECK (display_order > 0)
++    );
++
++    CREATE INDEX inspection_template_items_template_idx
++      ON fom.inspection_template_items (tenant_id, template_id, display_order);
++
++    -- ══════════════════════ INSPECCIÓN DIARIA ══════════════════════
++
++    CREATE TABLE fom.inspections (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      vehicle_id uuid NOT NULL,
++      driver_user_id uuid NOT NULL,
++      template_id uuid NOT NULL,
++      inspection_date date NOT NULL DEFAULT CURRENT_DATE,
++      result varchar(30) NOT NULL DEFAULT 'pendiente',
++      location varchar(200),
++      submitted_at timestamptz,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT inspections_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspections_vehicle_fk FOREIGN KEY (tenant_id, vehicle_id)
++        REFERENCES fom.vehicles(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspections_driver_fk FOREIGN KEY (tenant_id, driver_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspections_template_fk FOREIGN KEY (tenant_id, template_id)
++        REFERENCES fom.inspection_templates(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspections_tenant_id_unique UNIQUE (tenant_id, id),
++      -- Ata cada respuesta a la versión de plantilla de SU inspección.
++      CONSTRAINT inspections_template_id_unique UNIQUE (tenant_id, id, template_id),
++      CONSTRAINT inspections_result_check CHECK (
++        result IN (
++          'pendiente', 'aprobada', 'aprobada_con_observaciones', 'bloqueada'
++        )
++      ),
++      CONSTRAINT inspections_submission_check CHECK (
++        (result = 'pendiente' AND submitted_at IS NULL)
++        OR (result <> 'pendiente' AND submitted_at IS NOT NULL)
++      ),
++      CONSTRAINT inspections_location_check CHECK (
++        location IS NULL OR (location = btrim(location) AND location <> '')
++      ),
++      CONSTRAINT inspections_timestamps_check CHECK (
++        updated_at >= created_at
++        AND (submitted_at IS NULL OR submitted_at >= created_at)
++      )
++    );
++
++    CREATE UNIQUE INDEX inspections_daily_unique_idx
++      ON fom.inspections (tenant_id, vehicle_id, inspection_date, driver_user_id);
++    CREATE INDEX inspections_tenant_date_idx
++      ON fom.inspections (tenant_id, inspection_date DESC, result);
++    CREATE INDEX inspections_tenant_open_idx
++      ON fom.inspections (tenant_id, inspection_date DESC)
++      WHERE result IN ('pendiente', 'bloqueada');
++    CREATE INDEX inspections_driver_idx
++      ON fom.inspections (tenant_id, driver_user_id, inspection_date DESC);
++    CREATE INDEX inspections_template_idx
++      ON fom.inspections (tenant_id, template_id);
++
++    CREATE TABLE fom.inspection_answers (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      inspection_id uuid NOT NULL,
++      template_id uuid NOT NULL,
++      template_item_id uuid NOT NULL,
++      item_state varchar(20) NOT NULL,
++      is_critical boolean NOT NULL DEFAULT false,
++      note varchar(1000),
++      evidence_urls jsonb NOT NULL DEFAULT '[]'::jsonb,
++      requested_work_order boolean,
++      work_order_id uuid,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT inspection_answers_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspection_answers_inspection_fk
++        FOREIGN KEY (tenant_id, inspection_id, template_id)
++        REFERENCES fom.inspections(tenant_id, id, template_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspection_answers_item_fk
++        FOREIGN KEY (tenant_id, template_id, template_item_id)
++        REFERENCES fom.inspection_template_items(tenant_id, template_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspection_answers_work_order_fk
++        FOREIGN KEY (tenant_id, work_order_id)
++        REFERENCES fom.work_orders(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT inspection_answers_item_unique
++        UNIQUE (inspection_id, template_item_id),
++      CONSTRAINT inspection_answers_state_check CHECK (
++        item_state IN ('conforme', 'observacion', 'falla')
++      ),
++      CONSTRAINT inspection_answers_note_check CHECK (
++        note IS NULL OR (note = btrim(note) AND note <> '')
++      ),
++      CONSTRAINT inspection_answers_evidence_check CHECK (
++        jsonb_typeof(evidence_urls) = 'array'
++        AND jsonb_array_length(evidence_urls) <= 12
++        AND NOT evidence_urls @? '$[*] ? (@.type() != "string")'
++      ),
++      -- Un ítem conforme no lleva nota, evidencia ni ODT.
++      CONSTRAINT inspection_answers_conforme_check CHECK (
++        item_state <> 'conforme' OR (
++          note IS NULL
++          AND evidence_urls = '[]'::jsonb
++          AND coalesce(requested_work_order, false) = false
++          AND work_order_id IS NULL
++        )
++      ),
++      CONSTRAINT inspection_answers_work_order_check CHECK (
++        work_order_id IS NULL OR requested_work_order
++      ),
++      CONSTRAINT inspection_answers_timestamps_check CHECK (
++        updated_at >= created_at
++      )
++    );
++
++    CREATE INDEX inspection_answers_inspection_idx
++      ON fom.inspection_answers (tenant_id, inspection_id, template_id);
++    CREATE INDEX inspection_answers_item_idx
++      ON fom.inspection_answers (tenant_id, template_id, template_item_id);
++    CREATE INDEX inspection_answers_work_order_idx
++      ON fom.inspection_answers (tenant_id, work_order_id)
++      WHERE work_order_id IS NOT NULL;
++    CREATE INDEX inspection_answers_critical_failure_idx
++      ON fom.inspection_answers (inspection_id)
++      WHERE is_critical AND item_state = 'falla';
++
++    -- ═══════════════════════════ TRIGGERS ═══════════════════════════
++
++    CREATE TRIGGER work_orders_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.work_orders
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_work_order_record();
++
++    -- Dos triggers y no uno: un WHEN no puede referenciar OLD en un trigger
++    -- de INSERT, y sin comparar OLD.status con NEW.status cualquier edición
++    -- —corregir la descripción, adjuntar evidencia, registrar el costo—
++    -- insertaría un evento con from_status = to_status, que la restricción
++    -- work_order_events_change_check rechaza. Es decir: editar una ODT
++    -- fallaría siempre.
++    --
++    -- Tampoco se filtra por pg_trigger_depth(): el día que otro trigger cierre
++    -- una ODT automáticamente, esa transición ocurriría a profundidad mayor y
++    -- no dejaría rastro EN SILENCIO. Un histórico con huecos es peor que
++    -- ninguno, y no hay riesgo de recursión porque esta función escribe en
++    -- work_order_events, no en work_orders.
++    CREATE TRIGGER work_orders_record_creation
++      AFTER INSERT ON fom.work_orders
++      FOR EACH ROW
++      EXECUTE FUNCTION fom.record_work_order_event();
++
++    CREATE TRIGGER work_orders_record_transition
++      AFTER UPDATE OF status ON fom.work_orders
++      FOR EACH ROW
++      WHEN (OLD.status IS DISTINCT FROM NEW.status)
++      EXECUTE FUNCTION fom.record_work_order_event();
++
++    CREATE TRIGGER work_order_events_reject_mutation
++      BEFORE UPDATE OR DELETE ON fom.work_order_events
++      FOR EACH ROW EXECUTE FUNCTION fom.reject_work_order_event_mutation();
++
++    CREATE TRIGGER inspection_templates_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.inspection_templates
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_inspection_template_record();
++
++    CREATE TRIGGER inspection_template_items_guard_mutation
++      BEFORE INSERT OR UPDATE OR DELETE ON fom.inspection_template_items
++      FOR EACH ROW EXECUTE FUNCTION fom.guard_inspection_template_item_mutation();
++
++    CREATE TRIGGER inspections_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.inspections
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_inspection_record();
++
++    CREATE TRIGGER inspection_answers_maintain_record
++      BEFORE INSERT OR UPDATE OR DELETE ON fom.inspection_answers
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_inspection_answer_record();
++
++    -- ══════════════════════════ PRIVILEGIOS ══════════════════════════
++
++    REVOKE ALL ON TABLE
++      fom.work_orders,
++      fom.work_order_events,
++      fom.inspection_templates,
++      fom.inspection_template_items,
++      fom.inspections,
++      fom.inspection_answers
++      FROM PUBLIC;
++    REVOKE ALL ON FUNCTION
++      fom.maintain_work_order_record(),
++      fom.record_work_order_event(),
++      fom.reject_work_order_event_mutation(),
++      fom.maintain_inspection_template_record(),
++      fom.guard_inspection_template_item_mutation(),
++      fom.maintain_inspection_record(),
++      fom.maintain_inspection_answer_record()
++      FROM PUBLIC;
++
++    GRANT SELECT (
++        id, tenant_id, vehicle_id, created_by_user_id, author_via, kind, status,
++        description, failure_type, location, evidence_urls, resolution_note,
++        resolution_cost, resolution_evidence_urls, resolved_at, alert_rule_id,
++        last_status_actor_user_id, last_status_note, status_changed_at,
++        created_at, updated_at
++      ),
++      INSERT (
++        tenant_id, vehicle_id, created_by_user_id, author_via, kind, description,
++        failure_type, location, evidence_urls, alert_rule_id,
++        last_status_actor_user_id, last_status_note
++      ),
++      UPDATE (
++        status, description, failure_type, location, evidence_urls,
++        resolution_note, resolution_cost, resolution_evidence_urls,
++        last_status_actor_user_id, last_status_note
++      )
++      ON fom.work_orders TO fom_app;
++
++    -- Solo lectura: el histórico lo escribe el trigger SECURITY DEFINER.
++    GRANT SELECT (
++        id, tenant_id, work_order_id, sequence_number, from_status, to_status,
++        actor_user_id, note, occurred_at, created_at
++      )
++      ON fom.work_order_events TO fom_app;
++
++    GRANT SELECT (
++        id, tenant_id, code, version, name, description, status, published_at,
++        archived_at, created_by_user_id, created_at, updated_at
++      ),
++      INSERT (
++        tenant_id, code, version, name, description, created_by_user_id
++      ),
++      UPDATE (name, description, status)
++      ON fom.inspection_templates TO fom_app;
++
++    GRANT SELECT (
++        id, tenant_id, template_id, code, category, name, is_critical, help_text,
++        vehicle_types, display_order, created_at
++      ),
++      INSERT (
++        tenant_id, template_id, code, category, name, is_critical, help_text,
++        vehicle_types, display_order
++      ),
++      UPDATE (
++        code, category, name, is_critical, help_text, vehicle_types, display_order
++      ),
++      DELETE
++      ON fom.inspection_template_items TO fom_app;
++
++    GRANT SELECT (
++        id, tenant_id, vehicle_id, driver_user_id, template_id, inspection_date,
++        result, location, submitted_at, created_at, updated_at
++      ),
++      INSERT (
++        tenant_id, vehicle_id, driver_user_id, template_id, inspection_date,
++        location
++      ),
++      UPDATE (result, location)
++      ON fom.inspections TO fom_app;
++
++    GRANT SELECT (
++        id, tenant_id, inspection_id, template_id, template_item_id, item_state,
++        is_critical, note, evidence_urls, requested_work_order, work_order_id,
++        created_at, updated_at
++      ),
++      INSERT (
++        tenant_id, inspection_id, template_id, template_item_id, item_state,
++        note, evidence_urls, requested_work_order, work_order_id
++      ),
++      UPDATE (
++        item_state, note, evidence_urls, requested_work_order, work_order_id
++      ),
++      DELETE
++      ON fom.inspection_answers TO fom_app;
++
++    -- ══════════════════════════ COMENTARIOS ══════════════════════════
++
++    COMMENT ON TABLE fom.work_orders IS
++      'Tenant-owned work orders (ODT) raised against a vehicle';
++    COMMENT ON COLUMN fom.work_orders.created_by_user_id IS
++      'NULL means the work order was raised by the system from an alert rule';
++    COMMENT ON COLUMN fom.work_orders.alert_rule_id IS
++      'Alert rule that originated a preventive work order; the composite foreign key to fom.alert_rules is added by the compliance migration';
++    COMMENT ON COLUMN fom.work_orders.resolved_at IS
++      'Trigger-managed: set on close, cleared on reopen; never written by the application';
++    COMMENT ON TABLE fom.work_order_events IS
++      'Append-only state history of every work order; the publication point for RabbitMQ notification events';
++    COMMENT ON COLUMN fom.work_order_events.occurred_at IS
++      'Transition instant; consecutive rows measure time spent in each status';
++    COMMENT ON TABLE fom.inspection_templates IS
++      'Versioned daily inspection checklists; a published version is immutable';
++    COMMENT ON COLUMN fom.inspection_templates.version IS
++      'Monotonic version per (tenant_id, code); editing a published checklist means publishing a new version';
++    COMMENT ON TABLE fom.inspections IS
++      'One daily inspection per vehicle, driver and date, bound to a template version';
++    COMMENT ON TABLE fom.inspection_answers IS
++      'Per-item answers; frozen once the parent inspection is submitted';
++    COMMENT ON COLUMN fom.inspection_answers.is_critical IS
++      'Trigger-managed copy of the template item criticality at answering time';
++  `);
++};
++
++export const down = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    DO $guard$ BEGIN
++      IF EXISTS (SELECT 1 FROM fom.inspection_answers LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.inspections LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.inspection_template_items LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.inspection_templates LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.work_order_events LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.work_orders LIMIT 1)
++      THEN
++        RAISE EXCEPTION 'cannot roll back the operations domain while data exists';
++      END IF;
++    END $guard$;
++
++    REVOKE SELECT, INSERT, UPDATE, DELETE
++      ON fom.inspection_answers FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.inspections FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE, DELETE
++      ON fom.inspection_template_items FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.inspection_templates FROM fom_app;
++    REVOKE SELECT ON fom.work_order_events FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.work_orders FROM fom_app;
++
++    DROP TRIGGER inspection_answers_maintain_record ON fom.inspection_answers;
++    DROP TRIGGER inspections_maintain_record ON fom.inspections;
++    DROP TRIGGER inspection_template_items_guard_mutation
++      ON fom.inspection_template_items;
++    DROP TRIGGER inspection_templates_maintain_record ON fom.inspection_templates;
++    DROP TRIGGER work_order_events_reject_mutation ON fom.work_order_events;
++    DROP TRIGGER work_orders_record_transition ON fom.work_orders;
++    DROP TRIGGER work_orders_record_creation ON fom.work_orders;
++    DROP TRIGGER work_orders_maintain_record ON fom.work_orders;
++
++    DROP TABLE fom.inspection_answers;
++    DROP TABLE fom.inspections;
++    DROP TABLE fom.inspection_template_items;
++    DROP TABLE fom.inspection_templates;
++    DROP TABLE fom.work_order_events;
++    DROP TABLE fom.work_orders;
++
++    DROP FUNCTION fom.maintain_inspection_answer_record();
++    DROP FUNCTION fom.maintain_inspection_record();
++    DROP FUNCTION fom.guard_inspection_template_item_mutation();
++    DROP FUNCTION fom.maintain_inspection_template_record();
++    DROP FUNCTION fom.reject_work_order_event_mutation();
++    DROP FUNCTION fom.record_work_order_event();
++    DROP FUNCTION fom.maintain_work_order_record();
++  `);
++};
+diff --git a/src/database/migrations/files/20260818120000000_create_compliance_and_audit_domain.ts b/src/database/migrations/files/20260818120000000_create_compliance_and_audit_domain.ts
+new file mode 100644
+index 0000000..0b76e3e
+--- /dev/null
++++ b/src/database/migrations/files/20260818120000000_create_compliance_and_audit_domain.ts
+@@ -0,0 +1,805 @@
++import type { MigrationBuilder } from 'node-pg-migrate/dist/bundle/index';
++
++/**
++ * Documentos con vencimiento, reglas de alerta, notificaciones y auditoría.
++ *
++ * Depende de 20260814120000000 (dominio de operación): el reinicio del
++ * contador y la clave foránea de notificaciones referencian `fom.work_orders`.
++ *
++ * SOBRE LA AUDITORÍA. Es append-only de verdad, no por convención: `fom_app`
++ * recibe INSERT y SELECT y nada más, los triggers rechazan UPDATE y DELETE, y
++ * hay un trigger de sentencia aparte contra TRUNCATE —que no dispara triggers
++ * de fila y sería la vía obvia para borrar el rastro—. El actor técnico, el
++ * reloj y la dirección de red los pone el servidor con `current_user`,
++ * `clock_timestamp()` e `inet_client_addr()`: lo que mande el cliente en esas
++ * columnas se descarta, y además el GRANT de INSERT ni siquiera se las concede.
++ *
++ * SOBRE EL CRECIMIENTO. Ninguna de las dos tablas grandes se particiona hoy, y
++ * es una decisión razonada, no una omisión. `audit_log` registra mutaciones
++ * administrativas, no telemetría: su frecuencia la marca el número de personas
++ * que usan la consola, no los GPS. Con 200 eventos diarios son 73.000 filas al
++ * año; el umbral de particionado está en el orden de los 100 millones. Además
++ * es particionable más adelante sin drama —nadie la referencia y no tiene
++ * unicidad de idempotencia—, a diferencia de `gps_positions`. `notifications`
++ * sí escala con la telemetría, pero su índice caliente es parcial sobre las no
++ * leídas: su tamaño lo fija la bandeja pendiente, no el histórico.
++ *
++ * Retención: en `audit_log` NO, y es deliberado — una bitácora que se puede
++ * podar no es una bitácora, y la purga exigiría el DELETE que aquí se prohíbe.
++ * En `notifications` sí conviene, para las leídas con más de 180 días, con un
++ * rol de mantenimiento y en su propio Issue.
++ */
++
++export const up = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    CREATE FUNCTION fom.maintain_document_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.scope IS DISTINCT FROM OLD.scope
++        OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id
++        OR NEW.holder_user_id IS DISTINCT FROM OLD.holder_user_id
++        OR NEW.created_by_user_id IS DISTINCT FROM OLD.created_by_user_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'document identity and scope are immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.document_type = lower(btrim(NEW.document_type));
++      NEW.document_number = CASE
++        WHEN NEW.document_number IS NULL THEN NULL
++        ELSE upper(btrim(NEW.document_number))
++      END;
++      NEW.notes = CASE
++        WHEN NEW.notes IS NULL THEN NULL ELSE btrim(NEW.notes) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_document_file_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.document_id IS DISTINCT FROM OLD.document_id
++        OR NEW.storage_key IS DISTINCT FROM OLD.storage_key
++        OR NEW.content_type IS DISTINCT FROM OLD.content_type
++        OR NEW.byte_size IS DISTINCT FROM OLD.byte_size
++        OR NEW.checksum_sha256 IS DISTINCT FROM OLD.checksum_sha256
++        OR NEW.uploaded_by_user_id IS DISTINCT FROM OLD.uploaded_by_user_id
++        OR NEW.uploaded_at IS DISTINCT FROM OLD.uploaded_at
++      ) THEN
++        RAISE EXCEPTION 'document file content is immutable; only removal is allowed'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE'
++        AND OLD.removed_at IS NOT NULL
++        AND NEW.removed_at IS DISTINCT FROM OLD.removed_at THEN
++        RAISE EXCEPTION 'document file removal cannot be undone'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.storage_key = btrim(NEW.storage_key);
++      NEW.checksum_sha256 = lower(btrim(NEW.checksum_sha256));
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_alert_rule_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.rule_type IS DISTINCT FROM OLD.rule_type
++        OR NEW.created_by_user_id IS DISTINCT FROM OLD.created_by_user_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'alert rule identity and type are immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.service_name = CASE
++        WHEN NEW.service_name IS NULL THEN NULL ELSE btrim(NEW.service_name) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_alert_rule_vehicle_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.alert_rule_id IS DISTINCT FROM OLD.alert_rule_id
++        OR NEW.rule_type IS DISTINCT FROM OLD.rule_type
++        OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'alert rule assignment identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE'
++        AND OLD.unassigned_at IS NOT NULL
++        AND NEW.unassigned_at IS DISTINCT FROM OLD.unassigned_at THEN
++        RAISE EXCEPTION 'alert rule assignment cannot be reopened'
++          USING ERRCODE = '23514';
++      END IF;
++
++      -- El contador es dato derivado de la telemetría: solo avanza, y solo
++      -- retrocede a cero acompañado de un reinicio fechado.
++      IF TG_OP = 'UPDATE' AND NEW.progress_km < OLD.progress_km AND NOT (
++        NEW.progress_km = 0 AND NEW.last_reset_at > OLD.last_reset_at
++      ) THEN
++        RAISE EXCEPTION 'maintenance progress is monotonic outside a reset'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE' AND NEW.progress_km > OLD.progress_km THEN
++        NEW.last_progress_at = clock_timestamp();
++      END IF;
++
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.maintain_notification_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.notification_type IS DISTINCT FROM OLD.notification_type
++        OR NEW.title IS DISTINCT FROM OLD.title
++        OR NEW.detail IS DISTINCT FROM OLD.detail
++        OR NEW.work_order_id IS DISTINCT FROM OLD.work_order_id
++        OR NEW.dedupe_key IS DISTINCT FROM OLD.dedupe_key
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'notification content is immutable; only the read receipt changes'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE'
++        AND OLD.read_at IS NOT NULL
++        AND NEW.read_at IS DISTINCT FROM OLD.read_at THEN
++        RAISE EXCEPTION 'notification read receipt is immutable once set'
++          USING ERRCODE = '23514';
++      END IF;
++
++      NEW.title = btrim(NEW.title);
++      NEW.detail = btrim(NEW.detail);
++      NEW.dedupe_key = CASE
++        WHEN NEW.dedupe_key IS NULL THEN NULL
++        ELSE lower(btrim(NEW.dedupe_key)) END;
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.capture_audit_log_entry()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      NEW.occurred_at = clock_timestamp();
++      NEW.actor_db_role = current_user;
++      NEW.actor_client_addr = inet_client_addr();
++      NEW.action = lower(btrim(NEW.action));
++      NEW.entity_type = lower(btrim(NEW.entity_type));
++      NEW.actor_service_name = CASE
++        WHEN NEW.actor_service_name IS NULL THEN NULL
++        ELSE lower(btrim(NEW.actor_service_name)) END;
++      NEW.request_id = CASE
++        WHEN NEW.request_id IS NULL THEN NULL ELSE btrim(NEW.request_id) END;
++      IF NEW.changes IS NULL THEN
++        NEW.changes = '{}'::jsonb;
++      END IF;
++      RETURN NEW;
++    END
++    $function$;
++
++    CREATE FUNCTION fom.reject_audit_log_mutation()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      RAISE EXCEPTION 'audit log is append-only' USING ERRCODE = '23514';
++    END
++    $function$;
++
++    CREATE FUNCTION fom.reject_audit_log_truncate()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      RAISE EXCEPTION 'audit log cannot be truncated' USING ERRCODE = '23514';
++    END
++    $function$;
++
++    CREATE FUNCTION fom.reset_alert_rule_progress_on_work_order_close()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      UPDATE fom.alert_rule_vehicles
++      SET progress_km = 0,
++        last_reset_at = clock_timestamp(),
++        last_reset_work_order_id = NEW.id
++      WHERE tenant_id = NEW.tenant_id
++        AND alert_rule_id = NEW.alert_rule_id
++        AND vehicle_id = NEW.vehicle_id
++        AND unassigned_at IS NULL
++        AND progress_km > 0;
++      RETURN NULL;
++    END
++    $function$;
++
++    -- ═════════════════════════ DOCUMENTOS ═════════════════════════
++
++    CREATE TABLE fom.documents (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      scope varchar(20) NOT NULL,
++      vehicle_id uuid,
++      holder_user_id uuid,
++      document_type varchar(60) NOT NULL,
++      document_number varchar(60),
++      issued_on date,
++      expires_on date NOT NULL,
++      status varchar(20) NOT NULL DEFAULT 'active',
++      notes varchar(1000),
++      created_by_user_id uuid NOT NULL,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      archived_at timestamptz,
++
++      CONSTRAINT documents_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT documents_vehicle_fk FOREIGN KEY (tenant_id, vehicle_id)
++        REFERENCES fom.vehicles(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT documents_holder_fk FOREIGN KEY (tenant_id, holder_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT documents_creator_fk FOREIGN KEY (tenant_id, created_by_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT documents_tenant_id_unique UNIQUE (tenant_id, id),
++      CONSTRAINT documents_scope_check CHECK (
++        scope IN ('vehiculo', 'persona')
++      ),
++      -- El ámbito y el titular son coherentes en las DOS direcciones: un
++      -- documento de vehículo no admite titular persona, ni al revés.
++      CONSTRAINT documents_holder_coherence_check CHECK (
++        (scope = 'vehiculo' AND vehicle_id IS NOT NULL AND holder_user_id IS NULL)
++        OR
++        (scope = 'persona' AND holder_user_id IS NOT NULL AND vehicle_id IS NULL)
++      ),
++      CONSTRAINT documents_type_check CHECK (
++        document_type ~ '^[a-z][a-z0-9_]{1,59}$'
++      ),
++      CONSTRAINT documents_number_check CHECK (
++        document_number IS NULL
++        OR (document_number = btrim(document_number) AND document_number <> '')
++      ),
++      CONSTRAINT documents_status_check CHECK (status IN ('active', 'archived')),
++      CONSTRAINT documents_archive_check CHECK (
++        (status = 'archived') = (archived_at IS NOT NULL)
++      ),
++      CONSTRAINT documents_validity_check CHECK (
++        issued_on IS NULL OR expires_on >= issued_on
++      ),
++      CONSTRAINT documents_notes_check CHECK (
++        notes IS NULL OR (notes = btrim(notes) AND notes <> '')
++      ),
++      CONSTRAINT documents_timestamps_check CHECK (
++        updated_at >= created_at
++        AND (archived_at IS NULL OR archived_at >= created_at)
++      )
++    );
++
++    CREATE INDEX documents_tenant_type_idx
++      ON fom.documents (tenant_id, document_type, expires_on);
++    -- La consulta caliente del módulo: qué vence en los próximos 30 días.
++    CREATE INDEX documents_tenant_expiry_idx
++      ON fom.documents (tenant_id, expires_on) WHERE status = 'active';
++    -- El barrido diario recorre todos los tenants.
++    CREATE INDEX documents_expiry_sweep_idx
++      ON fom.documents (expires_on) WHERE status = 'active';
++    CREATE INDEX documents_vehicle_idx
++      ON fom.documents (tenant_id, vehicle_id, expires_on)
++      WHERE vehicle_id IS NOT NULL;
++    CREATE INDEX documents_holder_idx
++      ON fom.documents (tenant_id, holder_user_id, expires_on)
++      WHERE holder_user_id IS NOT NULL;
++    CREATE INDEX documents_creator_idx
++      ON fom.documents (tenant_id, created_by_user_id);
++
++    CREATE TABLE fom.document_files (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      document_id uuid NOT NULL,
++      storage_key varchar(500) NOT NULL,
++      content_type varchar(120) NOT NULL,
++      byte_size integer NOT NULL,
++      checksum_sha256 varchar(64) NOT NULL,
++      uploaded_by_user_id uuid NOT NULL,
++      uploaded_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      removed_at timestamptz,
++
++      CONSTRAINT document_files_document_fk
++        FOREIGN KEY (tenant_id, document_id)
++        REFERENCES fom.documents(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT document_files_uploader_fk
++        FOREIGN KEY (tenant_id, uploaded_by_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT document_files_storage_key_check CHECK (
++        storage_key = btrim(storage_key)
++        AND storage_key <> ''
++        AND storage_key NOT LIKE '/%'
++      ),
++      CONSTRAINT document_files_content_type_check CHECK (
++        content_type IN (
++          'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'application/pdf'
++        )
++      ),
++      CONSTRAINT document_files_byte_size_check CHECK (
++        byte_size BETWEEN 1 AND 26214400
++      ),
++      CONSTRAINT document_files_checksum_check CHECK (
++        checksum_sha256 ~ '^[0-9a-f]{64}$'
++      ),
++      CONSTRAINT document_files_removal_check CHECK (
++        removed_at IS NULL OR removed_at >= uploaded_at
++      )
++    );
++
++    CREATE INDEX document_files_document_idx
++      ON fom.document_files (tenant_id, document_id, uploaded_at);
++    CREATE INDEX document_files_uploader_idx
++      ON fom.document_files (tenant_id, uploaded_by_user_id);
++    CREATE UNIQUE INDEX document_files_content_unique_idx
++      ON fom.document_files (tenant_id, document_id, checksum_sha256)
++      WHERE removed_at IS NULL;
++
++    -- ═══════════════════════ REGLAS DE ALERTA ═══════════════════════
++
++    CREATE TABLE fom.alert_rules (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      rule_type varchar(20) NOT NULL,
++      threshold_kph smallint,
++      threshold_km integer,
++      service_name varchar(120),
++      is_active boolean NOT NULL DEFAULT true,
++      created_by_user_id uuid NOT NULL,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT alert_rules_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT alert_rules_creator_fk
++        FOREIGN KEY (tenant_id, created_by_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT alert_rules_tenant_id_unique UNIQUE (tenant_id, id),
++      -- Sostiene la clave foránea de tres columnas de alert_rule_vehicles,
++      -- que impide que una asignación mienta sobre el tipo de su regla.
++      CONSTRAINT alert_rules_tenant_id_type_unique UNIQUE (tenant_id, id, rule_type),
++      CONSTRAINT alert_rules_type_check CHECK (
++        rule_type IN ('velocidad', 'mantenimiento')
++      ),
++      -- El umbral lleva su unidad en el nombre y solo existe el de su tipo.
++      CONSTRAINT alert_rules_threshold_check CHECK (
++        (
++          rule_type = 'velocidad'
++          AND threshold_kph IS NOT NULL
++          AND threshold_kph BETWEEN 1 AND 300
++          AND threshold_km IS NULL
++          AND service_name IS NULL
++        )
++        OR
++        (
++          rule_type = 'mantenimiento'
++          AND threshold_km IS NOT NULL
++          AND threshold_km BETWEEN 1 AND 1000000
++          AND threshold_kph IS NULL
++          AND service_name IS NOT NULL
++        )
++      ),
++      CONSTRAINT alert_rules_service_name_check CHECK (
++        service_name IS NULL
++        OR (service_name = btrim(service_name) AND service_name <> '')
++      ),
++      CONSTRAINT alert_rules_timestamps_check CHECK (updated_at >= created_at)
++    );
++
++    CREATE INDEX alert_rules_tenant_type_idx
++      ON fom.alert_rules (tenant_id, rule_type, is_active);
++    CREATE INDEX alert_rules_creator_idx
++      ON fom.alert_rules (tenant_id, created_by_user_id);
++
++    -- La clave foránea que el dominio de operación dejó pendiente porque esta
++    -- tabla no existía todavía.
++    ALTER TABLE fom.work_orders
++      ADD CONSTRAINT work_orders_alert_rule_fk
++        FOREIGN KEY (tenant_id, alert_rule_id)
++        REFERENCES fom.alert_rules(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT;
++
++    CREATE TABLE fom.alert_rule_vehicles (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      alert_rule_id uuid NOT NULL,
++      rule_type varchar(20) NOT NULL,
++      vehicle_id uuid NOT NULL,
++      progress_km numeric(12,2) NOT NULL DEFAULT 0,
++      last_progress_at timestamptz,
++      last_reset_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      last_reset_work_order_id uuid,
++      unassigned_at timestamptz,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT alert_rule_vehicles_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT alert_rule_vehicles_rule_fk
++        FOREIGN KEY (tenant_id, alert_rule_id, rule_type)
++        REFERENCES fom.alert_rules(tenant_id, id, rule_type)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT alert_rule_vehicles_vehicle_fk
++        FOREIGN KEY (tenant_id, vehicle_id)
++        REFERENCES fom.vehicles(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT alert_rule_vehicles_reset_work_order_fk
++        FOREIGN KEY (tenant_id, last_reset_work_order_id)
++        REFERENCES fom.work_orders(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT alert_rule_vehicles_type_check CHECK (
++        rule_type IN ('velocidad', 'mantenimiento')
++      ),
++      CONSTRAINT alert_rule_vehicles_progress_check CHECK (
++        progress_km >= 0
++        AND (rule_type = 'mantenimiento' OR progress_km = 0)
++      ),
++      CONSTRAINT alert_rule_vehicles_timestamps_check CHECK (
++        updated_at >= created_at
++        AND last_reset_at >= created_at
++        AND (last_progress_at IS NULL OR last_progress_at >= created_at)
++        AND (unassigned_at IS NULL OR unassigned_at >= created_at)
++      )
++    );
++
++    CREATE UNIQUE INDEX alert_rule_vehicles_active_unique_idx
++      ON fom.alert_rule_vehicles (tenant_id, alert_rule_id, vehicle_id)
++      WHERE unassigned_at IS NULL;
++    CREATE INDEX alert_rule_vehicles_rule_idx
++      ON fom.alert_rule_vehicles (tenant_id, alert_rule_id, rule_type);
++    -- El evaluador de posiciones entra siempre por vehículo.
++    CREATE INDEX alert_rule_vehicles_vehicle_idx
++      ON fom.alert_rule_vehicles (tenant_id, vehicle_id);
++    CREATE INDEX alert_rule_vehicles_reset_work_order_idx
++      ON fom.alert_rule_vehicles (tenant_id, last_reset_work_order_id)
++      WHERE last_reset_work_order_id IS NOT NULL;
++
++    -- ═══════════════════════ NOTIFICACIONES ═══════════════════════
++
++    CREATE TABLE fom.notifications (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      notification_type varchar(30) NOT NULL DEFAULT 'otro',
++      title varchar(200) NOT NULL,
++      detail varchar(1000) NOT NULL DEFAULT '',
++      work_order_id uuid,
++      dedupe_key varchar(200),
++      read_at timestamptz,
++      created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT notifications_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT notifications_work_order_fk
++        FOREIGN KEY (tenant_id, work_order_id)
++        REFERENCES fom.work_orders(tenant_id, id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT notifications_type_check CHECK (
++        notification_type IN (
++          'odt_nueva', 'alerta_cumplida', 'documento_por_vencer', 'otro'
++        )
++      ),
++      CONSTRAINT notifications_title_check CHECK (
++        title = btrim(title) AND title <> ''
++      ),
++      CONSTRAINT notifications_detail_check CHECK (detail = btrim(detail)),
++      CONSTRAINT notifications_dedupe_key_check CHECK (
++        dedupe_key IS NULL OR dedupe_key ~ '^[a-z0-9][a-z0-9:._-]{2,199}$'
++      ),
++      CONSTRAINT notifications_read_check CHECK (
++        read_at IS NULL OR read_at >= created_at
++      )
++    );
++
++    -- La consulta de cada carga de pantalla. El índice parcial solo contiene
++    -- lo pendiente, no el histórico: su tamaño no crece con la tabla.
++    CREATE INDEX notifications_tenant_unread_idx
++      ON fom.notifications (tenant_id, created_at DESC) WHERE read_at IS NULL;
++    CREATE INDEX notifications_tenant_created_idx
++      ON fom.notifications (tenant_id, created_at DESC);
++    CREATE INDEX notifications_work_order_idx
++      ON fom.notifications (tenant_id, work_order_id)
++      WHERE work_order_id IS NOT NULL;
++    -- El productor es un consumidor de RabbitMQ con entrega al-menos-una-vez.
++    CREATE UNIQUE INDEX notifications_dedupe_unique_idx
++      ON fom.notifications (tenant_id, dedupe_key) WHERE dedupe_key IS NOT NULL;
++
++    -- ═════════════════════════ AUDITORÍA ═════════════════════════
++
++    CREATE TABLE fom.audit_log (
++      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++      tenant_id uuid NOT NULL,
++      actor_kind varchar(20) NOT NULL,
++      actor_user_id uuid,
++      actor_service_name varchar(80),
++      actor_db_role varchar(63) NOT NULL,
++      actor_client_addr inet,
++      action varchar(80) NOT NULL,
++      entity_type varchar(60) NOT NULL,
++      entity_id uuid NOT NULL,
++      changes jsonb NOT NULL DEFAULT '{}'::jsonb,
++      request_id varchar(64),
++      occurred_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++
++      CONSTRAINT audit_log_tenant_fk FOREIGN KEY (tenant_id)
++        REFERENCES fom.tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT audit_log_actor_fk FOREIGN KEY (tenant_id, actor_user_id)
++        REFERENCES fom.tenant_memberships(tenant_id, user_id)
++        ON UPDATE RESTRICT ON DELETE RESTRICT,
++      CONSTRAINT audit_log_actor_kind_check CHECK (
++        actor_kind IN ('user', 'service', 'system')
++      ),
++      CONSTRAINT audit_log_actor_identity_check CHECK (
++        (actor_kind = 'user' AND actor_user_id IS NOT NULL AND actor_service_name IS NULL)
++        OR (actor_kind = 'service' AND actor_user_id IS NULL AND actor_service_name IS NOT NULL)
++        OR (actor_kind = 'system' AND actor_user_id IS NULL AND actor_service_name IS NULL)
++      ),
++      CONSTRAINT audit_log_actor_service_name_check CHECK (
++        actor_service_name IS NULL
++        OR actor_service_name ~ '^[a-z][a-z0-9._-]{1,79}$'
++      ),
++      CONSTRAINT audit_log_actor_db_role_check CHECK (actor_db_role <> ''),
++      CONSTRAINT audit_log_action_check CHECK (
++        action ~ '^[a-z][a-z0-9_]{1,39}[.][a-z][a-z0-9_]{1,38}$'
++      ),
++      CONSTRAINT audit_log_entity_type_check CHECK (
++        entity_type ~ '^[a-z][a-z0-9_]{1,59}$'
++      ),
++      CONSTRAINT audit_log_changes_type_check CHECK (
++        jsonb_typeof(changes) = 'object'
++        AND char_length(changes::text) <= 65536
++      ),
++      CONSTRAINT audit_log_changes_shape_check CHECK (
++        changes = '{}'::jsonb
++        OR (
++          (NOT changes ? 'before' OR jsonb_typeof(changes -> 'before') = 'object')
++          AND (NOT changes ? 'after' OR jsonb_typeof(changes -> 'after') = 'object')
++        )
++      ),
++      CONSTRAINT audit_log_request_id_check CHECK (
++        request_id IS NULL OR (request_id = btrim(request_id) AND request_id <> '')
++      )
++    );
++
++    CREATE INDEX audit_log_tenant_time_idx
++      ON fom.audit_log (tenant_id, occurred_at DESC);
++    CREATE INDEX audit_log_entity_idx
++      ON fom.audit_log (tenant_id, entity_type, entity_id, occurred_at DESC);
++    CREATE INDEX audit_log_actor_idx
++      ON fom.audit_log (tenant_id, actor_user_id, occurred_at DESC)
++      WHERE actor_user_id IS NOT NULL;
++
++    -- ══════════════════════════ TRIGGERS ══════════════════════════
++
++    CREATE TRIGGER documents_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.documents
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_document_record();
++
++    CREATE TRIGGER document_files_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.document_files
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_document_file_record();
++
++    CREATE TRIGGER alert_rules_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.alert_rules
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_alert_rule_record();
++
++    CREATE TRIGGER alert_rule_vehicles_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.alert_rule_vehicles
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_alert_rule_vehicle_record();
++
++    CREATE TRIGGER notifications_maintain_record
++      BEFORE INSERT OR UPDATE ON fom.notifications
++      FOR EACH ROW EXECUTE FUNCTION fom.maintain_notification_record();
++
++    CREATE TRIGGER audit_log_capture_entry
++      BEFORE INSERT ON fom.audit_log
++      FOR EACH ROW EXECUTE FUNCTION fom.capture_audit_log_entry();
++
++    CREATE TRIGGER audit_log_reject_mutation
++      BEFORE UPDATE OR DELETE ON fom.audit_log
++      FOR EACH ROW EXECUTE FUNCTION fom.reject_audit_log_mutation();
++
++    -- TRUNCATE no dispara triggers de fila: hace falta el de sentencia, o
++    -- sería la vía obvia para borrar el rastro entero.
++    CREATE TRIGGER audit_log_reject_truncate
++      BEFORE TRUNCATE ON fom.audit_log
++      FOR EACH STATEMENT EXECUTE FUNCTION fom.reject_audit_log_truncate();
++
++    -- Cerrar una ODT preventiva reinicia el contador de kilómetros.
++    CREATE TRIGGER work_orders_reset_alert_rule_progress
++      AFTER UPDATE OF status ON fom.work_orders
++      FOR EACH ROW
++      WHEN (
++        NEW.status = 'cerrada'
++        AND OLD.status <> 'cerrada'
++        AND NEW.kind = 'preventiva'
++        AND NEW.alert_rule_id IS NOT NULL
++      )
++      EXECUTE FUNCTION fom.reset_alert_rule_progress_on_work_order_close();
++
++    -- ═════════════════════════ PERMISOS ═════════════════════════
++
++    REVOKE ALL ON TABLE
++      fom.documents, fom.document_files, fom.alert_rules,
++      fom.alert_rule_vehicles, fom.notifications, fom.audit_log
++      FROM PUBLIC;
++    REVOKE ALL ON FUNCTION
++      fom.maintain_document_record(),
++      fom.maintain_document_file_record(),
++      fom.maintain_alert_rule_record(),
++      fom.maintain_alert_rule_vehicle_record(),
++      fom.maintain_notification_record(),
++      fom.capture_audit_log_entry(),
++      fom.reject_audit_log_mutation(),
++      fom.reject_audit_log_truncate(),
++      fom.reset_alert_rule_progress_on_work_order_close()
++      FROM PUBLIC;
++
++    GRANT SELECT (
++        id, tenant_id, scope, vehicle_id, holder_user_id, document_type,
++        document_number, issued_on, expires_on, status, notes,
++        created_by_user_id, created_at, updated_at, archived_at
++      ),
++      INSERT (
++        tenant_id, scope, vehicle_id, holder_user_id, document_type,
++        document_number, issued_on, expires_on, notes, created_by_user_id
++      ),
++      UPDATE (document_number, issued_on, expires_on, status, notes, archived_at)
++      ON fom.documents TO fom_app;
++
++    GRANT SELECT (
++        id, tenant_id, document_id, storage_key, content_type, byte_size,
++        checksum_sha256, uploaded_by_user_id, uploaded_at, removed_at
++      ),
++      INSERT (
++        tenant_id, document_id, storage_key, content_type, byte_size,
++        checksum_sha256, uploaded_by_user_id
++      ),
++      UPDATE (removed_at)
++      ON fom.document_files TO fom_app;
++
++    GRANT SELECT (
++        id, tenant_id, rule_type, threshold_kph, threshold_km, service_name,
++        is_active, created_by_user_id, created_at, updated_at
++      ),
++      INSERT (
++        tenant_id, rule_type, threshold_kph, threshold_km, service_name,
++        is_active, created_by_user_id
++      ),
++      UPDATE (threshold_kph, threshold_km, service_name, is_active)
++      ON fom.alert_rules TO fom_app;
++
++    GRANT SELECT (
++        id, tenant_id, alert_rule_id, rule_type, vehicle_id, progress_km,
++        last_progress_at, last_reset_at, last_reset_work_order_id,
++        unassigned_at, created_at, updated_at
++      ),
++      INSERT (tenant_id, alert_rule_id, rule_type, vehicle_id),
++      UPDATE (progress_km, last_reset_at, last_reset_work_order_id, unassigned_at)
++      ON fom.alert_rule_vehicles TO fom_app;
++
++    GRANT SELECT (
++        id, tenant_id, notification_type, title, detail, work_order_id,
++        dedupe_key, read_at, created_at
++      ),
++      INSERT (
++        tenant_id, notification_type, title, detail, work_order_id, dedupe_key
++      ),
++      UPDATE (read_at)
++      ON fom.notifications TO fom_app;
++
++    -- Auditoría: solo INSERT y SELECT, y el INSERT no alcanza a las columnas
++    -- que captura el servidor. Sin UPDATE, sin DELETE, sin TRUNCATE.
++    GRANT SELECT (
++        id, tenant_id, actor_kind, actor_user_id, actor_service_name,
++        actor_db_role, actor_client_addr, action, entity_type, entity_id,
++        changes, request_id, occurred_at
++      ),
++      INSERT (
++        tenant_id, actor_kind, actor_user_id, actor_service_name,
++        action, entity_type, entity_id, changes, request_id
++      )
++      ON fom.audit_log TO fom_app;
++
++    -- ═══════════════════════ COMENTARIOS ═══════════════════════
++
++    COMMENT ON TABLE fom.documents IS
++      'Tenant-owned expiring documents scoped to either a vehicle or a person';
++    COMMENT ON COLUMN fom.documents.scope IS
++      'Discriminator kept coherent with the holder columns by a two-way CHECK';
++    COMMENT ON COLUMN fom.documents.expires_on IS
++      'Calendar expiry date, deliberately a date and not a timestamptz: an expiry is a calendar fact and a timestamp would shift the 30-day window with the timezone';
++    COMMENT ON TABLE fom.document_files IS
++      'Immutable attachment metadata for a document; removal is a soft flag';
++    COMMENT ON TABLE fom.alert_rules IS
++      'Tenant alert rules: speed threshold in km/h or service interval in km';
++    COMMENT ON COLUMN fom.alert_rules.rule_type IS
++      'Immutable rule type mirrored into alert_rule_vehicles through a composite foreign key';
++    COMMENT ON COLUMN fom.alert_rule_vehicles.progress_km IS
++      'Derived from telemetry; monotonic except on reset by a closed preventive work order';
++    COMMENT ON TABLE fom.notifications IS
++      'Tenant console inbox produced by message consumers, not by database triggers';
++    COMMENT ON COLUMN fom.notifications.dedupe_key IS
++      'Idempotency key for at-least-once delivery from the message broker';
++    COMMENT ON TABLE fom.audit_log IS
++      'Append-only record of administrative mutations; enforced by triggers and privileges';
++    COMMENT ON COLUMN fom.audit_log.actor_db_role IS
++      'Captured server-side from current_user; never accepted from the client';
++    COMMENT ON COLUMN fom.audit_log.occurred_at IS
++      'Captured server-side from clock_timestamp(); never accepted from the client';
++  `);
++};
++
++export const down = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    REVOKE SELECT, INSERT ON fom.audit_log FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.notifications FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.alert_rule_vehicles FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.alert_rules FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.document_files FROM fom_app;
++    REVOKE SELECT, INSERT, UPDATE ON fom.documents FROM fom_app;
++
++    DROP TRIGGER work_orders_reset_alert_rule_progress ON fom.work_orders;
++
++    DO $guard$ BEGIN
++      IF EXISTS (SELECT 1 FROM fom.audit_log LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.notifications LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.alert_rule_vehicles LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.alert_rules LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.document_files LIMIT 1)
++        OR EXISTS (SELECT 1 FROM fom.documents LIMIT 1) THEN
++        RAISE EXCEPTION
++          'cannot roll back compliance, alerting and audit while data exists';
++      END IF;
++    END $guard$;
++
++    ALTER TABLE fom.work_orders DROP CONSTRAINT work_orders_alert_rule_fk;
++
++    DROP TABLE fom.audit_log;
++    DROP TABLE fom.notifications;
++    DROP TABLE fom.alert_rule_vehicles;
++    DROP TABLE fom.alert_rules;
++    DROP TABLE fom.document_files;
++    DROP TABLE fom.documents;
++
++    DROP FUNCTION fom.reset_alert_rule_progress_on_work_order_close();
++    DROP FUNCTION fom.reject_audit_log_truncate();
++    DROP FUNCTION fom.reject_audit_log_mutation();
++    DROP FUNCTION fom.capture_audit_log_entry();
++    DROP FUNCTION fom.maintain_notification_record();
++    DROP FUNCTION fom.maintain_alert_rule_vehicle_record();
++    DROP FUNCTION fom.maintain_alert_rule_record();
++    DROP FUNCTION fom.maintain_document_file_record();
++    DROP FUNCTION fom.maintain_document_record();
++  `);
++};
+-- 
+2.55.0.windows.3
+
+
+From 067afcda5d6dc8cc98c9d656029dd7341fa6b4cb Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 11:58:34 -0400
+Subject: [PATCH 2/5] Validar tambien las reversiones de dominio en el CI de la
+ consola
+
+gps-console-ci.yml encadena reversiones con la misma suposicion que
+ci.yml: que arriba de la pila esta la migracion que el paso espera. Se
+arreglo un workflow y no el otro, y el primer down se llevaba una
+migracion de dominio en lugar de las vistas del observador.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ .github/workflows/gps-console-ci.yml | 60 ++++++++++++++++++++++++++++
+ 1 file changed, 60 insertions(+)
+
+diff --git a/.github/workflows/gps-console-ci.yml b/.github/workflows/gps-console-ci.yml
+index 6d2e1df..907d5b9 100644
+--- a/.github/workflows/gps-console-ci.yml
++++ b/.github/workflows/gps-console-ci.yml
+@@ -139,6 +139,66 @@ jobs:
+             'CI Bay','gps-metadata-ci'
+           FROM device CROSS JOIN vehicle;
+           SQL
++      # Este workflow encadena reversiones igual que ci.yml, contando desde la
++      # ultima migracion aplicada. Toda migracion nueva necesita su paso aqui
++      # arriba, o el primer `down` revierte la nueva y falla la comprobacion
++      # siguiente sin que haya nada roto que senalar.
++      - name: Roll back compliance and audit domain
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818120000000_create_compliance_and_audit_domain'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.documents') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.document_files') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.alert_rules') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.alert_rule_vehicles') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.notifications') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.audit_log') IS NOT NULL")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818120000000_create_compliance_and_audit_domain'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.documents') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.document_files') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.alert_rules') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.alert_rule_vehicles') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.notifications') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.audit_log') IS NOT NULL")" = "f"
++      - name: Roll back operations domain
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818110000000_create_operations_domain'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.work_orders') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.work_order_events') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_templates') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_template_items') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspections') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_answers') IS NOT NULL")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818110000000_create_operations_domain'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.work_orders') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.work_order_events') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_templates') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_template_items') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspections') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.inspection_answers') IS NOT NULL")" = "f"
++      - name: Roll back fleet domain
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818100000000_create_fleet_domain'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.areas') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.vehicle_driver_assignments') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.vehicle_live_state') IS NOT NULL")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818100000000_create_fleet_domain'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.areas') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.vehicle_driver_assignments') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.vehicle_live_state') IS NOT NULL")" = "f"
++      - name: Roll back identity and organization
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818090000000_create_identity_and_organization'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.tenant_relationships') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_profiles') IS NOT NULL")" = "t"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_credentials') IS NOT NULL")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818090000000_create_identity_and_organization'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.tenant_relationships') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_profiles') IS NOT NULL")" = "f"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_credentials') IS NOT NULL")" = "f"
+       - name: Roll back database observer views
+         run: |
+           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260816193000000_create_database_observer_views'")" = "1"
+-- 
+2.55.0.windows.3
+
+
+From 9b81133caf5779b2a1227aadcaafdb5a5574a55d Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 12:17:58 -0400
+Subject: [PATCH 3/5] Corregir una condicion IF partida por el THEN de un CASE
+
+`maintain_vehicle_driver_assignment_record` decidia si sellar
+`pin_set_at` con una condicion que incluia un CASE:
+
+    IF NEW.pin_hash IS NOT NULL AND NEW.pin_hash IS DISTINCT FROM
+       CASE WHEN TG_OP = 'UPDATE' THEN OLD.pin_hash ELSE NULL END THEN
+
+PL/pgSQL lee la condicion de un IF hasta el primer THEN que encuentra
+fuera de parentesis, y el THEN del CASE llega antes. La condicion queda
+cortada a media expresion y PostgreSQL responde `syntax error at end of
+input`, un mensaje que no menciona ni el CASE ni el IF y que cuesta
+relacionar con la causa.
+
+Se reescribe sin CASE. La forma explicita dice lo mismo y ademas se lee
+mejor: en un alta cualquier PIN es nuevo, y en una actualizacion solo
+cuenta si cambia respecto al anterior.
+
+Verificado contra un PostgreSQL 17 real ejecutando las veintitres
+migraciones en orden: las veinte anteriores mas las cuatro de dominio
+aplican sin error, y revertir las cuatro devuelve el esquema al mismo
+numero de tablas que habia antes. Ninguna migracion de este repositorio
+usa PostGIS ni TimescaleDB, de modo que la unica diferencia con el motor
+del CI son extensiones que estas migraciones no tocan.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ .../files/20260818100000000_create_fleet_domain.ts   | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/src/database/migrations/files/20260818100000000_create_fleet_domain.ts b/src/database/migrations/files/20260818100000000_create_fleet_domain.ts
+index 3e819da..ce9f499 100644
+--- a/src/database/migrations/files/20260818100000000_create_fleet_domain.ts
++++ b/src/database/migrations/files/20260818100000000_create_fleet_domain.ts
+@@ -80,8 +80,16 @@ export const up = (pgm: MigrationBuilder): void => {
+           USING ERRCODE = '23514';
+       END IF;
+ 
+-      IF NEW.pin_hash IS NOT NULL AND NEW.pin_hash IS DISTINCT FROM
+-         CASE WHEN TG_OP = 'UPDATE' THEN OLD.pin_hash ELSE NULL END THEN
++      -- Sin CASE aqui dentro: PL/pgSQL corta la condicion de un IF en el
++      -- primer THEN que encuentra, y el THEN del CASE se lo comia, dejando
++      -- media expresion. La forma equivalente es explicita y no tiene trampa:
++      -- en un alta cualquier PIN es nuevo, y en una actualizacion solo cuenta
++      -- si cambia respecto al anterior.
++      IF NEW.pin_hash IS NOT NULL
++        AND (
++          TG_OP <> 'UPDATE'
++          OR NEW.pin_hash IS DISTINCT FROM OLD.pin_hash
++        ) THEN
+         NEW.pin_set_at = clock_timestamp();
+       END IF;
+ 
+-- 
+2.55.0.windows.3
+
+
+From a921b051ca8c9e0b5357311a66203a95483c9c63 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 12:26:22 -0400
+Subject: [PATCH 4/5] Conservar el DEFAULT de tenants.category
+
+La migracion anadia `category` como NOT NULL con DEFAULT, rellenaba el
+parque existente y acto seguido quitaba el DEFAULT. La intencion era
+obligar a que cada alta declarase la clasificacion; el efecto real es que
+toda sentencia que hoy inserta un tenant sin nombrar la columna deja de
+funcionar.
+
+El CI lo demostro sin ambiguedad: `test/gps-canonical-runtime.sql` inserta
+dos tenants con las columnas que existian antes de este PR y fallo con
+`null value in column "category" violates not-null constraint`. No es un
+fixture desactualizado, es el aviso de que una migracion aditiva estaba
+rompiendo a quien ya escribia.
+
+Se conserva el DEFAULT. 'contratista' es ademas la clasificacion
+conservadora y la misma que recibe el parque existente en el backfill,
+de modo que el valor implicito coincide con el explicito. Exigir que se
+declare es asunto del contrato de la aplicacion, no de un cambio de
+esquema que rompe en silencio.
+
+Verificado en local sobre PostgreSQL 17: las veintitres migraciones
+aplican y el INSERT que fallaba en CI ahora pasa.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ .../20260818090000000_create_identity_and_organization.ts | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts b/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
+index f171aca..9329b08 100644
+--- a/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
++++ b/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
+@@ -43,7 +43,13 @@ export const up = (pgm: MigrationBuilder): void => {
+ 
+     UPDATE fom.tenants SET category = 'personal' WHERE kind = 'individual';
+ 
+-    ALTER TABLE fom.tenants ALTER COLUMN category DROP DEFAULT;
++    -- El DEFAULT se queda. Quitarlo obligaria a nombrar `category` en cada
++    -- alta, y toda sentencia que hoy inserta un tenant sin mencionarla dejaria
++    -- de funcionar: una migracion aditiva no puede romper a los que ya
++    -- escriben. 'contratista' es ademas la clasificacion conservadora, la
++    -- misma que recibe el parque existente en el backfill de arriba. Exigir
++    -- que se declare explicitamente es asunto del contrato de la aplicacion,
++    -- no de un cambio de esquema que rompe en silencio.
+ 
+     ALTER TABLE fom.tenants
+       ADD CONSTRAINT tenants_category_check CHECK (
+-- 
+2.55.0.windows.3
+
+
+From e73a1089dbf798e9248a830a430e8c7f3a54b4a2 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 12:30:36 -0400
+Subject: [PATCH 5/5] Quitar las comillas invertidas del comentario anadido
+
+Un comentario SQL con comillas invertidas cierra la plantilla de
+TypeScript en la que vive la migracion. Es el mismo fallo que corrigio
+esta rama unos commits atras, cometido otra vez al redactar la
+explicacion del DEFAULT.
+
+El typecheck lo detecta en segundos; se me paso ejecutarlo antes de
+subir porque la comprobacion contra PostgreSQL, que si corri, extrae el
+SQL con una expresion regular y no repara en la sintaxis de TypeScript.
+Las dos comprobaciones miran cosas distintas y hacen falta las dos.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ .../files/20260818090000000_create_identity_and_organization.ts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts b/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
+index 9329b08..99e96b6 100644
+--- a/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
++++ b/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
+@@ -43,7 +43,7 @@ export const up = (pgm: MigrationBuilder): void => {
+ 
+     UPDATE fom.tenants SET category = 'personal' WHERE kind = 'individual';
+ 
+-    -- El DEFAULT se queda. Quitarlo obligaria a nombrar `category` en cada
++    -- El DEFAULT se queda. Quitarlo obligaria a nombrar category en cada
+     -- alta, y toda sentencia que hoy inserta un tenant sin mencionarla dejaria
+     -- de funcionar: una migracion aditiva no puede romper a los que ya
+     -- escriben. 'contratista' es ademas la clasificacion conservadora, la
+-- 
+2.55.0.windows.3
+

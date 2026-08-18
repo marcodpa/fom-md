@@ -43,7 +43,13 @@ export const up = (pgm: MigrationBuilder): void => {
 
     UPDATE fom.tenants SET category = 'personal' WHERE kind = 'individual';
 
-    ALTER TABLE fom.tenants ALTER COLUMN category DROP DEFAULT;
+    -- El DEFAULT se queda. Quitarlo obligaria a nombrar category en cada
+    -- alta, y toda sentencia que hoy inserta un tenant sin mencionarla dejaria
+    -- de funcionar: una migracion aditiva no puede romper a los que ya
+    -- escriben. 'contratista' es ademas la clasificacion conservadora, la
+    -- misma que recibe el parque existente en el backfill de arriba. Exigir
+    -- que se declare explicitamente es asunto del contrato de la aplicacion,
+    -- no de un cambio de esquema que rompe en silencio.
 
     ALTER TABLE fom.tenants
       ADD CONSTRAINT tenants_category_check CHECK (
@@ -508,7 +514,7 @@ export const up = (pgm: MigrationBuilder): void => {
 
     -- tenants: alta y contacto. Nunca code ni kind, que son derivados o
     -- inmutables. category solo en el alta.
-    -- `category` también en UPDATE: el backfill deja a TODA organización
+    -- category también en UPDATE: el backfill deja a TODA organización
     -- existente como 'contratista', y sin permiso de actualización ningún
     -- ente podría promoverse a 'compania' desde la aplicación. La relación
     -- compañía↔contratista quedaría inalcanzable sobre los datos actuales
