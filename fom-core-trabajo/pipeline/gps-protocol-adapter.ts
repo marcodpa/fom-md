@@ -63,7 +63,13 @@ export type ObservedFrameTelemetry = {
   readonly speed: {
     readonly raw: string;
     readonly value: number;
-    readonly wireUnit: 'knot' | 'kph';
+    /**
+     * `'undetermined'` no es un caso degenerado: es la respuesta honesta
+     * mientras nadie haya demostrado la unidad. Publicar `'knot'` por
+     * conservar el tipo simple afirmaria como observado algo que no lo esta, y
+     * cualquier consumidor del resultado decodificado se lo creeria.
+     */
+    readonly wireUnit: 'knot' | 'kph' | 'undetermined';
   } | null;
   readonly heading: {
     readonly raw: string;

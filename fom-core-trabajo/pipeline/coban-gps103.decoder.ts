@@ -213,10 +213,10 @@ function parseTelemetry(
     speed = {
       raw: speedField,
       value,
-      // La unidad se decide en un solo sitio. Mientras este indeterminada se
-      // marca como nudos para conservar el tipo, y la persistencia se niega a
-      // escribir el valor; ver COBAN_SPEED_WIRE_UNIT.
-      wireUnit: COBAN_SPEED_WIRE_UNIT === 'kph' ? 'kph' : 'knot',
+      // Se publica la constante literal. Traducirla a 'knot' mientras esta
+      // indeterminada convertiria una incognita en una afirmacion, y quien
+      // leyera el resultado decodificado no tendria forma de notarlo.
+      wireUnit: COBAN_SPEED_WIRE_UNIT,
     };
   }
 

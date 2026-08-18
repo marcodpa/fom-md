@@ -1,4 +1,3 @@
-import { COBAN_SPEED_WIRE_UNIT } from '../gps-ingress/adapters/coban-gps103.decoder';
 import type { ObservedFrameTelemetry } from '../gps-ingress/gps-protocol-adapter';
 import type { CanonicalTelemetry } from './gps-canonical.types';
 
@@ -34,18 +33,19 @@ function redondear(valor: number): number {
 export function toCanonicalTelemetry(
   observed: ObservedFrameTelemetry,
 ): CanonicalTelemetry {
+  // La unidad viaja pegada al valor, asi que la conversion depende solo de
+  // ella y no de leer otra vez la constante global. Con la unidad todavia
+  // indeterminada no se escribe nada: el valor no se pierde, porque la trama
+  // esta preservada integra y basta con subir la version del decodificador y
+  // reprocesar cuando quede demostrada. Guardar un numero plausible y
+  // equivocado si seria irreversible, porque nadie volveria a revisarlo.
   let speedKph: number | null = null;
   if (observed.speed !== null) {
     if (observed.speed.wireUnit === 'kph') {
       speedKph = redondear(observed.speed.value);
-    } else if (COBAN_SPEED_WIRE_UNIT === 'knot') {
+    } else if (observed.speed.wireUnit === 'knot') {
       speedKph = redondear(observed.speed.value * KNOT_TO_KPH);
     }
-    // Con la unidad todavia indeterminada no se escribe nada. El valor no se
-    // pierde: la trama esta preservada integra y basta con subir la version del
-    // decodificador y reprocesar cuando la unidad quede demostrada. Guardar un
-    // numero plausible y equivocado si seria irreversible, porque nadie
-    // volveria a revisarlo.
   }
 
   return {

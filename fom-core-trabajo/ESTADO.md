@@ -5,32 +5,60 @@ vive en **otro repositorio** (`juancpachecog/fom-core`). Está aquí para poder
 continuar desde cualquier computadora sin depender de tener aquel repositorio
 clonado ni de recordar en qué rama quedó cada cosa.
 
-Última actualización: 18 de agosto de 2026.
+Última actualización: 18 de agosto de 2026, tras el despliegue en FOM-TEST.
 
 ---
 
 ## Dónde está cada cosa hoy
 
-| PR | Qué es | Rama | CI | Estado |
-|---|---|---|---|---|
-| [#165](https://github.com/juancpachecog/fom-core/pull/165) | Telemetría: velocidad y rumbo (Issue #159) | `feat/159-telemetria-canonica-aditiva` | verde | abierto, sin integrar |
-| [#166](https://github.com/juancpachecog/fom-core/pull/166) | Esquema de dominio: 18 tablas | `feat/esquema-dominio-fom02` | verde | abierto, sin integrar |
+| | Qué es | Estado |
+|---|---|---|
+| [PR #165](https://github.com/juancpachecog/fom-core/pull/165) | Telemetría: velocidad y rumbo (Issue #159) | **Integrado y desplegado en FOM-TEST** |
+| [PR #166](https://github.com/juancpachecog/fom-core/pull/166) | Esquema de dominio: 18 tablas | Abierto, CI verde, **no se despliega** |
 
-**Nada se ha aplicado a ninguna base de datos.** Ni a producción ni a FOM-TEST.
-Las migraciones existen como propuesta y están verificadas, pero no ejecutadas.
+El #165 se integró por squash merge en el commit
+`1c3e1a3d32fbdcf6b69ee96e99a7e38af65ac95e`.
 
-Juan pidió expresamente no ejecutar migraciones ni despliegues hasta que él lo
-coordine, después del merge.
+El #166 queda como propuesta de diseño, dividida en cuatro Issues:
+
+| Issue | Bloque | Depende de |
+|---|---|---|
+| [#168](https://github.com/juancpachecog/fom-core/issues/168) | Identidad y organización | — |
+| [#169](https://github.com/juancpachecog/fom-core/issues/169) | Flota | #168 |
+| [#170](https://github.com/juancpachecog/fom-core/issues/170) | Operación: ODT e inspecciones | #168, #169 |
+| [#171](https://github.com/juancpachecog/fom-core/issues/171) | Cumplimiento y auditoría | los tres |
 
 ---
 
-## Contenido
+## Lo que YA está en la base de FOM-TEST
+
+`fom.gps_positions` tiene cuatro columnas nuevas: `speed_kph`, `heading_deg`,
+`ignition` y `odometer_km`.
+
+Salida de los seis pasos, el 18 de agosto de 2026:
+
+```text
+FOM_TEST_PROMOTION_OK   commit=1c3e1a3d32fbdcf6b69ee96e99a7e38af65ac95e
+FOM_TEST_VALIDATION_OK  commit=1c3e1a3d32fbdcf6b69ee96e99a7e38af65ac95e
+deploy                  Image fom-core-api:test Built · fom-test-api Healthy
+FOM_TEST_MIGRATION_OK   20260817120000000_add_gps_position_telemetry (UP)
+FOM_TEST_SMOKE_OK       las cinco pruebas de móvil en PASS
+FOM_TEST_VERSION_OK     commit=1c3e1a3, environment=test, node v22.23.2
+```
+
+**Es la base de PRUEBAS, no producción.** FOM-PROD queda fuera de este acceso
+de forma permanente.
+
+---
+
+## Contenido de esta carpeta
 
 ```
-parches/       Los dos PR completos, aplicables con git am
-migraciones/   Las cinco migraciones, legibles sin aplicar nada
-pipeline/      Los archivos del decodificador GPS que cambian en el #165
-verificar/     Herramientas para probar las migraciones sin servidor
+parches/       165-INTEGRADO-1c3e1a3.txt  resumen de lo que se integró
+               166-esquema-dominio.patch  el PR abierto, aplicable con git am
+migraciones/   las cinco migraciones, legibles sin aplicar nada
+pipeline/      los archivos del decodificador GPS, ya en su versión de main
+verificar/     probar migraciones sin servidor ni PostgreSQL instalado
 ```
 
 ### Retomar desde otra computadora
@@ -38,24 +66,21 @@ verificar/     Herramientas para probar las migraciones sin servidor
 ```bash
 git clone https://github.com/juancpachecog/fom-core.git
 cd fom-core
-git checkout -b feat/159-telemetria-canonica-aditiva origin/feat/159-telemetria-canonica-aditiva
 ```
 
-Las ramas están publicadas, así que basta con eso. Los parches de `parches/`
-son la red de seguridad por si alguna rama se pierde:
+`main` ya trae el #165. Para seguir con el esquema de dominio:
 
 ```bash
-git checkout main
-git am < ../fom/fom-core-trabajo/parches/165-telemetria-canonica.patch
+git checkout -b feat/esquema-dominio-fom02 origin/feat/esquema-dominio-fom02
 ```
 
 ---
 
-## Cómo probar las migraciones sin servidor
+## Cómo probar migraciones sin servidor
 
-Esto es lo que convirtió las vueltas de 25 minutos en vueltas de 20 segundos.
-No hace falta PostgreSQL instalado ni acceso al servidor: PGlite es PostgreSQL
-17 compilado a WebAssembly y corre dentro de Node.
+Esto convirtió las vueltas de 25 minutos en vueltas de 20 segundos. No hace
+falta PostgreSQL instalado ni acceso al servidor: PGlite es PostgreSQL 17
+compilado a WebAssembly y corre dentro de Node.
 
 ```bash
 mkdir prueba-pg && cd prueba-pg
@@ -69,8 +94,8 @@ Después, desde la raíz de `fom-core`:
 node ../fom/fom-core-trabajo/verificar/aplicar.mjs src/database/migrations/files
 ```
 
-Aplica las veintitrés migraciones en orden y se detiene en la primera que
-falle, mostrando el error con su contexto.
+Aplica todas las migraciones en orden y se detiene en la primera que falle,
+mostrando el error con su contexto.
 
 | Script | Para qué |
 |---|---|
@@ -87,7 +112,7 @@ comprobaciones distintas y ya se coló un error por saltarse la segunda.
 
 ---
 
-## El hallazgo importante del #165
+## El hallazgo del #165
 
 El decodificador Coban exigía que los campos 12 y 13 de GPS103 —velocidad y
 rumbo— vinieran **vacíos**, y descartaba la trama completa cuando no lo
@@ -109,32 +134,42 @@ subir la versión del decodificador y reprocesar recupera el histórico.
 
 ---
 
-## Dos cosas que quedaron deliberadamente en NULL
+## Lo que sigue pendiente
 
-**`speed_kph`.** GPS103 no declara la unidad de ese campo y las dos lecturas
-posibles se diferencian en un factor de 1,852. Equivocarse no produce un error
-visible: produce velocidades verosímiles y falsas de forma permanente.
+### 1. La unidad de velocidad
 
-Se resuelve comparando el campo reportado con la velocidad implícita entre dos
-posiciones válidas consecutivas del mismo equipo (distancia sobre tiempo). Si
-coincide son km/h; si el campo es la implícita entre 1,852, son nudos.
-Confirmada la unidad: cambiar `COBAN_SPEED_WIRE_UNIT` en el decodificador,
-subir `protocolVersion` a `'3'` y reprocesar.
+`COBAN_SPEED_WIRE_UNIT` está en `'undetermined'` y `speed_kph` se escribe como
+NULL. GPS103 no declara la unidad y las dos lecturas posibles se diferencian en
+1,852. Equivocarse no produce un error visible: produce velocidades verosímiles
+y falsas de forma permanente.
 
-**`ignition` y `odometer_km`.** Ninguno de los trece campos de una trama
-`tracker` los transporta. El encendido llega en mensajes `acc on` / `acc off`
-que hoy se rechazan como `unsupported_family`. Las columnas se crean ahora para
-no volver a migrar la tabla. Derivar el encendido de la velocidad sería
-inventarlo.
+**Cómo se resuelve:** para un mismo equipo, tomar pares de posiciones válidas
+consecutivas, calcular la velocidad implícita entre ellas (distancia sobre
+tiempo) y compararla con el campo reportado. Si coincide son km/h; si el campo
+es la implícita entre 1,852, son nudos.
 
----
+No se puede hacer en FOM-TEST: `GPS_LIVE_ENABLED=NO` y los datos son
+sintéticos. Hace falta alguien con lectura sobre tramas reales. Preguntado en
+el Issue #159.
 
-## Lo que falta para que la consola web funcione entera
+Confirmada la unidad: cambiar la constante, subir `protocolVersion` a `'3'` y
+reprocesar.
+
+### 2. Ignición y odómetro
+
+Ninguno de los trece campos de una trama `tracker` los transporta. El encendido
+llega en mensajes `acc on` / `acc off` que hoy se rechazan como
+`unsupported_family`. Preguntado en el #159 si entra ahí o va en Issue aparte.
+
+Mientras tanto, el verde y el gris del mapa siguen significando «reportando» y
+«sin señal», no «encendido» y «apagado».
+
+### 3. Los endpoints que faltan para la consola web
 
 Las tablas son necesarias pero **no suficientes**. La web no habla con la base
 de datos: habla con la API, y la API no tiene endpoints para estos dominios.
 
-Endpoints que existen hoy en `fom-core`:
+Endpoints que existen hoy:
 
 ```
 login · session · logout · me · refresh
@@ -144,8 +179,6 @@ devices/:id/telemetry · observability/* · map-providers/* · health
 
 No hay ninguno para órdenes de trabajo, inspecciones, documentos, alertas,
 conductores ni administración.
-
-Estado por módulo de la consola:
 
 | Con datos reales | Con datos de ejemplo |
 |---|---|
@@ -171,9 +204,9 @@ falta una superficie pública equivalente a la de la app móvil.
 ## Trampas encontradas, para no repetirlas
 
 **Comillas invertidas en comentarios SQL.** Las migraciones son plantillas de
-TypeScript. Un comentario que escriba `` `columna`` `` con comillas invertidas
+TypeScript. Un comentario que escriba una columna entre comillas invertidas
 cierra la cadena a media migración y el archivo deja de compilar. Pasó dos
-veces.
+veces, la segunda al redactar la explicación de un arreglo.
 
 **`CASE` dentro de la condición de un `IF` en PL/pgSQL.** El analizador corta la
 condición en el primer `THEN` fuera de paréntesis, y el `THEN` del `CASE` llega
@@ -181,30 +214,46 @@ antes. El error que devuelve —`syntax error at end of input`— no menciona ni
 `IF` ni el `CASE`.
 
 **Añadir una columna `NOT NULL` y quitarle el `DEFAULT`.** Rompe toda sentencia
-existente que no nombre la columna. Una migración aditiva no puede romper a
-quien ya escribe. Lo detectó el CI, no la revisión humana.
+existente que no nombre la columna. Una migración aditiva no puede hacer eso.
+Lo detectó el CI, no la revisión humana.
 
 **La cadena de reversión del CI.** Los pasos de `migration:down` de `ci.yml` y
 `gps-console-ci.yml` encadenan reversiones contando desde la última migración
-aplicada. Cualquier migración nueva rompe esa cuenta y hace fallar una
-comprobación que no tiene nada roto que señalar. Toda migración necesita su
-paso de reversión insertado **arriba** de los existentes.
+aplicada. Cualquier migración nueva rompe esa cuenta. Toda migración necesita su
+paso de reversión insertado **arriba** de los existentes. Corregido en ambos
+workflows con un comentario que lo advierte.
+
+**Declarar una unidad que no está demostrada.** El tipo del decodificador solo
+admitía `'knot' | 'kph'`, así que con la constante en `'undetermined'` publicaba
+`'knot'`. Lo detectó la revisión de Juan: afirmaba como observado justo lo que
+el PR declaraba desconocido.
 
 ---
 
 ## Acceso al servidor
 
-La cuenta individual funciona: `fomdev-marco` en `fom-app-01` (10.20.30.10),
-por WireGuard, grupo `fom-test-operators`.
+Cuenta individual nominal en `fom-app-01`, por WireGuard, grupo
+`fom-test-operators`. El usuario, la dirección y la ruta de la llave no se
+escriben aquí: este repositorio es público. Están en
+`docs/team/FOM-TEST-DIRECT-ACCESS.md` del repositorio del backend y en la
+configuración local de cada quien.
 
-Permite ejecutar, cuando esté autorizado y solo sobre FOM-TEST:
+Comandos disponibles, solo sobre FOM-TEST:
 
 ```bash
-sudo /usr/local/sbin/fom-test promote
+sudo /usr/local/sbin/fom-test promote    # trae main al servidor
+sudo /usr/local/sbin/fom-test validate
 sudo /usr/local/sbin/fom-test deploy
-sudo /usr/local/sbin/fom-test migrate
+sudo /usr/local/sbin/fom-test migrate    # aplica migraciones up
 sudo /usr/local/sbin/fom-test smoke
+sudo /usr/local/sbin/fom-test version
 ```
 
-`promote` solo acepta lo que ya está integrado en `main`. FOM-PROD queda fuera
-de este acceso de forma permanente.
+`promote` solo acepta lo que ya está integrado en `main`; rechaza ramas de
+trabajo. Si `deploy` o `migrate` fallan: detenerse, publicar la salida y no
+repetir.
+
+Para que Claude Code pueda ejecutarlos hace falta
+`.claude/settings.json` en el proyecto con la regla de permiso correspondiente.
+Ese archivo lo tiene que crear una persona: ampliar los permisos del asistente
+no es algo que el asistente pueda hacerse a sí mismo.

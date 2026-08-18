@@ -22,3 +22,8 @@ graphify-out/
 # se llama `fom-app`, sin punto, y se colaría.
 infra/*
 !infra/*.md
+
+# Configuración local de Claude Code. Nombra el usuario, la dirección del
+# servidor y la ruta de la llave SSH, y este repositorio es PÚBLICO.
+.claude/settings.json
+.claude/settings.local.json

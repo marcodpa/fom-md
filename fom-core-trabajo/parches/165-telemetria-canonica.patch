@@ -1,7 +1,7 @@
 From 46422317a9f7e92e672c873fc718bb4ab57852f6 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 11:38:53 -0400
-Subject: [PATCH 1/4] Extraer velocidad y rumbo de las tramas Coban observadas
+Subject: [PATCH 1/5] Extraer velocidad y rumbo de las tramas Coban observadas
  (#159)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -912,7 +912,7 @@ index bec330a..cca9e62 100644
 From 644215b034017f18c9e6e4100bcb7f8bd860ef06 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 11:48:19 -0400
-Subject: [PATCH 2/4] Validar la reversion de la migracion de telemetria en CI
+Subject: [PATCH 2/5] Validar la reversion de la migracion de telemetria en CI
 
 Los pasos de reversion del CI encadenan `migration:down` y cada uno
 afirma que arriba de la pila esta la migracion que le toca. El primero
@@ -965,7 +965,7 @@ index dfc9f3f..2e2a5ce 100644
 From 90389aa27742b9546aad229dc642684edc9131b1 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 11:58:11 -0400
-Subject: [PATCH 3/4] Validar tambien la reversion de telemetria en el CI de la
+Subject: [PATCH 3/5] Validar tambien la reversion de telemetria en el CI de la
  consola
 
 `gps-console-ci.yml` encadena reversiones igual que `ci.yml` y con la
@@ -1011,7 +1011,7 @@ index 6d2e1df..e1e8c01 100644
 From ccb0fba93e64bc8e2af39bc67521ff7c370b1868 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 12:05:09 -0400
-Subject: [PATCH 4/4] Completar la telemetria en el fixture de runtime 45C
+Subject: [PATCH 4/5] Completar la telemetria en el fixture de runtime 45C
 
 `test/gps-canonical-45c-runtime.js` arma una posicion sin fijacion y la
 inserta como `fom_app` contra PostgreSQL real. Le faltaba el campo nuevo,
@@ -1063,6 +1063,217 @@ index 74031c7..ba9648f 100644
        },
      };
      const attempt = await new GpsDecodeAttemptRepository().insert(
+-- 
+2.55.0.windows.3
+
+
+From 2716063c8342394ec7362c62eafe1f27f075b781 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 18 Aug 2026 14:24:54 -0400
+Subject: [PATCH 5/5] Declarar la unidad de velocidad como undetermined en el
+ contrato
+
+El tipo `ObservedFrameTelemetry.speed.wireUnit` solo admitia
+`'knot' | 'kph'`, asi que con la constante en `'undetermined'` el
+decodificador publicaba `'knot'`. Afirmaba como observado precisamente
+lo que este PR declara desconocido.
+
+Que `toCanonicalTelemetry` consultara ademas la constante y dejara
+`speed_kph` en NULL no arreglaba el fondo: cualquier otro consumidor del
+resultado decodificado leia `'knot'` y no tenia forma de notar que era
+un relleno para satisfacer al tipo.
+
+Ahora `'undetermined'` es un valor legitimo del contrato y el
+decodificador emite la constante literal. La conversion canonica pasa a
+depender de la unidad que viaja pegada al valor y no de volver a leer la
+constante global, que es la separacion correcta: la constante decide que
+estampa el decodificador, y la unidad estampada decide como se convierte.
+
+`test/gps-telemetry.test.js` cubre los tres casos por separado, asi que
+kph y nudos quedan probados desde ahora aunque la constante todavia no
+los use. El dia que la unidad se demuestre solo cambia lo que estampa el
+decodificador; la conversion ya esta verificada.
+
+No cambia la decision de fondo: la velocidad sigue sin persistirse
+mientras no haya evidencia de la unidad.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ src/gps-canonical/gps-telemetry.ts            | 14 ++---
+ .../adapters/coban-gps103.decoder.ts          |  8 +--
+ src/gps-ingress/gps-protocol-adapter.ts       |  8 ++-
+ test/gps-coban-decoder.test.js                |  8 ++-
+ test/gps-telemetry.test.js                    | 58 +++++++++++++++++++
+ 5 files changed, 83 insertions(+), 13 deletions(-)
+ create mode 100644 test/gps-telemetry.test.js
+
+diff --git a/src/gps-canonical/gps-telemetry.ts b/src/gps-canonical/gps-telemetry.ts
+index 8cdd648..40b6f9f 100644
+--- a/src/gps-canonical/gps-telemetry.ts
++++ b/src/gps-canonical/gps-telemetry.ts
+@@ -1,4 +1,3 @@
+-import { COBAN_SPEED_WIRE_UNIT } from '../gps-ingress/adapters/coban-gps103.decoder';
+ import type { ObservedFrameTelemetry } from '../gps-ingress/gps-protocol-adapter';
+ import type { CanonicalTelemetry } from './gps-canonical.types';
+ 
+@@ -34,18 +33,19 @@ function redondear(valor: number): number {
+ export function toCanonicalTelemetry(
+   observed: ObservedFrameTelemetry,
+ ): CanonicalTelemetry {
++  // La unidad viaja pegada al valor, asi que la conversion depende solo de
++  // ella y no de leer otra vez la constante global. Con la unidad todavia
++  // indeterminada no se escribe nada: el valor no se pierde, porque la trama
++  // esta preservada integra y basta con subir la version del decodificador y
++  // reprocesar cuando quede demostrada. Guardar un numero plausible y
++  // equivocado si seria irreversible, porque nadie volveria a revisarlo.
+   let speedKph: number | null = null;
+   if (observed.speed !== null) {
+     if (observed.speed.wireUnit === 'kph') {
+       speedKph = redondear(observed.speed.value);
+-    } else if (COBAN_SPEED_WIRE_UNIT === 'knot') {
++    } else if (observed.speed.wireUnit === 'knot') {
+       speedKph = redondear(observed.speed.value * KNOT_TO_KPH);
+     }
+-    // Con la unidad todavia indeterminada no se escribe nada. El valor no se
+-    // pierde: la trama esta preservada integra y basta con subir la version del
+-    // decodificador y reprocesar cuando la unidad quede demostrada. Guardar un
+-    // numero plausible y equivocado si seria irreversible, porque nadie
+-    // volveria a revisarlo.
+   }
+ 
+   return {
+diff --git a/src/gps-ingress/adapters/coban-gps103.decoder.ts b/src/gps-ingress/adapters/coban-gps103.decoder.ts
+index b0df537..cbfa63d 100644
+--- a/src/gps-ingress/adapters/coban-gps103.decoder.ts
++++ b/src/gps-ingress/adapters/coban-gps103.decoder.ts
+@@ -213,10 +213,10 @@ function parseTelemetry(
+     speed = {
+       raw: speedField,
+       value,
+-      // La unidad se decide en un solo sitio. Mientras este indeterminada se
+-      // marca como nudos para conservar el tipo, y la persistencia se niega a
+-      // escribir el valor; ver COBAN_SPEED_WIRE_UNIT.
+-      wireUnit: COBAN_SPEED_WIRE_UNIT === 'kph' ? 'kph' : 'knot',
++      // Se publica la constante literal. Traducirla a 'knot' mientras esta
++      // indeterminada convertiria una incognita en una afirmacion, y quien
++      // leyera el resultado decodificado no tendria forma de notarlo.
++      wireUnit: COBAN_SPEED_WIRE_UNIT,
+     };
+   }
+ 
+diff --git a/src/gps-ingress/gps-protocol-adapter.ts b/src/gps-ingress/gps-protocol-adapter.ts
+index 51ad62d..d85be92 100644
+--- a/src/gps-ingress/gps-protocol-adapter.ts
++++ b/src/gps-ingress/gps-protocol-adapter.ts
+@@ -63,7 +63,13 @@ export type ObservedFrameTelemetry = {
+   readonly speed: {
+     readonly raw: string;
+     readonly value: number;
+-    readonly wireUnit: 'knot' | 'kph';
++    /**
++     * `'undetermined'` no es un caso degenerado: es la respuesta honesta
++     * mientras nadie haya demostrado la unidad. Publicar `'knot'` por
++     * conservar el tipo simple afirmaria como observado algo que no lo esta, y
++     * cualquier consumidor del resultado decodificado se lo creeria.
++     */
++    readonly wireUnit: 'knot' | 'kph' | 'undetermined';
+   } | null;
+   readonly heading: {
+     readonly raw: string;
+diff --git a/test/gps-coban-decoder.test.js b/test/gps-coban-decoder.test.js
+index cca9e62..d4a9a19 100644
+--- a/test/gps-coban-decoder.test.js
++++ b/test/gps-coban-decoder.test.js
+@@ -8,6 +8,9 @@ const {
+ const {
+   TcpFrameBuffer,
+ } = require('../dist/gps-ingress/tcp-frame-buffer.js');
++const {
++  COBAN_SPEED_WIRE_UNIT,
++} = require('../dist/gps-ingress/adapters/coban-gps103.decoder.js');
+ const {
+   SYNTHETIC_IMEI,
+   heartbeat,
+@@ -264,11 +267,14 @@ test('reads speed and course when the frame carries them', () => {
+   assert.equal(result.kind, 'position_valid');
+   // El numero se conserva junto al texto original, que es la unica prueba de
+   // lo que dijo el equipo si manana se revisa la unidad.
++  // La unidad se publica tal como esta declarada. Mientras nadie la demuestre
++  // eso es 'undetermined', y afirmar 'knot' seria inventar una observacion.
+   assert.deepEqual(result.telemetry.speed, {
+     raw: '42.50',
+     value: 42.5,
+-    wireUnit: 'knot',
++    wireUnit: COBAN_SPEED_WIRE_UNIT,
+   });
++  assert.equal(COBAN_SPEED_WIRE_UNIT, 'undetermined');
+   assert.deepEqual(result.telemetry.heading, {
+     raw: '187.30',
+     degrees: 187.3,
+diff --git a/test/gps-telemetry.test.js b/test/gps-telemetry.test.js
+new file mode 100644
+index 0000000..7971dbe
+--- /dev/null
++++ b/test/gps-telemetry.test.js
+@@ -0,0 +1,58 @@
++'use strict';
++
++const assert = require('node:assert/strict');
++const { test } = require('node:test');
++const {
++  TELEMETRIA_AUSENTE,
++  toCanonicalTelemetry,
++} = require('../dist/gps-canonical/gps-telemetry.js');
++
++// La unidad viaja pegada al valor, de modo que estas pruebas cubren los tres
++// casos con independencia de lo que declare hoy `COBAN_SPEED_WIRE_UNIT`. El dia
++// que la unidad quede demostrada, la conversion ya esta probada y solo cambia
++// lo que estampa el decodificador.
++
++const conVelocidad = (value, wireUnit) => ({
++  speed: { raw: String(value), value, wireUnit },
++  heading: null,
++});
++
++test('kph se guarda tal cual', () => {
++  assert.equal(toCanonicalTelemetry(conVelocidad(80, 'kph')).speedKph, 80);
++});
++
++test('los nudos se convierten a km/h', () => {
++  // 1 nudo = 1,852 km/h exactos, por definicion de milla nautica.
++  assert.equal(toCanonicalTelemetry(conVelocidad(50, 'knot')).speedKph, 92.6);
++});
++
++test('una unidad indeterminada no se guarda', () => {
++  const r = toCanonicalTelemetry(conVelocidad(42.5, 'undetermined'));
++  // NULL, no cero: cero afirmaria que el vehiculo estaba detenido.
++  assert.equal(r.speedKph, null);
++});
++
++test('el rumbo se guarda sin depender de la velocidad', () => {
++  const r = toCanonicalTelemetry({
++    speed: null,
++    heading: { raw: '187.30', degrees: 187.3 },
++  });
++  assert.equal(r.headingDeg, 187.3);
++  assert.equal(r.speedKph, null);
++});
++
++test('ignicion y odometro no se derivan de nada', () => {
++  const r = toCanonicalTelemetry(conVelocidad(100, 'kph'));
++  // Aunque haya velocidad, el encendido no se infiere del movimiento.
++  assert.equal(r.ignition, null);
++  assert.equal(r.odometerKm, null);
++});
++
++test('la ausencia total son cuatro nulos', () => {
++  assert.deepEqual(TELEMETRIA_AUSENTE, {
++    speedKph: null,
++    headingDeg: null,
++    ignition: null,
++    odometerKm: null,
++  });
++});
 -- 
 2.55.0.windows.3
 

@@ -1,0 +1,146 @@
+commit 1c3e1a3d32fbdcf6b69ee96e99a7e38af65ac95e
+Author: marcodpa <marcodpacheco@gmail.com>
+Date:   Tue Aug 18 14:42:01 2026 -0400
+
+    Extraer velocidad y rumbo de las tramas Coban observadas (#159) (#165)
+    
+    * Extraer velocidad y rumbo de las tramas Coban observadas (#159)
+    
+    El decodificador exigia que los campos 12 y 13 de GPS103 —velocidad y
+    rumbo— vinieran vacios, y rechazaba la trama entera con
+    `unexpected_fields` cuando no lo estaban. Un equipo detenido los deja en
+    blanco y uno en movimiento no, de modo que la regla descartaba
+    justamente las tramas de los vehiculos que circulaban: el recorrido que
+    llegaba a `fom.gps_positions` era el de las paradas.
+    
+    Esta version los lee. Tambien deja de perder la posicion cuando el
+    equipo trae configurado el numero de devolucion de llamada, que no
+    participa en la posicion y hasta ahora costaba la trama completa.
+    
+    La migracion anade cuatro columnas nullable sin default, con las
+    restricciones de rango y sin ningun indice: el Issue pide no crearlos
+    hasta demostrar una consulta que los use. Los permisos no se tocan,
+    porque el GRANT de tabla que ya existe alcanza a las columnas nuevas y
+    es el minimo correcto.
+    
+    `protocolVersion` sube a '2' porque forma parte de la clave de
+    idempotencia: reprocesar una trama ya vista debe producir una fila nueva
+    y mejor, no chocar con la que escribio el decodificador anterior.
+    
+    Lo que NO se guarda todavia, y por que:
+    
+      VELOCIDAD. GPS103 no declara la unidad de ese campo, y las dos
+      lecturas posibles se diferencian en un factor de 1,852. Elegir mal no
+      da un error visible, da velocidades verosimiles y equivocadas para
+      siempre. El valor se decodifica y la trama se conserva integra, pero
+      `speed_kph` queda en NULL hasta que la unidad se demuestre comparando
+      el campo con la velocidad implicita entre posiciones consecutivas.
+      Confirmada, es cambiar una constante, subir a '3' y reprocesar.
+    
+      IGNICION Y ODOMETRO. Ninguno de los trece campos de una trama
+      `tracker` los transporta. El encendido llega en mensajes `acc on` /
+      `acc off` que este decodificador aun no interpreta. Las columnas se
+      crean ahora para no volver a migrar la tabla, y se llenan cuando haya
+      fuente observada. Derivarlas de la velocidad seria inventarlas.
+    
+    El rumbo si se guarda: se mide en grados y no admite dos lecturas.
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+    
+    * Validar la reversion de la migracion de telemetria en CI
+    
+    Los pasos de reversion del CI encadenan `migration:down` y cada uno
+    afirma que arriba de la pila esta la migracion que le toca. El primero
+    esperaba encontrar `create_database_observer_views`, que hasta ahora era
+    la ultima aplicada.
+    
+    Al anadir una migracion posterior, ese primer `down` revierte la nueva y
+    la comprobacion falla: no porque la migracion este mal, sino porque el
+    CI cuenta desde el final. Cualquier migracion futura tiene el mismo
+    problema, asi que el paso nuevo lo deja dicho en un comentario.
+    
+    De paso, la comprobacion afirma algo que este PR sostiene y que conviene
+    demostrar en vez de argumentar: `fom_app` puede insertar en `speed_kph`
+    sin haber concedido ningun permiso nuevo, porque el GRANT de tabla que
+    ya existia alcanza a las columnas nuevas.
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+    
+    * Validar tambien la reversion de telemetria en el CI de la consola
+    
+    `gps-console-ci.yml` encadena reversiones igual que `ci.yml` y con la
+    misma suposicion: que arriba de la pila esta la migracion que el paso
+    espera. Se arreglo un workflow y no el otro.
+    
+    El log confirma que la migracion en si esta bien: se aplico dos veces y
+    se revirtio limpia. Lo que fallaba era la comprobacion posterior, que
+    buscaba las vistas del observador y encontraba que el `down` se habia
+    llevado la telemetria.
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+    
+    * Completar la telemetria en el fixture de runtime 45C
+    
+    `test/gps-canonical-45c-runtime.js` arma una posicion sin fijacion y la
+    inserta como `fom_app` contra PostgreSQL real. Le faltaba el campo nuevo,
+    asi que el repositorio leia `undefined` y el CI reportaba
+    `stage=canonical-attempt-and-position code=unknown`, que no dice nada de
+    lo que realmente pasaba.
+    
+    Se completa el fixture con los cuatro nulos, que es lo que corresponde a
+    una trama sin fijacion, y el repositorio pasa a rechazar una posicion sin
+    telemetria con `position_telemetry_missing` en vez de romperse leyendo
+    una propiedad de undefined. Un fixture incompleto debe decir que le
+    falta.
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+    
+    * Declarar la unidad de velocidad como undetermined en el contrato
+    
+    El tipo `ObservedFrameTelemetry.speed.wireUnit` solo admitia
+    `'knot' | 'kph'`, asi que con la constante en `'undetermined'` el
+    decodificador publicaba `'knot'`. Afirmaba como observado precisamente
+    lo que este PR declara desconocido.
+    
+    Que `toCanonicalTelemetry` consultara ademas la constante y dejara
+    `speed_kph` en NULL no arreglaba el fondo: cualquier otro consumidor del
+    resultado decodificado leia `'knot'` y no tenia forma de notar que era
+    un relleno para satisfacer al tipo.
+    
+    Ahora `'undetermined'` es un valor legitimo del contrato y el
+    decodificador emite la constante literal. La conversion canonica pasa a
+    depender de la unidad que viaja pegada al valor y no de volver a leer la
+    constante global, que es la separacion correcta: la constante decide que
+    estampa el decodificador, y la unidad estampada decide como se convierte.
+    
+    `test/gps-telemetry.test.js` cubre los tres casos por separado, asi que
+    kph y nudos quedan probados desde ahora aunque la constante todavia no
+    los use. El dia que la unidad se demuestre solo cambia lo que estampa el
+    decodificador; la conversion ya esta verificada.
+    
+    No cambia la decision de fondo: la velocidad sigue sin persistirse
+    mientras no haya evidencia de la unidad.
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+    
+    ---------
+    
+    Co-authored-by: marcodpa <marcodpa@users.noreply.github.com>
+    Co-authored-by: Claude Opus 5 <noreply@anthropic.com>
+
+ .github/workflows/ci.yml                           |  13 +++
+ .github/workflows/gps-console-ci.yml               |  11 ++
+ ...20260817120000000_add_gps_position_telemetry.ts | 124 +++++++++++++++++++++
+ src/gps-canonical/gps-canonical.processor.ts       |   7 ++
+ src/gps-canonical/gps-canonical.types.ts           |  19 ++++
+ src/gps-canonical/gps-position.repository.ts       |  95 +++++++++++++++-
+ src/gps-canonical/gps-telemetry.ts                 |  65 +++++++++++
+ src/gps-ingress/adapters/coban-gps103.adapter.ts   |   6 +-
+ src/gps-ingress/adapters/coban-gps103.decoder.ts   | 101 ++++++++++++++++-
+ src/gps-ingress/gps-protocol-adapter.ts            |  31 ++++++
+ test/fixtures/coban-observed.fixtures.js           |  33 ++++++
+ test/gps-canonical-45c-runtime.js                  |   7 ++
+ test/gps-canonical-persistence.test.js             |  27 +++++
+ test/gps-coban-decoder.test.js                     |  92 +++++++++++++++
+ test/gps-telemetry.test.js                         |  58 ++++++++++
+ 15 files changed, 683 insertions(+), 6 deletions(-)
