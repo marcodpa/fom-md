@@ -14,12 +14,30 @@ clonado ni de recordar en qué rama quedó cada cosa.
 | | Qué es | Estado |
 |---|---|---|
 | [PR #165](https://github.com/juancpachecog/fom-core/pull/165) | Telemetría: velocidad y rumbo (Issue #159) | **Integrado y desplegado en FOM-TEST** |
-| [PR #166](https://github.com/juancpachecog/fom-core/pull/166) | Esquema de dominio: 18 tablas | Abierto, CI verde, **no se despliega** |
+| [PR #166](https://github.com/juancpachecog/fom-core/pull/166) | Esquema de dominio: 18 tablas | **Draft.** Rechazado como implementación; sirve de fuente de diseño |
 
 El #165 se integró por squash merge en el commit
 `1c3e1a3d32fbdcf6b69ee96e99a7e38af65ac95e`.
 
-El #166 queda como propuesta de diseño, dividida en cuatro Issues:
+### La revisión del #166
+
+Juan lo devolvió a Draft con tres objeciones, todas atendidas el 18 de agosto:
+
+1. **No estaba vinculado a un Issue que autorizase el alcance.** El handoff
+   exige presentar el diseño, pero eso no sustituye una decisión de alcance.
+2. **Mezclaba seis límites funcionales y de seguridad distintos.** La revisión
+   y el despliegue deben poder aprobarse bloque a bloque.
+3. **Al integrar el #165 antes, había que rebasar y arreglar la cadena de
+   reversión de CI.** Hecho: los dos workflows conservan los cinco pasos, con
+   los cuatro de dominio delante del de telemetría.
+
+Los cuatro Issues quedan completos con lo que pidió: tablas, invariantes con el
+CHECK o trigger que los impone, permisos por columna, estrategia
+expand/contract, pruebas cross-tenant y autorización operacional acotada a
+FOM-TEST.
+
+**Ninguno está autorizado todavía.** Sin ese permiso no se despliegan, y
+`promote` solo acepta lo que está en `main`.
 
 | Issue | Bloque | Depende de |
 |---|---|---|
@@ -27,6 +45,12 @@ El #166 queda como propuesta de diseño, dividida en cuatro Issues:
 | [#169](https://github.com/juancpachecog/fom-core/issues/169) | Flota | #168 |
 | [#170](https://github.com/juancpachecog/fom-core/issues/170) | Operación: ODT e inspecciones | #168, #169 |
 | [#171](https://github.com/juancpachecog/fom-core/issues/171) | Cumplimiento y auditoría | los tres |
+
+Y uno más, para desbloquear la consola web:
+
+| Issue | Qué decide |
+|---|---|
+| [#173](https://github.com/juancpachecog/fom-core/issues/173) | El contrato de la superficie de lectura: vehículos, áreas y conductores |
 
 ---
 
@@ -102,6 +126,8 @@ mostrando el error con su contexto.
 | `aplicar.mjs` | Aplica todas las migraciones en orden |
 | `revertir.mjs` | Aplica y después revierte las nuevas, comprobando que el esquema queda igual |
 | `sintaxis.mjs` | Solo sintaxis, ignorando errores de catálogo |
+| `determinar-unidad-velocidad.sql` | Resuelve si el campo de GPS103 son km/h o nudos |
+| `lib-bloques.mjs` | Extrae el SQL de una migración separando up() de down() |
 
 Ninguna migración del repositorio usa PostGIS ni TimescaleDB, así que lo único
 que le falta a esta copia local son extensiones que estas migraciones no tocan.
@@ -109,6 +135,14 @@ que le falta a esta copia local son extensiones que estas migraciones no tocan.
 **Aviso.** Estos scripts extraen el SQL con una expresión regular y no miran la
 sintaxis de TypeScript. Hay que correr también `npx tsc --noEmit`: son
 comprobaciones distintas y ya se coló un error por saltarse la segunda.
+
+**Segundo aviso, aprendido a golpes.** La primera versión de `aplicar.mjs`
+tomaba solo el primer `pgm.sql()` de cada migración. La de telemetría tiene
+cuatro en `up()` —`SET LOCAL`, `ALTER TABLE`, restricciones y comentarios—, así
+que la herramienta ejecutaba únicamente el `SET LOCAL` y daba por aplicada una
+migración que no lo estaba. Corregido en `lib-bloques.mjs`, que corta por la
+posición de `export const down`. Una herramienta de verificación que miente es
+peor que no tenerla.
 
 ---
 

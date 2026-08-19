@@ -1,5 +1,6 @@
 import { PGlite } from '@electric-sql/pglite';
 import { readFileSync, readdirSync } from 'node:fs';
+import { bloquesDe } from './lib-bloques.mjs';
 import { join } from 'node:path';
 
 // Aplica TODAS las migraciones en orden contra un PostgreSQL 17 real (WASM).
@@ -22,12 +23,13 @@ await db.exec(`
 
 const archivos = readdirSync(DIR).filter((f) => f.endsWith('.ts')).sort();
 for (const archivo of archivos) {
-  const src = readFileSync(join(DIR, archivo), 'utf8');
-  const bloques = [...src.matchAll(/pgm\.sql\(`([\s\S]*?)`\)/g)].map((m) => m[1]);
-  const creaEsquema = /pgm\.createSchema\(\s*'([a-z_]+)'/.exec(src);
+  const { up, esquema } = bloquesDe(join(DIR, archivo));
+  const bloques = up;
   try {
-    if (creaEsquema) await db.exec(`CREATE SCHEMA IF NOT EXISTS ${creaEsquema[1]}`);
-    if (bloques[0]) await db.exec(bloques[0]);
+    if (esquema) await db.exec(`CREATE SCHEMA IF NOT EXISTS ${esquema}`);
+    // TODOS los bloques de up(), en orden. Quedarse con el primero dejaba
+    // migraciones a medio aplicar sin que nada lo dijera.
+    for (const bloque of up) await db.exec(bloque);
     console.log('  ok   %s', archivo.slice(18));
   } catch (error) {
     console.log('\nFALLA %s', archivo.slice(18));

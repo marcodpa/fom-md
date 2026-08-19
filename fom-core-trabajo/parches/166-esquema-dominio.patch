@@ -1,4 +1,4 @@
-From 2e7b23d9389e2444eab4acae7ee43cc34799674c Mon Sep 17 00:00:00 2001
+From d69702dcfcd61ed4bfe0b04f9adc31aef2475463 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 11:47:38 -0400
 Subject: [PATCH 1/5] Presentar el esquema de dominio FOM-02 en cuatro
@@ -43,22 +43,22 @@ esta la prueba real, y por eso el PR va en borrador hasta que pase.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 ---
- .github/workflows/ci.yml                      |   67 ++
+ .github/workflows/ci.yml                      |   66 ++
  ...000000_create_identity_and_organization.ts |  708 ++++++++++++
  .../20260818100000000_create_fleet_domain.ts  |  558 +++++++++
  ...60818110000000_create_operations_domain.ts | 1014 +++++++++++++++++
  ...0000_create_compliance_and_audit_domain.ts |  805 +++++++++++++
- 5 files changed, 3152 insertions(+)
+ 5 files changed, 3151 insertions(+)
  create mode 100644 src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
  create mode 100644 src/database/migrations/files/20260818100000000_create_fleet_domain.ts
  create mode 100644 src/database/migrations/files/20260818110000000_create_operations_domain.ts
  create mode 100644 src/database/migrations/files/20260818120000000_create_compliance_and_audit_domain.ts
 
 diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
-index dfc9f3f..45656b6 100644
+index 2e2a5ce..80ac605 100644
 --- a/.github/workflows/ci.yml
 +++ b/.github/workflows/ci.yml
-@@ -368,6 +368,73 @@ jobs:
+@@ -368,6 +368,72 @@ jobs:
              -v ON_ERROR_STOP=1 \
              -c "DROP ROLE fom_observer_ci"
  
@@ -128,10 +128,9 @@ index dfc9f3f..45656b6 100644
 +          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_profiles') IS NOT NULL")" = "f"
 +          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_credentials') IS NOT NULL")" = "f"
 +          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema='fom' AND table_name='tenants' AND column_name='category'")" = "0"
-+
-       - name: Validate database observer views down
-         run: |
-           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260816193000000_create_database_observer_views'")" = "1"
+       # Esta migracion es ahora la ultima aplicada, de modo que le corresponde
+       # el primer `migration:down`. Los pasos siguientes revierten en cadena y
+       # cada uno afirma cual espera encontrar arriba: si se anade otra
 diff --git a/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts b/src/database/migrations/files/20260818090000000_create_identity_and_organization.ts
 new file mode 100644
 index 0000000..f171aca
@@ -3245,7 +3244,7 @@ index 0000000..0b76e3e
 2.55.0.windows.3
 
 
-From 067afcda5d6dc8cc98c9d656029dd7341fa6b4cb Mon Sep 17 00:00:00 2001
+From 80216c90e8f3f3f1c015a63185c1f126ca6d26dd Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 11:58:34 -0400
 Subject: [PATCH 2/5] Validar tambien las reversiones de dominio en el CI de la
@@ -3258,21 +3257,17 @@ migracion de dominio en lugar de las vistas del observador.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 ---
- .github/workflows/gps-console-ci.yml | 60 ++++++++++++++++++++++++++++
- 1 file changed, 60 insertions(+)
+ .github/workflows/gps-console-ci.yml | 56 ++++++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
 
 diff --git a/.github/workflows/gps-console-ci.yml b/.github/workflows/gps-console-ci.yml
-index 6d2e1df..907d5b9 100644
+index e1e8c01..612d8b8 100644
 --- a/.github/workflows/gps-console-ci.yml
 +++ b/.github/workflows/gps-console-ci.yml
-@@ -139,6 +139,66 @@ jobs:
-             'CI Bay','gps-metadata-ci'
-           FROM device CROSS JOIN vehicle;
-           SQL
-+      # Este workflow encadena reversiones igual que ci.yml, contando desde la
-+      # ultima migracion aplicada. Toda migracion nueva necesita su paso aqui
-+      # arriba, o el primer `down` revierte la nueva y falla la comprobacion
-+      # siguiente sin que haya nada roto que senalar.
+@@ -143,6 +143,62 @@ jobs:
+       # ultima migracion aplicada. Toda migracion nueva necesita su paso aqui
+       # arriba, o el primer `down` revierte la nueva y falla la comprobacion
+       # siguiente sin que haya nada roto que senalar.
 +      - name: Roll back compliance and audit domain
 +        run: |
 +          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818120000000_create_compliance_and_audit_domain'")" = "1"
@@ -3329,14 +3324,14 @@ index 6d2e1df..907d5b9 100644
 +          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.tenant_relationships') IS NOT NULL")" = "f"
 +          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_profiles') IS NOT NULL")" = "f"
 +          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT to_regclass('fom.user_credentials') IS NOT NULL")" = "f"
-       - name: Roll back database observer views
+       - name: Roll back GPS position telemetry
          run: |
-           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260816193000000_create_database_observer_views'")" = "1"
+           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260817120000000_add_gps_position_telemetry'")" = "1"
 -- 
 2.55.0.windows.3
 
 
-From 9b81133caf5779b2a1227aadcaafdb5a5574a55d Mon Sep 17 00:00:00 2001
+From 7aaca9c271179611daf50c850be4591f9184d491 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 12:17:58 -0400
 Subject: [PATCH 3/5] Corregir una condicion IF partida por el THEN de un CASE
@@ -3396,7 +3391,7 @@ index 3e819da..ce9f499 100644
 2.55.0.windows.3
 
 
-From a921b051ca8c9e0b5357311a66203a95483c9c63 Mon Sep 17 00:00:00 2001
+From 0c2149e519528812ff5af9d934578066b7b1d43c Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 12:26:22 -0400
 Subject: [PATCH 4/5] Conservar el DEFAULT de tenants.category
@@ -3450,7 +3445,7 @@ index f171aca..9329b08 100644
 2.55.0.windows.3
 
 
-From e73a1089dbf798e9248a830a430e8c7f3a54b4a2 Mon Sep 17 00:00:00 2001
+From 2246d4bbf00562f1b1d290d0cee2e897768c559a Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 18 Aug 2026 12:30:36 -0400
 Subject: [PATCH 5/5] Quitar las comillas invertidas del comentario anadido
