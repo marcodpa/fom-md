@@ -14,7 +14,8 @@ clonado ni de recordar en qué rama quedó cada cosa.
 | | Qué es | Estado |
 |---|---|---|
 | [PR #165](https://github.com/juancpachecog/fom-core/pull/165) | Telemetría: velocidad y rumbo (Issue #159) | **Integrado y desplegado en FOM-TEST** |
-| [PR #166](https://github.com/juancpachecog/fom-core/pull/166) | Esquema de dominio: 18 tablas | **Draft.** Rechazado como implementación; sirve de fuente de diseño |
+| [PR #166](https://github.com/juancpachecog/fom-core/pull/166) | Esquema de dominio: 18 tablas | Draft. Sirvió de fuente; se dividió en cuatro PR ya integrados |
+| #175, #176, #177, #178 | Los cuatro bloques | **Integrados y desplegados** |
 
 El #165 se integró por squash merge en el commit
 `1c3e1a3d32fbdcf6b69ee96e99a7e38af65ac95e`.
@@ -36,8 +37,10 @@ CHECK o trigger que los impone, permisos por columna, estrategia
 expand/contract, pruebas cross-tenant y autorización operacional acotada a
 FOM-TEST.
 
-**Ninguno está autorizado todavía.** Sin ese permiso no se despliegan, y
-`promote` solo acepta lo que está en `main`.
+**Los cuatro fueron autorizados** bajo la política de autonomía continua
+([#174](https://github.com/juancpachecog/fom-core/issues/174)) y están
+integrados y desplegados. Cada uno traía criterios de cierre propios, atendidos
+en su PR.
 
 | Issue | Bloque | Depende de |
 |---|---|---|
@@ -56,24 +59,53 @@ Y uno más, para desbloquear la consola web:
 
 ## Lo que YA está en la base de FOM-TEST
 
-`fom.gps_positions` tiene cuatro columnas nuevas: `speed_kph`, `heading_deg`,
-`ignition` y `odometer_km`.
+**Las dieciocho tablas están aplicadas.** Programa #168 → #169 → #170 → #171
+cerrado el 19 de agosto de 2026, más las cuatro columnas de telemetría del
+#159 del día anterior.
 
-Salida de los seis pasos, el 18 de agosto de 2026:
+| Bloque | Commit | Qué añadió |
+|---|---|---|
+| #159 telemetría | `1c3e1a3` | `speed_kph`, `heading_deg`, `ignition`, `odometer_km` |
+| #168 identidad | `4795575` | `tenant_relationships`, `user_profiles`, `user_credentials`, `tenants.category` |
+| #169 flota | `3f6387e` | `areas`, `vehicle_driver_assignments`, `vehicle_live_state`, `vehicles.vehicle_type` |
+| #170 operación | `a47d5cc` | `work_orders`, `work_order_events` y las cuatro de inspecciones |
+| #171 cumplimiento | `301d474` | `documents`, `document_files`, `alert_rules`, `alert_rule_vehicles`, `notifications`, `audit_log` |
 
-```text
-FOM_TEST_PROMOTION_OK   commit=1c3e1a3d32fbdcf6b69ee96e99a7e38af65ac95e
-FOM_TEST_VALIDATION_OK  commit=1c3e1a3d32fbdcf6b69ee96e99a7e38af65ac95e
-deploy                  Image fom-core-api:test Built · fom-test-api Healthy
-FOM_TEST_MIGRATION_OK   20260817120000000_add_gps_position_telemetry (UP)
-FOM_TEST_SMOKE_OK       las cinco pruebas de móvil en PASS
-FOM_TEST_VERSION_OK     commit=1c3e1a3, environment=test, node v22.23.2
-```
+Cinco despliegues, ningún paso fallido, ningún seed ni backfill ni dato real.
 
-**Es la base de PRUEBAS, no producción.** FOM-PROD queda fuera de este acceso
-de forma permanente.
+**Es la base de PRUEBAS.** FOM-PROD queda fuera de este acceso de forma
+permanente, y ahí no hay nada de esto todavía.
 
----
+### Lo que cada bloque encontró
+
+Ninguno fue solo copiar tablas. En cada uno apareció algo:
+
+**#168** — el aislamiento de datos personales **no existía**. Un permiso por
+columna limita qué columnas se leen, no qué filas, y estas tablas no llevan
+`tenant_id` porque la cédula es de la persona y no del contratista. La
+aplicación podía leer la cédula y el teléfono de todo el sistema. Se resolvió
+con identidad de actor en la sesión y políticas de fila. Además, `operator` se
+traducía a `conductor`: el operador telemático no es quien maneja.
+
+**#169** — el PIN del conductor ya no puede guardarse en claro: el CHECK exige
+formato argon2id, así que la base rechaza cuatro dígitos o un hash de otra
+familia.
+
+**#170** — el catálogo de estados vivía repetido en tres sitios, de modo que
+ampliarlo obligaba a acertar en los tres. Ahora vive en un dominio y crecer es
+una línea. Se reconcilió con `docs/functional/FOM-MAINTENANCE.md` y con la app
+móvil: entran `aprobada` y `cancelada`, no entra `pendiente` —la solicitud es
+una entidad, no un estado—.
+
+**#171** — la clave de almacenamiento admitía URLs. Una URL firmada mete un
+secreto con caducidad en una tabla que se respalda y se audita. Ahora se
+rechaza cualquier esquema, cadena de consulta o espacio.
+
+### Las pruebas tienen dientes
+
+Las cuatro pruebas de ejecución (`pruebas/`) corren en cada CI, y **cada una se
+verificó rompiéndola a propósito** para comprobar que detecta el fallo que dice
+cubrir. Una prueba que no puede fallar no demuestra nada.
 
 ## Contenido de esta carpeta
 
@@ -81,6 +113,7 @@ de forma permanente.
 parches/       165-INTEGRADO-1c3e1a3.txt  resumen de lo que se integró
                166-esquema-dominio.patch  el PR abierto, aplicable con git am
 migraciones/   las cinco migraciones, legibles sin aplicar nada
+pruebas/       las cuatro pruebas de ejecucion y el guardia de plantillas
 pipeline/      los archivos del decodificador GPS, ya en su versión de main
 verificar/     probar migraciones sin servidor ni PostgreSQL instalado
 ```

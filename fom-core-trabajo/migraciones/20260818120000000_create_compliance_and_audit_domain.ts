@@ -336,10 +336,19 @@ export const up = (pgm: MigrationBuilder): void => {
         FOREIGN KEY (tenant_id, uploaded_by_user_id)
         REFERENCES fom.tenant_memberships(tenant_id, user_id)
         ON UPDATE RESTRICT ON DELETE RESTRICT,
+      -- La clave es una RUTA dentro del almacen, nunca una direccion. Guardar
+      -- una URL aqui acoplaria el expediente al proveedor de turno, y si ademas
+      -- viene firmada mete un secreto con caducidad en una tabla que se
+      -- respalda y se audita: el dia que caduque el enlace, el documento queda
+      -- inaccesible y el secreto sigue ahi. La direccion se construye al
+      -- servir, no se persiste.
       CONSTRAINT document_files_storage_key_check CHECK (
         storage_key = btrim(storage_key)
         AND storage_key <> ''
         AND storage_key NOT LIKE '/%'
+        AND storage_key !~* '^[a-z][a-z0-9+.-]*://'
+        AND storage_key NOT LIKE '%?%'
+        AND storage_key !~ '[[:space:]]'
       ),
       CONSTRAINT document_files_content_type_check CHECK (
         content_type IN (

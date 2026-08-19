@@ -392,10 +392,20 @@ export const up = (pgm: MigrationBuilder): void => {
     RETURNS varchar LANGUAGE sql IMMUTABLE PARALLEL SAFE
     RETURNS NULL ON NULL INPUT AS $function$
       SELECT CASE membership_role
+        -- owner es el titular de UN ente, no un administrador de FOM.
+        -- Traducirlo a admin_fom le abriria la visibilidad multiempresa,
+        -- que es un rango distinto y superior.
         WHEN 'owner' THEN 'supervisor'
         WHEN 'administrator' THEN 'supervisor'
         WHEN 'fleet_manager' THEN 'supervisor'
-        WHEN 'operator' THEN 'conductor'
+        -- operator se preserva. El operador telematico —quien atiende la
+        -- consola y los equipos— no es el conductor, que es quien maneja el
+        -- vehiculo. Traducir uno en otro perdia el significado en las dos
+        -- direcciones: daba al operador una condicion que no tiene y sugeria
+        -- que ser conductor es un rol de pertenencia, cuando es un hecho de
+        -- asignacion que vive en vehicle_driver_assignments y tiene fechas,
+        -- vehiculo y PIN propios. Un rol no puede afirmar eso.
+        WHEN 'operator' THEN 'operator'
         WHEN 'viewer' THEN 'usuario'
         ELSE membership_role
       END::varchar(30)
@@ -572,6 +582,87 @@ export const up = (pgm: MigrationBuilder): void => {
     GRANT SELECT ON fom.actor_tenant_scope TO fom_app;
     GRANT EXECUTE ON FUNCTION fom.canonical_membership_role(varchar) TO fom_app;
 
+    -- ═══════════════ 9 · aislamiento por fila de los datos personales ═══════
+
+    -- Un permiso por columna limita QUE COLUMNAS se leen, no QUE FILAS. Sin
+    -- nada mas, fom_app podria hacer SELECT national_id, phone FROM
+    -- fom.user_profiles y llevarse la cedula y el telefono de todas las
+    -- personas del sistema, de cualquier ente. Estas dos tablas no llevan
+    -- tenant_id a proposito —la cedula es de la persona, no del contratista—,
+    -- de modo que tampoco hay una columna por la que filtrar.
+    --
+    -- La base, ademas, no sabe quien pregunta: toda la aplicacion se conecta
+    -- como fom_app. Se introduce por eso una identidad de actor en la sesion,
+    -- que la aplicacion fija por peticion, y politicas que solo dejan ver a las
+    -- personas con las que el actor comparte un ente activo.
+    --
+    -- Se puede ser estricto desde el primer dia porque las dos tablas son
+    -- nuevas y todavia no las lee nadie. Endurecer despues, con consumidores ya
+    -- escritos, habria sido mucho mas caro.
+
+    CREATE FUNCTION fom.current_actor_user_id()
+    RETURNS uuid LANGUAGE sql STABLE PARALLEL SAFE
+    SET search_path = pg_catalog AS $function$
+      -- El segundo argumento en true devuelve NULL en vez de fallar cuando el
+      -- ajuste no existe. Sin actor no hay filas: negar por omision es lo
+      -- correcto, porque olvidar fijarlo debe dejar la consulta vacia y no
+      -- abrir la tabla entera.
+      SELECT nullif(current_setting('fom.actor_user_id', true), '')::uuid
+    $function$;
+
+    -- PostgreSQL concede EXECUTE a PUBLIC en toda funcion nueva. Sin este
+    -- REVOKE, el rol de solo lectura del observador la hereda: lo detecto
+    -- ops/database-readonly/validate-admin.sql, que comprueba justamente que
+    -- ninguna rutina de fom sea ejecutable por ese rol.
+    REVOKE ALL ON FUNCTION fom.current_actor_user_id() FROM PUBLIC;
+    GRANT EXECUTE ON FUNCTION fom.current_actor_user_id() TO fom_app;
+
+    -- Comparte ente activo con el actor, o es el actor mismo.
+    CREATE FUNCTION fom.actor_may_see_person(subject_user_id uuid)
+    RETURNS boolean LANGUAGE sql STABLE PARALLEL SAFE
+    SET search_path = pg_catalog AS $function$
+      SELECT
+        fom.current_actor_user_id() IS NOT NULL
+        AND (
+          subject_user_id = fom.current_actor_user_id()
+          OR EXISTS (
+            SELECT 1
+            FROM fom.tenant_memberships actor
+            JOIN fom.tenant_memberships subject
+              ON subject.tenant_id = actor.tenant_id
+            WHERE actor.user_id = fom.current_actor_user_id()
+              AND actor.status = 'active'
+              AND subject.user_id = subject_user_id
+              AND subject.status = 'active'
+          )
+        )
+    $function$;
+
+    REVOKE ALL ON FUNCTION fom.actor_may_see_person(uuid) FROM PUBLIC;
+    GRANT EXECUTE ON FUNCTION fom.actor_may_see_person(uuid) TO fom_app;
+
+    ALTER TABLE fom.user_profiles ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE fom.user_profiles FORCE ROW LEVEL SECURITY;
+    ALTER TABLE fom.user_credentials ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE fom.user_credentials FORCE ROW LEVEL SECURITY;
+
+    -- FORCE incluye al propietario de la tabla. Sin el, quien ejecuta las
+    -- migraciones seguiria viendolo todo y una prueba hecha con esa identidad
+    -- pasaria sin demostrar nada.
+
+    CREATE POLICY user_profiles_actor_scope ON fom.user_profiles
+      FOR ALL TO PUBLIC
+      USING (fom.actor_may_see_person(user_id))
+      WITH CHECK (fom.actor_may_see_person(user_id));
+
+    CREATE POLICY user_credentials_actor_scope ON fom.user_credentials
+      FOR ALL TO PUBLIC
+      USING (fom.actor_may_see_person(user_id))
+      WITH CHECK (fom.actor_may_see_person(user_id));
+
+    -- WITH CHECK ademas de USING: sin el, se podria escribir el perfil de
+    -- una persona ajena aunque no se pueda leer, que es la mitad del agujero.
+
     -- ═══════════════ comentarios ═══════════════
 
     COMMENT ON COLUMN fom.tenants.category IS
@@ -614,6 +705,20 @@ export const down = (pgm: MigrationBuilder): void => {
           'cannot restore the legacy role catalogue while canonical roles are in use';
       END IF;
     END $guard$;
+
+    -- El aislamiento por fila se retira antes que nada: dejar politicas
+    -- apuntando a funciones que ya no existen dejaria las tablas ilegibles
+    -- para todos en vez de para nadie.
+    DROP POLICY IF EXISTS user_credentials_actor_scope ON fom.user_credentials;
+    DROP POLICY IF EXISTS user_profiles_actor_scope ON fom.user_profiles;
+    ALTER TABLE fom.user_credentials NO FORCE ROW LEVEL SECURITY;
+    ALTER TABLE fom.user_credentials DISABLE ROW LEVEL SECURITY;
+    ALTER TABLE fom.user_profiles NO FORCE ROW LEVEL SECURITY;
+    ALTER TABLE fom.user_profiles DISABLE ROW LEVEL SECURITY;
+    REVOKE EXECUTE ON FUNCTION fom.actor_may_see_person(uuid) FROM fom_app;
+    REVOKE EXECUTE ON FUNCTION fom.current_actor_user_id() FROM fom_app;
+    DROP FUNCTION IF EXISTS fom.actor_may_see_person(uuid);
+    DROP FUNCTION IF EXISTS fom.current_actor_user_id();
 
     REVOKE EXECUTE ON FUNCTION fom.canonical_membership_role(varchar) FROM fom_app;
     REVOKE SELECT ON fom.actor_tenant_scope FROM fom_app;

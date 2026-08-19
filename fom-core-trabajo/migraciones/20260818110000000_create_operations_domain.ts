@@ -31,6 +31,36 @@ import type { MigrationBuilder } from 'node-pg-migrate/dist/bundle/index';
 
 export const up = (pgm: MigrationBuilder): void => {
   pgm.sql(`
+    -- ═══════════════ 0 . catalogo de estados de la orden ═══════════════
+
+    -- FUNDACION INICIAL EXPANDIBLE, declarada como tal segun pide el Issue.
+    --
+    -- docs/functional/FOM-MAINTENANCE.md contempla un ciclo mucho mas largo:
+    -- pendiente de revision, aprobada, planificada, asignada, en ejecucion,
+    -- pausada, esperando repuesto, esperando proveedor, en prueba, en calidad,
+    -- cerrada y cancelada. Este bloque NO lo implementa entero, porque cada
+    -- uno de esos estados arrastra actores, motivos y evidencia que todavia no
+    -- estan decididos, y fijarlos a ciegas seria peor que no fijarlos.
+    --
+    -- Lo que si se resuelve es que ampliarlo despues no cueste una reescritura.
+    -- El catalogo vivia repetido en tres sitios —la columna de la orden y las
+    -- dos del historial—, de modo que anadir un estado obligaba a acertar en
+    -- los tres. Aqui vive una sola vez, en un dominio, y ampliarlo es cambiar
+    -- la restriccion del dominio y nada mas.
+    --
+    -- Se incluyen 'aprobada' y 'cancelada' porque no son suposiciones: el
+    -- documento maestro las nombra y la aplicacion movil ya las emite. Dejarlas
+    -- fuera garantizaba que la base rechazara datos que el cliente ya produce.
+    --
+    -- Lo que NO se modela todavia, y consta para que no se de por cerrado:
+    -- la solicitud es una entidad con identidad propia y no un estado de la
+    -- orden (FOM-MAINTENANCE.md §5), asi que 'pendiente' no aparece aqui.
+
+    CREATE DOMAIN fom.work_order_status AS varchar(30)
+      CONSTRAINT work_order_status_catalogue CHECK (
+        VALUE IN ('abierta', 'en_revision', 'aprobada', 'cerrada', 'cancelada')
+      );
+
     CREATE FUNCTION fom.maintain_work_order_record()
     RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
     BEGIN
@@ -57,9 +87,17 @@ export const up = (pgm: MigrationBuilder): void => {
         -- Reabrir devuelve a revisión, nunca a abierta: el trabajo ya pasó por
         -- el taller, y fingir lo contrario produciría un segundo tramo de
         -- "abierta" que ensucia la métrica de primera respuesta.
+        -- Cancelar se permite desde cualquier estado no terminal: una orden
+        -- se anula por motivos ajenos al taller —el vehiculo se vendio, la
+        -- falla no existia— y obligar a pasarla por revision para cerrarla
+        -- falsearia el historial de trabajo.
         IF NOT (
-          (OLD.status = 'abierta' AND NEW.status IN ('en_revision', 'cerrada'))
-          OR (OLD.status = 'en_revision' AND NEW.status IN ('abierta', 'cerrada'))
+          (OLD.status = 'abierta'
+            AND NEW.status IN ('en_revision', 'cerrada', 'cancelada'))
+          OR (OLD.status = 'en_revision'
+            AND NEW.status IN ('abierta', 'aprobada', 'cerrada', 'cancelada'))
+          OR (OLD.status = 'aprobada'
+            AND NEW.status IN ('en_revision', 'cerrada', 'cancelada'))
           OR (OLD.status = 'cerrada' AND NEW.status = 'en_revision')
         ) THEN
           RAISE EXCEPTION 'invalid work order status transition: % to %',
@@ -371,7 +409,7 @@ export const up = (pgm: MigrationBuilder): void => {
       created_by_user_id uuid,
       author_via varchar(20),
       kind varchar(20) NOT NULL DEFAULT 'correctiva',
-      status varchar(20) NOT NULL DEFAULT 'abierta',
+      status fom.work_order_status NOT NULL DEFAULT 'abierta',
       description varchar(2000) NOT NULL,
       failure_type varchar(30),
       location varchar(200),
@@ -404,9 +442,6 @@ export const up = (pgm: MigrationBuilder): void => {
 
       CONSTRAINT work_orders_kind_check CHECK (
         kind IN ('correctiva', 'preventiva')
-      ),
-      CONSTRAINT work_orders_status_check CHECK (
-        status IN ('abierta', 'en_revision', 'cerrada')
       ),
       CONSTRAINT work_orders_author_via_check CHECK (
         author_via IS NULL OR author_via IN ('principal', 'secundario')
@@ -494,8 +529,8 @@ export const up = (pgm: MigrationBuilder): void => {
       tenant_id uuid NOT NULL,
       work_order_id uuid NOT NULL,
       sequence_number integer NOT NULL,
-      from_status varchar(20),
-      to_status varchar(20) NOT NULL,
+      from_status fom.work_order_status,
+      to_status fom.work_order_status NOT NULL,
       actor_user_id uuid,
       note varchar(1000),
       occurred_at timestamptz NOT NULL,
@@ -514,13 +549,6 @@ export const up = (pgm: MigrationBuilder): void => {
       CONSTRAINT work_order_events_sequence_unique
         UNIQUE (work_order_id, sequence_number),
       CONSTRAINT work_order_events_sequence_check CHECK (sequence_number > 0),
-      CONSTRAINT work_order_events_from_status_check CHECK (
-        from_status IS NULL
-        OR from_status IN ('abierta', 'en_revision', 'cerrada')
-      ),
-      CONSTRAINT work_order_events_to_status_check CHECK (
-        to_status IN ('abierta', 'en_revision', 'cerrada')
-      ),
       CONSTRAINT work_order_events_change_check CHECK (
         from_status IS DISTINCT FROM to_status
       ),
@@ -1002,6 +1030,10 @@ export const down = (pgm: MigrationBuilder): void => {
     DROP TABLE fom.inspection_templates;
     DROP TABLE fom.work_order_events;
     DROP TABLE fom.work_orders;
+
+    -- El dominio al final: mientras una columna lo use, PostgreSQL se niega a
+    -- soltarlo, y con razon.
+    DROP DOMAIN IF EXISTS fom.work_order_status;
 
     DROP FUNCTION fom.maintain_inspection_answer_record();
     DROP FUNCTION fom.maintain_inspection_record();
