@@ -5,7 +5,8 @@
 // módulo, si la respuesta viene de la base de datos real o de la semilla:
 //
 //   · Con `VITE_FOM_API` configurado, lo que la API respalda hoy —flota,
-//     posiciones, recorrido— sale de producción.
+//     posiciones, recorrido, áreas y conductores— sale de la base real, por la
+//     superficie `/api/v1/console` del Issue #173.
 //   · Todo lo demás —ODT, inspecciones, documentos, personal, alertas, pagos,
 //     auditoría— todavía no existe en el esquema real y lo sirve la semilla.
 //   · Sin `VITE_FOM_API`, absolutamente todo es semilla y el sitio funciona
@@ -23,7 +24,9 @@ import repoApi from './repoApi'
 import repoSemilla, { alCambiarDatos, reiniciarDatos } from './repoSemilla'
 
 /** ¿Qué módulos están leyendo de la base real? Útil para avisarlo en pantalla. */
-export const FUENTE_REAL = HAY_API ? ['vehiculos', 'recorrido', 'resumen'] : []
+export const FUENTE_REAL = HAY_API
+  ? ['vehiculos', 'recorrido', 'resumen', 'areas', 'conductores']
+  : []
 
 /** ¿La consola está conectada a la base de datos de producción? */
 export const CONECTADO = HAY_API
@@ -43,10 +46,14 @@ const repo = HAY_API
       recorrido: repoApi.recorrido,
       resumen: repoApi.resumen,
 
-      // El esquema real tiene `areas`, pero vacía y sin vínculo con los
-      // vehículos. Devolver las de la semilla pondría filtros de mentira
-      // ("Costa oriental: 0") sobre unidades reales.
-      areas: () => Promise.resolve([]),
+      // Áreas y conductores pasan a ser reales: los sirve `/api/v1/console`
+      // desde las tablas del #169. Antes las áreas devolvían una lista vacía a
+      // propósito, porque las de la semilla habrían puesto filtros de mentira
+      // sobre unidades reales.
+      areas: repoApi.areas,
+      // La semilla no tiene una colección `conductores` —los suyos viven en
+      // `personal`—, así que esta es nueva y no envuelve nada.
+      conductores: repoApi.conductores,
     }
   : repoSemilla
 

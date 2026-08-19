@@ -70,7 +70,20 @@ export async function pedir(ruta, { metodo = 'GET', cuerpo, señal } = {}) {
 }
 
 // --- Rutas concretas -------------------------------------------------------
-const CONSOLA = '/gps-console-internal/api'
+
+/**
+ * Superficie propia de la consola, aprobada en el Issue #173 (opción B).
+ *
+ * Se autentica SOLO con la sesión en cookie. La superficie vieja
+ * —`gps-console-internal`— exige además un token interno que un sitio en el
+ * navegador no puede custodiar, y por eso no se puede publicar: funcionaba en
+ * local únicamente porque el puente de `vite.config.js` guardaba el token del
+ * lado del servidor.
+ */
+const CONSOLA = '/api/v1/console'
+
+/** La superficie interna. Queda solo para lo que aún no tiene equivalente. */
+const INTERNA = '/gps-console-internal/api'
 
 export const api = {
   // Autenticación self-hosted
@@ -83,26 +96,44 @@ export const api = {
   salud: () => pedir('/health'),
   version: () => pedir('/version'),
 
-  /**
-   * Inventario de equipos CON el vehículo instalado. Es, de hecho, la lista de
-   * flota: la consulta del servidor cruza `gps_devices` con
-   * `gps_device_assignments` y `vehicles`.
-   */
-  dispositivos: () => pedir(`${CONSOLA}/devices`),
+  // --- Flota, por la superficie de consola ---------------------------------
+  //
+  // Estas cinco preguntan por VEHÍCULO, no por equipo. Antes la lista de flota
+  // salía del inventario de equipos GPS, que es otra cosa: un vehículo sin
+  // equipo instalado no aparecía, y el identificador que manejaba el panel era
+  // el del aparato y no el de la unidad.
 
-  /** Última posición conocida de un equipo. */
-  posicion: (dispositivoId) => pedir(`${CONSOLA}/devices/${dispositivoId}/position/latest`),
+  /** Vehículos de la empresa, con su estado en vivo. */
+  vehiculos: ({ limite = 200, desplazamiento = 0, q = '' } = {}) => {
+    const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
+    if (q) p.set('q', q)
+    return pedir(`${CONSOLA}/vehicles?${p}`)
+  },
 
-  /** Historial de posiciones de un equipo (el trazado del recorrido). */
-  historial: (dispositivoId, limite = 200) =>
-    pedir(`${CONSOLA}/devices/${dispositivoId}/positions?limit=${limite}`),
+  /** Ficha de un vehículo, con su última situación conocida. */
+  vehiculo: (vehiculoId) => pedir(`${CONSOLA}/vehicles/${vehiculoId}`),
 
-  /** Última posición por vehículo, cuando se tiene su id y no el del equipo. */
+  /** Última posición válida del vehículo. */
   posicionDeVehiculo: (vehiculoId) =>
     pedir(`${CONSOLA}/vehicles/${vehiculoId}/position/latest`),
 
+  /** Recorrido del vehículo. El rango va sobre la hora de RECEPCIÓN. */
+  recorrido: (vehiculoId, limite = 200) =>
+    pedir(`${CONSOLA}/vehicles/${vehiculoId}/positions?limit=${limite}`),
+
+  /** Áreas de la empresa, con cuántas unidades tiene cada una. */
+  areas: () => pedir(`${CONSOLA}/areas?limit=200`),
+
+  /** Conductores con asignación vigente. Sin datos personales. */
+  conductores: () => pedir(`${CONSOLA}/drivers?limit=200`),
+
+  // --- Todavía por la superficie interna -----------------------------------
+
+  /** Inventario de equipos GPS. Aún no tiene equivalente en `/console`. */
+  dispositivos: () => pedir(`${INTERNA}/devices`),
+
   /** Panorama de la recepción: totales, equipos activos, último mensaje. */
-  panorama: () => pedir(`${CONSOLA}/observability/overview`),
+  panorama: () => pedir(`${INTERNA}/observability/overview`),
 }
 
 export default api

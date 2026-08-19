@@ -107,10 +107,16 @@ function puenteFom(env) {
 
     configure(proxy) {
       proxy.on('proxyReq', (peticion) => {
-        // El mismo valor viaja con dos nombres: `authentication` valida uno y
-        // `maps` / `gps-console` el otro. Se mandan siempre los dos para no
-        // tener que adivinar a qué módulo va cada ruta.
-        if (token) {
+        // La superficie `/api/v1/console` (Issue #173) se autentica SOLO con
+        // la cookie de sesión, igual que hará en producción. No recibe el
+        // token interno a propósito: si aquí se lo mandáramos, funcionaría en
+        // local y fallaría al publicar, que es la peor forma de enterarse.
+        const rutaConsola = (peticion.path || '').startsWith('/api/v1/console')
+
+        // Para el resto, el mismo valor viaja con dos nombres: `authentication`
+        // valida uno y `maps` / `gps-console` el otro. Se mandan los dos para
+        // no tener que adivinar a qué módulo va cada ruta.
+        if (token && !rutaConsola) {
           peticion.setHeader('x-fom-auth-internal-token', token)
           peticion.setHeader('x-fom-map-internal-token', token)
         }
@@ -119,11 +125,20 @@ function puenteFom(env) {
         peticion.removeHeader('x-fom-auth-session')
         peticion.removeHeader('x-fom-map-actor-email')
         if (sesionDev) {
-          peticion.setHeader('x-fom-auth-session', sesionDev)
+          // La cookie va siempre; la cabecera de sesión solo a la superficie
+          // interna, que es la que la lee.
           peticion.setHeader('cookie', `${COOKIE_SESION}=${sesionDev}`)
+          if (!rutaConsola) {
+            peticion.setHeader('x-fom-auth-session', sesionDev)
+          }
         } else {
           peticion.removeHeader('cookie')
-          if (actorDev) peticion.setHeader('x-fom-map-actor-email', actorDev)
+          // El atajo por correo no existe en `/api/v1/console`: ahí la sesión
+          // es obligatoria. Sin haber entrado, esas rutas responden 401, que es
+          // exactamente lo que harán en producción.
+          if (actorDev && !rutaConsola) {
+            peticion.setHeader('x-fom-map-actor-email', actorDev)
+          }
         }
       })
 
