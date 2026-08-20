@@ -136,15 +136,20 @@ export const repoApi = {
         api.vehiculo(id),
         repoApi.recorrido(id),
       ])
+      // El expediente trae ahora sus dominios reales. Cada uno cae a lista
+      // vacía por separado: un fallo en documentos no debe dejar el vehículo
+      // sin mapa.
+      const [documentos, odts, inspecciones] = await Promise.all([
+        repoApi.documentos.listar({ vehiculoId: id }).catch(() => []),
+        repoApi.odts.listar().then((l) => l.filter((o) => o.vehiculoId === id)).catch(() => []),
+        repoApi.inspecciones.listar({ vehiculoId: id }).catch(() => []),
+      ])
       return {
         ...comoUnidad(ficha.vehicle),
         recorrido,
-        // Estos dominios tienen tablas desde los Issues #170 y #171, pero
-        // todavía no hay endpoints que los sirvan. Van vacíos en vez de traer
-        // los de la semilla, que pertenecen a otros vehículos.
-        documentos: [],
-        odts: [],
-        inspecciones: [],
+        documentos,
+        odts,
+        inspecciones,
         eventos: [],
         costos: [],
       }
@@ -204,11 +209,164 @@ export const repoApi = {
     }
   },
 
+  // --- Operación y cumplimiento --------------------------------------------
+  //
+  // La forma de cada elemento imita a la de la semilla para que los módulos no
+  // cambien: la migración es del dato, no de la interfaz.
+
+  odts: {
+    async listar({ estado = '', q = '' } = {}) {
+      try {
+        const r = await api.odts({ estado })
+        let lista = (r?.items ?? []).map((o) => ({
+          id: o.id,
+          estado: o.status,
+          tipo: o.kind,
+          descripcion: o.description,
+          falla: o.failureType,
+          ubicacion: o.location,
+          notaResolucion: o.resolutionNote,
+          costo: o.resolutionCost,
+          resueltaEn: o.resolvedAt,
+          creadaEn: o.createdAt,
+          vehiculoId: o.vehicleId,
+          vehiculoNombre: [o.vehicleCode, o.vehiclePlate].filter(Boolean).join(' · ') || '—',
+          creadorNombre: o.createdByName || 'Sistema',
+        }))
+        if (q) {
+          const t = q.toLowerCase()
+          lista = lista.filter((o) =>
+            [o.descripcion, o.vehiculoNombre].join(' ').toLowerCase().includes(t))
+        }
+        return lista
+      } catch {
+        return []
+      }
+    },
+
+    async obtener(id) {
+      const r = await api.odt(id)
+      const o = r.workOrder
+      return {
+        id: o.id,
+        estado: o.status,
+        tipo: o.kind,
+        descripcion: o.description,
+        falla: o.failureType,
+        ubicacion: o.location,
+        notaResolucion: o.resolutionNote,
+        costo: o.resolutionCost,
+        resueltaEn: o.resolvedAt,
+        creadaEn: o.createdAt,
+        vehiculoId: o.vehicleId,
+        vehiculoNombre: [o.vehicleCode, o.vehiclePlate].filter(Boolean).join(' · ') || '—',
+        creadorNombre: o.createdByName || 'Sistema',
+        // El historial es inmutable: lo escribe la base al cambiar el estado.
+        eventos: (r.events ?? []).map((e) => ({
+          orden: e.sequence,
+          de: e.fromStatus,
+          a: e.toStatus,
+          nota: e.note,
+          cuando: e.occurredAt,
+          quien: e.actorName || 'Sistema',
+        })),
+      }
+    },
+  },
+
+  inspecciones: {
+    async listar({ vehiculoId = '' } = {}) {
+      try {
+        const r = await api.inspecciones({ vehiculoId })
+        return (r?.items ?? []).map((i) => ({
+          id: i.id,
+          resultado: i.result,
+          fecha: i.inspectionDate,
+          ubicacion: i.location,
+          enviadaEn: i.submittedAt,
+          vehiculoId: i.vehicleId,
+          vehiculoNombre: [i.vehicleCode, i.vehiclePlate].filter(Boolean).join(' · ') || '—',
+          conductorNombre: i.driverName || '—',
+          plantilla: i.templateName,
+        }))
+      } catch {
+        return []
+      }
+    },
+  },
+
+  documentos: {
+    async listar({ vehiculoId = '' } = {}) {
+      try {
+        const r = await api.documentos({ vehiculoId })
+        return (r?.items ?? []).map((d) => ({
+          id: d.id,
+          ambito: d.scope,
+          tipo: d.documentType,
+          numero: d.documentNumber,
+          emitidoEl: d.issuedOn,
+          venceEl: d.expiresOn,
+          // Calculado en la base, no aquí: el reloj del navegador puede estar
+          // en otra zona, y un documento vencido que aparece vigente es el
+          // fallo que este módulo evita.
+          diasParaVencer: d.daysToExpiry,
+          estado: d.status,
+          notas: d.notes,
+          vehiculoId: d.vehicleId,
+          vehiculoNombre: [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') || '—',
+          archivos: d.fileCount,
+        }))
+      } catch {
+        return []
+      }
+    },
+  },
+
+  alertas: {
+    async listar({ soloSinLeer = false } = {}) {
+      try {
+        const r = await api.notificaciones({ soloSinLeer })
+        return (r?.items ?? []).map((n) => ({
+          id: n.id,
+          tipo: n.notificationType,
+          titulo: n.title,
+          detalle: n.detail,
+          odtId: n.workOrderId,
+          leidaEn: n.readAt,
+          creadaEn: n.createdAt,
+        }))
+      } catch {
+        return []
+      }
+    },
+  },
+
+  reglas: {
+    async listar() {
+      try {
+        const r = await api.reglasAlerta()
+        return (r?.items ?? []).map((g) => ({
+          id: g.id,
+          tipo: g.ruleType,
+          umbralKmh: g.thresholdKph,
+          umbralKm: g.thresholdKm,
+          servicio: g.serviceName,
+          activa: g.isActive,
+          vehiculos: g.vehicleCount,
+        }))
+      } catch {
+        return []
+      }
+    },
+  },
+
   /** Resumen con lo que la base puede afirmar hoy. */
   async resumen() {
-    const [lista, areas] = await Promise.all([
+    const [lista, areas, operacion] = await Promise.all([
       flota(),
       repoApi.areas().catch(() => []),
+      // Si los contadores fallan, el panel muestra el resto igual.
+      api.resumenOperacion().catch(() => ({})),
     ])
     const reportando = lista.filter((v) => v.conectado).length
     const sabeMarcha = lista.some((v) => v.estadoMarcha != null)
@@ -228,17 +386,11 @@ export const repoApi = {
       conductores: null,
       sinConductor: lista.filter((v) => v.conductorNombre === 'Sin asignar').length,
       porArea: areas.map((a) => ({ area: a.nombre, total: a.vehiculos })),
-      // Sin endpoint todavía, aunque las tablas existan.
+      // Contadores reales de operación, todos del mismo instante.
+      ...operacion,
+      // Sin respaldo todavía.
       indiceSeguroPromedio: null,
-      odtAbiertas: null,
-      odtEnRevision: null,
-      odtCerradas: null,
-      inspeccionesHoy: null,
-      inspeccionesPendientes: null,
       unidadesBloqueadas: null,
-      docsVencidos: null,
-      docsPorVencer: null,
-      alertasSinLeer: null,
     }
   },
 }

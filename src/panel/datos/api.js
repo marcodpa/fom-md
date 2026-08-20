@@ -130,6 +130,46 @@ export const api = {
   /** Conductores con asignación vigente. Sin datos personales. */
   conductores: () => pedir(`${CONSOLA}/drivers?limit=200`),
 
+  // --- Operación y cumplimiento (tablas de #170 y #171) --------------------
+
+  /** Órdenes de trabajo, de la más recientemente movida a la más vieja. */
+  odts: ({ estado = '', vehiculoId = '', limite = 100 } = {}) => {
+    const p = new URLSearchParams({ limit: limite })
+    if (estado) p.set('status', estado)
+    if (vehiculoId) p.set('vehicleId', vehiculoId)
+    return pedir(`${CONSOLA}/work-orders?${p}`)
+  },
+
+  /** Ficha de una orden con su historial inmutable. */
+  odt: (odtId) => pedir(`${CONSOLA}/work-orders/${odtId}`),
+
+  /** Inspecciones realizadas. */
+  inspecciones: ({ vehiculoId = '', limite = 100 } = {}) => {
+    const p = new URLSearchParams({ limit: limite })
+    if (vehiculoId) p.set('vehicleId', vehiculoId)
+    return pedir(`${CONSOLA}/inspections?${p}`)
+  },
+
+  /** Documentos, del que antes vence al que más tarda. */
+  documentos: ({ vehiculoId = '', limite = 100 } = {}) => {
+    const p = new URLSearchParams({ limit: limite })
+    if (vehiculoId) p.set('vehicleId', vehiculoId)
+    return pedir(`${CONSOLA}/documents?${p}`)
+  },
+
+  /** Reglas de alerta y a cuántas unidades alcanzan. */
+  reglasAlerta: () => pedir(`${CONSOLA}/alert-rules?limit=200`),
+
+  /** Avisos, los no leídos primero. */
+  notificaciones: ({ soloSinLeer = false, limite = 100 } = {}) => {
+    const p = new URLSearchParams({ limit: limite })
+    if (soloSinLeer) p.set('unreadOnly', 'true')
+    return pedir(`${CONSOLA}/notifications?${p}`)
+  },
+
+  /** Contadores del panel, todos del mismo instante. */
+  resumenOperacion: () => pedir(`${CONSOLA}/summary`),
+
   // --- Todavía por la superficie interna -----------------------------------
 
   /** Inventario de equipos GPS. Aún no tiene equivalente en `/console`. */

@@ -25,7 +25,8 @@ import repoSemilla, { alCambiarDatos, reiniciarDatos } from './repoSemilla'
 
 /** ¿Qué módulos están leyendo de la base real? Útil para avisarlo en pantalla. */
 export const FUENTE_REAL = HAY_API
-  ? ['vehiculos', 'recorrido', 'resumen', 'areas', 'conductores']
+  ? ['vehiculos', 'recorrido', 'resumen', 'areas', 'conductores',
+     'odts', 'inspecciones', 'documentos', 'alertas', 'reglas']
   : []
 
 /** ¿La consola está conectada a la base de datos de producción? */
@@ -54,6 +55,15 @@ const repo = HAY_API
       // La semilla no tiene una colección `conductores` —los suyos viven en
       // `personal`—, así que esta es nueva y no envuelve nada.
       conductores: repoApi.conductores,
+
+      // Operación y cumplimiento, desde las tablas de #170 y #171. Las
+      // escrituras de la semilla se conservan donde existen: la superficie
+      // real es de solo lectura todavía.
+      odts: { ...repoSemilla.odts, listar: repoApi.odts.listar, obtener: repoApi.odts.obtener },
+      inspecciones: { ...repoSemilla.inspecciones, listar: repoApi.inspecciones.listar },
+      documentos: { ...repoSemilla.documentos, listar: repoApi.documentos.listar },
+      alertas: { ...repoSemilla.alertas, listar: repoApi.alertas.listar },
+      reglas: { ...repoSemilla.reglas, listar: repoApi.reglas.listar },
     }
   : repoSemilla
 
