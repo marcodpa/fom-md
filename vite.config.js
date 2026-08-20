@@ -70,18 +70,43 @@ function puenteFom(env) {
    */
   const actorDev = env.FOM_DEV_ACTOR_EMAIL || ''
 
+  // La consola lee de `/api/v1/console`, que solo acepta sesión. Mientras esa
+  // sea la fuente de la flota, el atajo por correo no alcanza y hay que entrar.
+  const exigeSesionReal = true
+
   return {
     target: destino,
     changeOrigin: true,
     rewrite: (ruta) => ruta.replace(/^\/fom-api/, ''),
 
-    // Con el atajo activo, la consola pregunta "¿hay sesión?" y hay que
-    // responderle que sí; si no, se queda en la pantalla de acceso para
-    // siempre. Se responde aquí sin molestar a la API.
+    // ATAJO DE DESARROLLO, y su límite.
+    //
+    // Con `FOM_DEV_ACTOR_EMAIL` puesto, el puente responde que hay sesión sin
+    // molestar a la API, y la consola abre sin pasar por la pantalla de acceso.
+    // Eso sigue valiendo para la superficie interna, que acepta el correo del
+    // actor como credencial servidor a servidor.
+    //
+    // NO VALE para `/api/v1/console`: ahí la única credencial es la sesión, y
+    // una sesión fingida por el puente no existe del lado del servidor. Con el
+    // atajo activo esas rutas responden 401 y media consola se queda vacía.
+    //
+    // Por eso el atajo se desactiva en cuanto la web pide algo de la consola:
+    // más vale ver la pantalla de acceso y entrar una vez —el puente guarda la
+    // sesión de verdad— que trabajar sobre un espejismo que en producción no
+    // se sostiene.
     bypass(peticion, respuesta) {
       if (!actorDev || sesionDev) return undefined
+      if ((peticion.url || '').startsWith('/fom-api/api/v1/console')) {
+        return undefined
+      }
       const ruta = (peticion.url || '').split('?')[0]
-      if (ruta === '/fom-api/auth/session') {
+      // Sin sesión real no se finge una: la consola necesita entrar de verdad
+      // para que `/api/v1/console` funcione. Fingirla aquí dejaría al panel
+      // creyendo que está dentro mientras cada consulta de flota devuelve 401.
+      const rutaDeSesion =
+        ruta === '/fom-api/auth/session' ||
+        ruta === '/fom-api/api/v1/console/auth/session'
+      if (rutaDeSesion && !exigeSesionReal) {
         respuesta.setHeader('content-type', 'application/json')
         respuesta.end(
           JSON.stringify({

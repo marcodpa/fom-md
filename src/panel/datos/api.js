@@ -86,11 +86,14 @@ const CONSOLA = '/api/v1/console'
 const INTERNA = '/gps-console-internal/api'
 
 export const api = {
-  // Autenticación self-hosted
+  // Acceso por la superficie de consola. No usa `/auth/*`: ese controlador
+  // exige el token interno y FOM-TEST no lo tiene configurado, así que
+  // responde 503. Estas tres sí funcionan solo con la sesión, igual que el
+  // acceso de la app móvil.
   entrar: (email, password) =>
-    pedir('/auth/login', { metodo: 'POST', cuerpo: { email, password } }),
-  sesion: () => pedir('/auth/session'),
-  salir: () => pedir('/auth/logout', { metodo: 'POST' }),
+    pedir(`${CONSOLA}/auth/login`, { metodo: 'POST', cuerpo: { email, password } }),
+  sesion: () => pedir(`${CONSOLA}/auth/session`),
+  salir: () => pedir(`${CONSOLA}/auth/logout`, { metodo: 'POST' }),
 
   // Estado del backend
   salud: () => pedir('/health'),
