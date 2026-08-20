@@ -125,6 +125,27 @@ alertas dejaron de ser datos de ejemplo.
 Pendiente para probar de punta a punta: una CUENTA en FOM-TEST. Crear
 usuarios es seed y esta excluido del #174; pedido a Juan en el #173.
 
+## Subfase #182: la cuenta de Marco (20 de agosto, tarde)
+
+El PR #183 quedo integrado (`7977faf`) y desplegado. Trae:
+
+- la identidad `fomdev-marco@fom-test.invalid` (fleet_manager, sin contrasena);
+- fixtures E2E para las 16 rutas: ordenes con historial de triggers,
+  inspeccion aprobada, documentos por vencer y vencidos, alertas, avisos, y
+  datos en un segundo tenant para probar el aislamiento;
+- `ops/test/set-console-password.js`: pone la contrasena de ESA identidad por
+  stdin, Argon2id, revocando sesiones. El correo es constante en el codigo.
+
+Verificado con doble ejecucion contra PostgreSQL 17: salida identica byte a
+byte. Los triggers del dominio corrigieron el seed cinco veces (plantillas
+nacen en borrador, inspecciones en pendiente, respuestas antes del envio...).
+
+**Pendiente, todo del lado root de Juan** (detallado en el Issue #182 con los
+SHA-256 exactos): actualizar la copia root-owned del seed en
+`/opt/fom/docker/test/` —el deploy no la sincroniza, hallazgo de esta pasada—
+e instalar el helper. Despues: re-ejecutar seed y que Marco teclee su
+contrasena via el helper, sin pasar por ningun chat.
+
 ## Contenido de esta carpeta
 
 ```
