@@ -171,6 +171,31 @@ formal a «quiero una sola base: la de produccion con todo».
 La pila LOCAL (laptop) sigue disponible como gemela exacta:
 fomdev-marco@fom-test.invalid / fom-local-2026-prueba en localhost:5173.
 
+## Produccion: el runbook esta en manos de Juan (20 de agosto, cierre)
+
+Hitos del dia:
+
+- Marco fijo su contrasena en el servidor con `fom-test console-password`
+  (tecleada en persona; nadie mas la conoce) y ENTRO a la consola contra
+  FOM-TEST. Primera sesion nominal real de la historia del sistema.
+- Validacion E2E del #182 completa y publicada: 16 rutas con datos, tenant
+  ajeno no enumerable (404 por id directo), logout y revocacion en vivo.
+- El primer login fallido real destapo un defecto latente: el contador de
+  intentos moria con un error de tipos de PostgreSQL — 500 al cliente y el
+  bloqueo por fuerza bruta sin registrarse JAMAS. Corregido (PR #187, con un
+  CI intermitente en revision; la ruta feliz no se afecta).
+- #188 integrado: runbook autocontenido de produccion (pasos 0-5 con recibos
+  y rollback en tres rutas; respaldo BLOQUEANTE verificado por --list) y el
+  helper de credencial real con la identidad en archivo root-owned
+  (sha c8858aea..., verificado en main tras el merge).
+
+Lo que queda es integramente ejecucion de Juan: correr el runbook publicando
+cada recibo en el #185. Cuando la sonda publica de /api/v1/console pase de
+404 a 401, la pagina se reconecta a produccion y Marco vera su flota real.
+
+La web sigue apuntando a FOM-TEST por el tunel (Marco puede entrar con su
+clave). La pila local queda como respaldo de desarrollo.
+
 ## Contenido de esta carpeta
 
 ```
