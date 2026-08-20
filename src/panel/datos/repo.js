@@ -32,15 +32,60 @@ export const FUENTE_REAL = HAY_API
 /** ¿La consola está conectada a la base de datos de producción? */
 export const CONECTADO = HAY_API
 
+// ── Conectado a la base: lo que no tiene respaldo real se declara vacío ─────
+//
+// Antes, los módulos sin endpoint (personal, costos, administración) seguían
+// mostrando la semilla COMO SI fuera real. Un panel conectado que enseña
+// datos inventados sin decirlo es peor que uno incompleto: alguien toma una
+// decisión sobre un pago o un usuario que no existe.
+//
+// Regla nueva: conectado, cada dato viene de la base o no viene. Las
+// escrituras sin superficie real fallan con un mensaje claro en vez de
+// simular que funcionaron sobre memoria del navegador.
+
+const NO_HAY_ESCRITURA = () =>
+  Promise.reject(
+    new Error(
+      'Esta acción todavía no existe en el servidor: el bloque de escritura ' +
+        'está pendiente de contrato. Los datos que ves son reales; crear y ' +
+        'editar llegará con esa superficie.',
+    ),
+  )
+
+/** Sustituye una colección de la semilla por su versión honesta y vacía. */
+function sinRespaldo(coleccion) {
+  const vacia = {}
+  for (const [nombre, fn] of Object.entries(coleccion)) {
+    if (typeof fn !== 'function') continue
+    // Los listados devuelven vacío; todo lo demás (crear, set, eliminar,
+    // asignar…) rechaza con el aviso. `obtener` devuelve null: no encontrado.
+    if (nombre === 'listar') vacia[nombre] = () => Promise.resolve([])
+    else if (nombre === 'obtener') vacia[nombre] = () => Promise.resolve(null)
+    else if (nombre === 'resumen') vacia[nombre] = () => Promise.resolve(null)
+    else vacia[nombre] = NO_HAY_ESCRITURA
+  }
+  return vacia
+}
+
 const repo = HAY_API
   ? {
       ...repoSemilla,
 
+      // --- Sin respaldo real todavía: vacío honesto, nunca semilla ------
+      personal: sinRespaldo(repoSemilla.personal),
+      costos: sinRespaldo(repoSemilla.costos),
+      empresa: () => Promise.resolve(null),
+      admin: {
+        empresas: sinRespaldo(repoSemilla.admin.empresas),
+        usuarios: sinRespaldo(repoSemilla.admin.usuarios ?? {}),
+        gps: sinRespaldo(repoSemilla.admin.gps),
+        pagos: sinRespaldo(repoSemilla.admin.pagos),
+        auditoria: sinRespaldo(repoSemilla.admin.auditoria ?? {}),
+      },
+
       // --- Reales -------------------------------------------------------
       vehiculos: {
-        // Se conservan las escrituras de la semilla: la API todavía no
-        // expone alta ni edición de vehículos para la consola de flota.
-        ...repoSemilla.vehiculos,
+        ...sinRespaldo(repoSemilla.vehiculos),
         listar: repoApi.vehiculos.listar,
         obtener: repoApi.vehiculos.obtener,
       },
@@ -59,11 +104,11 @@ const repo = HAY_API
       // Operación y cumplimiento, desde las tablas de #170 y #171. Las
       // escrituras de la semilla se conservan donde existen: la superficie
       // real es de solo lectura todavía.
-      odts: { ...repoSemilla.odts, listar: repoApi.odts.listar, obtener: repoApi.odts.obtener },
-      inspecciones: { ...repoSemilla.inspecciones, listar: repoApi.inspecciones.listar },
-      documentos: { ...repoSemilla.documentos, listar: repoApi.documentos.listar },
-      alertas: { ...repoSemilla.alertas, listar: repoApi.alertas.listar },
-      reglas: { ...repoSemilla.reglas, listar: repoApi.reglas.listar },
+      odts: { ...sinRespaldo(repoSemilla.odts), listar: repoApi.odts.listar, obtener: repoApi.odts.obtener },
+      inspecciones: { ...sinRespaldo(repoSemilla.inspecciones), listar: repoApi.inspecciones.listar },
+      documentos: { ...sinRespaldo(repoSemilla.documentos), listar: repoApi.documentos.listar },
+      alertas: { ...sinRespaldo(repoSemilla.alertas), listar: repoApi.alertas.listar },
+      reglas: { ...sinRespaldo(repoSemilla.reglas), listar: repoApi.reglas.listar },
     }
   : repoSemilla
 
