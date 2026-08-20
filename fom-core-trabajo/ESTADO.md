@@ -146,6 +146,31 @@ SHA-256 exactos): actualizar la copia root-owned del seed en
 e instalar el helper. Despues: re-ejecutar seed y que Marco teclee su
 contrasena via el helper, sin pasar por ningun chat.
 
+## Entrada al servidor: a un instalador de distancia (20 de agosto, noche)
+
+La ruta nominal de contrasena esta integrada y corregida:
+
+- #184: `sudo fom-test console-password` — contrasena por teclado del
+  operador, sin eco, dos veces, solo hacia el stdin del contenedor; sudoers
+  crece exactamente una linea; instalador root con SHA y rollback.
+- #186: correccion de la revision de Juan — el compose se instala y se
+  RESTAURA como root:fom 0640 (lo que exige validate_package); la prueba
+  cuenta las dos apariciones para que corregir un camino y olvidar el otro
+  no pase el CI. SHA del instalador: c327626c...
+
+Recorrido restante, definido por Juan en el #182:
+
+    root installer -> promote -> validate -> deploy -> version
+                   -> MARCO teclea su clave con console-password -> entra
+
+Tambien abierto el #185: el plan completo para llevar TODO a produccion
+(respaldo primero — el hueco señalado desde el inicio—, las 5 migraciones
+aditivas, la imagen, Nginx, credenciales reales sin seed). Es la respuesta
+formal a «quiero una sola base: la de produccion con todo».
+
+La pila LOCAL (laptop) sigue disponible como gemela exacta:
+fomdev-marco@fom-test.invalid / fom-local-2026-prueba en localhost:5173.
+
 ## Contenido de esta carpeta
 
 ```
