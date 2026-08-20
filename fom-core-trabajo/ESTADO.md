@@ -107,6 +107,24 @@ Las cuatro pruebas de ejecución (`pruebas/`) corren en cada CI, y **cada una se
 verificó rompiéndola a propósito** para comprobar que detecta el fallo que dice
 cubrir. Una prueba que no puede fallar no demuestra nada.
 
+## La superficie /api/v1/console esta completa (20 de agosto)
+
+Dieciseis rutas de solo lectura, integradas y desplegadas en FOM-TEST:
+
+| Grupo | Rutas | PR |
+|---|---|---|
+| Acceso | login, session, logout | #180 |
+| Flota | vehiculos, ficha, posicion, recorrido, areas, conductores | #179 |
+| Operacion | ordenes, ficha con historial, inspecciones | #181 |
+| Cumplimiento | documentos, reglas, avisos, resumen | #181 |
+
+Todas responden 401 sin cookie, verificado contra la API desplegada. La
+consola web ya consume todas: mantenimiento, inspecciones, documentos y
+alertas dejaron de ser datos de ejemplo.
+
+Pendiente para probar de punta a punta: una CUENTA en FOM-TEST. Crear
+usuarios es seed y esta excluido del #174; pedido a Juan en el #173.
+
 ## Contenido de esta carpeta
 
 ```
