@@ -196,6 +196,33 @@ cada recibo en el #185. Cuando la sonda publica de /api/v1/console pase de
 La web sigue apuntando a FOM-TEST por el tunel (Marco puede entrar con su
 clave). La pila local queda como respaldo de desarrollo.
 
+## Produccion: el runbook en revision dura (21 de agosto)
+
+Marco reporto dos veces que Juan "ya corrio todo"; la verificacion (recibos
+en el #185 + sonda publica, que sigue en 404) mostro que NO — lo que hubo fue
+dos rondas de revision operacional del runbook, ambas con bloqueos reales:
+
+  1a ronda (6): SHA fijado que el squash invalida; dump ilegible para
+     postgres; migrar antes de construir la imagen; upstream de nginx
+     apuntando a TEST (habria publicado la consola equivocada); credencial
+     con placeholders; rollbacks no ejecutables.
+  2a ronda (5): git como root sobre checkout ajeno; dump no exclusivo;
+     rutas nginx comentadas + conf.d invalido -> instalador atomico con
+     marcadores y baseline por hash; identidad ilegible para USER node
+     (0644 en dir 0700 + preflight de UID en el wrapper); rollback DB
+     separado por hosts con recibos entre fases.
+
+Todo respondido en el PR #189 (abierto, SIN auto-merge — leccion aprendida:
+mi cadena integro el #188 durante la revision, y otro push mio tapo el exit
+code de la suite con un grep; ambas practicas corregidas).
+
+Piezas del PR: runbook final, wrapper de credencial con preflight de UID,
+instalador atomico de nginx (sha f30f1fa4...), helper .js (c8858aea...).
+
+Circuito restante: CI verde -> revision de Juan -> squash -> SHA final ->
+ventana unica 0-5 con recibo por paso en el #185 -> correo de Marco en el
+archivo de identidad -> su clave tecleada en persona -> flota real visible.
+
 ## Contenido de esta carpeta
 
 ```
