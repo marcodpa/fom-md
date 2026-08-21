@@ -223,6 +223,30 @@ Circuito restante: CI verde -> revision de Juan -> squash -> SHA final ->
 ventana unica 0-5 con recibo por paso en el #185 -> correo de Marco en el
 archivo de identidad -> su clave tecleada en persona -> flota real visible.
 
+## fom-prod: la delegacion de produccion, entregada (21 de agosto)
+
+Juan autorizo preparar el helper de delegacion (#190) y el PR #191 lo
+entrega, SIN auto-merge:
+
+- Diez subcomandos fijos: status, backup, plan, deploy, rollback-image,
+  nginx-install/remove, console-password, smoke, version.
+- EL CANDADO NUEVO: ningun cambio de base sin respaldo del dia — `backup`
+  (solo en fom-db-01) imprime un recibo con fecha y SHA; `deploy` (solo en
+  fom-app-01) exige pegarlo integro, valida que sea DE HOY y lo archiva.
+  Mecanica, no disciplina.
+- Envoltorio sobre las herramientas ya revisadas (deploy.sh
+  --with-migrations, rollback.sh, activos del #189 verificados por SHA
+  contra el commit objetivo antes de correr como root).
+- Exclusiones permanentes verificadas por prueba: psql, DELETE, TRUNCATE,
+  DROP, seed, migraciones down.
+- sha fom-prod=5d1c56f8..., instalador=49384715... (el instalador lleva
+  grabado el SHA del helper y la prueba lo recalcula del arbol).
+
+Circuito final: Juan revisa el #191 -> squash -> instala en ambos hosts ->
+YO ejecuto la ventana completa de produccion publicando recibos en el #185
+-> Marco teclea su clave -> SU FLOTA REAL EN EL PANEL. Y todo cambio futuro
+de la base de produccion pasa a ser un recibo, no una tarde.
+
 ## Contenido de esta carpeta
 
 ```
