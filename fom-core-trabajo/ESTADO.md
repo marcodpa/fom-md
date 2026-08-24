@@ -492,3 +492,22 @@ se omite.
 Siguiente paso: CI verde → integrar → re-ejecutar `fom-prod deploy` con la
 atestación del respaldo del día (recibo del 2026-08-24 vigente) → nginx →
 smoke → recibos en #191.
+
+---
+
+## 2026-08-24 — LAS TABLAS ESTÁN EN PRODUCCIÓN ✅
+
+Juan integró el PR #192 y Claude ejecutó la ventana completa:
+
+- `fom-prod deploy` → `MIGRATION_EXECUTED=YES DATABASE_CHANGED=YES
+  DEPLOYMENT_OK=YES`, commit `eb0bea1`, imagen `fom-core-api:git-eb0bea119ab7`
+  (rollback: `fom-core-api:git-978f731745c6`).
+- Nginx de consola instalado (`NGINX_CONSOLE_INSTALL_OK`).
+- Desde internet, las 4 rutas de consola responden 401 (exigen sesión): el
+  contrato exacto. La sonda interna del helper falla por hairpin NAT — defecto
+  de la sonda, anotado como seguimiento, no del servicio.
+- Recibos completos publicados en el #191.
+
+Falta UN paso para que Marco entre: Juan (root) crea
+`/opt/fom/secrets/prod/console-identity.email` con el email real de Marco y
+se corre `sudo fom-prod console-password` con Marco tecleando su contraseña.
