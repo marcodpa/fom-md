@@ -464,3 +464,31 @@ Para que Claude Code pueda ejecutarlos hace falta
 `.claude/settings.json` en el proyecto con la regla de permiso correspondiente.
 Ese archivo lo tiene que crear una persona: ampliar los permisos del asistente
 no es algo que el asistente pueda hacerse a sí mismo.
+
+---
+
+## 2026-08-24 — Primera ventana de producción: bloqueo diagnosticado y corregido (PR #192)
+
+La ejecución autorizada de `fom-prod deploy` (ventana del #191) llegó hasta la
+construcción de la imagen y falló ahí, **sin tocar la base**:
+
+```
+not ok 79 - Issue 160 developer pair helper is executable and valid Bash
+MIGRATION_EXECUTED=NO DATABASE_CHANGED=NO DEPLOYMENT_OK=NO
+```
+
+Diagnóstico: el archivo está como ejecutable (100755) en git en ambos commits,
+pero en el checkout de producción quedó sin bit de ejecución **en disco** (el
+archivo llegó por fetch posterior y ese repo no refleja modos). La prueba
+gemela de mobile-ingress pasó en el mismo build, o sea que no era un problema
+global del contexto.
+
+Corrección — PR #192 (solo pruebas, cero runtime, cero migraciones): la prueba
+verifica ahora el modo donde es autoritativo, el índice de git (`git ls-files
+--stage` debe decir 100755). Con git disponible la guarda es más fuerte que
+antes; en la imagen Docker (sin `.git`) el modo en disco no significa nada y
+se omite.
+
+Siguiente paso: CI verde → integrar → re-ejecutar `fom-prod deploy` con la
+atestación del respaldo del día (recibo del 2026-08-24 vigente) → nginx →
+smoke → recibos en #191.

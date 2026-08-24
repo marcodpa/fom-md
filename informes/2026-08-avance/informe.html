@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>FOM: informe de avance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lienzo: #0a0d12;
+    --superficie: #141a22;
+    --alta: #1d2530;
+    --tinta: #f3f5f8;
+    --acero: #abb3bf;
+    --filo: rgba(171, 179, 191, 0.13);
+    --azul: #3d9bf5;
+    --azul-p: #208aef;
+    --verde: #3dd68c;
+    --ambar: #f5c242;
+    --rojo: #ff6369;
+    --perla-a: #dce1ea;
+    --perla-b: #d1d7e2;
+    --tinta-prof: #0d1526;
+    --pizarra: #4a5468;
+    --nube: #eef1f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--lienzo); }
+  body {
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    color: var(--tinta);
+    font-size: 15.5px;
+    line-height: 1.6;
+  }
+  h1, h2, h3, .brand { font-family: 'Space Grotesk', 'Segoe UI', sans-serif; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  @page { size: Letter; margin: 0; }
+  .page {
+    width: 8.5in; height: 11in;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+    background: var(--lienzo);
+    padding: 0.62in 0.62in 0.85in;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--azul);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-size: 30px; font-weight: 600; letter-spacing: -0.025em;
+    line-height: 1.15; margin-bottom: 10px;
+  }
+  .lede { color: var(--acero); max-width: 62ch; margin-bottom: 22px; }
+
+  .pie {
+    position: absolute; left: 0.62in; right: 0.62in; bottom: 0.34in;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--filo); padding-top: 10px;
+    font-size: 11.5px; color: var(--acero);
+  }
+  .pie .marca { display: flex; align-items: center; gap: 7px; }
+  .pin { width: 10px; height: 10px; border-radius: 50% 50% 50% 0; background: var(--azul); transform: rotate(-45deg); }
+
+  .shot {
+    border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--filo);
+    background: var(--superficie);
+    box-shadow: 0 24px 50px -34px rgba(4, 12, 28, 0.9);
+  }
+  .shot img { width: 100%; display: block; }
+  .cap {
+    font-size: 12.5px; color: var(--acero);
+    margin-top: 9px; display: flex; align-items: baseline; gap: 8px;
+  }
+  .cap b { color: var(--tinta); font-weight: 600; }
+  .cap::before { content: ''; width: 14px; height: 2px; background: var(--azul); flex: none; align-self: center; }
+
+  .marco {
+    border-radius: 22px; padding: 7px;
+    background: var(--alta);
+    border: 1px solid var(--filo);
+  }
+  .marco .shot { border-radius: 15px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+
+  /* ---------- portada ---------- */
+  .portada { padding: 0; }
+  .portada .fondo { position: absolute; inset: 0; }
+  .portada .fondo img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .portada .velo {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10,13,18,0.55) 0%, rgba(10,13,18,0.35) 38%, rgba(10,13,18,0.94) 78%, #0a0d12 100%);
+  }
+  .portada .arriba { position: absolute; top: 0.62in; left: 0.62in; right: 0.62in; display: flex; justify-content: space-between; align-items: center; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 22px; letter-spacing: -0.01em; }
+  .brand .pin { width: 14px; height: 14px; }
+  .portada .fecha { font-size: 12.5px; color: var(--acero); }
+  .portada .abajo { position: absolute; left: 0.62in; right: 0.62in; bottom: 0.7in; }
+  .portada h1 {
+    font-size: 54px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.06;
+    margin: 12px 0 14px;
+  }
+  .portada h1 .azul { color: var(--azul); }
+  .portada .sub { color: var(--acero); font-size: 16px; max-width: 52ch; margin-bottom: 26px; }
+  .portada .cifras { display: flex; border-top: 1px solid var(--filo); padding-top: 18px; }
+  .portada .cifras div { flex: 1; padding-right: 18px; }
+  .portada .cifras div + div { border-left: 1px solid var(--filo); padding-left: 18px; }
+  .portada .cifras .n { font-family: 'Space Grotesk'; font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
+  .portada .cifras .t { font-size: 12px; color: var(--acero); margin-top: 2px; }
+
+  /* ---------- kpis ---------- */
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+  .kpi {
+    background: var(--superficie); border: 1px solid var(--filo); border-radius: 18px;
+    padding: 20px 22px;
+  }
+  .kpi .n { font-family: 'Space Grotesk'; font-size: 40px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+  .kpi .n small { font-size: 20px; color: var(--acero); font-weight: 500; }
+  .kpi .t { font-weight: 600; font-size: 14.5px; margin-top: 8px; }
+  .kpi .d { font-size: 12.5px; color: var(--acero); margin-top: 2px; }
+
+  .lista { list-style: none; }
+  .lista li {
+    padding: 11px 0 11px 0; border-bottom: 1px solid var(--filo);
+    display: flex; gap: 12px; align-items: baseline; font-size: 14.5px;
+  }
+  .lista li:first-child { border-top: 1px solid var(--filo); }
+  .lista .rombo { width: 7px; height: 7px; background: var(--azul); transform: rotate(45deg); flex: none; align-self: center; }
+  .lista b { font-weight: 600; }
+  .lista span { color: var(--acero); }
+
+  .estado { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+  .estado i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .estado.ok { color: var(--verde); } .estado.ok i { background: var(--verde); }
+  .estado.curso { color: var(--ambar); } .estado.curso i { background: var(--ambar); }
+
+  /* ---------- banda clara ---------- */
+  .clara {
+    background: linear-gradient(160deg, var(--perla-a), var(--perla-b));
+    color: var(--tinta-prof);
+  }
+  .clara .page-inner { }
+  .clara h2 { color: var(--tinta-prof); }
+  .clara .lede, .clara .cap, .clara .pie { color: var(--pizarra); }
+  .clara .pie { border-top-color: rgba(13,21,38,0.14); }
+  .clara .tarjeta {
+    background: var(--nube); border: 1px solid rgba(13,21,38,0.08); border-radius: 18px;
+    padding: 18px 20px; color: var(--pizarra); font-size: 14px;
+  }
+  .clara .tarjeta b { color: var(--tinta-prof); }
+  .clara .lista li { border-color: rgba(13,21,38,0.12); color: var(--pizarra); }
+  .clara .lista b { color: var(--tinta-prof); }
+  .clara .lista span { color: var(--pizarra); }
+  .clara .kpi { background: var(--nube); border-color: rgba(13,21,38,0.08); }
+  .clara .kpi .t { color: var(--tinta-prof); }
+  .clara .kpi .d, .clara .kpi .n small { color: var(--pizarra); }
+  .clara .kpi .n { color: var(--tinta-prof); }
+
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .apilado > .bloque + .bloque { margin-top: 18px; }
+  .apilado .shot { height: 3.42in; }
+  .apilado .shot img { height: 100%; object-fit: cover; object-position: top; }
+
+  .nota {
+    border: 1px solid var(--filo); border-left: 3px solid var(--azul);
+    border-radius: 0 14px 14px 0;
+    background: var(--superficie);
+    padding: 16px 20px; font-size: 13.5px; color: var(--acero);
+  }
+  .nota b { color: var(--tinta); }
+  .clara .nota { background: var(--nube); border-color: rgba(13,21,38,0.1); border-left-color: var(--azul-p); color: var(--pizarra); }
+  .clara .nota b { color: var(--tinta-prof); }
+
+  /* cierre */
+  .cierre { display: flex; flex-direction: column; justify-content: center; }
+  .cierre h2 { font-size: 40px; max-width: 16ch; }
+  .cierre .lede { font-size: 16.5px; }
+  .cta {
+    display: inline-block; margin-top: 10px;
+    background: var(--azul-p); color: #061019; font-weight: 600; font-size: 15px;
+    border-radius: 999px; padding: 13px 26px;
+    box-shadow: 0 18px 44px -20px rgba(61,155,245,0.75);
+  }
+</style>
+</head>
+<body>
+
+<!-- 1 · PORTADA -->
+<section class="page portada">
+  <div class="fondo"><img src="shots-opt/portada.jpg" alt=""></div>
+  <div class="velo"></div>
+  <div class="arriba">
+    <div class="brand"><span class="pin"></span>FOM</div>
+    <div class="fecha num">Cabimas, 21 de agosto de 2026</div>
+  </div>
+  <div class="abajo">
+    <div class="eyebrow">Informe de avance</div>
+    <h1>Tu flota en movimiento.<br><span class="azul">Tu operación bajo control.</span></h1>
+    <div class="sub">Estado del proyecto FOM: la plataforma de control y monitoreo de flotas para la Costa Oriental del Lago. Sitio, consola de supervisión y base de datos, funcionando de punta a punta en el ambiente de pruebas.</div>
+    <div class="cifras">
+      <div><div class="n num">24</div><div class="t">pantallas construidas</div></div>
+      <div><div class="n num">16</div><div class="t">consultas al servidor</div></div>
+      <div><div class="n num">18</div><div class="t">tablas en la base de datos</div></div>
+      <div><div class="n num">26</div><div class="t">unidades en el demo</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · RESUMEN EJECUTIVO -->
+<section class="page">
+  <div class="eyebrow">Resumen ejecutivo</div>
+  <h2>Dónde estamos, en corto</h2>
+  <p class="lede">FOM es la plataforma para localizar, organizar y supervisar flotas de vehículos desde una sola pantalla. Este informe muestra lo que ya está construido y funcionando hoy.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n num">24</div><div class="t">pantallas terminadas</div><div class="d">8 del sitio público y 16 de la consola de supervisión, con tema oscuro y claro</div></div>
+    <div class="kpi"><div class="n num">16</div><div class="t">consultas conectadas al servidor</div><div class="d">la consola ya lee vehículos, posiciones, recorridos y alertas desde la base de datos real</div></div>
+    <div class="kpi"><div class="n num">18</div><div class="t">tablas aplicadas en la base</div><div class="d">el esquema completo del negocio ya vive en PostgreSQL, en el ambiente de pruebas</div></div>
+    <div class="kpi"><div class="n num">2<small> rondas</small></div><div class="t">de revisión del paso a producción</div><div class="d">el procedimiento para publicar está escrito, revisado y aprobado, con plan de reversa</div></div>
+  </div>
+
+  <ul class="lista">
+    <li><span class="rombo"></span><div><b>El sitio público está completo.</b> <span>Portada con video, páginas de producto, seguridad, preguntas frecuentes y acceso.</span></div></li>
+    <li><span class="rombo"></span><div><b>La consola de supervisión está completa en pantalla.</b> <span>Resumen, mapa en vivo, flota, mantenimiento, inspecciones, documentos, personal, reportes y administración.</span></div></li>
+    <li><span class="rombo"></span><div><b>La conexión con la base real ya funciona.</b> <span>El rastreo en vivo, la lista de la flota y el expediente de cada unidad ya leen datos de PostgreSQL en el ambiente de pruebas.</span></div></li>
+    <li><span class="rombo"></span><div><b>El camino a producción está aprobado.</b> <span>Procedimiento paso a paso con respaldos obligatorios y tres rutas de reversa, revisado en dos rondas.</span></div></li>
+  </ul>
+
+  <div class="nota" style="margin-top:20px"><b>Sobre los datos de este informe.</b> Las capturas provienen del ambiente de pruebas, con una empresa y 26 unidades de ejemplo. Son datos realistas creados para validar cada pantalla mientras se completa la conexión de todos los módulos a la base real.</div>
+
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 2</div></div>
+</section>
+
+<!-- 3 · SITIO PÚBLICO -->
+<section class="page">
+  <div class="eyebrow">La cara pública</div>
+  <h2>Un sitio que vende el producto solo</h2>
+  <p class="lede">La primera impresión de FOM es una portada cinematográfica con video real de la Costa Oriental, y páginas que explican la plataforma con maquetas vivas.</p>
+  <div class="apilado">
+    <div class="bloque">
+      <div class="shot"><img src="shots-opt/02-plataforma.jpg" alt=""></div>
+      <div class="cap"><b>Página de plataforma.</b> Toda la flota en un solo panel, con maqueta real de la consola.</div>
+    </div>
+    <div class="bloque">
+      <div class="shot"><img src="shots-opt/03-seguridad.jpg" alt=""></div>
+      <div class="cap"><b>Página de seguridad.</b> El índice de manejo seguro y el cuidado del conductor, explicados al cliente.</div>
+    </div>
+  </div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 3</div></div>
+</section>
+
+<!-- 4 · ACCESO -->
+<section class="page">
+  <div class="eyebrow">La puerta de entrada</div>
+  <h2>Acceso con identidad propia</h2>
+  <p class="lede">La pantalla de acceso conecta el sitio con la consola. En el ambiente de pruebas la clave se verifica contra el servidor, con sesión que se puede revocar desde la base.</p>
+  <div class="marco"><div class="shot"><img src="shots-opt/04-entrar.jpg" alt=""></div></div>
+  <div class="cap"><b>Inicio de sesión.</b> Acceso por correo y contraseña, con cuentas de demostración para enseñar el producto.</div>
+  <div class="nota" style="margin-top:18px"><b>Seguridad desde el día uno.</b> La contraseña nunca viaja ni se guarda en texto plano: se protege con cifrado moderno y la sesión vive del lado del servidor, no en el navegador.</div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 4</div></div>
+</section>
+
+<!-- 5 · RESUMEN CONSOLA -->
+<section class="page">
+  <div class="eyebrow">La consola · 1 de 6</div>
+  <h2>Cómo va la operación, de un vistazo</h2>
+  <p class="lede">Al entrar, el supervisor ve el estado del día completo: flota en marcha, órdenes abiertas, alertas, inspecciones y documentos por vencer, con el mapa en vivo al centro.</p>
+  <div class="marco"><div class="shot"><img src="shots-opt/05-panel-resumen.jpg" alt=""></div></div>
+  <div class="cap"><b>Resumen.</b> Ocho indicadores del día y el mapa en vivo de las 26 unidades del demo.</div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 5</div></div>
+</section>
+
+<!-- 6 · CENTRO DE CONTROL -->
+<section class="page">
+  <div class="eyebrow">La consola · 2 de 6</div>
+  <h2>El centro de control en vivo</h2>
+  <p class="lede">Cada unidad en el mapa, con su conductor, su placa y su velocidad. Se filtra por estado y por área de trabajo: Occidente, Costa oriental, Sur del lago o contrato.</p>
+  <div class="marco"><div class="shot"><img src="shots-opt/06-centro-control.jpg" alt=""></div></div>
+  <div class="cap"><b>Centro de control.</b> Esta pantalla ya funciona conectada a la base de datos real en el ambiente de pruebas.</div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 6</div></div>
+</section>
+
+<!-- 7 · FLOTA + EXPEDIENTE -->
+<section class="page">
+  <div class="eyebrow">La consola · 3 de 6</div>
+  <h2>Cada unidad con su expediente</h2>
+  <p class="lede">La flota completa en una tabla viva, y al tocar una unidad se abre su expediente: ficha, kilometraje, índice de manejo, recorrido del día y sus pestañas de historial.</p>
+  <div class="apilado">
+    <div class="bloque">
+      <div class="shot"><img src="shots-opt/07-flota.jpg" alt=""></div>
+      <div class="cap"><b>Vehículos.</b> Las 26 unidades con estado, conductor y área asignada.</div>
+    </div>
+    <div class="bloque">
+      <div class="shot"><img src="shots-opt/08-expediente-vehiculo.jpg" alt=""></div>
+      <div class="cap"><b>Expediente de la Unidad 01.</b> Ficha completa, asignaciones y recorrido del día.</div>
+    </div>
+  </div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 7</div></div>
+</section>
+
+<!-- 8 · MANTENIMIENTO -->
+<section class="page">
+  <div class="eyebrow">La consola · 4 de 6</div>
+  <h2>Mantenimiento que no se pierde</h2>
+  <p class="lede">Las órdenes de trabajo van de abiertas a en revisión y a cerradas, en un tablero que cualquiera entiende. Cada orden carga su unidad, su costo y quién la reportó.</p>
+  <div class="marco"><div class="shot"><img src="shots-opt/09-mantenimiento.jpg" alt=""></div></div>
+  <div class="cap"><b>Mantenimiento.</b> Tablero de órdenes con correctivas y preventivas, y el costo acumulado del mes.</div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 8</div></div>
+</section>
+
+<!-- 9 · INSPECCIONES + ALERTAS -->
+<section class="page">
+  <div class="eyebrow">La consola · 5 de 6</div>
+  <h2>La rutina diaria, vigilada sola</h2>
+  <p class="lede">Cada mañana el sistema sabe qué unidades pasaron su inspección y cuáles no deben salir. Y cuando algo se sale de la regla, la alerta llega a la consola con su severidad.</p>
+  <div class="apilado">
+    <div class="bloque">
+      <div class="shot"><img src="shots-opt/10-inspecciones.jpg" alt=""></div>
+      <div class="cap"><b>Inspecciones.</b> El preoperacional del día: aprobadas, con observaciones y pendientes.</div>
+    </div>
+    <div class="bloque">
+      <div class="shot"><img src="shots-opt/11-alertas.jpg" alt=""></div>
+      <div class="cap"><b>Alertas.</b> Excesos de velocidad, documentos por vencer y unidades sin reportar, en una sola bandeja.</div>
+    </div>
+  </div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 9</div></div>
+</section>
+
+<!-- 10 · REPORTES -->
+<section class="page">
+  <div class="eyebrow">La consola · 6 de 6</div>
+  <h2>Reportes listos para la gerencia</h2>
+  <p class="lede">Kilometraje total, unidades en marcha, órdenes del período y costos, filtrados por área y por fecha. Se exportan a CSV o directo a PDF.</p>
+  <div class="marco"><div class="shot"><img src="shots-opt/12-reportes.jpg" alt=""></div></div>
+  <div class="cap"><b>Reportes.</b> La gestión de flota de los últimos 30 días, lista para imprimir o exportar.</div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 10</div></div>
+</section>
+
+<!-- 11 · ADMINISTRACIÓN -->
+<section class="page">
+  <div class="eyebrow">Administración FOM</div>
+  <h2>Un negocio de varias empresas</h2>
+  <p class="lede">FOM nace multiempresa. La capa de administración maneja contratistas, compañías y cuentas personales, con sus pagos, sus equipos GPS, sus usuarios y la auditoría de cada acción.</p>
+  <div class="marco"><div class="shot"><img src="shots-opt/15-admin-empresas.jpg" alt=""></div></div>
+  <div class="cap"><b>Empresas.</b> Cada ente con sus usuarios, sus unidades, su deuda y su estado de servicio. Suspender y reactivar toma un clic.</div>
+  <div class="nota" style="margin-top:18px"><b>Cinco pantallas solo para FOM.</b> Empresas, pagos, inventario de GPS, usuarios y auditoría: la administración del negocio ya está dibujada y funcionando con datos de ejemplo.</div>
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 11</div></div>
+</section>
+
+<!-- 12 · DEBAJO DEL CAPÓ (banda clara) -->
+<section class="page clara">
+  <div class="eyebrow">Lo que no se ve</div>
+  <h2>Debajo de las pantallas hay una base sólida</h2>
+  <p class="lede">Lo más difícil de este trimestre no se ve en una captura: es la conexión real entre la consola, el servidor y la base de datos, y el camino seguro para publicarlo.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n num">18</div><div class="t">tablas del negocio en PostgreSQL</div><div class="d">identidad, flota, operación, cumplimiento y telemetría, aplicadas por bloques y con pruebas</div></div>
+    <div class="kpi"><div class="n num">16</div><div class="t">consultas de la consola al servidor</div><div class="d">vehículos, posiciones, recorridos, órdenes, inspecciones, documentos y alertas</div></div>
+    <div class="kpi"><div class="n num">5</div><div class="t">máquinas de infraestructura propia</div><div class="d">portal, base de datos, aplicación y servicios, administradas por red privada</div></div>
+    <div class="kpi"><div class="n num">10</div><div class="t">comandos en el asistente de producción</div><div class="d">publicar con respaldo del día obligatorio y acciones peligrosas bloqueadas de fábrica</div></div>
+  </div>
+
+  <ul class="lista">
+    <li><span class="rombo"></span><div><b>Rastreo real funcionando.</b> <span>Los equipos GPS ya reportan al servidor y la posición llega del receptor a la base y de la base al mapa.</span></div></li>
+    <li><span class="rombo"></span><div><b>Sesiones seguras.</b> <span>Contraseñas cifradas con estándar moderno y sesiones que se pueden revocar desde el servidor.</span></div></li>
+    <li><span class="rombo"></span><div><b>Paso a producción aprobado.</b> <span>Procedimiento con pasos numerados, recibos de verificación y tres rutas de reversa, revisado en dos rondas.</span></div></li>
+  </ul>
+
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 12</div></div>
+</section>
+
+<!-- 13 · LO QUE VIENE + CIERRE -->
+<section class="page cierre">
+  <div class="eyebrow">Lo que viene</div>
+  <h2>Esto apenas empieza</h2>
+  <p class="lede">Con las pantallas terminadas y la base conectada, lo que sigue es encender módulo por módulo con datos reales. El orden ya está definido por valor para la operación.</p>
+
+  <ul class="lista" style="margin-bottom:26px">
+    <li><span class="rombo"></span><div><b>Conectar mantenimiento, inspecciones y documentos a la base real.</b> <span>Las pantallas ya existen; falta abrirles la llave de los datos.</span></div><span style="margin-left:auto" class="estado curso"><i></i>siguiente</span></li>
+    <li><span class="rombo"></span><div><b>Publicar en producción.</b> <span>El procedimiento está aprobado y el asistente de publicación entregado.</span></div><span style="margin-left:auto" class="estado curso"><i></i>listo para ejecutar</span></li>
+    <li><span class="rombo"></span><div><b>La app del conductor.</b> <span>Inspección diaria y órdenes de trabajo desde el teléfono, sobre los mismos datos.</span></div><span style="margin-left:auto" class="estado curso"><i></i>en diseño</span></li>
+    <li><span class="rombo"></span><div><b>Afinar la telemetría.</b> <span>Calibrar la unidad de velocidad y sumar encendido y odómetro de los equipos GPS.</span></div><span style="margin-left:auto" class="estado curso"><i></i>en estudio</span></li>
+  </ul>
+
+  <h2 style="font-size:34px">La mejor forma de verlo es en vivo</h2>
+  <p class="lede">Todo lo que muestra este informe se puede recorrer en una demostración de 20 minutos, con el mapa moviéndose y las pantallas reales. Cuando quieran, la agendamos.</p>
+  <div><span class="cta">Solicitar demostración</span></div>
+
+  <div class="pie"><div class="marca"><span class="pin"></span>FOM · Informe de avance</div><div class="num">agosto 2026 · pág. 13</div></div>
+</section>
+
+</body>
+</html>

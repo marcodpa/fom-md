@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Samfor: gestión de mantenimiento de la flota</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lienzo: #0a0d12;
+    --superficie: #141a22;
+    --alta: #1d2530;
+    --tinta: #f3f5f8;
+    --acero: #abb3bf;
+    --filo: rgba(171, 179, 191, 0.13);
+    --azul: #2f86e0;
+    --rojo-marca: #d81f26;
+    --azul-marca: #1b75d0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--lienzo); }
+  body {
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    color: var(--tinta);
+    font-size: 15.5px;
+    line-height: 1.6;
+  }
+  h1, h2, h3 { font-family: 'Space Grotesk', 'Segoe UI', sans-serif; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  @page { size: Letter; margin: 0; }
+  .page {
+    width: 8.5in; height: 11in;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+    background: var(--lienzo);
+    padding: 0.62in 0.62in 0.85in;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  .logo { display: inline-flex; align-items: center; gap: 12px; }
+  .logo svg { display: block; }
+
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--azul);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-size: 30px; font-weight: 600; letter-spacing: -0.025em;
+    line-height: 1.15; margin-bottom: 10px;
+  }
+  .lede { color: var(--acero); max-width: 64ch; margin-bottom: 22px; }
+
+  .pie {
+    position: absolute; left: 0.62in; right: 0.62in; bottom: 0.34in;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--filo); padding-top: 10px;
+    font-size: 11.5px; color: var(--acero);
+  }
+
+  .shot {
+    border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--filo);
+    background: var(--superficie);
+    box-shadow: 0 24px 50px -34px rgba(4, 12, 28, 0.9);
+  }
+  .shot img { width: 100%; display: block; }
+  .cap {
+    font-size: 12.5px; color: var(--acero);
+    margin-top: 9px; display: flex; align-items: baseline; gap: 8px;
+  }
+  .cap b { color: var(--tinta); font-weight: 600; }
+  .cap::before { content: ''; width: 14px; height: 2px; background: var(--azul); flex: none; align-self: center; }
+
+  .marco {
+    border-radius: 22px; padding: 7px;
+    background: var(--alta);
+    border: 1px solid var(--filo);
+  }
+  .marco .shot { border-radius: 15px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+
+  .apilado > .bloque + .bloque { margin-top: 18px; }
+  .apilado .shot { height: 3.42in; }
+  .apilado .shot img { height: 100%; object-fit: cover; object-position: top; }
+
+  /* portada */
+  .portada { padding: 0; }
+  .portada .fondo { position: absolute; inset: 0; }
+  .portada .fondo img { width: 100%; height: 100%; object-fit: cover; }
+  .portada .velo {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10,13,18,0.72) 0%, rgba(10,13,18,0.55) 35%, rgba(10,13,18,0.95) 74%, #0a0d12 100%);
+  }
+  .portada .arriba { position: absolute; top: 0.62in; left: 0.62in; right: 0.62in; display: flex; justify-content: space-between; align-items: center; }
+  .portada .fecha { font-size: 12.5px; color: var(--acero); }
+  .portada .abajo { position: absolute; left: 0.62in; right: 0.62in; bottom: 0.7in; }
+  .portada h1 {
+    font-size: 50px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.08;
+    margin: 12px 0 14px; max-width: 15ch;
+  }
+  .portada .sub { color: var(--acero); font-size: 16px; max-width: 58ch; margin-bottom: 26px; }
+  .portada .cifras { display: flex; border-top: 1px solid var(--filo); padding-top: 18px; }
+  .portada .cifras div { flex: 1; padding-right: 16px; }
+  .portada .cifras div + div { border-left: 1px solid var(--filo); padding-left: 16px; }
+  .portada .cifras .n { font-family: 'Space Grotesk'; font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
+  .portada .cifras .t { font-size: 12px; color: var(--acero); margin-top: 2px; }
+
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+  .kpi {
+    background: var(--superficie); border: 1px solid var(--filo); border-radius: 18px;
+    padding: 20px 22px;
+  }
+  .kpi .n { font-family: 'Space Grotesk'; font-size: 38px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+  .kpi .n small { font-size: 19px; color: var(--acero); font-weight: 500; }
+  .kpi .t { font-weight: 600; font-size: 14.5px; margin-top: 8px; }
+  .kpi .d { font-size: 12.5px; color: var(--acero); margin-top: 2px; }
+
+  .lista { list-style: none; }
+  .lista li {
+    padding: 11px 0; border-bottom: 1px solid var(--filo);
+    display: flex; gap: 12px; align-items: baseline; font-size: 14.5px;
+  }
+  .lista li:first-child { border-top: 1px solid var(--filo); }
+  .lista .rombo { width: 7px; height: 7px; background: var(--azul); transform: rotate(45deg); flex: none; align-self: center; }
+  .lista b { font-weight: 600; }
+  .lista span { color: var(--acero); }
+
+  .pasos { counter-reset: paso; margin: 6px 0 4px; list-style: none; }
+  .pasos li {
+    counter-increment: paso;
+    display: flex; gap: 16px; padding: 13px 0;
+    border-bottom: 1px solid var(--filo); font-size: 14.5px;
+  }
+  .pasos li:first-child { border-top: 1px solid var(--filo); }
+  .pasos li::before {
+    content: '0' counter(paso);
+    font-family: 'Space Grotesk'; font-weight: 600; font-size: 15px;
+    color: var(--azul); flex: none; width: 30px;
+    font-variant-numeric: tabular-nums;
+  }
+  .pasos b { font-weight: 600; }
+  .pasos span { color: var(--acero); }
+
+  .cierre { display: flex; flex-direction: column; justify-content: center; }
+  .cierre h2 { font-size: 38px; max-width: 20ch; }
+  .cierre .lede { font-size: 16.5px; }
+  .aviso { font-size: 11px; color: var(--acero); opacity: 0.75; margin-top: 34px; }
+</style>
+</head>
+<body>
+
+<!-- 1 · PORTADA -->
+<section class="page portada">
+  <div class="fondo"><img src="shots-opt/portada.jpg" alt=""></div>
+  <div class="velo"></div>
+  <div class="arriba">
+    <span class="logo"><img src="samfor-logo.png" alt="Samfor" style="height:54px; width:auto;"></span>
+    <div class="fecha num">Agosto de 2026</div>
+  </div>
+  <div class="abajo">
+    <div class="eyebrow">Informe operativo</div>
+    <h1>Gestión de mantenimiento de la flota</h1>
+    <div class="sub">Descripción del procedimiento de mantenimiento vehicular de Samfor, C.A. y del sistema que lo soporta: inspección preoperacional, órdenes de trabajo, control documental, registro de costos y generación de reportes.</div>
+    <div style="border-top: 1px solid var(--filo); padding-top: 16px; font-size: 12.5px; color: var(--acero);">Gerencia de Operaciones · Costa Oriental del Lago</div>
+  </div>
+</section>
+
+<!-- 2 · PROCEDIMIENTO -->
+<section class="page">
+  <div class="eyebrow">Procedimiento</div>
+  <h2>Ciclo de mantenimiento de la flota</h2>
+  <p class="lede">El mantenimiento se administra en una plataforma web centralizada. Cada evento del ciclo queda registrado con unidad, responsable, fecha y costo, y alimenta el expediente del vehículo y los reportes del período.</p>
+
+  <ol class="pasos">
+    <li><div><b>Inspección preoperacional diaria.</b> <span>Lista de chequeo por unidad (frenos, luces, neumáticos, niveles) antes de salir a ruta. El sistema clasifica el resultado: aprobada, con observaciones o bloqueada.</span></div></li>
+    <li><div><b>Registro de la falla.</b> <span>La orden de trabajo (ODT) se registra con unidad, descripción, tipo de falla y ubicación. Queda asociada al responsable que la generó.</span></div></li>
+    <li><div><b>Atención en taller.</b> <span>La orden avanza por tres estados: abierta, en revisión y cerrada. El estado es visible en todo momento.</span></div></li>
+    <li><div><b>Cierre con costo.</b> <span>Al cierre se carga el costo de la intervención: repuestos, mano de obra, lubricantes. El gasto se acumula por unidad y por período.</span></div></li>
+    <li><div><b>Historial y reportes.</b> <span>La orden queda en el expediente de la unidad y se refleja en los reportes por período y por área, exportables en CSV y PDF.</span></div></li>
+  </ol>
+
+  <div class="kpis" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 22px;">
+    <div class="kpi"><div class="n num">15</div><div class="t">órdenes del período</div><div class="d">11 correctivas y 4 preventivas</div></div>
+    <div class="kpi"><div class="n num">$1628</div><div class="t">costo registrado del mes</div><div class="d">cargado al cierre de cada orden</div></div>
+    <div class="kpi"><div class="n num">6</div><div class="t">órdenes cerradas este mes</div><div class="d">con historial por unidad</div></div>
+  </div>
+
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 2</span></div>
+</section>
+
+<!-- 3 · TABLERO ODT -->
+<section class="page">
+  <div class="eyebrow">Órdenes de trabajo</div>
+  <h2>Tablero de órdenes de trabajo</h2>
+  <p class="lede">Las órdenes se organizan en tres columnas según su estado: abiertas, en revisión y cerradas. Cada tarjeta identifica la unidad, la placa, el tipo de intervención (correctiva o preventiva), el responsable y la antigüedad del reporte. El costo acumulado del mes se calcula sobre las órdenes cerradas.</p>
+  <div class="marco"><div class="shot"><img src="shots-samfor-opt/01-mantenimiento-tablero.jpg" alt=""></div></div>
+  <div class="cap"><b>Tablero de órdenes.</b> Estados abierta, en revisión y cerrada, con clasificación correctiva y preventiva y costo acumulado del período.</div>
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 3</span></div>
+</section>
+
+<!-- 4 · REGISTRO Y TRAZABILIDAD -->
+<section class="page">
+  <div class="eyebrow">Órdenes de trabajo · registro</div>
+  <h2>Registro y trazabilidad de las órdenes</h2>
+  <p class="lede">El registro se realiza desde el propio panel con los campos unidad, descripción, tipo de falla y ubicación. La vista de lista presenta todas las órdenes con su unidad, tipo, falla, responsable, fecha de creación, estado y costo, para consulta y auditoría.</p>
+  <div class="apilado">
+    <div class="bloque">
+      <div class="shot"><img src="shots-samfor-opt/03-nueva-odt.jpg" alt=""></div>
+      <div class="cap"><b>Registro de una orden.</b> Formulario con unidad, descripción de la falla, tipo y ubicación.</div>
+    </div>
+    <div class="bloque">
+      <div class="shot"><img src="shots-samfor-opt/02-mantenimiento-lista.jpg" alt=""></div>
+      <div class="cap"><b>Vista de lista.</b> Registro completo de órdenes con responsable, fecha, estado y costo por fila.</div>
+    </div>
+  </div>
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 4</span></div>
+</section>
+
+<!-- 5 · INSPECCIONES -->
+<section class="page">
+  <div class="eyebrow">Prevención</div>
+  <h2>Inspección preoperacional diaria</h2>
+  <p class="lede">El módulo de inspecciones consolida el resultado del chequeo diario: unidades aprobadas, con observaciones y bloqueadas para salir a ruta. Adicionalmente acumula la estadística de ítems con falla (frenos, luces, neumáticos), insumo para la planificación de compras y de mantenimiento preventivo.</p>
+  <div class="marco"><div class="shot"><img src="shots-samfor-opt/04-inspecciones.jpg" alt=""></div></div>
+  <div class="cap"><b>Inspecciones del día.</b> Estado de la inspección por unidad y estadística de ítems con mayor incidencia de falla.</div>
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 5</span></div>
+</section>
+
+<!-- 6 · DOCUMENTOS -->
+<section class="page">
+  <div class="eyebrow">Cumplimiento</div>
+  <h2>Control documental de la flota</h2>
+  <p class="lede">Pólizas, certificados de circulación y revisiones técnicas se registran con su fecha de vencimiento. El módulo clasifica los documentos en vencidos, por vencer en 30 días y vigentes, y proyecta los vencimientos de los próximos seis meses para programar renovaciones.</p>
+  <div class="marco"><div class="shot"><img src="shots-samfor-opt/05-documentos.jpg" alt=""></div></div>
+  <div class="cap"><b>Documentos de la flota.</b> Clasificación por estado de vigencia y proyección de vencimientos a seis meses. Exportable a CSV.</div>
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 6</span></div>
+</section>
+
+<!-- 7 · EXPEDIENTE -->
+<section class="page">
+  <div class="eyebrow">Historial</div>
+  <h2>Expediente por unidad</h2>
+  <p class="lede">Cada vehículo cuenta con un expediente que reúne su ficha técnica, kilometraje, órdenes de trabajo, inspecciones, documentos y costos. El historial de mantenimiento de la unidad queda centralizado y disponible para consulta y auditoría.</p>
+  <div class="apilado">
+    <div class="bloque">
+      <div class="shot"><img src="shots-samfor-opt/06-expediente-mantenimiento.jpg" alt=""></div>
+      <div class="cap"><b>Pestaña de mantenimiento.</b> Órdenes de trabajo de la unidad con tipo de intervención y estado.</div>
+    </div>
+    <div class="bloque">
+      <div class="shot"><img src="shots-samfor-opt/07-expediente-costos.jpg" alt=""></div>
+      <div class="cap"><b>Pestaña de costos.</b> Gasto de la unidad desglosado por categoría: repuestos, mano de obra, lubricantes, seguros.</div>
+    </div>
+  </div>
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 7</span></div>
+</section>
+
+<!-- 8 · REPORTES -->
+<section class="page">
+  <div class="eyebrow">Reportes</div>
+  <h2>Generación de reportes</h2>
+  <p class="lede">Los reportes se generan desde el sistema con filtros de período (mes, 90 días, año) y de alcance (toda la empresa o un área). Cada reporte declara su alcance, su período y su fecha de generación, y se exporta en CSV para análisis o en PDF para entrega.</p>
+  <div class="marco"><div class="shot"><img src="shots-samfor-opt/08-reportes.jpg" alt=""></div></div>
+  <div class="cap"><b>Reporte de gestión de flota.</b> Últimos 30 días, con fecha de generación y alcance declarados en el encabezado.</div>
+  <ul class="lista" style="margin-top:14px">
+    <li><span class="rombo"></span><div><b>Contenido del reporte:</b> <span>unidades y su estado operativo, kilometraje total del período, órdenes abiertas, en revisión y cerradas, costo total y tiempo promedio de resolución.</span></div></li>
+  </ul>
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 8</span></div>
+</section>
+
+<!-- 9 · PANORAMA -->
+<section class="page">
+  <div class="eyebrow">Supervisión</div>
+  <h2>Panel de supervisión diaria</h2>
+  <p class="lede">El panel de resumen consolida los indicadores del día: órdenes abiertas, inspecciones completadas, unidades bloqueadas, documentos vencidos y alertas pendientes, junto con la posición de la flota. Es la vista de entrada del supervisor.</p>
+  <div class="marco"><div class="shot"><img src="shots-samfor-opt/09-resumen.jpg" alt=""></div></div>
+  <div class="cap"><b>Resumen del día.</b> Indicadores de mantenimiento y cumplimiento consolidados en una sola vista.</div>
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 9</span></div>
+</section>
+
+<!-- 10 · ADICIONAL GPS -->
+<section class="page">
+  <div class="eyebrow">Capacidad adicional</div>
+  <h2>Rastreo GPS integrado al mantenimiento</h2>
+  <p class="lede">La plataforma incorpora rastreo satelital como capacidad complementaria. No opera como un sistema aparte: la posición, el kilometraje y los eventos de manejo alimentan las mismas órdenes, inspecciones y reportes del ciclo de mantenimiento.</p>
+
+  <ul class="lista" style="margin-bottom:20px">
+    <li><span class="rombo"></span><div><b>Posición en tiempo real de cada unidad,</b> <span>con conductor asignado y velocidad, filtrable por estado y por área de trabajo.</span></div></li>
+    <li><span class="rombo"></span><div><b>Kilometraje automático para el preventivo.</b> <span>Los mantenimientos por kilometraje se programan con el odómetro calculado por GPS, sin registro manual.</span></div></li>
+    <li><span class="rombo"></span><div><b>Alertas de operación.</b> <span>Excesos de velocidad, unidades sin reportar y documentos por vencer se concentran en una sola bandeja.</span></div></li>
+  </ul>
+
+  <div class="marco"><div class="shot"><img src="shots-samfor-opt/10-centro-control.jpg" alt=""></div></div>
+  <div class="cap"><b>Centro de control.</b> Posición de la flota en tiempo real con filtros por estado y por área.</div>
+
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 10</span></div>
+</section>
+
+<!-- 11 · CIERRE -->
+<section class="page cierre">
+  <div class="eyebrow">Síntesis</div>
+  <h2>Registro, costo e historial en un solo sistema</h2>
+  <p class="lede">El mantenimiento de la flota de Samfor se soporta en un procedimiento definido y un sistema centralizado: inspección preoperacional diaria, orden de trabajo con responsable, cierre con costo, expediente por unidad y reportes generados desde el propio sistema. El rastreo GPS complementa el ciclo con posición y kilometraje automático.</p>
+
+  <ul class="lista" style="margin-bottom:26px">
+    <li><span class="rombo"></span><div><b>Trazabilidad.</b> <span>Cada orden registra quién la generó, la fecha, el tipo de falla, los estados por los que pasó y el costo de cierre.</span></div></li>
+    <li><span class="rombo"></span><div><b>Prevención.</b> <span>Inspección diaria obligatoria y mantenimientos preventivos programados por kilometraje cumplido.</span></div></li>
+    <li><span class="rombo"></span><div><b>Reportabilidad.</b> <span>Reportes por período y por área con alcance y fecha de generación declarados, exportables en CSV y PDF.</span></div></li>
+  </ul>
+
+  <span class="logo"><img src="samfor-logo.png" alt="Samfor" style="height:46px; width:auto;"></span>
+
+  <div class="aviso">Las pantallas de este documento son vistas ilustrativas del sistema de gestión de flota.</div>
+
+  <div class="pie"><span>Samfor, C.A. · Gestión de mantenimiento de flota</span><span class="num">agosto 2026 · pág. 11</span></div>
+</section>
+
+</body>
+</html>
