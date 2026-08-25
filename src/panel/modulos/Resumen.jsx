@@ -20,7 +20,10 @@ function cargarTablero() {
 }
 
 export default function Resumen() {
-  const { datos, estado, error, recargar } = useDatos(cargarTablero, [])
+  // El tablero también sigue algo vivo (el mini-mapa): mismo refresco
+  // silencioso que el centro de control, a ritmo más calmado porque aquí
+  // el mapa es de reojo, no de seguimiento.
+  const { datos, estado, error, recargar } = useDatos(cargarTablero, [], 30000)
 
   return (
     <>
