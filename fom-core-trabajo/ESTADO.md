@@ -549,3 +549,23 @@ En esta carpeta: `parches/197-carrera-reloj-odt.patch`, la migración en
 
 Nota para #187 y #194: al rebasar sobre esto, su eslabón de reversión va
 encima del de esta migración.
+
+---
+
+## 2026-08-25 — Fase 1 del directorio: PR #199 (encadenado al #194)
+
+Marco aprobó la matriz de permisos (documento publicado como artifact
+"Permisos FOM"). Con esa lógica quedó construida la Fase 1:
+
+- **PR #199**: primeras escrituras de la consola — crear usuarios (clave
+  temporal obligada a cambiarse), asignar/revocar conductores (principal /
+  secundario con PIN hasheado), crear/editar vehículos. Primera autorización
+  POR ROL del sistema (gestor / admin FOM). Dos migraciones: autoría
+  inmutable (quién creó cada cosa) y permiso mínimo de credenciales.
+- **PR #194** (proyector del estado vivo) sigue esperando el squash de Juan
+  tras su revisión de 4 puntos, ya atendida con CI verde.
+- La web ya muestra el mapa con posiciones en vivo (puente de última
+  posición) y se refresca sola (15 s centro de control / 30 s resumen).
+
+Pendiente: integración de #194 y #199 (Juan) → deploy con ventana → Fase 2
+(pantallas de Personal en la web contra los endpoints nuevos).
