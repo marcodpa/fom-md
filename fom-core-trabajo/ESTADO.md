@@ -5,7 +5,8 @@ vive en **otro repositorio** (`juancpachecog/fom-core`). Está aquí para poder
 continuar desde cualquier computadora sin depender de tener aquel repositorio
 clonado ni de recordar en qué rama quedó cada cosa.
 
-Última actualización: 18 de agosto de 2026, tras el despliegue en FOM-TEST.
+Última actualización: 25 de agosto de 2026, tras abrir el PR #197 (carrera de
+relojes al crear una ODT).
 
 ---
 
@@ -511,3 +512,40 @@ Juan integró el PR #192 y Claude ejecutó la ventana completa:
 Falta UN paso para que Marco entre: Juan (root) crea
 `/opt/fom/secrets/prod/console-identity.email` con el email real de Marco y
 se corre `sudo fom-prod console-password` con Marco tecleando su contraseña.
+
+---
+
+## 2026-08-25 — La carrera de relojes de las ODT, corregida (PR #197)
+
+El CI fallaba de vez en cuando en `test/operations-runtime.sql` con
+`work_orders_timestamps_check` sin que hubiera nada roto. Tumbó las corridas
+de los PR #187 y #194.
+
+**La causa, en sencillo:** al crear una orden de trabajo, la base le ponía la
+hora a tres columnas mirando el reloj tres veces (`DEFAULT clock_timestamp()`
+en cada una). Como `status_changed_at` se calcula antes que `created_at`,
+a veces quedaba un microsegundo "antes de crearse" y la regla que exige lo
+contrario rechazaba la fila. Una moneda al aire en cada INSERT.
+
+**El arreglo — [PR #197](https://github.com/juancpachecog/fom-core/pull/197),
+abierto, SIN auto-merge, lo revisa Juan:**
+
+- Migración nueva `20260825170000000_fix_work_order_insert_clock`: el trigger
+  BEFORE INSERT que ya vigilaba la tabla ahora copia `created_at` sobre
+  `updated_at` y `status_changed_at`. Una orden recién creada tiene UNA hora
+  de creación. En UPDATE nada cambia. Sin REVOKE nuevo (CREATE OR REPLACE
+  conserva los privilegios) y con `down()` que restaura el cuerpo original.
+- `operations-runtime.sql` gana la aserción 1.0: los tres relojes coinciden.
+- Los dos workflows (`ci.yml` y `gps-console-ci.yml`) suman su eslabón de
+  reversión ENCIMA de la cadena, como manda el comentario de advertencia.
+
+**Verificado en el banco PGlite** (25 migraciones aplican, la prueba pasa,
+el down restaura y re-aplica): con el cuerpo original la carrera se reprodujo
+de verdad — 1 de 2000 INSERTs falló con ese mismo error—; con el arreglo,
+0 de 2000 y las tres columnas idénticas. `tsc --noEmit` limpio.
+
+En esta carpeta: `parches/197-carrera-reloj-odt.patch`, la migración en
+`migraciones/` y la prueba actualizada en `pruebas/`.
+
+Nota para #187 y #194: al rebasar sobre esto, su eslabón de reversión va
+encima del de esta migración.

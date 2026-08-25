@@ -53,6 +53,20 @@ VALUES
 
 DO $prueba$
 BEGIN
+  -- 1.0 · Una orden recien creada tiene UNA hora de creacion. Con tres
+  -- DEFAULT clock_timestamp() independientes, status_changed_at podia caer un
+  -- microsegundo antes que created_at y el INSERT de arriba fallaba al azar
+  -- (work_orders_timestamps_check, PR #187 y #194); desde 20260825170000000
+  -- el trigger sella las tres columnas con el mismo instante.
+  IF NOT EXISTS (
+    SELECT 1 FROM fom.work_orders
+    WHERE id = 'e4000000-0000-4000-8000-000000000001'
+      AND updated_at = created_at
+      AND status_changed_at = created_at
+  ) THEN
+    RAISE EXCEPTION 'FALLO 1.0: los relojes de creacion no coinciden';
+  END IF;
+
   -- 1.a · Valida: abierta -> en_revision
   UPDATE fom.work_orders SET status = 'en_revision'
     WHERE id = 'e4000000-0000-4000-8000-000000000001';

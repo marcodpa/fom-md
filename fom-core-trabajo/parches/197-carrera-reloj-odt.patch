@@ -1,0 +1,288 @@
+From a9c4154aaa354d769f4274ae16aae834dbe97e79 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 25 Aug 2026 10:35:51 -0400
+Subject: [PATCH] Corregir la carrera de relojes al crear una orden de trabajo
+
+fom.work_orders declara status_changed_at, created_at y updated_at con
+DEFAULT clock_timestamp() cada una: tres lecturas distintas del reloj en
+el mismo INSERT. Como los DEFAULT se evaluan en el orden de las columnas
+y status_changed_at va antes que created_at, podia quedar un microsegundo
+por debajo y violar work_orders_timestamps_check al azar. Tumbo el CI de
+los PR #187 y #194 en test/operations-runtime.sql.
+
+El trigger BEFORE INSERT ahora copia created_at sobre updated_at y
+status_changed_at: una orden recien creada tiene una sola hora de
+creacion. En UPDATE nada cambia. En el banco PGlite local, el cuerpo
+original perdio la carrera 1 vez en 2000 INSERTs; el sellado, 0 en 2000.
+
+La prueba de runtime gana la asercion 1.0 (los tres relojes coinciden) y
+los dos workflows suman su eslabon de reversion encima de la cadena.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+---
+ .github/workflows/ci.yml                      |   8 +
+ .github/workflows/gps-console-ci.yml          |   8 +
+ ...25170000000_fix_work_order_insert_clock.ts | 187 ++++++++++++++++++
+ test/operations-runtime.sql                   |  14 ++
+ 4 files changed, 217 insertions(+)
+ create mode 100644 src/database/migrations/files/20260825170000000_fix_work_order_insert_clock.ts
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 24a22e4..b7d840d 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -372,6 +372,14 @@ jobs:
+       # el primer `migration:down`. Los pasos siguientes revierten en cadena y
+       # cada uno afirma cual espera encontrar arriba: si se anade otra
+       # migracion, su paso de reversion va aqui, antes que este.
++      - name: Validate work order insert clock down
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260825170000000_fix_work_order_insert_clock'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT prosrc LIKE '%NEW.status_changed_at = NEW.created_at%' FROM pg_proc WHERE oid = 'fom.maintain_work_order_record()'::regprocedure")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260825170000000_fix_work_order_insert_clock'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT prosrc LIKE '%NEW.status_changed_at = NEW.created_at%' FROM pg_proc WHERE oid = 'fom.maintain_work_order_record()'::regprocedure")" = "f"
++
+       - name: Validate compliance and audit domain down
+         run: |
+           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818120000000_create_compliance_and_audit_domain'")" = "1"
+diff --git a/.github/workflows/gps-console-ci.yml b/.github/workflows/gps-console-ci.yml
+index f73a083..b6ceb21 100644
+--- a/.github/workflows/gps-console-ci.yml
++++ b/.github/workflows/gps-console-ci.yml
+@@ -143,6 +143,14 @@ jobs:
+       # ultima migracion aplicada. Toda migracion nueva necesita su paso aqui
+       # arriba, o el primer `down` revierte la nueva y falla la comprobacion
+       # siguiente sin que haya nada roto que senalar.
++      - name: Roll back work order insert clock
++        run: |
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260825170000000_fix_work_order_insert_clock'")" = "1"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT prosrc LIKE '%NEW.status_changed_at = NEW.created_at%' FROM pg_proc WHERE oid = 'fom.maintain_work_order_record()'::regprocedure")" = "t"
++          npm run migration:down
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260825170000000_fix_work_order_insert_clock'")" = "0"
++          test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT prosrc LIKE '%NEW.status_changed_at = NEW.created_at%' FROM pg_proc WHERE oid = 'fom.maintain_work_order_record()'::regprocedure")" = "f"
++
+       - name: Roll back compliance and audit domain
+         run: |
+           test "$(psql -h localhost -U fom_core_ci -d fom_core_ci -tAc "SELECT count(*) FROM fom_meta.pgmigrations WHERE name='20260818120000000_create_compliance_and_audit_domain'")" = "1"
+diff --git a/src/database/migrations/files/20260825170000000_fix_work_order_insert_clock.ts b/src/database/migrations/files/20260825170000000_fix_work_order_insert_clock.ts
+new file mode 100644
+index 0000000..f9e6996
+--- /dev/null
++++ b/src/database/migrations/files/20260825170000000_fix_work_order_insert_clock.ts
+@@ -0,0 +1,187 @@
++import type { MigrationBuilder } from 'node-pg-migrate/dist/bundle/index';
++
++/**
++ * Sella los tres relojes de una ODT recién creada en un solo instante.
++ *
++ * fom.work_orders declara status_changed_at, created_at y updated_at con
++ * DEFAULT clock_timestamp() cada una: tres lecturas distintas del reloj
++ * dentro del mismo INSERT. La restricción work_orders_timestamps_check exige
++ * status_changed_at >= created_at, pero los DEFAULT se evalúan en el orden de
++ * declaración de las columnas y status_changed_at está declarada antes que
++ * created_at, así que puede quedar un microsegundo por debajo y el INSERT
++ * falla sin que el dato tenga nada de malo. Es intermitente por construcción:
++ * tumbó el CI de los PR #187 y #194 en test/operations-runtime.sql y seguirá
++ * haciéndolo mientras lo decida el azar del reloj.
++ *
++ * El arreglo vive en el trigger BEFORE INSERT que ya custodia la tabla, no en
++ * los DEFAULT: una orden recién creada tiene UNA hora de creación y las tres
++ * columnas deben decir exactamente esa. En INSERT el trigger copia created_at
++ * sobre updated_at y status_changed_at; el comportamiento en UPDATE no cambia
++ * en nada. Se reemplaza la función entera porque plpgsql no permite parchar
++ * solo el final; el resto del cuerpo es copia literal de 20260818110000000.
++ *
++ * CREATE OR REPLACE conserva los privilegios que fijó 20260818110000000
++ * (REVOKE ALL ... FROM PUBLIC), de modo que aquí no hay REVOKE que repetir.
++ * down() restaura el cuerpo original literal, con su carrera incluida: eso es
++ * lo que había, y la cadena de reversión del CI comprueba estados, no gustos.
++ */
++
++export const up = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    CREATE OR REPLACE FUNCTION fom.maintain_work_order_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id
++        OR NEW.created_by_user_id IS DISTINCT FROM OLD.created_by_user_id
++        OR NEW.author_via IS DISTINCT FROM OLD.author_via
++        OR NEW.kind IS DISTINCT FROM OLD.kind
++        OR NEW.alert_rule_id IS DISTINCT FROM OLD.alert_rule_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'work order identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'INSERT' AND NEW.status <> 'abierta' THEN
++        RAISE EXCEPTION 'a work order is always created in status abierta'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE' AND NEW.status IS DISTINCT FROM OLD.status THEN
++        -- Reabrir devuelve a revisión, nunca a abierta: el trabajo ya pasó por
++        -- el taller, y fingir lo contrario produciría un segundo tramo de
++        -- "abierta" que ensucia la métrica de primera respuesta.
++        -- Cancelar se permite desde cualquier estado no terminal: una orden
++        -- se anula por motivos ajenos al taller —el vehiculo se vendio, la
++        -- falla no existia— y obligar a pasarla por revision para cerrarla
++        -- falsearia el historial de trabajo.
++        IF NOT (
++          (OLD.status = 'abierta'
++            AND NEW.status IN ('en_revision', 'cerrada', 'cancelada'))
++          OR (OLD.status = 'en_revision'
++            AND NEW.status IN ('abierta', 'aprobada', 'cerrada', 'cancelada'))
++          OR (OLD.status = 'aprobada'
++            AND NEW.status IN ('en_revision', 'cerrada', 'cancelada'))
++          OR (OLD.status = 'cerrada' AND NEW.status = 'en_revision')
++        ) THEN
++          RAISE EXCEPTION 'invalid work order status transition: % to %',
++            OLD.status, NEW.status
++            USING ERRCODE = '23514';
++        END IF;
++        NEW.status_changed_at = clock_timestamp();
++      END IF;
++
++      -- Cerrar fija resuelta_en; reabrir lo limpia. Se conservan la nota y el
++      -- costo: el gasto ya incurrido no desaparece porque se reabra.
++      IF NEW.status = 'cerrada' THEN
++        NEW.resolved_at = coalesce(NEW.resolved_at, clock_timestamp());
++      ELSE
++        NEW.resolved_at = NULL;
++      END IF;
++
++      NEW.description = btrim(NEW.description);
++      NEW.failure_type = CASE
++        WHEN NEW.failure_type IS NULL THEN NULL
++        ELSE lower(btrim(NEW.failure_type)) END;
++      NEW.location = CASE
++        WHEN NEW.location IS NULL THEN NULL ELSE btrim(NEW.location) END;
++      NEW.resolution_note = CASE
++        WHEN NEW.resolution_note IS NULL THEN NULL
++        ELSE btrim(NEW.resolution_note) END;
++      NEW.last_status_note = CASE
++        WHEN NEW.last_status_note IS NULL THEN NULL
++        ELSE btrim(NEW.last_status_note) END;
++
++      -- Una sola hora de creación. Los tres DEFAULT clock_timestamp() son
++      -- lecturas independientes y status_changed_at, declarada antes que
++      -- created_at, podía quedar un microsegundo por debajo y disparar
++      -- work_orders_timestamps_check al azar.
++      IF TG_OP = 'INSERT' THEN
++        NEW.updated_at = NEW.created_at;
++        NEW.status_changed_at = NEW.created_at;
++      ELSE
++        NEW.updated_at = clock_timestamp();
++      END IF;
++      RETURN NEW;
++    END
++    $function$;
++  `);
++};
++
++export const down = (pgm: MigrationBuilder): void => {
++  pgm.sql(`
++    CREATE OR REPLACE FUNCTION fom.maintain_work_order_record()
++    RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $function$
++    BEGIN
++      IF TG_OP = 'UPDATE' AND (
++        NEW.id IS DISTINCT FROM OLD.id
++        OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
++        OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id
++        OR NEW.created_by_user_id IS DISTINCT FROM OLD.created_by_user_id
++        OR NEW.author_via IS DISTINCT FROM OLD.author_via
++        OR NEW.kind IS DISTINCT FROM OLD.kind
++        OR NEW.alert_rule_id IS DISTINCT FROM OLD.alert_rule_id
++        OR NEW.created_at IS DISTINCT FROM OLD.created_at
++      ) THEN
++        RAISE EXCEPTION 'work order identity is immutable'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'INSERT' AND NEW.status <> 'abierta' THEN
++        RAISE EXCEPTION 'a work order is always created in status abierta'
++          USING ERRCODE = '23514';
++      END IF;
++
++      IF TG_OP = 'UPDATE' AND NEW.status IS DISTINCT FROM OLD.status THEN
++        -- Reabrir devuelve a revisión, nunca a abierta: el trabajo ya pasó por
++        -- el taller, y fingir lo contrario produciría un segundo tramo de
++        -- "abierta" que ensucia la métrica de primera respuesta.
++        -- Cancelar se permite desde cualquier estado no terminal: una orden
++        -- se anula por motivos ajenos al taller —el vehiculo se vendio, la
++        -- falla no existia— y obligar a pasarla por revision para cerrarla
++        -- falsearia el historial de trabajo.
++        IF NOT (
++          (OLD.status = 'abierta'
++            AND NEW.status IN ('en_revision', 'cerrada', 'cancelada'))
++          OR (OLD.status = 'en_revision'
++            AND NEW.status IN ('abierta', 'aprobada', 'cerrada', 'cancelada'))
++          OR (OLD.status = 'aprobada'
++            AND NEW.status IN ('en_revision', 'cerrada', 'cancelada'))
++          OR (OLD.status = 'cerrada' AND NEW.status = 'en_revision')
++        ) THEN
++          RAISE EXCEPTION 'invalid work order status transition: % to %',
++            OLD.status, NEW.status
++            USING ERRCODE = '23514';
++        END IF;
++        NEW.status_changed_at = clock_timestamp();
++      END IF;
++
++      -- Cerrar fija resuelta_en; reabrir lo limpia. Se conservan la nota y el
++      -- costo: el gasto ya incurrido no desaparece porque se reabra.
++      IF NEW.status = 'cerrada' THEN
++        NEW.resolved_at = coalesce(NEW.resolved_at, clock_timestamp());
++      ELSE
++        NEW.resolved_at = NULL;
++      END IF;
++
++      NEW.description = btrim(NEW.description);
++      NEW.failure_type = CASE
++        WHEN NEW.failure_type IS NULL THEN NULL
++        ELSE lower(btrim(NEW.failure_type)) END;
++      NEW.location = CASE
++        WHEN NEW.location IS NULL THEN NULL ELSE btrim(NEW.location) END;
++      NEW.resolution_note = CASE
++        WHEN NEW.resolution_note IS NULL THEN NULL
++        ELSE btrim(NEW.resolution_note) END;
++      NEW.last_status_note = CASE
++        WHEN NEW.last_status_note IS NULL THEN NULL
++        ELSE btrim(NEW.last_status_note) END;
++      NEW.updated_at = clock_timestamp();
++      RETURN NEW;
++    END
++    $function$;
++  `);
++};
+diff --git a/test/operations-runtime.sql b/test/operations-runtime.sql
+index 04477b7..6de9a98 100644
+--- a/test/operations-runtime.sql
++++ b/test/operations-runtime.sql
+@@ -53,6 +53,20 @@ VALUES
+ 
+ DO $prueba$
+ BEGIN
++  -- 1.0 · Una orden recien creada tiene UNA hora de creacion. Con tres
++  -- DEFAULT clock_timestamp() independientes, status_changed_at podia caer un
++  -- microsegundo antes que created_at y el INSERT de arriba fallaba al azar
++  -- (work_orders_timestamps_check, PR #187 y #194); desde 20260825170000000
++  -- el trigger sella las tres columnas con el mismo instante.
++  IF NOT EXISTS (
++    SELECT 1 FROM fom.work_orders
++    WHERE id = 'e4000000-0000-4000-8000-000000000001'
++      AND updated_at = created_at
++      AND status_changed_at = created_at
++  ) THEN
++    RAISE EXCEPTION 'FALLO 1.0: los relojes de creacion no coinciden';
++  END IF;
++
+   -- 1.a · Valida: abierta -> en_revision
+   UPDATE fom.work_orders SET status = 'en_revision'
+     WHERE id = 'e4000000-0000-4000-8000-000000000001';
+-- 
+2.55.0.windows.3
+
