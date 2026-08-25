@@ -89,7 +89,9 @@ async function flota(q = '') {
   if (!q && enVuelo && ahora - enVueloDesde < VENTANA_COMPARTIDA_MS) {
     return enVuelo
   }
-  const peticion = api.vehiculos({ q }).then((r) => (r?.items ?? []).map(comoUnidad))
+  const peticion = api.vehiculos({ q })
+    .then((r) => (r?.items ?? []).map(comoUnidad))
+    .then(conPosicionDirecta)
   if (!q) {
     enVueloDesde = ahora
     enVuelo = peticion
@@ -100,6 +102,49 @@ async function flota(q = '') {
     })
   }
   return peticion
+}
+
+/**
+ * PUENTE mientras el estado vivo del servidor llega vacío (Issue #169,
+ * PR #194 de fom-core): si una unidad viene sin último reporte, se le pide
+ * su ÚLTIMA posición — una sola lectura por unidad, no el recorrido — y con
+ * eso el mapa pinta y el contador de reportando dice la verdad.
+ *
+ * El tope de 25 unidades es deliberado: este puente es para flotas chicas
+ * mientras el servidor no proyecta el estado vivo; con flotas grandes la
+ * ronda de peticiones se volvería el problema, y la respuesta correcta es
+ * la proyección del lado de la base, no más peticiones. Cuando el servidor
+ * empiece a mandar lastReportAt, este código deja de ejecutarse solo.
+ */
+async function conPosicionDirecta(lista) {
+  const sinVivo = lista.filter((v) => !v.ultimoReporte)
+  if (sinVivo.length === 0 || sinVivo.length > 25) return lista
+  const posiciones = await Promise.all(
+    sinVivo.map((v) =>
+      api
+        .posicionDeVehiculo(v.id)
+        .then((r) => r?.position ?? null)
+        // Sin posición no hay nada que corregir: la unidad queda como estaba.
+        .catch(() => null),
+    ),
+  )
+  const porId = new Map()
+  sinVivo.forEach((v, i) => porId.set(v.id, posiciones[i]))
+  return lista.map((v) => {
+    const p = porId.get(v.id)
+    if (!p) return v
+    return {
+      ...v,
+      lat: p.latitude ?? v.lat,
+      lng: p.longitude ?? v.lng,
+      ultimoReporte: p.receivedAt ?? null,
+      posicionEn: p.receivedAt ?? null,
+      rumbo: p.telemetry?.headingDeg ?? null,
+      velocidadKmh: p.telemetry?.speedKph ?? null,
+      conectado: Boolean(p.receivedAt),
+      conexion: p.receivedAt ? 'reportando' : 'sin_senal',
+    }
+  })
 }
 
 function conductoresPorVehiculo(lista) {

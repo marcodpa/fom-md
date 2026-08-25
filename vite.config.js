@@ -77,6 +77,9 @@ function puenteFom(env) {
   return {
     target: destino,
     changeOrigin: true,
+    // El servidor de producción presenta un certificado autofirmado; el puente
+    // lo acepta porque la IP destino está fijada aquí mismo, no la elige nadie.
+    secure: false,
     rewrite: (ruta) => ruta.replace(/^\/fom-api/, ''),
 
     // ATAJO DE DESARROLLO, y su límite.
