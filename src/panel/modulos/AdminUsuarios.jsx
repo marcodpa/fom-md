@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import repo from '../datos/repo'
+import repo, { DIRECTORIO_REAL } from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import {
@@ -17,6 +17,9 @@ import { Icono } from '../Iconos'
 // ============================================================
 
 function cargar(q, empresaId, rol) {
+  if (DIRECTORIO_REAL) {
+    return repo.admin.usuarios.listar({ q, rol }).then((lista) => ({ lista, empresas: [] }))
+  }
   return Promise.all([
     repo.admin.usuarios.listar({ q, empresaId, rol }),
     repo.admin.empresas.listar({}),
@@ -73,7 +76,9 @@ export default function AdminUsuarios() {
     <>
       <Cabecera
         titulo="Usuarios del sistema"
-        bajada="Todas las cuentas de todas las empresas, con las reglas de mando de la app."
+        bajada={DIRECTORIO_REAL
+          ? 'Directorio real del ente autorizado por tu sesión.'
+          : 'Todas las cuentas de todas las empresas, con las reglas de mando de la app.'}
       >
         <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
           <Icono nombre="mas" tam={16} />
@@ -98,6 +103,7 @@ export default function AdminUsuarios() {
             aDesempleados={aDesempleados}
             eliminarDefinitivo={eliminarDefinitivo}
             abrirMover={setMoviendo}
+            directorioReal={DIRECTORIO_REAL}
           />
         )}
       </div>
@@ -110,14 +116,15 @@ export default function AdminUsuarios() {
             alCerrar={() => setCreando(false)}
             alGuardar={recargar}
             actor={actor}
+            directorioReal={DIRECTORIO_REAL}
           />
-          <ModalMover
+          {!DIRECTORIO_REAL && <ModalMover
             usuario={moviendo}
             empresas={datos.empresas}
             alCerrar={() => setMoviendo(null)}
             alGuardar={recargar}
             actor={actor}
-          />
+          />}
         </>
       )}
 
@@ -144,7 +151,7 @@ export default function AdminUsuarios() {
 
 function Contenido({
   datos, q, setQ, empresaId, setEmpresaId, rol, setRol, aviso,
-  restablecerClave, aDesempleados, eliminarDefinitivo, abrirMover,
+  restablecerClave, aDesempleados, eliminarDefinitivo, abrirMover, directorioReal,
 }) {
   const { lista, empresas } = datos
   const desempleados = lista.filter((p) => p.esDesempleado).length
@@ -166,7 +173,7 @@ function Contenido({
         sinCuerpo
       >
         <div className="pnl-card-cuerpo">
-          <div className="pnl-chips">
+          {!directorioReal && <div className="pnl-chips">
             <select
               className="pnl-input"
               value={empresaId}
@@ -178,14 +185,22 @@ function Contenido({
                 <option key={e.id} value={e.id}>{e.nombre}</option>
               ))}
             </select>
-          </div>
+          </div>}
           <Chips
-            opciones={[
-              { v: '', t: 'Todos' },
-              { v: 'conductor', t: 'Conductores' },
-              { v: 'supervisor_company', t: 'Supervisores' },
-              { v: 'supervisor_personal', t: 'Personales' },
-            ]}
+            opciones={directorioReal
+              ? [
+                  { v: '', t: 'Todos' },
+                  { v: 'conductor', t: 'Conductores' },
+                  { v: 'supervisor', t: 'Supervisores' },
+                  { v: 'operator', t: 'Operadores' },
+                  { v: 'usuario', t: 'Usuarios' },
+                ]
+              : [
+                  { v: '', t: 'Todos' },
+                  { v: 'conductor', t: 'Conductores' },
+                  { v: 'supervisor_company', t: 'Supervisores' },
+                  { v: 'supervisor_personal', t: 'Personales' },
+                ]}
             valor={rol}
             alCambiar={setRol}
           />
@@ -201,7 +216,7 @@ function Contenido({
               <thead>
                 <tr>
                   <th>Usuario</th>
-                  <th>Empresa</th>
+                  <th>{directorioReal ? 'Alcance' : 'Empresa'}</th>
                   <th>Rol</th>
                   <th>Señales</th>
                   <th aria-label="Acciones" />
@@ -231,7 +246,7 @@ function Contenido({
                       </div>
                     </td>
                     <td className="num">
-                      {p.rol !== 'admin' && (
+                      {!directorioReal && p.rol !== 'admin' && (
                         <div className="pnl-chips">
                           <button type="button" className="pnl-btn sutil" onClick={() => abrirMover(p)}>
                             Mover
@@ -262,12 +277,40 @@ function Contenido({
   )
 }
 
-function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor }) {
+const GRUPOS_CLAVE = [
+  'ABCDEFGHJKLMNPQRSTUVWXYZ',
+  'abcdefghijkmnopqrstuvwxyz',
+  '23456789',
+  '!@#$%*-_',
+]
+const CARACTERES_CLAVE = GRUPOS_CLAVE.join('')
+
+function indiceAleatorio(limite) {
+  const bytes = new Uint32Array(1)
+  crypto.getRandomValues(bytes)
+  return bytes[0] % limite
+}
+
+function generarClaveTemporal() {
+  const caracteres = GRUPOS_CLAVE.map((grupo) => grupo[indiceAleatorio(grupo.length)])
+  while (caracteres.length < 20) {
+    caracteres.push(CARACTERES_CLAVE[indiceAleatorio(CARACTERES_CLAVE.length)])
+  }
+  for (let i = caracteres.length - 1; i > 0; i -= 1) {
+    const j = indiceAleatorio(i + 1)
+    ;[caracteres[i], caracteres[j]] = [caracteres[j], caracteres[i]]
+  }
+  return caracteres.join('')
+}
+
+function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, directorioReal }) {
   const [nombre, setNombre] = useState('')
+  const [apellido, setApellido] = useState('')
   const [email, setEmail] = useState('')
   const [empresaId, setEmpresaId] = useState('')
   const [rol, setRol] = useState('conductor')
   const [conduce, setConduce] = useState(false)
+  const [clave, setClave] = useState(() => generarClaveTemporal())
   const [error, setError] = useState('')
   const [creado, setCreado] = useState(null) // {nombre, clave}
   const [guardando, setGuardando] = useState(false)
@@ -276,8 +319,8 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor }) {
   const destinos = empresas.filter((e) => !e.respaldo)
 
   const cerrar = () => {
-    setNombre(''); setEmail(''); setEmpresaId(''); setRol('conductor')
-    setConduce(false); setError(''); setCreado(null)
+    setNombre(''); setApellido(''); setEmail(''); setEmpresaId(''); setRol('conductor')
+    setConduce(false); setClave(generarClaveTemporal()); setError(''); setCreado(null)
     alCerrar()
   }
 
@@ -285,9 +328,19 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor }) {
     setGuardando(true)
     setError('')
     try {
-      const r = await repo.admin.usuarios.crear({ nombre, email, rol, empresaId, conduce }, actor)
+      if (!nombre.trim() || (directorioReal && !apellido.trim())) {
+        throw new Error('Escribe el nombre y el apellido.')
+      }
+      if (!/.+@.+\..+/.test(email)) throw new Error('Escribe un correo válido.')
+      if (directorioReal && clave.length < 16) {
+        throw new Error('La contraseña temporal debe tener al menos 16 caracteres.')
+      }
+      const nombreCompleto = [nombre, directorioReal ? apellido : ''].filter(Boolean).join(' ').trim()
+      const r = await repo.admin.usuarios.crear({
+        nombre: nombreCompleto, email, rol, empresaId, conduce, clave,
+      }, actor)
       await alGuardar()
-      setCreado({ nombre: r.nombre, clave: r.clave })
+      setCreado({ nombre: r.nombre, clave: r.clave, claveCreada: r.claveCreada !== false })
     } catch (e) {
       setError(e.message)
     } finally {
@@ -295,13 +348,24 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor }) {
     }
   }
 
+  const rolesReales = actor?.rol === 'admin_fom'
+    ? [
+        { v: 'supervisor', t: 'Supervisor' },
+        { v: 'conductor', t: 'Conductor' },
+        { v: 'operator', t: 'Operador' },
+        { v: 'usuario', t: 'Usuario' },
+      ]
+    : [{ v: 'conductor', t: 'Conductor' }]
+
   return (
     <Modal titulo="Nuevo usuario" abierto={abierto} alCerrar={cerrar} ancho={520}>
       {creado ? (
         <>
-          <p>
-            <b>{creado.nombre}</b> ya puede entrar con la clave <code>{creado.clave}</code>.
-          </p>
+          {creado.clave ? (
+            <p><b>{creado.nombre}</b> ya puede entrar con la clave <code>{creado.clave}</code>.</p>
+          ) : (
+            <p><b>{creado.nombre}</b> ya pertenecía al sistema y conserva su contraseña actual.</p>
+          )}
           <p className="pnl-campo-ayuda">
             Entrégasela en persona: deberá cambiarla al entrar. No se volverá a mostrar.
           </p>
@@ -316,25 +380,30 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor }) {
           <Campo etiqueta="Nombre" error={error}>
             <input type="text" className="pnl-input" value={nombre} onChange={(e) => setNombre(e.target.value)} />
           </Campo>
+          {directorioReal && (
+            <Campo etiqueta="Apellido">
+              <input type="text" className="pnl-input" value={apellido} onChange={(e) => setApellido(e.target.value)} />
+            </Campo>
+          )}
           <Campo etiqueta="Correo">
             <input type="email" className="pnl-input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="persona@empresa.com" />
           </Campo>
-          <Campo etiqueta="Empresa">
+          {!directorioReal && <Campo etiqueta="Empresa">
             <select className="pnl-input" value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
               <option value="">Selecciona el ente…</option>
               {destinos.map((e) => (
                 <option key={e.id} value={e.id}>{e.nombre} · {e.tipoEtiqueta}</option>
               ))}
             </select>
-          </Campo>
+          </Campo>}
           <Campo etiqueta="Rol" ayuda="El repositorio valida rol contra tipo de ente, igual que la app.">
             <select className="pnl-input" value={rol} onChange={(e) => setRol(e.target.value)}>
-              {ROLES_ASIGNABLES.map((r) => (
-                <option key={r} value={r}>{etiquetaRol(r, destino?.tipo)}</option>
+              {(directorioReal ? rolesReales : ROLES_ASIGNABLES.map((r) => ({ v: r, t: etiquetaRol(r, destino?.tipo) }))).map((r) => (
+                <option key={r.v} value={r.v}>{r.t}</option>
               ))}
             </select>
           </Campo>
-          <Campo etiqueta="Permisos">
+          {!directorioReal && <Campo etiqueta="Permisos">
             <label className="pnl-chip" style={{ display: 'inline-flex', gap: 8 }}>
               <input
                 type="checkbox"
@@ -344,7 +413,23 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor }) {
               />
               Conduce vehículos
             </label>
-          </Campo>
+          </Campo>}
+          {directorioReal && (
+            <Campo etiqueta="Contraseña temporal" ayuda="Mínimo 16 caracteres. La persona deberá cambiarla al entrar.">
+              <div className="pnl-chips">
+                <input
+                  type="text"
+                  className="pnl-input"
+                  value={clave}
+                  onChange={(e) => setClave(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <button type="button" className="pnl-btn sutil" onClick={() => setClave(generarClaveTemporal())}>
+                  Generar otra
+                </button>
+              </div>
+            </Campo>
+          )}
 
           <div className="pnl-chips">
             <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>

@@ -12,6 +12,7 @@ const Home = lazy(() => import('./pages/Home'))
 
 // La consola solo la carga quien entra al panel.
 const Entrar = lazy(() => import('./pages/Entrar'))
+const CambiarClaveInicial = lazy(() => import('./pages/CambiarClaveInicial'))
 const Consola = lazy(() => import('./panel/Consola'))
 
 // Al entrar a cualquier tab, empezar desde arriba. useLayoutEffect corre
@@ -173,6 +174,7 @@ export default function App() {
           <Route path="/contacto" element={<ProductPage />} />
           <Route path="/preguntas-frecuentes" element={<ProductPage />} />
           <Route path="/entrar" element={<Entrar />} />
+          <Route path="/cambiar-clave-inicial" element={<CambiarClaveInicial />} />
           <Route path="/panel/*" element={<Consola />} />
           <Route path="*" element={<ProductPage />} />
         </Routes>

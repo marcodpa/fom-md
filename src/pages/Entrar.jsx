@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { alCambiar, CONECTADO_A_BD, CUENTAS_DEMO, iniciarSesion, sesionActual } from '../panel/auth'
 import GloboCanvas from '../components/GloboCanvas'
 
@@ -49,6 +49,7 @@ const Ojo = ({ tachado }) => (
 
 export default function Entrar() {
   const navegar = useNavigate()
+  const ubicacion = useLocation()
   const [usuario, setUsuario] = useState('')
   const [clave, setClave] = useState('')
   const [verClave, setVerClave] = useState(false)
@@ -59,9 +60,10 @@ export default function Entrar() {
     document.title = 'Inicia sesión — FOM'
     // Contra la base real la sesión se resuelve preguntando al servidor, así
     // que puede llegar después de pintar: hay que quedarse escuchando.
-    if (sesionActual()) navegar('/panel', { replace: true })
+    const actual = sesionActual()
+    if (actual) navegar(actual.debeCambiarClave ? '/cambiar-clave-inicial' : '/panel', { replace: true })
     const baja = alCambiar((s) => {
-      if (s) navegar('/panel', { replace: true })
+      if (s) navegar(s.debeCambiarClave ? '/cambiar-clave-inicial' : '/panel', { replace: true })
     })
     return () => {
       baja()
@@ -80,7 +82,10 @@ export default function Entrar() {
       // El formulario se desvanece, la escena queda quieta y la vista
       // cambia detrás, sin bajón de luz.
       setFase('saliendo')
-      setTimeout(() => navegar('/panel', { replace: true }), 660)
+      setTimeout(
+        () => navegar(r.debeCambiarClave ? '/cambiar-clave-inicial' : '/panel', { replace: true }),
+        660,
+      )
     } else {
       setFase('lista')
       setError(r.error)
@@ -112,6 +117,9 @@ export default function Entrar() {
           <div className="lg-tarjeta">
             <h1>Inicia sesión</h1>
             <p className="lg-sub">Bienvenido de vuelta a tu panel</p>
+            {ubicacion.state?.aviso && (
+              <div className="lg-demo" role="status">{ubicacion.state.aviso}</div>
+            )}
 
             <form onSubmit={enviar} noValidate>
               <label className="lg-campo">

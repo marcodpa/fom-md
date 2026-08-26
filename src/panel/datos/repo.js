@@ -31,6 +31,7 @@ export const FUENTE_REAL = HAY_API
 
 /** ¿La consola está conectada a la base de datos de producción? */
 export const CONECTADO = HAY_API
+export const DIRECTORIO_REAL = HAY_API
 
 // ── Conectado a la base: lo que no tiene respaldo real se declara vacío ─────
 //
@@ -77,7 +78,7 @@ const repo = HAY_API
       empresa: () => Promise.resolve(null),
       admin: {
         empresas: sinRespaldo(repoSemilla.admin.empresas),
-        usuarios: sinRespaldo(repoSemilla.admin.usuarios ?? {}),
+        usuarios: repoApi.admin.usuarios,
         gps: sinRespaldo(repoSemilla.admin.gps),
         pagos: sinRespaldo(repoSemilla.admin.pagos),
         auditoria: sinRespaldo(repoSemilla.admin.auditoria ?? {}),

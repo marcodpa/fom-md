@@ -156,6 +156,55 @@ function conductoresPorVehiculo(lista) {
 }
 
 export const repoApi = {
+  admin: {
+    usuarios: {
+      async listar({ q = '', rol = '' } = {}) {
+        const r = await api.usuarios({ q, limite: 200 })
+        let lista = (r?.items ?? []).map((u) => ({
+          id: u.userId,
+          nombre: u.displayName,
+          email: u.email,
+          rol: u.role,
+          rolEtiqueta: u.role === 'supervisor'
+            ? 'Supervisor'
+            : u.role === 'conductor'
+              ? 'Conductor'
+              : u.role === 'operator'
+                ? 'Operador'
+                : 'Usuario',
+          empresaId: null,
+          empresaNombre: 'Ente actual',
+          conduce: u.role === 'conductor',
+          claveTemporal: null,
+          perfilCompleto: null,
+          esDesempleado: false,
+          estado: u.status,
+          activadoEn: u.activatedAt,
+        }))
+        if (rol) lista = lista.filter((u) => u.rol === rol)
+        return lista
+      },
+
+      async crear({ nombre, email, rol, clave }) {
+        const r = await api.crearUsuario({
+          email,
+          displayName: nombre,
+          role: rol,
+          temporaryPassword: clave,
+        })
+        return {
+          id: r.userId,
+          nombre: r.displayName,
+          email: r.email,
+          rol: r.role,
+          clave: r.passwordSet ? clave : null,
+          claveCreada: Boolean(r.passwordSet),
+          debeCambiarClave: Boolean(r.mustChangePassword),
+        }
+      },
+    },
+  },
+
   vehiculos: {
     async listar({ q = '' } = {}) {
       const [lista, conductores] = await Promise.all([

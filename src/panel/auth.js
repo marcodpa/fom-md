@@ -21,6 +21,7 @@
 
 import { api, HAY_API } from './datos/api'
 import { iniciales as inicialesDe } from './datos/formato'
+import { esAdminFom, etiquetaRolSesion, rolCanonico } from './roles'
 
 const CLAVE_SESION = 'fom.panel.sesion'
 
@@ -30,22 +31,6 @@ const CLAVE_SESION = 'fom.panel.sesion'
  * migración de identidad: primero el código entiende los dos juegos de
  * valores, después se migran las filas, y solo al final se retiran los viejos.
  */
-const ROL_CANONICO = {
-  owner: 'admin_fom',
-  administrator: 'supervisor',
-  fleet_manager: 'supervisor',
-  operator: 'conductor',
-  viewer: 'usuario',
-  admin: 'admin_fom',
-}
-
-const ETIQUETA_ROL = {
-  admin_fom: 'Administrador FOM',
-  supervisor: 'Supervisor',
-  conductor: 'Conductor',
-  usuario: 'Usuario',
-}
-
 // --- Cuentas de demostración (solo sin API) --------------------------------
 const CUENTAS = [
   {
@@ -70,7 +55,7 @@ const CUENTAS = [
       id: 'usr-000',
       nombre: 'Marco Pacheco',
       correo: 'admin@fom.com.ve',
-      rol: 'admin',
+      rol: 'admin_fom',
       rolNombre: 'Administrador FOM',
       empresa: 'FOM · Administración',
       empresaId: null, // multiempresa: no pertenece a un ente
@@ -146,8 +131,8 @@ function entrarDemo({ usuario, clave, recordar }) {
  *   móvil. Devuelve `tenant: { id, name, role }` y no necesita token interno.
  *   Es a donde debe migrar la consola.
  *
- *   `GET /auth/session` — la interna que se usa hoy. NO devuelve rol; en modo
- *   de desarrollo lo declara el puente (ver `FOM_DEV_ROL` en vite.config.js).
+ *   `GET /api/v1/console/auth/session` — la consola pública que devuelve el
+ *   rol resuelto por el servidor y la obligación de cambio inicial de clave.
  *
  * Si no llega ningún rol se queda en `null` y `esAdminFom` da false: sin dato,
  * no se abre la administración. Inventar un rol aquí sería abrir una puerta que
@@ -159,13 +144,13 @@ function armarPerfil(usuario) {
   // (`owner`, `administrator`, `fleet_manager`, `operator`, `viewer`) se
   // traducen al catálogo del producto; ver `canonical_membership_role` en la
   // migración de identidad, que hace lo mismo del lado de la base.
-  const rol = ROL_CANONICO[usuario?.role] ?? usuario?.role ?? null
+  const rol = rolCanonico(usuario?.role)
   return {
     id: usuario?.email || 'desconocido',
     nombre,
     correo: usuario?.email || '',
     rol,
-    rolNombre: rol ? (ETIQUETA_ROL[rol] ?? rol) : 'Usuario de la consola',
+    rolNombre: etiquetaRolSesion(rol),
     empresa: 'FOM',
     empresaId: null,
     sede: 'Conectado a la base real',
@@ -177,7 +162,15 @@ function armarPerfil(usuario) {
 async function resolverSesion() {
   try {
     const r = await api.sesion()
-    fijar(r?.authenticated ? { perfil: armarPerfil(r.user), inicio: Date.now() } : null)
+    fijar(
+      r?.authenticated
+        ? {
+            perfil: armarPerfil(r.user),
+            inicio: Date.now(),
+            debeCambiarClave: Boolean(r.mustChangePassword),
+          }
+        : null,
+    )
   } catch {
     // 401 o servidor caído: en ambos casos, no hay sesión utilizable.
     fijar(null)
@@ -220,8 +213,9 @@ export async function iniciarSesion({ usuario, clave, recordar = true }) {
   try {
     const r = await api.entrar(email, password)
     const perfil = armarPerfil(r?.user)
-    fijar({ perfil, inicio: Date.now() })
-    return { ok: true, perfil }
+    const debeCambiarClave = Boolean(r?.mustChangePassword)
+    fijar({ perfil, inicio: Date.now(), debeCambiarClave })
+    return { ok: true, perfil, debeCambiarClave }
   } catch (error) {
     return { ok: false, error: error.message || 'Usuario o clave incorrectos.' }
   }
@@ -242,9 +236,21 @@ export async function cerrarSesion() {
 }
 
 /** ¿La sesión es del administrador de FOM? (rango 4, ve todo el sistema) */
-export function esAdminFom(perfil) {
-  return perfil?.rol === 'admin_fom' || perfil?.rol === 'admin'
+export async function completarCambioInicial({ claveActual, claveNueva }) {
+  if (!HAY_API) return { ok: true }
+  try {
+    await api.cambiarClaveInicial(claveActual, claveNueva)
+    // El servidor revoca atomicamente todas las sesiones abiertas con la
+    // clave temporal. Esta sesión también termina: hay que volver a entrar
+    // con la clave definitiva para obtener un testigo nuevo.
+    fijar(null)
+    return { ok: true }
+  } catch (error) {
+    return { ok: false, error: error.message || 'No se pudo cambiar la contraseña.' }
+  }
 }
+
+export { esAdminFom }
 
 /** ¿El acceso está validando contra la base real? Lo muestra la pantalla de acceso. */
 export const CONECTADO_A_BD = HAY_API

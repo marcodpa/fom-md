@@ -24,6 +24,9 @@ function traducir(estado, cuerpo) {
   }
   if (estado === 401) return 'Tu sesión no es válida o expiró. Vuelve a entrar.'
   if (estado === 403) {
+    if (String(detalle || '').includes('Initial password change pending')) {
+      return 'Debes cambiar la contraseña temporal antes de usar la consola.'
+    }
     // El caso real más frecuente: la API exige exactamente una membresía activa.
     return 'Tu usuario no tiene un ente activo asignado, o tiene más de uno.'
   }
@@ -42,13 +45,20 @@ export async function pedir(ruta, { metodo = 'GET', cuerpo, señal } = {}) {
 
   let respuesta
   try {
+    const mutacion = !['GET', 'HEAD', 'OPTIONS'].includes(metodo.toUpperCase())
     respuesta = await fetch(`${BASE}${ruta}`, {
       method: metodo,
-      headers: cuerpo ? { 'content-type': 'application/json' } : undefined,
+      headers: mutacion
+        ? {
+            'content-type': 'application/json',
+            'x-fom-csrf': 'fom-browser-v1',
+          }
+        : undefined,
       body: cuerpo ? JSON.stringify(cuerpo) : undefined,
       signal: señal,
-      // El proxy guarda la sesión; no hace falta mandar credenciales.
-      credentials: 'omit',
+      // En desarrollo la guarda el proxy; publicada, la cookie HttpOnly viaja
+      // solo al mismo origen. Nunca se habilitan credenciales cross-origin.
+      credentials: 'same-origin',
     })
   } catch (error) {
     if (error.name === 'AbortError') throw error
@@ -94,6 +104,24 @@ export const api = {
     pedir(`${CONSOLA}/auth/login`, { metodo: 'POST', cuerpo: { email, password } }),
   sesion: () => pedir(`${CONSOLA}/auth/session`),
   salir: () => pedir(`${CONSOLA}/auth/logout`, { metodo: 'POST' }),
+  cambiarClaveInicial: (currentPassword, newPassword) =>
+    pedir(`${CONSOLA}/auth/password`, {
+      metodo: 'POST',
+      cuerpo: { currentPassword, newPassword },
+    }),
+
+  // Directorio real del ente resuelto por la sesión. El navegador nunca
+  // declara tenantId: fom-core lo obtiene del actor autenticado.
+  usuarios: ({ limite = 100, desplazamiento = 0, q = '' } = {}) => {
+    const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
+    if (q) p.set('q', q)
+    return pedir(`${CONSOLA}/users?${p}`)
+  },
+  crearUsuario: ({ email, displayName, role, temporaryPassword }) =>
+    pedir(`${CONSOLA}/users`, {
+      metodo: 'POST',
+      cuerpo: { email, displayName, role, temporaryPassword },
+    }),
 
   // Estado del backend
   salud: () => pedir('/health'),

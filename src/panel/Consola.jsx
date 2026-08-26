@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { cerrarSesion, esAdminFom } from './auth'
+import { esGestor } from './roles'
 import { useSesion } from './useSesion'
 import { Icono } from './Iconos'
 import repo, { alCambiarDatos } from './datos/repo'
@@ -69,7 +70,12 @@ const MENU_ADMIN = {
 }
 
 function Lateral({ perfil, abierto, cerrar, sinLeer, esquema, alternarTema }) {
-  const menu = esAdminFom(perfil) ? [MENU_ADMIN, ...MENU] : MENU
+  const menuGestor = MENU.map((grupo) =>
+    grupo.grupo === 'Gente' && esGestor(perfil)
+      ? { ...grupo, items: [...grupo.items, { a: '/panel/admin/usuarios', icono: 'gente', texto: 'Usuarios' }] }
+      : grupo,
+  )
+  const menu = esAdminFom(perfil) ? [MENU_ADMIN, ...MENU] : menuGestor
   return (
     <aside className={`pnl-side${abierto ? ' abierto' : ''}`}>
       <div className="pnl-side-top">
@@ -188,6 +194,7 @@ export default function Consola() {
     )
   }
   if (!sesion) return <Navigate to="/entrar" replace />
+  if (sesion.debeCambiarClave) return <Navigate to="/cambiar-clave-inicial" replace />
 
   const { perfil } = sesion
 
@@ -238,10 +245,10 @@ export default function Consola() {
               <Route path="admin/empresas" element={<AdminEmpresas />} />
               <Route path="admin/pagos" element={<AdminPagos />} />
               <Route path="admin/gps" element={<AdminGps />} />
-              <Route path="admin/usuarios" element={<AdminUsuarios />} />
               <Route path="admin/auditoria" element={<AdminAuditoria />} />
             </>
           )}
+          {esGestor(perfil) && <Route path="admin/usuarios" element={<AdminUsuarios />} />}
           <Route path="*" element={<Navigate to="/panel" replace />} />
         </Routes>
       </main>
