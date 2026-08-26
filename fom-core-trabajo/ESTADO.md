@@ -569,3 +569,27 @@ Marco aprobó la matriz de permisos (documento publicado como artifact
 
 Pendiente: integración de #194 y #199 (Juan) → deploy con ventana → Fase 2
 (pantallas de Personal en la web contra los endpoints nuevos).
+
+---
+
+## 2026-08-26 — Los seis puntos del #202 atendidos en el PR #199
+
+Juan formalizó el contrato de las primeras escrituras (#202) con seis
+correcciones obligatorias. Todas resueltas:
+
+1. Cambio inicial de clave OBLIGATORIO y aplicado: sesión restringida (403)
+   hasta completarlo; la escritura pasa por una función SECURITY DEFINER que
+   solo alcanza credenciales pendientes — el candado de hashes sigue intacto.
+2. Editar vehículo y revocar conductor auditados en fom.audit_log (actor,
+   instante, antes/después, motivo) en la misma transacción.
+3. Evidencia runtime real: 12 casos de los servicios compilados contra
+   PostgreSQL con el rol efectivo de la aplicación (CI: login IN ROLE
+   fom_app; local: PGlite en proceso, reproducible sin servidor). La
+   evidencia encontró un bug real: las altas quedaban 'pending' sin poder
+   entrar jamás — corregido (active + email verificado por invitación).
+4. Directorio paginado con orden determinista.
+5. Tipo de rol al catálogo completo (canónico + heredado).
+6. Usuario inactivo: 409 explícito, sin membresías nuevas.
+
+Pendiente: CI verde del head d06c0cf → squash de Juan → ventana operacional
+con respaldo fresco (también para el #194, ya integrado y sin desplegar).
