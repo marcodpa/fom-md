@@ -593,3 +593,37 @@ correcciones obligatorias. Todas resueltas:
 
 Pendiente: CI verde del head d06c0cf → squash de Juan → ventana operacional
 con respaldo fresco (también para el #194, ya integrado y sin desplegar).
+
+---
+
+## 2026-08-28 — La app puede hacerlo todo: PR #231
+
+Faltaban dos cosas y ya están construidas:
+
+**Mantenimiento tenía tablas pero ninguna puerta.** Se subieron a producción
+con los programas delta, pero nadie podía consultarlas: ni la app ni el
+módulo de Mantenimiento del panel. Ahora se leen desde las dos superficies.
+
+**La app solo miraba.** Pasó de 8 a 19 rutas de lectura (órdenes,
+inspecciones, documentos, alertas, avisos, resumen, áreas, conductores,
+mantenimiento, odómetro) y estrena las tres escrituras del conductor:
+
+- Reportar una falla (abre una orden correctiva con fotos)
+- Entregar la inspección diaria
+- Anotar el odómetro
+
+La regla de quién puede escribir sobre una unidad **no es el rol: es la
+asignación vigente**. El conductor secundario escribe igual que el principal
+y queda distinguido; un supervisor puede reportar, pero no firma la
+inspección diaria. El resultado de la inspección lo calcula el servidor —el
+teléfono no puede declarar "aprobada" ni decir que un ítem no es crítico— y
+un ítem crítico en falla bloquea la unidad.
+
+La prueba en ejecución real encontró tres fallos míos antes de subir: el tipo
+de falla es un catálogo cerrado y yo lo aceptaba libre; los mensajes de
+choque eran genéricos y obligaban a adivinar; y la hora por defecto de una
+lectura la tiene que poner la base, no el proceso.
+
+Estado de los PR abiertos: **#221** (administrar personas: cambiar perfil,
+suspender, revocar, reiniciar clave) y **#231** (esto). Ambos esperan
+revisión de Juan.
