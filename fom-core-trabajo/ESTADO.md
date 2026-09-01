@@ -661,3 +661,25 @@ solo reportes queda a medio camino — el supervisor de compañía ya es de solo
 lectura sobre sus contratistas, pero recortarle también lo operativo exige
 que existan los reportes, que hoy no están en el backend (en la app son
 simulados).
+
+---
+
+## 2026-09-01 (tarde) — Todo desplegado en producción
+
+Ventana del #252 ejecutada con la cuenta nominal de Marco:
+
+- `plan` → DEPLOYMENT_OK=YES, objetivo 3de8ca1 (main tras integrar el #250)
+- `deploy` → MIGRATION_EXECUTED=YES, DATABASE_CHANGED=YES, aplicación sana
+- `version` → commit 3de8ca1 y environment=prod (antes decían "unknown"/"dev")
+
+Ya está vivo en producción todo lo construido: administración de personas,
+escrituras de campo desde la app, mantenimiento, y ahora la administración de
+entes (crear empresas de los tres tipos, colgar y descolgar contratistas,
+suspender, áreas y lectura de auditoría).
+
+Una discrepancia reportada, no ocultada: el `smoke` interno del helper sale
+con código 7 porque el servidor no puede consultarse a sí mismo por su IP
+pública (falta hairpin NAT) — defecto de la sonda, ya anotado desde la
+primera ventana. Verificado desde fuera: las seis rutas de consola responden
+401, y `tenants` y `audit` pasaron de 404 a 401, que es la prueba de que el
+#250 está desplegado.
