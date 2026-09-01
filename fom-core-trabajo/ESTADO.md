@@ -627,3 +627,37 @@ lectura la tiene que poner la base, no el proceso.
 Estado de los PR abiertos: **#221** (administrar personas: cambiar perfil,
 suspender, revocar, reiniciar clave) y **#231** (esto). Ambos esperan
 revisión de Juan.
+
+---
+
+## 2026-09-01 — Administración de entes: ya se pueden crear clientes (PR #250)
+
+Era el hueco que impedía vender: una empresa nueva solo nacía por migración,
+así que crecer significaba tocar el esquema de la base.
+
+Se levantaron dos inventarios con agentes antes de escribir código —qué hace
+un administrador en la app, y qué existía ya en el backend— para no repetir
+lo que Codex hubiera construido en paralelo.
+
+**Lo nuevo:** crear empresas de los tres tipos (compañía, contratista,
+personal), colgar y descolgar contratistas de una compañía, suspender un
+ente, áreas por base/sector/contrato, y leer el registro de auditoría, que se
+escribía desde el primer día sin que nadie pudiera verlo.
+
+**Dos correcciones que salieron de probar contra la base real:**
+
+1. La auditoría del alta no puede guardarse en la empresa recién creada: la
+   base exige que el actor sea miembro del ente de la entrada, y quien crea
+   una empresa todavía no pertenece a ella.
+2. Marco aclaró el modelo —Chevron es una compañía con varias contratistas, y
+   su supervisor las ve todas con una sola cuenta— y eso destapó que mi
+   código dejaba a esa compañía ESCRIBIR sobre sus contratistas. La base
+   declara lo contrario en el comentario de su propia vista de alcance: las
+   escrituras solo sobre el ente propio. Corregido: una compañía lee a sus
+   contratistas y no las administra.
+
+**Pendiente de producto:** el "supervisor superior de solo lectura" que ve
+solo reportes queda a medio camino — el supervisor de compañía ya es de solo
+lectura sobre sus contratistas, pero recortarle también lo operativo exige
+que existan los reportes, que hoy no están en el backend (en la app son
+simulados).
