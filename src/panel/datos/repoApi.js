@@ -117,7 +117,13 @@ async function flota(q = '') {
  * empiece a mandar lastReportAt, este código deja de ejecutarse solo.
  */
 async function conPosicionDirecta(lista) {
-  const sinVivo = lista.filter((v) => !v.ultimoReporte)
+  // Se pide por FALTA DE COORDENADAS, no por falta de fecha. El listado
+  // del servidor manda `lastReportAt` pero NO manda latitud ni longitud, asi
+  // que mirar la fecha daba por resuelto lo que seguia sin resolverse: la
+  // unidad contaba como «reportando» y el mapa se quedaba sin punto.
+  const sinVivo = lista.filter(
+    (v) => !Number.isFinite(v.lat) || !Number.isFinite(v.lng),
+  )
   if (sinVivo.length === 0 || sinVivo.length > 25) return lista
   const posiciones = await Promise.all(
     sinVivo.map((v) =>
@@ -137,12 +143,15 @@ async function conPosicionDirecta(lista) {
       ...v,
       lat: p.latitude ?? v.lat,
       lng: p.longitude ?? v.lng,
-      ultimoReporte: p.receivedAt ?? null,
-      posicionEn: p.receivedAt ?? null,
+      // La fecha que ya traia el listado es la buena si la posicion no trae
+      // una suya: no se pisa un dato cierto con un nulo.
+      ultimoReporte: p.receivedAt ?? v.ultimoReporte ?? null,
+      posicionEn: p.receivedAt ?? v.posicionEn ?? null,
       rumbo: p.telemetry?.headingDeg ?? null,
       velocidadKmh: p.telemetry?.speedKph ?? null,
-      conectado: Boolean(p.receivedAt),
-      conexion: p.receivedAt ? 'reportando' : 'sin_senal',
+      conectado: Boolean(p.receivedAt ?? v.ultimoReporte),
+      conexion:
+        (p.receivedAt ?? v.ultimoReporte) ? 'reportando' : 'sin_senal',
     }
   })
 }
