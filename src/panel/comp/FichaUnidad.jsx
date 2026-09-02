@@ -60,7 +60,7 @@ export function estadoUnidad(v) {
 /** Filas de datos: se descartan las que no tienen valor. */
 function datosDe(v) {
   const filas = [
-    ['Última señal', v.ultimoReporte ? f.desde(v.ultimoReporte) : null],
+    ['Última señal', v.ultimoReporte ? f.momento(v.ultimoReporte) : null],
     // El encendido ya se anuncia en la etiqueta de estado; aquí solo se repite
     // si además hay velocidad, donde las dos cosas juntas cuentan algo: un
     // motor encendido a 0 km/h es ralentí, y eso interesa.
