@@ -347,6 +347,21 @@ export const repoApi = {
       }
     },
 
+    /**
+   * Abrir una orden. El servidor decide el estado inicial y el histórico:
+   * aquí solo viaja lo que el supervisor escribió.
+   */
+    async crear({ vehiculoId, descripcion, tipoFalla, ubicacion, tipo }) {
+      const r = await api.crearOdt({
+        vehicleId: vehiculoId,
+        description: descripcion,
+        kind: tipo || 'correctiva',
+        failureType: tipoFalla || undefined,
+        location: ubicacion || undefined,
+      })
+      return { id: r?.workOrder?.id ?? null, estado: r?.workOrder?.status ?? null }
+    },
+
     async obtener(id) {
       const r = await api.odt(id)
       const o = r.workOrder

@@ -30,7 +30,19 @@ function traducir(estado, cuerpo) {
     // El caso real más frecuente: la API exige exactamente una membresía activa.
     return 'Tu usuario no tiene un ente activo asignado, o tiene más de uno.'
   }
-  if (estado === 404) return 'Ese recurso no existe en el servidor.'
+  if (estado === 404) {
+    // Nest responde «Cannot POST /ruta» cuando la RUTA no existe, y un 404
+    // propio cuando el REGISTRO no existe. Son cosas distintas y el que las
+    // lee necesita distinguirlas: una se arregla desplegando, la otra
+    // buscando otro registro.
+    if (/^Cannot (GET|POST|PATCH|PUT|DELETE) /u.test(String(detalle || ''))) {
+      return (
+        'Esta función todavía no está en el servidor publicado. Ya está ' +
+        'construida y espera el despliegue.'
+      )
+    }
+    return 'Ese recurso no existe en el servidor.'
+  }
   if (estado === 502) return detalle || 'El puente no alcanzó la API. ¿Está abierto el túnel SSH?'
   if (estado === 503) return detalle || 'El servidor no está listo para responder esto todavía.'
   return detalle || `El servidor respondió ${estado}.`
@@ -121,6 +133,18 @@ export const api = {
     pedir(`${CONSOLA}/users`, {
       metodo: 'POST',
       cuerpo: { email, displayName, role, temporaryPassword },
+    }),
+
+  /**
+   * Levantar una orden de trabajo desde el panel (#258 de fom-core).
+   *
+   * `vehicleId` viaja en el cuerpo y no en la ruta porque el supervisor abre
+   * la orden eligiendo la unidad en un desplegable, no navegando a ella.
+   */
+  crearOdt: ({ vehicleId, description, kind, failureType, location }) =>
+    pedir(`${CONSOLA}/work-orders`, {
+      metodo: 'POST',
+      cuerpo: { vehicleId, description, kind, failureType, location },
     }),
 
   // Estado del backend

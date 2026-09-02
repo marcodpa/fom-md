@@ -582,7 +582,12 @@ function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar }) {
 
   function crear() {
     const err = {}
+    // El mismo minimo que exige el servidor. Validarlo aqui convierte un
+    // rechazo del servidor en un aviso junto al campo, que es donde se puede
+    // corregir.
     if (!descripcion.trim()) err.descripcion = 'Describe la falla.'
+    else if (descripcion.trim().length < 10)
+      err.descripcion = 'Describe un poco mas: al menos 10 caracteres.'
     setErrores(err)
     if (Object.keys(err).length > 0) return
 
@@ -600,8 +605,11 @@ function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar }) {
         alCerrar()
         return recargar()
       })
-      .catch(() => {
-        setFallo('No pudimos crear la orden. Inténtalo otra vez.')
+      .catch((error) => {
+        // Se muestra el motivo REAL. Un «inténtalo otra vez» generico invita a
+        // repetir algo que no puede funcionar, y esconde justo el dato que
+        // permite arreglarlo.
+        setFallo(error?.message || 'No pudimos crear la orden.')
         setGuardando(false)
       })
   }
