@@ -85,15 +85,30 @@ export default function Reportes() {
   const [areaId, setAreaId] = useState('')
 
   const areas = useDatos(() => repo.areas(), [])
+  // Seis fuentes, y NO todas existen: los costos y el histórico de eventos de
+  // alerta no tienen superficie en el servidor todavía. Con `Promise.all` una
+  // sola ausencia tumbaba el reporte entero y la pantalla decía «revisa tu
+  // conexión» — un diagnóstico falso sobre cinco fuentes que sí respondieron.
+  //
+  // Se piden por separado y se tolera la falta: el reporte se arma con lo que
+  // hay y DICE qué le faltó. Un informe incompleto que nombra su hueco sirve;
+  // uno que se cae, no. Lo que nunca se hace es rellenar el hueco con un cero:
+  // «sin datos» y «cero» son cosas distintas y se toman decisiones sobre ellas.
   const carga = useDatos(
-    () =>
-      Promise.all([
-        repo.resumen(),
-        repo.vehiculos.listar({ areaId }),
-        repo.personal.listar({ soloConductores: true }),
-        repo.odts.listar({}),
-        repo.costos.resumen({ dias }),
-        repo.alertas.eventos({ dias }),
+    () => {
+      const faltantes = []
+      const tolerar = (nombre, promesa, vacio) =>
+        promesa.catch((error) => {
+          faltantes.push({ nombre, motivo: error?.message ?? 'No disponible' })
+          return vacio
+        })
+      return Promise.all([
+        tolerar('Resumen', repo.resumen(), null),
+        tolerar('Vehículos', repo.vehiculos.listar({ areaId }), []),
+        tolerar('Conductores', repo.personal.listar({ soloConductores: true }), []),
+        tolerar('Órdenes de trabajo', repo.odts.listar({}), []),
+        tolerar('Costos', repo.costos.resumen({ dias }), null),
+        tolerar('Eventos de alerta', repo.alertas.eventos({ dias }), []),
       ]).then(([resumen, vehiculos, conductores, odts, costos, eventos]) => ({
         resumen,
         vehiculos,
@@ -101,7 +116,9 @@ export default function Reportes() {
         odts,
         costos,
         eventos,
-      })),
+        faltantes,
+      }))
+    },
     [areaId, dias]
   )
 
@@ -236,9 +253,25 @@ export default function Reportes() {
         </div>
 
         {carga.estado === 'cargando' && <Cargando filas={8} />}
-        {carga.estado === 'error' && <ErrorCarga onReintentar={carga.recargar} />}
+        {carga.estado === 'error' && (
+          <ErrorCarga onReintentar={carga.recargar} error={carga.error} />
+        )}
         {carga.estado === 'ok' && calculo && (
           <div className="pnl-imprimible">
+            {/* Un informe que no dice lo que le falta se lee como si estuviera
+                completo, y sobre eso se toman decisiones. Se nombra el hueco
+                arriba del todo, donde no se puede pasar por alto. */}
+            {(d?.faltantes ?? []).length > 0 && (
+              <Tarjeta titulo="Este reporte está incompleto">
+                <ul className="pnl-lista-avisos">
+                  {d.faltantes.map((falta) => (
+                    <li key={falta.nombre}>
+                      <b>{falta.nombre}:</b> {falta.motivo}
+                    </li>
+                  ))}
+                </ul>
+              </Tarjeta>
+            )}
             <div className="pnl-grid">
               <Tarjeta titulo={EMPRESA_NOMBRE}>
                 <Datos

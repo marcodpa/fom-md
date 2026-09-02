@@ -1803,3 +1803,18 @@ button.pnl-kpi:active { transform: scale(var(--e-escala-press)); }
   outline: var(--e-borde-foco) solid var(--e-primario);
   outline-offset: 3px;
 }
+
+/* Lista de fuentes que le faltaron a un reporte. Se lee como un aviso, no
+   como contenido: el informe está ahí, pero incompleto y con nombre propio. */
+.pnl-lista-avisos {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--pnl-texto-tenue, #94a3b8);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.pnl-lista-avisos b {
+  color: var(--pnl-texto, inherit);
+}

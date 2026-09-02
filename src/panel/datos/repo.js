@@ -74,6 +74,11 @@ const FALTA_GPS_CAMPO =
   'delante: se hacen desde la app de campo, al comisionarlo. Registrarlo y ' +
   'asociarlo a una unidad sí se hace desde aquí.'
 
+const FALTA_EVENTOS =
+  'El histórico de eventos de alerta (excesos de velocidad, frenadas) ' +
+  'todavía no se sirve desde el servidor: las tablas existen, la consulta ' +
+  'de consola no. Sin ella, el índice de manejo seguro no se puede calcular.'
+
 const FALTA_COSTOS =
   'Cargar costos todavía no existe en el servidor como módulo propio: hoy ' +
   'el costo se registra al cerrar la orden de trabajo que lo generó.'
@@ -217,7 +222,13 @@ const repo = HAY_API
       alertas: conRespaldoParcial(
         repoSemilla.alertas,
         { listar: repoApi.alertas.listar, ...repoApi.avisosEscritura },
-        { marcar: FALTA_ALERTAS_ANTIGUO },
+        {
+          marcar: FALTA_ALERTAS_ANTIGUO,
+          // Es una LECTURA, y le tocaba el aviso genérico de escritura: decía
+          // «el bloque de escritura está pendiente» sobre algo que solo lee.
+          // Un mensaje que describe mal el problema estorba más que uno corto.
+          eventos: FALTA_EVENTOS,
+        },
       ),
       reglas: conRespaldoParcial(
         repoSemilla.reglas,
