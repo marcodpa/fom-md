@@ -342,7 +342,7 @@ function Lista({ odts, alAbrir }) {
               </td>
               <td>{o.tipoFalla ? etiqueta('tipo_falla', o.tipoFalla) : 'No especificado'}</td>
               <td>{o.creadorNombre}</td>
-              <td>{f.fecha(o.creadaEn)}</td>
+              <td>{f.fechaCorta(o.creadaEn)}</td>
               <td>
                 <Tag color={color('odt_estado', o.estado)}>{etiqueta('odt_estado', o.estado)}</Tag>
               </td>
@@ -728,7 +728,7 @@ function Reglas({ reglas }) {
                   )}
                 </div>
                 <Tag color={r.activa ? 'verde' : 'gris'}>{r.activa ? 'Activa' : 'Pausada'}</Tag>
-                <em>{f.fecha(r.creadaEn)}</em>
+                <em>{f.fechaCorta(r.creadaEn)}</em>
               </div>
             )
           })}

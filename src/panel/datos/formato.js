@@ -12,19 +12,11 @@ function parseFecha(iso) {
   return new Date(iso)
 }
 
-/**
- * "02/09/2026" — dia, mes y año, siempre con dos digitos y el año completo.
- *
- * Es el formato que se usa en Venezuela y el que la gente escribe a mano. Un
- * "3 jul" sin año obliga a suponer cual, y suponer el año de un vencimiento es
- * como se deja vencer un seguro.
- */
+/** "3 jul 2026" */
 export function fecha(iso) {
   if (!iso) return '—'
   const d = parseFecha(iso)
-  const dia = String(d.getDate()).padStart(2, '0')
-  const mes = String(d.getMonth() + 1).padStart(2, '0')
-  return `${dia}/${mes}/${d.getFullYear()}`
+  return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`
 }
 
 /** "3 jul" */
@@ -45,23 +37,10 @@ export function hora(iso) {
   return `${h12}:${m} ${sufijo}`
 }
 
-/** "02/09/2026, 8:30 a. m." — la fecha completa, y la hora detras. */
+/** "3 jul, 8:30 a. m." */
 export function fechaHora(iso) {
   if (!iso) return '—'
-  return `${fecha(iso)}, ${hora(iso)}`
-}
-
-/**
- * "02/09/2026, 8:30 a. m. · hace 25 min"
- *
- * Para un «ultimo reporte» o una «ultima señal»: la fecha exacta manda —es la
- * que se copia en un correo o se compara con otra— y lo relativo va detras,
- * que es lo unico que responde «¿esta fresco?» de un vistazo. Las dos juntas
- * porque cada una contesta una pregunta distinta y ninguna sustituye a la otra.
- */
-export function momento(iso) {
-  if (!iso) return '—'
-  return `${fechaHora(iso)} · ${desde(iso)}`
+  return `${fechaCorta(iso)}, ${hora(iso)}`
 }
 
 /** "55 min" · "1 h" · "1 h 5 min" */
@@ -85,9 +64,7 @@ export function desde(iso) {
   const d = Math.floor(h / 24)
   if (d === 1) return 'ayer'
   if (d < 30) return `hace ${d} días`
-  // Pasado un mes lo relativo deja de informar: «hace 7 meses» no sirve para
-  // comparar ni para escribirlo en ningun sitio. Se pasa a la fecha completa.
-  return fecha(iso)
+  return fechaCorta(iso)
 }
 
 /** Separador de miles con punto, como en toda la app. */

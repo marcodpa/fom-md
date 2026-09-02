@@ -326,7 +326,7 @@ export default function ExpedienteVehiculo() {
                       { etiqueta: 'Estado', valor: etiqueta('marcha_estado', v.estadoMarcha) },
                       { etiqueta: 'Kilometraje', valor: f.km(v.km) },
                       { etiqueta: 'Ubicación', valor: v.ubicacionTexto },
-                      { etiqueta: 'Último reporte', valor: f.momento(v.ultimoReporte) },
+                      { etiqueta: 'Último reporte', valor: f.desde(v.ultimoReporte) },
                     ]}
                   />
                 </Tarjeta>
@@ -386,7 +386,7 @@ export default function ExpedienteVehiculo() {
                           <span>
                             {o.tipoFalla ? etiqueta('tipo_falla', o.tipoFalla) : 'Sin clasificar'}
                             {' · '}
-                            {f.fecha(o.creadaEn)}
+                            {f.fechaCorta(o.creadaEn)}
                             {o.estado === 'cerrada' && o.costo != null ? ` · ${f.moneda(o.costo)}` : ''}
                           </span>
                         </div>
