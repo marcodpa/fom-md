@@ -264,3 +264,189 @@ export class ResetCredentialDto {
   @Matches(/^[a-z0-9][a-z0-9._-]{0,99}$/u)
   reason?: string;
 }
+
+// ============================================================
+// INVENTARIO DE EQUIPOS GPS
+// ------------------------------------------------------------
+// El equipo se REGISTRA en la consola —es inventario, y quien lo compra no es
+// quien lo instala— y se INSTALA sobre una unidad, que sí es trabajo de campo.
+// Separarlos importa: un equipo puede existir meses en una gaveta antes de
+// montarse, y su historia de instalaciones es lo que explica de qué unidad
+// venían las posiciones de hace tres meses.
+// ============================================================
+
+/** Los estados que admite la base (`gps_devices_status_check`). `archived` no
+ *  se fija por aquí: archivar exige su propia fecha y su propia decisión. */
+export const ESTADOS_DE_EQUIPO = [
+  'inventory',
+  'active',
+  'inactive',
+  'maintenance',
+  'lost',
+] as const;
+
+export class RegisterGpsDeviceDto {
+  @ApiProperty({
+    description:
+      'IMEI de 15 dígitos. Es único en TODA la plataforma, no solo en la ' +
+      'empresa: el aparato es uno solo en el mundo.',
+    pattern: '^[0-9]{15}$',
+  })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @Matches(/^[0-9]{15}$/u)
+  imei!: string;
+
+  @ApiProperty({ maxLength: 80 })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 80)
+  model!: string;
+
+  @ApiProperty({
+    maxLength: 50,
+    description: 'Familia de protocolo, p. ej. `coban-gps103`.',
+  })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 50)
+  protocolFamily!: string;
+
+  @ApiPropertyOptional({ maxLength: 80 })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 80)
+  manufacturer?: string;
+
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 100)
+  serialNumber?: string;
+
+  @ApiPropertyOptional({ enum: ESTADOS_DE_EQUIPO, default: 'inventory' })
+  @IsOptional()
+  @IsIn(ESTADOS_DE_EQUIPO as unknown as string[])
+  status?: (typeof ESTADOS_DE_EQUIPO)[number];
+}
+
+/** Ajustes del equipo en inventario. El IMEI NO se corrige: si el IMEI está
+ *  mal, el aparato registrado es otro, y lo que toca es registrar el que es. */
+export class UpdateGpsDeviceDto {
+  @ApiPropertyOptional({ enum: ESTADOS_DE_EQUIPO })
+  @IsOptional()
+  @IsIn(ESTADOS_DE_EQUIPO as unknown as string[])
+  status?: (typeof ESTADOS_DE_EQUIPO)[number];
+
+  @ApiPropertyOptional({ maxLength: 80 })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 80)
+  manufacturer?: string;
+
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 100)
+  serialNumber?: string;
+}
+
+/** Instalar un equipo sobre una unidad. */
+export class InstallGpsDeviceDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID('4')
+  vehicleId!: string;
+
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Dónde quedó montado, con qué quedó pendiente.',
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 500)
+  notes?: string;
+}
+
+/** Desmontar un equipo. La instalación no se borra: se cierra con fecha. */
+export class RemoveGpsInstallationDto {
+  @ApiPropertyOptional({ maxLength: 500, description: 'Por qué se retira.' })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 500)
+  notes?: string;
+}
+
+// ============================================================
+// LA PERSONA COMPLETA
+// ------------------------------------------------------------
+// El panel tenía dos pantallas para la misma gente: una preguntaba «¿puede
+// manejar hoy?» y la otra «¿tiene acceso?». Nunca fueron dos tipos de
+// persona, y la base lo dice sola: un documento de persona apunta a su
+// membresía, así que aquí NO existe alguien sin cuenta.
+// ============================================================
+
+/**
+ * Datos personales. Van aparte del alta de la cuenta porque se llenan en otro
+ * momento y por otra persona: la cuenta la crea el supervisor el primer día,
+ * y la cédula la trae el conductor cuando aparece con sus papeles.
+ */
+export class UpdateUserProfileDto {
+  @ApiPropertyOptional({
+    description: 'Cédula en el formato de la base: `v-12345678`.',
+    pattern: '^[ve]-[0-9]{6,9}$',
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  @Matches(/^[ve]-[0-9]{6,9}$/u)
+  nationalId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Teléfono con código de país: `+584141234567`.',
+    pattern: '^[+][0-9]{7,15}$',
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.replace(/[\s-]/gu, '') : value,
+  )
+  @Matches(/^[+][0-9]{7,15}$/u)
+  phone?: string;
+
+  @ApiPropertyOptional({ maxLength: 300 })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString()
+  @Length(1, 300)
+  address?: string;
+
+  @ApiPropertyOptional({ format: 'date' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/u)
+  birthDate?: string;
+}

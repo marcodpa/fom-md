@@ -76,6 +76,30 @@ test('el tenant jamas viene del cliente', () => {
   assert.match(service, /actor\.tenantId/u);
 });
 
+test('un ente nombrado en la RUTA se comprueba contra el alcance del actor', () => {
+  // La regla de arriba prohíbe que el tenant llegue en un cuerpo. Leer la
+  // gente de un contratista necesita decir CUÁL, y para eso el ente viaja en
+  // la ruta — igual que en la administración de entes. Lo que autoriza sigue
+  // saliendo de la sesión: esto solo elige entre los entes ya permitidos, y
+  // quien decide cuáles son es `fom.actor_tenant_scope`, no el servicio.
+  const alcance = service.slice(
+    service.indexOf('private async alcanceDeLectura'),
+    service.indexOf('async listDirectory'),
+  );
+  assert.match(alcance, /fom\.actor_tenant_scope/u);
+  assert.match(alcance, /NotFoundException/u);
+  // El camino corto —sin ente pedido— usa el de la sesión y no consulta nada.
+  assert.match(alcance, /actor\.tenantId, propio: true/u);
+
+  // Y la escritura del perfil NUNCA usa el ente pedido: solo el de la sesión.
+  const perfil = service.slice(service.indexOf('async updateUserProfile'));
+  assert.ok(
+    !/alcanceDeLectura/u.test(perfil),
+    'editar un perfil no admite elegir ente: se escribe en el propio',
+  );
+  assert.match(perfil, /tenant_id = \$1[\s\S]{0,120}actor\.tenantId/u);
+});
+
 test('toda alta escribe su autoria', () => {
   assert.match(service, /created_by_user_id/u);
   assert.match(service, /granted_by_user_id/u);
@@ -131,7 +155,7 @@ test('el modulo protege el controlador con sesion y almacen de actor', () => {
     controller,
     /@UseGuards\(ConsoleSessionGuard, ConsoleBrowserMutationGuard\)/u,
   );
-  assert.match(moduleSource, /ConsoleDirectoryController,\s*\n\s*ConsoleOperationsController,\s*\n\s*\)/u);
+  assert.match(moduleSource, /ConsoleDirectoryController,\s*\n\s*ConsoleMaintenanceController,\s*\n\s*ConsoleInspectionTemplatesController,\s*\n\s*ConsoleOperationsController,\s*\n\s*ConsoleTenantsController,\s*\n\s*\)/u);
 });
 
 test('el cambio inicial revoca sesiones web dentro de la misma funcion', () => {
@@ -218,8 +242,12 @@ test('administrar exige rango antes de escribir, y bajo candado', () => {
       bloque.indexOf('UPDATE fom.tenant_memberships'),
     'el rango se comprueba antes de escribir',
   );
-  assert.match(bloque, /dto\.role === 'supervisor'[\s\S]{0,80}requireFomAdminActor/u);
+  assert.match(
+    bloque,
+    /dto\.role === 'supervisor'[\s\S]{0,160}canonicalRole\(actorMembership\.role\) !== 'admin_fom'/u,
+  );
   assert.match(bloque, /'membership.updated'/u);
+  assert.match(bloque, /lockIdentities/u);
 });
 
 test('perder el acceso cierra las sesiones abiertas', () => {
@@ -246,17 +274,31 @@ test('el reinicio de clave lo escribe la base, no el servicio', () => {
 
 test('la funcion de reinicio comprueba la autorizacion por su cuenta', () => {
   assert.match(credentialReset, /SECURITY DEFINER/u);
+  assert.match(credentialReset, /console_session_token/u);
+  assert.match(credentialReset, /refresh_token_hash/u);
+  assert.match(credentialReset, /sha256/u);
   assert.match(credentialReset, /actor_user_id = target_user_id/u);
   assert.match(credentialReset, /target_role = 'admin_fom'/u);
   assert.match(credentialReset, /actor_rank <= target_rank/u);
   assert.match(credentialReset, /actor_membership\.status = 'active'/u);
   assert.match(credentialReset, /must_change_password = true/u);
   assert.match(credentialReset, /UPDATE fom\.auth_sessions/u);
+  assert.match(credentialReset, /tenant_id = shared_tenant/u);
   assert.match(credentialReset, /argon2id/u);
   assert.match(
     credentialReset,
     /REVOKE ALL ON FUNCTION\s*\n\s*fom\.reset_member_credential/u,
   );
+});
+
+test('el actor del reinicio no es un UUID suministrado por la aplicacion', () => {
+  assert.doesNotMatch(
+    credentialReset,
+    /CREATE FUNCTION fom\.reset_member_credential\(\s*actor_user_id uuid/u,
+  );
+  assert.match(credentialReset, /active_tenant_count <> 1/u);
+  assert.match(credentialReset, /pg_advisory_xact_lock/u);
+  assert.match(credentialReset, /FOR UPDATE/u);
 });
 
 test('revocar es terminal y no se administra una membresia inexistente', () => {

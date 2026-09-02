@@ -22,9 +22,14 @@ import {
   AssignDriverDto,
   CreateDirectoryUserDto,
   CreateVehicleDto,
+  InstallGpsDeviceDto,
+  RegisterGpsDeviceDto,
+  RemoveGpsInstallationDto,
   ResetCredentialDto,
   RevokeDriverDto,
+  UpdateGpsDeviceDto,
   UpdateMembershipDto,
+  UpdateUserProfileDto,
   UpdateVehicleDto,
 } from './console-directory.dto';
 import { ListQueryDto } from './console.dto';
@@ -158,4 +163,114 @@ export class ConsoleDirectoryController {
   ) {
     return this.directory.revokeDriver(assignmentId, dto);
   }
+  @Post('gps-devices')
+  @ApiOperation({
+    summary: 'Registrar un equipo GPS en el inventario de la empresa',
+    description:
+      'Registrar e instalar son cosas distintas: un equipo puede pasar ' +
+      'meses en una gaveta antes de montarse. El IMEI es único en toda la ' +
+      'plataforma, porque el aparato es uno solo en el mundo.',
+  })
+  @ApiResponse({ status: 403, description: 'El alta de equipos es del administrador FOM.' })
+  @ApiResponse({ status: 409, description: 'Ese IMEI ya está registrado.' })
+  registerGpsDevice(@Body() dto: RegisterGpsDeviceDto) {
+    return this.directory.registerGpsDevice(dto);
+  }
+
+  @Patch('gps-devices/:deviceId')
+  @ApiOperation({
+    summary: 'Ajustar un equipo del inventario',
+    description:
+      'El IMEI no se corrige: si el IMEI está mal, el aparato registrado es ' +
+      'otro, y lo que toca es registrar el que es.',
+  })
+  updateGpsDevice(
+    @Param('deviceId', new ParseUUIDPipe({ version: '4' })) deviceId: string,
+    @Body() dto: UpdateGpsDeviceDto,
+  ) {
+    return this.directory.updateGpsDevice(deviceId, dto);
+  }
+
+  @Post('gps-devices/:deviceId/installation')
+  @ApiOperation({
+    summary: 'Instalar el equipo sobre una unidad',
+    description:
+      'Un equipo no puede estar montado en dos unidades a la vez, ni una ' +
+      'unidad llevar dos equipos: lo sostienen dos índices únicos de la base, ' +
+      'que es donde tiene que estar, porque también hay instalaciones que ' +
+      'entran por la app de campo.',
+  })
+  @ApiResponse({ status: 409, description: 'El equipo o la unidad ya están ocupados.' })
+  installGpsDevice(
+    @Param('deviceId', new ParseUUIDPipe({ version: '4' })) deviceId: string,
+    @Body() dto: InstallGpsDeviceDto,
+  ) {
+    return this.directory.installGpsDevice(deviceId, dto);
+  }
+
+  @Patch('gps-installations/:assignmentId/remove')
+  @ApiOperation({
+    summary: 'Desmontar un equipo',
+    description:
+      'La instalación no se borra: se cierra con fecha, porque es lo que ' +
+      'explica de qué unidad venían las posiciones de hace tres meses.',
+  })
+  removeGpsInstallation(
+    @Param('assignmentId', new ParseUUIDPipe({ version: '4' }))
+    assignmentId: string,
+    @Body() dto: RemoveGpsInstallationDto,
+  ) {
+    return this.directory.removeGpsInstallation(assignmentId, dto);
+  }
+
+  @Get('directory')
+  @ApiOperation({
+    summary: 'La gente del ente, con su cuenta y sus papeles en una sola vista',
+    description:
+      'Cuenta, datos personales, la unidad que maneja hoy y el documento ' +
+      'que vence antes. Estaban repartidos en dos pantallas para la misma ' +
+      'persona, y cruzarlas a mano es lo que hace que a un conductor se le ' +
+      'venza la licencia sin que nadie lo note.',
+  })
+  listDirectory(@Query() query: ListQueryDto) {
+    return this.directory.listDirectory(query);
+  }
+
+  @Get('tenants/:tenantId/directory')
+  @ApiOperation({
+    summary: 'La gente de un contratista, en solo lectura',
+    description:
+      'Una compañía lee así la gente de los contratistas que tiene ' +
+      'vigentes. El ente viaja en la RUTA y no en el cuerpo, y se comprueba ' +
+      'contra `fom.actor_tenant_scope`: lo que autoriza sigue saliendo de la ' +
+      'sesión, y esto solo elige a cuál de los entes permitidos mirar. Los ' +
+      'datos personales no cruzan — la política de fila exige compartir un ' +
+      'ente activo, y una compañía no lo comparte con la gente ajena.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Fuera de alcance o inexistente. Responden igual.',
+  })
+  listContractorDirectory(
+    @Param('tenantId', new ParseUUIDPipe({ version: '4' })) tenantId: string,
+    @Query() query: ListQueryDto,
+  ) {
+    return this.directory.listDirectory(query, tenantId);
+  }
+
+  @Patch('users/:userId/profile')
+  @ApiOperation({
+    summary: 'Datos personales: cédula, teléfono, dirección, nacimiento',
+    description:
+      'Se llenan en otro momento y por otra persona que el alta de la ' +
+      'cuenta. «Perfil completo» lo decide el servidor cuando están la ' +
+      'cédula y el teléfono, no un botón.',
+  })
+  updateUserProfile(
+    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
+    @Body() dto: UpdateUserProfileDto,
+  ) {
+    return this.directory.updateUserProfile(userId, dto);
+  }
+
 }

@@ -683,3 +683,54 @@ pública (falta hairpin NAT) — defecto de la sonda, ya anotado desde la
 primera ventana. Verificado desde fuera: las seis rutas de consola responden
 401, y `tenants` y `audit` pasaron de 404 a 401, que es la prueba de que el
 #250 está desplegado.
+
+---
+
+## 2026-09-02 — La consola escribe lo que ya leía
+
+Desplegado en FOM-PROD (commit `53d0493`). El PR #259 sumó **12 escrituras
+y 2 lecturas** a la consola:
+
+| Área | Qué se puede hacer ahora |
+|---|---|
+| Órdenes | Abrir una ODT desde el panel, correctiva o preventiva |
+| Avisos | Marcar leído uno o todos, con auditoría |
+| Documentos | Registrar, corregir vencimientos, archivar |
+| Reglas | Crear y ajustar reglas de velocidad y mantenimiento |
+| GPS | Registrar en inventario, instalar, desmontar |
+| Personas | Una sola pantalla «Gente» con cuenta, unidad y papeles |
+
+Comprobadas las 13 rutas nuevas desde internet: todas responden 401 (existen
+y exigen sesión) donde antes daban 404.
+
+### Tres defectos que ya estaban en producción y se corrigieron
+
+1. **El histórico de las órdenes nacía anónimo.** El trigger toma el actor de
+   `last_status_actor_user_id` y ninguna de las dos creaciones de la app la
+   rellenaba: toda orden abierta desde el teléfono empezaba con un «alguien la
+   abrió». Revisadas las 20 tablas con columna de autoría: era el único caso.
+
+2. **Las fechas de calendario se corrían un día.** Las columnas `date` viajaban
+   sin convertir y el conversor las vuelve un instante a medianoche local. Un
+   vencimiento del 31 se leía como 30 en otro huso — justo el fallo que el
+   comentario del módulo decía existir para evitar.
+
+3. **Un perfil oculto se leía como incompleto.** Con la política de fila
+   ocultando la fila, `IS NOT NULL` devolvía `false`, mandando a perseguir un
+   pendiente inexistente. Ahora son tres estados.
+
+### En el panel
+
+- El mapa volvió a pintar los carros: el puente que pedía la posición se
+  apagaba al ver la fecha, y la condición correcta era tener coordenadas.
+- Revisados los 25 botones de escritura. 18 conectados; los 7 restantes dicen
+  qué falta en vez de fallar en genérico o reventar con «no es una función».
+- Reportes dejó de caerse entero cuando falta una de sus seis fuentes.
+- «Personal» y «Usuarios» eran la misma gente: ahora es una pantalla.
+- Nueva prueba `test/acciones-del-panel.test.js`: carga el panel conectado y
+  comprueba que cada botón resuelve a algo que existe.
+
+### Lo que sigue sin servidor
+
+Eventos de alerta (y con ellos el índice de manejo seguro), costos, pagos,
+subida de archivos de documentos, y verificar/probar un GPS —que son de campo.
