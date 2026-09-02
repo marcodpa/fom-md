@@ -28,7 +28,7 @@ export default function AdminEmpresas() {
   const [predeDe, setPredeDe] = useState(null) // empresa cuyo listado de compañías se edita
   const [aviso, setAviso] = useState('')
 
-  const { datos, estado, recargar } = useDatos(() => cargar(q, tipo), [q, tipo])
+  const { datos, estado, error, recargar } = useDatos(() => cargar(q, tipo), [q, tipo])
 
   const accion = async (fn) => {
     setAviso('')
@@ -65,7 +65,7 @@ export default function AdminEmpresas() {
 
       <div className="pnl-cuerpo">
         {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
           <Contenido
             lista={datos}

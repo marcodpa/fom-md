@@ -16,6 +16,64 @@ import { Icono } from '../Iconos'
 // aquí solo se muestran sus mensajes tal cual.
 // ============================================================
 
+/** El tipo de documento en palabras: los códigos son para agrupar, no para leer. */
+function etiquetaDocumento(tipo) {
+  const NOMBRES = {
+    licencia_conducir: 'Licencia',
+    certificado_medico: 'Certificado médico',
+    rcv: 'RCV',
+    cedula: 'Cédula',
+  }
+  return NOMBRES[tipo] ?? (tipo ? tipo.replace(/_/gu, ' ') : 'Documento')
+}
+
+/** Una celda de CSV: comillas dobles escapadas, como espera Excel. */
+function celda(valor) {
+  const t = String(valor ?? '').replace(/"/gu, '""')
+  return `"${t}"`
+}
+
+/**
+ * Descarga la lista sin librerías: Blob y enlace temporal.
+ *
+ * Venía de la pantalla «Personal» y se conserva al unirlas: quien la usaba
+ * para pasarle el listado a alguien fuera del sistema lo seguirá necesitando,
+ * y perder una función al fusionar dos pantallas es la peor forma de fusionar.
+ */
+function exportarCSV(lista) {
+  const cabecera = [
+    'Nombre', 'Cédula', 'Correo', 'Teléfono', 'Rol', 'Estado', 'Unidad',
+    'Rol en la unidad', 'Perfil completo', 'Documento próximo',
+    'Vence', 'Días', 'Papeles por vencer',
+  ]
+  const filas = lista.map((p) => [
+    p.nombre,
+    p.cedula ?? '',
+    p.email,
+    p.telefono ?? '',
+    p.rolEtiqueta ?? p.rol,
+    p.estado ?? '',
+    p.unidadNombre ?? 'Sin unidad',
+    p.rolEnUnidad ?? '',
+    p.perfilCompleto ? 'Sí' : 'No',
+    p.documentoTipo ? etiquetaDocumento(p.documentoTipo) : '',
+    p.documentoVence ?? '',
+    p.documentoDias ?? '',
+    p.papelesPendientes ?? 0,
+  ])
+  const csv = [cabecera, ...filas].map((fila) => fila.map(celda).join(';')).join('\r\n')
+  // El BOM evita que Excel rompa los acentos al abrir el archivo.
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const enlace = document.createElement('a')
+  enlace.href = url
+  enlace.download = `gente-fom-${f.hoyISO()}.csv`
+  document.body.appendChild(enlace)
+  enlace.click()
+  enlace.remove()
+  URL.revokeObjectURL(url)
+}
+
 function cargar(q, empresaId, rol) {
   if (DIRECTORIO_REAL) {
     return repo.admin.usuarios.listar({ q, rol }).then((lista) => ({ lista, empresas: [] }))
@@ -37,7 +95,7 @@ export default function AdminUsuarios() {
   const [claveDe, setClaveDe] = useState(null) // {nombre, clave} tras restablecer
   const [aviso, setAviso] = useState('')
 
-  const { datos, estado, recargar } = useDatos(() => cargar(q, empresaId, rol), [q, empresaId, rol])
+  const { datos, estado, error, recargar } = useDatos(() => cargar(q, empresaId, rol), [q, empresaId, rol])
 
   const accion = async (fn) => {
     setAviso('')
@@ -75,11 +133,20 @@ export default function AdminUsuarios() {
   return (
     <>
       <Cabecera
-        titulo="Usuarios del sistema"
+        titulo="Gente"
         bajada={DIRECTORIO_REAL
-          ? 'Directorio real del ente autorizado por tu sesión.'
+          ? 'Quién es, qué maneja y qué papel le vence. Todo en un sitio.'
           : 'Todas las cuentas de todas las empresas, con las reglas de mando de la app.'}
       >
+        <button
+          type="button"
+          className="pnl-btn"
+          onClick={() => exportarCSV(datos?.lista ?? [])}
+          disabled={(datos?.lista ?? []).length === 0}
+        >
+          <Icono nombre="descargar" tam={16} />
+          Exportar
+        </button>
         <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
           <Icono nombre="mas" tam={16} />
           Nuevo usuario
@@ -88,7 +155,7 @@ export default function AdminUsuarios() {
 
       <div className="pnl-cuerpo">
         {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
           <Contenido
             datos={datos}
@@ -215,8 +282,8 @@ function Contenido({
             <table className="pnl-tabla">
               <thead>
                 <tr>
-                  <th>Usuario</th>
-                  <th>{directorioReal ? 'Alcance' : 'Empresa'}</th>
+                  <th>Persona</th>
+                  <th>{directorioReal ? 'Unidad' : 'Empresa'}</th>
                   <th>Rol</th>
                   <th>Señales</th>
                   <th aria-label="Acciones" />
@@ -234,7 +301,24 @@ function Contenido({
                         </div>
                       </div>
                     </td>
-                    <td>{p.empresaNombre}</td>
+                    <td>
+                      {/* La unidad que maneja HOY. Antes esto vivía en la
+                          pantalla «Personal», que estaba vacía porque nunca
+                          tuvo servidor. Verlo aquí ahorra el cruce entre dos
+                          pantallas, que es donde se pierden los vencimientos. */}
+                      {directorioReal ? (
+                        p.unidadNombre ? (
+                          <div className="pnl-doble">
+                            <b>{p.unidadNombre}</b>
+                            {p.rolEnUnidad && <span>{p.rolEnUnidad}</span>}
+                          </div>
+                        ) : (
+                          <span className="pnl-tenue">Sin unidad</span>
+                        )
+                      ) : (
+                        p.empresaNombre
+                      )}
+                    </td>
                     <td>
                       <Tag color={p.rol === 'admin' ? 'azul' : 'gris'} plano>{p.rolEtiqueta}</Tag>
                     </td>
@@ -242,7 +326,24 @@ function Contenido({
                       <div className="pnl-chips">
                         {p.claveTemporal && <Tag color="ambar" plano>Clave temporal</Tag>}
                         {p.esDesempleado && <Tag color="gris">Desempleado</Tag>}
+                        {p.estado === 'suspended' && <Tag color="ambar">Suspendido</Tag>}
+                        {p.estado === 'revoked' && <Tag color="rojo">Sin acceso</Tag>}
                         {!p.perfilCompleto && <Tag color="gris" plano>Perfil incompleto</Tag>}
+                        {/* Los días los cuenta la base con su propia fecha:
+                            juzgar un vencimiento con el reloj del navegador
+                            cambia la respuesta según quién abra la pantalla. */}
+                        {p.documentoDias !== null && p.documentoDias !== undefined && (
+                          p.documentoDias < 0 ? (
+                            <Tag color="rojo">{etiquetaDocumento(p.documentoTipo)} vencida</Tag>
+                          ) : p.documentoDias <= 30 ? (
+                            <Tag color="ambar">
+                              {etiquetaDocumento(p.documentoTipo)} vence en {p.documentoDias} d
+                            </Tag>
+                          ) : null
+                        )}
+                        {p.papelesPendientes > 1 && (
+                          <Tag color="gris" plano>{p.papelesPendientes} papeles por vencer</Tag>
+                        )}
                       </div>
                     </td>
                     <td className="num">

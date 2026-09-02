@@ -250,6 +250,26 @@ export const api = {
       cuerpo,
     }),
 
+  // --- La persona completa (#260 de fom-core) ------------------------------
+
+  /**
+   * La gente del ente: cuenta, datos personales, la unidad que maneja hoy y
+   * el documento que le vence antes, todo en una sola lectura.
+   *
+   * Con `enteId` se lee un CONTRATISTA, y el ente viaja en la ruta y no en la
+   * consulta a propósito: lo que autoriza sale de la sesión, y esto solo
+   * elige a cuál de los entes permitidos mirar.
+   */
+  directorio: ({ limite = 200, desplazamiento = 0, q = '', enteId = '' } = {}) => {
+    const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
+    if (q) p.set('q', q)
+    const ruta = enteId ? `${CONSOLA}/tenants/${enteId}/directory` : `${CONSOLA}/directory`
+    return pedir(`${ruta}?${p}`)
+  },
+
+  actualizarPerfil: (userId, cuerpo) =>
+    pedir(`${CONSOLA}/users/${userId}/profile`, { metodo: 'PATCH', cuerpo }),
+
   // Estado del backend
   salud: () => pedir('/health'),
   version: () => pedir('/version'),

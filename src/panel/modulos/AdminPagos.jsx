@@ -35,7 +35,7 @@ export default function AdminPagos() {
   const [registrando, setRegistrando] = useState(false)
   const [aviso, setAviso] = useState('')
 
-  const { datos, estado, recargar } = useDatos(() => cargar(empresaId, estadoPago), [empresaId, estadoPago])
+  const { datos, estado, error, recargar } = useDatos(() => cargar(empresaId, estadoPago), [empresaId, estadoPago])
 
   const cambiarEstado = (p, nuevo) => {
     const texto = nuevo === 'pagado'
@@ -60,7 +60,7 @@ export default function AdminPagos() {
 
       <div className="pnl-cuerpo">
         {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
           <Contenido
             datos={datos}

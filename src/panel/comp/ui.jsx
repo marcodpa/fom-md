@@ -48,12 +48,28 @@ export function Vacio({ icono = 'buscar', titulo, texto, accion }) {
  * allá varias pantallas se quedaban en spinner infinito, aquí siempre hay
  * salida.
  */
-export function ErrorCarga({ onReintentar, texto = 'Revisa tu conexión e inténtalo de nuevo.' }) {
+/**
+ * Fallo al cargar, DICIENDO POR QUÉ.
+ *
+ * Antes decía siempre «revisa tu conexión», que es un diagnóstico inventado:
+ * la causa más común no es la red sino un permiso, una sesión caída o una
+ * función que todavía no está publicada. Mandar a revisar el cable a quien
+ * tiene un problema de permisos es peor que no decir nada.
+ *
+ * `error` es el que devuelve `useDatos`. Si no llega, se mantiene el texto
+ * genérico de siempre.
+ */
+export function ErrorCarga({
+  onReintentar,
+  error = null,
+  texto = 'Revisa tu conexión e inténtalo de nuevo.',
+}) {
+  const motivo = error?.message || texto
   return (
     <div className="pnl-vacio error" role="alert">
       <Icono nombre="alerta" tam={40} />
       <b>No pudimos cargar esto</b>
-      <span>{texto}</span>
+      <span>{motivo}</span>
       <button type="button" className="pnl-btn" onClick={onReintentar}>
         Reintentar
       </button>

@@ -406,6 +406,72 @@ export const repoApi = {
   // La forma de cada elemento imita a la de la semilla para que los módulos no
   // cambien: la migración es del dato, no de la interfaz.
 
+  /**
+   * La gente del ente, en UNA sola forma.
+   *
+   * Antes habia dos: `personal` (que estaba vacia) y `admin.usuarios`. Eran
+   * dos vistas de la misma persona, y la base lo dice sola — un documento de
+   * persona apunta a su membresia, asi que aqui no existe alguien sin cuenta.
+   */
+  gente: {
+    async listar({ q = '', rol = '', enteId = '' } = {}) {
+      const r = await api.directorio({ q, enteId })
+      let lista = (r?.items ?? []).map((p) => ({
+        id: p.userId,
+        userId: p.userId,
+        nombre: p.displayName,
+        email: p.email,
+        rol: p.role,
+        estado: p.status,
+        activadoEn: p.activatedAt,
+
+        // Datos personales. Vienen NULOS cuando se lee un contratista: la
+        // politica de fila de la base exige compartir ente, y una compania no
+        // lo comparte con la gente ajena. Se ve quien es, no su cedula.
+        cedula: p.nationalId ?? null,
+        telefono: p.phone ?? null,
+        perfilCompleto: Boolean(p.profileComplete),
+
+        unidad: p.vehicleId ?? null,
+        unidadNombre: [p.vehicleCode, p.vehiclePlate].filter(Boolean).join(' · ') || null,
+        rolEnUnidad: p.assignmentRole ?? null,
+        conduce: Boolean(p.vehicleId) || p.role === 'conductor',
+
+        // El papel que vence antes, con los dias que faltan calculados por la
+        // base. Un numero negativo es un documento YA vencido.
+        documentoTipo: p.nextDocumentType ?? null,
+        documentoVence: p.nextDocumentExpiresOn ?? null,
+        documentoDias:
+          p.nextDocumentDaysToExpiry === null || p.nextDocumentDaysToExpiry === undefined
+            ? null
+            : Number(p.nextDocumentDaysToExpiry),
+        papelesPendientes: Number(p.expiringDocumentCount ?? 0),
+      }))
+      if (rol) lista = lista.filter((p) => p.rol === rol)
+      // El alcance viaja pegado a la lista: el panel necesita saber si puede
+      // ofrecer botones o si esta mirando a un contratista.
+      lista.alcance = {
+        enteId: r?.scope?.tenantId ?? null,
+        administrable: r?.scope?.writable !== false,
+      }
+      return lista
+    },
+
+    async actualizarPerfil(userId, { cedula, telefono, direccion, nacimiento }) {
+      const r = await api.actualizarPerfil(userId, {
+        nationalId: cedula,
+        phone: telefono,
+        address: direccion,
+        birthDate: nacimiento,
+      })
+      return {
+        cedula: r?.profile?.nationalId ?? null,
+        telefono: r?.profile?.phone ?? null,
+        perfilCompleto: Boolean(r?.profile?.profileComplete),
+      }
+    },
+  },
+
   avisosEscritura: {
     /**
      * Dar un aviso por visto. Marca para TODA la empresa: la base no guarda

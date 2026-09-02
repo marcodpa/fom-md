@@ -17,7 +17,6 @@ import Flota from './modulos/Flota'
 import ExpedienteVehiculo from './modulos/ExpedienteVehiculo'
 import Mantenimiento from './modulos/Mantenimiento'
 import Inspecciones from './modulos/Inspecciones'
-import Personal from './modulos/Personal'
 import ExpedienteConductor from './modulos/ExpedienteConductor'
 import Alertas from './modulos/Alertas'
 import Documentos from './modulos/Documentos'
@@ -49,7 +48,10 @@ const MENU = [
   },
   {
     grupo: 'Gente',
-    items: [{ a: '/panel/personal', icono: 'gente', texto: 'Personal' }],
+    // Una sola entrada. «Personal» y «Usuarios» eran dos pantallas para la
+    // misma gente —una preguntaba «puede manejar hoy» y la otra «tiene
+    // acceso»— y la primera ademas estaba vacia. Ahora es una.
+    items: [{ a: '/panel/personal', icono: 'gente', texto: 'Gente' }],
   },
   {
     grupo: 'Análisis',
@@ -64,17 +66,14 @@ const MENU_ADMIN = {
     { a: '/panel/admin/empresas', icono: 'empresa', texto: 'Empresas' },
     { a: '/panel/admin/pagos', icono: 'costos', texto: 'Pagos' },
     { a: '/panel/admin/gps', icono: 'pin', texto: 'GPS' },
-    { a: '/panel/admin/usuarios', icono: 'gente', texto: 'Usuarios' },
     { a: '/panel/admin/auditoria', icono: 'auditoria', texto: 'Auditoría' },
   ],
 }
 
 function Lateral({ perfil, abierto, cerrar, sinLeer, esquema, alternarTema }) {
-  const menuGestor = MENU.map((grupo) =>
-    grupo.grupo === 'Gente' && esGestor(perfil)
-      ? { ...grupo, items: [...grupo.items, { a: '/panel/admin/usuarios', icono: 'gente', texto: 'Usuarios' }] }
-      : grupo,
-  )
+  // Antes aqui se colaba una segunda entrada, «Usuarios», para los gestores.
+  // Sobra: la pantalla de Gente ya trae la cuenta y sus acciones.
+  const menuGestor = MENU
   const menu = esAdminFom(perfil) ? [MENU_ADMIN, ...MENU] : menuGestor
   return (
     <aside className={`pnl-side${abierto ? ' abierto' : ''}`}>
@@ -236,7 +235,7 @@ export default function Consola() {
           <Route path="mantenimiento" element={<Mantenimiento />} />
           <Route path="inspecciones" element={<Inspecciones />} />
           <Route path="documentos" element={<Documentos />} />
-          <Route path="personal" element={<Personal />} />
+          <Route path="personal" element={<AdminUsuarios />} />
           <Route path="personal/:id" element={<ExpedienteConductor />} />
           <Route path="reportes" element={<Reportes />} />
           {/* La capa multiempresa: solo existe para el Administrador FOM. */}

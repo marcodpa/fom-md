@@ -186,7 +186,7 @@ export default function ExpedienteVehiculo() {
         <Volver a="/panel/flota">Flota</Volver>
 
         {cargando && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
 
         {estado === 'ok' && !v && (
           <Vacio

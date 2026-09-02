@@ -32,7 +32,7 @@ export default function AdminGps() {
   // Estado por fila: { [id]: { ocupado, error, mensaje } }
   const [filas, setFilas] = useState({})
 
-  const { datos, estado, recargar } = useDatos(() => cargar(q), [q])
+  const { datos, estado, error, recargar } = useDatos(() => cargar(q), [q])
 
   const marcarFila = (id, patch) =>
     setFilas((s) => ({ ...s, [id]: { ...(s[id] || {}), ...patch } }))
@@ -90,7 +90,7 @@ export default function AdminGps() {
 
       <div className="pnl-cuerpo">
         {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
           <Contenido
             datos={datos}

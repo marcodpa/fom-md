@@ -47,7 +47,7 @@ export default function AdminAuditoria() {
   const [empresaId, setEmpresaId] = useState('')
   const [q, setQ] = useState('')
 
-  const { datos, estado, recargar } = useDatos(() => cargar(tipo, empresaId, q), [tipo, empresaId, q])
+  const { datos, estado, error, recargar } = useDatos(() => cargar(tipo, empresaId, q), [tipo, empresaId, q])
 
   return (
     <>
@@ -58,7 +58,7 @@ export default function AdminAuditoria() {
 
       <div className="pnl-cuerpo">
         {estado === 'cargando' && <Cargando filas={8} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
           <Tarjeta
             titulo={`${datos.lista.length} eventos`}

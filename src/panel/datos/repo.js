@@ -127,7 +127,15 @@ const repo = HAY_API
       ...repoSemilla,
 
       // --- Sin respaldo real todavía: vacío honesto, nunca semilla ------
-      personal: sinRespaldo(repoSemilla.personal),
+      // `personal` y `admin.usuarios` eran dos vistas de la MISMA gente, y la
+      // primera devolvia lista vacia porque nunca tuvo servidor. Ahora las dos
+      // leen del mismo sitio: la persona entera, con su cuenta, sus datos, la
+      // unidad que maneja y el papel que le vence antes.
+      personal: {
+        ...sinRespaldo(repoSemilla.personal),
+        listar: repoApi.gente.listar,
+        actualizarPerfil: repoApi.gente.actualizarPerfil,
+      },
       costos: conRespaldoParcial(repoSemilla.costos, {}, {
         registrar: FALTA_COSTOS,
         actualizar: FALTA_COSTOS,
@@ -140,7 +148,12 @@ const repo = HAY_API
           repoSemilla.admin.empresas,
           repoApi.empresas,
         ),
-        usuarios: repoApi.admin.usuarios,
+        usuarios: {
+          ...repoApi.admin.usuarios,
+          // El mismo listado que «Personal»: una sola forma de la persona.
+          listar: repoApi.gente.listar,
+          actualizarPerfil: repoApi.gente.actualizarPerfil,
+        },
         // Registrar, asociar y desmontar son reales desde el #260. Verificar
         // y probar el botón de pánico siguen siendo de campo: exigen el
         // aparato delante, y fingirlos desde una pantalla sería peor que no
