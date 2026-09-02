@@ -53,6 +53,63 @@ const NO_HAY_ESCRITURA = () =>
     ),
   )
 
+// Lo que de verdad NO tiene superficie en el servidor todavia, con el motivo
+// concreto. Cada texto dice que falta y, cuando existe, por donde se hace hoy.
+
+const FALTA_ALERTAS =
+  'Marcar avisos como leídos todavía no existe en el servidor: la consola ' +
+  'los lee pero aún no puede escribir su estado.'
+
+const FALTA_DOCUMENTOS =
+  'Cargar documentos y mover vencimientos todavía no existe en el ' +
+  'servidor: la consola los lee y avisa de los vencidos, pero aún no ' +
+  'puede modificarlos.'
+
+const FALTA_INSPECCIONES =
+  'Las inspecciones se registran desde la app del conductor, que es quien ' +
+  'revisa la unidad. Desde la consola todavía solo se consultan.'
+
+const FALTA_REGLAS =
+  'Crear y editar reglas de alerta todavía no existe en el servidor: la ' +
+  'consola muestra las que hay y a cuántas unidades alcanzan.'
+
+const FALTA_GPS =
+  'Los equipos GPS se registran y comisionan desde la app de campo, junto ' +
+  'al vehículo. Desde la consola todavía no.'
+
+const FALTA_COSTOS =
+  'Cargar costos todavía no existe en el servidor como módulo propio: hoy ' +
+  'el costo se registra al cerrar la orden de trabajo que lo generó.'
+
+const FALTA_PAGOS =
+  'La facturación no existe todavía en el servidor: no hay tablas de pagos ' +
+  'ni superficie que las sirva. Lo que se ve aquí no es real.'
+
+/**
+ * Igual que la anterior pero DICIENDO QUÉ FALTA.
+ *
+ * Un mensaje genérico deja al que lo lee sin saber si el problema es suyo, de
+ * su permiso o del producto. Nombrar la pieza que falta convierte un callejón
+ * sin salida en algo que se puede pedir, esperar o rodear.
+ */
+const faltaEnElServidor = (queFalta) => () =>
+  Promise.reject(new Error(queFalta))
+
+/**
+ * Envuelve una colección de la semilla dejando reales las funciones que sí
+ * tienen respaldo, y con un aviso PROPIO las que no.
+ *
+ * Lo importante es que ninguna quede sin definir: una función ausente revienta
+ * con «no es una función», que no le dice nada a nadie.
+ */
+function conRespaldoParcial(coleccion, reales, avisos = {}) {
+  const salida = { ...sinRespaldo(coleccion), ...reales }
+  for (const [nombre, aviso] of Object.entries(avisos)) {
+    salida[nombre] = faltaEnElServidor(aviso)
+  }
+  return salida
+}
+
 /** Sustituye una colección de la semilla por su versión honesta y vacía. */
 function sinRespaldo(coleccion) {
   const vacia = {}
@@ -74,13 +131,30 @@ const repo = HAY_API
 
       // --- Sin respaldo real todavía: vacío honesto, nunca semilla ------
       personal: sinRespaldo(repoSemilla.personal),
-      costos: sinRespaldo(repoSemilla.costos),
+      costos: conRespaldoParcial(repoSemilla.costos, {}, {
+        registrar: FALTA_COSTOS,
+        actualizar: FALTA_COSTOS,
+        crear: FALTA_COSTOS,
+      }),
       empresa: () => Promise.resolve(null),
       admin: {
-        empresas: sinRespaldo(repoSemilla.admin.empresas),
+        // Empresas, contratistas y áreas: reales desde el #250.
+        empresas: conRespaldoParcial(
+          repoSemilla.admin.empresas,
+          repoApi.empresas,
+        ),
         usuarios: repoApi.admin.usuarios,
-        gps: sinRespaldo(repoSemilla.admin.gps),
-        pagos: sinRespaldo(repoSemilla.admin.pagos),
+        gps: conRespaldoParcial(repoSemilla.admin.gps, {}, {
+          registrar: FALTA_GPS,
+          asociar: FALTA_GPS,
+          verificar: FALTA_GPS,
+          probarPanico: FALTA_GPS,
+        }),
+        pagos: conRespaldoParcial(repoSemilla.admin.pagos, {}, {
+          registrar: FALTA_PAGOS,
+          actualizar: FALTA_PAGOS,
+          actualizarEstado: FALTA_PAGOS,
+        }),
         auditoria: sinRespaldo(repoSemilla.admin.auditoria ?? {}),
       },
 
@@ -89,6 +163,8 @@ const repo = HAY_API
         ...sinRespaldo(repoSemilla.vehiculos),
         listar: repoApi.vehiculos.listar,
         obtener: repoApi.vehiculos.obtener,
+        // Alta, edición, área y conductor: reales desde el #219.
+        ...repoApi.vehiculosEscritura,
       },
       recorrido: repoApi.recorrido,
       resumen: repoApi.resumen,
@@ -110,11 +186,45 @@ const repo = HAY_API
         listar: repoApi.odts.listar,
         obtener: repoApi.odts.obtener,
         crear: repoApi.odts.crear,
+        mover: repoApi.odts.mover,
       },
-      inspecciones: { ...sinRespaldo(repoSemilla.inspecciones), listar: repoApi.inspecciones.listar },
-      documentos: { ...sinRespaldo(repoSemilla.documentos), listar: repoApi.documentos.listar },
-      alertas: { ...sinRespaldo(repoSemilla.alertas), listar: repoApi.alertas.listar },
-      reglas: { ...sinRespaldo(repoSemilla.reglas), listar: repoApi.reglas.listar },
+      inspecciones: conRespaldoParcial(
+        repoSemilla.inspecciones,
+        { listar: repoApi.inspecciones.listar },
+        { crear: FALTA_INSPECCIONES, registrar: FALTA_INSPECCIONES },
+      ),
+      documentos: conRespaldoParcial(
+        repoSemilla.documentos,
+        { listar: repoApi.documentos.listar },
+        {
+          actualizarVencimiento: FALTA_DOCUMENTOS,
+          actualizar: FALTA_DOCUMENTOS,
+          crear: FALTA_DOCUMENTOS,
+          subir: FALTA_DOCUMENTOS,
+        },
+      ),
+      alertas: conRespaldoParcial(
+        repoSemilla.alertas,
+        { listar: repoApi.alertas.listar },
+        {
+          marcarLeida: FALTA_ALERTAS,
+          marcarTodasLeidas: FALTA_ALERTAS,
+          marcar: FALTA_ALERTAS,
+        },
+      ),
+      reglas: conRespaldoParcial(
+        repoSemilla.reglas,
+        { listar: repoApi.reglas.listar },
+        { crear: FALTA_REGLAS, set: FALTA_REGLAS, eliminar: FALTA_REGLAS },
+      ),
+      // `areas` se INVOCA como función en cuatro pantallas —`repo.areas()`—,
+      // así que sus escrituras se le cuelgan encima en vez de mezclarla en un
+      // objeto: mezclarla la convertiría en objeto y todas esas pantallas
+      // dejarían de cargar.
+      areas: Object.assign(
+        (...args) => repoApi.areas(...args),
+        repoApi.areasEscritura,
+      ),
     }
   : repoSemilla
 

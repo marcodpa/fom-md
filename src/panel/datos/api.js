@@ -147,6 +147,77 @@ export const api = {
       cuerpo: { vehicleId, description, kind, failureType, location },
     }),
 
+  // --- Escrituras del directorio (#219 de fom-core) ------------------------
+
+  /** Cambiar perfil o estado de una persona en el ente. */
+  actualizarMiembro: (userId, { role, status, reason }) =>
+    pedir(`${CONSOLA}/users/${userId}`, {
+      metodo: 'PATCH',
+      cuerpo: { role, status, reason },
+    }),
+
+  /** Reiniciar la credencial: nace obligada a cambiarse. */
+  reiniciarClave: (userId, { temporaryPassword, reason }) =>
+    pedir(`${CONSOLA}/users/${userId}/credential-reset`, {
+      metodo: 'POST',
+      cuerpo: { temporaryPassword, reason },
+    }),
+
+  /** Alta de vehiculo. */
+  crearVehiculo: (cuerpo) =>
+    pedir(`${CONSOLA}/vehicles`, { metodo: 'POST', cuerpo }),
+
+  /** Editar el vehiculo, incluida su area. */
+  actualizarVehiculo: (vehicleId, cuerpo) =>
+    pedir(`${CONSOLA}/vehicles/${vehicleId}`, { metodo: 'PATCH', cuerpo }),
+
+  /** Asignar conductor a una unidad. */
+  asignarConductor: (vehicleId, { userId, role, pin, reason }) =>
+    pedir(`${CONSOLA}/vehicles/${vehicleId}/drivers`, {
+      metodo: 'POST',
+      cuerpo: { userId, role, pin, reason },
+    }),
+
+  /** Revocar una asignacion. No se borra: se cierra con fecha. */
+  revocarAsignacion: (assignmentId, { reason } = {}) =>
+    pedir(`${CONSOLA}/driver-assignments/${assignmentId}/revoke`, {
+      metodo: 'PATCH',
+      cuerpo: { reason },
+    }),
+
+  // --- Ordenes de trabajo --------------------------------------------------
+
+  /** Mover una orden de estado. `expectedStatus` evita pisar a otro. */
+  moverOdt: (odtId, cuerpo) =>
+    pedir(`${CONSOLA}/work-orders/${odtId}/status`, {
+      metodo: 'PATCH',
+      cuerpo,
+    }),
+
+  // --- Entes: empresas, contratistas y areas (#250 de fom-core) ------------
+
+  entes: ({ limite = 100, desplazamiento = 0 } = {}) => {
+    const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
+    return pedir(`${CONSOLA}/tenants?${p}`)
+  },
+  crearEnte: (cuerpo) => pedir(`${CONSOLA}/tenants`, { metodo: 'POST', cuerpo }),
+  actualizarEnte: (tenantId, cuerpo) =>
+    pedir(`${CONSOLA}/tenants/${tenantId}`, { metodo: 'PATCH', cuerpo }),
+  colgarContratista: (tenantId, cuerpo) =>
+    pedir(`${CONSOLA}/tenants/${tenantId}/contractors`, {
+      metodo: 'POST',
+      cuerpo,
+    }),
+  descolgarContratista: (relationshipId, cuerpo = {}) =>
+    pedir(`${CONSOLA}/tenant-relationships/${relationshipId}/end`, {
+      metodo: 'PATCH',
+      cuerpo,
+    }),
+  crearArea: (tenantId, cuerpo) =>
+    pedir(`${CONSOLA}/tenants/${tenantId}/areas`, { metodo: 'POST', cuerpo }),
+  actualizarArea: (areaId, cuerpo) =>
+    pedir(`${CONSOLA}/areas/${areaId}`, { metodo: 'PATCH', cuerpo }),
+
   // Estado del backend
   salud: () => pedir('/health'),
   version: () => pedir('/version'),

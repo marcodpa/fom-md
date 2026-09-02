@@ -156,6 +156,18 @@ async function conPosicionDirecta(lista) {
   })
 }
 
+/**
+ * Clave temporal legible pero no adivinable. Se genera en el navegador y
+ * viaja una sola vez: el servidor guarda el hash y obliga a cambiarla.
+ */
+function claveTemporal() {
+  const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const bytes = new Uint32Array(12)
+  crypto.getRandomValues(bytes)
+  const cuerpo = [...bytes].map((b) => alfabeto[b % alfabeto.length]).join('')
+  return `Fom-${cuerpo.slice(0, 4)}-${cuerpo.slice(4, 8)}-${cuerpo.slice(8, 12)}`
+}
+
 function conductoresPorVehiculo(lista) {
   const porVehiculo = new Map()
   for (const c of lista) {
@@ -210,6 +222,83 @@ export const repoApi = {
           claveCreada: Boolean(r.passwordSet),
           debeCambiarClave: Boolean(r.mustChangePassword),
         }
+      },
+
+      /**
+       * Cambiar el perfil o el estado de alguien.
+       *
+       * `revoked` es terminal por diseño del ciclo de vida: de ahi no se
+       * vuelve. Suspender, en cambio, se deshace.
+       */
+      async cambiar(id, { rol, estado, motivo } = {}) {
+        await api.actualizarMiembro(id, {
+          role: rol || undefined,
+          status: estado || undefined,
+          reason: motivo || undefined,
+        })
+        return true
+      },
+
+      async suspender(id, motivo) {
+        await api.actualizarMiembro(id, { status: 'suspended', reason: motivo })
+        return true
+      },
+
+      async reactivar(id, motivo) {
+        await api.actualizarMiembro(id, { status: 'active', reason: motivo })
+        return true
+      },
+
+      /**
+       * Reiniciar la clave. La nueva se genera AQUI y se devuelve una sola
+       * vez para entregarla en mano; el servidor solo guarda su hash y la
+       * marca como obligada a cambiarse en el primer ingreso.
+       */
+      async cambiarClave(id) {
+        const clave = claveTemporal()
+        await api.reiniciarClave(id, {
+          temporaryPassword: clave,
+          reason: 'Reinicio solicitado desde la consola',
+        })
+        return { clave, debeCambiarClave: true }
+      },
+
+      /**
+       * Sacar a alguien del ente. El servidor NO borra la membresia: la
+       * revoca, y con eso caen sus sesiones. Borrarla dejaria sin dueño el
+       * rastro de todo lo que esa persona hizo.
+       */
+      async enviarADesempleados(id) {
+        await api.actualizarMiembro(id, {
+          status: 'revoked',
+          reason: 'Salida del ente registrada desde la consola',
+        })
+        return true
+      },
+
+      /** Mismo camino: revocar. Aqui no existe el borrado definitivo. */
+      async eliminar(id) {
+        await api.actualizarMiembro(id, {
+          status: 'revoked',
+          reason: 'Acceso revocado desde la consola',
+        })
+        return true
+      },
+
+      async eliminarDefinitivo() {
+        throw new Error(
+          'Una cuenta no se borra: se revoca, y su rastro queda. Borrarla ' +
+            'dejaria sin dueño todo lo que esa persona registro — ordenes, ' +
+            'inspecciones y firmas. Usa «revocar acceso».',
+        )
+      },
+
+      async mover() {
+        throw new Error(
+          'Mudar una persona de empresa no existe todavia en el servidor: ' +
+            'hoy se revoca en la empresa de origen y se le da de alta en la ' +
+            'de destino.',
+        )
       },
     },
   },
@@ -317,6 +406,186 @@ export const repoApi = {
   // La forma de cada elemento imita a la de la semilla para que los módulos no
   // cambien: la migración es del dato, no de la interfaz.
 
+  empresas: {
+    /**
+     * Los tres tipos del panel son las tres categorias de la base:
+     * «estandar» es un contratista, «predefinida» es una compania (la que
+     * cuelga contratistas de si misma) y «personal» es la de una persona.
+     */
+    async listar() {
+      const r = await api.entes()
+      return (r?.items ?? []).map((t) => ({
+        id: t.id,
+        nombre: t.name,
+        codigo: t.code,
+        tipo:
+          t.category === 'compania'
+            ? 'predefinida'
+            : t.category === 'personal'
+              ? 'personal'
+              : 'estandar',
+        estado: t.status,
+        servicioActivo: t.status === 'active',
+        rif: t.rif ?? '',
+        telefono: t.phone ?? '',
+        email: t.email ?? '',
+        contacto: t.contactName ?? '',
+        creadoEn: t.createdAt ?? null,
+      }))
+    },
+
+    async crear({ nombre, tipo, rif, contacto, telefono, email }) {
+      const r = await api.crearEnte({
+        name: nombre,
+        category:
+          tipo === 'predefinida'
+            ? 'compania'
+            : tipo === 'personal'
+              ? 'personal'
+              : 'contratista',
+        rif: rif || undefined,
+        phone: telefono || undefined,
+        email: email || undefined,
+        contactName: contacto || undefined,
+      })
+      return { id: r?.tenant?.id ?? null }
+    },
+
+    /** Suspender o reactivar el servicio de un ente. */
+    async setServicio(id, activo, _actor, motivo) {
+      await api.actualizarEnte(id, {
+        status: activo ? 'active' : 'suspended',
+        reason: motivo || 'Cambio de servicio desde la consola',
+      })
+      return true
+    },
+
+    async eliminar(id, _actor, motivo) {
+      // Un ente con historial no se borra. Suspenderlo lo saca de operacion
+      // y deja el rastro en pie, que es lo que la auditoria necesita.
+      await api.actualizarEnte(id, {
+        status: 'suspended',
+        reason: motivo || 'Ente retirado de operacion desde la consola',
+      })
+      return true
+    },
+
+    /** Colgar un contratista de una compania. */
+    async asignar(companiaId, contratistaId) {
+      await api.colgarContratista(companiaId, {
+        contractorTenantId: contratistaId,
+      })
+      return true
+    },
+
+    async desasignar(relacionId, motivo) {
+      await api.descolgarContratista(relacionId, {
+        reason: motivo || undefined,
+      })
+      return true
+    },
+
+    async asignarPredefinidas(companiaId, contratistas = []) {
+      for (const contratistaId of contratistas) {
+        await api.colgarContratista(companiaId, {
+          contractorTenantId: contratistaId,
+        })
+      }
+      return true
+    },
+  },
+
+  areasEscritura: {
+    async crear(tenantId, { nombre, tipo = 'zona' }) {
+      const r = await api.crearArea(tenantId, { name: nombre, kind: tipo })
+      return { id: r?.area?.id ?? null }
+    },
+    async set(areaId, { nombre, tipo, estado }) {
+      await api.actualizarArea(areaId, {
+        name: nombre,
+        kind: tipo,
+        status: estado,
+      })
+      return true
+    },
+  },
+
+  vehiculosEscritura: {
+    /**
+     * Alta de vehiculo.
+     *
+     * El panel pide un GPS al crear, pero la superficie de consola da de alta
+     * la UNIDAD; el equipo se comisiona aparte desde la app de campo. Se avisa
+     * en vez de fingir que el GPS quedo asociado, porque un vehiculo que se
+     * cree «con GPS» y no lo tenga es peor que uno que se sepa sin el.
+     */
+    async crear({ alias, placa, marca, modelo, anio, tipo, areaId, gpsId }) {
+      const r = await api.crearVehiculo({
+        code: (alias || placa || '').trim().toLowerCase().replace(/\s+/gu, '-'),
+        plate: placa || undefined,
+        alias: alias || undefined,
+        make: marca || undefined,
+        model: modelo || undefined,
+        modelYear: anio ? Number(anio) : undefined,
+        vehicleType: tipo || undefined,
+      })
+      const id = r?.vehicle?.id ?? null
+      if (id && areaId) await api.actualizarVehiculo(id, { areaId })
+      if (gpsId) {
+        throw new Error(
+          'La unidad quedo creada, pero el GPS se asocia desde la app de ' +
+            'campo al comisionar el equipo. Registrala ahi para vincularlo.',
+        )
+      }
+      return { id }
+    },
+
+    async set(id, parche) {
+      await api.actualizarVehiculo(id, {
+        plate: parche.placa,
+        alias: parche.alias,
+        make: parche.marca,
+        model: parche.modelo,
+        modelYear: parche.anio ? Number(parche.anio) : undefined,
+        vehicleType: parche.tipo,
+        areaId: parche.areaId,
+      })
+      return true
+    },
+
+    /** El area del vehiculo es un campo suyo, no una tabla aparte. */
+    async asignarArea(id, areaId) {
+      await api.actualizarVehiculo(id, { areaId: areaId || null })
+      return true
+    },
+
+    /**
+     * Asignar conductor. Sin `userId` la intencion es DESASIGNAR, y eso el
+     * servidor no lo hace borrando sino revocando la asignacion vigente, que
+     * es la que deja rastro de quien manejo y hasta cuando.
+     */
+    async asignarConductor(id, userId, { rol = 'principal', pin, motivo } = {}) {
+      if (!userId) {
+        throw new Error(
+          'Para quitar un conductor hay que revocar su asignacion vigente ' +
+            'desde su expediente: no se borra, se cierra con fecha.',
+        )
+      }
+      await api.asignarConductor(id, {
+        userId,
+        role: rol,
+        pin: pin || undefined,
+        reason: motivo || undefined,
+      })
+      return true
+    },
+
+    async revocarAsignacion(asignacionId, motivo) {
+      await api.revocarAsignacion(asignacionId, { reason: motivo || undefined })
+      return true
+    },
+  },
+
   odts: {
     async listar({ estado = '', q = '' } = {}) {
       try {
@@ -360,6 +629,25 @@ export const repoApi = {
         location: ubicacion || undefined,
       })
       return { id: r?.workOrder?.id ?? null, estado: r?.workOrder?.status ?? null }
+    },
+
+    /**
+     * Mover la orden de estado. `estadoEsperado` es el que el panel acaba de
+     * leer: si otro lo movio mientras tanto, el servidor responde 409 en vez
+     * de pisar su trabajo.
+     */
+    async mover(id, { estadoEsperado, estado, nota, notaResolucion, costo, moneda }) {
+      const r = await api.moverOdt(id, {
+        expectedStatus: estadoEsperado,
+        status: estado,
+        note: nota,
+        resolutionNote: notaResolucion || undefined,
+        resolutionCost: costo === undefined || costo === null || costo === ''
+          ? undefined
+          : Number(costo),
+        resolutionCurrency: moneda || undefined,
+      })
+      return { estado: r?.workOrder?.status ?? null }
     },
 
     async obtener(id) {
