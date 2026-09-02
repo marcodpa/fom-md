@@ -218,6 +218,38 @@ export const api = {
   actualizarArea: (areaId, cuerpo) =>
     pedir(`${CONSOLA}/areas/${areaId}`, { metodo: 'PATCH', cuerpo }),
 
+  // --- Cumplimiento y avisos (#260 de fom-core) ---------------------------
+
+  marcarAvisoLeido: (avisoId) =>
+    pedir(`${CONSOLA}/notifications/${avisoId}/read`, { metodo: 'PATCH', cuerpo: {} }),
+  marcarTodosLosAvisos: () =>
+    pedir(`${CONSOLA}/notifications/read-all`, { metodo: 'POST', cuerpo: {} }),
+
+  crearDocumento: (cuerpo) =>
+    pedir(`${CONSOLA}/documents`, { metodo: 'POST', cuerpo }),
+  actualizarDocumento: (documentoId, cuerpo) =>
+    pedir(`${CONSOLA}/documents/${documentoId}`, { metodo: 'PATCH', cuerpo }),
+
+  crearRegla: (cuerpo) =>
+    pedir(`${CONSOLA}/alert-rules`, { metodo: 'POST', cuerpo }),
+  actualizarRegla: (reglaId, cuerpo) =>
+    pedir(`${CONSOLA}/alert-rules/${reglaId}`, { metodo: 'PATCH', cuerpo }),
+
+  registrarEquipoGps: (cuerpo) =>
+    pedir(`${CONSOLA}/gps-devices`, { metodo: 'POST', cuerpo }),
+  actualizarEquipoGps: (equipoId, cuerpo) =>
+    pedir(`${CONSOLA}/gps-devices/${equipoId}`, { metodo: 'PATCH', cuerpo }),
+  instalarEquipoGps: (equipoId, cuerpo) =>
+    pedir(`${CONSOLA}/gps-devices/${equipoId}/installation`, {
+      metodo: 'POST',
+      cuerpo,
+    }),
+  desmontarEquipoGps: (instalacionId, cuerpo = {}) =>
+    pedir(`${CONSOLA}/gps-installations/${instalacionId}/remove`, {
+      metodo: 'PATCH',
+      cuerpo,
+    }),
+
   // Estado del backend
   salud: () => pedir('/health'),
   version: () => pedir('/version'),

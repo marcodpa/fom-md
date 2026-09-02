@@ -56,26 +56,23 @@ const NO_HAY_ESCRITURA = () =>
 // Lo que de verdad NO tiene superficie en el servidor todavia, con el motivo
 // concreto. Cada texto dice que falta y, cuando existe, por donde se hace hoy.
 
-const FALTA_ALERTAS =
-  'Marcar avisos como leídos todavía no existe en el servidor: la consola ' +
-  'los lee pero aún no puede escribir su estado.'
+const FALTA_ALERTAS_ANTIGUO =
+  'Esa forma de marcar avisos quedó vieja: usa «marcar como leído» sobre el ' +
+  'aviso, o «marcar todos».'
 
-const FALTA_DOCUMENTOS =
-  'Cargar documentos y mover vencimientos todavía no existe en el ' +
-  'servidor: la consola los lee y avisa de los vencidos, pero aún no ' +
-  'puede modificarlos.'
+const FALTA_ARCHIVOS =
+  'Adjuntar el archivo del documento todavía no existe: falta la subida de ' +
+  'archivos en el servidor. El documento sí se registra con su vencimiento, ' +
+  'que es lo que se vigila.'
 
 const FALTA_INSPECCIONES =
   'Las inspecciones se registran desde la app del conductor, que es quien ' +
   'revisa la unidad. Desde la consola todavía solo se consultan.'
 
-const FALTA_REGLAS =
-  'Crear y editar reglas de alerta todavía no existe en el servidor: la ' +
-  'consola muestra las que hay y a cuántas unidades alcanzan.'
-
-const FALTA_GPS =
-  'Los equipos GPS se registran y comisionan desde la app de campo, junto ' +
-  'al vehículo. Desde la consola todavía no.'
+const FALTA_GPS_CAMPO =
+  'Verificar el equipo y probar el botón de pánico exigen tener el aparato ' +
+  'delante: se hacen desde la app de campo, al comisionarlo. Registrarlo y ' +
+  'asociarlo a una unidad sí se hace desde aquí.'
 
 const FALTA_COSTOS =
   'Cargar costos todavía no existe en el servidor como módulo propio: hoy ' +
@@ -144,12 +141,15 @@ const repo = HAY_API
           repoApi.empresas,
         ),
         usuarios: repoApi.admin.usuarios,
-        gps: conRespaldoParcial(repoSemilla.admin.gps, {}, {
-          registrar: FALTA_GPS,
-          asociar: FALTA_GPS,
-          verificar: FALTA_GPS,
-          probarPanico: FALTA_GPS,
-        }),
+        // Registrar, asociar y desmontar son reales desde el #260. Verificar
+        // y probar el botón de pánico siguen siendo de campo: exigen el
+        // aparato delante, y fingirlos desde una pantalla sería peor que no
+        // tenerlos.
+        gps: conRespaldoParcial(
+          repoSemilla.admin.gps,
+          repoApi.gpsEscritura,
+          { verificar: FALTA_GPS_CAMPO, probarPanico: FALTA_GPS_CAMPO },
+        ),
         pagos: conRespaldoParcial(repoSemilla.admin.pagos, {}, {
           registrar: FALTA_PAGOS,
           actualizar: FALTA_PAGOS,
@@ -195,27 +195,20 @@ const repo = HAY_API
       ),
       documentos: conRespaldoParcial(
         repoSemilla.documentos,
-        { listar: repoApi.documentos.listar },
-        {
-          actualizarVencimiento: FALTA_DOCUMENTOS,
-          actualizar: FALTA_DOCUMENTOS,
-          crear: FALTA_DOCUMENTOS,
-          subir: FALTA_DOCUMENTOS,
-        },
+        { listar: repoApi.documentos.listar, ...repoApi.documentosEscritura },
+        // El ARCHIVO del documento (el PDF) es otra cosa que su registro: sin
+        // una subida de objetos, aceptarlo aquí prometería un respaldo que no
+        // existe.
+        { subir: FALTA_ARCHIVOS },
       ),
       alertas: conRespaldoParcial(
         repoSemilla.alertas,
-        { listar: repoApi.alertas.listar },
-        {
-          marcarLeida: FALTA_ALERTAS,
-          marcarTodasLeidas: FALTA_ALERTAS,
-          marcar: FALTA_ALERTAS,
-        },
+        { listar: repoApi.alertas.listar, ...repoApi.avisosEscritura },
+        { marcar: FALTA_ALERTAS_ANTIGUO },
       ),
       reglas: conRespaldoParcial(
         repoSemilla.reglas,
-        { listar: repoApi.reglas.listar },
-        { crear: FALTA_REGLAS, set: FALTA_REGLAS, eliminar: FALTA_REGLAS },
+        { listar: repoApi.reglas.listar, ...repoApi.reglasEscritura },
       ),
       // `areas` se INVOCA como función en cuatro pantallas —`repo.areas()`—,
       // así que sus escrituras se le cuelgan encima en vez de mezclarla en un

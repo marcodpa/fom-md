@@ -85,24 +85,40 @@ test('toda acción que invoca el panel existe en el repositorio conectado', asyn
   assert.deepEqual(rotas, [], `acciones sin respaldo:\n  ${rotas.join('\n  ')}`)
 })
 
-test('lo que no tiene servidor falla diciendo qué falta, no en genérico', async () => {
+test('lo que no tiene servidor avisa sin salir a la red', async () => {
   const repo = await repositorioConectado()
 
-  // Estas son las que hoy NO tienen superficie en el servidor. Cada una debe
-  // rechazar con un motivo propio: si alguna empieza a funcionar, hay que
-  // quitarla de aquí, y si otra deja de funcionar, hay que añadirla.
+  // Estas NO tienen superficie en el servidor. Cada una debe rechazar con su
+  // motivo propio y, sobre todo, SIN intentar la petición: si saliera a la
+  // red, el usuario vería un fallo de conexión en vez de la explicación, que
+  // es un diagnóstico falso.
+  //
+  // Si alguna empieza a existir, hay que sacarla de aquí; si otra deja de
+  // existir, hay que meterla. Esa es la parte útil de la lista.
   const sinServidor = [
-    ['alertas.marcarLeida', () => repo.alertas.marcarLeida('x')],
-    ['alertas.marcarTodasLeidas', () => repo.alertas.marcarTodasLeidas()],
-    ['documentos.actualizarVencimiento', () => repo.documentos.actualizarVencimiento('x', {})],
-    ['admin.gps.registrar', () => repo.admin.gps.registrar({})],
+    ['documentos.subir', () => repo.documentos.subir('d', {})],
+    ['admin.gps.verificar', () => repo.admin.gps.verificar('g')],
+    ['admin.gps.probarPanico', () => repo.admin.gps.probarPanico('g')],
+    ['admin.usuarios.eliminarDefinitivo', () => repo.admin.usuarios.eliminarDefinitivo('u')],
+    ['admin.usuarios.mover', () => repo.admin.usuarios.mover('u', 'e')],
     ['admin.pagos.registrar', () => repo.admin.pagos.registrar({})],
+    ['costos.registrar', () => repo.costos.registrar({})],
   ]
 
-  for (const [nombre, llamar] of sinServidor) {
-    await assert.rejects(
-      llamar(),
-      (error) => {
+  const original = globalThis.fetch
+  try {
+    for (const [nombre, llamar] of sinServidor) {
+      let saliUALaRed = false
+      globalThis.fetch = async () => {
+        saliUALaRed = true
+        throw new Error('no debería haberse llamado')
+      }
+      await assert.rejects(llamar(), (error) => {
+        assert.equal(
+          saliUALaRed,
+          false,
+          `${nombre} salió a la red en vez de explicar que no existe`,
+        )
         assert.ok(
           error.message.length > 40,
           `${nombre} falla con un mensaje demasiado corto para explicar nada`,
@@ -112,8 +128,46 @@ test('lo que no tiene servidor falla diciendo qué falta, no en genérico', asyn
           `${nombre} invita a repetir algo que no puede funcionar`,
         )
         return true
-      },
-      nombre,
-    )
+      }, nombre)
+    }
+  } finally {
+    globalThis.fetch = original
+  }
+})
+
+test('lo que sí tiene servidor sale a la red, no se queda en un aviso', async () => {
+  const repo = await repositorioConectado()
+
+  // La otra mitad de la anterior, y la que de verdad se rompió: una acción
+  // real que quede envuelta en un aviso pasa desapercibida, porque el panel
+  // sigue “funcionando” — solo que sin hacer nada.
+  const conServidor = [
+    ['vehiculos.crear', () => repo.vehiculos.crear({ alias: 'a', placa: 'b' })],
+    ['vehiculos.asignarConductor', () => repo.vehiculos.asignarConductor('v', 'u')],
+    ['odts.crear', () => repo.odts.crear({ vehiculoId: 'v', descripcion: 'una falla descrita' })],
+    ['odts.mover', () => repo.odts.mover('o', { estadoEsperado: 'abierta', estado: 'cerrada', nota: 'x' })],
+    ['admin.usuarios.cambiar', () => repo.admin.usuarios.cambiar('u', { rol: 'supervisor' })],
+    ['admin.empresas.crear', () => repo.admin.empresas.crear({ nombre: 'n', tipo: 'estandar' })],
+    ['alertas.marcarLeida', () => repo.alertas.marcarLeida('n')],
+    ['alertas.marcarTodasLeidas', () => repo.alertas.marcarTodasLeidas()],
+    ['documentos.actualizarVencimiento', () => repo.documentos.actualizarVencimiento('d', '2028-01-31')],
+    ['reglas.crear', () => repo.reglas.crear({ tipo: 'velocidad', umbralKmh: 90 })],
+    ['admin.gps.registrar', () => repo.admin.gps.registrar({ imei: '860000000000001', modelo: 'GT06N' })],
+    ['admin.gps.asociar', () => repo.admin.gps.asociar('g', 'v')],
+  ]
+
+  const original = globalThis.fetch
+  try {
+    for (const [nombre, llamar] of conServidor) {
+      let salio = false
+      globalThis.fetch = async () => {
+        salio = true
+        throw new Error('corte deliberado')
+      }
+      await llamar().catch(() => {})
+      assert.ok(salio, `${nombre} no llegó a llamar al servidor`)
+    }
+  } finally {
+    globalThis.fetch = original
   }
 })

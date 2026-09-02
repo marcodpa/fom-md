@@ -406,6 +406,121 @@ export const repoApi = {
   // La forma de cada elemento imita a la de la semilla para que los módulos no
   // cambien: la migración es del dato, no de la interfaz.
 
+  avisosEscritura: {
+    /**
+     * Dar un aviso por visto. Marca para TODA la empresa: la base no guarda
+     * quien lo leyo, porque el aviso describe algo de la flota y no del que
+     * lo mira. Si un supervisor lo marca, deja de aparecerle a sus companeros.
+     */
+    async marcarLeida(avisoId) {
+      await api.marcarAvisoLeido(avisoId)
+      return true
+    },
+    async marcarTodasLeidas() {
+      const r = await api.marcarTodosLosAvisos()
+      return { marcados: r?.markedCount ?? 0 }
+    },
+  },
+
+  documentosEscritura: {
+    async crear({ ambito, vehiculoId, personaId, tipo, numero, emitidoEn, venceEn, notas }) {
+      const r = await api.crearDocumento({
+        scope: ambito === 'persona' ? 'persona' : 'vehiculo',
+        vehicleId: ambito === 'persona' ? undefined : vehiculoId,
+        holderUserId: ambito === 'persona' ? personaId : undefined,
+        documentType: tipo,
+        documentNumber: numero || undefined,
+        issuedOn: emitidoEn || undefined,
+        expiresOn: venceEn,
+        notes: notas || undefined,
+      })
+      return { id: r?.document?.id ?? null }
+    },
+
+    /** La correccion mas frecuente del modulo: mover el vencimiento. */
+    async actualizarVencimiento(documentoId, venceEn) {
+      await api.actualizarDocumento(documentoId, { expiresOn: venceEn })
+      return true
+    },
+
+    async actualizar(documentoId, { numero, emitidoEn, venceEn, notas, estado }) {
+      await api.actualizarDocumento(documentoId, {
+        documentNumber: numero,
+        issuedOn: emitidoEn,
+        expiresOn: venceEn,
+        notes: notas,
+        status: estado,
+      })
+      return true
+    },
+
+    /** Archivar no borra: saca de la vigilancia y conserva el historial. */
+    async archivar(documentoId) {
+      await api.actualizarDocumento(documentoId, { status: 'archived' })
+      return true
+    },
+  },
+
+  reglasEscritura: {
+    async crear({ tipo, umbralKmh, umbralKm, servicio, activa = true }) {
+      const r = await api.crearRegla({
+        ruleType: tipo === 'velocidad' ? 'velocidad' : 'mantenimiento',
+        thresholdKph: tipo === 'velocidad' ? Number(umbralKmh) : undefined,
+        thresholdKm: tipo === 'velocidad' ? undefined : Number(umbralKm),
+        serviceName: tipo === 'velocidad' ? undefined : servicio,
+        isActive: activa,
+      })
+      return { id: r?.alertRule?.id ?? null }
+    },
+    async set(reglaId, { umbralKmh, umbralKm, servicio, activa }) {
+      await api.actualizarRegla(reglaId, {
+        thresholdKph: umbralKmh === undefined ? undefined : Number(umbralKmh),
+        thresholdKm: umbralKm === undefined ? undefined : Number(umbralKm),
+        serviceName: servicio,
+        isActive: activa,
+      })
+      return true
+    },
+    async eliminar(reglaId) {
+      // Una regla no se borra: se desactiva. Borrarla dejaria sin explicacion
+      // las alertas que ya genero.
+      await api.actualizarRegla(reglaId, { isActive: false })
+      return true
+    },
+  },
+
+  gpsEscritura: {
+    async registrar({ imei, modelo, protocolo, fabricante, serie }) {
+      const r = await api.registrarEquipoGps({
+        imei,
+        model: modelo,
+        protocolFamily: protocolo || 'coban-gps103',
+        manufacturer: fabricante || undefined,
+        serialNumber: serie || undefined,
+      })
+      return { id: r?.gpsDevice?.id ?? null }
+    },
+    async asociar(equipoId, vehiculoId, notas) {
+      await api.instalarEquipoGps(equipoId, {
+        vehicleId: vehiculoId,
+        notes: notas || undefined,
+      })
+      return true
+    },
+    async desmontar(instalacionId, notas) {
+      await api.desmontarEquipoGps(instalacionId, { notes: notas || undefined })
+      return true
+    },
+    async set(equipoId, { estado, fabricante, serie }) {
+      await api.actualizarEquipoGps(equipoId, {
+        status: estado,
+        manufacturer: fabricante,
+        serialNumber: serie,
+      })
+      return true
+    },
+  },
+
   empresas: {
     /**
      * Los tres tipos del panel son las tres categorias de la base:
