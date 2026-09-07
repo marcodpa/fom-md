@@ -170,7 +170,13 @@ export default function ExpedienteVehiculo() {
     <>
       <Cabecera
         titulo={v ? v.alias : 'Expediente de la unidad'}
-        bajada={v ? `${v.marca} ${v.modelo} · ${v.anio} · ${v.placa}` : 'Ficha completa de la unidad'}
+        bajada={
+          // Solo lo que existe. Un año nulo salia como la palabra «null» en
+          // medio del subtitulo, que es peor que no decir el año.
+          v
+            ? [`${v.marca} ${v.modelo}`.trim(), v.anio, v.placa].filter(Boolean).join(' · ')
+            : 'Ficha completa de la unidad'
+        }
       >
         {v && (
           <>
@@ -238,7 +244,7 @@ export default function ExpedienteVehiculo() {
                       { etiqueta: 'Placa', valor: v.placa },
                       { etiqueta: 'Marca', valor: v.marca },
                       { etiqueta: 'Modelo', valor: v.modelo },
-                      { etiqueta: 'Año', valor: v.anio },
+                      { etiqueta: 'Año', valor: v.anio ?? '—' },
                       { etiqueta: 'Tipo', valor: etiqueta('vehiculo_tipo', v.tipo) },
                       { etiqueta: 'Área', valor: v.areaNombre },
                       {
