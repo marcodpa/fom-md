@@ -108,7 +108,10 @@ export default function AdminUsuarios() {
   }
 
   const restablecerClave = async (p) => {
-    if (!window.confirm(`¿Restablecer la clave de ${p.nombre} a la por defecto?`)) return
+    const pregunta = DIRECTORIO_REAL
+      ? `Se generará una clave temporal nueva para ${p.nombre}. La anterior deja de servir y sus sesiones abiertas se cierran. ¿Continuar?`
+      : `¿Restablecer la clave de ${p.nombre} a la por defecto?`
+    if (!window.confirm(pregunta)) return
     setAviso('')
     try {
       const r = await repo.admin.usuarios.cambiarClave(p.id, actor)
@@ -128,6 +131,20 @@ export default function AdminUsuarios() {
     if (!window.confirm(`¿Eliminar DEFINITIVAMENTE la cuenta de ${p.nombre}?`)) return
     if (!window.confirm('Esta acción no se puede deshacer. ¿Confirmas?')) return
     accion(() => repo.admin.usuarios.eliminarDefinitivo(p.id, actor))
+  }
+
+  // Las tres acciones que el servidor SI sabe hacer sobre una cuenta. Ninguna
+  // borra: suspender se deshace, revocar es terminal pero deja el rastro.
+  const suspender = (p) => {
+    if (!window.confirm(`${p.nombre} no podrá entrar hasta que la reactives. ¿Suspender?`)) return
+    accion(() => repo.admin.usuarios.suspender(p.id, 'Suspendida desde la consola'))
+  }
+  const reactivar = (p) => {
+    accion(() => repo.admin.usuarios.reactivar(p.id, 'Reactivada desde la consola'))
+  }
+  const revocarAcceso = (p) => {
+    if (!window.confirm(`Revocar el acceso de ${p.nombre} es definitivo: no se puede volver a activar, aunque su historial queda. ¿Continuar?`)) return
+    accion(() => repo.admin.usuarios.eliminar(p.id))
   }
 
   return (
@@ -171,6 +188,10 @@ export default function AdminUsuarios() {
             eliminarDefinitivo={eliminarDefinitivo}
             abrirMover={setMoviendo}
             directorioReal={DIRECTORIO_REAL}
+            actor={actor}
+            suspender={suspender}
+            reactivar={reactivar}
+            revocarAcceso={revocarAcceso}
           />
         )}
       </div>
@@ -182,15 +203,17 @@ export default function AdminUsuarios() {
             empresas={datos.empresas}
             alCerrar={() => setCreando(false)}
             alGuardar={recargar}
-            actor={actor}
             directorioReal={DIRECTORIO_REAL}
+            actor={actor}
+            suspender={suspender}
+            reactivar={reactivar}
+            revocarAcceso={revocarAcceso}
           />
           {!DIRECTORIO_REAL && <ModalMover
             usuario={moviendo}
             empresas={datos.empresas}
             alCerrar={() => setMoviendo(null)}
             alGuardar={recargar}
-            actor={actor}
           />}
         </>
       )}
@@ -219,6 +242,7 @@ export default function AdminUsuarios() {
 function Contenido({
   datos, q, setQ, empresaId, setEmpresaId, rol, setRol, aviso,
   restablecerClave, aDesempleados, eliminarDefinitivo, abrirMover, directorioReal,
+  actor, suspender, reactivar, revocarAcceso,
 }) {
   const { lista, empresas } = datos
   const desempleados = lista.filter((p) => p.esDesempleado).length
@@ -354,6 +378,31 @@ function Contenido({
                       </div>
                     </td>
                     <td className="num">
+                      {/* En modo conectado solo se ofrecen las acciones que el
+                          servidor sabe hacer, y solo sobre quien el rango del
+                          actor puede administrar. Ofrecer un boton que va a
+                          devolver 403 es peor que no ofrecerlo. */}
+                      {directorioReal && puedeAdministrar(actor, p) && (
+                        <div className="pnl-chips">
+                          <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
+                            Clave
+                          </button>
+                          {p.estado === 'suspended' ? (
+                            <button type="button" className="pnl-btn sutil" onClick={() => reactivar(p)}>
+                              Reactivar
+                            </button>
+                          ) : p.estado === 'active' ? (
+                            <button type="button" className="pnl-btn sutil" onClick={() => suspender(p)}>
+                              Suspender
+                            </button>
+                          ) : null}
+                          {p.estado !== 'revoked' && (
+                            <button type="button" className="pnl-btn sutil" onClick={() => revocarAcceso(p)}>
+                              Revocar
+                            </button>
+                          )}
+                        </div>
+                      )}
                       {!directorioReal && p.rol !== 'admin' && (
                         <div className="pnl-chips">
                           <button type="button" className="pnl-btn sutil" onClick={() => abrirMover(p)}>
@@ -383,6 +432,22 @@ function Contenido({
       </Tarjeta>
     </>
   )
+}
+
+/**
+ * Misma regla que `puedeAdministrarA` en el servidor: nadie se administra a si
+ * mismo, nadie administra a un admin FOM, y solo se administra hacia abajo. Se
+ * repite aqui para no pintar botones que el servidor va a rechazar; la que
+ * manda sigue siendo la del servidor.
+ */
+const RANGO = { admin_fom: 4, supervisor: 3 }
+function puedeAdministrar(actor, objetivo) {
+  if (!actor || !objetivo) return false
+  if (actor.correo && objetivo.email && actor.correo === objetivo.email) return false
+  if (objetivo.rol === 'admin_fom') return false
+  const rangoActor = RANGO[actor.rol] ?? 1
+  if (rangoActor < 3) return false
+  return rangoActor > (RANGO[objetivo.rol] ?? 1)
 }
 
 const GRUPOS_CLAVE = [
