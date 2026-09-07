@@ -297,7 +297,14 @@ function Contenido({
                         <i className="pnl-avatar">{f.iniciales(p.nombre)}</i>
                         <div className="pnl-doble">
                           <b>{p.nombre}</b>
-                          <span>{p.email}</span>
+                          {/* La empresa debajo del nombre, como pidio Marco: en la
+                              vista de un contratista, o en la del admin FOM, es lo
+                              que distingue a dos personas con el mismo nombre. Si
+                              el nombre del ente no se resolvio, no se inventa. */}
+                          <span>
+                            {p.empresaNombre ? `${p.empresaNombre} · ` : ''}
+                            {p.email}
+                          </span>
                         </div>
                       </div>
                     </td>

@@ -168,6 +168,15 @@ function claveTemporal() {
   return `Fom-${cuerpo.slice(0, 4)}-${cuerpo.slice(4, 8)}-${cuerpo.slice(8, 12)}`
 }
 
+/** El rol canonico en palabras, como lo ve la gente. */
+const ETIQUETA_ROL = {
+  admin_fom: 'Administrador FOM',
+  supervisor: 'Supervisor',
+  conductor: 'Conductor',
+  operator: 'Operador',
+  usuario: 'Usuario',
+}
+
 function conductoresPorVehiculo(lista) {
   const porVehiculo = new Map()
   for (const c of lista) {
@@ -415,15 +424,29 @@ export const repoApi = {
    */
   gente: {
     async listar({ q = '', rol = '', enteId = '' } = {}) {
-      const r = await api.directorio({ q, enteId })
+      // La lista de entes viaja en paralelo y se tolera su falta: sirve solo
+      // para poner NOMBRE a la empresa de cada persona. Todas las filas de una
+      // lectura pertenecen al mismo ente —el propio, o el contratista pedido—
+      // asi que basta con encontrar ese uno.
+      const [r, entes] = await Promise.all([
+        api.directorio({ q, enteId }),
+        api.entes().then((e) => e?.items ?? []).catch(() => []),
+      ])
+      const enteDeLaLista = r?.scope?.tenantId ?? enteId ?? null
+      const empresa = entes.find((t) => t.id === enteDeLaLista) ?? null
       let lista = (r?.items ?? []).map((p) => ({
         id: p.userId,
         userId: p.userId,
         nombre: p.displayName,
         email: p.email,
         rol: p.role,
+        rolEtiqueta: ETIQUETA_ROL[p.role] ?? p.role ?? '—',
         estado: p.status,
         activadoEn: p.activatedAt,
+        empresaId: enteDeLaLista,
+        // Sin nombre resuelto se deja vacio, no un texto inventado: el panel
+        // muestra la fila igual y el hueco dice la verdad.
+        empresaNombre: empresa?.name ?? null,
 
         // Datos personales. Vienen NULOS cuando se lee un contratista: la
         // politica de fila de la base exige compartir ente, y una compania no

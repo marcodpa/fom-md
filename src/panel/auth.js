@@ -151,10 +151,30 @@ function armarPerfil(usuario) {
     correo: usuario?.email || '',
     rol,
     rolNombre: etiquetaRolSesion(rol),
-    empresa: 'FOM',
-    empresaId: null,
+    // El servidor manda el identificador del ente en la sesion pero no su
+    // nombre; el nombre se resuelve aparte, contra la lista de entes. Hasta
+    // entonces se muestra un texto neutro y NUNCA uno inventado: un nombre de
+    // empresa escrito a mano en el codigo es una mentira con buena letra.
+    empresa: 'Tu empresa',
+    empresaId: usuario?.tenantId ?? null,
     sede: 'Conectado a la base real',
     iniciales: inicialesDe(nombre),
+  }
+}
+
+/**
+ * Pone el nombre real del ente en el perfil. Se hace despues de entrar y sin
+ * bloquear: si la lista de entes falla, la sesion sigue valiendo y el nombre
+ * queda en el texto neutro. Lo que no se hace es fingir que se sabe.
+ */
+async function resolverNombreDeEmpresa(perfil) {
+  if (!perfil?.empresaId) return perfil
+  try {
+    const r = await api.entes()
+    const mio = (r?.items ?? []).find((t) => t.id === perfil.empresaId)
+    return mio ? { ...perfil, empresa: mio.name } : perfil
+  } catch {
+    return perfil
   }
 }
 
@@ -165,7 +185,7 @@ async function resolverSesion() {
     fijar(
       r?.authenticated
         ? {
-            perfil: armarPerfil(r.user),
+            perfil: await resolverNombreDeEmpresa(armarPerfil(r.user)),
             inicio: Date.now(),
             debeCambiarClave: Boolean(r.mustChangePassword),
           }
@@ -212,7 +232,7 @@ export async function iniciarSesion({ usuario, clave, recordar = true }) {
 
   try {
     const r = await api.entrar(email, password)
-    const perfil = armarPerfil(r?.user)
+    const perfil = await resolverNombreDeEmpresa(armarPerfil(r?.user))
     const debeCambiarClave = Boolean(r?.mustChangePassword)
     fijar({ perfil, inicio: Date.now(), debeCambiarClave })
     return { ok: true, perfil, debeCambiarClave }

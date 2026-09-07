@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
+import { useSesion } from '../useSesion'
 import { Cabecera, Campo, Cargando, Chips, Datos, ErrorCarga, Kpi, Tag, Tarjeta, Vacio } from '../comp/ui'
 import { Anillo, Barras, BarrasH, Split } from '../comp/Grafico'
 import * as f from '../datos/formato'
@@ -11,7 +12,6 @@ import { Icono } from '../Iconos'
 // La app promete "Próximamente: tendencias del período y comparativas
 // visuales". Este módulo es esa promesa cumplida, más impresión y CSV.
 
-const EMPRESA_NOMBRE = 'Transporte Lago Sur, C.A.'
 
 const PERIODOS = [
   { v: 30, t: 'Este mes' },
@@ -84,6 +84,7 @@ export default function Reportes() {
   const [dias, setDias] = useState(30)
   const [areaId, setAreaId] = useState('')
 
+  const sesion = useSesion()
   const areas = useDatos(() => repo.areas(), [])
   // Seis fuentes, y NO todas existen: los costos y el histórico de eventos de
   // alerta no tienen superficie en el servidor todavía. Con `Promise.all` una
@@ -273,7 +274,12 @@ export default function Reportes() {
               </Tarjeta>
             )}
             <div className="pnl-grid">
-              <Tarjeta titulo={EMPRESA_NOMBRE}>
+              {/* El nombre de la empresa sale de la sesion, que lo resuelve
+                  contra la lista de entes. Antes estaba escrito a mano en el
+                  codigo: «Transporte Lago Sur» en un informe de FOM Operations
+                  es una mentira con buena letra, y este es un documento que se
+                  imprime y se firma. */}
+              <Tarjeta titulo={sesion?.perfil?.empresa ?? 'Tu empresa'}>
                 <Datos
                   items={[
                     { etiqueta: 'Reporte', valor: 'Gestión de flota' },

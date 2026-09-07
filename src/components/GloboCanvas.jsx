@@ -116,6 +116,11 @@ export default function GloboCanvas() {
       const cx = ancho / 2
       const cy = alto * 0.46
       const R = Math.min(ancho, alto) * 0.42
+      // Con el lienzo todavia sin medida —pasa un instante al salir de la
+      // portada hacia el panel— R vale cero, y el borde de abajo se dibuja
+      // con radio R - 0.75: negativo, y canvas revienta con IndexSizeError.
+      // No hay nada que pintar en un globo de radio cero; se sale.
+      if (R < 1) return
 
       const gira = (p) => ({
         x: p.x * cosg + p.z * seng,
