@@ -72,7 +72,7 @@ export default function ExpedienteVehiculo() {
   const { id } = useParams()
   const sesion = useSesion()
 
-  const { datos: v, estado, recargar } = useDatos(() => repo.vehiculos.obtener(id), [id])
+  const { datos: v, estado, error, recargar } = useDatos(() => repo.vehiculos.obtener(id), [id])
   const areas = useDatos(() => repo.areas(), [])
   const conductores = useDatos(() => repo.personal.listar({ soloConductores: true }), [])
 

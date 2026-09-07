@@ -37,10 +37,15 @@ export default function Alertas() {
   const lista = useMemo(() => notif.datos ?? [], [notif.datos])
   const eventos = useMemo(() => manejo.datos ?? [], [manejo.datos])
 
+  // El estado de la pantalla lo decide SOLO la bandeja. Los eventos de
+  // manejo no tienen servidor todavia, asi que su carga siempre falla; si
+  // ese fallo tumbara la pantalla entera, la bandeja —que si funciona— no se
+  // veria nunca. Cada mitad responde por si misma.
+  const sinEventos = manejo.estado === 'error'
   const estado =
-    notif.estado === 'error' || manejo.estado === 'error'
+    notif.estado === 'error'
       ? 'error'
-      : notif.estado === 'ok' && manejo.estado === 'ok'
+      : notif.estado === 'ok' && manejo.estado !== 'cargando'
         ? 'ok'
         : 'cargando'
 
@@ -122,7 +127,7 @@ export default function Alertas() {
 
       <div className="pnl-cuerpo">
         {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={notif.error} />}
         {estado === 'ok' && (
           <>
             <div className="pnl-grid k4">
@@ -134,18 +139,21 @@ export default function Alertas() {
                 nota={sinLeer > 0 ? 'Esperan tu revisión' : 'Bandeja al día'}
               />
               <Kpi titulo="Alertas de hoy" valor={f.numero(deHoy)} icono="alerta" />
+              {/* Sin servidor de eventos, un «0» aqui seria mentira: cero
+                  excesos y «no se sabe» no son lo mismo, y sobre ese numero
+                  se juzga a un conductor. Se muestra un guion y el motivo. */}
               <Kpi
                 titulo="Eventos de manejo"
-                valor={f.numero(eventos.length)}
+                valor={sinEventos ? '—' : f.numero(eventos.length)}
                 icono="velocidad"
-                nota={`Últimos ${DIAS_EVENTOS} días`}
+                nota={sinEventos ? 'Sin servidor todavía' : `Últimos ${DIAS_EVENTOS} días`}
               />
               <Kpi
                 titulo="Excesos de velocidad"
-                valor={f.numero(excesos)}
+                valor={sinEventos ? '—' : f.numero(excesos)}
                 icono="escudo"
-                tono={excesos > 0 ? 'aviso' : ''}
-                nota={`Últimos ${DIAS_EVENTOS} días`}
+                tono={!sinEventos && excesos > 0 ? 'aviso' : ''}
+                nota={sinEventos ? 'Sin servidor todavía' : `Últimos ${DIAS_EVENTOS} días`}
               />
             </div>
 
@@ -173,7 +181,18 @@ export default function Alertas() {
             ) : (
               <>
                 <Chips opciones={filtrosEvento} valor={tipoEvento} alCambiar={setTipoEvento} />
-                {eventos.length === 0 ? (
+                {sinEventos ? (
+                  <Tarjeta titulo="Eventos de manejo">
+                    {/* Decir «buena señal» cuando lo que pasa es que no hay
+                        servidor seria felicitar a la flota por un dato que
+                        no existe. Se dice el motivo real. */}
+                    <Vacio
+                      icono="velocidad"
+                      titulo="Los eventos de manejo todavía no se pueden consultar"
+                      texto={manejo.error?.message ?? 'Sin servidor todavía.'}
+                    />
+                  </Tarjeta>
+                ) : eventos.length === 0 ? (
                   <Tarjeta titulo="Eventos de manejo">
                     <Vacio
                       icono="velocidad"

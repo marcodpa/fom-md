@@ -227,7 +227,12 @@ export default function Flota() {
 
       <div className="pnl-cuerpo">
         {estado === 'cargando' && <Cargando filas={8} />}
-        {estado === 'error' && <ErrorCarga onReintentar={() => { vehiculos.recargar(); areas.recargar() }} />}
+        {estado === 'error' && (
+          <ErrorCarga
+            onReintentar={() => { vehiculos.recargar(); areas.recargar() }}
+            error={vehiculos.error ?? areas.error}
+          />
+        )}
 
         {estado === 'ok' && (
           <>
