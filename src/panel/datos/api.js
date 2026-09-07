@@ -87,7 +87,15 @@ export async function pedir(ruta, { metodo = 'GET', cuerpo, señal } = {}) {
     }
   }
 
-  if (!respuesta.ok) throw new Error(traducir(respuesta.status, datos))
+  if (!respuesta.ok) {
+    // El estado viaja pegado al error: un 401 en el LOGIN significa «clave
+    // incorrecta», y el mismo 401 en cualquier otra ruta significa «sesion
+    // caida». Sin el numero, quien llama no puede distinguirlos y termina
+    // diciendo «tu sesion expiro» a alguien que nunca llego a entrar.
+    const error = new Error(traducir(respuesta.status, datos))
+    error.estado = respuesta.status
+    throw error
+  }
   return datos
 }
 

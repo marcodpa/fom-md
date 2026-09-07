@@ -237,6 +237,19 @@ export async function iniciarSesion({ usuario, clave, recordar = true }) {
     fijar({ perfil, inicio: Date.now(), debeCambiarClave })
     return { ok: true, perfil, debeCambiarClave }
   } catch (error) {
+    // Un 401 aqui NO es una sesion caida: es que el servidor rechazo el
+    // usuario o la clave. Decirle «tu sesion expiro» a quien nunca entro lo
+    // manda a buscar el problema donde no esta. Tambien se avisa del bloqueo
+    // por intentos, porque es lo siguiente que le va a pasar si insiste.
+    if (error?.estado === 401) {
+      return {
+        ok: false,
+        error:
+          'Usuario o clave incorrectos. Ojo: tras varios intentos fallidos la ' +
+          'cuenta se bloquea un rato; si la acabas de crear, reinicia su clave ' +
+          'desde Gente y usa la temporal nueva.',
+      }
+    }
     return { ok: false, error: error.message || 'Usuario o clave incorrectos.' }
   }
 }
