@@ -128,8 +128,14 @@ export default function MiUnidad() {
     return lat != null && lng != null ? [{ ...unidad, lat, lng }] : []
   }, [unidad])
 
+  // «Cargando» también mientras la unidad que llegó no es la de la
+  // asignación actual: el hook conserva el estado «ok» anterior al cambiar de
+  // dependencias, y sin esto se ve un «no tienes unidad» falso durante la
+  // carga del expediente.
   const cargando =
-    asignaciones.estado === 'cargando' || vehiculos.estado === 'cargando'
+    asignaciones.estado === 'cargando' ||
+    vehiculos.estado === 'cargando' ||
+    (asignacion != null && vehiculos.estado !== 'error' && unidad?.id !== asignacion.vehiculoId)
   const error = asignaciones.error ?? vehiculos.error
   const abiertas = (odts.datos ?? []).filter((o) => o.estado === 'abierta' || o.estado === 'en_revision')
   const hoy = f.hoyISO()
@@ -192,7 +198,7 @@ export default function MiUnidad() {
               <MapaLibre
                 vehiculos={enMapa}
                 recorrido={unidad.recorrido ?? null}
-                alto="400px"
+                alto="clamp(400px, calc(100vh - 450px), 820px)"
                 leyenda={false}
                 ficha={false}
               />

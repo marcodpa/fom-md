@@ -207,6 +207,27 @@ function conductoresPorVehiculo(lista) {
   return porVehiculo
 }
 
+/** Metros entre dos puntos (haversine). */
+function metrosEntre(a, b) {
+  const R = 6371000
+  const rad = (g) => (g * Math.PI) / 180
+  const dLat = rad(b.lat - a.lat)
+  const dLng = rad(b.lng - a.lng)
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
+
+const DERIVA_METROS = 20
+
+/** Reductor: conserva un punto solo si se alejó de verdad del último. */
+function sinDeriva(acum, p, i, todos) {
+  const ultimo = acum[acum.length - 1]
+  if (!ultimo || i === todos.length - 1 || metrosEntre(ultimo, p) >= DERIVA_METROS) acum.push(p)
+  return acum
+}
+
 export const repoApi = {
   admin: {
     usuarios: {
@@ -390,7 +411,15 @@ export const repoApi = {
     },
   },
 
-  /** Trazado del recorrido, del más antiguo al más reciente. */
+  /**
+   * Trazado del recorrido, del más antiguo al más reciente.
+   *
+   * Se limpia la «deriva»: un GPS parado sigue mandando puntos que bailan
+   * unos metros alrededor del sitio real, y dibujarlos todos pinta un
+   * garabato encima del estacionamiento y suma kilómetros que la unidad no
+   * hizo. Solo se conserva un punto cuando se alejó al menos 20 m del último
+   * conservado; el primero y el último se quedan siempre.
+   */
   async recorrido(vehiculoId) {
     if (!vehiculoId) return []
     try {
@@ -405,6 +434,7 @@ export const repoApi = {
           hora: p.eventTime || p.receivedAt,
         }))
         .reverse()
+        .reduce(sinDeriva, [])
     } catch {
       return []
     }

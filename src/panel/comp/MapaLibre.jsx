@@ -145,6 +145,10 @@ export default function MapaLibre({
       mapa.current?.remove()
       mapa.current = null
       marcadores.current.clear()
+      // El mapa nuevo que venga tiene que volver a encuadrarse. Sin esto, en
+      // desarrollo (StrictMode monta, desmonta y vuelve a montar) el segundo
+      // mapa se quedaba en el centro por defecto y a zoom regional.
+      encuadrado.current = false
     }
   }, [])
 
@@ -225,7 +229,11 @@ export default function MapaLibre({
     if (!encuadrado.current && vistos.size) {
       const puntos = vehiculos.filter((v) => v.lat != null).map((v) => [v.lat, v.lng])
       if (puntos.length) {
-        mapa.current.fitBounds(puntos, { padding: [48, 48], maxZoom: 12 })
+        // Una sola unidad: centrarla a un zoom de ciudad. Encuadrar «los
+        // límites» de un único punto depende del tamaño que tenga el lienzo
+        // en ese instante y en pantallas anchas salía medio continente.
+        if (puntos.length === 1) mapa.current.setView(puntos[0], 13)
+        else mapa.current.fitBounds(puntos, { padding: [48, 48], maxZoom: 12 })
         encuadrado.current = true
       }
     }

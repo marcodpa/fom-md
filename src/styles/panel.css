@@ -1994,7 +1994,7 @@ button.pnl-kpi:focus-visible,
   background: var(--e-sup);
 }
 .mu-mapa > * { border: 0; border-radius: 0; box-shadow: none; }
-.mu-mapa-vacio { min-height: 400px; display: grid; place-items: center; }
+.mu-mapa-vacio { min-height: clamp(400px, calc(100vh - 450px), 820px); display: grid; place-items: center; }
 .mu-cifras {
   position: absolute;
   left: var(--e-md);
