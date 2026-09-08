@@ -171,3 +171,43 @@ test('lo que sí tiene servidor sale a la red, no se queda en un aviso', async (
     globalThis.fetch = original
   }
 })
+
+test('todo motivo que viaja al servidor cumple su patrón', async () => {
+  const repo = await repositorioConectado()
+
+  // Las rutas que aceptan `reason` lo validan con ^[a-z0-9][a-z0-9._-]{0,99}$
+  // y devuelven 400 ante una frase con espacios. Esta prueba captura el
+  // cuerpo que el panel manda y comprueba el patrón, pasando motivos escritos
+  // como los escribe una persona. Se encontró al reiniciar una clave real:
+  // el servidor rechazó «Reinicio solicitado desde la consola».
+  const PATRON = /^[a-z0-9][a-z0-9._-]{0,99}$/u
+  const acciones = [
+    ['usuarios.cambiarClave', () => repo.admin.usuarios.cambiarClave('u')],
+    ['usuarios.suspender', () => repo.admin.usuarios.suspender('u', 'Suspendida desde la consola')],
+    ['usuarios.reactivar', () => repo.admin.usuarios.reactivar('u', 'Reactivación por revisión')],
+    ['usuarios.eliminar', () => repo.admin.usuarios.eliminar('u')],
+    ['usuarios.enviarADesempleados', () => repo.admin.usuarios.enviarADesempleados('u')],
+    ['usuarios.cambiar', () => repo.admin.usuarios.cambiar('u', { rol: 'supervisor', motivo: 'Ascenso a supervisor' })],
+    ['empresas.setServicio', () => repo.admin.empresas.setServicio('e', false, null, 'Impago del mes')],
+    ['empresas.eliminar', () => repo.admin.empresas.eliminar('e', null, 'Cierre de contrato')],
+    ['vehiculos.revocarAsignacion', () => repo.vehiculos.revocarAsignacion('a', 'Cambio de conductor')],
+  ]
+
+  const original = globalThis.fetch
+  try {
+    for (const [nombre, llamar] of acciones) {
+      let cuerpo = null
+      globalThis.fetch = async (_url, opciones) => {
+        cuerpo = JSON.parse(opciones?.body ?? '{}')
+        throw new Error('corte deliberado')
+      }
+      await llamar().catch(() => {})
+      assert.ok(cuerpo, `${nombre} no envió cuerpo`)
+      if (cuerpo.reason !== undefined) {
+        assert.match(cuerpo.reason, PATRON, `${nombre} manda un motivo que el servidor rechaza: «${cuerpo.reason}»`)
+      }
+    }
+  } finally {
+    globalThis.fetch = original
+  }
+})

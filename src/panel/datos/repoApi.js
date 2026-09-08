@@ -177,6 +177,28 @@ const ETIQUETA_ROL = {
   usuario: 'Usuario',
 }
 
+/**
+ * Convierte cualquier texto en el «motivo» que exige el servidor: un codigo
+ * corto, en minusculas, sin espacios ni acentos (^[a-z0-9][a-z0-9._-]{0,99}$).
+ *
+ * Las cuatro rutas que reciben motivo lo validan igual y devuelven 400 ante
+ * una frase con espacios. El panel escribia frases —«Suspendida desde la
+ * consola»— y todos esos botones habrian fallado al primer clic. Se normaliza
+ * aqui, en un solo sitio, para que ningun caller tenga que acordarse.
+ */
+function motivo(texto, porDefecto = 'consola') {
+  const base = String(texto ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/gu, '') // los acentos, ya separados por NFD
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/gu, '-')
+    .replace(/^[^a-z0-9]+/u, '')
+    .replace(/-+/gu, '-')
+    .replace(/-$/u, '')
+    .slice(0, 100)
+  return base || porDefecto
+}
+
 function conductoresPorVehiculo(lista) {
   const porVehiculo = new Map()
   for (const c of lista) {
@@ -239,22 +261,22 @@ export const repoApi = {
        * `revoked` es terminal por diseño del ciclo de vida: de ahi no se
        * vuelve. Suspender, en cambio, se deshace.
        */
-      async cambiar(id, { rol, estado, motivo } = {}) {
+      async cambiar(id, { rol, estado, motivo: razon } = {}) {
         await api.actualizarMiembro(id, {
           role: rol || undefined,
           status: estado || undefined,
-          reason: motivo || undefined,
+          reason: motivo(razon),
         })
         return true
       },
 
-      async suspender(id, motivo) {
-        await api.actualizarMiembro(id, { status: 'suspended', reason: motivo })
+      async suspender(id, razon) {
+        await api.actualizarMiembro(id, { status: 'suspended', reason: motivo(razon, 'suspendida-desde-consola') })
         return true
       },
 
-      async reactivar(id, motivo) {
-        await api.actualizarMiembro(id, { status: 'active', reason: motivo })
+      async reactivar(id, razon) {
+        await api.actualizarMiembro(id, { status: 'active', reason: motivo(razon, 'reactivada-desde-consola') })
         return true
       },
 
@@ -267,7 +289,7 @@ export const repoApi = {
         const clave = claveTemporal()
         await api.reiniciarClave(id, {
           temporaryPassword: clave,
-          reason: 'Reinicio solicitado desde la consola',
+          reason: 'reinicio-desde-consola',
         })
         return { clave, debeCambiarClave: true }
       },
@@ -280,7 +302,7 @@ export const repoApi = {
       async enviarADesempleados(id) {
         await api.actualizarMiembro(id, {
           status: 'revoked',
-          reason: 'Salida del ente registrada desde la consola',
+          reason: 'salida-del-ente-desde-consola',
         })
         return true
       },
@@ -289,7 +311,7 @@ export const repoApi = {
       async eliminar(id) {
         await api.actualizarMiembro(id, {
           status: 'revoked',
-          reason: 'Acceso revocado desde la consola',
+          reason: 'acceso-revocado-desde-consola',
         })
         return true
       },
@@ -656,20 +678,20 @@ export const repoApi = {
     },
 
     /** Suspender o reactivar el servicio de un ente. */
-    async setServicio(id, activo, _actor, motivo) {
+    async setServicio(id, activo, _actor, razon) {
       await api.actualizarEnte(id, {
         status: activo ? 'active' : 'suspended',
-        reason: motivo || 'Cambio de servicio desde la consola',
+        reason: motivo(razon, 'cambio-de-servicio-desde-consola'),
       })
       return true
     },
 
-    async eliminar(id, _actor, motivo) {
+    async eliminar(id, _actor, razon) {
       // Un ente con historial no se borra. Suspenderlo lo saca de operacion
       // y deja el rastro en pie, que es lo que la auditoria necesita.
       await api.actualizarEnte(id, {
         status: 'suspended',
-        reason: motivo || 'Ente retirado de operacion desde la consola',
+        reason: motivo(razon, 'ente-retirado-desde-consola'),
       })
       return true
     },
@@ -682,9 +704,9 @@ export const repoApi = {
       return true
     },
 
-    async desasignar(relacionId, motivo) {
+    async desasignar(relacionId, razon) {
       await api.descolgarContratista(relacionId, {
-        reason: motivo || undefined,
+        reason: razon ? motivo(razon) : undefined,
       })
       return true
     },
@@ -768,7 +790,7 @@ export const repoApi = {
      * servidor no lo hace borrando sino revocando la asignacion vigente, que
      * es la que deja rastro de quien manejo y hasta cuando.
      */
-    async asignarConductor(id, userId, { rol = 'principal', pin, motivo } = {}) {
+    async asignarConductor(id, userId, { rol = 'principal', pin, motivo: razon } = {}) {
       if (!userId) {
         throw new Error(
           'Para quitar un conductor hay que revocar su asignacion vigente ' +
@@ -779,13 +801,13 @@ export const repoApi = {
         userId,
         role: rol,
         pin: pin || undefined,
-        reason: motivo || undefined,
+        reason: razon ? motivo(razon) : undefined,
       })
       return true
     },
 
-    async revocarAsignacion(asignacionId, motivo) {
-      await api.revocarAsignacion(asignacionId, { reason: motivo || undefined })
+    async revocarAsignacion(asignacionId, razon) {
+      await api.revocarAsignacion(asignacionId, { reason: razon ? motivo(razon) : undefined })
       return true
     },
   },
