@@ -1984,7 +1984,7 @@ button.pnl-kpi:focus-visible,
 .mu-estado-sep { opacity: 0.5; }
 .mu-estado-nota { font-weight: 500; opacity: 0.85; }
 
-/* --- Mapa con cifras encima --- */
+/* --- Mapa con cifras encima (las cifras son compartidas: .pnl-cifra) --- */
 .mu-mapa {
   position: relative;
   border-radius: var(--e-r-lg);
@@ -1995,7 +1995,7 @@ button.pnl-kpi:focus-visible,
 }
 .mu-mapa > * { border: 0; border-radius: 0; box-shadow: none; }
 .mu-mapa-vacio { min-height: clamp(400px, calc(100vh - 450px), 820px); display: grid; place-items: center; }
-.mu-cifras {
+.pnl-cifras {
   position: absolute;
   left: var(--e-md);
   bottom: var(--e-md);
@@ -2006,7 +2006,7 @@ button.pnl-kpi:focus-visible,
   z-index: 500; /* como la leyenda del mapa: encima de Leaflet, debajo de los modales */
   pointer-events: none;
 }
-.mu-cifra {
+.pnl-cifra {
   pointer-events: auto;
   display: grid;
   gap: 2px;
@@ -2019,7 +2019,7 @@ button.pnl-kpi:focus-visible,
   -webkit-backdrop-filter: blur(10px) saturate(1.2);
   backdrop-filter: blur(10px) saturate(1.2);
 }
-.mu-cifra-k {
+.pnl-cifra-k {
   font-size: 11px;
   line-height: 14px;
   font-weight: 600;
@@ -2027,7 +2027,7 @@ button.pnl-kpi:focus-visible,
   text-transform: uppercase;
   color: var(--e-texto-3);
 }
-.mu-cifra-v {
+.pnl-cifra-v {
   font-size: var(--e-t-lg);
   line-height: 24px;
   font-weight: 700;
@@ -2035,8 +2035,8 @@ button.pnl-kpi:focus-visible,
   font-variant-numeric: tabular-nums;
   color: var(--e-texto);
 }
-.mu-cifra-v.ok { color: var(--e-exito); }
-.mu-cifra-v.aviso { color: var(--e-aviso); }
+.pnl-cifra-v.ok { color: var(--e-exito); }
+.pnl-cifra-v.aviso { color: var(--e-aviso); }
 
 /* --- Hoy + Ficha --- */
 .mu-abajo {
@@ -2095,9 +2095,173 @@ button.pnl-kpi:focus-visible,
   .mu-identidad .mu-estado { grid-column: 1 / -1; justify-self: start; }
 }
 @media (max-width: 560px) {
-  .mu-cifras { position: static; max-width: none; padding: var(--e-md); background: var(--e-sup); border-top: var(--e-borde-fino) solid var(--e-borde); }
-  .mu-cifra { flex: 1 1 40%; min-width: 0; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; background: var(--e-sup-baja); }
+  .pnl-cifras { position: static; max-width: none; padding: var(--e-md); background: var(--e-sup); border-top: var(--e-borde-fino) solid var(--e-borde); }
+  .pnl-cifra { flex: 1 1 40%; min-width: 0; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; background: var(--e-sup-baja); }
 }
 @media (prefers-reduced-motion: reduce) {
   .mu-estado.ok .mu-estado-punto { animation: none; }
+}
+
+/* ============================================================
+   RESUMEN (inicio del supervisor) — Opción B «Mapa protagonista»
+   ------------------------------------------------------------
+   Unidades a la izquierda, mapa grande con las cifras encima, y
+   «Hoy, en orden» debajo.
+   ============================================================ */
+.rs { display: grid; gap: var(--e-lg); }
+.rs-vivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--e-t-xs);
+  color: var(--e-texto-2);
+}
+.rs-vivo i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--e-exito);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--e-exito) 20%, transparent);
+}
+.rs-arriba {
+  /* Panel y mapa miden lo mismo: el mapa manda y la lista se desplaza. */
+  --rs-alto: clamp(420px, calc(100vh - 470px), 760px);
+  display: grid;
+  grid-template-columns: 312px minmax(0, 1fr);
+  gap: var(--e-lg);
+  align-items: start;
+}
+.rs-arriba > .pnl-card { display: flex; flex-direction: column; height: var(--rs-alto); min-height: 0; }
+.rs-arriba > .pnl-card > .pnl-card-cuerpo { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.rs-unidades {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+.rs-unidad {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--e-md);
+  padding: 10px 8px;
+  margin: 0 -8px;
+  border: 0;
+  border-top: var(--e-borde-fino) solid var(--e-borde);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--e-d-base) var(--e-curva);
+}
+.rs-unidades li:first-child .rs-unidad { border-top: 0; }
+.rs-unidad:hover { background: var(--e-sup-baja); }
+.rs-unidad.activa { background: color-mix(in srgb, var(--e-primario) 10%, transparent); }
+.rs-unidad:focus-visible { outline: 2px solid var(--e-primario); outline-offset: -2px; }
+.rs-unidad-txt { display: grid; gap: 2px; min-width: 0; }
+.rs-unidad-txt b { font-size: var(--e-t-sm); font-weight: 600; color: var(--e-texto); }
+.rs-unidad-txt b code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--e-texto-2);
+  letter-spacing: 0.6px;
+  margin-left: 6px;
+}
+.rs-unidad-txt > span {
+  font-size: var(--e-t-xs);
+  line-height: var(--e-lh-xs);
+  color: var(--e-texto-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rs-unidad-senal {
+  display: grid;
+  gap: 1px;
+  text-align: right;
+  font-size: var(--e-t-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rs-unidad-senal.ok { color: var(--e-exito); }
+.rs-unidad-senal.malo { color: var(--e-peligro); }
+.rs-unidad-senal em { font-style: normal; font-weight: 500; color: var(--e-texto-2); }
+.rs-pista {
+  margin: var(--e-md) 0 0;
+  padding: var(--e-md);
+  border-radius: var(--e-r-md);
+  background: var(--e-sup-alta);
+  border: var(--e-borde-fino) solid var(--e-borde);
+  font-size: var(--e-t-xs);
+  line-height: var(--e-lh-xs);
+  color: var(--e-texto-2);
+}
+.rs-mapa {
+  position: relative;
+  border-radius: var(--e-r-lg);
+  overflow: hidden;
+  border: var(--e-borde-fino) solid var(--e-borde);
+  box-shadow: inset 0 1px 0 var(--e-luz-borde), var(--e-sombra-card);
+  background: var(--e-sup);
+  min-width: 0;
+}
+.rs-mapa > .pnl-mapa { border: 0; border-radius: 0; box-shadow: none; }
+.rs-mapa-enlace {
+  /* Arriba a la izquierda, junto al zoom: arriba a la derecha vive la
+     ficha flotante de la unidad seleccionada y se pisaban. */
+  position: absolute;
+  top: var(--e-md);
+  left: 56px;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: var(--e-t-xs);
+  font-weight: 600;
+  color: var(--e-texto);
+  background: color-mix(in srgb, var(--e-sup) 84%, transparent);
+  border: var(--e-borde-fino) solid var(--e-borde);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  text-decoration: none;
+}
+.rs-mapa-enlace:hover { border-color: var(--e-borde-fuerte); background: var(--e-sup); }
+.rs-eventos { list-style: none; margin: 0; padding: 0; display: grid; }
+.rs-evento {
+  display: grid;
+  grid-template-columns: 76px 10px minmax(0, 1fr) minmax(0, max-content);
+  align-items: center;
+  gap: var(--e-md);
+  padding: 10px 0;
+  border-top: var(--e-borde-fino) solid var(--e-borde);
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--e-d-base) var(--e-curva);
+}
+.rs-eventos li:first-child .rs-evento { border-top: 0; }
+.rs-evento:hover b { color: var(--e-primario); }
+.rs-evento time { font-size: var(--e-t-xs); color: var(--e-texto-2); font-variant-numeric: tabular-nums; }
+.rs-evento b { font-size: var(--e-t-sm); font-weight: 500; color: var(--e-texto); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rs-evento > span { font-size: var(--e-t-xs); color: var(--e-texto-2); white-space: nowrap; }
+.rs-evento-punto { width: 8px; height: 8px; border-radius: 50%; background: var(--e-texto-3); }
+.rs-evento-punto.ok { background: var(--e-exito); }
+.rs-evento-punto.aviso { background: var(--e-aviso); }
+.rs-evento-punto.malo { background: var(--e-peligro); }
+.rs-evento-punto.azul { background: var(--e-primario); }
+@media (max-width: 1100px) {
+  .rs-arriba { grid-template-columns: minmax(0, 1fr); }
+  .rs-arriba > .pnl-card { height: auto; }
+  .rs-unidades { max-height: 280px; }
+}
+@media (max-width: 640px) {
+  .rs-evento { grid-template-columns: 64px 10px minmax(0, 1fr); }
+  .rs-evento > span { grid-column: 3; white-space: normal; }
 }

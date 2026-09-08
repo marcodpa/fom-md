@@ -4,9 +4,24 @@
     {
       "name": "fom-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5173,
       "autoPort": true
+    },
+    {
+      "name": "fom-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--mode",
+        "demo",
+        "--port",
+        "5174"
+      ],
+      "port": 5174
     }
   ]
 }

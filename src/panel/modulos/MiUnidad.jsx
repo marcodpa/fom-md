@@ -76,9 +76,9 @@ function kmDeHoy(recorrido, hoy) {
 /** Una cifra sobre el mapa: etiqueta pequeña arriba, valor tabular debajo. */
 function Cifra({ etiqueta: k, valor, tono = '' }) {
   return (
-    <div className="mu-cifra">
-      <span className="mu-cifra-k">{k}</span>
-      <span className={`mu-cifra-v${tono ? ` ${tono}` : ''}`}>{valor}</span>
+    <div className="pnl-cifra">
+      <span className="pnl-cifra-k">{k}</span>
+      <span className={`pnl-cifra-v${tono ? ` ${tono}` : ''}`}>{valor}</span>
     </div>
   )
 }
@@ -211,7 +211,7 @@ export default function MiUnidad() {
                 />
               </div>
             )}
-            <div className="mu-cifras" aria-label="Cifras de la unidad">
+            <div className="pnl-cifras" aria-label="Cifras de la unidad">
               <Cifra etiqueta="Estado" valor={reportando ? 'Reportando' : 'Sin señal'} tono={reportando ? 'ok' : 'aviso'} />
               <Cifra etiqueta="Última señal" valor={unidad.ultimoReporte ? f.desde(unidad.ultimoReporte) : '—'} />
               <Cifra etiqueta="Recorrido hoy" valor={kmHoy != null ? `${kmHoy.toFixed(kmHoy < 10 ? 1 : 0).replace('.', ',')} km` : '—'} />

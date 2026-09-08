@@ -1041,7 +1041,9 @@ export const repoApi = {
   /** Resumen con lo que la base puede afirmar hoy. */
   async resumen() {
     const [lista, areas, operacion] = await Promise.all([
-      flota(),
+      // Con los conductores ya unidos: `flota()` cruda dice «Sin asignar»
+      // para todas y el contador de «sin conductor» salía inflado.
+      repoApi.vehiculos.listar(),
       repoApi.areas().catch(() => []),
       // Si los contadores fallan, el panel muestra el resto igual.
       api.resumenOperacion().catch(() => ({})),

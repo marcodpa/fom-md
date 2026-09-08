@@ -27,3 +27,4 @@ infra/*
 # servidor y la ruta de la llave SSH, y este repositorio es PÚBLICO.
 .claude/settings.json
 .claude/settings.local.json
+!.env.demo
