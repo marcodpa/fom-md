@@ -114,16 +114,28 @@ export default function ExpedienteVehiculo() {
 
   const totalCostos = useMemo(() => (v?.costos ?? []).reduce((a, c) => a + c.monto, 0), [v])
 
+  // Sin try/catch un rechazo del servidor era una promesa sin capturar:
+  // ningun mensaje, el selector volvia a su valor, y parecia que «no dejaba».
   async function cambiarArea(valor) {
-    await repo.vehiculos.asignarArea(id, valor || null)
-    await recargar()
-    avisarGuardado()
+    setErrorForma('')
+    try {
+      await repo.vehiculos.asignarArea(id, valor || null)
+      await recargar()
+      avisarGuardado()
+    } catch (e) {
+      setErrorForma(e.message)
+    }
   }
 
   async function cambiarConductor(valor) {
-    await repo.vehiculos.asignarConductor(id, valor || null)
-    await recargar()
-    avisarGuardado()
+    setErrorForma('')
+    try {
+      await repo.vehiculos.asignarConductor(id, valor || null)
+      await recargar()
+      avisarGuardado('Conductor asignado')
+    } catch (e) {
+      setErrorForma(e.message)
+    }
   }
 
   async function cambiarVencimiento(docId, venceEn) {
@@ -279,7 +291,7 @@ export default function ExpedienteVehiculo() {
                       </select>
                     </Campo>
 
-                    <Campo etiqueta="Conductor principal" ayuda="Solo aparece el personal habilitado para conducir.">
+                    <Campo etiqueta="Conductor principal" ayuda="Solo aparece el personal habilitado para conducir." error={errorForma}>
                       <select
                         className="pnl-select"
                         value={v.conductorPrincipalId ?? ''}

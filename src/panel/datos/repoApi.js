@@ -367,8 +367,19 @@ export const repoApi = {
         repoApi.odts.listar().then((l) => l.filter((o) => o.vehiculoId === id)).catch(() => []),
         repoApi.inspecciones.listar({ vehiculoId: id }).catch(() => []),
       ])
+      // La ficha del servidor no trae al conductor: vive en las asignaciones.
+      // Sin esto el expediente decia «Sin conductor» aunque la asignacion se
+      // hubiera guardado, y el selector volvia a vacio: parecia que no dejaba.
+      const asignacion = await api
+        .conductores()
+        .then((r) => (r?.items ?? [])
+          .filter((c) => c.vehicleId === id)
+          .sort((a, b) => (a.role === 'principal' ? -1 : 1) - (b.role === 'principal' ? -1 : 1))[0] ?? null)
+        .catch(() => null)
       return {
         ...comoUnidad(ficha.vehicle),
+        conductorPrincipalId: asignacion?.userId ?? null,
+        conductorNombre: asignacion?.displayName ?? 'Sin asignar',
         recorrido,
         documentos,
         odts,
@@ -445,7 +456,7 @@ export const repoApi = {
    * persona apunta a su membresia, asi que aqui no existe alguien sin cuenta.
    */
   gente: {
-    async listar({ q = '', rol = '', enteId = '' } = {}) {
+    async listar({ q = '', rol = '', enteId = '', soloConductores = false } = {}) {
       // La lista de entes viaja en paralelo y se tolera su falta: sirve solo
       // para poner NOMBRE a la empresa de cada persona. Todas las filas de una
       // lectura pertenecen al mismo ente —el propio, o el contratista pedido—
@@ -493,6 +504,9 @@ export const repoApi = {
         papelesPendientes: Number(p.expiringDocumentCount ?? 0),
       }))
       if (rol) lista = lista.filter((p) => p.rol === rol)
+      // Un supervisor no maneja: el selector de conductor de una unidad solo
+      // ofrece a quien puede llevarla.
+      if (soloConductores) lista = lista.filter((p) => p.rol === 'conductor')
       // El alcance viaja pegado a la lista: el panel necesita saber si puede
       // ofrecer botones o si esta mirando a un contratista.
       lista.alcance = {
