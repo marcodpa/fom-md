@@ -7,6 +7,7 @@ import {
 } from '../comp/ui'
 import * as f from '../datos/formato'
 import { ROLES_ASIGNABLES, etiquetaRol } from '../datos/catalogos'
+import { areaDe } from '../roles'
 import { Icono } from '../Iconos'
 
 // ============================================================
@@ -76,7 +77,12 @@ function exportarCSV(lista) {
 
 function cargar(q, empresaId, rol) {
   if (DIRECTORIO_REAL) {
-    return repo.admin.usuarios.listar({ q, rol }).then((lista) => ({ lista, empresas: [] }))
+    // Las empresas al alcance viajan en paralelo y se toleran: solo sirven
+    // para que la compañia elija a cual de sus contratistas mirar.
+    return Promise.all([
+      repo.admin.usuarios.listar({ q, rol, enteId: empresaId || '' }),
+      repo.admin.empresas.listar().catch(() => []),
+    ]).then(([lista, empresas]) => ({ lista, empresas }))
   }
   return Promise.all([
     repo.admin.usuarios.listar({ q, empresaId, rol }),
@@ -155,6 +161,22 @@ export default function AdminUsuarios() {
           ? 'Quién es, qué maneja y qué papel le vence. Todo en un sitio.'
           : 'Todas las cuentas de todas las empresas, con las reglas de mando de la app.'}
       >
+        {/* La compañia elige a cual de sus contratistas mirar. Es su unica
+            forma de ver gente ajena, y es solo lectura: quien administra a un
+            contratista es el contratista. */}
+        {areaDe(actor) === 'gerencial' && (
+          <select
+            className="pnl-select"
+            value={empresaId}
+            onChange={(e) => setEmpresaId(e.target.value)}
+            aria-label="Contratista"
+          >
+            <option value="">Elige un contratista…</option>
+            {(datos?.empresas ?? []).filter((e) => e.alcance === 'contractor').map((e) => (
+              <option key={e.id} value={e.id}>{e.nombre}</option>
+            ))}
+          </select>
+        )}
         <button
           type="button"
           className="pnl-btn"
@@ -164,10 +186,12 @@ export default function AdminUsuarios() {
           <Icono nombre="descargar" tam={16} />
           Exportar
         </button>
-        <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
-          <Icono nombre="mas" tam={16} />
-          Nuevo usuario
-        </button>
+        {(datos?.lista?.alcance?.administrable ?? true) && (
+          <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
+            <Icono nombre="mas" tam={16} />
+            Nuevo usuario
+          </button>
+        )}
       </Cabecera>
 
       <div className="pnl-cuerpo">
@@ -382,7 +406,7 @@ function Contenido({
                           servidor sabe hacer, y solo sobre quien el rango del
                           actor puede administrar. Ofrecer un boton que va a
                           devolver 403 es peor que no ofrecerlo. */}
-                      {directorioReal && puedeAdministrar(actor, p) && (
+                      {directorioReal && (lista.alcance?.administrable ?? true) && puedeAdministrar(actor, p) && (
                         <div className="pnl-chips">
                           <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
                             Clave

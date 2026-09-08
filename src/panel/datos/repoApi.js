@@ -657,6 +657,8 @@ export const repoApi = {
         email: t.email ?? '',
         contacto: t.contactName ?? '',
         creadoEn: t.createdAt ?? null,
+        // «home» es el ente propio; «contractor», uno colgado de mi compañia.
+        alcance: t.scopeKind ?? 'home',
       }))
     },
 

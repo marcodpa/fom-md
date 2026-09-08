@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { cerrarSesion, esAdminFom } from './auth'
-import { esGestor } from './roles'
+import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
 import { Icono } from './Iconos'
 import repo, { alCambiarDatos } from './datos/repo'
@@ -26,6 +26,7 @@ import AdminPagos from './modulos/AdminPagos'
 import AdminGps from './modulos/AdminGps'
 import AdminUsuarios from './modulos/AdminUsuarios'
 import AdminAuditoria from './modulos/AdminAuditoria'
+import MiUnidad from './modulos/MiUnidad'
 
 // Módulos de la consola, agrupados como en la arquitectura FOM-WEB.
 const MENU = [
@@ -70,11 +71,60 @@ const MENU_ADMIN = {
   ],
 }
 
+// Lo que ve cada area. Es la misma reparticion que las carpetas de la app:
+// `admin/`, `panel/`, `compania/`, `(driver)/` y `personal/`. Que el menu y
+// las rutas salgan de la MISMA lista es lo que impide que una pantalla quede
+// alcanzable por la barra de direcciones sin estar en el menu.
+const MENU_POR_AREA = {
+  admin: [MENU_ADMIN, ...MENU],
+  operativo: MENU,
+  gerencial: [
+    {
+      grupo: 'Contratistas',
+      items: [
+        { a: '/panel/personal', icono: 'gente', texto: 'Gente' },
+        { a: '/panel/reportes', icono: 'reporte', texto: 'Reportes' },
+      ],
+    },
+  ],
+  conductor: [
+    {
+      grupo: 'Mi trabajo',
+      items: [
+        { a: '/panel', icono: 'camion', texto: 'Mi unidad', fin: true },
+        { a: '/panel/alertas', icono: 'alerta', texto: 'Alertas' },
+      ],
+    },
+  ],
+  personal: [
+    {
+      grupo: 'Mi flota',
+      items: [
+        { a: '/panel/mapa', icono: 'mapa', texto: 'Mapa' },
+        { a: '/panel/alertas', icono: 'alerta', texto: 'Alertas' },
+        { a: '/panel/documentos', icono: 'documento', texto: 'Documentos' },
+      ],
+    },
+  ],
+}
+
+/** Rutas alcanzables por area. Todo lo que no este aqui vuelve al inicio. */
+const RUTAS_POR_AREA = {
+  admin: null, // todas
+  operativo: ['', 'mapa', 'alertas', 'flota', 'mantenimiento', 'inspecciones', 'documentos', 'personal', 'reportes'],
+  gerencial: ['personal', 'reportes'],
+  conductor: ['', 'alertas'],
+  personal: ['mapa', 'alertas', 'documentos', 'personal'],
+}
+
+function inicioDe(area) {
+  if (area === 'gerencial') return '/panel/personal'
+  if (area === 'personal') return '/panel/mapa'
+  return '/panel'
+}
+
 function Lateral({ perfil, abierto, cerrar, sinLeer, esquema, alternarTema }) {
-  // Antes aqui se colaba una segunda entrada, «Usuarios», para los gestores.
-  // Sobra: la pantalla de Gente ya trae la cuenta y sus acciones.
-  const menuGestor = MENU
-  const menu = esAdminFom(perfil) ? [MENU_ADMIN, ...MENU] : menuGestor
+  const menu = MENU_POR_AREA[areaDe(perfil)] ?? MENU_POR_AREA.conductor
   return (
     <aside className={`pnl-side${abierto ? ' abierto' : ''}`}>
       <div className="pnl-side-top">
@@ -196,6 +246,15 @@ export default function Consola() {
   if (sesion.debeCambiarClave) return <Navigate to="/cambiar-clave-inicial" replace />
 
   const { perfil } = sesion
+  const area = areaDe(perfil)
+  const permitidas = RUTAS_POR_AREA[area]
+  // La primera parte de la ruta tras /panel/ decide si esta area la alcanza.
+  // `pathname` viene del router, no del `window`: asi la guarda vuelve a
+  // evaluarse en cada navegacion y no solo al cargar la pagina.
+  const primerTramo = pathname.replace(/^\/panel\/?/u, '').split('/')[0]
+  if (permitidas && !permitidas.includes(primerTramo)) {
+    return <Navigate to={inicioDe(area)} replace />
+  }
 
   return (
     <div className="pnl">
@@ -227,7 +286,9 @@ export default function Consola() {
         </button>
 
         <Routes>
-          <Route index element={<Resumen />} />
+          {/* El inicio depende del area: el conductor abre en SU unidad, no en
+              el resumen de toda la flota. */}
+          <Route index element={area === 'conductor' ? <MiUnidad /> : <Resumen />} />
           <Route path="mapa" element={<CentroControl />} />
           <Route path="alertas" element={<Alertas />} />
           <Route path="flota" element={<Flota />} />

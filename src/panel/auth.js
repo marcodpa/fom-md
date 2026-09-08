@@ -21,7 +21,7 @@
 
 import { api, HAY_API } from './datos/api'
 import { iniciales as inicialesDe } from './datos/formato'
-import { esAdminFom, etiquetaRolSesion, rolCanonico } from './roles'
+import { esAdminFom, etiquetaRolSesion, rolCanonico, tipoEmpresaDe } from './roles'
 
 const CLAVE_SESION = 'fom.panel.sesion'
 
@@ -169,10 +169,18 @@ function armarPerfil(usuario) {
  */
 async function resolverNombreDeEmpresa(perfil) {
   if (!perfil?.empresaId) return perfil
+  // La lista de entes es de gestores. Pedirla como conductor es un 403
+  // seguro: no se intenta, y el nombre queda en el texto neutro.
+  const rol = rolCanonico(perfil.rol)
+  if (rol !== 'admin_fom' && rol !== 'supervisor') return perfil
   try {
     const r = await api.entes()
     const mio = (r?.items ?? []).find((t) => t.id === perfil.empresaId)
-    return mio ? { ...perfil, empresa: mio.name } : perfil
+    // El TIPO de ente decide el area de la sesion (compañia, contratista o
+    // personal), asi que viaja junto al nombre.
+    return mio
+      ? { ...perfil, empresa: mio.name, empresaTipo: tipoEmpresaDe(mio.category) }
+      : perfil
   } catch {
     return perfil
   }
