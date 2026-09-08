@@ -48,7 +48,11 @@ export default function MiUnidad() {
 
   // `repo.conductores()` devuelve las asignaciones vigentes de la empresa:
   // { id, nombre, rol, vehiculoId, vehiculo, desde }.
-  const asignaciones = useDatos(() => repo.conductores(), [])
+  // La pantalla del conductor se refresca sola cada minuto. Sin esto, quien
+  // la deja abierta no se entera de que le asignaron una unidad —o de que se
+  // la quitaron— hasta que recarga a mano, y lo que ve es mentira sin saberlo.
+  const CADA_MINUTO = 60_000
+  const asignaciones = useDatos(() => repo.conductores(), [], CADA_MINUTO)
 
   const asignacion = useMemo(
     () => miAsignacion(perfil, asignaciones.datos ?? []),
@@ -60,6 +64,7 @@ export default function MiUnidad() {
   const vehiculos = useDatos(
     () => (asignacion ? repo.vehiculos.obtener(asignacion.vehiculoId) : Promise.resolve(null)),
     [asignacion?.vehiculoId],
+    CADA_MINUTO,
   )
   const unidad = vehiculos.datos ?? null
 
