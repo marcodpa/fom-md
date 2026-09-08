@@ -107,6 +107,11 @@ export default function MapaLibre({
   vehiculos = [],
   seleccionado = null,
   alSeleccionar,
+  // La leyenda («N unidades · M reportando») y la ficha flotante sobran
+  // cuando el mapa muestra UNA sola unidad y la pantalla ya dice quién es
+  // (Mi unidad): ahí se apagan y la pantalla pone sus propias cifras.
+  leyenda = true,
+  ficha = true,
   recorrido = null,
   alto = 'clamp(320px, 52vh, 560px)',
 }) {
@@ -271,7 +276,7 @@ export default function MapaLibre({
         </div>
       )}
 
-      <div className="pnl-mapa-leyenda">
+      {leyenda && <div className="pnl-mapa-leyenda">
         <span className="pnl-mapa-vivo">
           <i />
           En vivo
@@ -279,9 +284,9 @@ export default function MapaLibre({
         <span>{vehiculos.length} unidades</span>
         <span className="sep">·</span>
         <span>{sabeMarcha ? `${enMarcha} en marcha` : `${reportando} reportando`}</span>
-      </div>
+      </div>}
 
-      {v && (
+      {ficha && v && (
         <FichaUnidad
           unidad={v}
           variante="flotante"

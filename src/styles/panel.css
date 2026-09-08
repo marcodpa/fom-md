@@ -1818,3 +1818,286 @@ button.pnl-kpi:active { transform: scale(var(--e-escala-press)); }
 .pnl-lista-avisos b {
   color: var(--pnl-texto, inherit);
 }
+
+/* ============================================================
+   ACABADO (pase de diseño, sept. 2026)
+   ------------------------------------------------------------
+   Mejoras de superficie que valen para todo el panel. Van al final
+   para ganarle a las reglas base con la misma especificidad, sin
+   tocarlas: cada bloque se puede quitar solo si estorba.
+   - Sombra teñida con el tono del fondo (no negro puro) y una línea
+     de luz de 1 px en el borde superior: la tarjeta parece que
+     recibe luz desde arriba, todas desde el mismo lado.
+   - Cifras con dígitos tabulares y tracking cerrado: los números no
+     bailan cuando cambian.
+   - Etiquetas con radio de 8 px en vez de píldora: se leen como
+     dato, no como botón.
+   - Foco de teclado visible en todo lo que se pulsa.
+   - Titulares con «balance»: sin palabra huérfana en la última línea.
+   ============================================================ */
+.pnl {
+  --e-sombra-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.06);
+  --e-luz-borde: rgba(255, 255, 255, 0.55);
+}
+[data-tema='oscuro'] .pnl {
+  --e-sombra-card: 0 1px 2px rgba(3, 6, 12, 0.5), 0 6px 18px rgba(3, 6, 12, 0.4);
+  --e-luz-borde: rgba(255, 255, 255, 0.045);
+}
+.pnl-card,
+.pnl-kpi {
+  box-shadow: inset 0 1px 0 var(--e-luz-borde), var(--e-sombra-card);
+  transition: border-color var(--e-d-base) var(--e-curva),
+    box-shadow var(--e-d-base) var(--e-curva),
+    transform var(--e-d-micro) var(--e-curva);
+}
+a.pnl-kpi:hover,
+button.pnl-kpi:hover {
+  border-color: var(--e-borde-fuerte);
+  box-shadow: inset 0 1px 0 var(--e-luz-borde), var(--e-sombra-flotante);
+  transform: translateY(-1px);
+}
+a.pnl-kpi:active,
+button.pnl-kpi:active { transform: translateY(0) scale(var(--e-escala-press)); }
+.pnl-kpi b {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--e-track-ajustado);
+}
+.pnl-kpi-top span {
+  letter-spacing: var(--e-track-amplio);
+  text-transform: uppercase;
+  font-size: var(--e-t-xs);
+  line-height: var(--e-lh-xs);
+  font-weight: 600;
+  color: var(--e-texto-3);
+}
+.pnl-card-cab h2 { letter-spacing: -0.2px; text-wrap: balance; }
+.pnl-cab h1 { text-wrap: balance; }
+.pnl-cab p { text-wrap: pretty; max-width: 62ch; }
+.pnl-tag { border-radius: 8px; padding: 3px var(--e-sm); }
+.pnl-datos b { font-variant-numeric: tabular-nums; }
+
+/* Foco de teclado: un anillo del color primario, separado del borde
+   para que se vea también sobre superficies del mismo tono. */
+.pnl-btn:focus-visible,
+.pnl-chip:focus-visible,
+.pnl-input:focus-visible,
+.pnl select:focus-visible,
+.pnl textarea:focus-visible,
+a.pnl-kpi:focus-visible,
+button.pnl-kpi:focus-visible,
+.pnl-tabla-fila-link:focus-visible {
+  outline: 2px solid var(--e-primario);
+  outline-offset: 2px;
+  border-radius: var(--e-r-md);
+}
+.pnl-tabla-fila-link:focus-visible { outline-offset: -2px; border-radius: 0; }
+
+/* ============================================================
+   MI UNIDAD (inicio del conductor) — Opción C «Ficha del conductor»
+   ------------------------------------------------------------
+   Franja de identidad → mapa con las cifras encima → «Hoy» + Ficha.
+   ============================================================ */
+.mu { display: grid; gap: var(--e-lg); }
+
+/* --- Franja de identidad --- */
+.mu-identidad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--e-lg);
+  padding: var(--e-lg);
+  background:
+    radial-gradient(120% 180% at 0% 0%, color-mix(in srgb, var(--e-primario) 9%, transparent), transparent 55%),
+    var(--e-sup);
+}
+.mu-identidad-icono {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--e-r-md);
+  color: var(--e-primario);
+  background: color-mix(in srgb, var(--e-primario) 14%, transparent);
+  border: var(--e-borde-fino) solid color-mix(in srgb, var(--e-primario) 28%, transparent);
+  box-shadow: inset 0 1px 0 var(--e-luz-borde);
+}
+.mu-identidad-txt { min-width: 0; display: grid; gap: 4px; }
+.mu-identidad-linea {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--e-sm) var(--e-md);
+}
+.mu-alias {
+  font-family: var(--e-fuente);
+  font-size: 26px;
+  line-height: 30px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--e-texto);
+  margin: 0;
+}
+.mu-placa {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: var(--e-t-sm);
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: var(--e-texto);
+  background: var(--e-sup-baja);
+  border: var(--e-borde-fino) solid var(--e-borde);
+  white-space: nowrap;
+}
+.mu-modelo { font-size: var(--e-t-sm); color: var(--e-texto-2); }
+.mu-identidad-sub {
+  margin: 0;
+  font-size: var(--e-t-sm);
+  line-height: var(--e-lh-sm);
+  color: var(--e-texto-2);
+}
+.mu-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border-radius: var(--e-r-pill);
+  font-size: var(--e-t-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  border: var(--e-borde-fino) solid transparent;
+}
+.mu-estado.ok { color: var(--e-exito); background: var(--e-exito-sup); border-color: color-mix(in srgb, var(--e-exito) 25%, transparent); }
+.mu-estado.aviso { color: var(--e-aviso); background: var(--e-aviso-sup); border-color: color-mix(in srgb, var(--e-aviso) 25%, transparent); }
+.mu-estado-punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
+}
+.mu-estado.ok .mu-estado-punto { animation: mu-latido 2.4s var(--e-curva) infinite; }
+@keyframes mu-latido {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, currentColor 8%, transparent); }
+}
+.mu-estado-sep { opacity: 0.5; }
+.mu-estado-nota { font-weight: 500; opacity: 0.85; }
+
+/* --- Mapa con cifras encima --- */
+.mu-mapa {
+  position: relative;
+  border-radius: var(--e-r-lg);
+  overflow: hidden;
+  border: var(--e-borde-fino) solid var(--e-borde);
+  box-shadow: inset 0 1px 0 var(--e-luz-borde), var(--e-sombra-card);
+  background: var(--e-sup);
+}
+.mu-mapa > * { border: 0; border-radius: 0; box-shadow: none; }
+.mu-mapa-vacio { min-height: 400px; display: grid; place-items: center; }
+.mu-cifras {
+  position: absolute;
+  left: var(--e-md);
+  bottom: var(--e-md);
+  display: flex;
+  gap: var(--e-sm);
+  flex-wrap: wrap;
+  max-width: calc(100% - var(--e-md) * 2);
+  z-index: 500; /* como la leyenda del mapa: encima de Leaflet, debajo de los modales */
+  pointer-events: none;
+}
+.mu-cifra {
+  pointer-events: auto;
+  display: grid;
+  gap: 2px;
+  min-width: 128px;
+  padding: 10px 14px;
+  border-radius: var(--e-r-md);
+  background: color-mix(in srgb, var(--e-sup) 82%, transparent);
+  border: var(--e-borde-fino) solid color-mix(in srgb, var(--e-borde) 70%, transparent);
+  box-shadow: inset 0 1px 0 var(--e-luz-borde), var(--e-sombra-flotante);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+}
+.mu-cifra-k {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: var(--e-track-amplio);
+  text-transform: uppercase;
+  color: var(--e-texto-3);
+}
+.mu-cifra-v {
+  font-size: var(--e-t-lg);
+  line-height: 24px;
+  font-weight: 700;
+  letter-spacing: var(--e-track-ajustado);
+  font-variant-numeric: tabular-nums;
+  color: var(--e-texto);
+}
+.mu-cifra-v.ok { color: var(--e-exito); }
+.mu-cifra-v.aviso { color: var(--e-aviso); }
+
+/* --- Hoy + Ficha --- */
+.mu-abajo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: var(--e-lg);
+  align-items: start;
+}
+.mu-hoy { list-style: none; margin: 0; padding: 0; display: grid; }
+.mu-hoy-fila {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--e-md);
+  padding: var(--e-md) 0;
+  border-top: var(--e-borde-fino) solid var(--e-borde);
+}
+.mu-hoy-fila:first-child { border-top: 0; padding-top: 0; }
+.mu-hoy-fila.sub {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-left: calc(36px + var(--e-md));
+  border-top-style: dashed;
+}
+.mu-hoy-icono {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: var(--e-borde-fino) solid transparent;
+}
+.mu-hoy-icono.ok { color: var(--e-exito); background: var(--e-exito-sup); border-color: color-mix(in srgb, var(--e-exito) 22%, transparent); }
+.mu-hoy-icono.aviso { color: var(--e-aviso); background: var(--e-aviso-sup); border-color: color-mix(in srgb, var(--e-aviso) 22%, transparent); }
+.mu-hoy-txt { display: grid; gap: 2px; min-width: 0; }
+.mu-hoy-txt b { font-size: var(--e-t-sm); font-weight: 600; color: var(--e-texto); }
+.mu-hoy-txt span { font-size: var(--e-t-xs); line-height: var(--e-lh-xs); color: var(--e-texto-2); }
+.mu-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-sm);
+  margin: var(--e-md) 0 0;
+  padding: var(--e-md);
+  border-radius: var(--e-r-md);
+  font-size: var(--e-t-sm);
+  line-height: var(--e-lh-sm);
+  color: var(--e-texto-2);
+  background: color-mix(in srgb, var(--e-primario) 7%, transparent);
+  border: var(--e-borde-fino) solid color-mix(in srgb, var(--e-primario) 18%, transparent);
+}
+.mu-nota .ico { color: var(--e-primario); flex: none; margin-top: 1px; }
+.mu-nota b { color: var(--e-texto); font-weight: 600; }
+
+@media (max-width: 900px) {
+  .mu-abajo { grid-template-columns: minmax(0, 1fr); }
+  .mu-identidad { grid-template-columns: auto minmax(0, 1fr); }
+  .mu-identidad .mu-estado { grid-column: 1 / -1; justify-self: start; }
+}
+@media (max-width: 560px) {
+  .mu-cifras { position: static; max-width: none; padding: var(--e-md); background: var(--e-sup); border-top: var(--e-borde-fino) solid var(--e-borde); }
+  .mu-cifra { flex: 1 1 40%; min-width: 0; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; background: var(--e-sup-baja); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mu-estado.ok .mu-estado-punto { animation: none; }
+}
