@@ -222,6 +222,23 @@ function metrosEntre(a, b) {
 
 const DERIVA_METROS = 20
 
+function normalizarCedula(texto) {
+  const t = String(texto).trim().toLowerCase().replace(/[\s.]/gu, '')
+  const m = t.match(/^([ve])-?(\d{6,9})$/u)
+  if (m) return `${m[1]}-${m[2]}`
+  if (/^\d{6,9}$/u.test(t)) return `v-${t}`
+  return t
+}
+
+function normalizarTelefono(texto) {
+  let t = String(texto).replace(/[\s().-]/gu, '')
+  if (t.startsWith('00')) t = `+${t.slice(2)}`
+  if (/^0\d{10}$/u.test(t)) t = `+58${t.slice(1)}`
+  if (/^\d{10}$/u.test(t)) t = `+58${t}`
+  if (!t.startsWith('+') && /^\d{7,15}$/u.test(t)) t = `+${t}`
+  return t
+}
+
 const MANTENIMIENTO_ES_PLAN =
   'Las reglas de mantenimiento por kilometraje ya no existen como alerta: el ' +
   'servidor las convirtió en planes de mantenimiento, con su propia pantalla ' +
@@ -406,6 +423,7 @@ export const repoApi = {
       return {
         ...comoUnidad(ficha.vehicle),
         conductorPrincipalId: asignacion?.userId ?? null,
+        asignacionId: asignacion?.assignmentId ?? null,
         conductorNombre: asignacion?.displayName ?? 'Sin asignar',
         recorrido,
         documentos,
@@ -492,6 +510,41 @@ export const repoApi = {
    * persona apunta a su membresia, asi que aqui no existe alguien sin cuenta.
    */
   gente: {
+    /**
+     * Una persona por su identificador. El directorio no tiene ruta de
+     * detalle: se busca en la lista. Antes «obtener» caía en la semilla y
+     * devolvía null siempre: el expediente decía «no conseguimos a esta
+     * persona» para todo el mundo.
+     */
+    async obtener(id) {
+      const [lista, insp, odts] = await Promise.all([
+        repoApi.gente.listar({}),
+        repoApi.inspecciones.listar({}).catch(() => []),
+        repoApi.odts.listar({}).catch(() => []),
+      ])
+      const p = lista.find((x) => x.userId === id || x.id === id)
+      if (!p) return null
+      const nombre = String(p.nombre ?? '').trim().toLowerCase()
+      return {
+        ...p,
+        // El expediente espera la unidad como objeto y las colecciones como
+        // listas. Lo que el servidor no sirve por persona queda vacío, no
+        // inventado: eventos de manejo y licencia todavía no viajan aquí.
+        unidad: p.unidad ? { id: p.unidad, alias: p.unidadNombre ?? p.unidad, placa: p.placaUnidad ?? '' } : null,
+        eventos: [],
+        inspecciones: insp.filter((i) => String(i.conductorNombre ?? '').trim().toLowerCase() === nombre),
+        odts: odts.filter((o) => String(o.creadorNombre ?? '').trim().toLowerCase() === nombre),
+        documentos: [],
+        direccion: p.direccion ?? null,
+        fechaNacimiento: p.fechaNacimiento ?? null,
+        licenciaNumero: null,
+        licenciaCategoria: null,
+        licenciaVence: null,
+        cartaMedicaVence: null,
+        indiceSeguro: null,
+        creadoEn: p.activadoEn ?? null,
+      }
+    },
     async listar({ q = '', rol = '', enteId = '', soloConductores = false } = {}) {
       // La lista de entes viaja en paralelo y se tolera su falta: sirve solo
       // para poner NOMBRE a la empresa de cada persona. Todas las filas de una
@@ -553,9 +606,14 @@ export const repoApi = {
     },
 
     async actualizarPerfil(userId, { cedula, telefono, direccion, nacimiento }) {
+      // El servidor exige `v-12345678` / `e-1234567` y `+584141234567`. La
+      // gente escribe «V12345678» y «0414-1234567»: se traduce aquí, no se
+      // rechaza.
+      const ced = cedula === undefined || cedula === '' ? undefined : normalizarCedula(cedula)
+      const tel = telefono === undefined || telefono === '' ? undefined : normalizarTelefono(telefono)
       const r = await api.actualizarPerfil(userId, {
-        nationalId: cedula,
-        phone: telefono,
+        nationalId: ced,
+        phone: tel,
         address: direccion,
         birthDate: nacimiento,
       })
@@ -580,6 +638,15 @@ export const repoApi = {
     async marcarTodasLeidas() {
       const r = await api.marcarTodosLosAvisos()
       return { marcados: r?.markedCount ?? 0 }
+    },
+    /** Descartar saca el aviso de la bandeja de ESTA persona; el hecho sigue. */
+    async descartar(avisoId) {
+      await api.descartarAviso(avisoId)
+      return true
+    },
+    async descartarLeidos() {
+      const r = await api.descartarAvisosLeidos()
+      return { descartados: r?.dismissedCount ?? r?.markedCount ?? 0 }
     },
   },
 
@@ -881,10 +948,13 @@ export const repoApi = {
      */
     async asignarConductor(id, userId, { rol = 'principal', pin } = {}) {
       if (!userId) {
-        throw new Error(
-          'Para quitar un conductor hay que revocar su asignacion vigente ' +
-            'desde su expediente: no se borra, se cierra con fecha.',
-        )
+        // Quitar = REVOCAR la asignación vigente, con fecha y rastro, que es
+        // el paso de la app. Se busca la asignación abierta de la unidad.
+        const vigentes = await api.conductores().then((r) => (r?.items ?? []).filter((c) => c.vehicleId === id))
+        if (vigentes.length === 0) return true
+        const principal = vigentes.find((c) => c.role === 'principal') ?? vigentes[0]
+        await api.revocarAsignacion(principal.assignmentId, { reason: 'quitado-desde-consola' })
+        return true
       }
       // AssignDriverDto: userId, role, pin. No admite `reason`: mandarlo
       // es un 400 «property reason should not exist».
@@ -896,6 +966,20 @@ export const repoApi = {
       return true
     },
 
+    /** Qué impide archivar la unidad (jornadas, asignaciones, GPS, órdenes, emergencias abiertas). */
+    async preflightArchivo(id) {
+      const r = await api.preflightArchivoVehiculo(id)
+      return {
+        estadoActual: r?.currentStatus ?? null,
+        sePuede: Boolean(r?.canArchive),
+        bloqueos: r?.blockers ?? {},
+      }
+    },
+    /** Archivar: la unidad sale de la operación y conserva su historial. */
+    async archivar(id, { estadoActual, motivo: razon }) {
+      await api.archivarVehiculo(id, { expectedStatus: estadoActual, reason: motivo(razon || '', 'archivada-desde-consola') })
+      return true
+    },
     async revocarAsignacion(asignacionId, razon) {
       await api.revocarAsignacion(asignacionId, { reason: razon ? motivo(razon) : undefined })
       return true
@@ -1236,6 +1320,27 @@ const pagina = (r) => ({
 })
 
 Object.assign(repoApi, {
+  /** Bitácora real del ente (`GET /audit`), en el vocabulario de la pantalla. */
+  auditoria: {
+    async listar({ tipo = '', q = '' } = {}) {
+      const r = await api.auditoria({ action: tipo || undefined })
+      const t = q.trim().toLowerCase()
+      const lista = (r?.items ?? []).map((e) => ({
+        id: e.id,
+        tipo: e.action,
+        objetivo: `${e.entityType ?? ''}${e.entityId ? ` ${String(e.entityId).slice(0, 8)}` : ''}`.trim() || '—',
+        detalle: resumirCambios(e.changes),
+        actorNombre: e.actorName ?? (e.actorKind === 'system' ? 'Sistema' : e.actorUserId?.slice(0, 8) ?? '—'),
+        empresaNombre: '',
+        fecha: e.occurredAt,
+      }))
+      const tipos = [...new Set((r?.items ?? []).map((e) => e.action))].sort()
+      const salida = t ? lista.filter((a) => [a.objetivo, a.detalle, a.actorNombre, a.tipo].join(' ').toLowerCase().includes(t)) : lista
+      salida.tipos = tipos
+      return salida
+    },
+  },
+
   /** Eventos de alerta (reglas que se cumplieron) y emergencias (SOS). */
   seguridad: {
     async eventos({ estado = '', severidad = '', vehiculoId = '' } = {}) {
@@ -1547,6 +1652,18 @@ Object.assign(repoApi, {
     },
   },
 })
+
+/** Los cambios de una entrada de auditoría, en una línea legible. */
+function resumirCambios(cambios) {
+  if (!cambios || typeof cambios !== 'object') return ''
+  const partes = []
+  for (const [k, v] of Object.entries(cambios)) {
+    if (v && typeof v === 'object' && ('from' in v || 'to' in v)) partes.push(`${k}: ${v.from ?? '—'} → ${v.to ?? '—'}`)
+    else if (v && typeof v === 'object') partes.push(`${k}: ${JSON.stringify(v).slice(0, 60)}`)
+    else partes.push(`${k}: ${v}`)
+  }
+  return partes.slice(0, 4).join(' · ')
+}
 
 function comoTransferencia(t) {
   return {

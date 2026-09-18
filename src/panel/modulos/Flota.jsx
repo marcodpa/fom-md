@@ -5,6 +5,7 @@ import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import { esAdminFom } from '../auth'
+import { esGestor } from '../roles'
 import {
   Cabecera, Campo, Cargando, Vacio, ErrorCarga, Tag, Tarjeta, Kpi, Buscador, Chips, Modal,
 } from '../comp/ui'
@@ -122,6 +123,8 @@ export default function Flota() {
   const navegar = useNavigate()
   const sesion = useSesion()
   const esAdmin = esAdminFom(sesion?.perfil)
+  const esGestorDeFlota = esGestor(sesion?.perfil)
+  const [creandoArea, setCreandoArea] = useState(false)
   const [q, setQ] = useState('')
   const [filtro, setFiltro] = useState('todas')
   const [areaId, setAreaId] = useState('')
@@ -207,6 +210,12 @@ export default function Flota() {
           <Icono nombre="descargar" tam={16} />
           Exportar CSV
         </button>
+        {esGestorDeFlota && (
+          <button type="button" className="pnl-btn sutil" onClick={() => setCreandoArea(true)}>
+            <Icono nombre="pin" tam={16} />
+            Nueva área
+          </button>
+        )}
         {esAdmin && (
           <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
             <Icono nombre="mas" tam={16} />
@@ -404,6 +413,7 @@ export default function Flota() {
           </>
         )}
       </div>
+      <ModalArea abierto={creandoArea} tenantId={sesion?.perfil?.empresaId ?? null} alCerrar={() => setCreandoArea(false)} alGuardar={recargar} />
     </>
   )
 }
@@ -518,6 +528,49 @@ function ModalNuevaUnidad({ abierto, areas, alCerrar, alGuardar, actor }) {
           </div>
         </>
       )}
+    </Modal>
+  )
+}
+
+// ---------------- Nueva área ----------------
+// Igual que en la app: nombre y tipo (ubicación, sector o contrato). El ente
+// es el de la sesión; el servidor la crea bajo `tenants/:id/areas`.
+const TIPOS_DE_AREA = [['ubicacion', 'Ubicación'], ['sector', 'Sector'], ['contrato', 'Contrato']]
+function ModalArea({ abierto, tenantId, alCerrar, alGuardar }) {
+  const [nombre, setNombre] = useState('')
+  const [tipo, setTipo] = useState('ubicacion')
+  const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  async function confirmar() {
+    if (nombre.trim().length < 2) return setError('Ponle nombre al área.')
+    if (!tenantId) return setError('No se sabe el ente de la sesión: vuelve a entrar.')
+    setGuardando(true)
+    setError('')
+    try {
+      await repo.areas.crear(tenantId, { nombre: nombre.trim(), tipo })
+      await alGuardar()
+      setNombre('')
+      alCerrar()
+    } catch (e) {
+      setError(e?.message || 'No se pudo crear el área.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+  return (
+    <Modal titulo="Nueva área" abierto={abierto} alCerrar={alCerrar} ancho={440}>
+      <Campo etiqueta="Nombre" error={error}>
+        <input className="pnl-input" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Costa oriental" />
+      </Campo>
+      <Campo etiqueta="Tipo">
+        <select className="pnl-input" value={tipo} onChange={(e) => setTipo(e.target.value)}>
+          {TIPOS_DE_AREA.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+        </select>
+      </Campo>
+      <div className="pnl-chips">
+        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>{guardando ? 'Guardando…' : 'Crear área'}</button>
+        <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
+      </div>
     </Modal>
   )
 }

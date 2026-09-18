@@ -100,6 +100,15 @@ export default function Alertas() {
     [eventos, tipoEvento]
   )
 
+  const descartar = async (alerta) => {
+    await repo.alertas.descartar(alerta.id).catch(() => {})
+    notif.recargar()
+  }
+  const descartarLeidos = async () => {
+    await repo.alertas.descartarLeidos().catch(() => {})
+    notif.recargar()
+  }
+
   const marcar = (alerta) => {
     if (!alerta.leida) repo.alertas.marcarLeida(alerta.id)
   }
@@ -122,6 +131,10 @@ export default function Alertas() {
         >
           <Icono nombre="check" tam={16} />
           Marcar todas como leídas
+        </button>
+        <button type="button" className="pnl-btn sutil" onClick={descartarLeidos}>
+          <Icono nombre="cerrar" tam={16} />
+          Descartar leídos
         </button>
       </Cabecera>
 
@@ -172,7 +185,7 @@ export default function Alertas() {
                   ) : (
                     <div className="pnl-filas">
                       {notificaciones.map((n) => (
-                        <FilaNotificacion key={n.id} alerta={n} alAbrir={marcar} />
+                        <FilaNotificacion key={n.id} alerta={n} alAbrir={marcar} alDescartar={descartar} />
                       ))}
                     </div>
                   )}
@@ -238,7 +251,7 @@ export default function Alertas() {
 }
 
 /** Fila de la bandeja. Si la notificación trae ODT, lleva a Mantenimiento. */
-function FilaNotificacion({ alerta, alAbrir }) {
+function FilaNotificacion({ alerta, alAbrir, alDescartar }) {
   const contenido = (
     <>
       <i className={`pnl-punto ${alerta.leida ? 'off' : 'alerta'}`} />
@@ -247,6 +260,14 @@ function FilaNotificacion({ alerta, alAbrir }) {
         <span>{alerta.detalle}</span>
       </div>
       <em>{f.desde(alerta.creadaEn)}</em>
+      <button
+        type="button"
+        className="pnl-btn sutil"
+        aria-label="Descartar este aviso"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); alDescartar?.(alerta) }}
+      >
+        Descartar
+      </button>
     </>
   )
 

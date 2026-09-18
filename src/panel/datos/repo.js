@@ -155,6 +155,7 @@ const repo = HAY_API
       personal: {
         ...sinRespaldo(repoSemilla.personal),
         listar: repoApi.gente.listar,
+        obtener: repoApi.gente.obtener,
         actualizarPerfil: repoApi.gente.actualizarPerfil,
       },
       costos: conRespaldoParcial(repoSemilla.costos, {}, {
@@ -196,7 +197,8 @@ const repo = HAY_API
           actualizar: FALTA_PAGOS,
           actualizarEstado: FALTA_PAGOS,
         }),
-        auditoria: sinRespaldo(repoSemilla.admin.auditoria ?? {}),
+        // Bitácora real desde `GET /audit`.
+        auditoria: repoApi.auditoria,
       },
 
       // --- Reales -------------------------------------------------------

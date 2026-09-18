@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import {
-  Cabecera, Campo, Cargando, Datos, ErrorCarga, Kpi, Pestanas, Tag, Tarjeta, Vacio, Volver,
+  Cabecera, Campo, Cargando, Datos, ErrorCarga, Kpi, Modal, Pestanas, Tag, Tarjeta, Vacio, Volver,
 } from '../comp/ui'
 import { Anillo, BarrasH } from '../comp/Grafico'
 import * as f from '../datos/formato'
@@ -36,6 +36,8 @@ export default function ExpedienteConductor() {
     const t = setTimeout(() => setGuardado(0), 2000)
     return () => clearTimeout(t)
   }, [guardado])
+
+  const [editandoPerfil, setEditandoPerfil] = useState(false)
 
   const asignar = async (vehiculoId) => {
     if (!vehiculoId) return
@@ -98,6 +100,12 @@ export default function ExpedienteConductor() {
         {ficha.estado === 'ok' && p && (
           <>
             <Identidad persona={p} />
+            <div className="pnl-chips">
+              <button type="button" className="pnl-btn sutil" onClick={() => setEditandoPerfil(true)}>
+                <Icono nombre="editar" tam={16} />
+                {p.perfilCompleto ? 'Editar datos' : 'Completar perfil'}
+              </button>
+            </div>
 
             <div className="pnl-grid k4">
               <Kpi
@@ -154,6 +162,9 @@ export default function ExpedienteConductor() {
           </>
         )}
       </div>
+      {p && editandoPerfil && (
+        <ModalPerfil persona={p} alCerrar={() => setEditandoPerfil(false)} alHecho={() => { setEditandoPerfil(false); ficha.recargar() }} />
+      )}
     </>
   )
 }
@@ -469,5 +480,52 @@ function Documentos({ documentos }) {
         </table>
       </div>
     </Tarjeta>
+  )
+}
+
+// ---------------- Completar el perfil ----------------
+// Los cuatro datos que la app pide para dar el perfil por completo: cédula,
+// teléfono, dirección y fecha de nacimiento. El servidor exige formatos
+// (`v-12345678`, `+58414…`); el repositorio los normaliza antes de enviar.
+function ModalPerfil({ persona: p, alCerrar, alHecho }) {
+  const [d, setD] = useState({ cedula: p.cedula ?? '', telefono: p.telefono ?? '', direccion: p.direccion ?? '', nacimiento: p.fechaNacimiento ?? '' })
+  const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  const set = (k) => (e) => setD((x) => ({ ...x, [k]: e.target.value }))
+  async function confirmar() {
+    setGuardando(true)
+    setError('')
+    try {
+      await repo.personal.actualizarPerfil(p.userId ?? p.id, d)
+      alHecho()
+    } catch (e) {
+      setError(e?.message || 'No se pudo guardar el perfil.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+  return (
+    <Modal titulo={`Datos de ${p.nombre}`} abierto alCerrar={alCerrar} ancho={520}>
+      <div className="pnl-grid k2">
+        <Campo etiqueta="Cédula" ayuda="V12345678 o E-1234567">
+          <input className="pnl-input" value={d.cedula} onChange={set('cedula')} placeholder="V12345678" />
+        </Campo>
+        <Campo etiqueta="Teléfono" ayuda="0414-1234567 o +584141234567">
+          <input className="pnl-input" value={d.telefono} onChange={set('telefono')} placeholder="0414-1234567" />
+        </Campo>
+      </div>
+      <Campo etiqueta="Dirección">
+        <input className="pnl-input" value={d.direccion} onChange={set('direccion')} />
+      </Campo>
+      <Campo etiqueta="Fecha de nacimiento" error={error}>
+        <input type="date" className="pnl-input" value={d.nacimiento} onChange={set('nacimiento')} />
+      </Campo>
+      <div className="pnl-chips">
+        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>
+          {guardando ? 'Guardando…' : 'Guardar'}
+        </button>
+        <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
+      </div>
+    </Modal>
   )
 }

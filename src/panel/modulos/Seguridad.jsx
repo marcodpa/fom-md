@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
-import { Cabecera, Cargando, Chips, ErrorCarga, Kpi, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
+import { Cabecera, Campo, Cargando, Chips, ErrorCarga, Kpi, Modal, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 
@@ -42,6 +42,8 @@ export default function Seguridad() {
   const eventos = useDatos(() => repo.seguridad.eventos({ estado: estadoEvento, severidad }), [estadoEvento, severidad], 30000)
   const sos = useDatos(() => repo.seguridad.emergencias({ estado: estadoSos }), [estadoSos], 30000)
   const abiertas = useDatos(() => repo.seguridad.emergencias({ estado: 'active' }), [], 30000)
+  const reglas = useDatos(() => repo.reglas.listar(), [])
+  const [nuevaRegla, setNuevaRegla] = useState(false)
 
   async function actuar(fn, exito) {
     setOcupado(true)
@@ -52,6 +54,8 @@ export default function Seguridad() {
       eventos.recargar()
       sos.recargar()
       abiertas.recargar()
+      reglas.recargar()
+      return true
     } catch (e) {
       setAviso(e?.message || 'No se pudo completar la acción.')
     } finally {
@@ -82,7 +86,7 @@ export default function Seguridad() {
             tono={estadoEvento === 'open' && evAbiertos > 0 ? 'aviso' : ''}
             nota="Con el filtro de arriba"
           />
-          <Kpi titulo="Reglas" valor="Ver" icono="escudo" nota="Velocidad y condición se configuran en Alertas" a="/panel/alertas" />
+          <Kpi titulo="Reglas activas" valor={reglas.datos ? f.numero(reglas.datos.filter((r) => r.activa).length) : '—'} icono="escudo" nota="Velocidad máxima de la flota" onClick={() => setPestana('reglas')} />
         </div>
 
         {aviso && <p className="pnl-campo-error" role="status">{aviso}</p>}
@@ -91,6 +95,7 @@ export default function Seguridad() {
           opciones={[
             { v: 'eventos', t: 'Eventos de alerta' },
             { v: 'sos', t: `Emergencias (SOS)${activas ? ` · ${activas}` : ''}` },
+            { v: 'reglas', t: 'Reglas' },
           ]}
           valor={pestana}
           alCambiar={setPestana}
@@ -198,7 +203,67 @@ export default function Seguridad() {
             ))}
           </Tarjeta>
         )}
+
+        {pestana === 'reglas' && (
+          <Tarjeta
+            titulo="Reglas de alerta"
+            accion={<button type="button" className="pnl-btn primario" onClick={() => setNuevaRegla(true)}><Icono nombre="mas" tam={16} />Nueva regla de velocidad</button>}
+            sinCuerpo
+          >
+            {reglas.estado === 'cargando' && <Cargando filas={3} />}
+            {reglas.estado === 'error' && <ErrorCarga onReintentar={reglas.recargar} error={reglas.error} />}
+            {reglas.estado === 'ok' && (reglas.datos.length === 0 ? (
+              <div className="pnl-card-cuerpo">
+                <Vacio icono="velocidad" titulo="Sin reglas todavía" texto="Crea una de velocidad: cuando una unidad la supere, aparecerá un evento aquí y un aviso en Alertas." />
+              </div>
+            ) : (
+              <div className="pnl-filas">
+                {reglas.datos.map((r) => (
+                  <div className="pnl-fila" key={r.id}>
+                    <Icono nombre={r.tipo === 'velocidad' ? 'velocidad' : 'alerta'} tam={18} />
+                    <div className="pnl-fila-txt">
+                      <b>{r.tipo === 'velocidad' ? `Velocidad máxima ${f.numero(r.umbralKmh)} km/h` : `Condición ${r.variable ?? ''} ${r.operador ?? ''} ${r.umbral ?? ''}`.trim()}</b>
+                      <span>{r.vehiculos ? `${r.vehiculos} unidades` : 'Toda la flota'}</span>
+                    </div>
+                    <Tag color={r.activa ? 'verde' : 'gris'}>{r.activa ? 'Activa' : 'Apagada'}</Tag>
+                    <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => actuar(() => repo.reglas.set(r.id, { activa: !r.activa }), r.activa ? 'Regla apagada.' : 'Regla activada.')}>
+                      {r.activa ? 'Apagar' : 'Activar'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </Tarjeta>
+        )}
       </div>
+
+      <ModalRegla abierto={nuevaRegla} alCerrar={() => setNuevaRegla(false)} guardar={(umbral) => actuar(() => repo.reglas.crear({ tipo: 'velocidad', umbralKmh: umbral }), 'Regla creada.')} />
     </>
+  )
+}
+
+function ModalRegla({ abierto, alCerrar, guardar }) {
+  const [umbral, setUmbral] = useState('90')
+  const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  async function confirmar() {
+    const n = Number(umbral)
+    if (!Number.isFinite(n) || n < 10 || n > 250) return setError('Un límite entre 10 y 250 km/h.')
+    setGuardando(true)
+    setError('')
+    const ok = await guardar(n)
+    setGuardando(false)
+    if (ok) alCerrar()
+  }
+  return (
+    <Modal titulo="Nueva regla de velocidad" abierto={abierto} alCerrar={alCerrar} ancho={440}>
+      <Campo etiqueta="Velocidad máxima (km/h)" error={error} ayuda="Cuando una unidad la supere, el servidor crea el evento y el aviso.">
+        <input type="number" className="pnl-input" min="10" max="250" value={umbral} onChange={(e) => setUmbral(e.target.value)} />
+      </Campo>
+      <div className="pnl-chips">
+        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>{guardando ? 'Guardando…' : 'Crear regla'}</button>
+        <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
+      </div>
+    </Modal>
   )
 }

@@ -33,7 +33,24 @@ const TIPOS = {
   asociar_gps: { t: 'GPS asociado', i: 'pin', c: 'azul' },
   probar_panico: { t: 'Pánico probado', i: 'alerta', c: 'ambar' },
 }
-const vista = (tipo) => TIPOS[tipo] ?? { t: tipo, i: 'auditoria', c: 'gris' }
+// Acciones reales del servidor («work_order.created», «driver_assignment.revoked»…)
+const ACCION = {
+  created: ['creado', 'verde'], transitioned: ['cambió de estado', 'azul'], updated: ['editado', 'azul'],
+  revoked: ['revocado', 'ambar'], assigned: ['asignado', 'azul'], read: ['leído', 'gris'],
+  reset: ['reiniciado', 'azul'], replaced: ['reemplazado', 'azul'], self_update: ['actualizado por la persona', 'gris'],
+  archived: ['archivado', 'ambar'], installed: ['instalado', 'verde'], removed: ['desmontado', 'ambar'],
+}
+const ENTIDAD = {
+  work_order: 'Orden de trabajo', vehicle_driver_assignment: 'Asignación de conductor', user_credential: 'Clave',
+  user_profile: 'Perfil', notification: 'Aviso', vehicle: 'Vehículo', tenant: 'Ente', user: 'Persona',
+  membership: 'Membresía', document: 'Documento', gps_device: 'Equipo GPS', alert_rule: 'Regla',
+}
+const vista = (tipo) => {
+  if (TIPOS[tipo]) return TIPOS[tipo]
+  const [ent, acc] = String(tipo).split('.')
+  const [t, c] = ACCION[acc] ?? [acc ?? tipo, 'gris']
+  return { t: `${ENTIDAD[ent] ?? ent} ${t}`, i: 'auditoria', c }
+}
 
 function cargar(tipo, empresaId, q) {
   return Promise.all([
@@ -74,8 +91,8 @@ export default function AdminAuditoria() {
                   aria-label="Filtrar por tipo de evento"
                 >
                   <option value="">Todos los eventos</option>
-                  {Object.entries(TIPOS).map(([v, x]) => (
-                    <option key={v} value={v}>{x.t}</option>
+                  {(datos.lista.tipos ?? []).map((v) => (
+                    <option key={v} value={v}>{vista(v).t}</option>
                   ))}
                 </select>
                 <select
@@ -106,7 +123,7 @@ export default function AdminAuditoria() {
                       <div className="pnl-fila-txt">
                         <b>{a.objetivo}</b>
                         <span>
-                          {a.detalle} · por {a.actorNombre} · {a.empresaNombre}
+                          {[a.detalle, `por ${a.actorNombre}`, a.empresaNombre].filter(Boolean).join(' · ')}
                         </span>
                       </div>
                       <div className="pnl-doble" style={{ textAlign: 'right' }}>

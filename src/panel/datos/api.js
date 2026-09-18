@@ -252,6 +252,10 @@ export const api = {
     pedir(`${CONSOLA}/notifications/${avisoId}/read`, { metodo: 'PATCH', cuerpo: {} }),
   marcarTodosLosAvisos: () =>
     pedir(`${CONSOLA}/notifications/read-all`, { metodo: 'POST', cuerpo: {} }),
+  descartarAviso: (avisoId) =>
+    pedir(`${CONSOLA}/notifications/${avisoId}/dismiss`, { metodo: 'PATCH', cuerpo: {} }),
+  descartarAvisosLeidos: () =>
+    pedir(`${CONSOLA}/notifications/dismiss-read`, { metodo: 'POST', cuerpo: {} }),
 
   crearDocumento: (cuerpo) =>
     pedir(`${CONSOLA}/documents`, { metodo: 'POST', cuerpo }),
@@ -447,6 +451,13 @@ Object.assign(api, {
   personasDePlataforma: ({ q, limit = 50, offset = 0 } = {}) =>
     pedir(`${CONSOLA}/platform/users${consulta({ q, limit, offset })}`),
   gpsSinEmparejar: () => pedir(`${CONSOLA}/gps-devices/unpaired`),
+  /** Bitácora del ente: quién hizo qué y cuándo. */
+  auditoria: ({ entityType, action, limit = 200, offset = 0 } = {}) =>
+    pedir(`${CONSOLA}/audit${consulta({ entityType, action, limit, offset })}`),
+  /** Archivar una unidad: primero qué lo impide, luego el archivo con clave de idempotencia. */
+  preflightArchivoVehiculo: (vehicleId) => pedir(`${CONSOLA}/vehicles/${vehicleId}/archive-preflight`),
+  archivarVehiculo: (vehicleId, cuerpo) =>
+    pedir(`${CONSOLA}/vehicles/${vehicleId}/archive`, { metodo: 'POST', cuerpo, idempotente: true }),
   /** Quién ejecuta la orden (aprobada → asignada, o reasignar). */
   asignarResponsableOdt: (id, cuerpo) =>
     pedir(`${CONSOLA}/work-orders/${id}/assignee`, { metodo: 'PUT', cuerpo }),

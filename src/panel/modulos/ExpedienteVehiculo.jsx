@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
+import { esGestor } from '../roles'
 import {
   Cabecera, Cargando, Vacio, ErrorCarga, Tag, Tarjeta, Kpi, Barra, Modal, Campo,
   Volver, Pestanas, Datos,
@@ -84,6 +85,7 @@ export default function ExpedienteVehiculo() {
   const [modalOdt, setModalOdt] = useState(false)
   const [forma, setForma] = useState({ descripcion: '', tipoFalla: 'motor', ubicacion: '' })
   const [errorForma, setErrorForma] = useState('')
+  const [archivando, setArchivando] = useState(false)
   const [enviando, setEnviando] = useState(false)
 
   const reloj = useRef(null)
@@ -195,6 +197,12 @@ export default function ExpedienteVehiculo() {
             <Tag color={color('marcha_estado', v.estadoMarcha)}>
               {etiqueta('marcha_estado', v.estadoMarcha)}
             </Tag>
+            {esGestor(sesion?.perfil) && (
+              <button type="button" className="pnl-btn sutil" onClick={() => setArchivando(true)}>
+                <Icono nombre="cerrar" tam={16} />
+                Archivar unidad
+              </button>
+            )}
             <Tag color="azul">{etiqueta('vehiculo_tipo', v.tipo)}</Tag>
           </>
         )}
@@ -601,6 +609,68 @@ export default function ExpedienteVehiculo() {
           </div>
         </form>
       </Modal>
+      {v && archivando && (
+        <ModalArchivar unidad={v} alCerrar={() => setArchivando(false)} alHecho={() => { setArchivando(false); recargar() }} />
+      )}
     </>
+  )
+}
+
+// ---------------- Archivar la unidad ----------------
+// Mismo paso que en la app: primero se pregunta qué lo impide (jornadas o
+// asignaciones abiertas, GPS instalado, órdenes o emergencias vivas) y solo
+// si nada lo impide se archiva, con motivo y con el estado que se vio.
+const BLOQUEO = {
+  driverSessions: 'jornadas abiertas', driverAssignments: 'conductores asignados', gpsInstallations: 'equipos GPS instalados',
+  workOrders: 'órdenes de trabajo abiertas', emergencies: 'emergencias activas',
+}
+function ModalArchivar({ unidad, alCerrar, alHecho }) {
+  const [motivo, setMotivo] = useState('')
+  const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  const pre = useDatos(() => repo.vehiculos.preflightArchivo(unidad.id), [unidad.id])
+  const bloqueos = Object.entries(pre.datos?.bloqueos ?? {}).filter(([, n]) => Number(n) > 0)
+  async function confirmar() {
+    if (motivo.trim().length < 3) return setError('Escribe el motivo: queda en el historial.')
+    setGuardando(true)
+    setError('')
+    try {
+      await repo.vehiculos.archivar(unidad.id, { estadoActual: pre.datos?.estadoActual, motivo: motivo.trim() })
+      alHecho()
+    } catch (e) {
+      setError(e?.message || 'No se pudo archivar.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+  return (
+    <Modal titulo={`Archivar ${unidad.alias}`} abierto alCerrar={alCerrar} ancho={480}>
+      {pre.estado === 'cargando' && <Cargando filas={2} />}
+      {pre.estado === 'error' && <ErrorCarga onReintentar={pre.recargar} error={pre.error} />}
+      {pre.estado === 'ok' && (
+        <>
+          {bloqueos.length > 0 ? (
+            <div className="pnl-fila critica">
+              <Icono nombre="alerta" tam={16} />
+              <div className="pnl-fila-txt">
+                <b>Todavía no se puede archivar</b>
+                <span>Antes resuelve: {bloqueos.map(([k, n]) => `${n} ${BLOQUEO[k] ?? k}`).join(', ')}.</span>
+              </div>
+            </div>
+          ) : (
+            <p style={{ margin: '0 0 12px', color: 'var(--e-texto-2)' }}>La unidad sale de la operación y conserva todo su historial. No se borra nada.</p>
+          )}
+          <Campo etiqueta="Motivo" error={error}>
+            <input className="pnl-input" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Vendida, siniestrada, fuera de servicio…" />
+          </Campo>
+          <div className="pnl-chips">
+            <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando || bloqueos.length > 0}>
+              {guardando ? 'Archivando…' : 'Archivar'}
+            </button>
+            <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
+          </div>
+        </>
+      )}
+    </Modal>
   )
 }
