@@ -810,7 +810,8 @@ export const repoApi = {
   },
 
   areasEscritura: {
-    async crear(tenantId, { nombre, tipo = 'zona' }) {
+    // Tipos que admite el servidor: ubicacion | sector | contrato.
+    async crear(tenantId, { nombre, tipo = 'ubicacion' }) {
       const r = await api.crearArea(tenantId, { name: nombre, kind: tipo })
       return { id: r?.area?.id ?? null }
     },
@@ -878,18 +879,19 @@ export const repoApi = {
      * servidor no lo hace borrando sino revocando la asignacion vigente, que
      * es la que deja rastro de quien manejo y hasta cuando.
      */
-    async asignarConductor(id, userId, { rol = 'principal', pin, motivo: razon } = {}) {
+    async asignarConductor(id, userId, { rol = 'principal', pin } = {}) {
       if (!userId) {
         throw new Error(
           'Para quitar un conductor hay que revocar su asignacion vigente ' +
             'desde su expediente: no se borra, se cierra con fecha.',
         )
       }
+      // AssignDriverDto: userId, role, pin. No admite `reason`: mandarlo
+      // es un 400 «property reason should not exist».
       await api.asignarConductor(id, {
         userId,
         role: rol,
         pin: pin || undefined,
-        reason: razon ? motivo(razon) : undefined,
       })
       return true
     },
@@ -1090,26 +1092,48 @@ export const repoApi = {
   },
 
   documentos: {
-    async listar({ vehiculoId = '' } = {}) {
+    /**
+     * Lista con el vocabulario de la pantalla: `titular`, `venceEn` y un
+     * `estado` de vigilancia (vigente | por_vencer | vencido) calculado con
+     * los días que manda la base, no con el reloj del navegador. Los
+     * archivados no se listan: salieron de la vigilancia.
+     */
+    async listar({ vehiculoId = '', ambito = '', estado = '', q = '' } = {}) {
       try {
         const r = await api.documentos({ vehiculoId })
-        return (r?.items ?? []).map((d) => ({
-          id: d.id,
-          ambito: d.scope,
-          tipo: d.documentType,
-          numero: d.documentNumber,
-          emitidoEl: d.issuedOn,
-          venceEl: d.expiresOn,
-          // Calculado en la base, no aquí: el reloj del navegador puede estar
-          // en otra zona, y un documento vencido que aparece vigente es el
-          // fallo que este módulo evita.
-          diasParaVencer: d.daysToExpiry,
-          estado: d.status,
-          notas: d.notes,
-          vehiculoId: d.vehicleId,
-          vehiculoNombre: [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') || '—',
-          archivos: d.fileCount,
-        }))
+        const t = q.trim().toLowerCase()
+        return (r?.items ?? [])
+          .filter((d) => d.status !== 'archived')
+          .map((d) => {
+            const dias = d.daysToExpiry
+            const vigilancia = dias == null ? 'vigente' : dias < 0 ? 'vencido' : dias <= 30 ? 'por_vencer' : 'vigente'
+            const titular = d.scope === 'persona'
+              ? d.holderDisplayName || d.holderName || '—'
+              : [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') || '—'
+            return {
+              id: d.id,
+              ambito: d.scope,
+              tipo: d.documentType,
+              numero: d.documentNumber,
+              emitidoEl: d.issuedOn,
+              emitidoEn: d.issuedOn,
+              venceEl: d.expiresOn,
+              venceEn: d.expiresOn,
+              diasParaVencer: dias,
+              estado: vigilancia,
+              activo: d.status,
+              notas: d.notes,
+              titular,
+              titularId: d.scope === 'persona' ? d.holderUserId ?? null : d.vehicleId ?? null,
+              personaId: d.holderUserId ?? null,
+              vehiculoId: d.vehicleId,
+              vehiculoNombre: [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') || '—',
+              archivos: d.fileCount,
+            }
+          })
+          .filter((d) => !ambito || d.ambito === ambito)
+          .filter((d) => !estado || d.estado === estado)
+          .filter((d) => !t || [d.tipo, d.titular, d.numero].join(' ').toLowerCase().includes(t))
       } catch {
         return []
       }

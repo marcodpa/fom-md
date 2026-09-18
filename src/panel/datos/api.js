@@ -200,10 +200,10 @@ export const api = {
     pedir(`${CONSOLA}/vehicles/${vehicleId}`, { metodo: 'PATCH', cuerpo }),
 
   /** Asignar conductor a una unidad. */
-  asignarConductor: (vehicleId, { userId, role, pin, reason }) =>
+  asignarConductor: (vehicleId, { userId, role, pin }) =>
     pedir(`${CONSOLA}/vehicles/${vehicleId}/drivers`, {
       metodo: 'POST',
-      cuerpo: { userId, role, pin, reason },
+      cuerpo: { userId, role, pin },
     }),
 
   /** Revocar una asignacion. No se borra: se cierra con fecha. */

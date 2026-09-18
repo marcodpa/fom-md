@@ -81,6 +81,8 @@ export default function Documentos() {
   const [estadoDoc, setEstadoDoc] = useState('')
   const [q, setQ] = useState('')
   const [renovando, setRenovando] = useState(null)
+  const [creando, setCreando] = useState(false)
+  const [aviso, setAviso] = useState('')
 
   const { datos, estado, error, recargar } = useDatos(() => cargar(ambito, estadoDoc, q), [ambito, estadoDoc, q])
 
@@ -99,9 +101,14 @@ export default function Documentos() {
           <Icono nombre="descargar" tam={16} />
           Exportar CSV
         </button>
+        <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
+          <Icono nombre="mas" tam={16} />
+          Registrar documento
+        </button>
       </Cabecera>
 
       <div className="pnl-cuerpo">
+        {aviso && <p className="pnl-campo-error" role="status">{aviso}</p>}
         {estado === 'cargando' && <Cargando filas={6} />}
         {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
@@ -114,6 +121,16 @@ export default function Documentos() {
             q={q}
             setQ={setQ}
             abrirRenovar={setRenovando}
+            archivar={async (d) => {
+              setAviso('')
+              try {
+                await repo.documentos.archivar(d.id)
+                setAviso(`${d.tipo} archivado: sale de la vigilancia y queda en el historial.`)
+                await recargar()
+              } catch (e) {
+                setAviso(e?.message || 'No se pudo archivar.')
+              }
+            }}
           />
         )}
       </div>
@@ -123,11 +140,12 @@ export default function Documentos() {
         alCerrar={() => setRenovando(null)}
         alGuardar={recargar}
       />
+      <ModalNuevo abierto={creando} alCerrar={() => setCreando(false)} alGuardar={recargar} />
     </>
   )
 }
 
-function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ, abrirRenovar }) {
+function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ, abrirRenovar, archivar }) {
   const { todos, lista } = datos
 
   const vencidos = todos.filter((d) => d.estado === 'vencido').length
@@ -294,10 +312,16 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
                         </Tag>
                       </td>
                       <td className="num">
-                        <button type="button" className="pnl-btn sutil" onClick={() => abrirRenovar(d)}>
-                          <Icono nombre="editar" tam={15} />
-                          Renovar
-                        </button>
+                        <div className="pnl-chips">
+                          <button type="button" className="pnl-btn sutil" onClick={() => abrirRenovar(d)}>
+                            <Icono nombre="editar" tam={15} />
+                            Renovar
+                          </button>
+                          <button type="button" className="pnl-btn sutil" onClick={() => archivar(d)}>
+                            <Icono nombre="cerrar" tam={15} />
+                            Archivar
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -364,6 +388,122 @@ function ModalRenovar({ documento, alCerrar, alGuardar }) {
         <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>
           <Icono nombre="check" tam={16} />
           {guardando ? 'Guardando…' : 'Guardar vencimiento'}
+        </button>
+        <button type="button" className="pnl-btn sutil" onClick={cerrar} disabled={guardando}>
+          Cancelar
+        </button>
+      </div>
+    </Modal>
+  )
+}
+
+// ---------------- Registrar un documento ----------------
+// Mismo alta que en la app: ámbito (unidad o persona), tipo con código
+// estable, número, emisión y vencimiento. El PDF se sube aparte (todavía
+// sin ruta en el panel); aquí queda el registro que dispara los avisos.
+
+const TIPOS_SUGERIDOS = [
+  ['seguro_rcv', 'Seguro RCV'],
+  ['poliza_casco', 'Póliza de casco'],
+  ['certificado_gas', 'Certificado de gas'],
+  ['permiso_circulacion', 'Permiso de circulación'],
+  ['revision_tecnica', 'Revisión técnica'],
+  ['certificado_medico', 'Certificado médico'],
+  ['licencia_conducir', 'Licencia de conducir'],
+]
+const PATRON_TIPO = /^[a-z][a-z0-9_]{1,59}$/u
+
+function ModalNuevo({ abierto, alCerrar, alGuardar }) {
+  const [d, setD] = useState({ ambito: 'vehiculo', vehiculoId: '', personaId: '', tipo: '', numero: '', emitidoEn: '', venceEn: '', notas: '' })
+  const [error, setError] = useState({})
+  const [guardando, setGuardando] = useState(false)
+  const vehiculos = useDatos(() => repo.vehiculos.listar({}), [])
+  const gente = useDatos(() => repo.admin.usuarios.listar({}), [])
+  const set = (k) => (e) => setD((x) => ({ ...x, [k]: e.target.value }))
+
+  const cerrar = () => {
+    setError({})
+    alCerrar()
+  }
+
+  async function confirmar() {
+    const err = {}
+    const tipo = d.tipo.trim().toLowerCase().replace(/\s+/gu, '_')
+    if (d.ambito === 'vehiculo' && !d.vehiculoId) err.sujeto = 'Elige la unidad.'
+    if (d.ambito === 'persona' && !d.personaId) err.sujeto = 'Elige la persona.'
+    if (!PATRON_TIPO.test(tipo)) err.tipo = 'Un código corto en minúsculas, sin espacios: seguro_rcv, permiso_circulacion…'
+    if (!d.venceEn) err.venceEn = 'Di cuándo vence: es lo que dispara los avisos.'
+    if (d.emitidoEn && d.venceEn && d.emitidoEn > d.venceEn) err.venceEn = 'No puede vencer antes de emitirse.'
+    setError(err)
+    if (Object.keys(err).length > 0) return
+    setGuardando(true)
+    try {
+      await repo.documentos.crear({
+        ambito: d.ambito,
+        vehiculoId: d.ambito === 'vehiculo' ? d.vehiculoId : undefined,
+        personaId: d.ambito === 'persona' ? d.personaId : undefined,
+        tipo,
+        numero: d.numero.trim(),
+        emitidoEn: d.emitidoEn,
+        venceEn: d.venceEn,
+        notas: d.notas.trim(),
+      })
+      await alGuardar()
+      setD({ ambito: 'vehiculo', vehiculoId: '', personaId: '', tipo: '', numero: '', emitidoEn: '', venceEn: '', notas: '' })
+      cerrar()
+    } catch (e) {
+      setError({ general: e?.message || 'No pudimos registrar el documento.' })
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <Modal titulo="Registrar documento" abierto={abierto} alCerrar={cerrar} ancho={560}>
+      <Campo etiqueta="De quién es" error={error.sujeto}>
+        <div className="pnl-chips">
+          <select className="pnl-input" value={d.ambito} onChange={set('ambito')} aria-label="Ámbito">
+            <option value="vehiculo">De una unidad</option>
+            <option value="persona">De una persona</option>
+          </select>
+          {d.ambito === 'vehiculo' ? (
+            <select className="pnl-input" value={d.vehiculoId} onChange={set('vehiculoId')} aria-label="Unidad">
+              <option value="">Elige la unidad…</option>
+              {(vehiculos.datos ?? []).map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
+            </select>
+          ) : (
+            <select className="pnl-input" value={d.personaId} onChange={set('personaId')} aria-label="Persona">
+              <option value="">Elige la persona…</option>
+              {(gente.datos ?? []).map((p) => <option key={p.id} value={p.userId ?? p.id}>{p.nombre}</option>)}
+            </select>
+          )}
+        </div>
+      </Campo>
+      <Campo etiqueta="Tipo de documento" error={error.tipo} ayuda="Código estable del tipo dentro de tu empresa. Elige uno sugerido o escribe el tuyo.">
+        <input className="pnl-input" list="tipos-de-documento" value={d.tipo} onChange={set('tipo')} placeholder="seguro_rcv" />
+        <datalist id="tipos-de-documento">
+          {TIPOS_SUGERIDOS.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+        </datalist>
+      </Campo>
+      <Campo etiqueta="Número (opcional)">
+        <input className="pnl-input" value={d.numero} onChange={set('numero')} />
+      </Campo>
+      <div className="pnl-grid k2">
+        <Campo etiqueta="Emitido el (opcional)">
+          <input type="date" className="pnl-input" value={d.emitidoEn} onChange={set('emitidoEn')} />
+        </Campo>
+        <Campo etiqueta="Vence el" error={error.venceEn}>
+          <input type="date" className="pnl-input" value={d.venceEn} onChange={set('venceEn')} />
+        </Campo>
+      </div>
+      <Campo etiqueta="Notas (opcional)">
+        <input className="pnl-input" value={d.notas} onChange={set('notas')} />
+      </Campo>
+      {error.general && <p className="pnl-campo-error" role="alert">{error.general}</p>}
+      <div className="pnl-chips">
+        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>
+          <Icono nombre="check" tam={16} />
+          {guardando ? 'Guardando…' : 'Registrar'}
         </button>
         <button type="button" className="pnl-btn sutil" onClick={cerrar} disabled={guardando}>
           Cancelar

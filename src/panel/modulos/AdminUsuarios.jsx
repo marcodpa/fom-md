@@ -552,7 +552,11 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, directorioR
         { v: 'operator', t: 'Operador' },
         { v: 'usuario', t: 'Usuario' },
       ]
-    : [{ v: 'conductor', t: 'Conductor' }]
+    : [
+        { v: 'conductor', t: 'Conductor' },
+        { v: 'operator', t: 'Operador' },
+        { v: 'usuario', t: 'Usuario' },
+      ]
 
   return (
     <Modal titulo="Nuevo usuario" abierto={abierto} alCerrar={cerrar} ancho={520}>

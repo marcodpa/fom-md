@@ -11,7 +11,7 @@ import * as f from '../datos/formato'
 // ============================================================
 // INVENTARIO GPS (solo Administrador FOM)
 // El ciclo del equipo, igual que en la app: registrar → verificar por
-// ping → asociar a un ente → instalar en una unidad. Sin GPS verificado
+// ping → instalar en una unidad → desmontar. Sin GPS verificado
 // no se crea ningún vehículo.
 // ============================================================
 
@@ -19,9 +19,11 @@ function cargar(q) {
   return Promise.all([
     repo.admin.gps.listar({ q }),
     repo.admin.empresas.listar({}),
-  ]).then(([lista, empresas]) => ({
+    repo.vehiculos.listar({}),
+  ]).then(([lista, empresas, vehiculos]) => ({
     lista,
     empresas: empresas.filter((e) => !e.respaldo),
+    vehiculos,
   }))
 }
 
@@ -55,10 +57,13 @@ export default function AdminGps() {
     }
   }
 
-  const asociar = async (g, empresaId) => {
+  // Mismo paso que en la app de campo: el equipo del inventario se instala
+  // en UNA unidad (`POST gps-devices/:id/installation`).
+  const asociar = async (g, vehiculoId) => {
+    if (!vehiculoId) return
     marcarFila(g.id, { ocupado: true, error: '', mensaje: '' })
     try {
-      await repo.admin.gps.asociar(g.id, empresaId, actor)
+      await repo.admin.gps.asociar(g.id, vehiculoId)
       marcarFila(g.id, { ocupado: false })
       await recargar()
     } catch (e) {
@@ -81,7 +86,7 @@ export default function AdminGps() {
     <>
       <Cabecera
         titulo="Inventario GPS"
-        bajada="Registrar, verificar por ping, asociar e instalar: sin GPS verificado no hay unidad nueva."
+        bajada="Registrar el equipo, instalarlo en una unidad y ver cuáles reportan. Verificar por ping y probar el pánico se hacen en campo, desde la app."
       >
         <button type="button" className="pnl-btn primario" onClick={() => setRegistrando(true)}>
           <Icono nombre="mas" tam={16} />
@@ -148,7 +153,7 @@ function SinEmparejar() {
 }
 
 function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) {
-  const { lista, empresas } = datos
+  const { lista, vehiculos } = datos
   const sinVerificar = lista.filter((g) => !g.verificado).length
   const libres = lista.filter((g) => g.verificado && !g.vehiculoId).length
   const instalados = lista.filter((g) => g.vehiculoId).length
@@ -164,7 +169,7 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
 
       <Tarjeta
         titulo="Equipos"
-        accion={<Buscador valor={q} alCambiar={setQ} placeholder="Buscar por modelo, IMEI o ente…" />}
+        accion={<Buscador valor={q} alCambiar={setQ} placeholder="Buscar por modelo, IMEI, línea o unidad…" />}
         sinCuerpo
       >
         {lista.length === 0 ? (
@@ -179,7 +184,7 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
                   <th>Equipo</th>
                   <th>IMEI</th>
                   <th>Línea</th>
-                  <th>Ente</th>
+                  <th>Unidad</th>
                   <th>Estado</th>
                   <th aria-label="Acciones" />
                 </tr>
@@ -193,7 +198,7 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
                       <td><b>{g.modelo}</b></td>
                       <td><code>{g.imei}</code></td>
                       <td>{g.linea || '—'}</td>
-                      <td>{instalado ? `${g.empresaNombre}` : g.empresaNombre}</td>
+                      <td>{instalado ? g.vehiculoNombre : 'En inventario'}</td>
                       <td>
                         <div className="pnl-chips">
                           {g.verificado ? (
@@ -221,14 +226,14 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
                             )}
                             <select
                               className="pnl-input"
-                              value={g.empresaId || ''}
+                              value=""
                               disabled={fila.ocupado}
                               onChange={(e) => asociar(g, e.target.value)}
-                              aria-label={`Asociar ${g.modelo} a un ente`}
+                              aria-label={`Instalar ${g.modelo} en una unidad`}
                             >
-                              <option value="">Sin asociar</option>
-                              {empresas.map((e) => (
-                                <option key={e.id} value={e.id}>{e.nombre}</option>
+                              <option value="">Instalar en…</option>
+                              {vehiculos.map((v) => (
+                                <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>
                               ))}
                             </select>
                             {g.verificado && g.pinSupport && !g.panicoProbado && (
