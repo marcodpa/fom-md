@@ -172,6 +172,29 @@ test('lo que sí tiene servidor sale a la red, no se queda en un aviso', async (
   }
 })
 
+test('abrir una ODT manda una Idempotency-Key en formato UUID v4', async () => {
+  const repo = await repositorioConectado()
+  // Desde la publicación del 18 de septiembre de 2026 el servidor responde
+  // 400 «Idempotency-Key must be a UUID v4» a toda apertura sin la cabecera.
+  // Esta prueba se escribió después de que Marco no pudiera abrir órdenes.
+  const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u
+  const original = globalThis.fetch
+  try {
+    const claves = []
+    globalThis.fetch = async (_url, opciones) => {
+      claves.push(opciones?.headers?.['idempotency-key'])
+      throw new Error('corte deliberado')
+    }
+    await repo.odts.crear({ vehiculoId: 'v', descripcion: 'Se calienta al subir', tipo: 'correctiva' }).catch(() => {})
+    await repo.odts.crear({ vehiculoId: 'v', descripcion: 'Se calienta al subir', tipo: 'correctiva' }).catch(() => {})
+    assert.equal(claves.length, 2)
+    for (const c of claves) assert.match(String(c), UUID_V4, `clave inválida: ${c}`)
+    assert.notEqual(claves[0], claves[1], 'dos intentos distintos no pueden compartir clave')
+  } finally {
+    globalThis.fetch = original
+  }
+})
+
 test('todo motivo que viaja al servidor cumple su patrón', async () => {
   const repo = await repositorioConectado()
 

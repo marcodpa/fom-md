@@ -221,6 +221,11 @@ function metrosEntre(a, b) {
 
 const DERIVA_METROS = 20
 
+const MANTENIMIENTO_ES_PLAN =
+  'Las reglas de mantenimiento por kilometraje ya no existen como alerta: el ' +
+  'servidor las convirtió en planes de mantenimiento, con su propia pantalla ' +
+  'que el panel todavía no tiene. Las reglas de velocidad sí se pueden crear.'
+
 /** Reductor: conserva un punto solo si se alejó de verdad del último. */
 function sinDeriva(acum, p, i, todos) {
   const ultimo = acum[acum.length - 1]
@@ -616,22 +621,29 @@ export const repoApi = {
     },
   },
 
+  // Desde la publicación del 18 de septiembre de 2026 el servidor solo
+  // conoce reglas de «velocidad» y de «condicion» (una variable de telemetría
+  // contra un umbral). Las reglas de mantenimiento por kilometraje dejaron de
+  // ser reglas de alerta: ahora son PLANES de mantenimiento, con su propio
+  // módulo en el servidor que el panel todavía no tiene.
   reglasEscritura: {
-    async crear({ tipo, umbralKmh, umbralKm, servicio, activa = true }) {
+    async crear({ tipo, umbralKmh, activa = true }) {
+      if (tipo !== 'velocidad') {
+        throw new Error(MANTENIMIENTO_ES_PLAN)
+      }
       const r = await api.crearRegla({
-        ruleType: tipo === 'velocidad' ? 'velocidad' : 'mantenimiento',
-        thresholdKph: tipo === 'velocidad' ? Number(umbralKmh) : undefined,
-        thresholdKm: tipo === 'velocidad' ? undefined : Number(umbralKm),
-        serviceName: tipo === 'velocidad' ? undefined : servicio,
+        ruleType: 'velocidad',
+        thresholdKph: Number(umbralKmh),
         isActive: activa,
       })
       return { id: r?.alertRule?.id ?? null }
     },
     async set(reglaId, { umbralKmh, umbralKm, servicio, activa }) {
+      if (umbralKm !== undefined || servicio !== undefined) {
+        throw new Error(MANTENIMIENTO_ES_PLAN)
+      }
       await api.actualizarRegla(reglaId, {
         thresholdKph: umbralKmh === undefined ? undefined : Number(umbralKmh),
-        thresholdKm: umbralKm === undefined ? undefined : Number(umbralKm),
-        serviceName: servicio,
         isActive: activa,
       })
       return true
@@ -892,11 +904,13 @@ export const repoApi = {
    * Abrir una orden. El servidor decide el estado inicial y el histórico:
    * aquí solo viaja lo que el supervisor escribió.
    */
-    async crear({ vehiculoId, descripcion, tipoFalla, ubicacion, tipo }) {
+    async crear({ vehiculoId, descripcion, tipoFalla, ubicacion, tipo, prioridad }) {
       const r = await api.crearOdt({
         vehicleId: vehiculoId,
         description: descripcion,
         kind: tipo || 'correctiva',
+        // baja | media | alta. El servidor pone «media» si no viaja.
+        severity: prioridad || undefined,
         failureType: tipoFalla || undefined,
         location: ubicacion || undefined,
       })

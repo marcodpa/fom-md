@@ -52,7 +52,25 @@ function traducir(estado, cuerpo) {
  * Petición a la API. Devuelve el cuerpo ya interpretado, o lanza un Error con
  * el mensaje traducido.
  */
-export async function pedir(ruta, { metodo = 'GET', cuerpo, señal } = {}) {
+/**
+ * Clave de idempotencia: un UUID v4 nuevo por intento. Desde la publicación
+ * del 18 de septiembre de 2026, el servidor exige la cabecera
+ * `Idempotency-Key` en algunas escrituras (abrir una ODT, entre otras) y
+ * responde 400 «Idempotency-Key must be a UUID v4» si falta. Si la misma
+ * petición se repite con la misma clave, el servidor devuelve el recibo de la
+ * primera en vez de crear dos veces.
+ */
+function claveIdempotente() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID()
+  // Respaldo para entornos sin `crypto.randomUUID`: mismo formato v4, con los
+  // bits de versión y variante fijados.
+  const h = () => Math.floor(Math.random() * 16).toString(16)
+  const s = (n) => Array.from({ length: n }, h).join('')
+  const variante = '89ab'[Math.floor(Math.random() * 4)]
+  return `${s(8)}-${s(4)}-4${s(3)}-${variante}${s(3)}-${s(12)}`
+}
+
+export async function pedir(ruta, { metodo = 'GET', cuerpo, señal, idempotente = false } = {}) {
   if (!HAY_API) throw new Error('La API real no está configurada en este entorno.')
 
   let respuesta
@@ -64,6 +82,7 @@ export async function pedir(ruta, { metodo = 'GET', cuerpo, señal } = {}) {
         ? {
             'content-type': 'application/json',
             'x-fom-csrf': 'fom-browser-v1',
+            ...(idempotente ? { 'idempotency-key': claveIdempotente() } : {}),
           }
         : undefined,
       body: cuerpo ? JSON.stringify(cuerpo) : undefined,
@@ -149,10 +168,11 @@ export const api = {
    * `vehicleId` viaja en el cuerpo y no en la ruta porque el supervisor abre
    * la orden eligiendo la unidad en un desplegable, no navegando a ella.
    */
-  crearOdt: ({ vehicleId, description, kind, failureType, location }) =>
+  crearOdt: ({ vehicleId, description, kind, severity, failureType, location }) =>
     pedir(`${CONSOLA}/work-orders`, {
       metodo: 'POST',
-      cuerpo: { vehicleId, description, kind, failureType, location },
+      cuerpo: { vehicleId, description, kind, severity, failureType, location },
+      idempotente: true,
     }),
 
   // --- Escrituras del directorio (#219 de fom-core) ------------------------

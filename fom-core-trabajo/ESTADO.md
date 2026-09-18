@@ -734,3 +734,48 @@ y exigen sesión) donde antes daban 404.
 
 Eventos de alerta (y con ellos el índice de manejo seguro), costos, pagos,
 subida de archivos de documentos, y verificar/probar un GPS —que son de campo.
+
+---
+
+## 2026-09-18 — Producción cambió de versión y el panel se quedó atrás
+
+Entre el 9 y el 18 de septiembre Juan integró unos cincuenta PR en `fom-core`
+(paridad web, mantenimiento por planes, transferencias, pagos, almacenamiento
+de archivos, alertas por condición) y **publicó producción dos veces**:
+
+| Fecha | Commit desplegado | Recibo |
+|---|---|---|
+| 18 sep, 01:20 | `24ce256` | Issue #443 (`DEPLOYMENT_RESULT=PASS`, sin migraciones) |
+| 18 sep, 03:04 | `71121bf` | Issue #447 (solo lista blanca de Nginx) |
+
+### El administrador FOM
+
+- El PR #331 (migración que promueve a `marcodpacheco@gmail.com`) quedó
+  fusionado en `main` el 9 de septiembre, commit `fc29b1d`. **Está integrado
+  pero NO aplicado**: los despliegues del 18 fueron sin migraciones.
+- Juan cerró el Issue #330 el 16 de septiembre: el objetivo «que exista un
+  primer `admin_fom` en producción» lo cubrió el Issue #375, que promovió
+  **la cuenta de Juan** (`jguerracaldera@gmail.com`) de `operator` a
+  `admin_fom` con un gate nominal, respaldo del día y sesiones revocadas.
+- Marco sigue como supervisor (`fleet_manager`). Para que su cuenta sea
+  `admin_fom` hace falta un gate como el #375 pero con su identidad, o
+  aplicar la migración del #331 en un despliegue con migraciones.
+
+### Lo que rompió en el panel (y se corrigió el 18)
+
+1. **Abrir una ODT** devolvía 400 «Idempotency-Key must be a UUID v4»: el
+   servidor exige ahora esa cabecera en `POST /work-orders`. El panel manda
+   un UUID v4 nuevo por intento (`pedir(..., { idempotente: true })`).
+2. **Reglas de mantenimiento** (`ruleType: 'mantenimiento'`, `thresholdKm`,
+   `serviceName`) ya no existen: los tipos son `velocidad` y `condicion`, y
+   el mantenimiento por kilometraje pasó a **planes** (`/maintenance/plans`).
+   El panel crea reglas de velocidad y explica el cambio en las de
+   mantenimiento en vez de fallar en genérico.
+3. La ODT acepta `severity` (baja | media | alta; «media» por defecto).
+
+### Pendiente para el panel
+
+Planes de mantenimiento, alertas por condición, evidencias de mantenimiento
+(subida de archivos), transferencias de vehículos e identidades, pagos de
+servicio, archivo de vehículos: todo eso ya existe en el servidor y el panel
+no lo muestra todavía.
