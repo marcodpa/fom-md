@@ -68,7 +68,7 @@ export default function ExpedienteConductor() {
   )
 
   const bajada = p
-    ? `${etiqueta('rol', p.rol)} · ${p.unidad ? `${p.unidad.alias} · ${p.unidad.placa}` : 'Sin unidad'}`
+    ? [etiqueta('rol', p.rol), p.unidad ? [p.unidad.alias, p.unidad.placa].filter(Boolean).join(' · ') : 'Sin unidad'].join(' · ')
     : 'Expediente de la persona'
 
   return (
@@ -260,7 +260,7 @@ function UnidadAsignada({ persona: p, unidades, cargandoFlota, guardado, alAsign
             <i className="pnl-punto on" />
             <div className="pnl-fila-txt">
               <b>{p.unidad.alias}</b>
-              <span>{p.unidad.placa}</span>
+              <span>{p.unidad.placa || 'Sin placa'}</span>
             </div>
             <Link to={`/panel/flota/${p.unidad.id}`} className="pnl-link">
               Ver la unidad

@@ -530,7 +530,7 @@ export const repoApi = {
         // El expediente espera la unidad como objeto y las colecciones como
         // listas. Lo que el servidor no sirve por persona queda vacío, no
         // inventado: eventos de manejo y licencia todavía no viajan aquí.
-        unidad: p.unidad ? { id: p.unidad, alias: p.unidadNombre ?? p.unidad, placa: p.placaUnidad ?? '' } : null,
+        unidad: p.unidad ? { id: p.unidad, alias: p.unidadAlias ?? p.unidadNombre ?? p.unidad, placa: p.unidadPlaca ?? '' } : null,
         eventos: [],
         inspecciones: insp.filter((i) => String(i.conductorNombre ?? '').trim().toLowerCase() === nombre),
         odts: odts.filter((o) => String(o.creadorNombre ?? '').trim().toLowerCase() === nombre),
@@ -579,6 +579,9 @@ export const repoApi = {
 
         unidad: p.vehicleId ?? null,
         unidadNombre: [p.vehicleCode, p.vehiclePlate].filter(Boolean).join(' · ') || null,
+        // Sueltos además de juntos: el expediente los pinta en dos líneas.
+        unidadAlias: p.vehicleCode ?? null,
+        unidadPlaca: p.vehiclePlate ?? null,
         rolEnUnidad: p.assignmentRole ?? null,
         conduce: Boolean(p.vehicleId) || p.role === 'conductor',
 
