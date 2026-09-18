@@ -45,8 +45,15 @@ export const ETIQUETA = {
   odt_estado: {
     abierta: 'Abierta',
     en_revision: 'En revisión',
+    aprobada: 'Aprobada',
+    asignada: 'Asignada',
+    en_ejecucion: 'En ejecución',
+    pausada: 'Pausada',
+    en_calidad: 'En calidad',
     cerrada: 'Cerrada',
+    cancelada: 'Cancelada',
   },
+  odt_prioridad: { baja: 'Baja', media: 'Media', alta: 'Alta' },
   odt_tipo: {
     correctiva: 'Correctiva',
     preventiva: 'Preventiva',
@@ -103,7 +110,18 @@ export const ETIQUETA = {
 export const COLOR = {
   marcha_estado: { en_marcha: 'verde', parada: 'gris' },
   conexion: { reportando: 'verde', sin_senal: 'gris' },
-  odt_estado: { abierta: 'ambar', en_revision: 'azul', cerrada: 'verde' },
+  odt_estado: {
+    abierta: 'ambar',
+    en_revision: 'azul',
+    aprobada: 'azul',
+    asignada: 'azul',
+    en_ejecucion: 'azul',
+    pausada: 'ambar',
+    en_calidad: 'azul',
+    cerrada: 'verde',
+    cancelada: 'gris',
+  },
+  odt_prioridad: { baja: 'gris', media: 'azul', alta: 'rojo' },
   inspeccion_resultado: {
     pendiente: 'gris',
     aprobada: 'verde',

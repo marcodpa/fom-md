@@ -30,7 +30,73 @@ import { Icono } from '../Iconos'
 // expediente de cada orden y las reglas que crean las preventivas solas.
 // ============================================================
 
-const COLUMNAS = ['abierta', 'en_revision', 'cerrada']
+// El tablero agrupa los nueve estados del servidor en cuatro columnas que
+// se leen de un vistazo; el detalle de cada orden enseña el estado exacto.
+const GRUPOS = [
+  { clave: 'abierta', titulo: 'Abiertas', color: 'ambar', estados: ['abierta'], vacio: 'Nadie ha reportado fallas nuevas.' },
+  { clave: 'revision', titulo: 'En revisión', color: 'azul', estados: ['en_revision', 'aprobada'], vacio: 'Ninguna orden esperando aprobación.' },
+  { clave: 'taller', titulo: 'En taller', color: 'azul', estados: ['asignada', 'en_ejecucion', 'pausada', 'en_calidad'], vacio: 'Ninguna unidad está en taller ahora mismo.' },
+  { clave: 'cerrada', titulo: 'Cerradas', color: 'verde', estados: ['cerrada', 'cancelada'], vacio: 'Todavía no se ha cerrado ninguna orden.' },
+]
+const EN_CURSO = ['en_revision', 'aprobada', 'asignada', 'en_ejecucion', 'pausada', 'en_calidad']
+
+// Los pasos posibles desde cada estado. Es la tabla de transiciones del
+// servidor más los dos caminos aparte que usa la app: asignar responsable
+// (aprobada → asignada) y los eventos de ejecución (inicio, pausa,
+// reanudación, entrega).
+const PASOS_ODT = {
+  abierta: [
+    { a: 'en_revision', t: 'Pasar a revisión' },
+    { a: 'cerrada', t: 'Cerrar' },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+  ],
+  en_revision: [
+    { a: 'aprobada', t: 'Aprobar' },
+    { a: 'abierta', t: 'Devolver a abierta', sutil: true },
+    { a: 'cerrada', t: 'Cerrar' },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+  ],
+  aprobada: [
+    { a: 'asignar', t: 'Asignar responsable' },
+    { a: 'en_revision', t: 'Volver a revisión', sutil: true },
+    { a: 'cerrada', t: 'Cerrar' },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+  ],
+  asignada: [
+    { a: 'inicio', t: 'Iniciar trabajo', ejecucion: true },
+    { a: 'asignar', t: 'Reasignar', sutil: true },
+    { a: 'en_revision', t: 'Volver a revisión', sutil: true },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+  ],
+  en_ejecucion: [
+    { a: 'entrega', t: 'Entregar a calidad', ejecucion: true },
+    { a: 'pausa', t: 'Pausar', ejecucion: true, sutil: true },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+  ],
+  pausada: [
+    { a: 'reanudacion', t: 'Reanudar', ejecucion: true },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+  ],
+  en_calidad: [
+    { a: 'cerrada', t: 'Cerrar' },
+    { a: 'en_ejecucion', t: 'Devolver a ejecución', sutil: true },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+  ],
+  cerrada: [{ a: 'en_revision', t: 'Reabrir' }],
+  cancelada: [],
+}
+const EVENTO_ODT = { inicio: 'inició', pausa: 'pausó', reanudacion: 'reanudó', entrega: 'entregó a calidad' }
+const AYUDA_ODT = {
+  abierta: 'Alguien reportó la falla. Pásala a revisión para evaluarla, o ciérrala si ya se atendió.',
+  en_revision: 'Se está evaluando. Apruébala para que pase a taller.',
+  aprobada: 'Aprobada. Asigna quién la ejecuta: lo verá en su app.',
+  asignada: 'Tiene responsable. El trabajo empieza cuando el responsable lo inicia desde su app.',
+  en_ejecucion: 'En taller. Cuando termine, se entrega a calidad.',
+  pausada: 'El trabajo está detenido. Reanúdalo cuando siga.',
+  en_calidad: 'Terminó el trabajo: revisa y cierra con lo que se hizo y el costo.',
+  cerrada: 'Si la falla volvió, reábrela: pasa a revisión y el cierre queda en el historial.',
+  cancelada: 'Cancelada: no admite más cambios.',
+}
 
 const TIPOS_FALLA = ['motor', 'frenos', 'neumaticos', 'electrico', 'carroceria', 'otro']
 
@@ -150,6 +216,7 @@ export default function Mantenimiento() {
           <Detalle
             key={detalle.id}
             odt={detalle}
+            perfil={sesion?.perfil ?? null}
             recargar={recargar}
             alCerrar={() => setDetalleId(null)}
           />
@@ -179,7 +246,7 @@ export default function Mantenimiento() {
 
 function Indicadores({ odts }) {
   const abiertas = odts.filter((o) => o.estado === 'abierta')
-  const enRevision = odts.filter((o) => o.estado === 'en_revision')
+  const enRevision = odts.filter((o) => EN_CURSO.includes(o.estado))
   const cerradas = odts.filter((o) => o.estado === 'cerrada')
 
   const hoy = new Date()
@@ -201,10 +268,10 @@ function Indicadores({ odts }) {
         nota={abiertas.length > 0 ? 'Esperando que alguien las tome' : 'Nada pendiente por atender'}
       />
       <Kpi
-        titulo="En revisión"
+        titulo="En curso"
         valor={f.numero(enRevision.length)}
         icono="reloj"
-        nota={enRevision.length > 0 ? 'Ya están en taller' : 'Ninguna en taller'}
+        nota={enRevision.length > 0 ? 'En revisión, aprobadas o en taller' : 'Ninguna en revisión ni en taller'}
       />
       <Kpi
         titulo="Cerradas este mes"
@@ -242,19 +309,19 @@ function FiltroTipo({ odts, valor, alCambiar }) {
 function Tablero({ odts, alAbrir }) {
   return (
     <div className="pnl-kanban">
-      {COLUMNAS.map((col) => {
-        const dela = odts.filter((o) => o.estado === col)
+      {GRUPOS.map((col) => {
+        const dela = odts.filter((o) => col.estados.includes(o.estado))
         return (
-          <div className="pnl-kanban-col" key={col}>
+          <div className="pnl-kanban-col" key={col.clave}>
             <div className="pnl-kanban-cab">
-              <Tag color={color('odt_estado', col)}>{etiqueta('odt_estado', col)}</Tag>
+              <Tag color={col.color}>{col.titulo}</Tag>
               <em>{f.numero(dela.length)}</em>
             </div>
             <div className="pnl-kanban-lista">
               {dela.length === 0 ? (
                 <div className="pnl-vacio">
                   <b>Sin órdenes aquí</b>
-                  <span>{textoColumnaVacia(col)}</span>
+                  <span>{col.vacio}</span>
                 </div>
               ) : (
                 dela.map((o) => <TarjetaOdt key={o.id} odt={o} alAbrir={alAbrir} />)
@@ -267,11 +334,6 @@ function Tablero({ odts, alAbrir }) {
   )
 }
 
-function textoColumnaVacia(col) {
-  if (col === 'abierta') return 'Nadie ha reportado fallas nuevas.'
-  if (col === 'en_revision') return 'Ninguna unidad está en taller ahora mismo.'
-  return 'Todavía no se ha cerrado ninguna orden.'
-}
 
 function TarjetaOdt({ odt, alAbrir }) {
   return (
@@ -280,6 +342,7 @@ function TarjetaOdt({ odt, alAbrir }) {
       <span>{odt.vehiculoNombre}</span>
       <div className="pnl-kanban-cab">
         <Tag color={colorTipo(odt.tipo)}>{etiqueta('odt_tipo', odt.tipo)}</Tag>
+        {odt.estado !== 'abierta' && <Tag color={color('odt_estado', odt.estado)} plano>{etiqueta('odt_estado', odt.estado)}</Tag>}
         {odt.estado === 'cerrada' && odt.costo != null && <Tag color="gris">{f.moneda(odt.costo)}</Tag>}
       </div>
       <em>
@@ -361,15 +424,39 @@ function Lista({ odts, alAbrir }) {
 
 // ---------------- Detalle de una ODT ----------------
 
-function Detalle({ odt, recargar, alCerrar }) {
-  const [cerrando, setCerrando] = useState(false)
-  const [nota, setNota] = useState(odt.notaSolucion ?? '')
+function Detalle({ odt, perfil, recargar, alCerrar }) {
+  // ------------------------------------------------------------
+  // El ciclo de la orden es el MISMO que el de la app y el del servidor:
+  //   abierta → en revisión → aprobada → asignada → en ejecución ⇄ pausada
+  //   → en calidad → cerrada; cancelada en cualquier punto; cerrada se
+  //   reabre a revisión.
+  // Cada paso viaja con el estado que se vio (para no pisar a nadie) y una
+  // nota que queda en el historial. Asignar responsable y ejecutar (iniciar,
+  // pausar, reanudar, entregar) son rutas distintas del cambio de estado, tal
+  // como las usa la app en el taller.
+  // ------------------------------------------------------------
+  const [pendiente, setPendiente] = useState(null) // { a, t, ... }
+  const [nota, setNota] = useState('')
+  const [notaSolucion, setNotaSolucion] = useState(odt.notaSolucion ?? '')
   const [costo, setCosto] = useState(odt.costo != null ? String(odt.costo) : '')
+  const [responsableId, setResponsableId] = useState('')
   const [errores, setErrores] = useState({})
   const [guardando, setGuardando] = useState(false)
   const [fallo, setFallo] = useState('')
-
-  const seleccion = cerrando ? 'cerrada' : odt.estado
+  const gente = useDatos(() => repo.admin.usuarios.listar({}), [])
+  // Responsable y eventos de taller: solo cuando la orden ya está en taller.
+  const enTaller = ['asignada', 'en_ejecucion', 'pausada', 'en_calidad'].includes(odt.estado)
+  const ejecucion = useDatos(
+    () => (enTaller ? repo.odts.ejecucion(odt.id) : Promise.resolve(null)),
+    [odt.id, odt.estado],
+  )
+  const responsable = ejecucion.datos?.responsable ?? null
+  // La sesión trae correo y nombre, no identificador: se resuelve contra la
+  // lista de gente. Iniciar, pausar, reanudar y entregar los hace SOLO el
+  // responsable (el servidor responde «no existe» a cualquier otro), igual
+  // que en la app: el gestor asigna, revisa y cierra.
+  const yo = (gente.datos ?? []).find((p) => p.email && perfil?.correo && p.email.toLowerCase() === perfil.correo.toLowerCase())
+  const soyResponsable = Boolean(responsable && yo && (yo.userId ?? yo.id) === responsable.id)
 
   const items = [
     {
@@ -383,6 +470,7 @@ function Detalle({ odt, recargar, alCerrar }) {
       ),
     },
     { etiqueta: 'Tipo de orden', valor: etiqueta('odt_tipo', odt.tipo) },
+    { etiqueta: 'Prioridad', valor: etiqueta('odt_prioridad', odt.prioridad) },
     {
       etiqueta: 'Tipo de falla',
       valor: odt.tipoFalla ? etiqueta('tipo_falla', odt.tipoFalla) : 'No especificado',
@@ -391,6 +479,7 @@ function Detalle({ odt, recargar, alCerrar }) {
     { etiqueta: 'Creada', valor: f.fechaHora(odt.creadaEn) },
     { etiqueta: 'Ubicación', valor: odt.ubicacion || 'Sin ubicación' },
   ]
+  if (responsable) items.push({ etiqueta: 'Responsable', valor: `${responsable.nombre} · desde ${f.fechaHora(responsable.desde)}` })
 
   if (odt.estado === 'cerrada' && odt.resueltaEn) {
     const minutos = (new Date(odt.resueltaEn) - new Date(odt.creadaEn)) / 60000
@@ -398,54 +487,54 @@ function Detalle({ odt, recargar, alCerrar }) {
     items.push({ etiqueta: 'Tiempo de resolución', valor: f.duracion(minutos) })
   }
 
-  function aplicar(nuevo) {
-    setGuardando(true)
-    setFallo('')
-    repo.odts
-      .cambiarEstado(odt.id, nuevo)
-      .then(() => {
-        setCerrando(false)
-        setErrores({})
-        return recargar()
-      })
-      .catch(() => setFallo('No pudimos guardar el cambio de estado. Inténtalo otra vez.'))
-      .then(() => setGuardando(false))
-  }
+  const pasos = (PASOS_ODT[odt.estado] ?? []).filter((p) => !p.ejecucion || soyResponsable)
+  const pasosDelResponsable = (PASOS_ODT[odt.estado] ?? []).filter((p) => p.ejecucion)
 
-  function elegir(nuevo) {
+  function elegir(paso) {
     if (guardando) return
     setFallo('')
-    if (nuevo === 'cerrada') {
-      if (odt.estado === 'cerrada') setCerrando(false)
-      else setCerrando(true)
-      return
-    }
-    setCerrando(false)
-    if (nuevo === odt.estado) return
-    aplicar(nuevo)
+    setErrores({})
+    setPendiente(pendiente?.a === paso.a ? null : paso)
   }
 
-  function guardarCierre() {
+  async function confirmar() {
     const err = {}
-    if (!nota.trim()) err.nota = 'Cuenta qué se hizo para resolver la falla.'
-    const crudo = costo.trim()
-    const monto = crudo === '' ? null : Number(crudo)
-    if (monto !== null && (!Number.isFinite(monto) || monto < 0)) {
-      err.costo = 'El costo no puede ser negativo.'
+    if (nota.trim().length < 3) err.nota = 'Escribe una nota de al menos 3 letras: queda en el historial.'
+    if (pendiente.a === 'asignar' && !responsableId) err.responsable = 'Elige quién se hace cargo.'
+    let monto = null
+    if (pendiente.a === 'cerrada') {
+      if (!notaSolucion.trim()) err.notaSolucion = 'Cuenta qué se hizo para resolver la falla.'
+      const crudo = costo.trim()
+      monto = crudo === '' ? null : Number(crudo)
+      if (monto !== null && (!Number.isFinite(monto) || monto < 0)) err.costo = 'El costo no puede ser negativo.'
     }
     setErrores(err)
     if (Object.keys(err).length > 0) return
 
     setGuardando(true)
     setFallo('')
-    repo.odts
-      .cambiarEstado(odt.id, 'cerrada', { notaSolucion: nota.trim(), costo: monto })
-      .then(() => {
-        setCerrando(false)
-        return recargar()
-      })
-      .catch(() => setFallo('No pudimos guardar el cierre. Inténtalo otra vez.'))
-      .then(() => setGuardando(false))
+    try {
+      if (pendiente.a === 'asignar') {
+        await repo.odts.asignarResponsable(odt.id, { usuarioId: responsableId, nota: nota.trim() })
+      } else if (pendiente.ejecucion) {
+        await repo.odts.ejecutar(odt, pendiente.a, nota.trim())
+      } else {
+        await repo.odts.cambiarEstado(odt.id, pendiente.a, {
+          estadoActual: odt.estado,
+          nota: nota.trim(),
+          notaSolucion: pendiente.a === 'cerrada' ? notaSolucion.trim() : undefined,
+          costo: pendiente.a === 'cerrada' ? monto : undefined,
+          moneda: pendiente.a === 'cerrada' && monto != null ? 'USD' : undefined,
+        })
+      }
+      setPendiente(null)
+      setNota('')
+      await recargar()
+    } catch (e) {
+      setFallo(e?.message || 'No pudimos guardar el cambio. Inténtalo otra vez.')
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -453,6 +542,7 @@ function Detalle({ odt, recargar, alCerrar }) {
       <div className="pnl-kanban-cab">
         <Tag color={color('odt_estado', odt.estado)}>{etiqueta('odt_estado', odt.estado)}</Tag>
         <Tag color={colorTipo(odt.tipo)}>{etiqueta('odt_tipo', odt.tipo)}</Tag>
+        {odt.prioridad && <Tag color={color('odt_prioridad', odt.prioridad)} plano>{etiqueta('odt_prioridad', odt.prioridad)}</Tag>}
         <em>{f.desde(odt.creadaEn)}</em>
       </div>
 
@@ -477,78 +567,92 @@ function Detalle({ odt, recargar, alCerrar }) {
       )}
 
       <div className="pnl-fila-txt">
-        <b>Estado de la orden</b>
-        <span>
-          {odt.estado === 'cerrada'
-            ? 'Si la falla volvió, reábrela y el cierre se borra.'
-            : 'Mueve la orden según vaya avanzando el trabajo.'}
-        </span>
+        <b>Qué sigue</b>
+        <span>{AYUDA_ODT[odt.estado] ?? 'Mueve la orden según vaya avanzando el trabajo.'}</span>
       </div>
 
-      <div className="pnl-tabs" role="group">
-        {COLUMNAS.map((e) => (
-          <button
-            key={e}
-            type="button"
-            className={`pnl-tab${seleccion === e ? ' activo' : ''}`}
-            onClick={() => elegir(e)}
-            disabled={guardando}
-            aria-pressed={seleccion === e}
-          >
-            {etiqueta('odt_estado', e)}
-          </button>
-        ))}
-      </div>
+      {enTaller && pasosDelResponsable.length > 0 && !soyResponsable && (
+        <div className="pnl-fila">
+          <Icono nombre="llamar" tam={16} />
+          <div className="pnl-fila-txt">
+            <b>{pasosDelResponsable.map((p) => p.t).join(', ')}: lo hace {responsable ? responsable.nombre : 'el responsable'} desde su app.</b>
+            <span>Como en el taller: quien tiene la orden asignada la inicia, la pausa y la entrega. Tú puedes reasignarla, devolverla a revisión o cancelarla.</span>
+          </div>
+        </div>
+      )}
 
-      {cerrando && (
-        <>
-          <Campo etiqueta="Qué se hizo" error={errores.nota} ayuda="Queda como historial de la unidad.">
-            <textarea
-              className="pnl-textarea"
-              rows={3}
-              value={nota}
-              onChange={(e) => setNota(e.target.value)}
-              placeholder="Se cambiaron las pastillas delanteras y se purgó el sistema."
-            />
-          </Campo>
+      {ejecucion.datos?.eventos?.length > 0 && (
+        <div className="pnl-fila-txt">
+          <b>Taller</b>
+          <span>
+            {ejecucion.datos.eventos.map((e) => `${f.hora(e.en)} ${e.actor}: ${EVENTO_ODT[e.tipo] ?? e.tipo}${e.nota ? ` · ${e.nota}` : ''}`).join(' → ')}
+          </span>
+        </div>
+      )}
 
-          <Campo etiqueta="Costo" error={errores.costo} ayuda="Opcional. Déjalo vacío si aún no lo tienes.">
-            <input
-              type="number"
-              className="pnl-input"
-              min="0"
-              step="1"
-              value={costo}
-              onChange={(e) => setCosto(e.target.value)}
-              placeholder="0"
-            />
-          </Campo>
-
-          <div className="pnl-kanban-cab">
+      {pasos.length === 0 ? (
+        <span className="pnl-fila-txt">Esta orden está cancelada: no admite más cambios.</span>
+      ) : (
+        <div className="pnl-kanban-cab" role="group" aria-label="Acciones sobre la orden">
+          {pasos.map((p) => (
             <button
+              key={p.a}
               type="button"
-              className="pnl-btn primario"
-              onClick={guardarCierre}
+              className={`pnl-btn${pendiente?.a === p.a ? ' primario' : p.sutil ? ' sutil' : ''}`}
+              onClick={() => elegir(p)}
               disabled={guardando}
+              aria-pressed={pendiente?.a === p.a}
             >
-              {guardando ? 'Guardando…' : 'Guardar cierre'}
+              {p.t}
             </button>
-            <button
-              type="button"
-              className="pnl-btn sutil"
-              onClick={() => {
-                setCerrando(false)
-                setErrores({})
-              }}
-              disabled={guardando}
-            >
-              Cancelar
+          ))}
+        </div>
+      )}
+
+      {pendiente && (
+        <>
+          {pendiente.a === 'asignar' && (
+            <Campo etiqueta="Responsable" error={errores.responsable} ayuda="Quien va a ejecutar el trabajo. Lo verá en su app.">
+              <select className="pnl-input" value={responsableId} onChange={(e) => setResponsableId(e.target.value)}>
+                <option value="">Elige…</option>
+                {(gente.datos ?? [])
+                  .filter((p) => p.estado === 'active' || p.estado === 'activo' || !p.estado)
+                  .map((p) => (
+                    <option key={p.id} value={p.userId ?? p.id}>{p.nombre}{p.rolEtiqueta ? ` · ${p.rolEtiqueta}` : ''}</option>
+                  ))}
+              </select>
+            </Campo>
+          )}
+          {pendiente.a === 'cerrada' && (
+            <>
+              <Campo etiqueta="Qué se hizo" error={errores.notaSolucion} ayuda="Queda como historial de la unidad.">
+                <textarea
+                  className="pnl-textarea"
+                  rows={3}
+                  value={notaSolucion}
+                  onChange={(e) => setNotaSolucion(e.target.value)}
+                  placeholder="Se cambiaron las pastillas delanteras y se purgó el sistema."
+                />
+              </Campo>
+              <Campo etiqueta="Costo (USD)" error={errores.costo} ayuda="Opcional. Déjalo vacío si aún no lo tienes.">
+                <input type="number" className="pnl-input" min="0" step="0.01" value={costo} onChange={(e) => setCosto(e.target.value)} placeholder="0" />
+              </Campo>
+            </>
+          )}
+          <Campo etiqueta={pendiente.a === 'cerrada' ? 'Nota del cierre' : 'Nota'} error={errores.nota} ayuda="Por qué se da este paso. Queda en el historial de la orden.">
+            <textarea className="pnl-textarea" rows={2} value={nota} onChange={(e) => setNota(e.target.value)} />
+          </Campo>
+          <div className="pnl-kanban-cab">
+            <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>
+              {guardando ? 'Guardando…' : pendiente.t}
+            </button>
+            <button type="button" className="pnl-btn sutil" onClick={() => { setPendiente(null); setErrores({}) }} disabled={guardando}>
+              Volver
             </button>
           </div>
         </>
       )}
 
-      {guardando && !cerrando && <span className="pnl-fila-txt">Guardando…</span>}
       {fallo && (
         <div className="pnl-fila critica">
           <Icono nombre="alerta" tam={16} />

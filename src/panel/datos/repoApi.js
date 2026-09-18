@@ -901,15 +901,73 @@ export const repoApi = {
   },
 
   odts: {
+    /**
+     * Cambio de estado con el estado que se vio (`expectedStatus`) y una nota
+     * que queda en el historial. Es la misma ruta que usa la app.
+     */
+    async cambiarEstado(id, nuevo, { estadoActual, nota, notaSolucion, costo, moneda, odometro } = {}) {
+      const r = await api.moverOdt(id, {
+        expectedStatus: estadoActual,
+        status: nuevo,
+        note: nota,
+        resolutionNote: notaSolucion || undefined,
+        resolutionCost: costo === undefined || costo === null || costo === '' ? undefined : Number(costo),
+        resolutionCurrency: costo === undefined || costo === null || costo === '' ? undefined : moneda || 'USD',
+        completionOdometerKm: odometro === undefined || odometro === null || odometro === '' ? undefined : Number(odometro),
+      })
+      return { estado: r?.workOrder?.status ?? null }
+    },
+    /**
+     * Quién es el responsable vigente y qué pasó en el taller. Solo el
+     * responsable puede iniciar, pausar, reanudar o entregar (así lo exige
+     * el servidor, igual que la app); el gestor lo ve.
+     */
+    async ejecucion(id) {
+      const r = await api.ejecucionOdt(id)
+      const vigente = (r?.assignments ?? []).find((a) => !a.endedAt) ?? null
+      return {
+        estado: r?.workOrder?.status ?? null,
+        responsable: vigente ? { id: vigente.userId, nombre: vigente.displayName, desde: vigente.assignedAt } : null,
+        eventos: (r?.events ?? []).map((e) => ({
+          id: e.id,
+          tipo: e.eventKind,
+          de: e.fromStatus,
+          a: e.toStatus,
+          nota: e.note ?? '',
+          actor: e.actorName ?? '—',
+          en: e.occurredAt,
+        })),
+        totales: r?.totals ?? null,
+      }
+    },
+    /** Aprobada → asignada (o reasignar): quién ejecuta el trabajo. */
+    async asignarResponsable(id, { usuarioId, nota }) {
+      const r = await api.asignarResponsableOdt(id, { userId: usuarioId, note: nota || undefined })
+      return { estado: r?.workOrder?.status ?? null }
+    },
+    /** Evento de ejecución desde el taller: inicio, pausa, reanudación, entrega. */
+    async ejecutar(odt, accion, nota) {
+      const r = await api.ejecutarOdt(odt.id, {
+        clientEventId: uuid(),
+        action: accion,
+        expectedStatus: odt.estado,
+        note: nota || undefined,
+      })
+      return { estado: r?.workOrder?.status ?? null }
+    },
     async listar({ estado = '', q = '' } = {}) {
       try {
         const r = await api.odts({ estado })
         let lista = (r?.items ?? []).map((o) => ({
           id: o.id,
           estado: o.status,
+          prioridad: o.severity ?? null,
+          responsableId: o.assigneeUserId ?? null,
+          responsable: o.assigneeDisplayName ?? o.assigneeName ?? null,
           tipo: o.kind,
           descripcion: o.description,
           falla: o.failureType,
+          tipoFalla: o.failureType,
           ubicacion: o.location,
           notaResolucion: o.resolutionNote,
           costo: o.resolutionCost,

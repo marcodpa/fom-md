@@ -447,6 +447,14 @@ Object.assign(api, {
   personasDePlataforma: ({ q, limit = 50, offset = 0 } = {}) =>
     pedir(`${CONSOLA}/platform/users${consulta({ q, limit, offset })}`),
   gpsSinEmparejar: () => pedir(`${CONSOLA}/gps-devices/unpaired`),
+  /** Quién ejecuta la orden (aprobada → asignada, o reasignar). */
+  asignarResponsableOdt: (id, cuerpo) =>
+    pedir(`${CONSOLA}/work-orders/${id}/assignee`, { metodo: 'PUT', cuerpo }),
+  /** Responsable vigente, eventos de taller y tiempos de la orden. */
+  ejecucionOdt: (id) => pedir(`${CONSOLA}/work-orders/${id}/execution`),
+  /** inicio | pausa | reanudacion | entrega, como desde el taller en la app. */
+  ejecutarOdt: (id, cuerpo) =>
+    pedir(`${CONSOLA}/work-orders/${id}/execution-events`, { metodo: 'POST', cuerpo }),
   equiposGps: () => pedir(`${CONSOLA}/gps-devices`),
 
   // --- Programa de inspecciones: plantillas, citas y hallazgos -------------

@@ -228,6 +228,13 @@ const repo = HAY_API
         obtener: repoApi.odts.obtener,
         crear: repoApi.odts.crear,
         mover: repoApi.odts.mover,
+        // El ciclo completo, como en la app: estado con nota, responsable y
+        // eventos de ejecución. Antes «cambiarEstado» caía en el rechazo
+        // genérico y ningún botón de la orden funcionaba.
+        cambiarEstado: repoApi.odts.cambiarEstado,
+        asignarResponsable: repoApi.odts.asignarResponsable,
+        ejecucion: repoApi.odts.ejecucion,
+        ejecutar: repoApi.odts.ejecutar,
       },
       inspecciones: conRespaldoParcial(
         repoSemilla.inspecciones,
