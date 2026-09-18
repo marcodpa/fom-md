@@ -231,7 +231,13 @@ const repo = HAY_API
       },
       inspecciones: conRespaldoParcial(
         repoSemilla.inspecciones,
-        { listar: repoApi.inspecciones.listar },
+        {
+          listar: repoApi.inspecciones.listar,
+          pendientesHoy: repoApi.inspecciones.pendientesHoy,
+          // Catálogo de puntos del checklist: es síncrono y no toca el
+          // servidor, así que se conserva tal cual.
+          itemsPlantilla: repoSemilla.inspecciones.itemsPlantilla,
+        },
         { crear: FALTA_INSPECCIONES, registrar: FALTA_INSPECCIONES },
       ),
       documentos: conRespaldoParcial(

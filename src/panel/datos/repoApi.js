@@ -12,6 +12,7 @@
 // ============================================================
 
 import { api } from './api'
+import { hoyISO } from './formato'
 
 /**
  * Une el vehículo con su estado en vivo en la forma que consumen los módulos.
@@ -996,6 +997,20 @@ export const repoApi = {
   },
 
   inspecciones: {
+    /**
+     * Unidades sin inspección de hoy: la flota menos las que ya tienen una
+     * inspección con fecha de hoy. Es una LECTURA; antes caía en el rechazo
+     * genérico de escritura y tumbaba la pantalla entera de Inspecciones.
+     */
+    async pendientesHoy() {
+      const hoy = hoyISO()
+      const [flota, hechas] = await Promise.all([
+        repoApi.vehiculos.listar(),
+        repoApi.inspecciones.listar({}),
+      ])
+      const revisadas = new Set(hechas.filter((i) => String(i.fecha ?? '').slice(0, 10) === hoy).map((i) => i.vehiculoId))
+      return flota.filter((v) => !revisadas.has(v.id))
+    },
     async listar({ vehiculoId = '' } = {}) {
       try {
         const r = await api.inspecciones({ vehiculoId })
