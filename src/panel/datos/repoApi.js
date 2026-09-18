@@ -657,6 +657,35 @@ export const repoApi = {
   },
 
   gpsEscritura: {
+    /**
+     * Inventario real desde `GET /gps-devices`. Antes «listar» caía en la
+     * semilla vacía y el inventario salía en cero aunque hubiera equipos
+     * instalados y reportando.
+     */
+    async listar({ q = '' } = {}) {
+      const r = await api.equiposGps()
+      const t = q.trim().toLowerCase()
+      return (r?.devices ?? [])
+        .map((d) => ({
+          id: d.id,
+          imei: d.imei,
+          modelo: d.model,
+          fabricante: d.manufacturer ?? null,
+          protocolo: d.protocolFamily,
+          linea: d.simPhone ?? null,
+          estado: d.status,
+          // «Verificado» = el receptor ya lo oyó alguna vez.
+          verificado: Boolean(d.connected || d.lastConnectionAt),
+          conectado: Boolean(d.connected),
+          ultimaConexion: d.lastConnectionAt ?? null,
+          panicoProbado: false,
+          empresaNombre: '—',
+          vehiculoId: d.vehicleId ?? null,
+          vehiculoNombre: d.vehicleId ? [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') : null,
+          ubicacion: d.storageLocation ?? null,
+        }))
+        .filter((g) => !t || [g.imei, g.modelo, g.linea, g.vehiculoNombre].some((v) => String(v ?? '').toLowerCase().includes(t)))
+    },
     async registrar({ imei, modelo, protocolo, fabricante, serie }) {
       const r = await api.registrarEquipoGps({
         imei,

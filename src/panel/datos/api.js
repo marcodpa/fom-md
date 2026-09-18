@@ -447,6 +447,7 @@ Object.assign(api, {
   personasDePlataforma: ({ q, limit = 50, offset = 0 } = {}) =>
     pedir(`${CONSOLA}/platform/users${consulta({ q, limit, offset })}`),
   gpsSinEmparejar: () => pedir(`${CONSOLA}/gps-devices/unpaired`),
+  equiposGps: () => pedir(`${CONSOLA}/gps-devices`),
 
   // --- Programa de inspecciones: plantillas, citas y hallazgos -------------
   plantillasDeInspeccion: ({ status, limit = 200 } = {}) =>
