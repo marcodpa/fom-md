@@ -188,8 +188,9 @@ export default function Alertas() {
                         no existe. Se dice el motivo real. */}
                     <Vacio
                       icono="velocidad"
-                      titulo="Los eventos de manejo todavía no se pueden consultar"
-                      texto={manejo.error?.message ?? 'Sin servidor todavía.'}
+                      titulo="Los eventos de manejo viven en «Eventos y SOS»"
+                      texto="Ahí están los excesos de velocidad y las condiciones que disparan las reglas, con reconocer y resolver. Esta pestaña queda para los avisos personales."
+                      accion={<Link to="/panel/seguridad" className="pnl-btn primario">Ir a Eventos y SOS</Link>}
                     />
                   </Tarjeta>
                 ) : eventos.length === 0 ? (

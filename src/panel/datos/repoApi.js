@@ -353,9 +353,9 @@ export const repoApi = {
 
       async mover() {
         throw new Error(
-          'Mudar una persona de empresa no existe todavia en el servidor: ' +
-            'hoy se revoca en la empresa de origen y se le da de alta en la ' +
-            'de destino.',
+          'Mover a una persona de empresa se hace desde Transferencias, a doble ' +
+            'control: el ente de origen la libera y el de destino la acepta, ' +
+            'igual que en la app. Ábrela ahí.',
         )
       },
     },
