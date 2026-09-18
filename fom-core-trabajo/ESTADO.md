@@ -779,3 +779,24 @@ Planes de mantenimiento, alertas por condición, evidencias de mantenimiento
 (subida de archivos), transferencias de vehículos e identidades, pagos de
 servicio, archivo de vehículos: todo eso ya existe en el servidor y el panel
 no lo muestra todavía.
+
+### 18 sep (tarde) — El panel enseña lo que ve el administrador en la consola de Juan
+
+Referencia: `apps/gps-web` de fom-core (menú por rol en `app/SidebarNav.tsx`)
+y el manifiesto `docs/team/FOM-WEB-PARITY-MANIFEST.json`. Pantallas nuevas
+en el panel, todas contra rutas reales de `/api/v1/console`:
+
+| Pantalla | Ruta del panel | Servidor |
+|---|---|---|
+| Eventos y SOS | `/panel/seguridad` | `alert-events`, `emergencies` (reconocer, resolver) |
+| Jornadas | `/panel/jornadas` | `driver-sessions` |
+| Planes de mantenimiento | `/panel/mantenimiento/planes` | `maintenance/plans`, `maintenance/actions`, ODT desde acción |
+| Programa de inspecciones | `/panel/inspecciones/programa` | `inspection-schedules`, `inspection-findings`, `inspection-templates` |
+| Transferencias (admin) | `/panel/admin/transferencias` | `identity-transfers`, `vehicle-transfers` (doble control) |
+| Toda la plataforma (admin) | `/panel/admin/plataforma` | `platform/users` |
+| GPS sin emparejar (admin) | dentro de `/panel/admin/gps` | `gps-devices/unpaired` |
+
+Queda por hacer del lado del panel: pagos de servicio y gastos de flota
+(Marco pidió no tocar pagos), configuración de mapas, transferencias para
+supervisores (hoy solo en el grupo de administración), evidencias de
+mantenimiento y archivos de documentos (subida de objetos).

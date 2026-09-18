@@ -85,6 +85,10 @@ export default function Inspecciones() {
         titulo="Inspecciones"
         bajada="Revisión preoperacional de cada unidad, con el detalle de lo que reportó el conductor."
       >
+        <Link to="/panel/inspecciones/programa" className="pnl-btn sutil">
+          <Icono nombre="inspeccion" tam={16} />
+          Programa y hallazgos
+        </Link>
         <button type="button" className="pnl-btn" onClick={() => setFecha(f.hoyISO())}>
           <Icono nombre="reloj" tam={16} />
           Ver hoy

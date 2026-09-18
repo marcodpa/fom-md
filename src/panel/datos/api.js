@@ -382,4 +382,85 @@ export const api = {
   panorama: () => pedir(`${INTERNA}/observability/overview`),
 }
 
+
+// ============================================================
+// Superficie publicada el 18 de septiembre de 2026 (paridad web de Juan).
+// Lo que ve el administrador FOM en su consola, ruta por ruta, para que
+// el panel enseñe lo mismo. Las lecturas devuelven `{ items, page }`.
+// ============================================================
+
+/** Arma una cadena de consulta sin los valores vacíos. */
+function consulta(valores) {
+  const p = new URLSearchParams()
+  Object.entries(valores).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') p.set(k, String(v))
+  })
+  const s = p.toString()
+  return s ? `?${s}` : ''
+}
+
+Object.assign(api, {
+  // --- Alertas y SOS -------------------------------------------------------
+  eventosDeAlerta: ({ status, severity, vehicleId, limit = 100, offset = 0 } = {}) =>
+    pedir(`${CONSOLA}/alert-events${consulta({ status, severity, vehicleId, limit, offset })}`),
+  reconocerEventoDeAlerta: (id) => pedir(`${CONSOLA}/alert-events/${id}/acknowledge`, { metodo: 'POST' }),
+  resolverEventoDeAlerta: (id) => pedir(`${CONSOLA}/alert-events/${id}/resolve`, { metodo: 'POST' }),
+  emergencias: ({ status } = {}) => pedir(`${CONSOLA}/emergencies${consulta({ status })}`),
+  reconocerEmergencia: (id) => pedir(`${CONSOLA}/emergencies/${id}/acknowledge`, { metodo: 'POST' }),
+  resolverEmergencia: (id) => pedir(`${CONSOLA}/emergencies/${id}/resolve`, { metodo: 'POST' }),
+
+  // --- Jornadas de conducción ---------------------------------------------
+  jornadas: ({ status, vehicleId, userId, limit = 100 } = {}) =>
+    pedir(`${CONSOLA}/driver-sessions${consulta({ status, vehicleId, userId, limit })}`),
+
+  // --- Planes y acciones de mantenimiento ----------------------------------
+  planesDeMantenimiento: ({ q, limit = 200 } = {}) =>
+    pedir(`${CONSOLA}/maintenance/plans${consulta({ q, limit })}`),
+  guardarPlanDeMantenimiento: (planId, cuerpo) =>
+    pedir(`${CONSOLA}/maintenance/plans/${planId}`, { metodo: 'PUT', cuerpo }),
+  cubrirUnidadEnPlan: (planId, vehicleId, cuerpo) =>
+    pedir(`${CONSOLA}/maintenance/plans/${planId}/vehicles/${vehicleId}`, { metodo: 'PUT', cuerpo }),
+  quitarUnidadDePlan: (planId, vehicleId) =>
+    pedir(`${CONSOLA}/maintenance/plans/${planId}/vehicles/${vehicleId}`, { metodo: 'DELETE' }),
+  accionesDeMantenimiento: ({ vehicleId, status, q, limit = 200 } = {}) =>
+    pedir(`${CONSOLA}/maintenance/actions${consulta({ vehicleId, status, q, limit })}`),
+  guardarAccionDeMantenimiento: (actionId, cuerpo) =>
+    pedir(`${CONSOLA}/maintenance/actions/${actionId}`, { metodo: 'PUT', cuerpo }),
+  moverAccionDeMantenimiento: (actionId, cuerpo) =>
+    pedir(`${CONSOLA}/maintenance/actions/${actionId}/status`, { metodo: 'PATCH', cuerpo }),
+
+  // --- Transferencias entre entes (doble control) --------------------------
+  transferenciasDeIdentidad: ({ status, tenantId, limit = 100 } = {}) =>
+    pedir(`${CONSOLA}/identity-transfers${consulta({ status, tenantId, limit })}`),
+  crearTransferenciaDeIdentidad: (cuerpo) =>
+    pedir(`${CONSOLA}/identity-transfers`, { metodo: 'POST', cuerpo, idempotente: true }),
+  decidirTransferenciaDeIdentidad: (id, paso, cuerpo) =>
+    pedir(`${CONSOLA}/identity-transfers/${id}/${paso}`, { metodo: 'POST', cuerpo, idempotente: true }),
+  transferenciasDeVehiculo: ({ status, tenantId, limit = 100 } = {}) =>
+    pedir(`${CONSOLA}/vehicle-transfers${consulta({ status, tenantId, limit })}`),
+  crearTransferenciaDeVehiculo: (cuerpo) =>
+    pedir(`${CONSOLA}/vehicle-transfers`, { metodo: 'POST', cuerpo, idempotente: true }),
+  decidirTransferenciaDeVehiculo: (id, paso, cuerpo) =>
+    pedir(`${CONSOLA}/vehicle-transfers/${id}/${paso}`, { metodo: 'POST', cuerpo, idempotente: true }),
+
+  // --- Lecturas de toda la plataforma (solo administrador FOM) -------------
+  personasDePlataforma: ({ q, limit = 50, offset = 0 } = {}) =>
+    pedir(`${CONSOLA}/platform/users${consulta({ q, limit, offset })}`),
+  gpsSinEmparejar: () => pedir(`${CONSOLA}/gps-devices/unpaired`),
+
+  // --- Programa de inspecciones: plantillas, citas y hallazgos -------------
+  plantillasDeInspeccion: ({ status, limit = 200 } = {}) =>
+    pedir(`${CONSOLA}/inspection-templates${consulta({ status, limit })}`),
+  programasDeInspeccion: ({ status, vehicleId, limit = 200 } = {}) =>
+    pedir(`${CONSOLA}/inspection-schedules${consulta({ status, vehicleId, limit })}`),
+  crearProgramaDeInspeccion: (cuerpo) =>
+    pedir(`${CONSOLA}/inspection-schedules`, { metodo: 'POST', cuerpo }),
+  cancelarProgramaDeInspeccion: (id, cuerpo) =>
+    pedir(`${CONSOLA}/inspection-schedules/${id}/cancel`, { metodo: 'POST', cuerpo }),
+  hallazgosDeInspeccion: ({ status, vehicleId, limit = 200 } = {}) =>
+    pedir(`${CONSOLA}/inspection-findings${consulta({ status, vehicleId, limit })}`),
+  moverHallazgo: (inspectionId, answerId, cuerpo) =>
+    pedir(`${CONSOLA}/inspections/${inspectionId}/findings/${answerId}/follow-up`, { metodo: 'POST', cuerpo }),
+})
+
 export default api

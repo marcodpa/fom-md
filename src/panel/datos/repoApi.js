@@ -1089,4 +1089,371 @@ export const repoApi = {
   },
 }
 
+
+// ============================================================
+// Lo que el administrador FOM ve en la consola de Juan (paridad web,
+// 18 sep 2026), traducido al vocabulario del panel. Cada módulo devuelve
+// filas en español y deja los catálogos cerrados como los manda el servidor.
+// ============================================================
+
+function uuid() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID()
+  const h = () => Math.floor(Math.random() * 16).toString(16)
+  const s = (n) => Array.from({ length: n }, h).join('')
+  return `${s(8)}-${s(4)}-4${s(3)}-${'89ab'[Math.floor(Math.random() * 4)]}${s(3)}-${s(12)}`
+}
+
+const pagina = (r) => ({
+  total: r?.page?.total ?? (r?.items?.length ?? 0),
+  limite: r?.page?.limit ?? null,
+  desde: r?.page?.offset ?? 0,
+})
+
+Object.assign(repoApi, {
+  /** Eventos de alerta (reglas que se cumplieron) y emergencias (SOS). */
+  seguridad: {
+    async eventos({ estado = '', severidad = '', vehiculoId = '' } = {}) {
+      const r = await api.eventosDeAlerta({ status: estado, severity: severidad, vehicleId: vehiculoId })
+      const lista = (r?.items ?? []).map((e) => ({
+        id: e.id,
+        tipo: e.ruleType,
+        vehiculo: e.vehicleCode,
+        placa: e.vehiclePlate ?? null,
+        severidad: e.severity,
+        valor: e.observedValue ?? null,
+        estado: e.status,
+        ocurrioEn: e.occurredAt,
+        odtId: e.workOrderId ?? null,
+      }))
+      lista.pagina = pagina(r)
+      return lista
+    },
+    async reconocerEvento(id) {
+      await api.reconocerEventoDeAlerta(id)
+      return true
+    },
+    async resolverEvento(id) {
+      await api.resolverEventoDeAlerta(id)
+      return true
+    },
+    async emergencias({ estado = '' } = {}) {
+      const r = await api.emergencias({ status: estado })
+      return (r?.items ?? []).map((e) => ({
+        id: e.id,
+        vehiculoId: e.vehicleId ?? null,
+        reportadaPor: e.reportedByUserId,
+        tipo: e.kind,
+        tipoOtro: e.kindOther ?? null,
+        detalle: e.detail,
+        estado: e.status,
+        reportadaEn: e.reportedAt,
+        ubicacionReportante: e.reporterLocation ?? null,
+        ubicacionVehiculo: e.vehicleLocation ?? null,
+      }))
+    },
+    async reconocerEmergencia(id) {
+      await api.reconocerEmergencia(id)
+      return true
+    },
+    async resolverEmergencia(id) {
+      await api.resolverEmergencia(id)
+      return true
+    },
+  },
+
+  /** Jornadas de conducción: quién manejó qué unidad y cuándo. */
+  jornadas: {
+    async listar({ estado = '', vehiculoId = '', usuarioId = '' } = {}) {
+      const r = await api.jornadas({ status: estado, vehicleId: vehiculoId, userId: usuarioId })
+      return (r?.items ?? []).map((j) => ({
+        id: j.id,
+        conductor: j.displayName ?? '—',
+        vehiculo: j.vehicleCode,
+        placa: j.vehiclePlate ?? null,
+        rol: j.assignmentRole,
+        origen: j.source,
+        estado: j.status,
+        inicio: j.startedAt,
+        fin: j.endedAt ?? null,
+      }))
+    },
+  },
+
+  /** Planes de mantenimiento y sus acciones (lo que antes eran «reglas de mantenimiento»). */
+  planes: {
+    async listar({ q = '' } = {}) {
+      const r = await api.planesDeMantenimiento({ q })
+      return (r?.items ?? []).map((p) => ({
+        id: p.id,
+        codigo: p.code,
+        servicio: p.serviceName,
+        descripcion: p.description ?? '',
+        estrategia: p.strategy,
+        cadaKm: p.intervalKm ?? null,
+        cadaDias: p.intervalDays ?? null,
+        criticidad: p.criticality,
+        activo: Boolean(p.enabled),
+        unidades: Number(p.vehicleCount ?? 0),
+      }))
+    },
+    /** PUT idempotente: mismo id, mismo plan. Sin id, es un plan nuevo. */
+    async guardar({ id, codigo, servicio, descripcion, estrategia, cadaKm, cadaDias, criticidad, activo = true }) {
+      const planId = id || uuid()
+      const r = await api.guardarPlanDeMantenimiento(planId, {
+        code: codigo,
+        serviceName: servicio,
+        description: descripcion || undefined,
+        strategy: estrategia,
+        intervalKm: cadaKm ? Number(cadaKm) : undefined,
+        intervalDays: cadaDias ? Number(cadaDias) : undefined,
+        criticality: criticidad,
+        enabled: Boolean(activo),
+      })
+      return { id: r?.plan?.id ?? planId }
+    },
+    async cubrirUnidad(planId, vehiculoId, { ultimoServicioKm, proximoKm, proximaFecha } = {}) {
+      await api.cubrirUnidadEnPlan(planId, vehiculoId, {
+        lastServiceOdometerKm: ultimoServicioKm ? Number(ultimoServicioKm) : undefined,
+        nextDueOdometerKm: proximoKm ? Number(proximoKm) : undefined,
+        nextDueAt: proximaFecha ? new Date(proximaFecha).toISOString() : undefined,
+        enabled: true,
+      })
+      return true
+    },
+    async quitarUnidad(planId, vehiculoId) {
+      await api.quitarUnidadDePlan(planId, vehiculoId)
+      return true
+    },
+    async acciones({ vehiculoId = '', estado = '', q = '' } = {}) {
+      const r = await api.accionesDeMantenimiento({ vehicleId: vehiculoId, status: estado, q })
+      return (r?.items ?? []).map((a) => ({
+        id: a.id,
+        vehiculoId: a.vehicleId,
+        vehiculo: a.vehicleCode,
+        placa: a.plate ?? null,
+        planId: a.planId ?? null,
+        plan: a.planName ?? null,
+        odtId: a.workOrderId ?? null,
+        tipo: a.kind,
+        titulo: a.title,
+        detalle: a.detail ?? '',
+        relevancia: a.relevance,
+        estado: a.status,
+        venceKm: a.dueOdometerKm ?? null,
+        venceEn: a.dueAt ?? null,
+        avance: a.progressRatio ?? null,
+        costo: a.costAmount ?? null,
+        moneda: a.costCurrency ?? null,
+      }))
+    },
+    async crearAccion({ vehiculoId, planId, tipo = 'preventive', titulo, detalle, relevancia = 'medium', venceKm, venceEn, costo, moneda }) {
+      const actionId = uuid()
+      await api.guardarAccionDeMantenimiento(actionId, {
+        vehicleId: vehiculoId,
+        planId: planId || undefined,
+        kind: tipo,
+        title: titulo,
+        detail: detalle || undefined,
+        relevance: relevancia,
+        dueOdometerKm: venceKm ? Number(venceKm) : undefined,
+        dueAt: venceEn ? new Date(venceEn).toISOString() : undefined,
+        costAmount: costo ? Number(costo) : undefined,
+        costCurrency: costo ? moneda || 'USD' : undefined,
+      })
+      return { id: actionId }
+    },
+    /** in_progress | completed | dismissed, con el estado esperado para no pisar a nadie. */
+    async moverAccion(accion, destino, nota) {
+      await api.moverAccionDeMantenimiento(accion.id, {
+        expectedStatus: accion.estado,
+        status: destino,
+        note: nota,
+        progressRatio: destino === 'completed' ? 0.9999 : undefined,
+      })
+      return true
+    },
+    /** Abre una ODT preventiva vinculada a la acción. */
+    async odtDesdeAccion(accion) {
+      const r = await api.crearOdt({
+        vehicleId: accion.vehiculoId,
+        maintenanceActionId: accion.id,
+        description: accion.detalle && accion.detalle.length >= 10 ? accion.detalle : `Ejecutar acción de mantenimiento: ${accion.titulo}`,
+        kind: 'preventiva',
+        severity: accion.relevancia === 'critical' || accion.relevancia === 'high' ? 'alta' : 'media',
+      })
+      return { id: r?.workOrder?.id ?? null }
+    },
+  },
+
+  /** Transferencias de personas y vehículos entre entes, a doble control. */
+  transferencias: {
+    identidad: {
+      async listar({ estado = '' } = {}) {
+        const r = await api.transferenciasDeIdentidad({ status: estado })
+        return (r?.items ?? []).map(comoTransferencia)
+      },
+      async crear({ usuarioId, origenId, destinoId, rolDestino, motivo: motivo_ }) {
+        const r = await api.crearTransferenciaDeIdentidad({
+          userId: usuarioId,
+          originTenantId: origenId,
+          destinationTenantId: destinoId,
+          destinationRole: rolDestino,
+          reason: motivo(motivo_ || '', 'transferencia'),
+        })
+        return { id: r?.transfer?.id ?? null }
+      },
+      async decidir(t, paso, motivo_) {
+        const cierre = paso === 'rejection' || paso === 'cancellation'
+        await api.decidirTransferenciaDeIdentidad(t.id, paso, {
+          expectedVersion: t.version,
+          ...(cierre ? { reason: motivo(motivo_ || '', paso) } : {}),
+        })
+        return true
+      },
+    },
+    vehiculo: {
+      async listar({ estado = '' } = {}) {
+        const r = await api.transferenciasDeVehiculo({ status: estado })
+        return (r?.items ?? []).map(comoTransferencia)
+      },
+      async crear({ vehiculoId, origenId, destinoId, codigoDestino, motivo: motivo_ }) {
+        const r = await api.crearTransferenciaDeVehiculo({
+          vehicleId: vehiculoId,
+          originTenantId: origenId,
+          destinationTenantId: destinoId,
+          destinationCode: codigoDestino,
+          reason: motivo(motivo_ || '', 'transferencia'),
+        })
+        return { id: r?.transfer?.id ?? null }
+      },
+      async decidir(t, paso, motivo_) {
+        const cierre = paso === 'rejection' || paso === 'cancellation'
+        await api.decidirTransferenciaDeVehiculo(t.id, paso, {
+          expectedVersion: t.version,
+          ...(cierre ? { reason: motivo(motivo_ || '', paso) } : {}),
+        })
+        return true
+      },
+    },
+  },
+
+  /** Personas de TODOS los entes: una fila por membresía. Solo administrador FOM. */
+  plataforma: {
+    async personas({ q = '', limite = 50, desde = 0 } = {}) {
+      const r = await api.personasDePlataforma({ q, limit: limite, offset: desde })
+      const lista = (r?.items ?? []).map((u) => ({
+        id: `${u.userId}:${u.tenantId}`,
+        userId: u.userId,
+        nombre: u.displayName,
+        email: u.email,
+        empresaId: u.tenantId,
+        empresaCodigo: u.tenantCode,
+        empresaNombre: u.tenantName,
+        rol: u.role,
+        estado: u.status,
+      }))
+      lista.pagina = pagina(r)
+      return lista
+    },
+  },
+
+  /** Programa de inspecciones: plantillas, citas y hallazgos con seguimiento. */
+  programaInspecciones: {
+    async plantillas({ estado = '' } = {}) {
+      const r = await api.plantillasDeInspeccion({ status: estado })
+      return (r?.items ?? []).map((t) => ({
+        id: t.id, codigo: t.code, version: t.version, nombre: t.name, estado: t.status, puntos: t.itemCount ?? 0,
+      }))
+    },
+    async citas({ estado = '', vehiculoId = '' } = {}) {
+      const r = await api.programasDeInspeccion({ status: estado, vehicleId: vehiculoId })
+      return (r?.items ?? []).map((s) => ({
+        id: s.id,
+        estado: s.status,
+        fecha: s.scheduledFor,
+        vehiculo: s.vehicleCode,
+        placa: s.vehiclePlate ?? null,
+        plantilla: s.templateName,
+        asignadoA: s.assignedUserName,
+        inspeccionId: s.inspectionId ?? null,
+      }))
+    },
+    async programar({ vehiculoId, plantillaId, asignadoA, fecha }) {
+      const r = await api.crearProgramaDeInspeccion({
+        vehicleId: vehiculoId,
+        templateId: plantillaId,
+        assignedUserId: asignadoA,
+        scheduledFor: fecha,
+      })
+      return { id: r?.schedule?.id ?? null }
+    },
+    async cancelar(id, motivo_) {
+      await api.cancelarProgramaDeInspeccion(id, {
+        expectedStatus: 'programada',
+        reason: motivo(motivo_ || '', 'cancelada-desde-el-panel'),
+      })
+      return true
+    },
+    async hallazgos({ estado = '', vehiculoId = '' } = {}) {
+      const r = await api.hallazgosDeInspeccion({ status: estado, vehicleId: vehiculoId })
+      return (r?.items ?? []).map((h) => ({
+        id: h.id,
+        inspeccionId: h.inspectionId,
+        vehiculo: h.vehicleCode,
+        punto: h.itemName,
+        estadoPunto: h.itemState,
+        critico: Boolean(h.isCritical),
+        nota: h.note ?? '',
+        odtId: h.workOrderId ?? null,
+        estado: h.status,
+      }))
+    },
+    /** en_seguimiento | resuelto | descartado, con nota obligatoria. */
+    async moverHallazgo(h, destino, nota, odtId) {
+      await api.moverHallazgo(h.inspeccionId, h.id, {
+        expectedStatus: h.estado,
+        status: destino,
+        note: nota,
+        workOrderId: odtId || undefined,
+        clientActionId: uuid(),
+      })
+      return true
+    },
+  },
+})
+
+function comoTransferencia(t) {
+  return {
+    id: t.id,
+    usuarioId: t.userId ?? null,
+    vehiculoId: t.vehicleId ?? null,
+    origenId: t.originTenantId,
+    destinoId: t.destinationTenantId,
+    rolDestino: t.destinationRole ?? null,
+    codigoOrigen: t.originCode ?? null,
+    codigoDestino: t.destinationCode ?? null,
+    estado: t.status,
+    motivo: t.reason,
+    version: t.version,
+    liberadaEn: t.originReleasedAt ?? null,
+    aceptadaEn: t.destinationAcceptedAt ?? null,
+    completadaEn: t.completedAt ?? null,
+    cerradaEn: t.closedAt ?? null,
+    creadaEn: t.createdAt,
+  }
+}
+
+/** La bandeja de IMEI que reportan sin ente: solo administrador FOM. */
+repoApi.gpsEscritura.sinEmparejar = async function sinEmparejar() {
+  const r = await api.gpsSinEmparejar()
+  return (r?.devices ?? []).map((d) => ({
+    imei: d.observedImei,
+    primeraVez: d.firstSeenAt,
+    ultimaVez: d.lastSeenAt,
+    mensajes: d.messageCount,
+    transporte: d.transport,
+    reportando: Boolean(d.isReporting),
+  }))
+}
+
 export default repoApi

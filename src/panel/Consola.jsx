@@ -27,6 +27,12 @@ import AdminGps from './modulos/AdminGps'
 import AdminUsuarios from './modulos/AdminUsuarios'
 import AdminAuditoria from './modulos/AdminAuditoria'
 import MiUnidad from './modulos/MiUnidad'
+import Seguridad from './modulos/Seguridad'
+import Jornadas from './modulos/Jornadas'
+import Planes from './modulos/Planes'
+import ProgramaInspecciones from './modulos/ProgramaInspecciones'
+import Transferencias from './modulos/Transferencias'
+import Plataforma from './modulos/Plataforma'
 
 // Módulos de la consola, agrupados como en la arquitectura FOM-WEB.
 const MENU = [
@@ -36,14 +42,18 @@ const MENU = [
       { a: '/panel', icono: 'resumen', texto: 'Resumen', fin: true },
       { a: '/panel/mapa', icono: 'mapa', texto: 'Centro de control' },
       { a: '/panel/alertas', icono: 'alerta', texto: 'Alertas' },
+      { a: '/panel/seguridad', icono: 'escudo', texto: 'Eventos y SOS' },
     ],
   },
   {
     grupo: 'Flota',
     items: [
       { a: '/panel/flota', icono: 'camion', texto: 'Vehículos' },
-      { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento' },
-      { a: '/panel/inspecciones', icono: 'check', texto: 'Inspecciones' },
+      { a: '/panel/jornadas', icono: 'reloj', texto: 'Jornadas' },
+      { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento', fin: true },
+      { a: '/panel/mantenimiento/planes', icono: 'sync', texto: 'Planes de mantenimiento' },
+      { a: '/panel/inspecciones', icono: 'check', texto: 'Inspecciones', fin: true },
+      { a: '/panel/inspecciones/programa', icono: 'inspeccion', texto: 'Programa de inspecciones' },
       { a: '/panel/documentos', icono: 'documento', texto: 'Documentos' },
     ],
   },
@@ -65,6 +75,8 @@ const MENU_ADMIN = {
   grupo: 'Administración FOM',
   items: [
     { a: '/panel/admin/empresas', icono: 'empresa', texto: 'Empresas' },
+    { a: '/panel/admin/plataforma', icono: 'buscar', texto: 'Toda la plataforma' },
+    { a: '/panel/admin/transferencias', icono: 'comparar', texto: 'Transferencias' },
     { a: '/panel/admin/pagos', icono: 'costos', texto: 'Pagos' },
     { a: '/panel/admin/gps', icono: 'pin', texto: 'GPS' },
     { a: '/panel/admin/auditoria', icono: 'auditoria', texto: 'Auditoría' },
@@ -111,7 +123,7 @@ const MENU_POR_AREA = {
 /** Rutas alcanzables por area. Todo lo que no este aqui vuelve al inicio. */
 const RUTAS_POR_AREA = {
   admin: null, // todas
-  operativo: ['', 'mapa', 'alertas', 'flota', 'mantenimiento', 'inspecciones', 'documentos', 'personal', 'reportes'],
+  operativo: ['', 'mapa', 'alertas', 'seguridad', 'flota', 'jornadas', 'mantenimiento', 'inspecciones', 'documentos', 'personal', 'reportes'],
   gerencial: ['personal', 'reportes'],
   conductor: ['', 'alertas'],
   personal: ['mapa', 'alertas', 'documentos', 'personal'],
@@ -293,8 +305,12 @@ export default function Consola() {
           <Route path="alertas" element={<Alertas />} />
           <Route path="flota" element={<Flota />} />
           <Route path="flota/:id" element={<ExpedienteVehiculo />} />
+          <Route path="seguridad" element={<Seguridad />} />
+          <Route path="jornadas" element={<Jornadas />} />
           <Route path="mantenimiento" element={<Mantenimiento />} />
+          <Route path="mantenimiento/planes" element={<Planes />} />
           <Route path="inspecciones" element={<Inspecciones />} />
+          <Route path="inspecciones/programa" element={<ProgramaInspecciones />} />
           <Route path="documentos" element={<Documentos />} />
           <Route path="personal" element={<AdminUsuarios />} />
           <Route path="personal/:id" element={<ExpedienteConductor />} />
@@ -303,6 +319,8 @@ export default function Consola() {
           {esAdminFom(perfil) && (
             <>
               <Route path="admin/empresas" element={<AdminEmpresas />} />
+              <Route path="admin/plataforma" element={<Plataforma />} />
+              <Route path="admin/transferencias" element={<Transferencias />} />
               <Route path="admin/pagos" element={<AdminPagos />} />
               <Route path="admin/gps" element={<AdminGps />} />
               <Route path="admin/auditoria" element={<AdminAuditoria />} />

@@ -6,6 +6,7 @@ import {
   Buscador, Cabecera, Campo, Cargando, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import { Icono } from '../Iconos'
+import * as f from '../datos/formato'
 
 // ============================================================
 // INVENTARIO GPS (solo Administrador FOM)
@@ -104,8 +105,45 @@ export default function AdminGps() {
         )}
       </div>
 
+      <div className="pnl-cuerpo">
+        <SinEmparejar />
+      </div>
+
       <ModalRegistrar abierto={registrando} alCerrar={() => setRegistrando(false)} alGuardar={recargar} actor={actor} />
     </>
+  )
+}
+
+/**
+ * IMEI que están mandando mensajes al receptor sin pertenecer a ningún ente.
+ * Es la bandeja del administrador: un equipo recién encendido aparece aquí
+ * antes de registrarlo. Lectura reservada al administrador FOM.
+ */
+function SinEmparejar() {
+  const bandeja = useDatos(() => repo.admin.gps.sinEmparejar(), [], 60000)
+  return (
+    <Tarjeta titulo="Equipos que reportan sin ente" sinCuerpo>
+      {bandeja.estado === 'cargando' && <Cargando filas={2} />}
+      {bandeja.estado === 'error' && <ErrorCarga onReintentar={bandeja.recargar} error={bandeja.error} />}
+      {bandeja.estado === 'ok' && (bandeja.datos.length === 0 ? (
+        <div className="pnl-card-cuerpo">
+          <Vacio icono="pin" titulo="Nada sin emparejar" texto="Todo IMEI que llega al receptor ya está registrado en algún ente." />
+        </div>
+      ) : (
+        <div className="pnl-filas">
+          {bandeja.datos.map((d) => (
+            <div className="pnl-fila aviso" key={d.imei}>
+              <Icono nombre="pin" tam={18} />
+              <div className="pnl-fila-txt">
+                <b>IMEI {d.imei}</b>
+                <span>{d.mensajes} mensajes por {d.transporte.toUpperCase()} · visto por primera vez {f.desde(d.primeraVez)} · último {f.desde(d.ultimaVez)}</span>
+              </div>
+              <Tag color={d.reportando ? 'verde' : 'gris'}>{d.reportando ? 'Reportando' : 'Callado'}</Tag>
+            </div>
+          ))}
+        </div>
+      ))}
+    </Tarjeta>
   )
 }
 

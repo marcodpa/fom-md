@@ -127,6 +127,22 @@ function sinRespaldo(coleccion) {
   return vacia
 }
 
+/**
+ * Los módulos de paridad con la consola de Juan (eventos y SOS, jornadas,
+ * planes, transferencias, plataforma, programa de inspecciones) no tienen
+ * semilla: nacieron ya conectados. En modo demostración cada llamada dice
+ * eso, en vez de reventar con «no es una función».
+ */
+const SOLO_CON_BASE_REAL =
+  'Esta pantalla solo funciona conectada a la base real. En modo demostración no hay datos de ejemplo para ella.'
+function soloConBaseReal(forma) {
+  const salida = {}
+  for (const [nombre, valor] of Object.entries(forma)) {
+    salida[nombre] = typeof valor === 'function' ? faltaEnElServidor(SOLO_CON_BASE_REAL) : soloConBaseReal(valor)
+  }
+  return salida
+}
+
 const repo = HAY_API
   ? {
       ...repoSemilla,
@@ -147,7 +163,14 @@ const repo = HAY_API
         crear: FALTA_COSTOS,
       }),
       empresa: () => Promise.resolve(null),
+      // Paridad con la consola de Juan (18 sep 2026): reales, sin semilla.
+      seguridad: repoApi.seguridad,
+      jornadas: repoApi.jornadas,
+      planes: repoApi.planes,
+      transferencias: repoApi.transferencias,
+      programaInspecciones: repoApi.programaInspecciones,
       admin: {
+        plataforma: repoApi.plataforma,
         // Empresas, contratistas y áreas: reales desde el #250.
         empresas: conRespaldoParcial(
           repoSemilla.admin.empresas,
@@ -243,7 +266,19 @@ const repo = HAY_API
         repoApi.areasEscritura,
       ),
     }
-  : repoSemilla
+  : {
+      ...repoSemilla,
+      seguridad: soloConBaseReal(repoApi.seguridad),
+      jornadas: soloConBaseReal(repoApi.jornadas),
+      planes: soloConBaseReal(repoApi.planes),
+      transferencias: soloConBaseReal(repoApi.transferencias),
+      programaInspecciones: soloConBaseReal(repoApi.programaInspecciones),
+      admin: {
+        ...repoSemilla.admin,
+        plataforma: soloConBaseReal(repoApi.plataforma),
+        gps: { ...repoSemilla.admin.gps, sinEmparejar: faltaEnElServidor(SOLO_CON_BASE_REAL) },
+      },
+    }
 
 export { alCambiarDatos, reiniciarDatos }
 export { repo }

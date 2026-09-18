@@ -81,6 +81,10 @@ export default function Mantenimiento() {
         titulo="Mantenimiento"
         bajada="Las órdenes de trabajo de la flota, desde que se reportan hasta que se cierran."
       >
+        <Link to="/panel/mantenimiento/planes" className="pnl-btn sutil">
+          <Icono nombre="sync" tam={16} />
+          Planes y acciones
+        </Link>
         <Buscador
           valor={q}
           alCambiar={setQ}
