@@ -221,6 +221,16 @@ export function perfilActual() {
   return sesion?.perfil ?? null
 }
 
+/** Refleja un nombre confirmado por el servidor sin cambiar rol ni alcance. */
+export function actualizarNombreSesion(correo, nombre) {
+  if (!sesion || sesion.perfil.correo !== correo) return
+  const nueva = { ...sesion, perfil: { ...sesion.perfil, nombre, iniciales: inicialesDe(nombre) } }
+  if (!HAY_API) {
+    try { localStorage.setItem(CLAVE_SESION, JSON.stringify(nueva)) } catch { /* sesión en memoria */ }
+  }
+  fijar(nueva)
+}
+
 /** Suscribe a cambios de sesión. Devuelve la función para desuscribirse. */
 export function alCambiar(fn) {
   oyentes.add(fn)

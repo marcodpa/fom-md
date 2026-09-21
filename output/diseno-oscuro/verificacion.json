@@ -1,0 +1,194 @@
+[
+  {
+    "file": "01-resumen.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "c13f5260db49c9ddaa78a81fc502d52ea9c6cac07991a15c34bb73018faa0c99"
+  },
+  {
+    "file": "02-centro-control.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "0c157d629878a3bde49e15414f7f12e6f03f5093e44770f334e0ad732e5e306c"
+  },
+  {
+    "file": "03-alertas.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "49c16650a5ac38b2ea328f208174aa45d41cdb8452c879cdad56bb127d766816"
+  },
+  {
+    "file": "04-vehiculos.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "861c207856dd0849197137bfa0e85665e2b7dafad185a5be534303d0b2953237"
+  },
+  {
+    "file": "05-expediente-vehiculo.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "14dd177ec9191b4d8663807ec2fc68b67030144c0c7732b6546dfb818584b0f5"
+  },
+  {
+    "file": "06-eventos-sos.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "f7f0512744331b89095c3b6040abc3de95495032aad335a8adca1897acf800f3"
+  },
+  {
+    "file": "07-jornadas.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "eccc0906fe1b867dced86a62543509d010c4fe7b5a1d5fda98ba6a2d241f09cc"
+  },
+  {
+    "file": "08-mantenimiento.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "4c8d70b69b5be1cb5afe386e0b1920147c3a382455661ee8e201571731f1c4d5"
+  },
+  {
+    "file": "09-planes-mantenimiento.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "41dc70d131d51395a1dff528041993b55c15be6f5fdcf565e5b039adb36fb717"
+  },
+  {
+    "file": "10-inspecciones.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "86f290e97e94aeed5a4aa32517d214e03407cd4b2f900f0c0c212494e6ebc485"
+  },
+  {
+    "file": "11-programa-inspecciones.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "ff13c30e800ec2b2fbed45e01831d4077fced39db8c8fa7271fddb6179c0554d"
+  },
+  {
+    "file": "12-documentos.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "55ca1ac888fe84f3a21d82a4f568d5381d6b2551f6aca2bbb39a4edba20ac8e5"
+  },
+  {
+    "file": "13-gente.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "7a8a2d3e116e40aa8c11b48647ad46db8d7b68fcbc1939a67d2148c2ae1a2243"
+  },
+  {
+    "file": "14-expediente-conductor.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "a694306395e5fa33ec3a2b2e41853fbe18b6891321cb08aa7044a62ed06cb5de"
+  },
+  {
+    "file": "15-reportes.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "7cf8256707660f2e67329396d3faf1adb3592c8193cf6d6100b7c8e10827755a"
+  },
+  {
+    "file": "16-mi-unidad.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "91df896d3454c3acbf46fb7b2bc5dc58bddd4a5c8516d5c1c0411dfd37169ce6"
+  },
+  {
+    "file": "17-empresas.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "ab9a25713cce71a04e361d4054d4db70da929c39d01f530b966fae5e183afd9b"
+  },
+  {
+    "file": "18-toda-plataforma.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "1648964cb781714790af4a23420f2b37be04c8ce7abe4dc67e5ba60997d3af7f"
+  },
+  {
+    "file": "19-transferencias.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "79940ceb01e871b28bc134d54cc0ff3d9e508f263d1460ade72c70d8758db22f"
+  },
+  {
+    "file": "20-pagos.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "09f8d551504b4301cc440bd1d093f565c19fc2c4c75af1c7ebdac98e557e7da3"
+  },
+  {
+    "file": "21-gps.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "808cd5f0d8826fdbf4ee2bd4624f5670ee3ce4b9b5a8b55c04ce1e775bb90437"
+  },
+  {
+    "file": "22-auditoria.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "117da8e7f4cca78754833b8241696de709d55ef99ceb9085d3a536d6ec760556"
+  },
+  {
+    "file": "23-inicio.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "c1dd61fe20da647ac9b35adf56362e75e848f623bdeb0ae5e041731ef0830d88"
+  },
+  {
+    "file": "24-plataforma.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "b25e7107cfecbc8b11677b3f5c79ce863f4048bb2e1a4c47a598b26ccb689e21"
+  },
+  {
+    "file": "25-funciones.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "d16227046169cf1ee7cfce8ee051c8c35c3441e4aae7c8456f2ec6b6649720c2"
+  },
+  {
+    "file": "26-seguridad-publica.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "cff09e8e4b47fbfbcf001b6380fd7bca4f0687096bb07fa2619b10be836ed2d8"
+  },
+  {
+    "file": "27-areas.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "7263010e90c81545b958b2b02baa7d95335d62e874dbabc3500f8fd900084a70"
+  },
+  {
+    "file": "28-contacto.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "119a8ea67668f36d33c62794d307eaf6b6fb4b0336c6e37c899faa83d86286ec"
+  },
+  {
+    "file": "29-preguntas-frecuentes.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "dca5ea50bd56cf1a34ab456c63ca550f804f91f9d028ffa3e85d21ba35bd2eed"
+  },
+  {
+    "file": "30-iniciar-sesion.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "7b545b04c4bb04964e7ab9f00fd5e3a44e159ec8017e744aee62e99b83cb4ee1"
+  },
+  {
+    "file": "31-cambiar-contrasena.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "9c3ffc20080a848c2227f3ea3188bb38aa350cb78f2fb4d969d752e876a4cedc"
+  },
+  {
+    "file": "32-pagina-no-encontrada.png",
+    "width": 1586,
+    "height": 992,
+    "sha256": "5e769ca8736afc70f86083b0761eba6e7c7266d05248597359e158a2cfcc8b9a"
+  }
+]

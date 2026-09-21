@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
-import { Cabecera, Campo, Cargando, Chips, ErrorCarga, Modal, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
+import { Cabecera, Campo, Cargando, Chips, Datos, ErrorCarga, Modal, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 
@@ -23,6 +23,7 @@ const PIE = { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16
 
 export default function ProgramaInspecciones() {
   const [pestana, setPestana] = useState('citas')
+  const [citaId, setCitaId] = useState(null)
   const [estadoCita, setEstadoCita] = useState('programada')
   const [estadoHallazgo, setEstadoHallazgo] = useState('pendiente')
   const [aviso, setAviso] = useState('')
@@ -34,6 +35,7 @@ export default function ProgramaInspecciones() {
   const citas = useDatos(() => repo.programaInspecciones.citas({ estado: estadoCita }), [estadoCita])
   const hallazgos = useDatos(() => repo.programaInspecciones.hallazgos({ estado: estadoHallazgo }), [estadoHallazgo])
   const plantillas = useDatos(() => repo.programaInspecciones.plantillas({}), [])
+  const seleccion = citas.estado === 'ok' ? citas.datos.find(c => c.id === citaId) ?? citas.datos[0] : null
 
   async function actuar(fn, exito) {
     setOcupado(true)
@@ -65,7 +67,7 @@ export default function ProgramaInspecciones() {
         </button>
       </Cabecera>
 
-      <div className="pnl-cuerpo">
+      <div className="pnl-cuerpo pnl-programa">
         {aviso && <p className="pnl-campo-error" role="status">{aviso}</p>}
         <Pestanas
           opciones={[{ v: 'citas', t: 'Citas' }, { v: 'hallazgos', t: 'Hallazgos' }, { v: 'plantillas', t: 'Plantillas' }]}
@@ -74,6 +76,7 @@ export default function ProgramaInspecciones() {
         />
 
         {pestana === 'citas' && (
+          <div className="pnl-admin-dividido">
           <Tarjeta titulo="Citas de inspección" sinCuerpo>
             <div className="pnl-card-cuerpo">
               <Chips opciones={[{ v: 'programada', t: 'Programadas' }, { v: 'completada', t: 'Completadas' }, { v: 'cancelada', t: 'Canceladas' }, { v: '', t: 'Todas' }]} valor={estadoCita} alCambiar={setEstadoCita} />
@@ -92,7 +95,7 @@ export default function ProgramaInspecciones() {
                     <div className="pnl-fila" key={c.id}>
                       <Icono nombre="inspeccion" tam={18} />
                       <div className="pnl-fila-txt">
-                        <b>{c.vehiculo}{c.placa ? ` · ${c.placa}` : ''} · {c.plantilla}</b>
+                        <button type="button" className="pnl-table-action" aria-pressed={seleccion?.id === c.id} onClick={() => setCitaId(c.id)}>{c.vehiculo}{c.placa ? ` · ${c.placa}` : ''} · {c.plantilla}</button>
                         <span>{c.asignadoA} · {f.fechaHora(c.fecha)}{c.inspeccionId && <> · <Link to="/panel/inspecciones" className="pnl-link">ver inspección</Link></>}</span>
                       </div>
                       <Tag color={esC}>{esT}</Tag>
@@ -105,6 +108,22 @@ export default function ProgramaInspecciones() {
               </div>
             ))}
           </Tarjeta>
+          <aside className="pnl-admin-detalle">
+            <Tarjeta titulo="Detalle de la cita">
+              {seleccion ? <>
+                <h3>{seleccion.vehiculo}</h3>
+                <Tag color={ESTADO_CITA[seleccion.estado]?.[1] ?? 'gris'}>{ESTADO_CITA[seleccion.estado]?.[0] ?? seleccion.estado}</Tag>
+                <Datos items={[
+                  { etiqueta: 'Placa', valor: seleccion.placa || '—' },
+                  { etiqueta: 'Plantilla', valor: seleccion.plantilla },
+                  { etiqueta: 'Responsable', valor: seleccion.asignadoA || 'Sin asignar' },
+                  { etiqueta: 'Fecha y hora', valor: f.fechaHora(seleccion.fecha) },
+                ]} />
+                {seleccion.inspeccionId && <Link to="/panel/inspecciones" className="pnl-btn sutil">Ver inspección realizada</Link>}
+              </> : <Vacio icono="inspeccion" titulo="Sin cita seleccionada" texto="Las citas del filtro aparecerán aquí." />}
+            </Tarjeta>
+          </aside>
+          </div>
         )}
 
         {pestana === 'hallazgos' && (

@@ -6,6 +6,7 @@ import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import { esAdminFom } from '../auth'
 import { esGestor } from '../roles'
+import VehicleVisual from '../../components/VehicleVisual'
 import {
   Cabecera, Campo, Cargando, Vacio, ErrorCarga, Tag, Tarjeta, Kpi, Buscador, Chips, Modal,
 } from '../comp/ui'
@@ -365,10 +366,10 @@ export default function Flota() {
                           }}
                         >
                           <td>
-                            <div className="pnl-doble">
+                            <div className="pnl-vehicle-cell"><VehicleVisual modelo={v.modelo ?? ''} compacta /><div className="pnl-doble">
                               <b>{v.alias}</b>
                               <span>{v.numero} · {v.marca} {v.modelo}</span>
-                            </div>
+                            </div></div>
                           </td>
                           <td className="placa">{v.placa}</td>
                           <td>{v.areaNombre}</td>
@@ -413,7 +414,7 @@ export default function Flota() {
           </>
         )}
       </div>
-      <ModalArea abierto={creandoArea} tenantId={sesion?.perfil?.empresaId ?? null} alCerrar={() => setCreandoArea(false)} alGuardar={recargar} />
+      <ModalArea abierto={creandoArea} tenantId={sesion?.perfil?.empresaId ?? null} alCerrar={() => setCreandoArea(false)} alGuardar={() => { vehiculos.recargar(); areas.recargar() }} />
     </>
   )
 }

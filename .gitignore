@@ -28,3 +28,8 @@ infra/*
 .claude/settings.json
 .claude/settings.local.json
 !.env.demo
+
+# Paquetes compilados y copias temporales; los diseños originales sí se versionan.
+ops/deploy/**/web-build.tar.gz
+output/*.zip
+output/design-review/public-redesign-backup/

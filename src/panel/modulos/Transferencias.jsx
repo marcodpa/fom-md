@@ -36,6 +36,7 @@ export default function Transferencias() {
   const [aviso, setAviso] = useState('')
   const [ocupado, setOcupado] = useState(false)
   const [creando, setCreando] = useState(false)
+  const [seleccionId, setSeleccionId] = useState(null)
   const [cerrando, setCerrando] = useState(null) // { t, paso }
 
   const lista = useDatos(
@@ -60,6 +61,7 @@ export default function Transferencias() {
       setOcupado(false)
     }
   }
+  const seleccion = lista.datos?.find(t => t.id === seleccionId) ?? lista.datos?.[0]
   const modulo = () => (pestana === 'identidad' ? repo.transferencias.identidad : repo.transferencias.vehiculo)
 
   return (
@@ -75,7 +77,7 @@ export default function Transferencias() {
         {aviso && <p className="pnl-campo-error" role="status">{aviso}</p>}
         <Pestanas opciones={[{ v: 'identidad', t: 'Personas' }, { v: 'vehiculo', t: 'Vehículos' }]} valor={pestana} alCambiar={setPestana} />
 
-        <Tarjeta titulo={pestana === 'identidad' ? 'Transferencias de personas' : 'Transferencias de vehículos'} sinCuerpo>
+        <div className="pnl-admin-dividido"><Tarjeta titulo={pestana === 'identidad' ? 'Transferencias de personas' : 'Transferencias de vehículos'} sinCuerpo>
           <div className="pnl-card-cuerpo">
             <Chips
               opciones={[{ v: 'pending', t: 'En curso' }, { v: 'completed', t: 'Completadas' }, { v: 'rejected', t: 'Rechazadas' }, { v: 'cancelled', t: 'Canceladas' }, { v: '', t: 'Todas' }]}
@@ -95,7 +97,7 @@ export default function Transferencias() {
                 const [esT, esC] = ESTADO[t.estado] ?? [t.estado, 'gris']
                 const siguiente = paso(t)
                 return (
-                  <div className="pnl-fila" key={t.id}>
+                  <div className={`pnl-fila pnl-transfer-card${seleccion?.id === t.id ? ' seleccionada' : ''}`} key={t.id}>
                     <Icono nombre={pestana === 'identidad' ? 'gente' : 'camion'} tam={18} />
                     <div className="pnl-fila-txt">
                       <b>
@@ -111,6 +113,7 @@ export default function Transferencias() {
                       </span>
                     </div>
                     <Tag color={esC}>{esT}</Tag>
+                    <button className="pnl-btn sutil" onClick={()=>setSeleccionId(t.id)} aria-pressed={seleccion?.id === t.id}>Ver detalle</button>
                     {siguiente && (
                       <button type="button" className="pnl-btn primario" disabled={ocupado} onClick={() => actuar(() => modulo().decidir(t, siguiente.clave), 'Paso registrado.')}>
                         {siguiente.texto}
@@ -127,7 +130,16 @@ export default function Transferencias() {
               })}
             </div>
           ))}
-        </Tarjeta>
+        </Tarjeta><aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle de la transferencia">
+          {seleccion ? <><h3>{nombreEmpresa(seleccion.origenId)} <span aria-hidden="true">→</span> {nombreEmpresa(seleccion.destinoId)}</h3><Tag color={ESTADO[seleccion.estado]?.[1] ?? 'gris'}>{ESTADO[seleccion.estado]?.[0] ?? seleccion.estado}</Tag>
+            <ol className="pnl-transfer-pasos">
+              <li className="hecho"><i>1</i><div><b>Solicitud</b><span>{f.fechaHora(seleccion.creadaEn)}</span></div></li>
+              <li className={seleccion.liberadaEn ? 'hecho' : ''}><i>2</i><div><b>Liberación en origen</b><span>{seleccion.liberadaEn ? f.fechaHora(seleccion.liberadaEn) : 'Pendiente'}</span></div></li>
+              <li className={seleccion.aceptadaEn ? 'hecho' : ''}><i>3</i><div><b>Aceptación en destino</b><span>{seleccion.aceptadaEn ? f.fechaHora(seleccion.aceptadaEn) : 'Pendiente'}</span></div></li>
+            </ol>
+            <div className="pnl-audit-detalle"><b>Motivo</b><p>{seleccion.motivo}</p>{seleccion.rolDestino && <p>Rol en destino: {seleccion.rolDestino}</p>}</div>
+          </> : <Vacio icono="comparar" titulo="Sin transferencias" texto="Cuando exista una solicitud podrás consultar sus pasos aquí." />}
+        </Tarjeta></aside></div>
       </div>
 
       <ModalNueva

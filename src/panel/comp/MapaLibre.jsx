@@ -127,7 +127,7 @@ export default function MapaLibre({
   const [sobre, setSobre] = useState(null)
   const [fallaTeselas, setFallaTeselas] = useState(false)
 
-  const esquema = document.documentElement.getAttribute('data-tema') === 'oscuro' ? 'oscuro' : 'claro'
+  const esquema = 'oscuro'
 
   // Crear el mapa una sola vez
   useEffect(() => {

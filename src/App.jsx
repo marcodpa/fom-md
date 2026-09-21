@@ -115,7 +115,7 @@ export default function App() {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
   // La consola y el acceso son producto, no sitio: sin cabecera de marketing.
-  const esConsola = pathname === '/entrar' || pathname.startsWith('/panel')
+  const esConsola = pathname === '/entrar' || pathname === '/cambiar-clave-inicial' || pathname.startsWith('/panel')
   const [ready, setReady] = useState(!isHome)
 
   // Pantalla de carga: solo el home espera. No espera el video entero (son

@@ -5,7 +5,7 @@ import {
   Buscador, Cabecera, Cargando, Chips, ErrorCarga, Tarjeta, Vacio,
 } from '../comp/ui'
 import Mapa from '../comp/Mapa'
-import { estadoUnidad } from '../comp/FichaUnidad'
+import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
 
 const ESTADOS = [
@@ -98,7 +98,10 @@ export default function CentroControl() {
           </Tarjeta>
         )}
         {flota.estado === 'ok' && lista.length > 0 && (
-          <div className="pnl-grid dos-tercios">
+          <div className="pnl-control-grid">
+            <Tarjeta titulo="Unidades">
+              <ListaUnidades vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado} />
+            </Tarjeta>
             <Tarjeta sinCuerpo>
               <Mapa
                 vehiculos={lista}
@@ -106,16 +109,15 @@ export default function CentroControl() {
                 alSeleccionar={setSeleccionado}
                 recorrido={unidad?.recorrido ?? null}
                 alto="clamp(420px, 68vh, 760px)"
+                ficha={false}
               />
             </Tarjeta>
 
-            <Tarjeta titulo="Unidades">
-              <ListaUnidades
-                vehiculos={lista}
-                seleccionado={seleccionado}
-                alSeleccionar={setSeleccionado}
-              />
-            </Tarjeta>
+            <div className="pnl-control-detalle">
+              <Tarjeta titulo="Detalle de la unidad">
+                {seleccionado ? <FichaUnidad unidad={unidad ?? lista.find(v => v.id === seleccionado)} /> : <Vacio icono="pin" titulo="Selecciona una unidad" texto="Elige una unidad de la lista o del mapa para consultar su ficha." />}
+              </Tarjeta>
+            </div>
           </div>
         )}
       </div>

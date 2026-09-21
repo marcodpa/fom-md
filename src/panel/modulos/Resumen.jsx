@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
-import { Cabecera, Cargando, ErrorCarga, Tarjeta, Vacio } from '../comp/ui'
+import { Cabecera, Cargando, ErrorCarga, Tarjeta, Vacio, Kpi } from '../comp/ui'
 import MapaLibre from '../comp/MapaLibre'
+import FichaUnidad from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
@@ -114,7 +115,7 @@ export default function Resumen() {
 
   return (
     <>
-      <Cabecera titulo="Resumen" bajada="Dónde está la flota ahora y qué pasó hoy.">
+      <Cabecera titulo="Resumen" bajada="Toda tu operación, en un solo lugar.">
         {estado === 'ok' && (
           <span className="rs-vivo">
             <i />
@@ -170,74 +171,48 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
     [vehiculos, odts, alertas, inspecciones, ahora],
   )
 
-  return (
-    <div className="rs">
-      <div className="rs-arriba">
-        <Tarjeta
-          titulo="Unidades"
-          accion={<Link to="/panel/flota" className="pnl-link">{total} en total</Link>}
-        >
-          {unidades.length === 0 ? (
-            <Vacio
-              icono="camion"
-              titulo="Sin unidades todavía"
-              texto="Registra la primera desde Vehículos y aparecerá aquí y en el mapa."
-            />
-          ) : (
-            <ul className="rs-unidades">
-              {unidades.map((u) => (
-                <li key={u.id}>
-                  <button
-                    type="button"
-                    className={`rs-unidad${seleccionado === u.id ? ' activa' : ''}`}
-                    onClick={() => alSeleccionar(seleccionado === u.id ? null : u.id)}
-                    aria-pressed={seleccionado === u.id}
-                  >
-                    <i className={`pnl-punto ${u.senal.viva ? 'on' : 'off'}`} />
-                    <span className="rs-unidad-txt">
-                      <b>
-                        {u.alias} <code>{u.placa}</code>
-                      </b>
-                      <span>
-                        {u.conductorNombre} · {`${u.marca} ${u.modelo}`.trim()}
-                      </span>
-                    </span>
-                    <span className={`rs-unidad-senal${u.senal.viva ? ' ok' : ' malo'}`}>
-                      {u.senal.viva ? 'Reportando' : 'Sin señal'}
-                      <em>{u.senal.texto}</em>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="rs-pista">Toca una unidad para centrarla en el mapa y abrir su ficha.</p>
-        </Tarjeta>
+  const seleccion = unidades.find(u => u.id === seleccionado) ?? unidades.find(u => u.lat != null) ?? unidades[0]
+  const sabeMarcha = unidades.some(u => u.estadoMarcha != null)
+  const enMarcha = unidades.filter(u => u.estadoMarcha === 'en_marcha').length
+  const activas = sabeMarcha ? enMarcha : reportando
 
-        <section className="rs-mapa" aria-label="Mapa de la flota">
-          <MapaLibre
-            vehiculos={unidades}
-            seleccionado={seleccionado}
-            alSeleccionar={alSeleccionar}
-            alto="var(--rs-alto)"
-            leyenda={false}
-          />
-          <Link to="/panel/mapa" className="rs-mapa-enlace">
-            <Icono nombre="mapa" tam={14} />
-            Centro de control
-          </Link>
-          <div className="pnl-cifras" aria-label="Cifras del día">
-            <Cifra
-              etiqueta="Reportando"
-              valor={`${reportando} de ${total}`}
-              tono={total === 0 ? '' : reportando === total ? 'ok' : 'aviso'}
-            />
-            <Cifra etiqueta="Sin inspección hoy" valor={num(sinInspeccion)} tono={tono(sinInspeccion)} />
-            <Cifra etiqueta="Docs por vencer" valor={num(r.docsPorVencer)} tono={tono(r.docsPorVencer)} />
-            <Cifra etiqueta="Órdenes abiertas" valor={num(odtAbiertas)} tono={tono(odtAbiertas)} />
-            <Cifra etiqueta="Alertas sin leer" valor={num(r.alertasSinLeer)} tono={tono(r.alertasSinLeer)} />
+  return (
+    <div className="pnl-resumen">
+      <div className="pnl-resumen-metricas">
+        <Link to="/panel/flota" className="pnl-flota-metrica">
+          <span className="pnl-metrica-icono"><Icono nombre="camion" tam={28} /></span>
+          <div><h2>Flota de vehículos</h2><strong>{total}</strong><small>vehículos</small></div>
+          <div className="pnl-flota-desglose">
+            <div className="pnl-flota-barra"><i style={{ '--proporcion': `${total ? activas / total * 100 : 0}%` }} /></div>
+            <div className="pnl-flota-leyenda">
+              <span>{activas} {sabeMarcha ? 'en marcha' : 'reportando'}</span>
+              <span>{total - activas} {sabeMarcha ? 'detenidos' : 'sin señal'}</span>
+            </div>
           </div>
-        </section>
+        </Link>
+        <Kpi titulo="ODT abiertas" valor={odtAbiertas} icono="llave" nota="Órdenes de trabajo" a="/panel/mantenimiento" />
+        <Kpi titulo="Alertas nuevas" valor={num(r.alertasSinLeer)} icono="campana" nota="Pendientes de leer" a="/panel/alertas" />
+      </div>
+      <div className="pnl-resumen-central">
+        <div className="pnl-resumen-mapa">
+          <Tarjeta titulo="Vehículos en tiempo real" accion={<Link to="/panel/mapa" className="pnl-link">Ver centro de control →</Link>} sinCuerpo>
+            <MapaLibre vehiculos={unidades} seleccionado={seleccion?.id} alSeleccionar={alSeleccionar} alto="clamp(360px, 48vh, 570px)" leyenda={false} ficha={false} />
+          </Tarjeta>
+        </div>
+        <div className="pnl-resumen-unidad">
+        <Tarjeta titulo="Vehículo seleccionado" accion={unidades.length > 0 && (
+          <select className="pnl-input pnl-resumen-select" aria-label="Seleccionar vehículo" value={seleccion?.id ?? ''} onChange={e => alSeleccionar(e.target.value)}>
+            {unidades.map(u => <option key={u.id} value={u.id}>{u.alias} · {u.placa}</option>)}
+          </select>
+        )}>
+          {seleccion ? <FichaUnidad unidad={seleccion} /> : <Vacio icono="camion" titulo="Sin unidades todavía" texto="Las unidades registradas aparecerán aquí." accion={<Link className="pnl-btn" to="/panel/flota">Ver vehículos</Link>} />}
+        </Tarjeta>
+        </div>
+      </div>
+      <div className="pnl-resumen-acciones">
+        <Kpi titulo="Inspecciones de hoy" valor={num(r.inspeccionesHoy)} icono="inspeccion" nota={sinInspeccion == null ? 'Consulta el historial' : `${sinInspeccion} unidades pendientes`} a="/panel/inspecciones" />
+        <Kpi titulo="Mantenimiento" valor={odtAbiertas} icono="llave" nota="Órdenes pendientes y en revisión" tono={odtAbiertas ? 'aviso' : ''} a="/panel/mantenimiento" />
+        <Kpi titulo="Documentos por vencer" valor={num(r.docsPorVencer)} icono="documento" nota="Revisa los próximos vencimientos" tono={r.docsPorVencer ? 'aviso' : ''} a="/panel/documentos" />
       </div>
 
       <Tarjeta

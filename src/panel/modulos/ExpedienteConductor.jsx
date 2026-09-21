@@ -9,6 +9,7 @@ import { Anillo, BarrasH } from '../comp/Grafico'
 import * as f from '../datos/formato'
 import { color, estadoDocumento, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
+import VehicleVisual from '../../components/VehicleVisual'
 
 const PESTANAS = [
   { v: 'datos', t: 'Datos' },
@@ -254,6 +255,7 @@ function UnidadAsignada({ persona: p, unidades, cargandoFlota, guardado, alAsign
       titulo="Unidad asignada"
       accion={guardado ? <Tag color="verde">Guardado</Tag> : null}
     >
+      {p.unidad && <VehicleVisual modelo={p.unidad.modelo ?? ''} />}
       <div className="pnl-filas">
         {p.unidad ? (
           <div className="pnl-fila">

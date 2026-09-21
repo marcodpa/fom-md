@@ -3,7 +3,7 @@ import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import {
-  Cabecera, Campo, Cargando, Chips, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
+  Cabecera, Campo, Cargando, Chips, Datos, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
@@ -89,6 +89,8 @@ export default function AdminPagos() {
 
 function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, aviso, cambiarEstado }) {
   const { todos, lista, empresas } = datos
+  const [seleccionId, setSeleccionId] = useState(null)
+  const seleccion = lista.find(p => p.id === seleccionId) ?? lista[0]
 
   const suma = (e) => todos.filter((p) => p.estado === e).reduce((a, p) => a + p.monto, 0)
   const cuenta = (e) => (e ? todos.filter((p) => p.estado === e).length : todos.length)
@@ -104,7 +106,7 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
 
       {aviso && <p className="pnl-campo-error" role="alert">{aviso}</p>}
 
-      <Tarjeta
+      <div className="pnl-admin-dividido"><Tarjeta
         titulo="Registro de cuotas"
         accion={
           <select
@@ -154,8 +156,8 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
               </thead>
               <tbody>
                 {lista.map((p) => (
-                  <tr key={p.id}>
-                    <td><b>{p.empresaNombre}</b></td>
+                  <tr key={p.id} className={seleccion?.id === p.id ? 'seleccionada' : ''}>
+                    <td><button className="pnl-table-action" onClick={() => setSeleccionId(p.id)} aria-pressed={seleccion?.id === p.id}>{p.empresaNombre}</button></td>
                     <td>{p.periodo}</td>
                     <td className="num"><b>{f.moneda(p.monto)}</b> {p.moneda}</td>
                     <td>
@@ -184,7 +186,11 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
             </table>
           </div>
         )}
-      </Tarjeta>
+      </Tarjeta><aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle de la cuota">
+        {seleccion ? <><h3>{seleccion.empresaNombre}</h3><Tag color={color('pago_estado',seleccion.estado)}>{etiqueta('pago_estado',seleccion.estado)}</Tag>
+        <Datos items={[{etiqueta:'Período',valor:seleccion.periodo},{etiqueta:'Monto',valor:f.moneda(seleccion.monto)},{etiqueta:'Moneda',valor:seleccion.moneda},{etiqueta:'Pagado el',valor:seleccion.pagadoEn ? f.fecha(seleccion.pagadoEn) : 'Pendiente'},{etiqueta:'Nota',valor:seleccion.nota || '—'}]} />
+        <div className="pnl-chips">{seleccion.estado !== 'pagado' && <button className="pnl-btn primario" onClick={()=>cambiarEstado(seleccion,'pagado')}>Marcar pagada</button>}{seleccion.estado === 'pendiente' && <button className="pnl-btn" onClick={()=>cambiarEstado(seleccion,'vencido')}>Marcar vencida</button>}</div></> : <Vacio icono="costos" titulo="Sin cuota seleccionada" texto="Aquí verás su período, monto y estado." />}
+      </Tarjeta></aside></div>
     </>
   )
 }

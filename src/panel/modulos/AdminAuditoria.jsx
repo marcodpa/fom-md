@@ -2,7 +2,7 @@ import { useState } from 'react'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import {
-  Buscador, Cabecera, Cargando, ErrorCarga, Tag, Tarjeta, Vacio,
+  Buscador, Cabecera, Cargando, Datos, ErrorCarga, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
@@ -63,8 +63,11 @@ export default function AdminAuditoria() {
   const [tipo, setTipo] = useState('')
   const [empresaId, setEmpresaId] = useState('')
   const [q, setQ] = useState('')
+  const [seleccionId, setSeleccionId] = useState(null)
 
   const { datos, estado, error, recargar } = useDatos(() => cargar(tipo, empresaId, q), [tipo, empresaId, q])
+
+  const seleccion = datos?.lista.find(a => a.id === seleccionId) ?? datos?.lista[0]
 
   return (
     <>
@@ -77,7 +80,7 @@ export default function AdminAuditoria() {
         {estado === 'cargando' && <Cargando filas={8} />}
         {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
-          <Tarjeta
+          <div className="pnl-admin-dividido"><Tarjeta
             titulo={`${datos.lista.length} eventos`}
             accion={<Buscador valor={q} alCambiar={setQ} placeholder="Buscar por persona, objetivo o detalle…" />}
             sinCuerpo
@@ -114,28 +117,16 @@ export default function AdminAuditoria() {
                 <Vacio icono="auditoria" titulo="Sin eventos" texto="Ninguna acción coincide con el filtro." />
               </div>
             ) : (
-              <div className="pnl-filas">
-                {datos.lista.map((a) => {
-                  const v = vista(a.tipo)
-                  return (
-                    <div className="pnl-fila" key={a.id}>
-                      <Icono nombre={v.i} tam={18} />
-                      <div className="pnl-fila-txt">
-                        <b>{a.objetivo}</b>
-                        <span>
-                          {[a.detalle, `por ${a.actorNombre}`, a.empresaNombre].filter(Boolean).join(' · ')}
-                        </span>
-                      </div>
-                      <div className="pnl-doble" style={{ textAlign: 'right' }}>
-                        <Tag color={v.c} plano>{v.t}</Tag>
-                        <span title={f.fechaHora(a.fecha)}>{f.desde(a.fecha)}</span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              <div className="pnl-tabla-wrap"><table className="pnl-tabla"><thead><tr><th>Fecha y hora</th><th>Actor</th><th>Acción</th><th>Recurso</th><th>Empresa</th></tr></thead><tbody>
+                {datos.lista.map(a => <tr key={a.id} className={seleccion?.id === a.id ? 'seleccionada' : ''}>
+                  <td><button className="pnl-table-action" onClick={()=>setSeleccionId(a.id)} aria-pressed={seleccion?.id === a.id}>{f.fechaHora(a.fecha)}</button></td>
+                  <td>{a.actorNombre}</td><td><Tag color={vista(a.tipo).c}>{vista(a.tipo).t}</Tag></td><td>{a.objetivo}</td><td>{a.empresaNombre || '—'}</td>
+                </tr>)}
+              </tbody></table></div>
             )}
-          </Tarjeta>
+          </Tarjeta><aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle del evento">
+            {seleccion ? <><h3>{vista(seleccion.tipo).t}</h3><Tag color={vista(seleccion.tipo).c}>Registrado</Tag><Datos items={[{etiqueta:'Fecha y hora',valor:f.fechaHora(seleccion.fecha)},{etiqueta:'Actor',valor:seleccion.actorNombre},{etiqueta:'Recurso',valor:seleccion.objetivo},{etiqueta:'Empresa',valor:seleccion.empresaNombre || '—'}]} /><p className="pnl-audit-detalle">{seleccion.detalle || 'Sin detalle adicional.'}</p></> : <Vacio icono="auditoria" titulo="Sin evento seleccionado" texto="Selecciona una fecha para consultar su detalle." />}
+          </Tarjeta></aside></div>
         )}
       </div>
     </>

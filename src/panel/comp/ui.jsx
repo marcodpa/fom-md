@@ -140,19 +140,20 @@ function Cifra({ valor }) {
 export function Kpi({ titulo, valor, icono, tono = '', nota, notaTono = '', a, onClick }) {
   const contenido = (
     <>
+      {icono && <span className={`pnl-kpi-icono ${tono}`}><Icono nombre={icono} tam={25} /></span>}
       <div className="pnl-kpi-top">
         <span>{titulo}</span>
-        {icono && <Icono nombre={icono} tam={16} />}
       </div>
       <b className={tono}>
-        <Cifra valor={valor} />
+        <Cifra valor={valor ?? '—'} />
       </b>
       {nota && <em className={notaTono}>{nota}</em>}
     </>
   )
-  if (a) return <Link to={a} className="pnl-kpi">{contenido}</Link>
-  if (onClick) return <button type="button" className="pnl-kpi" onClick={onClick}>{contenido}</button>
-  return <div className="pnl-kpi">{contenido}</div>
+  const clase = `pnl-kpi${icono ? ' con-icono' : ''}`
+  if (a) return <Link to={a} className={clase}>{contenido}</Link>
+  if (onClick) return <button type="button" className={clase} onClick={onClick}>{contenido}</button>
+  return <div className={clase}>{contenido}</div>
 }
 
 /** Buscador con ícono. */
@@ -202,21 +203,38 @@ export function Barra({ valor, tono = '' }) {
 
 /** Ventana modal accesible (Escape y clic fuera cierran). */
 export function Modal({ titulo, abierto, alCerrar, children, ancho = 520 }) {
+  const dialogo = useRef(null)
+  const cerrarRef = useRef(alCerrar)
+  cerrarRef.current = alCerrar
   useEffect(() => {
     if (!abierto) return undefined
-    const onKey = (e) => e.key === 'Escape' && alCerrar()
+    const previo = document.activeElement
+    const overflow = document.body.style.overflow
+    const enfocables = () => Array.from(dialogo.current?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]') ?? []).filter(e => e.getClientRects().length)
+    const marco = requestAnimationFrame(() => (enfocables()[0] ?? dialogo.current)?.focus())
+    const onKey = (e) => {
+      if (e.key === 'Escape') cerrarRef.current()
+      if (e.key !== 'Tab') return
+      const elementos = enfocables()
+      if (!elementos.length) { e.preventDefault(); return }
+      const primero = elementos[0], ultimo = elementos.at(-1)
+      if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus() }
+      else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus() }
+    }
     window.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
     return () => {
       window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
+      cancelAnimationFrame(marco)
+      document.body.style.overflow = overflow
+      if (previo?.isConnected) previo.focus()
     }
-  }, [abierto, alCerrar])
+  }, [abierto])
 
   if (!abierto) return null
   return (
     <div className="pnl-modal-fondo" onMouseDown={(e) => e.target === e.currentTarget && alCerrar()}>
-      <div className="pnl-modal" role="dialog" aria-modal="true" aria-label={titulo} style={{ maxWidth: ancho }}>
+      <div ref={dialogo} tabIndex={-1} className="pnl-modal" role="dialog" aria-modal="true" aria-label={titulo} style={{ maxWidth: ancho }}>
         <div className="pnl-modal-cab">
           <h2>{titulo}</h2>
           <button type="button" className="pnl-modal-x" onClick={alCerrar} aria-label="Cerrar">

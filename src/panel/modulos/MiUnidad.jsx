@@ -7,6 +7,7 @@ import MapaLibre from '../comp/MapaLibre'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
+import FichaUnidad from '../comp/FichaUnidad'
 
 // ============================================================
 // MI UNIDAD — el inicio del conductor
@@ -165,7 +166,7 @@ export default function MiUnidad() {
       )}
 
       {!cargando && !error && unidad && (
-        <div className="mu">
+        <div className="mu mu-redesign">
           {/* --- Franja de identidad ------------------------------------ */}
           <section className="pnl-card mu-identidad" aria-label="Identidad de la unidad">
             <div className="mu-identidad-icono" aria-hidden="true">
@@ -192,7 +193,8 @@ export default function MiUnidad() {
             </div>
           </section>
 
-          {/* --- Mapa con las cifras encima ----------------------------- */}
+          <div className="mu-vehicle"><Tarjeta titulo="Tu vehículo"><FichaUnidad unidad={unidad} conEnlace={false} /></Tarjeta></div>
+          {/* --- Posición y cifras de la unidad -------------------------- */}
           <section className="mu-mapa" aria-label="Posición de la unidad">
             {enMapa.length > 0 ? (
               <MapaLibre

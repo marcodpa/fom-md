@@ -1,0 +1,7 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>FOM · Estados de prueba locales</title><style>body{font:18px system-ui;background:#0a0d12;color:#f3f5f8;padding:40px}button{padding:16px;margin:12px;cursor:pointer}</style><h1>Estados de prueba locales</h1><p>Solo modifica la sesión de demostración del servidor 5174.</p><button id="driver">Revisar Mi unidad</button><button id="password">Revisar cambio de contraseña</button><button id="admin">Revisar administrador</button><script type="module">
+import repo from '/src/panel/datos/repo.js'
+const set = (perfil, debeCambiarClave=false) => { localStorage.setItem('fom.panel.sesion',JSON.stringify({perfil, debeCambiarClave, expira:Date.now()+3600000})); location.href = debeCambiarClave ? '/cambiar-clave-inicial' : '/panel' }
+document.querySelector('#driver').onclick=async()=>{const [p]=await repo.personal.listar({soloConductores:true});set({...p,userId:p.id,rol:'conductor',rolNombre:'Conductor',empresa:'Empresa de ejemplo',iniciales:'ER'})}
+document.querySelector('#password').onclick=()=>set({id:'review',nombre:'Usuario de prueba',rol:'conductor'},true)
+document.querySelector('#admin').onclick=()=>set({id:'review-admin',nombre:'Administrador de prueba',rol:'admin_fom',rolNombre:'Administrador FOM',empresa:'FOM · Demostración',iniciales:'AD'})
+</script></html>

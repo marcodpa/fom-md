@@ -3,7 +3,7 @@ import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import {
-  Buscador, Cabecera, Campo, Cargando, Chips, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
+  Buscador, Cabecera, Campo, Cargando, Chips, Datos, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import * as f from '../datos/formato'
 import { COMPANY_TIPO, color, etiqueta } from '../datos/catalogos'
@@ -88,6 +88,8 @@ export default function AdminEmpresas() {
 }
 
 function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eliminar, abrirPredefinidas }) {
+  const [seleccionId, setSeleccionId] = useState(null)
+  const seleccion = lista.find(e => e.id === seleccionId) ?? lista[0]
   const operativas = lista.filter((e) => !e.respaldo)
   const activas = operativas.filter((e) => e.servicioActivo).length
   const deudaTotal = operativas.reduce((a, e) => a + e.deuda, 0)
@@ -103,7 +105,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
 
       {aviso && <p className="pnl-campo-error" role="alert">{aviso}</p>}
 
-      <Tarjeta
+      <div className="pnl-admin-dividido"><Tarjeta
         titulo="Todos los entes"
         accion={<Buscador valor={q} alCambiar={setQ} placeholder="Buscar por nombre, RIF o contacto…" />}
         sinCuerpo
@@ -140,10 +142,10 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
               </thead>
               <tbody>
                 {lista.map((e) => (
-                  <tr key={e.id}>
+                  <tr key={e.id} className={seleccion?.id === e.id ? 'seleccionada' : ''}>
                     <td>
                       <div className="pnl-doble">
-                        <b>{e.nombre}</b>
+                        <button className="pnl-table-action" type="button" aria-pressed={seleccion?.id === e.id} onClick={() => setSeleccionId(e.id)}>{e.nombre}</button>
                         <span>{e.rif}</span>
                       </div>
                     </td>
@@ -177,21 +179,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
                       )}
                     </td>
                     <td className="num">
-                      {!e.respaldo && (
-                        <div className="pnl-chips">
-                          {e.tipo === 'estandar' && (
-                            <button type="button" className="pnl-btn sutil" onClick={() => abrirPredefinidas(e)}>
-                              Compañías
-                            </button>
-                          )}
-                          <button type="button" className="pnl-btn sutil" onClick={() => alternarServicio(e)}>
-                            {e.servicioActivo ? 'Suspender' : 'Reactivar'}
-                          </button>
-                          <button type="button" className="pnl-btn sutil" onClick={() => eliminar(e)}>
-                            Eliminar
-                          </button>
-                        </div>
-                      )}
+                      <button type="button" className="pnl-btn sutil" onClick={() => setSeleccionId(e.id)} aria-label={`Ver detalles de ${e.nombre}`}>Ver →</button>
                     </td>
                   </tr>
                 ))}
@@ -200,6 +188,27 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
           </div>
         )}
       </Tarjeta>
+      <aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle del ente">
+        {seleccion ? <>
+          <span className="pnl-metrica-icono"><Icono nombre="empresa" tam={28} /></span>
+          <h3>{seleccion.nombre}</h3>
+          <Tag color={seleccion.servicioActivo ? 'verde' : 'ambar'}>{seleccion.servicioActivo ? 'Servicio activo' : 'Servicio suspendido'}</Tag>
+          <Datos items={[
+            {etiqueta:'Tipo de ente',valor:seleccion.tipoEtiqueta},
+            {etiqueta:'Usuarios',valor:seleccion.usuarios},
+            {etiqueta:'Vehículos',valor:seleccion.vehiculos},
+            {etiqueta:'Saldo',valor:f.moneda(seleccion.deuda)},
+            {etiqueta:'Contacto',valor:seleccion.contacto || '—'},
+            {etiqueta:'Correo',valor:seleccion.email || '—'},
+            {etiqueta:'Teléfono',valor:seleccion.telefono || '—'},
+          ]} />
+          {!seleccion.respaldo && <div className="pnl-chips">
+            {seleccion.tipo === 'estandar' && <button type="button" className="pnl-btn" onClick={() => abrirPredefinidas(seleccion)}>Compañías asociadas</button>}
+            <button type="button" className="pnl-btn" onClick={() => alternarServicio(seleccion)}>{seleccion.servicioActivo ? 'Suspender servicio' : 'Reactivar servicio'}</button>
+            <button type="button" className="pnl-btn sutil" onClick={() => eliminar(seleccion)}>Eliminar ente</button>
+          </div>}
+        </> : <Vacio icono="empresa" titulo="Selecciona un ente" texto="Consulta su información y servicio." />}
+      </Tarjeta></aside></div>
     </>
   )
 }

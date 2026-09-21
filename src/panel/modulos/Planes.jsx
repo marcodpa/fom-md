@@ -75,6 +75,13 @@ export default function Planes() {
       <div className="pnl-cuerpo">
         {aviso && <p className="pnl-campo-error" role="status">{aviso}</p>}
 
+        {planes.estado === 'ok' && planes.datos.length > 0 && <div className="pnl-grid k2 pnl-plan-preview">
+          {planes.datos.slice(0, 2).map(p => <Tarjeta key={p.id} titulo={p.servicio} accion={<Tag color={p.activo ? 'verde' : 'gris'}>{p.activo ? 'Activo' : 'Apagado'}</Tag>}>
+            <div className="pnl-plan-intervalo"><span className="pnl-metrica-icono"><Icono nombre="sync" tam={24} /></span><div><b>{[p.cadaKm ? `Cada ${f.numero(p.cadaKm)} km` : '', p.cadaDias ? `${p.cadaDias} días` : ''].filter(Boolean).join(' / ')}</b><p>{ESTRATEGIA[p.estrategia] ?? p.estrategia} · {p.unidades} unidades</p></div></div>
+            <button type="button" className="pnl-btn sutil" onClick={() => setCubriendo(p)}>Cubrir unidad →</button>
+          </Tarjeta>)}
+        </div>}
+
         <Pestanas
           opciones={[{ v: 'acciones', t: 'Acciones que vencen' }, { v: 'planes', t: 'Planes' }]}
           valor={pestana}

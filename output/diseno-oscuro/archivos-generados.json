@@ -1,0 +1,260 @@
+[
+  {
+    "id": "01",
+    "slug": "resumen",
+    "title": "Resumen",
+    "route": "/panel",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-6054fb11-7e83-476d-b784-91a8ae20fb3e.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-6054fb11-7e83-476d-b784-91a8ae20fb3e.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "02",
+    "slug": "centro-control",
+    "title": "Centro de control",
+    "route": "/panel/mapa",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-c163724d-8856-44fe-8f23-c5831f6f8b5a.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-c163724d-8856-44fe-8f23-c5831f6f8b5a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "03",
+    "slug": "alertas",
+    "title": "Alertas",
+    "route": "/panel/alertas",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-6e89a0f7-ac4d-4c5f-886b-f85a112078ac.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-6e89a0f7-ac4d-4c5f-886b-f85a112078ac.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "04",
+    "slug": "vehiculos",
+    "title": "Vehículos",
+    "route": "/panel/flota",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-97141f0f-911a-404f-859e-307918c27faf.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-97141f0f-911a-404f-859e-307918c27faf.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "05",
+    "slug": "expediente-vehiculo",
+    "title": "Expediente de vehículo",
+    "route": "/panel/flota/:id",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-67c07192-ba39-4925-b29a-ea4a4059b26c.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-67c07192-ba39-4925-b29a-ea4a4059b26c.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "06",
+    "slug": "eventos-sos",
+    "title": "Eventos y SOS",
+    "route": "/panel/seguridad",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-90434f0d-efcd-4c77-832a-a62bb142ad52.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-90434f0d-efcd-4c77-832a-a62bb142ad52.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "07",
+    "slug": "jornadas",
+    "title": "Jornadas de conducción",
+    "route": "/panel/jornadas",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-7fa75994-49ec-4bfa-8255-10e31afc8108.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-7fa75994-49ec-4bfa-8255-10e31afc8108.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "08",
+    "slug": "mantenimiento",
+    "title": "Mantenimiento",
+    "route": "/panel/mantenimiento",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-1efe4494-dafe-44ac-a2d9-71919ee9c4e7.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-1efe4494-dafe-44ac-a2d9-71919ee9c4e7.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "09",
+    "slug": "planes-mantenimiento",
+    "title": "Planes de mantenimiento",
+    "route": "/panel/mantenimiento/planes",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-acda61ae-3f2d-4102-bbc7-50877b7abb24.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-acda61ae-3f2d-4102-bbc7-50877b7abb24.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "10",
+    "slug": "inspecciones",
+    "title": "Inspecciones",
+    "route": "/panel/inspecciones",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-1cc090fc-31bb-470e-8bbf-8cb84e675848.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-1cc090fc-31bb-470e-8bbf-8cb84e675848.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "11",
+    "slug": "programa-inspecciones",
+    "title": "Programa de inspecciones",
+    "route": "/panel/inspecciones/programa",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-5f45428c-46dd-42e1-918f-b17d48c1fee1.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-5f45428c-46dd-42e1-918f-b17d48c1fee1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "12",
+    "slug": "documentos",
+    "title": "Documentos",
+    "route": "/panel/documentos",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-44de7712-791f-4b1e-980c-6fa8b19ed58d.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-44de7712-791f-4b1e-980c-6fa8b19ed58d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "13",
+    "slug": "gente",
+    "title": "Gente",
+    "route": "/panel/personal ; /panel/admin/usuarios",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-f98131bc-e35e-4280-a784-1133348ec05b.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-f98131bc-e35e-4280-a784-1133348ec05b.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "14",
+    "slug": "expediente-conductor",
+    "title": "Expediente de conductor",
+    "route": "/panel/personal/:id",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-221568bf-064b-4f93-b156-d533533990f1.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-221568bf-064b-4f93-b156-d533533990f1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "15",
+    "slug": "reportes",
+    "title": "Reportes",
+    "route": "/panel/reportes",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-80b538be-c441-4bd6-9dc9-39a28971193d.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-80b538be-c441-4bd6-9dc9-39a28971193d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "16",
+    "slug": "mi-unidad",
+    "title": "Mi unidad · Conductor",
+    "route": "/panel (rol conductor)",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-4fdc397d-c6a2-424f-827a-1961816cadf8.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-4fdc397d-c6a2-424f-827a-1961816cadf8.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "17",
+    "slug": "empresas",
+    "title": "Empresas",
+    "route": "/panel/admin/empresas",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-645af9d0-05f2-4321-bf71-0170f3d2f2d1.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-645af9d0-05f2-4321-bf71-0170f3d2f2d1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "18",
+    "slug": "toda-plataforma",
+    "title": "Toda la plataforma",
+    "route": "/panel/admin/plataforma",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-3c6971f8-b706-4fe2-914b-fdec163c9cee.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-3c6971f8-b706-4fe2-914b-fdec163c9cee.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "19",
+    "slug": "transferencias",
+    "title": "Transferencias",
+    "route": "/panel/admin/transferencias",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-70f29b13-1fcd-4bf4-be5d-9d75d21db09f.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-70f29b13-1fcd-4bf4-be5d-9d75d21db09f.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "20",
+    "slug": "pagos",
+    "title": "Pagos del servicio",
+    "route": "/panel/admin/pagos",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-9a877ea3-82e9-4a6f-b299-47b5f8d81d83.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-9a877ea3-82e9-4a6f-b299-47b5f8d81d83.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "21",
+    "slug": "gps",
+    "title": "Inventario GPS",
+    "route": "/panel/admin/gps",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-d73bbef3-c92f-4734-bd8a-7238d155f2c9.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-d73bbef3-c92f-4734-bd8a-7238d155f2c9.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "22",
+    "slug": "auditoria",
+    "title": "Auditoría",
+    "route": "/panel/admin/auditoria",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-96573953-abd5-445b-9982-f44b7ef6c1d7.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-96573953-abd5-445b-9982-f44b7ef6c1d7.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "23",
+    "slug": "inicio",
+    "title": "Inicio",
+    "route": "/",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-07d6b021-52ea-4b15-bfaa-74ab93c81b96.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-07d6b021-52ea-4b15-bfaa-74ab93c81b96.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "24",
+    "slug": "plataforma",
+    "title": "Plataforma",
+    "route": "/plataforma",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-496822ce-2c0b-4421-8206-7ca0d3ba0c11.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-496822ce-2c0b-4421-8206-7ca0d3ba0c11.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "previous_path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-08e38068-8131-47e1-8abd-dbfcdd1b5122.png"
+  },
+  {
+    "id": "25",
+    "slug": "funciones",
+    "title": "Funciones",
+    "route": "/funciones",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-18f1214e-a4dc-4178-9bce-1ef70cb62a6e.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-18f1214e-a4dc-4178-9bce-1ef70cb62a6e.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "26",
+    "slug": "seguridad-publica",
+    "title": "Seguridad · Sitio público",
+    "route": "/seguridad",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-e3d09ad3-b258-444c-b59d-ff002c32e381.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-e3d09ad3-b258-444c-b59d-ff002c32e381.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "27",
+    "slug": "areas",
+    "title": "Áreas operativas",
+    "route": "/areas",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-c286fd73-8204-4e36-999f-e874a9e36936.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-c286fd73-8204-4e36-999f-e874a9e36936.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "28",
+    "slug": "contacto",
+    "title": "Contacto",
+    "route": "/contacto",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-e37b95e8-8848-47da-a4a8-5fbb4154693f.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-e37b95e8-8848-47da-a4a8-5fbb4154693f.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "29",
+    "slug": "preguntas-frecuentes",
+    "title": "Preguntas frecuentes",
+    "route": "/preguntas-frecuentes",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-d8371018-3f37-4813-b947-cf921e5019ff.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-d8371018-3f37-4813-b947-cf921e5019ff.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "30",
+    "slug": "iniciar-sesion",
+    "title": "Iniciar sesión",
+    "route": "/entrar",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-060b7066-81f0-4072-b7a4-5ce5203f679d.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-060b7066-81f0-4072-b7a4-5ce5203f679d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  },
+  {
+    "id": "31",
+    "slug": "cambiar-contrasena",
+    "title": "Cambiar contraseña inicial",
+    "route": "/cambiar-clave-inicial",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-26e24769-45e9-4f78-8553-647471a79830.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-26e24769-45e9-4f78-8553-647471a79830.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "previous_path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-2f5d9ba8-0ce4-464d-9f56-5ee361476b48.png"
+  },
+  {
+    "id": "32",
+    "slug": "pagina-no-encontrada",
+    "title": "Página no encontrada",
+    "route": "* (404)",
+    "path": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-2a78a835-05ea-4e19-a444-ff1fdca3375c.png",
+    "output_hint": "Generated images are saved to C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa as C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-2a78a835-05ea-4e19-a444-ff1fdca3375c.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+  }
+]

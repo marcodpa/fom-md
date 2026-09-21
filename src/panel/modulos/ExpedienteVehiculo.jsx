@@ -12,6 +12,7 @@ import {
 import Mapa from '../comp/Mapa'
 import { BarrasH } from '../comp/Grafico'
 import { Icono } from '../Iconos'
+import FichaUnidad from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
 
@@ -256,6 +257,7 @@ export default function ExpedienteVehiculo() {
             {/* ---------------- Resumen ---------------- */}
             {pestana === 'resumen' && (
               <>
+                <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto="470px" ficha={false} /></Tarjeta></div>
                 <Tarjeta titulo="Ficha de la unidad">
                   <Datos
                     items={[
@@ -314,19 +316,7 @@ export default function ExpedienteVehiculo() {
                   </div>
                 </Tarjeta>
 
-                <Tarjeta
-                  titulo="Recorrido del día"
-                  accion={<span className="pnl-link">{v.ubicacionTexto}</span>}
-                  sinCuerpo
-                >
-                  <Mapa
-                    vehiculos={[v]}
-                    seleccionado={pinSeleccionado}
-                    alSeleccionar={setPinSeleccionado}
-                    recorrido={v.recorrido}
-                    alto="clamp(260px, 38vh, 400px)"
-                  />
-                </Tarjeta>
+
               </>
             )}
 

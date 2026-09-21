@@ -20,8 +20,9 @@ export const HAY_API = Boolean(BASE)
 function traducir(estado, cuerpo) {
   const detalle = typeof cuerpo === 'string' ? cuerpo : cuerpo?.message || cuerpo?.error
   if (estado === 0) {
-    return 'Sin conexión con el servidor. Revisa que el túnel SSH siga abierto.'
+    return 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.'
   }
+  if (estado === 429) return 'Se alcanzó el límite de consultas. Espera un momento y vuelve a intentarlo.'
   if (estado === 401) return 'Tu sesión no es válida o expiró. Vuelve a entrar.'
   if (estado === 403) {
     if (String(detalle || '').includes('Initial password change pending')) {
@@ -43,7 +44,7 @@ function traducir(estado, cuerpo) {
     }
     return 'Ese recurso no existe en el servidor.'
   }
-  if (estado === 502) return detalle || 'El puente no alcanzó la API. ¿Está abierto el túnel SSH?'
+  if (estado === 502) return 'El servicio no está disponible en este momento. Inténtalo de nuevo en unos minutos.'
   if (estado === 503) return detalle || 'El servidor no está listo para responder esto todavía.'
   return detalle || `El servidor respondió ${estado}.`
 }

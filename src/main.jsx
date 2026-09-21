@@ -9,6 +9,7 @@ import './styles/pages.css'
 import './styles/mockups.css'
 import './styles/panel.css'
 import './styles/login.css'
+import './styles/redesign.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -52,23 +52,16 @@ export default function Plataforma() {
             </div>
           ) : (
             <>
-              <div className="pnl-filas">
-                {personas.datos.map((p) => {
-                  const rol = rolCanonico(p.rol)
-                  return (
-                    <div className="pnl-fila" key={p.id}>
-                      <Icono nombre="gente" tam={18} />
-                      <div className="pnl-fila-txt">
-                        <b>{p.nombre} <span style={{ fontWeight: 500, color: 'var(--e-texto-2)' }}>· {p.email}</span></b>
-                        <span>{p.empresaNombre} · {p.empresaCodigo}</span>
-                      </div>
-                      <Tag color={COLOR_ROL[rol] ?? 'gris'}>{etiquetaRolSesion(rol)}</Tag>
-                      <Tag color={COLOR_ESTADO[p.estado] ?? 'gris'} plano>{ESTADO[p.estado] ?? p.estado}</Tag>
-                      <Link to={`/panel/personal/${p.userId}`} className="pnl-btn sutil">Ver ficha</Link>
-                    </div>
-                  )
-                })}
-              </div>
+              <div className="pnl-tabla-wrap"><table className="pnl-tabla"><thead><tr><th>Persona</th><th>Ente</th><th>Rol</th><th>Estado</th><th>Código</th><th aria-label="Acciones" /></tr></thead><tbody>
+                {personas.datos.map(p => <tr key={p.id}>
+                  <td><div className="pnl-persona"><i className="pnl-avatar">{f.iniciales(p.nombre)}</i><div className="pnl-doble"><b>{p.nombre}</b><span>{p.email}</span></div></div></td>
+                  <td>{p.empresaNombre}</td>
+                  <td><Tag color={COLOR_ROL[rolCanonico(p.rol)] ?? 'gris'}>{etiquetaRolSesion(rolCanonico(p.rol))}</Tag></td>
+                  <td><Tag color={COLOR_ESTADO[p.estado] ?? 'gris'}>{ESTADO[p.estado] ?? p.estado}</Tag></td>
+                  <td>{p.empresaCodigo}</td>
+                  <td><Link to={`/panel/personal/${p.userId}`} className="pnl-btn sutil">Ver ficha</Link></td>
+                </tr>)}
+              </tbody></table></div>
               {paginas > 1 && (
                 <div className="pnl-card-cuerpo" style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
                   <span style={{ fontSize: 'var(--e-t-xs)', color: 'var(--e-texto-2)' }}>Página {actual} de {paginas}</span>

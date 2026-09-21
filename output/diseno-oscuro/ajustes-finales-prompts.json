@@ -1,0 +1,10 @@
+[
+  {
+    "id": "24",
+    "prompt": "Edit the supplied FOM Plataforma design image only in the specified content areas. Preserve exactly the dark palette, overall composition, top FOM navigation, hero title Toda tu flota en un solo panel, typography, blue buttons, grid and card styling. Remove the ENTIRE bottom strip labeled RESULTADOS REALES and every claimed performance percentage (98%, -25%, -18%), replacing that strip with a quiet dark footer containing only the FOM wordmark and 'Web y app, una sola operación'. Do not invent performance claims. Within the mobile preview replace delivery-specific entries with Inspección diaria, Reportar falla, Mi jornada, Documentos, and show sample vehicle FOM-024 Toyota Hilux. Replace the App del conductor feature card copy with 'Inspecciones, fallas y documentos desde el teléfono.' Change the hero paragraph to exact 'El supervisor coordina desde la web y el conductor registra su jornada desde la app.' Remove the 30-minute-call promise beside CTA and replace with 'Conoce la plataforma'. Keep label Diseño conceptual · Datos de ejemplo. Only dark mode, keep everything else as close to original as possible."
+  },
+  {
+    "id": "31",
+    "prompt": "Edit this dark FOM Cambia tu contraseña screen. Preserve exactly the password form card on right, all three fields and labels, minimum16 characters helper, blue button Cambiar y volver a entrar, dark map illustration background, two-column composition, fonts, colors and card shapes. Remove the top authenticated navigation links Inicio, Vehículos, Mapa, Reportes, Configuración and the user icon; this is a restricted first-login password screen before access to the app. Keep only the FOM logo and the small Diseño conceptual · Datos de ejemplo label in the slim header. Replace left marketing tagline with exact 'Protege tu cuenta antes de continuar'. No other text or layout changes. Only dark mode."
+  }
+]

@@ -3,7 +3,7 @@ import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import {
-  Buscador, Cabecera, Campo, Cargando, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
+  Buscador, Cabecera, Campo, Cargando, Datos, ErrorCarga, Kpi, Modal, Pestanas, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
@@ -32,6 +32,7 @@ export default function AdminGps() {
   const actor = sesion?.perfil
   const [q, setQ] = useState('')
   const [registrando, setRegistrando] = useState(false)
+  const [pestana, setPestana] = useState('equipos')
   // Estado por fila: { [id]: { ocupado, error, mensaje } }
   const [filas, setFilas] = useState({})
 
@@ -95,6 +96,8 @@ export default function AdminGps() {
       </Cabecera>
 
       <div className="pnl-cuerpo">
+        <Pestanas opciones={[{v:'equipos',t:'Equipos'},{v:'sin-ente',t:'Sin emparejar'}]} valor={pestana} alCambiar={setPestana} />
+        {pestana === 'sin-ente' ? <SinEmparejar /> : <>
         {estado === 'cargando' && <Cargando filas={6} />}
         {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
@@ -108,10 +111,7 @@ export default function AdminGps() {
             probarPanico={probarPanico}
           />
         )}
-      </div>
-
-      <div className="pnl-cuerpo">
-        <SinEmparejar />
+        </>}
       </div>
 
       <ModalRegistrar abierto={registrando} alCerrar={() => setRegistrando(false)} alGuardar={recargar} actor={actor} />
@@ -154,6 +154,8 @@ function SinEmparejar() {
 
 function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) {
   const { lista, vehiculos } = datos
+  const [seleccionId, setSeleccionId] = useState(null)
+  const seleccion = lista.find(g => g.id === seleccionId) ?? lista[0]
   const sinVerificar = lista.filter((g) => !g.verificado).length
   const libres = lista.filter((g) => g.verificado && !g.vehiculoId).length
   const instalados = lista.filter((g) => g.vehiculoId).length
@@ -167,7 +169,7 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
         <Kpi titulo="Instalados" valor={instalados} icono="camion" nota="Reportando en la flota" />
       </div>
 
-      <Tarjeta
+      <div className="pnl-admin-dividido"><Tarjeta
         titulo="Equipos"
         accion={<Buscador valor={q} alCambiar={setQ} placeholder="Buscar por modelo, IMEI, línea o unidad…" />}
         sinCuerpo
@@ -194,8 +196,8 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
                   const fila = filas[g.id] || {}
                   const instalado = !!g.vehiculoId
                   return (
-                    <tr key={`${g.id}-${g.imei}`}>
-                      <td><b>{g.modelo}</b></td>
+                    <tr key={`${g.id}-${g.imei}`} className={seleccion?.id === g.id ? 'seleccionada' : ''}>
+                      <td><button className="pnl-table-action" onClick={()=>setSeleccionId(g.id)} aria-pressed={seleccion?.id === g.id}>{g.modelo}</button></td>
                       <td><code>{g.imei}</code></td>
                       <td>{g.linea || '—'}</td>
                       <td>{instalado ? g.vehiculoNombre : 'En inventario'}</td>
@@ -259,7 +261,11 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
             </table>
           </div>
         )}
-      </Tarjeta>
+      </Tarjeta><aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle del equipo">
+        {seleccion ? <><div className="pnl-gps-visual"><Icono nombre="pin" tam={64} /></div><h3>{seleccion.modelo}</h3><Tag color={seleccion.verificado ? 'verde' : 'ambar'}>{seleccion.verificado ? 'Verificado' : 'Sin verificar'}</Tag>
+          <Datos items={[{etiqueta:'IMEI',valor:seleccion.imei},{etiqueta:'Línea',valor:seleccion.linea || '—'},{etiqueta:'Unidad',valor:seleccion.vehiculoNombre || 'En inventario'},{etiqueta:'Botón de pánico',valor:seleccion.panicoProbado ? 'Probado' : 'Sin prueba registrada'}]} />
+        </> : <Vacio icono="pin" titulo="Sin equipos" texto="Registra el primer GPS para consultar su información." />}
+      </Tarjeta></aside></div>
     </>
   )
 }

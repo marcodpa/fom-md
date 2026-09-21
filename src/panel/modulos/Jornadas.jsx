@@ -47,21 +47,14 @@ export default function Jornadas() {
               <Vacio icono="reloj" titulo="Sin jornadas" texto="Cuando un conductor entre con su PIN en la app, su jornada aparecerá aquí." />
             </div>
           ) : (
-            <div className="pnl-filas">
-              {jornadas.datos.map((j) => (
-                <div className="pnl-fila" key={j.id}>
-                  <Icono nombre="gente" tam={18} />
-                  <div className="pnl-fila-txt">
-                    <b>{j.conductor} · {j.vehiculo}{j.placa ? ` · ${j.placa}` : ''}</b>
-                    <span>
-                      {j.rol === 'secundario' ? 'Conductor secundario' : 'Conductor principal'} · {ORIGEN[j.origen] ?? j.origen}
-                      {' · '}desde {f.fechaHora(j.inicio)}{j.fin ? ` hasta ${f.fechaHora(j.fin)}` : ''} · {duracion(j.inicio, j.fin)}
-                    </span>
-                  </div>
-                  <Tag color={j.estado === 'active' ? 'verde' : 'gris'}>{j.estado === 'active' ? 'Al volante' : 'Cerrada'}</Tag>
-                </div>
-              ))}
-            </div>
+            <div className="pnl-tabla-wrap"><table className="pnl-tabla"><thead><tr><th>Conductor</th><th>Unidad</th><th>Inicio</th><th>Fin</th><th>Duración</th><th>Estado</th></tr></thead><tbody>
+              {jornadas.datos.map(j => <tr key={j.id}>
+                <td><div className="pnl-persona"><i className="pnl-avatar">{f.iniciales(j.conductor)}</i><div className="pnl-doble"><b>{j.conductor}</b><span>{j.rol === 'secundario' ? 'Conductor secundario' : 'Conductor principal'} · {ORIGEN[j.origen] ?? j.origen}</span></div></div></td>
+                <td><div className="pnl-doble"><b>{j.vehiculo}</b><span>{j.placa}</span></div></td>
+                <td>{f.fechaHora(j.inicio)}</td><td>{j.fin ? f.fechaHora(j.fin) : 'En curso'}</td><td>{duracion(j.inicio,j.fin)}</td>
+                <td><Tag color={j.estado === 'active' ? 'verde' : 'gris'}>{j.estado === 'active' ? 'Al volante' : 'Cerrada'}</Tag></td>
+              </tr>)}
+            </tbody></table></div>
           ))}
         </Tarjeta>
       </div>

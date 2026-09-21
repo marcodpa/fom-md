@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
+import VehicleVisual from '../../components/VehicleVisual'
 
 // ============================================================
 // FICHA DE UNIDAD
@@ -60,6 +61,8 @@ export function estadoUnidad(v) {
 /** Filas de datos: se descartan las que no tienen valor. */
 function datosDe(v) {
   const filas = [
+    ['Combustible', v.combustiblePct == null ? null : `${v.combustiblePct}%`],
+    ['Aceite', v.aceitePct == null ? null : `${v.aceitePct}%`],
     ['Última señal', v.ultimoReporte ? f.desde(v.ultimoReporte) : null],
     // El encendido ya se anuncia en la etiqueta de estado; aquí solo se repite
     // si además hay velocidad, donde las dos cosas juntas cuentan algo: un
@@ -121,6 +124,7 @@ export default function FichaUnidad({
         {descripcion && <span>{descripcion}</span>}
       </p>
 
+      {variante === 'panel' && <VehicleVisual modelo={v.modelo ?? ''} />}
       {datos.length > 0 ? (
         <dl className="pnl-ficha-datos">
           {datos.map(([etiqueta, valor]) => (

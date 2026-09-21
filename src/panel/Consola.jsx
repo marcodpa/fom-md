@@ -4,12 +4,7 @@ import { cerrarSesion, esAdminFom } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
 import { Icono } from './Iconos'
-import repo, { alCambiarDatos } from './datos/repo'
-import { useTema } from './useTema'
-
-// Marca de la empresa activa: repinta el acento de toda la consola, igual que
-// el sistema multi-marca de la app.
-const MARCA_EMPRESA = { nombre: 'Transporte Lago Sur, C.A.', color: '#208AEF' }
+import repo, { alCambiarDatos, CONECTADO } from './datos/repo'
 
 import Resumen from './modulos/Resumen'
 import CentroControl from './modulos/CentroControl'
@@ -27,6 +22,7 @@ import AdminGps from './modulos/AdminGps'
 import AdminUsuarios from './modulos/AdminUsuarios'
 import AdminAuditoria from './modulos/AdminAuditoria'
 import MiUnidad from './modulos/MiUnidad'
+import MiPerfil from './modulos/MiPerfil'
 import Seguridad from './modulos/Seguridad'
 import Jornadas from './modulos/Jornadas'
 import Planes from './modulos/Planes'
@@ -135,10 +131,10 @@ function inicioDe(area) {
   return '/panel'
 }
 
-function Lateral({ perfil, abierto, cerrar, sinLeer, esquema, alternarTema }) {
+function Lateral({ perfil, abierto, cerrar, sinLeer }) {
   const menu = MENU_POR_AREA[areaDe(perfil)] ?? MENU_POR_AREA.conductor
   return (
-    <aside className={`pnl-side${abierto ? ' abierto' : ''}`}>
+    <aside id="panel-navigation" className={`pnl-side${abierto ? ' abierto' : ''}`} onKeyDown={e => { if (e.key === 'Escape') cerrar() }}>
       <div className="pnl-side-top">
         <NavLink to="/panel" end className="pnl-marca" onClick={cerrar}>
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -155,8 +151,9 @@ function Lateral({ perfil, abierto, cerrar, sinLeer, esquema, alternarTema }) {
             </defs>
           </svg>
           <span>FOM</span>
-          <em>consola</em>
+          <em>{esAdminFom(perfil) ? 'Administración' : 'Operación conectada'}</em>
         </NavLink>
+        <button type="button" className="pnl-side-cerrar" aria-label="Cerrar navegación" onClick={cerrar}><Icono nombre="cerrar" tam={20} /></button>
       </div>
 
       <div className={`pnl-empresa${esAdminFom(perfil) ? ' es-admin' : ''}`}>
@@ -190,17 +187,14 @@ function Lateral({ perfil, abierto, cerrar, sinLeer, esquema, alternarTema }) {
       </nav>
 
       <div className="pnl-side-pie">
-        <div className="pnl-usuario">
+        <NavLink to="/panel/mi-perfil" className="pnl-usuario" aria-label="Abrir mi perfil" onClick={cerrar}>
           <i className="pnl-avatar">{perfil.iniciales}</i>
           <div>
             <b>{perfil.nombre}</b>
             <span>{perfil.rolNombre}</span>
           </div>
-        </div>
-        <button type="button" className="pnl-salir" onClick={alternarTema}>
-          <Icono nombre={esquema === 'oscuro' ? 'sol' : 'luna'} />
-          {esquema === 'oscuro' ? 'Modo claro' : 'Modo oscuro'}
-        </button>
+        </NavLink>
+        <NavLink to="/panel/mi-perfil" className={({ isActive }) => `pnl-salir mp-enlace${isActive ? ' activo' : ''}`} onClick={cerrar}><Icono nombre="gente" />Mi perfil</NavLink>
         <Link to="/" className="pnl-salir">
           <Icono nombre="volver" />
           Ir al sitio
@@ -217,9 +211,18 @@ function Lateral({ perfil, abierto, cerrar, sinLeer, esquema, alternarTema }) {
 export default function Consola() {
   const sesion = useSesion()
   const { pathname } = useLocation()
-  const { esquema, alternar } = useTema(MARCA_EMPRESA)
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [sinLeer, setSinLeer] = useState(0)
+
+  useEffect(() => {
+    const raiz = document.documentElement
+    const anterior = raiz.getAttribute('data-tema')
+    raiz.setAttribute('data-tema', 'oscuro')
+    return () => {
+      if (anterior) raiz.setAttribute('data-tema', anterior)
+      else raiz.removeAttribute('data-tema')
+    }
+  }, [])
 
   useEffect(() => {
     setMenuAbierto(false)
@@ -229,7 +232,7 @@ export default function Consola() {
   useEffect(() => {
     let vivo = true
     const leer = () =>
-      repo.alertas.listar({ soloSinLeer: true }).then((l) => vivo && setSinLeer(l.length))
+      repo.alertas.listar({ soloSinLeer: true }).then((l) => vivo && setSinLeer(l.length)).catch(() => {})
     leer()
     const baja = alCambiarDatos(leer)
     return () => {
@@ -264,19 +267,17 @@ export default function Consola() {
   // `pathname` viene del router, no del `window`: asi la guarda vuelve a
   // evaluarse en cada navegacion y no solo al cargar la pagina.
   const primerTramo = pathname.replace(/^\/panel\/?/u, '').split('/')[0]
-  if (permitidas && !permitidas.includes(primerTramo)) {
+  if (primerTramo !== 'mi-perfil' && permitidas && !permitidas.includes(primerTramo)) {
     return <Navigate to={inicioDe(area)} replace />
   }
 
   return (
-    <div className="pnl">
+    <div className="pnl fom-dark" data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'}>
       <Lateral
         perfil={perfil}
         abierto={menuAbierto}
         cerrar={() => setMenuAbierto(false)}
         sinLeer={sinLeer}
-        esquema={esquema}
-        alternarTema={alternar}
       />
       {menuAbierto && (
         <button
@@ -288,16 +289,30 @@ export default function Consola() {
       )}
 
       <main className="pnl-main" id="contenido">
+        <div className="pnl-topbar">
+          <span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{perfil.empresa}</span>
+          <div className="pnl-topbar-derecha">
+            <span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span>
+            <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={`Alertas: ${sinLeer} sin leer`}>
+              <Icono nombre="campana" tam={21} />
+              {sinLeer > 0 && <span>{sinLeer}</span>}
+            </Link>
+            <Link to="/panel/mi-perfil" className="pnl-topbar-perfil" aria-label="Mi perfil"><i className="pnl-avatar">{perfil.iniciales}</i><b>{perfil.nombre}</b></Link>
+          </div>
+        </div>
         <button
           type="button"
           className="pnl-menu-btn"
           aria-label="Abrir menú"
+          aria-expanded={menuAbierto}
+          aria-controls="panel-navigation"
           onClick={() => setMenuAbierto(true)}
         >
           <Icono nombre="menu" />
         </button>
 
         <Routes>
+          <Route path="mi-perfil" element={<MiPerfil />} />
           {/* El inicio depende del area: el conductor abre en SU unidad, no en
               el resumen de toda la flota. */}
           <Route index element={area === 'conductor' ? <MiUnidad /> : <Resumen />} />
