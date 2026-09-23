@@ -1,0 +1,74 @@
+{
+  "tool": "image_gen built-in",
+  "base": "Create ONE horizontal 16:9 high-fidelity desktop marketing website section design for FOM fleet management in Spanish. This is an image proposal, not a coded website. Art direction: premium industrial SaaS, a precise operational instrument with editorial product photography. All sections belong to ONE website. Palette strictly background #0A0D12, surfaces #141A22 and #1D2530, hairlines #262E39, white #F3F5F8, secondary #ABB3BF; brand action blue #3D9BF5. Green #3DD68C / amber #F5C242 / red #FF6369 reserved only for product statuses. Refined Neue Montreal-like sans typography, strong but not ultra-bold, generous margins, large legible Spanish text, 12px button radii, 24px panels, restrained thin line icons. No purple glow, blobs, fake testimonials, invented customers, pricing or performance claims. Four signature motifs throughout set: precise product UI panel stack, layered image crop frames, fine vertical rhythm rules, controlled editorial asymmetry. Motion only implied as gentle cinematic fade and pinned product reveal. Show this ONE section edge to edge, not a whole page, no surrounding design-board labels. Reference product screenshots must inform and preserve authentic FOM interface structure and labels; never invent unrelated charts. Product demo metrics are illustrative, add small 'Vista de demostración' caption where present. Do not copy private names. Realism of product screens is important. ",
+  "hero": "Create ONE horizontal 16:9 high-fidelity desktop marketing website section design for FOM fleet management in Spanish. This is an image proposal, not a coded website. Art direction: premium industrial SaaS, a precise operational instrument with editorial product photography. All sections belong to ONE website. Palette strictly background #0A0D12, surfaces #141A22 and #1D2530, hairlines #262E39, white #F3F5F8, secondary #ABB3BF; brand action blue #3D9BF5. Green #3DD68C / amber #F5C242 / red #FF6369 reserved only for product statuses. Refined Neue Montreal-like sans typography, strong but not ultra-bold, generous margins, large legible Spanish text, 12px button radii, 24px panels, restrained thin line icons. No purple glow, blobs, fake testimonials, invented customers, pricing or performance claims. Four signature motifs throughout set: precise product UI panel stack, layered image crop frames, fine vertical rhythm rules, controlled editorial asymmetry. Motion only implied as gentle cinematic fade and pinned product reveal. Show this ONE section edge to edge, not a whole page, no surrounding design-board labels. Reference product screenshots must inform and preserve authentic FOM interface structure and labels; never invent unrelated charts. Product demo metrics are illustrative, add small 'Vista de demostración' caption where present. Do not copy private names. Realism of product screens is important. SECTION 01 OF 10, HERO. Build a striking opening viewport. Thin top nav with blue pin FOM wordmark, Plataforma, Funciones, Seguridad, Contacto, ghost Iniciar sesión. Upper central headline in 2 lines 'Tu flota conectada.' / 'Tu operación, bajo control.' Beneath: 'La oficina y la carretera, en una misma plataforma.' Small blue primary CTA 'Solicitar una demo', understated 'Explorar FOM ↗'. Lower 55% large frontal browser product frame using supplied real FOM dashboard screenshot, with legible metric cards and dark geographic map, slightly cropped by lower edge like an expansive product reveal. Layer subtle atmospheric photo of a white fleet pickup on dusk highway behind lower far edges only, charcoal grade, no distracting objects. No giant phone invented. Centred mid-editorial architecture, refined spacing and very thin blue wayfinding line naturally linking headline to dashboard. Website fills frame.",
+  "sections": [
+    {
+      "n": "02",
+      "name": "dashboard",
+      "refs": [
+        "output/rediseno-publicitario-v2/referencias/dashboard-real.png"
+      ],
+      "brief": "DASHBOARD / PLATAFORMA. Inverted editorial composition: LEFT two thirds huge frontal browser screenshot of the supplied CURRENT REAL dashboard, preserving the three top metric panels (Flota de vehículos 26, ODT abiertas 9, Alertas nuevas 8), dark map and selected vehicle panel. RIGHT third spacious copy: eyebrow 'FOM CONSOLA'; headline 'Toda la operación.\\nUna sola vista.' Subcopy 'Vehículos, alertas y mantenimiento conectados para decidir con claridad.' Three concise hairline-separated feature lines 'Flota en tiempo real', 'Atención a las alertas', 'Expediente por vehículo'. Underlined 'Conocer la plataforma ↗'. Solid charcoal canvas, not photo background; keep broad top margin, no navigation. Product dominates. Small caption 'Panel real · Datos de demostración'. One focused section."
+    },
+    {
+      "n": "03",
+      "name": "app-conductor",
+      "refs": [
+        "output/rediseno-publicitario-v2/referencias/app-recreada.png",
+        "output/design-review/indice-tab-perfil-app.png"
+      ],
+      "brief": "MOBILE APP SHOWCASE. Use supplied mobile reference for the actual screen vocabulary/layout, and supplied source-derived profile card reference. Show three large upright black phones across lower/central frame in gallery cadence, no extreme perspective. Phone1 Inicio/map from first reference, phone2 Inspección from first reference, phone3 Perfil containing the current GREEN 94 TarjetaIndice from second reference: circle left, Manejo seguro right, three event bars underneath, bottom tabs Inicio Inspección Mantenim. Perfil with person icon highlighted blue. Keep screens readable, do not add features. Top left large 2-line headline 'La operación también\\nviaja con tu equipo.' Top right small copy 'FOM DRIVER conecta al conductor con su unidad y con la oficina.' Small labels below phones 'Inicio', 'Inspección', 'Perfil'. Editorial dark solid background with faint charcoal vignette. Tiny truthful caption 'Pantallas de referencia · Datos de ejemplo'. No CTA clutter, no website nav. This is one APP marketing section only."
+    },
+    {
+      "n": "04",
+      "name": "funciones",
+      "refs": [
+        "output/rediseno-publicitario-v2/referencias/app-recreada.png"
+      ],
+      "brief": "FUNCTIONS SECTION. Heading upper left 'Del primer chequeo\\nal próximo servicio.' Three horizontally connected operational stages using varied widths, thin precision blue line along baseline. Left 38% large cropped inspection PHONE from supplied reference, middle 25% text workflow '01 Inspecciona' with short copy 'Revisa la unidad antes de salir.' and '02 Reporta' with 'Registra fallas y observaciones.', right 30% enlarged authentic maintenance list crop from supplied reference with '03 Da seguimiento' and 'Consulta las órdenes de trabajo.' Bottom understated tabs 'Inspecciones / Mantenimiento / Documentos / Reportes', first active blue underline. Frontal readable source UI crops, large type, wide calm margins. Dark graphite diptych background (subtle division, no neon) and hairline rules. One cohesive section, not 3 separate web sections. Small 'Vista de demostración'."
+    },
+    {
+      "n": "05",
+      "name": "seguridad",
+      "refs": [
+        "output/design-review/indice-tab-perfil-app.png"
+      ],
+      "brief": "SAFETY SECTION. This section prominently showcases the EXACT source-derived driving score cards supplied in reference: retain green94/yellow76/red48, ring left verdict right, weekly trend and three event bars, precise labels. Do NOT substitute other simple cards or scatter arbitrary charts. Giant but calm headline upper left 'Conducir mejor empieza\\npor entender cada viaje.' Upper right concise copy 'Un índice claro para acompañar al conductor y atender lo que necesita mejorar.' Lower 60% three balanced dark cards with source design, green subtle gray border, amber and red thin color borders and restrained inner halo. Cards legible and main subject. Tiny legend below 'Verde: manejo seguro · Amarillo: puedes mejorar · Rojo: requiere atención'. Caption 'Índice del perfil · Datos de ejemplo'. Background flat ink, whitespace top, no cars or full page navigation. Underline text action 'Conocer la seguridad de FOM ↗'."
+    },
+    {
+      "n": "06",
+      "name": "areas",
+      "refs": [
+        "src/assets/consola-mapa.jpg"
+      ],
+      "brief": "AREAS / LIVE MAP SECTION. Map-as-canvas: supplied real dark geographic map of Lake Maracaibo fills RIGHT 70% and background, preserving lake geography, place names Maracaibo Cabimas Ciudad Ojeda Lagunillas, and green markers. Crop only the map from reference, don't show old metric cards. LEFT safe charcoal gradient field 30% with headline 'Un mismo control.\\nCada zona de tu flota.' Above 'ÁREAS DE OPERACIÓN'. Below a vertical editorial selector with 3 ruled rows: 'Maracaibo', 'Cabimas · Ciudad Ojeda', 'Lagunillas · Bachaquero'. First activeblue dot. Tiny explanatory copy 'Organiza unidades por área y consulta su ubicación desde la consola.' Bottom right small quiet label 'Mapa de demostración'. Brandblue used only selector/action. Expansive map visual and readable typography, no arbitrary counts or fake operational guarantees. One section."
+    },
+    {
+      "n": "07",
+      "name": "beneficios",
+      "refs": [],
+      "brief": "BENEFITS SECTION, human contextual full-bleed photographic background. Cinematic editorial image on right half: professional fleet driver next to white pickup parked safely in a depot at dawn, face not celebrity, natural local Venezuelan working context, charcoal/blue grade, warm restrained daylight, not posing with thumbs-up. Left 45% deep dark safe area with huge calm white headline 'Cuidar a la gente.\\nOrdenar la operación.' One sentence 'Información clara para actuar a tiempo y acompañar a tu equipo.' Underneath three fine ruled lines 'Historial de cada vehículo', 'Inspecciones y mantenimiento', 'Documentos y alertas en un lugar'. Small outline action 'Explorar beneficios ↗'. This is atmosphere + benefits only, no fake metrics/testimonials or product UI. Darkbackground extends edge to edge. Photographer-quality realism."
+    },
+    {
+      "n": "08",
+      "name": "preguntas-frecuentes",
+      "refs": [],
+      "brief": "FAQ SECTION, deliberately mini minimalist highend typographic pause. Clean flat nearblack background. Left 35% headline 'Lo que necesitas\\nsaber para empezar.' Small blue label 'PREGUNTAS FRECUENTES', one thin blue underlined 'Hablar con el equipo ↗'. Right 55% five wide editorial accordion rows, thin gray rules, readable text and small plus at far right. First expanded with minus: question '¿Cómo se conectan la app y la consola?' answer 'El conductor registra información en la app y el equipo la consulta desde el panel web.' Others collapsed: '¿Puedo organizar la flota por áreas?', '¿Qué información ve cada usuario?', '¿Cómo se consultan las inspecciones?', '¿Cómo solicito una demostración?'. Generous empty margins and line heights. No cards grid, no illustration, no nav, no made-up logos. Single focused FAQ section."
+    },
+    {
+      "n": "09",
+      "name": "contacto",
+      "refs": [
+        "output/rediseno-publicitario-v2/referencias/dashboard-real.png"
+      ],
+      "brief": "CONTACT / DEMO SECTION. Premium functional dark marketing contact layout. LEFT40% headline 'Ve FOM con\\ntu propia operación\\nen mente.' Short copy 'Cuéntanos cómo trabajas y coordinamos una demostración.' Beneath small tasteful oblique browser crop of supplied actual dark dashboard, secondary visual but authentic. RIGHT50% one elevated charcoal form panel with large legible labels Nombre, Empresa, Correo, Tamaño de la flota (selector), Cuéntanos qué necesitas (textarea), and wide clear blue button 'Solicitar demostración →'. Fields empty, no sample email or personal info. Thin outlines, consistent 12px buttonradius24panelradius, intentional alignment. No fake WhatsApp number, no price, no instant support promise. No nav. One focused section."
+    },
+    {
+      "n": "10",
+      "name": "pie-de-pagina",
+      "refs": [],
+      "brief": "FOOTER SECTION, quiet closing mini minimalist design. SINGLE FOOTER occupying horizontal16:9 canvas with luxurious negative space; no extra CTA banner section. Huge FOM wordmark left (simple blue pin plus FOM white sans), short tagline beneath 'La oficina y la carretera, conectadas.' Three neatly spaced link columns on right with readable type: 'Plataforma' links Consola, App del conductor, Funciones; 'Operación' links Seguridad, Áreas de flota, Beneficios; 'Conversemos' links Solicitar demo, Contacto, Preguntas frecuentes. Lower long hairline with left '© FOM' right small outlined 'Iniciar sesión ↗'. A tiny photographic crop of a dark road or blue route detail can sit below tagline but minimal, no dense map, no invented address, social brands, legal promises. Background #0A0D12; blue accents restrained. Footer design only. Premium typography and spacing."
+    }
+  ]
+}

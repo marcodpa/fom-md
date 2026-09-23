@@ -202,7 +202,6 @@ export default function MapaLibre({
             keyboard: true,
             alt: `${v.alias || v.placa}, ${estadoUnidad(v).texto}`,
           })
-          m.on('click', () => alSeleccionar?.(seleccionado === v.id ? null : v.id))
           m.on('mouseover', () => setSobre(v.id))
           m.on('mouseout', () => setSobre(null))
           m.addTo(mapa.current)
@@ -215,6 +214,7 @@ export default function MapaLibre({
           }
           m.setIcon(iconoUnidad(v, sel, tokens))
         }
+        m.off('click').on('click', () => alSeleccionar?.(seleccionado === v.id ? null : v.id))
         m.setZIndexOffset(sel ? 1000 : 0)
       })
 
@@ -262,8 +262,9 @@ export default function MapaLibre({
 
   // El contenedor cambia de tamaño al abrirse el módulo: recalcular
   useEffect(() => {
-    const id = setTimeout(() => mapa.current?.invalidateSize(), 250)
-    return () => clearTimeout(id)
+    const observer = new ResizeObserver(() => mapa.current?.invalidateSize())
+    if (contenedor.current) observer.observe(contenedor.current)
+    return () => observer.disconnect()
   }, [alto])
 
   const activo = sobre ?? seleccionado

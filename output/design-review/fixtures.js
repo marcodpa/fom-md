@@ -1,6 +1,21 @@
 // Fixtures de la revisión visual local. Este archivo no se importa en producción.
 export function applyReviewFixtures(repo) {
+  // Coordenadas de demostración en la zona urbana, sin dispersión sobre el lago.
+  const listarVehiculos = repo.vehiculos.listar.bind(repo.vehiculos)
+  const obtenerVehiculo = repo.vehiculos.obtener.bind(repo.vehiculos)
+  const posicionDemo = v => {
+    if (!v) return v
+    const n = [...v.id].reduce((sum, c) => sum + c.charCodeAt(0), 0)
+    return { ...v, lat: 10.659 + (n % 5) * .004, lng: -71.667 + (Math.floor(n / 5) % 5) * .004 }
+  }
+  repo.vehiculos.listar = async params => (await listarVehiculos(params)).map(posicionDemo)
+  repo.vehiculos.obtener = async id => posicionDemo(await obtenerVehiculo(id))
   const ahora = new Date().toISOString()
+  repo.seguridad.eventos = async () => Object.assign([
+    { id: 'review-event-1', vehiculo: 'FOM-024', placa: 'DEMO-024', tipo: 'velocidad', valor: 86, ocurrioEn: ahora, severidad: 'warning', estado: 'open' },
+    { id: 'review-event-2', vehiculo: 'FOM-012', placa: 'DEMO-012', tipo: 'condicion', valor: 1, ocurrioEn: ahora, severidad: 'info', estado: 'open' },
+  ], { total: 2 })
+  repo.seguridad.emergencias = async () => []
   const filtro = (rows, key = 'estado') => async (p = {}) => rows.filter(x => !p[key] || x[key] === p[key])
   repo.conductores = async () => {
     const [persona] = await repo.personal.listar({ soloConductores: true })

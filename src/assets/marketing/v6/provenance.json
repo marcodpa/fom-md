@@ -1,0 +1,22 @@
+[
+  {
+    "asset": "road.webp",
+    "prompt": "Generate a standalone photographic ASSET for implementation of the approved FOM website comp attached as style reference. Do NOT reproduce any webpage, text, UI or device screen from the reference. A white commercial freight truck driving on a dry divided road at dusk, in the right half of frame; distant low city lights and hills, navy twilight with restrained warm horizon. Broad quiet shadowed space on left for webpage heading. No water, no rain, no text or logos, no people. Professional documentary realism, subtle fine film grain, everyday optical imperfections and authentic material texture, restrained highlights. Match the navy cinematic photo grading of the reference. Wide landscape 16:9, high resolution."
+  },
+  {
+    "asset": "office.webp",
+    "prompt": "Generate a standalone photographic ASSET for implementation of the approved FOM website comp attached as style reference. Do NOT reproduce any webpage, text, UI or device screen from the reference. A real fleet operations office at blue hour, empty dark wood workstation across foreground, keyboard near bottom, shelves and industrial window softly out of focus, subtle distant depot vehicles. Leave the central-right foreground EMPTY for a desktop monitor to be composited by code, no screens anywhere, no computer monitors, no people. Dark but legible navy photographic backdrop. Professional documentary realism, subtle fine film grain, everyday optical imperfections and authentic material texture, restrained highlights. Match the navy cinematic photo grading of the reference. Wide landscape 16:9, high resolution."
+  },
+  {
+    "asset": "fleet.webp",
+    "prompt": "Generate a standalone photographic ASSET for implementation of the approved FOM website comp attached as style reference. Do NOT reproduce any webpage, text, UI or device screen from the reference. A line of white freight trucks and pickups parked naturally on dry asphalt in an industrial yard at dusk. Wide photographic composition, trucks mainly across lower and right areas, quiet dark sky for website heading. No people, no text, no logos, no water. Professional documentary realism, subtle fine film grain, everyday optical imperfections and authentic material texture, restrained highlights. Match the navy cinematic photo grading of the reference. Wide landscape 16:9, high resolution."
+  },
+  {
+    "asset": "camera.webp",
+    "prompt": "Generate a standalone photographic ASSET for implementation of the approved FOM website comp attached as style reference. Do NOT reproduce any webpage, text, UI or device screen from the reference. A professional close-up photograph of a compact black fleet dash camera mounted inside a commercial vehicle windshield; realistic lens glass, cable neatly routed, softly blurred dry highway beyond glass. No screen, no UI, no text, no logos, no people. Professional documentary realism, subtle fine film grain, everyday optical imperfections and authentic material texture, restrained highlights. Match the navy cinematic photo grading of the reference. Wide landscape 16:9, high resolution."
+  },
+  {
+    "asset": "yard.webp",
+    "origin": "Existing project asset src/assets/marketing/areas-patio-v3.png; converted to WebP."
+  }
+]

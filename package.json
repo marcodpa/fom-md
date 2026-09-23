@@ -10,6 +10,7 @@
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "gsap": "^3.12.5",
     "leaflet": "^1.9.4",
     "react": "^18.3.1",

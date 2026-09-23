@@ -1,3 +1,89 @@
+---
+name: "FOM marketing v6"
+description: "Tokens limitados al sitio público v6; el documento original del panel se conserva íntegro."
+colors:
+  marketing-background: "#071019"
+  marketing-ink: "#f3f7fc"
+  marketing-muted: "#bccbdc"
+  marketing-blue: "#349bfa"
+  marketing-line: "#223649"
+  marketing-button: "#198bfa"
+  marketing-button-hover: "#0876d9"
+  marketing-button-text: "#fff"
+  marketing-outline: "#0c1c2b"
+  marketing-outline-hover: "#183752"
+  marketing-outline-text: "#e5f2ff"
+  marketing-focus: "#68baff"
+  marketing-form: "#0e1c29"
+  marketing-field: "#091420"
+typography:
+  marketing-display:
+    fontFamily: "'Spline Sans', sans-serif"
+    fontSize: "clamp(38px,4.3vw,64px)"
+    fontWeight: 600
+    lineHeight: 1.12
+    letterSpacing: "-.035em"
+  marketing-headline:
+    fontFamily: "'Spline Sans', sans-serif"
+    fontSize: "clamp(30px,3.2vw,46px)"
+    fontWeight: 600
+    lineHeight: 1.12
+    letterSpacing: "-.025em"
+  marketing-title:
+    fontFamily: "'Spline Sans', sans-serif"
+    fontSize: "20px"
+    fontWeight: 600
+    lineHeight: 1.12
+    letterSpacing: "-.025em"
+  marketing-body:
+    fontFamily: "'Spline Sans', sans-serif"
+    fontSize: "16px"
+    lineHeight: 1.65
+  marketing-button:
+    fontSize: "15px"
+    fontWeight: 500
+    lineHeight: 1.4
+rounded:
+  marketing-field: "5px"
+  marketing-button: "6px"
+  marketing-monitor: "10px"
+  marketing-form: "12px"
+  marketing-phone-screen: "25px"
+  marketing-phone-frame: "35px"
+spacing:
+  marketing-button-gap: "24px"
+  marketing-copy-paragraph: "20px"
+  marketing-copy-button: "30px"
+  marketing-form-padding: "32px"
+components:
+  marketing-button-primary:
+    backgroundColor: "{colors.marketing-button}"
+    textColor: "{colors.marketing-button-text}"
+    typography: "{typography.marketing-button}"
+    rounded: "{rounded.marketing-button}"
+    padding: "14px 22px"
+  marketing-button-primary-hover:
+    backgroundColor: "{colors.marketing-button-hover}"
+  marketing-button-outline:
+    backgroundColor: "{colors.marketing-outline}"
+    textColor: "{colors.marketing-outline-text}"
+    rounded: "{rounded.marketing-button}"
+    padding: "14px 22px"
+  marketing-button-outline-hover:
+    backgroundColor: "{colors.marketing-outline-hover}"
+  marketing-form:
+    backgroundColor: "{colors.marketing-form}"
+    rounded: "{rounded.marketing-form}"
+    padding: "{spacing.marketing-form-padding}"
+  marketing-field:
+    backgroundColor: "{colors.marketing-field}"
+    textColor: "{colors.marketing-ink}"
+    rounded: "{rounded.marketing-field}"
+    padding: "12px"
+---
+
+> **Alcance de los tokens:** todos los tokens del frontmatter pertenecen exclusivamente al marketing público v6. No modifican el panel ni la autenticación. El documento original se conserva íntegro a continuación. Su vocabulario histórico de sitio público queda como referencia anterior; para las once páginas publicitarias prevalece el anexo «Marketing FOM v6» al final. Las normas del panel siguen vigentes en su propio alcance.
+
 # Sistema de diseño: FOM — Control de flotas
 
 > Documento para generar pantallas en Google Stitch que coincidan con el sitio real.
@@ -275,3 +361,91 @@ y "Lorem ipsum" en cualquier forma.
 15. Rayas largas (—) en el texto visible
 16. Enlaces rotos de Unsplash. Si hace falta relleno visual, se dibuja en SVG
 17. Botones sin fondo declarado (el navegador pinta gris de sistema)
+
+
+---
+
+# Marketing FOM v6
+
+## Overview
+
+El sistema público aprobado es fotográfico y cinematográfico oscuro: carretera, personas y operación de flota en azul nocturno, con capturas actuales originales como evidencia del producto. Las once láminas de output/rediseno-completo-v6 definen la dirección aprobada. Esta documentación describe su implementación en src/pages/FomMarketing.jsx y src/styles/fom-v6.css, con navegación en MarketingChrome.jsx y hero de inicio en ScrollHero.jsx.
+
+**Regla de alcance.** Los tokens con prefijo marketing- y estas ocho secciones aplican al contenedor público .marketing-v2 y su contenido .fom-site. No se trasladan al panel, a la app ni a autenticación. Donde el documento histórico pide Space Grotesk, Plus Jakarta Sans, maquetas SVG, bandas claras o prohíbe superposiciones, el marketing v6 usa la implementación aquí descrita: Spline Sans, fotografías oscuras y capturas originales montadas sobre las escenas.
+
+Características: contraste nocturno continuo, texto directo en español, fotografía de operación, interfaces legibles y alternancia editorial entre texto e imagen. Las fotografías son ilustrativas; las pantallas muestran datos de demostración.
+
+## Colors
+
+### Primary
+
+Azul de operación (marketing-blue) identifica elementos activos y acentos. El botón tiene relleno propio (marketing-button) y un tono más profundo al pasar el cursor (marketing-button-hover). El foco usa marketing-focus.
+
+### Neutral
+
+Lienzo nocturno (marketing-background), tinta principal (marketing-ink), texto secundario (marketing-muted) y separadores (marketing-line) sostienen el conjunto. Formularios y campos usan superficies ligeramente diferentes para distinguir su jerarquía. El botón de contorno utiliza su propio fondo oscuro y tinta azul clara.
+
+Las imágenes reciben velos oscuros y filtros de brillo/saturación: no se añaden bandas claras del diseño anterior para interrumpir este mundo fotográfico.
+
+## Typography
+
+Spline Sans con alternativa sans-serif es la familia del marketing. El frontmatter contiene la escala observada de títulos, cuerpo y botones. Los títulos equilibran sus líneas; el cuerpo tiene ancho máximo de (66ch).
+
+El hero de inicio tiene escala propia (clamp(37px,4vw,62px)), interlineado (1.08) y tracking (-.03em). Los demás heros usan la escala display, con cuerpo introductorio de (18px) y ancho de (47ch). Las listas de capacidades usan título de (17px) y cuerpo de (14px); los pies de captura usan (11px). Son roles existentes, no una escala impuesta al panel.
+
+## Layout
+
+Las secciones alternan texto y fotografía con dispositivo en dos columnas iguales, dentro de un máximo de (1600px). El hero interior llega a (1440px) y usa columnas (.87fr / 1.3fr), separación de (44px) y altura mínima de (500px). Las variantes de hero ancho prescinden del dispositivo y amplían el área de texto.
+
+A (1100px) se ajustan proporciones, espaciados y tamaños. A (760px) las secciones pasan a una columna; las filas invertidas recuperan el orden natural texto-imagen y usan márgenes laterales de (6%). El pie se reorganiza en dos columnas. A partir de (1600px) aumenta el espacio vertical. El hero de inicio usa (100svh), mínimo de (720px) en escritorio y (760px) en móvil.
+
+La navegación agrupada se convierte en menú desplegable a (1180px), por reglas compartidas de marketing.css. La cabecera mide (76px), y (70px) hasta (760px). Los destinos con ancla tienen compensación de scroll de (92px).
+
+## Elevation & Depth
+
+La profundidad surge de fotografías oscurecidas, gradientes de protección del texto y marcos físicos de monitor o teléfono. Las superficies de contenido se separan principalmente con líneas, no mediante una colección de tarjetas elevadas.
+
+El monitor usa (0 24px 35px -20px #030b16d9); el teléfono usa (0 22px 34px -18px #010811). El monitor del hero de inicio usa (0 25px 45px -20px #030b19). Estas sombras pertenecen a los dispositivos, no a todos los contenedores. El monitor del hero interior tiene perspectiva y ligera rotación; en móvil se elimina esa transformación.
+
+## Shapes
+
+Los radios del frontmatter diferencian controles, formulario y dispositivos. Las secciones mantienen bordes rectos y separadores finos. El teléfono tiene marco redondeado y pantalla con radio menor; el monitor tiene una carcasa delgada y pie propio.
+
+Las capturas se muestran con proporción original y altura automática. La fotografía de fondo puede recortarse con object-fit: cover; el contenido de las pantallas no debe recortarse para imitar la foto.
+
+## Components
+
+### Buttons
+
+El primario es rectangular con esquinas suaves, altura mínima de (48px), flecha diagonal y relleno azul. El secundario usa fondo oscuro y borde visible. Hover eleva (2px) con transición de (.2s); el foco visible del contenido público tiene contorno de (3px) y separación de (5px). Con movimiento reducido se desactiva la transición. El CTA del hero de inicio conserva el componente compartido m-button.
+
+### Devices and imagery
+
+Screen usa capturas originales de src/assets/marketing/real/: resumen, mapa, flota, alertas, reportes y seguridad para panel; inicio, inspección, mantenimiento y perfil para app. Incluye un pie que identifica los datos de demostración y el panel o app actual. Media combina fotografía ilustrativa y captura; Hero deja el dispositivo sobre la escena general. Las pantallas reinterpretadas en los mockups no son contenido factual.
+
+### Navigation
+
+Cabecera fija con marca, Inicio, grupos Plataforma e Información, Contacto e Iniciar sesión. Los grupos se abren con botón, mantienen aria-expanded y señalan la ruta activa. Escape devuelve el foco al disparador; cambio de ruta, clic exterior y salida de foco cierran el menú. La navegación móvil admite scroll interno.
+
+### Forms and questions
+
+El formulario mantiene etiquetas visibles, campos con altura mínima de (46px) y contenedor con radio propio. Su acción prepara un correo; el diseño no debe representar un envío confirmado.
+
+Las preguntas usan details y summary, separadores horizontales y símbolo de apertura. La página independiente permite buscar sin distinguir tildes, filtrar por tema y consultar el conteo de resultados. El estado vacío ofrece restablecer los filtros.
+
+### Scroll hero
+
+El inicio conserva el relato consola-a-teléfono mediante GSAP ScrollTrigger: escena fijada al scroll, recorrido de (1.8) veces la altura de escena y scrub (.4). El fondo fotográfico cede a un estudio oscuro, el monitor se transforma geométricamente y aparece la captura de app con su texto. La geometría se recalcula al refrescar. El umbral propio del cálculo móvil es (700px), distinto del breakpoint de composición.
+
+Con prefers-reduced-motion: reduce no se crea la secuencia fijada y el contenido se presenta en flujo estático, visible y legible.
+
+## Do's and Don'ts
+
+- **Do** conservar las composiciones aprobadas y las fuentes actuales de contenido.
+- **Do** usar capturas originales, legibles y rotuladas como demostración.
+- **Do** mantener contraste sobre fotografía, foco visible y navegación por teclado.
+- **Do** comprobar columnas, recortes fotográficos, cabeceras y dispositivos en móvil.
+- **Don't** trasladar estos tokens al panel o a autenticación.
+- **Don't** redibujar el producto a partir de textos pequeños o interfaces inventadas en los mockups.
+- **Don't** presentar fotografías ilustrativas como documentación de clientes.
+- **Don't** convertir las reglas históricas de bandas claras, tipografías o maquetas SVG en restricciones para el marketing v6 ya aprobado.

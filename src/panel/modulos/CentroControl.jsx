@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import {
-  Buscador, Cabecera, Cargando, Chips, ErrorCarga, Tarjeta, Vacio,
+  Buscador, Cargando, Chips, ErrorCarga, Vacio,
 } from '../comp/ui'
 import Mapa from '../comp/Mapa'
 import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
+import { Icono } from '../Iconos'
+import '../../styles/control-map.css'
 
 const ESTADOS = [
   { v: '', t: 'Todas' },
@@ -19,6 +21,7 @@ export default function CentroControl() {
   const [estadoMarcha, setEstadoMarcha] = useState('')
   const [areaId, setAreaId] = useState('')
   const [seleccionado, setSeleccionado] = useState(null)
+  const [listaAbierta, setListaAbierta] = useState(false)
 
   const areas = useDatos(() => repo.areas(), [])
   // Seguimiento en vivo: se vuelve a preguntar por la flota cada 15 segundos.
@@ -70,21 +73,25 @@ export default function CentroControl() {
   const unidad = detalle.datos?.id === seleccionado ? detalle.datos : null
 
   return (
-    <>
-      <Cabecera titulo="Centro de control" bajada={bajada}>
+    <section className="control-map" aria-label="Centro de control">
+      <div className="control-map-canvas">
+        <Mapa vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado}
+          recorrido={unidad?.recorrido ?? null} alto="100%" ficha={false} leyenda={false} />
+      </div>
+      <div className="control-search">
+        <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}</p></div>
+          <button className="pnl-btn" type="button" aria-expanded={listaAbierta} aria-controls="control-unidades" onClick={() => { setListaAbierta(v => !v); setSeleccionado(null) }}><Icono nombre="camion" tam={18} />Unidades</button>
+        </div>
         <Buscador valor={q} alCambiar={setQ} placeholder="Placa, alias o conductor…" />
-      </Cabecera>
-
-      <div className="pnl-cuerpo">
+      </div>
+      <div className="control-filters">
         <Chips opciones={ESTADOS} valor={estadoMarcha} alCambiar={setEstadoMarcha} />
-        {opcionesArea.length > 1 && (
-          <Chips opciones={opcionesArea} valor={areaId} alCambiar={setAreaId} />
-        )}
-
-        {flota.estado === 'cargando' && <Cargando filas={6} />}
+        {opcionesArea.length > 1 && <select className="pnl-input" aria-label="Área de la flota" value={areaId} onChange={e => setAreaId(e.target.value)}>{opcionesArea.map(a => <option key={a.v} value={a.v}>{a.t}</option>)}</select>}
+      </div>
+      {(flota.estado !== 'ok' || lista.length === 0) && <div className="control-panel control-feedback" role="status">
+        {flota.estado === 'cargando' && <Cargando filas={3} />}
         {flota.estado === 'error' && <ErrorCarga onReintentar={flota.recargar} />}
         {flota.estado === 'ok' && lista.length === 0 && (
-          <Tarjeta>
             <Vacio
               icono="buscar"
               titulo="Ninguna unidad coincide"
@@ -95,33 +102,18 @@ export default function CentroControl() {
                 </button>
               }
             />
-          </Tarjeta>
         )}
-        {flota.estado === 'ok' && lista.length > 0 && (
-          <div className="pnl-control-grid">
-            <Tarjeta titulo="Unidades">
-              <ListaUnidades vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado} />
-            </Tarjeta>
-            <Tarjeta sinCuerpo>
-              <Mapa
-                vehiculos={lista}
-                seleccionado={seleccionado}
-                alSeleccionar={setSeleccionado}
-                recorrido={unidad?.recorrido ?? null}
-                alto="clamp(420px, 68vh, 760px)"
-                ficha={false}
-              />
-            </Tarjeta>
-
-            <div className="pnl-control-detalle">
-              <Tarjeta titulo="Detalle de la unidad">
-                {seleccionado ? <FichaUnidad unidad={unidad ?? lista.find(v => v.id === seleccionado)} /> : <Vacio icono="pin" titulo="Selecciona una unidad" texto="Elige una unidad de la lista o del mapa para consultar su ficha." />}
-              </Tarjeta>
-            </div>
-          </div>
-        )}
-      </div>
-    </>
+      </div>}
+      {listaAbierta && flota.estado === 'ok' && lista.length > 0 && !seleccionado && <aside className="control-panel" id="control-unidades" aria-label="Unidades de la flota">
+        <div className="control-panel-heading"><h2>Unidades <span>{lista.length}</span></h2><button type="button" aria-label="Cerrar lista de unidades" onClick={() => setListaAbierta(false)}><Icono nombre="cerrar" /></button></div>
+        <ListaUnidades vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado} />
+      </aside>}
+      {seleccionado && <aside className="control-panel control-unit" aria-label="Detalle de la unidad">
+        <FichaUnidad unidad={unidad ?? lista.find(v => v.id === seleccionado)} alCerrar={() => setSeleccionado(null)} />
+        {detalle.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={detalle.recargar}>Reintentar</button></p>}
+      </aside>}
+      <div className="control-live"><i />Actualización cada 15 s<span>Selecciona una unidad en el mapa</span></div>
+    </section>
   )
 }
 

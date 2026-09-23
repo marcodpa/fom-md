@@ -69,6 +69,8 @@ export default function MapaGoogle({
   vehiculos = [],
   seleccionado = null,
   alSeleccionar,
+  ficha = true,
+  leyenda = true,
   recorrido = null,
   alto = 'clamp(320px, 52vh, 560px)',
 }) {
@@ -151,7 +153,6 @@ export default function MapaGoogle({
             title: `${v.alias} · ${v.placa}`,
             icon: icono,
           })
-          m.addListener('click', () => alSeleccionar?.(seleccionado === v.id ? null : v.id))
           m.addListener('mouseover', () => setSobre(v.id))
           m.addListener('mouseout', () => setSobre(null))
           marcadores.current.set(v.id, m)
@@ -159,6 +160,8 @@ export default function MapaGoogle({
           m.setPosition({ lat: v.lat, lng: v.lng })
           m.setIcon(icono)
         }
+        maps.event.clearListeners(m, 'click')
+        m.addListener('click', () => alSeleccionar?.(seleccionado === v.id ? null : v.id))
         m.setZIndex(sel ? 999 : 1)
       })
 
@@ -220,7 +223,7 @@ export default function MapaGoogle({
         </div>
       )}
 
-      <div className="pnl-mapa-leyenda">
+      {leyenda && <div className="pnl-mapa-leyenda">
         <span className="pnl-mapa-vivo">
           <i />
           En vivo
@@ -228,9 +231,9 @@ export default function MapaGoogle({
         <span>{vehiculos.length} unidades</span>
         <span className="sep">·</span>
         <span>{enMarcha} en marcha</span>
-      </div>
+      </div>}
 
-      {vehiculoActivo && (
+      {ficha && vehiculoActivo && (
         <div className="pnl-mapa-detalle">
           <div className="pnl-mapa-detalle-top">
             <span className={`pnl-tag ${vehiculoActivo.estadoMarcha === 'en_marcha' ? 'verde' : 'gris'}`}>

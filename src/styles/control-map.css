@@ -1,0 +1,31 @@
+.fom-dark[data-screen="/mapa"]{display:block;min-height:100dvh}
+.fom-dark[data-screen="/mapa"] .pnl-main{width:100%;max-width:none;margin:0;height:100dvh;overflow:hidden}
+.fom-dark[data-screen="/mapa"] .pnl-topbar{display:none}
+.fom-dark[data-screen="/mapa"] .pnl-side{position:fixed;inset:0 auto 0 0;width:272px;transform:translateX(-100%);visibility:hidden;transition:transform .2s;z-index:40}
+.fom-dark[data-screen="/mapa"] .pnl-side.abierto{transform:none;visibility:visible}
+.fom-dark[data-screen="/mapa"] .pnl-side-cerrar{display:grid;place-items:center}
+.fom-dark[data-screen="/mapa"] .pnl-menu-btn{display:grid;place-items:center;position:fixed;top:18px;left:18px;z-index:25;width:46px;height:46px;background:var(--e-sup);border:1px solid var(--e-borde);border-radius:14px;color:var(--e-texto);box-shadow:0 5px 22px #0003}
+.fom-dark[data-screen="/mapa"] .pnl-velo{display:block;position:fixed;inset:0;background:#0007;z-index:35}
+.control-map{height:100%;position:relative;isolation:isolate}
+.control-map-canvas{position:absolute;inset:0;z-index:0}
+.fom-dark .control-map .pnl-mapa{border-radius:0;height:100%;border:0}
+.control-search,.control-panel,.control-filters .pnl-chip,.control-filters select,.control-live{background:var(--e-sup);border:1px solid var(--e-borde);box-shadow:0 8px 26px #0003}
+.control-search{position:absolute;z-index:2;top:18px;left:78px;width:370px;padding:16px;border-radius:16px}
+.control-search-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
+.control-search h1{font-size:18px;letter-spacing:-.4px;margin:0}
+.control-search p{font-size:11px;color:var(--e-texto-2);margin:5px 0 0}
+.fom-dark .control-search .pnl-btn{min-height:36px;padding:6px 10px;font-size:12px;gap:6px}
+.control-search .pnl-buscar{width:100%}
+.control-filters{position:absolute;top:18px;left:466px;right:80px;display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;z-index:2;pointer-events:none}
+.control-filters>*{pointer-events:auto}.control-filters .pnl-chips{flex-wrap:nowrap;gap:6px;margin:0;flex-shrink:0}.control-filters .pnl-chip{white-space:nowrap}
+.control-filters select{max-width:220px;width:auto}
+.control-panel{position:absolute;left:78px;top:174px;width:370px;max-height:calc(100% - 240px);overflow:auto;overscroll-behavior:contain;border-radius:16px;z-index:3;padding:16px}
+.control-panel-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.control-panel-heading h2{font-size:16px;margin:0}.control-panel-heading span{color:var(--e-texto-3);margin-left:8px;font-size:12px}
+.control-panel-heading button{width:36px;height:36px;display:grid;place-items:center;border:0;border-radius:9px;background:var(--e-sup-alta);color:var(--e-texto)}
+.control-panel .pnl-fila{cursor:pointer;gap:8px}.control-panel .pnl-fila-txt{min-width:0}.control-panel .pnl-fila em{font-size:10px;white-space:nowrap}.control-panel .pnl-fila-txt span{font-size:11px}
+.control-unit .fom-vehicle-visual{max-height:130px}.control-unit .pnl-ficha-datos{grid-template-columns:repeat(2,minmax(0,1fr))}.control-detail-note{font-size:12px;color:var(--e-texto-2)}.control-detail-note button{color:var(--e-primario);background:none;border:0}
+.control-live{position:absolute;z-index:2;bottom:24px;left:18px;display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:12px;font-size:11px;color:var(--e-texto-2)}.control-live i{height:7px;width:7px;border-radius:50%;background:var(--e-exito)}.control-live span{border-left:1px solid var(--e-borde);padding-left:10px}
+.control-map .leaflet-top.leaflet-left{left:auto;right:18px;top:78px}.control-map .leaflet-control-zoom{margin:0}.control-map .leaflet-control-attribution{max-width:calc(100vw - 24px)}
+@media(max-width:1100px){.control-filters{top:162px;left:78px;right:18px}.control-panel{top:222px;max-height:calc(100% - 288px)}}
+@media(max-width:600px){.fom-dark[data-screen="/mapa"] .pnl-menu-btn{top:12px;left:12px;width:42px;height:42px}.control-search{top:12px;left:64px;right:12px;width:auto;padding:12px}.control-search h1{font-size:16px}.control-search-heading{gap:5px}.control-search p{font-size:10px}.fom-dark .control-search .pnl-btn{font-size:0;width:35px;padding:6px}.control-search .pnl-btn svg{width:19px}.control-filters{top:148px;left:12px;right:12px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}.fom-dark .control-filters .pnl-chip{font-size:11px;min-height:36px;padding:6px 10px}.control-filters select{min-width:140px;font-size:12px;min-height:36px}.control-panel{left:12px;right:12px;top:auto;bottom:48px;width:auto;max-height:40dvh;padding:14px}.control-feedback{top:204px;bottom:auto;max-height:40dvh}.control-live{bottom:24px;left:12px;padding:6px 10px;font-size:10px}.control-live span{display:none}.control-map .leaflet-top.leaflet-left{top:208px;right:12px}.control-unit .fom-vehicle-visual{display:none}}

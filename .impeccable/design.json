@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-23T18:32:08.328Z",
+  "title": "Design System: FOM marketing v6",
+  "extensions": {
+    "shadows": [
+      {
+        "name": "marketing-monitor",
+        "value": "0 24px 35px -20px #030b16d9",
+        "purpose": "Marco del monitor"
+      },
+      {
+        "name": "marketing-phone",
+        "value": "0 22px 34px -18px #010811",
+        "purpose": "Marco del teléfono"
+      },
+      {
+        "name": "marketing-hero-monitor",
+        "value": "0 25px 45px -20px #030b19",
+        "purpose": "Consola del hero de inicio"
+      }
+    ],
+    "motion": [
+      {
+        "name": "marketing-button-transition",
+        "value": "background .2s,transform .2s",
+        "purpose": "Hover de botones, desactivado con movimiento reducido"
+      },
+      {
+        "name": "marketing-button-hover-transform",
+        "value": "translateY(-2px)",
+        "purpose": "Respuesta al cursor"
+      },
+      {
+        "name": "marketing-hero-scrub",
+        "value": ".4",
+        "purpose": "GSAP ScrollTrigger"
+      },
+      {
+        "name": "marketing-hero-distance",
+        "value": "scene.clientHeight * 1.8",
+        "purpose": "Recorrido de la secuencia fijada"
+      },
+      {
+        "name": "marketing-hero-ease",
+        "value": "none",
+        "purpose": "Timeline ligado al scroll"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "marketing-wide-min",
+        "value": "1600px"
+      },
+      {
+        "name": "marketing-navigation-max",
+        "value": "1180px"
+      },
+      {
+        "name": "marketing-tablet-max",
+        "value": "1100px"
+      },
+      {
+        "name": "marketing-stack-max",
+        "value": "760px"
+      },
+      {
+        "name": "marketing-gsap-small-max",
+        "value": "700px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón primario marketing",
+      "kind": "button",
+      "refersTo": "marketing-button-primary",
+      "description": "CTA del contenido público v6; no corresponde al panel.",
+      "html": "<button class=\"ds-fom-primary\">Solicitar una demostración <span aria-hidden=\"true\">↗</span></button>",
+      "css": ".ds-fom-primary{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:48px;padding:14px 22px;border:1px solid #349bfa;background:#198bfa;color:#fff;border-radius:6px;font-family:'Spline Sans',sans-serif;font-weight:500;font-size:15px;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s}.ds-fom-primary>span{font-size:20px}.ds-fom-primary:hover{background:#0876d9;transform:translateY(-2px)}.ds-fom-primary:focus-visible{outline:3px solid #68baff;outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-fom-primary{transition:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Marketing fotográfico y cinematográfico oscuro aprobado en v6",
+    "overview": "Alcance exclusivo del sitio público .marketing-v2 y .fom-site. El panel y la autenticación conservan sus normas anteriores. El documento histórico permanece íntegro en DESIGN.md; los tokens marketing- describen únicamente la implementación v6.",
+    "keyCharacteristics": [
+      "Spline Sans",
+      "Fotografías ilustrativas oscuras",
+      "Capturas originales actuales con datos de demostración",
+      "Navegación agrupada responsive",
+      "Hero GSAP de consola a teléfono"
+    ],
+    "rules": [
+      {
+        "name": "Regla de alcance",
+        "body": "No aplicar tokens marketing- al panel ni a autenticación.",
+        "section": "colors"
+      },
+      {
+        "name": "Evidencia visual",
+        "body": "Pantallas desde src/assets/marketing/real; las interfaces reinterpretadas de los mockups no son fuente factual.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Mantener capturas legibles y proporción original.",
+      "Respetar movimiento reducido y foco visible.",
+      "Usar los once mockups aprobados como dirección visual."
+    ],
+    "donts": [
+      "No inventar capacidades ni resultados comerciales.",
+      "No representar fotos ilustrativas como clientes reales.",
+      "No imponer las reglas históricas de bandas claras al marketing v6."
+    ]
+  }
+}
