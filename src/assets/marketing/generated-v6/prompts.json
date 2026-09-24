@@ -1,0 +1,194 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "file": "highway-dusk.png",
+      "prompt": "Standalone dusk highway, white trucks, Venezuelan mountains, clean photograph; original home reference.",
+      "references": []
+    },
+    {
+      "file": "phone-hand.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE standalone 16:9 documentary photograph for FOM, not a website, not a collage. Cinematic but realistic charcoal/navy grading, natural textures, restrained contrast. No headings, captions, cards, buttons, watermarks, ornamental labels, or text outside an explicitly requested uniform logo. The supplied full page is only a reference for the corresponding photographic scene. A close-up of a natural adult left hand in a navy work jacket holding one large modern black smartphone vertically against a dark softly blurred fleet office. Phone straight front-facing, centered horizontally, all four corners visible, phone spans 90% of image height. Screen is a perfectly flat dark near-black rectangle, no content, no reflection obscuring the display, thin black bezel; this screen will receive a real app screenshot in HTML. Realistic fingers visible to sides and behind, no fingers over screen. Warm skin, shallow depth of field. Match the hand-held phone in the second band of the reference.",
+      "references": [
+        "01-inicio.png"
+      ]
+    },
+    {
+      "file": "operations-woman.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE standalone 16:9 documentary photograph for FOM, not a website, not a collage. Cinematic but realistic charcoal/navy grading, natural textures, restrained contrast. No headings, captions, cards, buttons, watermarks, ornamental labels, or text outside an explicitly requested uniform logo. The supplied full page is only a reference for the corresponding photographic scene. Over-the-shoulder photo of a female fleet dispatcher in a navy FOM work shirt, seated in left foreground of a dark modern practical logistics office, looking at a large monitor on the right that displays a nighttime fleet map with sparse green/blue vehicle dots. Use the second reference as the actual map display, preserve its dark interface. Monitor fills most of scene, not whole image. Candid pose, ponytail, window bokeh, real desk. Only subtle white FOM wordmark on back of shirt.",
+      "references": [
+        "01-inicio.png",
+        "panel-mapa.webp"
+      ]
+    },
+    {
+      "file": "driver-inspection.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE standalone 16:9 documentary photograph for FOM, not a website, not a collage. Cinematic but realistic charcoal/navy grading, natural textures, restrained contrast. No headings, captions, cards, buttons, watermarks, ornamental labels, or text outside an explicitly requested uniform logo. The supplied full page is only a reference for the corresponding photographic scene. Candid rear three-quarter close shot of a Latino male fleet technician in navy cap and textured navy work uniform with white FOM letters on upper back, crouching beside a white heavy truck, inspecting its large front tire while holding a smartphone. Technician on left half, tire on right half, dry depot in daylight. Same scene as the fifth band of the reference. Natural skin and clothing creases. Phone seen obliquely, screen not readable. No caption, no digital overlays.",
+      "references": [
+        "01-inicio.png"
+      ]
+    },
+    {
+      "file": "fleet-depot.png",
+      "prompt": "Use case: photorealistic-natural. ONE standalone high-resolution 16:9 photograph for FOM fleet operations. Reference is a full website design: reproduce only the described photo, never its layout. Dark navy cinematic documentary tone, real material texture, practical Venezuelan logistics setting. No UI overlays, captions, buttons, cards, badges, diagrams, watermark or written slogans. A low-angle close foreground view of one large truck's tire and undercarriage on the LEFT, with a row of six white freight trucks stretching across the CENTER and RIGHT in a dry paved logistics yard at dusk, distant Venezuelan mountains, warm sunset sky, practical headlights. Match the maintenance/first check to next service band in the attached reference.",
+      "references": [
+        "01-inicio.png"
+      ]
+    },
+    {
+      "file": "office-desk.png",
+      "prompt": "Use case: photorealistic-natural. ONE standalone high-resolution 16:9 photograph for FOM fleet operations. Reference is a full website design: reproduce only the described photo, never its layout. Dark navy cinematic documentary tone, real material texture, practical Venezuelan logistics setting. No UI overlays, captions, buttons, cards, badges, diagrams, watermark or written slogans. A clean dark logistics office desk of worn wood with a black keyboard low foreground, black coffee mug at far right, large dark blue windows and soft city bokeh behind. NO monitor, NO laptop, NO people. Keep central 80 percent unobstructed for a real HTML monitor to be composited later. Realistic depth of field and perspective at seated eye level, dim natural blue hour.",
+      "references": [
+        "02-plataforma.png"
+      ]
+    },
+    {
+      "file": "driver-cabin.png",
+      "prompt": "Use case: photorealistic-natural. ONE standalone high-resolution 16:9 photograph for FOM fleet operations. Reference is a full website design: reproduce only the described photo, never its layout. Dark navy cinematic documentary tone, real material texture, practical Venezuelan logistics setting. No UI overlays, captions, buttons, cards, badges, diagrams, watermark or written slogans. Candid over-left-shoulder view of a Latino male fleet driver seated inside a STATIONARY white pickup truck in its depot, navy cap and navy FOM work shirt. Holding a phone in his right hand near the steering wheel to check work information before departing. Through windshield show parked trucks out of focus. Driver body occupies left third, steering wheel and phone center, realistic grey fabric and hands. No other words besides subtle white FOM shirt logo.",
+      "references": [
+        "02-plataforma.png"
+      ]
+    },
+    {
+      "file": "aerial-yard.png",
+      "prompt": "Use case: photorealistic-natural. ONE standalone high-resolution 16:9 photograph for FOM fleet operations. Reference is a full website design: reproduce only the described photo, never its layout. Dark navy cinematic documentary tone, real material texture, practical Venezuelan logistics setting. No UI overlays, captions, buttons, cards, badges, diagrams, watermark or written slogans. A photorealistic oblique drone view of an organized Venezuelan industrial logistics depot: paved truck yard, two grey-roof maintenance warehouses, white trucks parked in rows, gatehouse, green trees, realistic roads. Soft late afternoon sunlight, dark green and slate blue palette, high detail. No pins, NO map labels, no overlays, no text. This will be the original clean photo beneath HTML map markers.",
+      "references": [
+        "06-areas.png"
+      ]
+    },
+    {
+      "file": "winding-road.png",
+      "prompt": "Use case: photorealistic-natural. Generate ONE individual 16:9 high-resolution editorial photograph as a website asset. The attached long page is ONLY scene/style reference, never produce website layout. FOM logistics in Venezuela, realistic navy/slate grading, natural professional environment. NO interface overlays, typography, slogans, captions, floating cards, badges, buttons, borders or watermarks. Wide evening landscape of a dry divided highway curving through forested Venezuelan mountains toward sunset, seen from an elevated roadside viewpoint. One small white cargo truck driving away in the distance, warm thin horizon under blue clouds, near road lower center, dark foliage left. Clean photographic background for a compact call to action.",
+      "references": [
+        "02-plataforma.png"
+      ]
+    },
+    {
+      "file": "driver-yard.png",
+      "prompt": "Use case: photorealistic-natural. Generate ONE individual 16:9 high-resolution editorial photograph as a website asset. The attached long page is ONLY scene/style reference, never produce website layout. FOM logistics in Venezuela, realistic navy/slate grading, natural professional environment. NO interface overlays, typography, slogans, captions, floating cards, badges, buttons, borders or watermarks. Rear three-quarter photograph of a fleet supervisor in navy cap and navy work shirt with subtle white FOM logo on upper back, checking his phone while standing in a paved truck depot. Man occupies left and center, neat row of white trucks behind to the right. Cloudy late afternoon, professional candid moment, textured cloth, no slogans.",
+      "references": [
+        "02-plataforma.png"
+      ]
+    },
+    {
+      "file": "server-racks.png",
+      "prompt": "Use case: photorealistic-natural. Generate ONE individual 16:9 high-resolution editorial photograph as a website asset. The attached long page is ONLY scene/style reference, never produce website layout. FOM logistics in Venezuela, realistic navy/slate grading, natural professional environment. NO interface overlays, typography, slogans, captions, floating cards, badges, buttons, borders or watermarks. Close oblique view down a small modern data center aisle, black server racks on both sides with delicate blue status lights and realistic metal mesh, dark charcoal and cobalt blue color palette. No people, no graphic icons, no padlocks, no UI, no text. Match the data-security photographic band near the bottom of the reference.",
+      "references": [
+        "02-plataforma.png"
+      ]
+    },
+    {
+      "file": "pickup-road.png",
+      "prompt": "Use case: photorealistic-natural. Generate ONE individual 16:9 high-resolution editorial photograph as a website asset. The attached long page is ONLY scene/style reference, never produce website layout. FOM logistics in Venezuela, realistic navy/slate grading, natural professional environment. NO interface overlays, typography, slogans, captions, floating cards, badges, buttons, borders or watermarks. A white midsize Toyota Hilux style fleet pickup on a dry winding road with Venezuelan mountain city at dusk. Front three-quarter angle, pickup center-right, natural realistic headlights, dark road foreground, sunset mountains behind. No people visible in close-up, no overlay text, no painted slogans. Match the Benefits hero's vehicle composition.",
+      "references": [
+        "09-beneficios.png"
+      ]
+    },
+    {
+      "file": "supervisor-office.png",
+      "prompt": "Use case: photorealistic-natural. ONE standalone 16:9 photographic asset, high resolution. Attached full-page design is a reference for photography only. Realistic FOM fleet operation in Venezuela, dark navy charcoal cinematic editorial grading, real skin and fabric, natural light. No page layout, NO overlay text, slogans, floating metrics, UI cards, buttons, watermarks, frames. Rear three-quarter view of a male logistics supervisor at a wooden office desk, dark FOM navy uniform, person on right edge, large physical desktop monitor on left-center. Integrate the SECOND reference image as the monitor display, preserving actual FOM interface. Monitor should be fully visible, camera at seated height, realistic dim office with glass partitions. Keep upper left background calm, natural candid working posture, subtle white FOM uniform logo only.",
+      "references": [
+        "07-quienes-somos.png",
+        "panel-resumen.webp"
+      ]
+    },
+    {
+      "file": "truck-highway.png",
+      "prompt": "Use case: photorealistic-natural. ONE standalone 16:9 photographic asset, high resolution. Attached full-page design is a reference for photography only. Realistic FOM fleet operation in Venezuela, dark navy charcoal cinematic editorial grading, real skin and fabric, natural light. No page layout, NO overlay text, slogans, floating metrics, UI cards, buttons, watermarks, frames. A single white heavy freight truck approaching on a dry mountain highway at dusk. Truck toward right center, city lights below distant hills, dark road sweeping through left foreground, blue sky and warm sunset horizon. Large truck three-quarter frontal view, natural headlights, realistic commercial vehicle details. Match the Funciones hero without any text or product device.",
+      "references": [
+        "04-funciones.png"
+      ]
+    },
+    {
+      "file": "truck-curve.png",
+      "prompt": "Use case: photorealistic-natural. ONE standalone 16:9 photographic asset, high resolution. Attached full-page design is a reference for photography only. Realistic FOM fleet operation in Venezuela, dark navy charcoal cinematic editorial grading, real skin and fabric, natural light. No page layout, NO overlay text, slogans, floating metrics, UI cards, buttons, watermarks, frames. Rear three-quarter view of a white box truck driving away around a winding dry mountain road, forested hills and guardrail, low sunset through slate clouds. Tall forest on either side, safe driving, truck center-right. No road signs containing text, no safety badges or overlays. Match the first risk detection photography band of Seguridad.",
+      "references": [
+        "05-seguridad.png"
+      ]
+    },
+    {
+      "file": "dash-camera.png",
+      "prompt": "Use case: photorealistic-natural. ONE standalone 16:9 photographic asset, high resolution. Attached full-page design is a reference for photography only. Realistic FOM fleet operation in Venezuela, dark navy charcoal cinematic editorial grading, real skin and fabric, natural light. No page layout, NO overlay text, slogans, floating metrics, UI cards, buttons, watermarks, frames. Macro documentary photograph of a compact black dual-lens fleet dash camera mounted beneath the rear-view mirror inside a truck windshield, visible suction mount and tidy cable, lens prominent and textured black plastic. Soft out-of-focus road and grey sky outside, no readable brand, no overlays. Match the video safety section photo.",
+      "references": [
+        "05-seguridad.png"
+      ]
+    },
+    {
+      "file": "driver-sos.png",
+      "prompt": "Create ONE standalone cinematic photorealistic marketing photograph, landscape 16:9. A navy FOM uniformed adult driver seen from behind three-quarter view checking his smartphone while standing safely beside his parked white truck at dusk. Calm realistic human anatomy. Match the navy blue lighting and photographic style of the attached website proposal. Only the described photograph, NOT the full website or a collage. No headings, cards, interface overlays, labels, maps or watermarks. High photographic detail, natural textures.",
+      "references": [
+        "05-seguridad.png"
+      ]
+    },
+    {
+      "file": "fleet-lineup.png",
+      "prompt": "Create ONE standalone cinematic photorealistic marketing photograph, landscape 16:9. Wide cinematic row of white commercial trucks in a Venezuelan logistics depot at blue hour. Navy-uniformed supervisor at far left, cloudy navy sky. Panoramic composition. Match the navy blue lighting and photographic style of the attached website proposal. Only the described photograph, NOT the full website or a collage. No headings, cards, interface overlays, labels, maps or watermarks. High photographic detail, natural textures.",
+      "references": [
+        "06-areas.png"
+      ]
+    },
+    {
+      "file": "aerial-terminal.png",
+      "prompt": "Create ONE standalone cinematic photorealistic marketing photograph, landscape 16:9. Oblique drone photograph of a large Venezuelan logistics terminal with white trucks, access lanes and low industrial warehouses at blue hour. Match the navy blue lighting and photographic style of the attached website proposal. Only the described photograph, NOT the full website or a collage. No headings, cards, interface overlays, labels, maps or watermarks. High photographic detail, natural textures.",
+      "references": [
+        "06-areas.png"
+      ]
+    },
+    {
+      "file": "aerial-workshop.png",
+      "prompt": "Create ONE standalone cinematic photorealistic marketing photograph, landscape 16:9. Oblique drone photograph of a fleet maintenance depot with service bays and parked white vehicles, warehouse roof and paved yard at blue hour. Distinct tighter composition. Match the navy blue lighting and photographic style of the attached website proposal. Only the described photograph, NOT the full website or a collage. No headings, cards, interface overlays, labels, maps or watermarks. High photographic detail, natural textures.",
+      "references": [
+        "06-areas.png"
+      ]
+    },
+    {
+      "file": "phone-truck.png",
+      "prompt": "Generate ONE independent 16:9 photorealistic photograph matching the photographic scene in the attached FOM website proposal. Close cinematic white commercial truck exterior filling the right background with a softly blurred navy uniformed driver beside it. Keep left foreground dark and uncluttered for a separately added smartphone. Do NOT include any smartphone or screen. Cinematic navy blue lighting with natural subtle warm highlights, professional commercial photography. Only the photo: no page, UI, headings, text overlay, graphic cards or watermark.",
+      "references": [
+        "03-app.png"
+      ]
+    },
+    {
+      "file": "truck-overhead.png",
+      "prompt": "Generate ONE independent 16:9 photorealistic photograph matching the photographic scene in the attached FOM website proposal. Directly overhead drone photograph of a single white semitrailer truck traveling on a paved divided road through tropical dark green forest in Venezuela at blue hour. Strong diagonal road composition. Cinematic navy blue lighting with natural subtle warm highlights, professional commercial photography. Only the photo: no page, UI, headings, text overlay, graphic cards or watermark.",
+      "references": [
+        "07-quienes-somos.png"
+      ]
+    },
+    {
+      "file": "inspection-checklist.png",
+      "prompt": "Generate ONE independent 16:9 photorealistic photograph matching the photographic scene in the attached FOM website proposal. Close-up of the hands of a navy-uniformed fleet technician writing a vehicle inspection checklist on a clipboard beside a large truck tire. Realistic hands and mechanical details, shallow depth of field. Paper has subtle lines and checkboxes without legible text. Cinematic navy blue lighting with natural subtle warm highlights, professional commercial photography. Only the photo: no page, UI, headings, text overlay, graphic cards or watermark.",
+      "references": [
+        "07-quienes-somos.png"
+      ]
+    },
+    {
+      "file": "supervisor-yard.png",
+      "prompt": "Create ONE standalone photorealistic 16:9 photograph for the attached FOM proposal. Navy FOM cap and uniform adult fleet supervisor using an open laptop on a worktable in a truck yard, white trucks behind, dusk. Match its cinematic dark navy blue color grading and photographic mood. Photo only, no website, page layout, captions, text panels, cards, UI or watermark.",
+      "references": [
+        "06-areas.png"
+      ]
+    },
+    {
+      "file": "laptop-contact.png",
+      "prompt": "Create ONE standalone photorealistic 16:9 photograph for the attached FOM proposal. Close-up of a CLOSED dark laptop with a small blue FOM logo centered on its lid, elegant dark office desk, blurred blue office lighting, no people. Match its cinematic dark navy blue color grading and photographic mood. Photo only, no website, page layout, captions, text panels, cards, UI or watermark.",
+      "references": [
+        "11-contacto.png"
+      ]
+    },
+    {
+      "file": "gps-installation.png",
+      "prompt": "Create ONE standalone photorealistic 16:9 photograph for the attached FOM proposal. Close documentary photograph of a professional navy-uniformed technician carefully connecting a small GPS tracking unit under the dashboard of a parked commercial truck. Realistic hands, neat wiring harness, no sparks. Match its cinematic dark navy blue color grading and photographic mood. Photo only, no website, page layout, captions, text panels, cards, UI or watermark.",
+      "references": [
+        "11-contacto.png"
+      ]
+    },
+    {
+      "file": "truck-brand.png",
+      "prompt": "Create ONE standalone photorealistic 16:9 photograph for the attached FOM proposal. Close photograph of the door and front side of a clean white commercial truck cab carrying a simple blue FOM logo. Dark logistics yard softly blurred behind. Match its cinematic dark navy blue color grading and photographic mood. Photo only, no website, page layout, captions, text panels, cards, UI or watermark.",
+      "references": [
+        "11-contacto.png"
+      ]
+    }
+  ]
+}

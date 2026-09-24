@@ -5,7 +5,7 @@ import './styles/marketing.css'
 import './styles/marketing-backgrounds.css'
 import './styles/fom-v6.css'
 
-const Marketing = lazy(() => import('./pages/FomMarketing'))
+const Marketing = lazy(() => import('./pages/ReferenceMarketing'))
 const Entrar = lazy(() => import('./pages/Entrar'))
 const CambiarClaveInicial = lazy(() => import('./pages/CambiarClaveInicial'))
 const Consola = lazy(() => import('./panel/Consola'))

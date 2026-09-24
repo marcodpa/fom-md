@@ -1,0 +1,93 @@
+/* Each main story fills the available viewport; longer content remains scrollable. */
+.marketing-v2{font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+.reference-site{--section-height:calc(100svh - 62px);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif;max-width:none}
+.reference-site :is(h1,h2,h3){font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif}
+.reference-site h1,.reference-site .r-hero h1,.reference-site .r-about-hero h1{font-size:clamp(36px,4.1vw,68px);font-weight:600;letter-spacing:-.045em;line-height:1.06;white-space:normal;text-wrap:balance}
+.reference-site h2{font-size:clamp(28px,3.1vw,48px);font-weight:500;letter-spacing:-.035em;line-height:1.12}
+.reference-site p{font-size:clamp(15px,1.2vw,18px);line-height:1.65}
+.reference-site .r-eyebrow{font-size:11px;line-height:1.6;letter-spacing:.16em;font-weight:600;max-width:none}
+.reference-site .r-facts h3{font-size:clamp(15px,1.25vw,18px);font-weight:500;line-height:1.35;letter-spacing:-.015em}
+.reference-site .r-facts p{font-size:14px;line-height:1.6}
+.reference-site .r-facts{gap:22px;margin-top:30px}
+.reference-site .r-button{font-family:inherit;font-size:14px;min-height:50px;padding:14px 23px;border-radius:8px}
+.reference-site :is(.r-hero,.r-row,.r-safety-areas,.r-about-hero,.r-contact,.r-process,.r-principles){min-height:var(--section-height)}
+.reference-site>.r-faq{min-height:var(--section-height);align-content:center;padding-block:64px}
+.reference-site .r-copy{padding-block:clamp(40px,7svh,88px)}
+.reference-site .r-copy>p{margin-top:22px}
+.reference-site .r-hero .r-copy{padding-block:64px}
+.reference-site .r-hero .r-copy>p{max-width:40ch}
+.reference-site .r-hero .r-button{margin-top:32px}
+.reference-site .r-contact{align-items:center;padding-block:64px}
+.reference-site .r-process,.reference-site .r-principles{display:flex;flex-direction:column;justify-content:center;padding-block:64px}
+.reference-site .r-process ol{margin-top:48px}
+.reference-site .r-principles>div{margin-top:40px}
+.reference-site .r-cta{min-height:52svh;align-items:center}
+.reference-site .r-end-split{min-height:65svh;align-items:stretch}
+.reference-site .r-end-split>.r-faq{align-content:center}
+.reference-site .r-end-split .r-cta{display:grid;align-content:center}
+.reference-site .r-help{min-height:var(--section-height);padding-block:64px}
+.reference-site .r-service-cards{margin-top:28px;gap:14px}
+.reference-site .r-service-cards h3{font-size:18px}
+.reference-site .r-service-cards p{font-size:13px;line-height:1.55}
+.reference-site .r-service-cards>a{padding:22px 16px}
+.reference-site .r-faq h2{font-size:clamp(26px,2.5vw,38px)}
+.reference-site .r-questions{gap:12px}
+.reference-site .r-questions summary{padding:20px;font-size:16px}
+.reference-site .r-questions details>p{padding:0 20px 20px;line-height:1.7}
+@media(min-width:761px){
+ .reference-site :is(.r-hero,.r-row)>.s-scene,.reference-site .r-row>.r-visual{align-self:stretch;aspect-ratio:auto!important;min-height:100%;position:relative}
+ .reference-site .r-row>.r-visual>.s-scene{position:absolute;inset:0;height:100%;aspect-ratio:auto!important}
+ .reference-site :is(.r-hero,.r-row) .s-scene{container-type:size}
+ .reference-site :is(.r-hero,.r-row) .s-device:not(.s-device-phone){width:min(86%,120cqh)}
+ .reference-site :is(.r-hero,.r-row) .s-hand-canvas{width:calc(100cqh * 1672 / 941)!important}
+ .reference-site .r-hero-center .r-copy{padding:48px 8% 32px}
+ .reference-site .r-hero-center>.s-scene{flex:1;min-height:45svh;width:100%}
+ .reference-site .r-safety-areas{align-items:center}
+ .reference-site .r-safety-areas>.s-scene{align-self:stretch;aspect-ratio:auto!important;container-type:size}
+ .reference-site .r-safety-areas>.s-scene .s-hand-canvas{width:calc(100cqh * 1672 / 941)!important}
+ .reference-site .r-safety-areas>.r-copy{padding:50px 8%}
+ .reference-site .r-safety-areas h2{font-size:clamp(26px,2.5vw,40px)}
+ .reference-site .r-about-hero>.s-scene{position:absolute;inset:0;height:100%;aspect-ratio:auto!important}
+ .reference-site .r-about-hero>.r-copy{position:relative;top:auto;left:auto;margin:7svh 4%;width:46%;padding:36px;background:#061017cc}
+ .reference-site .r-service-row .r-copy{align-self:center}
+ .reference-site .r-cta>.s-scene{align-self:stretch;aspect-ratio:auto!important;min-height:100%}
+ .reference-site .r-cta>.s-scene{container-type:size}
+ .reference-site .r-cta .s-device-phone{height:80%}
+}
+@media(max-width:1100px) and (min-width:761px){
+ .reference-site .r-hero h1{font-size:42px}
+ .reference-site h2{font-size:32px}
+ .reference-site .r-facts{gap:16px!important}
+ .reference-site .r-service-cards{grid-template-columns:1fr}
+ .reference-site .r-service-cards>a{padding:12px 16px}
+ .reference-site .r-service-cards svg{display:none}
+}
+@media(max-width:760px){
+ .reference-site{--section-height:calc(100svh - 70px)}
+ .reference-site .r-hero h1,.reference-site .r-about-hero h1{font-size:clamp(34px,9vw,48px);line-height:1.08}
+ .reference-site h2{font-size:30px;line-height:1.15}
+ .reference-site p{font-size:15px;line-height:1.65}
+ .reference-site .r-copy,.reference-site .r-row .r-copy,.reference-site .r-hero .r-copy{padding:40px 6%!important}
+ .reference-site :is(.r-hero,.r-row){justify-content:center}
+ .reference-site :is(.r-hero,.r-row)>.s-scene{margin-top:auto}
+ .reference-site .r-hero .r-copy{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+ .reference-site .r-hero>.s-scene{max-height:48svh;min-height:230px}
+ .reference-site .r-hero>.s-app-photo{aspect-ratio:435/450!important;max-height:none}
+ .reference-site .r-facts{gap:18px!important;margin-top:26px}
+ .reference-site .r-facts h3{font-size:16px}
+ .reference-site .r-facts p{font-size:13px}
+ .reference-site .r-safety-areas{grid-template-columns:1fr}
+ .reference-site .r-safety-areas>.s-scene{max-height:55svh;aspect-ratio:16/9!important}
+ .reference-site .r-safety-areas>.s-scene .s-hand-canvas{width:100%!important}
+ .reference-site .r-safety-areas>.r-copy:nth-child(2){padding:36px 6%!important}
+ .reference-site .r-safety-areas h2{font-size:30px}
+ .reference-site .r-safety-areas .r-facts h3{font-size:16px}
+ .reference-site .r-contact,.reference-site .r-process,.reference-site .r-principles{padding-block:44px}
+ .reference-site>.r-faq{min-height:70svh;padding-block:44px}
+ .reference-site .r-cta{min-height:55svh;justify-content:center}
+ .reference-site .r-questions summary{font-size:14px;padding:18px 14px}
+ .reference-site .r-service-cards{grid-template-columns:1fr}
+ .reference-site .r-service-cards>a{padding:18px;display:grid;grid-template-columns:30px 1fr;gap:4px 12px}
+ .reference-site .r-service-cards svg{grid-row:1/3;margin:0}
+ .reference-site .r-service-cards p{margin:0}
+}
