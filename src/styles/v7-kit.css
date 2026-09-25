@@ -329,3 +329,13 @@ a.v7-card:hover,.v7-card:hover{border-color:#2c8ee0;transform:translateY(-3px);b
 .v7-page .v7-footer.is-shared .v7-footer-links nav a:before{display:none!important}
 .v7-page .v7-footer.is-shared .v7-copyright{display:block;padding-top:22px!important;border-top:1px solid #ffffff12;font-size:13px;color:#8aa3bb}
 @media(max-width:760px){.v7-page .v7-footer.is-shared{padding:150px 6% 28px!important}.v7-page .v7-footer.is-shared>.v7-footer-photo{margin:0!important;width:100%!important;order:0}.v7-footer-photo img{height:auto;aspect-ratio:1672/941}.v7-page .v7-footer.is-shared .v7-footer-links{grid-template-columns:1fr 1fr}.v7-footer.is-shared .v7-footer-links nav[aria-label=Contacto]{grid-column:1/-1}.v7-footer.is-shared .v7-footer-brand .m-brand{font-size:36px}}
+/* On phones the pinned tour behaves like the tabbed one: nothing pins, tabs switch device and text. */
+@media(max-width:760px){
+ .v7-section>.v7-tour-stage{position:relative!important;top:0!important;box-shadow:none}
+ .v7-tour-step:not(.is-active){display:none}
+ .v7-tour-step.is-active .v7-tour-card{opacity:1!important;transform:none!important}
+ .v7-tour-stage>.v7-demo{position:relative!important;right:auto!important;bottom:auto!important;display:block;text-align:right;margin:6px 6% 0!important}
+}
+/* No small uppercase labels inside cards either (user request). */
+.v7-page .v7-card>small{display:none}
+.v7-app .ap-pillars li{text-transform:none!important;letter-spacing:0!important}

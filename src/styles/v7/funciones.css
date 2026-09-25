@@ -330,3 +330,4 @@
  .v7-funciones .fn-bento>.fn-bento-demo{order:4;margin:10px 6% 0!important}
  .fn-tele p strong{font-size:34px}
 }
+@media(max-width:760px){.fn-xray h2{font-size:clamp(28px,7.6vw,36px)!important;line-height:1.12}.fn-xray .v7-copy>p:not(.fn-xray-note){font-size:17px!important}.fn-xray-list h3{font-size:17px!important}.fn-xray-list p{font-size:15px!important}}
