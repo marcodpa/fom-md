@@ -1,0 +1,7 @@
+{
+  "file": "src/assets/marketing/home-v7/03-foreground.png",
+  "prompt": "Use case: background-extraction. Image1 is edit target. Extract ONLY the foreground seated woman, her entire visible head/hair/body/jacket/forearm/hand, and her foreground chair into genuine transparent alpha PNG. Preserve EXACT original position, scale and silhouette on the full1672x941 canvas. Do not center or resize the woman. All pixels belonging to monitor, computer screen, desk/table, mug, background room, lighting and other objects must be fully transparent. Preserve fine hair, fingertips and sleeves naturally with clean alpha. Keep physical FOM jacket branding. Do not change her appearance or pose. Output same landscape1672x941 dimensions with real transparency, no checkerboard baked in, no solid background. Woman is occlusion foreground layer to composite over matching original photo.",
+  "reference": "C:/Users/home/Downloads/fom/src/assets/marketing/home-v7/03.png",
+  "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-776d5f6f-9f49-48a5-a414-4847d7b4c6ef.png",
+  "method": "built-in image_gen"
+}

@@ -1,0 +1,488 @@
+[
+  {
+    "page": "02-plataforma",
+    "pageName": "Plataforma web",
+    "id": "06",
+    "title": "Roles y permisos que reflejan tu organización",
+    "kind": "section",
+    "content": {
+      "heading": "Roles y permisos que reflejan tu organización",
+      "body": "Cada persona entra directo a la vista que le corresponde. FOM separa a quien supervisa la operación de la empresa, a quien maneja su flota propia y a quien conduce, con una jerarquía de mando clara.",
+      "bullets": [
+        {
+          "label": "Supervisor de empresa",
+          "text": "Panel operativo de su empresa: mapa en vivo, reportes, órdenes de trabajo y gestión de sus propios conductores."
+        },
+        {
+          "label": "Supervisor personal",
+          "text": "Vista de su flota propia con mapa, alertas y documentos, sin el panel corporativo."
+        },
+        {
+          "label": "Conductor",
+          "text": "App del conductor con inspección diaria, órdenes de trabajo y jornada. No accede al panel de administración."
+        },
+        {
+          "label": "Jerarquía de mando",
+          "text": "Cada quien gestiona solo a los de rango menor, nunca a sí mismo. Todo queda registrado en auditoría."
+        }
+      ],
+      "stat": {
+        "value": "3 roles",
+        "label": "supervisor de empresa, flota personal y conductor"
+      }
+    },
+    "guide": "Text and roles icons left; rear-view supervisor beside parked trucks right; 3 roles metric card under text. No random office meeting.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/02-plataforma.png"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Plataforma web\", SECTION \"Roles y permisos que reflejan tu organización\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Text and roles icons left; rear-view supervisor beside parked trucks right; 3 roles metric card under text. No random office meeting.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"heading\":\"Roles y permisos que reflejan tu organización\",\"body\":\"Cada persona entra directo a la vista que le corresponde. FOM separa a quien supervisa la operación de la empresa, a quien maneja su flota propia y a quien conduce, con una jerarquía de mando clara.\",\"bullets\":[{\"label\":\"Supervisor de empresa\",\"text\":\"Panel operativo de su empresa: mapa en vivo, reportes, órdenes de trabajo y gestión de sus propios conductores.\"},{\"label\":\"Supervisor personal\",\"text\":\"Vista de su flota propia con mapa, alertas y documentos, sin el panel corporativo.\"},{\"label\":\"Conductor\",\"text\":\"App del conductor con inspección diaria, órdenes de trabajo y jornada. No accede al panel de administración.\"},{\"label\":\"Jerarquía de mando\",\"text\":\"Cada quien gestiona solo a los de rango menor, nunca a sí mismo. Todo queda registrado en auditoría.\"}],\"stat\":{\"value\":\"3 roles\",\"label\":\"supervisor de empresa, flota personal y conductor\"}}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nQUALITY CORRECTION: The previous attempt had an unwanted blurred horizontal stripe covering the third item and duplicated its label. Create a clean new version. All FOUR bullet labels must be distinct: Supervisor de empresa; Supervisor personal; Conductor; Jerarquía de mando. Use concise exact excerpts for body text if needed. No blur strips, no overlays across text, no duplication. Fit all four items and 3 roles metric with generous readable spacing in the left column.",
+    "file": "02-plataforma/06-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-f11f5db1-ce58-4ca1-a8bf-7f992a7fb692.png"
+  },
+  {
+    "page": "03-app",
+    "pageName": "App del conductor",
+    "id": "06",
+    "title": "Pie de página",
+    "kind": "footer",
+    "content": {
+      "title": "Pie de página",
+      "body": "FOM · La oficina y la carretera, conectadas.",
+      "links": [
+        "Plataforma web",
+        "App",
+        "Funciones",
+        "Seguridad",
+        "Áreas",
+        "Quiénes somos",
+        "Qué ofrecemos",
+        "Beneficios",
+        "Preguntas frecuentes",
+        "Contacto",
+        "contacto@fom.app"
+      ],
+      "copyright": "© 2026 FOM"
+    },
+    "guide": "Refined full-viewport footer following approvedpage: FOMlargeleft withtagline, threecleanlinkcolumns Plataforma/Información/Contacto. Navytonalbackground withsubtleroadhorizontexture. Main content verticallybalanced in screen, copyrightloweredge. No fabricatedlegallinks/socialicons.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/03-app.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-mapa.webp",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/app-inicio.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"App del conductor\", SECTION \"Pie de página\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Refined full-viewport footer following approvedpage: FOMlargeleft withtagline, threecleanlinkcolumns Plataforma/Información/Contacto. Navytonalbackground withsubtleroadhorizontexture. Main content verticallybalanced in screen, copyrightloweredge. No fabricatedlegallinks/socialicons.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. This is a full-viewport footer design; meaningful space, refined columns, understated dark atmosphere; do not include another section above it.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Pie de página\",\"body\":\"FOM · La oficina y la carretera, conectadas.\",\"links\":[\"Plataforma web\",\"App\",\"Funciones\",\"Seguridad\",\"Áreas\",\"Quiénes somos\",\"Qué ofrecemos\",\"Beneficios\",\"Preguntas frecuentes\",\"Contacto\",\"contacto@fom.app\"],\"copyright\":\"© 2026 FOM\"}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT SCREEN CORRECTION: In the footer photograph show the real supplied panel-mapa screenshot on the desktop monitor (image 2) and app-inicio screenshot on phone (image 3). Preserve those actual layouts and dark colors. Do not substitute a fictional blue dashboard with colored pins. Keep footer text exactly as requested. One independent full-screen horizontal footer image.",
+    "file": "03-app/06-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-257ca978-cccf-4632-9f85-3d43f722a3dd.png"
+  },
+  {
+    "page": "05-seguridad",
+    "pageName": "Seguridad",
+    "id": "07",
+    "title": "Preguntas frecuentes",
+    "kind": "faq",
+    "content": {
+      "title": "Preguntas frecuentes",
+      "faqs": [
+        {
+          "q": "¿La cámara graba al conductor todo el tiempo?",
+          "a": "No. La lente de cabina solo guarda clips cuando ocurre un evento de riesgo o cuando el conductor pulsa el botón SOS. No hay grabación abierta ni permanente del interior, y el conductor conoce estas reglas desde el inicio."
+        },
+        {
+          "q": "¿Cómo se calcula el puntaje de manejo seguro?",
+          "a": "Se combina la frecuencia y la severidad de los eventos como frenadas bruscas, aceleraciones y excesos de velocidad, y se normaliza por los kilómetros recorridos. El resultado es un valor de 0 a 100 comparable entre conductores que recorren distancias muy distintas."
+        },
+        {
+          "q": "¿Qué pasa cuando un conductor pulsa el botón SOS?",
+          "a": "El supervisor recibe en menos de cinco segundos una alerta prioritaria con la ubicación exacta del vehículo y el protocolo del evento, para coordinar apoyo o contactar a las autoridades. Es útil en casos de robo, accidente o emergencia de salud."
+        },
+        {
+          "q": "¿Sirve la detección de eventos si no tengo cámara instalada?",
+          "a": "Sí. La frenada brusca, la aceleración fuerte y el exceso de velocidad se detectan con el acelerómetro y la velocidad del vehículo, sin necesidad de video. La cámara agrega contexto visual, pero el puntaje y el coaching funcionan también sin ella."
+        }
+      ],
+      "email": "contacto@fom.app"
+    },
+    "guide": "Expand pageFAQ into one viewport. Preserve page-specific horizontalcards or two-column arrangement fromreference; all4questionslegible, firstansweropen. Blueicons and fineborders. Noextraheader.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/05-seguridad.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/app-inicio.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Seguridad\", SECTION \"Preguntas frecuentes\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Expand pageFAQ into one viewport. Preserve page-specific horizontalcards or two-column arrangement fromreference; all4questionslegible, firstansweropen. Blueicons and fineborders. Noextraheader.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Preguntas frecuentes\",\"faqs\":[{\"q\":\"¿La cámara graba al conductor todo el tiempo?\",\"a\":\"No. La lente de cabina solo guarda clips cuando ocurre un evento de riesgo o cuando el conductor pulsa el botón SOS. No hay grabación abierta ni permanente del interior, y el conductor conoce estas reglas desde el inicio.\"},{\"q\":\"¿Cómo se calcula el puntaje de manejo seguro?\",\"a\":\"Se combina la frecuencia y la severidad de los eventos como frenadas bruscas, aceleraciones y excesos de velocidad, y se normaliza por los kilómetros recorridos. El resultado es un valor de 0 a 100 comparable entre conductores que recorren distancias muy distintas.\"},{\"q\":\"¿Qué pasa cuando un conductor pulsa el botón SOS?\",\"a\":\"El supervisor recibe en menos de cinco segundos una alerta prioritaria con la ubicación exacta del vehículo y el protocolo del evento, para coordinar apoyo o contactar a las autoridades. Es útil en casos de robo, accidente o emergencia de salud.\"},{\"q\":\"¿Sirve la detección de eventos si no tengo cámara instalada?\",\"a\":\"Sí. La frenada brusca, la aceleración fuerte y el exceso de velocidad se detectan con el acelerómetro y la velocidad del vehículo, sin necesidad de video. La cámara agrega contexto visual, pero el puntaje y el coaching funcionan también sin ella.\"}],\"email\":\"contacto@fom.app\"}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSCREEN FIDELITY CORRECTION: If a phone is visible in the driver photo, use the actual dark app Inicio screenshot from image 2. Never draw a white or blue fictional map interface on the phone. Exact supplied question titles and answers, do not add new paragraphs. Keep one horizontal FAQ section.",
+    "file": "05-seguridad/07-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-5f7ba191-014c-43ed-907c-5aa266ebec6f.png"
+  },
+  {
+    "page": "06-areas",
+    "pageName": "Áreas de flota",
+    "id": "01",
+    "title": "Organiza tu flota por zona, sede o contrato",
+    "kind": "hero",
+    "content": {
+      "title": "Organiza tu flota por zona, sede o contrato",
+      "body": "Agrupa vehículos, define geocercas con alertas de entrada y salida, y controla el acceso por área. Todo se configura desde el panel web y ordena lo que cada persona ve, en la computadora y en la app."
+    },
+    "guide": "Centered title above diagonal row of parked trucks in depot, one supervisor seen from rear, no device.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/06-areas.png"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Áreas de flota\", SECTION \"Organiza tu flota por zona, sede o contrato\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Centered title above diagonal row of parked trucks in depot, one supervisor seen from rear, no device.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. Include ONLY this hero with slim header FOM pin logo / Inicio / Plataforma / Información / Contacto / Iniciar sesión.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Organiza tu flota por zona, sede o contrato\",\"body\":\"Agrupa vehículos, define geocercas con alertas de entrada y salida, y controla el acceso por área. Todo se configura desde el panel web y ordena lo que cada persona ve, en la computadora y en la app.\"}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nCORRECTION: ONLY TOP HERO. Absolutely NO monitor, NO laptop, NO phone, NO cards, NO bullet list, NO numeric statistic, NO second section. Use only the supplied title and body plus slim navigation. Large centered title and 3-line supporting paragraph at top, then broad photographic row of trucks parked on depot pavement filling the remaining viewport, supervisor seen from behind at left. Do not include \"Agrupa la flota como opera tu empresa\": that is a separate section already generated.",
+    "file": "06-areas/01-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-1400cf14-aaf8-41ef-9fa1-688b018007f6.png"
+  },
+  {
+    "page": "07-quienes-somos",
+    "pageName": "Quiénes somos",
+    "id": "03",
+    "title": "De cada dato a una acción concreta.",
+    "kind": "section",
+    "content": {
+      "title": "De cada dato a una acción concreta.",
+      "body": "Los recorridos, las alertas, las inspecciones y el mantenimiento comparten una misma vista de la operación. Así es más sencillo revisar lo que pasa y dar seguimiento sin perder el contexto."
+    },
+    "guide": "Continuous panoramic aerialtruck on pavedhighway, LEFT darkgradienttext OVER photograph; not split into boxes.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/07-quienes-somos.png"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Quiénes somos\", SECTION \"De cada dato a una acción concreta.\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Continuous panoramic aerialtruck on pavedhighway, LEFT darkgradienttext OVER photograph; not split into boxes.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"De cada dato a una acción concreta.\",\"body\":\"Los recorridos, las alertas, las inspecciones y el mantenimiento comparten una misma vista de la operación. Así es más sencillo revisar lo que pasa y dar seguimiento sin perder el contexto.\"}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT SECTION BOUNDARY: No cards, no Conectar/Entender/Actuar text or thumbnails, no devices, no dashboard. These belong to the next section. This image contains ONLY heading \"De cada dato a una acción concreta.\" and supplied paragraph, displayed left with plenty of space over an immersive aerial highway truck photograph. The photo fills the full 16:9 viewport. No header and no footer.",
+    "file": "07-quienes-somos/03-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-968eb998-9b5f-47b4-b083-64887318e6eb.png"
+  },
+  {
+    "page": "07-quienes-somos",
+    "pageName": "Quiénes somos",
+    "id": "05",
+    "title": "Conoce la operación detrás de cada pantalla.",
+    "kind": "section",
+    "content": {
+      "title": "Conoce la operación detrás de cada pantalla.",
+      "body": "Hablemos de tu flota",
+      "cta": "Hablemos de tu flota"
+    },
+    "guide": "Immersive duskroad with curvinghills, titleLEFT andCTA, landscape fillsviewport.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/07-quienes-somos.png"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Quiénes somos\", SECTION \"Conoce la operación detrás de cada pantalla.\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Immersive duskroad with curvinghills, titleLEFT andCTA, landscape fillsviewport.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Conoce la operación detrás de cada pantalla.\",\"body\":\"Hablemos de tu flota\",\"cta\":\"Hablemos de tu flota\"}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT SECTION BOUNDARY: The only text is the heading \"Conoce la operación detrás de cada pantalla.\" and the button \"Hablemos de tu flota\". NO Conectar/Entender/Actuar cards, NO thumbnails, NO second section. Fill the viewport with the dusk highway scene from this part of the reference, heading and single button on left. One horizontal CTA section only.",
+    "file": "07-quienes-somos/05-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-6d42b461-4494-4986-b848-dfc33326be18.png"
+  },
+  {
+    "page": "08-que-ofrecemos",
+    "pageName": "Qué ofrecemos",
+    "id": "06",
+    "title": "Pie de página",
+    "kind": "footer",
+    "content": {
+      "title": "Pie de página",
+      "body": "FOM · La oficina y la carretera, conectadas.",
+      "links": [
+        "Plataforma web",
+        "App",
+        "Funciones",
+        "Seguridad",
+        "Áreas",
+        "Quiénes somos",
+        "Qué ofrecemos",
+        "Beneficios",
+        "Preguntas frecuentes",
+        "Contacto",
+        "contacto@fom.app"
+      ],
+      "copyright": "© 2026 FOM"
+    },
+    "guide": "Refined full-viewport footer following approvedpage: FOMlargeleft withtagline, threecleanlinkcolumns Plataforma/Información/Contacto. Navytonalbackground withsubtleroadhorizontexture. Main content verticallybalanced in screen, copyrightloweredge. No fabricatedlegallinks/socialicons.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/08-que-ofrecemos.png"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Qué ofrecemos\", SECTION \"Pie de página\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Refined full-viewport footer following approvedpage: FOMlargeleft withtagline, threecleanlinkcolumns Plataforma/Información/Contacto. Navytonalbackground withsubtleroadhorizontexture. Main content verticallybalanced in screen, copyrightloweredge. No fabricatedlegallinks/socialicons.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. This is a full-viewport footer design; meaningful space, refined columns, understated dark atmosphere; do not include another section above it.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Pie de página\",\"body\":\"FOM · La oficina y la carretera, conectadas.\",\"links\":[\"Plataforma web\",\"App\",\"Funciones\",\"Seguridad\",\"Áreas\",\"Quiénes somos\",\"Qué ofrecemos\",\"Beneficios\",\"Preguntas frecuentes\",\"Contacto\",\"contacto@fom.app\"],\"copyright\":\"© 2026 FOM\"}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT LINK CORRECTION: Footer contact column contains ONLY contacto@fom.app. Absolutely no LinkedIn icon, no \"in\" square, no social icons of any kind. Do not reproduce any social icons that appear in the long reference. All other styling and road-photo background retained.",
+    "file": "08-que-ofrecemos/06-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-b028c3ab-e4dc-42fc-b29a-f7c8c8f59799.png"
+  },
+  {
+    "page": "09-beneficios",
+    "pageName": "Beneficios",
+    "id": "07",
+    "title": "Información para decidir",
+    "kind": "section",
+    "content": {
+      "title": "Información para decidir",
+      "body": "Consulta reportes e historial para revisar la operación y planificar los siguientes pasos."
+    },
+    "guide": "06 smallbluenumber; textLEFT35%, originalReportesmonitorRIGHT,3icons reports/history/planning.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/09-beneficios.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-reportes.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Beneficios\", SECTION \"Información para decidir\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: 06 smallbluenumber; textLEFT35%, originalReportesmonitorRIGHT,3icons reports/history/planning.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Información para decidir\",\"body\":\"Consulta reportes e historial para revisar la operación y planificar los siguientes pasos.\"}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nTEXT CORRECTION: Main copy must read exactly \"06. Información para decidir\" and \"Consulta reportes e historial para revisar la operación y planificar los siguientes pasos.\" Under it, if three icon labels are included, use ONLY \"Reportes\", \"Historial\" and \"Planificación\". Do not invent additional sentences or malformed words. Keep actual supplied report screenshot on the large monitor.",
+    "file": "09-beneficios/07-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-3756f00f-1b64-4019-bb76-4b4c2881972e.png"
+  },
+  {
+    "page": "10-preguntas",
+    "pageName": "Preguntas frecuentes",
+    "id": "02",
+    "title": "Plataforma",
+    "kind": "faq",
+    "content": {
+      "title": "Plataforma",
+      "faqs": [
+        {
+          "q": "¿Necesito instalar algún programa o servidor para usar FOM?",
+          "a": "No. FOM es una plataforma web, funciona desde el navegador en computadora, tableta o teléfono. El almacenamiento y los servidores los administra FOM, el cliente solo inicia sesión y trabaja."
+        },
+        {
+          "q": "¿Puedo dar acceso a varias personas con distintos niveles?",
+          "a": "Sí. La plataforma maneja roles y permisos. El supervisor de tu empresa trabaja en el panel con el mapa, los reportes y las órdenes de trabajo, y cada conductor entra a su app con lo que le toca. Puedes limitar el acceso por área o por grupo de unidades."
+        },
+        {
+          "q": "¿Sirve igual para una flota pequeña que para una grande?",
+          "a": "Sí. FOM está diseñada para escalar de 10 a cientos de unidades usando el mismo panel, sin migrar de sistema ni perder rendimiento en el mapa ni en las consultas."
+        },
+        {
+          "q": "¿Qué pasa con mis datos si un equipo pierde señal o hay una falla?",
+          "a": "Si el equipo pierde conexión, guarda los datos y los envía al recuperar señal. La información se almacena cifrada y con respaldos periódicos, de modo que el historial queda protegido."
+        }
+      ]
+    },
+    "guide": "FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/10-preguntas.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-resumen.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Preguntas frecuentes\", SECTION \"Plataforma\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Plataforma\",\"faqs\":[{\"q\":\"¿Necesito instalar algún programa o servidor para usar FOM?\",\"a\":\"No. FOM es una plataforma web, funciona desde el navegador en computadora, tableta o teléfono. El almacenamiento y los servidores los administra FOM, el cliente solo inicia sesión y trabaja.\"},{\"q\":\"¿Puedo dar acceso a varias personas con distintos niveles?\",\"a\":\"Sí. La plataforma maneja roles y permisos. El supervisor de tu empresa trabaja en el panel con el mapa, los reportes y las órdenes de trabajo, y cada conductor entra a su app con lo que le toca. Puedes limitar el acceso por área o por grupo de unidades.\"},{\"q\":\"¿Sirve igual para una flota pequeña que para una grande?\",\"a\":\"Sí. FOM está diseñada para escalar de 10 a cientos de unidades usando el mismo panel, sin migrar de sistema ni perder rendimiento en el mapa ni en las consultas.\"},{\"q\":\"¿Qué pasa con mis datos si un equipo pierde señal o hay una falla?\",\"a\":\"Si el equipo pierde conexión, guarda los datos y los envía al recuperar señal. La información se almacena cifrada y con respaldos periódicos, de modo que el historial queda protegido.\"}]}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT REAL PANEL CORRECTION: The laptop must show image 2, the original CURRENT FOM dashboard. Copy its layout, actual sidebar Administration FOM, metric cards and exact dark UI faithfully. Do not invent a simplified blue dashboard, different names, different vehicle plate or map. The first long reference is ONLY visual composition, never a source of interface pixels. Keep questions verbatim, one horizontal category section.",
+    "file": "10-preguntas/02-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-1703e1af-8d8e-4ff2-86ed-65a260d151d7.png"
+  },
+  {
+    "page": "10-preguntas",
+    "pageName": "Preguntas frecuentes",
+    "id": "05",
+    "title": "Áreas",
+    "kind": "faq",
+    "content": {
+      "title": "Áreas",
+      "faqs": [
+        {
+          "q": "¿Puedo agrupar un mismo vehículo por zona y por contrato a la vez?",
+          "a": "Sí. Un vehículo puede pertenecer a una zona geográfica y a un contrato al mismo tiempo mediante etiquetas múltiples, sin necesidad de duplicar el registro de la unidad."
+        },
+        {
+          "q": "¿Cuántas geocercas puedo crear para mi operación?",
+          "a": "No hay un límite práctico para una flota mediana. Es común manejar más de 50 geocercas activas entre patios, muelles, pozos y puntos de despacho de la Costa Oriental del Lago."
+        },
+        {
+          "q": "¿Las alertas de entrada y salida llegan en tiempo real?",
+          "a": "Sí. Cuando una unidad cruza el límite de una geocerca, el sistema genera la alerta de inmediato y la envía a los responsables asignados a esa zona, con hora y grupo registrados."
+        },
+        {
+          "q": "¿Un jefe de patio puede ver solo las unidades de su sede?",
+          "a": "Sí. El control de acceso por área permite asignar a cada usuario únicamente los grupos, sedes o contratos que le corresponden, de modo que cada responsable ve solo su parte de la flota."
+        }
+      ]
+    },
+    "guide": "FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/10-preguntas.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-flota.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Preguntas frecuentes\", SECTION \"Áreas\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Áreas\",\"faqs\":[{\"q\":\"¿Puedo agrupar un mismo vehículo por zona y por contrato a la vez?\",\"a\":\"Sí. Un vehículo puede pertenecer a una zona geográfica y a un contrato al mismo tiempo mediante etiquetas múltiples, sin necesidad de duplicar el registro de la unidad.\"},{\"q\":\"¿Cuántas geocercas puedo crear para mi operación?\",\"a\":\"No hay un límite práctico para una flota mediana. Es común manejar más de 50 geocercas activas entre patios, muelles, pozos y puntos de despacho de la Costa Oriental del Lago.\"},{\"q\":\"¿Las alertas de entrada y salida llegan en tiempo real?\",\"a\":\"Sí. Cuando una unidad cruza el límite de una geocerca, el sistema genera la alerta de inmediato y la envía a los responsables asignados a esa zona, con hora y grupo registrados.\"},{\"q\":\"¿Un jefe de patio puede ver solo las unidades de su sede?\",\"a\":\"Sí. El control de acceso por área permite asignar a cada usuario únicamente los grupos, sedes o contratos que le corresponden, de modo que cada responsable ve solo su parte de la flota.\"}]}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT REAL PANEL CORRECTION: The laptop must show image 2, the original CURRENT FOM dashboard. Copy its layout, actual sidebar Administration FOM, metric cards and exact dark UI faithfully. Do not invent a simplified blue dashboard, different names, different vehicle plate or map. The first long reference is ONLY visual composition, never a source of interface pixels. Keep questions verbatim, one horizontal category section.",
+    "file": "10-preguntas/05-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-36205d5c-0b18-4df9-a395-a3baf5e25d8a.png"
+  },
+  {
+    "page": "10-preguntas",
+    "pageName": "Preguntas frecuentes",
+    "id": "03",
+    "title": "Funciones",
+    "kind": "faq",
+    "content": {
+      "title": "Funciones",
+      "faqs": [
+        {
+          "q": "¿Con qué frecuencia se actualiza la posición de cada vehículo?",
+          "a": "La posición GPS se actualiza cada 10 segundos cuando la unidad está en movimiento y la señal celular está disponible. En zonas sin cobertura, el dispositivo guarda los datos y los envía apenas recupera la conexión, sin perder el recorrido."
+        },
+        {
+          "q": "¿Cómo funcionan los avisos de mantenimiento preventivo?",
+          "a": "Usted define el umbral por kilometraje o por fecha para cada tipo de servicio. El sistema toma el odómetro automático y la fecha del último servicio, y envía la alerta con la anticipación que configure para que la orden de trabajo se programe a tiempo."
+        },
+        {
+          "q": "¿Qué datos del vehículo puedo monitorear con la telemática?",
+          "a": "Según el dispositivo instalado, puede ver horas y temperatura de motor, revoluciones, voltaje de batería, kilometraje y códigos de falla. Todos estos valores se registran de forma continua y alimentan los reportes y las alertas de la operación."
+        },
+        {
+          "q": "¿Puedo exportar y programar el envío de los reportes?",
+          "a": "Sí. Cada reporte se descarga en PDF o Excel y se puede filtrar por vehículo, conductor o rango de fechas. También puede programar el envío automático al correo de los responsables con la frecuencia que necesite, por ejemplo diario o semanal."
+        }
+      ]
+    },
+    "guide": "FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/10-preguntas.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-resumen.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Preguntas frecuentes\", SECTION \"Funciones\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Funciones\",\"faqs\":[{\"q\":\"¿Con qué frecuencia se actualiza la posición de cada vehículo?\",\"a\":\"La posición GPS se actualiza cada 10 segundos cuando la unidad está en movimiento y la señal celular está disponible. En zonas sin cobertura, el dispositivo guarda los datos y los envía apenas recupera la conexión, sin perder el recorrido.\"},{\"q\":\"¿Cómo funcionan los avisos de mantenimiento preventivo?\",\"a\":\"Usted define el umbral por kilometraje o por fecha para cada tipo de servicio. El sistema toma el odómetro automático y la fecha del último servicio, y envía la alerta con la anticipación que configure para que la orden de trabajo se programe a tiempo.\"},{\"q\":\"¿Qué datos del vehículo puedo monitorear con la telemática?\",\"a\":\"Según el dispositivo instalado, puede ver horas y temperatura de motor, revoluciones, voltaje de batería, kilometraje y códigos de falla. Todos estos valores se registran de forma continua y alimentan los reportes y las alertas de la operación.\"},{\"q\":\"¿Puedo exportar y programar el envío de los reportes?\",\"a\":\"Sí. Cada reporte se descarga en PDF o Excel y se puede filtrar por vehículo, conductor o rango de fechas. También puede programar el envío automático al correo de los responsables con la frecuencia que necesite, por ejemplo diario o semanal.\"}]}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT REAL PANEL CORRECTION: The laptop must show image 2, the original CURRENT FOM dashboard. Copy its layout, actual sidebar Administration FOM, metric cards and exact dark UI faithfully. Do not invent a simplified blue dashboard, different names, different vehicle plate or map. The first long reference is ONLY visual composition, never a source of interface pixels. Keep questions verbatim, one horizontal category section.",
+    "file": "10-preguntas/03-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-79a53690-a1e2-417f-b8b7-ce593f7848b8.png"
+  },
+  {
+    "page": "10-preguntas",
+    "pageName": "Preguntas frecuentes",
+    "id": "04",
+    "title": "Seguridad",
+    "kind": "faq",
+    "content": {
+      "title": "Seguridad",
+      "faqs": [
+        {
+          "q": "¿La cámara graba al conductor todo el tiempo?",
+          "a": "No. La lente de cabina solo guarda clips cuando ocurre un evento de riesgo o cuando el conductor pulsa el botón SOS. No hay grabación abierta ni permanente del interior, y el conductor conoce estas reglas desde el inicio."
+        },
+        {
+          "q": "¿Cómo se calcula el puntaje de manejo seguro?",
+          "a": "Se combina la frecuencia y la severidad de los eventos como frenadas bruscas, aceleraciones y excesos de velocidad, y se normaliza por los kilómetros recorridos. El resultado es un valor de 0 a 100 comparable entre conductores que recorren distancias muy distintas."
+        },
+        {
+          "q": "¿Qué pasa cuando un conductor pulsa el botón SOS?",
+          "a": "El supervisor recibe en menos de cinco segundos una alerta prioritaria con la ubicación exacta del vehículo y el protocolo del evento, para coordinar apoyo o contactar a las autoridades. Es útil en casos de robo, accidente o emergencia de salud."
+        },
+        {
+          "q": "¿Sirve la detección de eventos si no tengo cámara instalada?",
+          "a": "Sí. La frenada brusca, la aceleración fuerte y el exceso de velocidad se detectan con el acelerómetro y la velocidad del vehículo, sin necesidad de video. La cámara agrega contexto visual, pero el puntaje y el coaching funcionan también sin ella."
+        }
+      ]
+    },
+    "guide": "FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/10-preguntas.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-resumen.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Preguntas frecuentes\", SECTION \"Seguridad\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Seguridad\",\"faqs\":[{\"q\":\"¿La cámara graba al conductor todo el tiempo?\",\"a\":\"No. La lente de cabina solo guarda clips cuando ocurre un evento de riesgo o cuando el conductor pulsa el botón SOS. No hay grabación abierta ni permanente del interior, y el conductor conoce estas reglas desde el inicio.\"},{\"q\":\"¿Cómo se calcula el puntaje de manejo seguro?\",\"a\":\"Se combina la frecuencia y la severidad de los eventos como frenadas bruscas, aceleraciones y excesos de velocidad, y se normaliza por los kilómetros recorridos. El resultado es un valor de 0 a 100 comparable entre conductores que recorren distancias muy distintas.\"},{\"q\":\"¿Qué pasa cuando un conductor pulsa el botón SOS?\",\"a\":\"El supervisor recibe en menos de cinco segundos una alerta prioritaria con la ubicación exacta del vehículo y el protocolo del evento, para coordinar apoyo o contactar a las autoridades. Es útil en casos de robo, accidente o emergencia de salud.\"},{\"q\":\"¿Sirve la detección de eventos si no tengo cámara instalada?\",\"a\":\"Sí. La frenada brusca, la aceleración fuerte y el exceso de velocidad se detectan con el acelerómetro y la velocidad del vehículo, sin necesidad de video. La cámara agrega contexto visual, pero el puntaje y el coaching funcionan también sin ella.\"}]}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT REAL PANEL CORRECTION: Every depicted laptop or tablet screen must show image 2, the ORIGINAL CURRENT FOM dashboard Resumen. Preserve actual Administration FOM sidebar, vehicle metrics and real dark map. Do not invent a simplified interface or different fleet data. First reference guides composition only. Use exact category and question content; no extra sections.",
+    "file": "10-preguntas/04-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-159163ac-ab34-429a-8daa-0214dd718bd2.png"
+  },
+  {
+    "page": "10-preguntas",
+    "pageName": "Preguntas frecuentes",
+    "id": "06",
+    "title": "Contacto",
+    "kind": "faq",
+    "content": {
+      "title": "Contacto",
+      "faqs": [
+        {
+          "q": "¿La demostración tiene algún costo o compromiso?",
+          "a": "No. La demostración es gratuita y sin obligación de contratar. Su objetivo es que evalúes la plataforma con tu equipo antes de decidir."
+        },
+        {
+          "q": "¿Cuánto tarda la instalación de los equipos?",
+          "a": "Depende del tamaño de la flota. Una flota de 40 unidades suele instalarse en 3 a 5 días, trabajando por lotes de 8 a 12 vehículos por jornada para no detener tu operación."
+        },
+        {
+          "q": "¿Dónde se realiza la instalación?",
+          "a": "Nuestro personal técnico acude a tu sede o a un punto que acordemos. Instalamos y probamos cada unidad en sitio, y coordinamos horarios según tu disponibilidad."
+        },
+        {
+          "q": "¿En qué ciudades de Venezuela tienen cobertura?",
+          "a": "Contamos con atención técnica en Caracas, Valencia, Maracaibo, Barquisimeto y Maracay, y coordinamos visitas en zonas cercanas según cada caso."
+        }
+      ]
+    },
+    "guide": "FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/10-preguntas.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-resumen.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Preguntas frecuentes\", SECTION \"Contacto\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: FULLVIEWPORT FAQscreen: slimcategorysidebarLEFT with5categories and currentcategoryselectedblue; wide searchbarabovecontent;4largeoutlinedaccordioncards; FIRST answer OPEN, remaining3closed. Semanticbluecategoryicon beside heading. Match approvedFAQdesign, no decorativephotos.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Contacto\",\"faqs\":[{\"q\":\"¿La demostración tiene algún costo o compromiso?\",\"a\":\"No. La demostración es gratuita y sin obligación de contratar. Su objetivo es que evalúes la plataforma con tu equipo antes de decidir.\"},{\"q\":\"¿Cuánto tarda la instalación de los equipos?\",\"a\":\"Depende del tamaño de la flota. Una flota de 40 unidades suele instalarse en 3 a 5 días, trabajando por lotes de 8 a 12 vehículos por jornada para no detener tu operación.\"},{\"q\":\"¿Dónde se realiza la instalación?\",\"a\":\"Nuestro personal técnico acude a tu sede o a un punto que acordemos. Instalamos y probamos cada unidad en sitio, y coordinamos horarios según tu disponibilidad.\"},{\"q\":\"¿En qué ciudades de Venezuela tienen cobertura?\",\"a\":\"Contamos con atención técnica en Caracas, Valencia, Maracaibo, Barquisimeto y Maracay, y coordinamos visitas en zonas cercanas según cada caso.\"}]}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT REAL PANEL CORRECTION: Every depicted laptop or tablet screen must show image 2, the ORIGINAL CURRENT FOM dashboard Resumen. Preserve actual Administration FOM sidebar, vehicle metrics and real dark map. Do not invent a simplified interface or different fleet data. First reference guides composition only. Use exact category and question content; no extra sections.",
+    "file": "10-preguntas/06-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-3956c157-e5b7-44d6-9252-a41b065dc78d.png"
+  },
+  {
+    "page": "10-preguntas",
+    "pageName": "Preguntas frecuentes",
+    "id": "08",
+    "title": "Pie de página",
+    "kind": "footer",
+    "content": {
+      "title": "Pie de página",
+      "body": "FOM · La oficina y la carretera, conectadas.",
+      "links": [
+        "Plataforma web",
+        "App",
+        "Funciones",
+        "Seguridad",
+        "Áreas",
+        "Quiénes somos",
+        "Qué ofrecemos",
+        "Beneficios",
+        "Preguntas frecuentes",
+        "Contacto",
+        "contacto@fom.app"
+      ],
+      "copyright": "© 2026 FOM"
+    },
+    "guide": "Refined full-viewport footer following approvedpage: FOMlargeleft withtagline, threecleanlinkcolumns Plataforma/Información/Contacto. Navytonalbackground withsubtleroadhorizontexture. Main content verticallybalanced in screen, copyrightloweredge. No fabricatedlegallinks/socialicons.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/10-preguntas.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-resumen.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Preguntas frecuentes\", SECTION \"Pie de página\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Refined full-viewport footer following approvedpage: FOMlargeleft withtagline, threecleanlinkcolumns Plataforma/Información/Contacto. Navytonalbackground withsubtleroadhorizontexture. Main content verticallybalanced in screen, copyrightloweredge. No fabricatedlegallinks/socialicons.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. This is a full-viewport footer design; meaningful space, refined columns, understated dark atmosphere; do not include another section above it.\nEXACT FACTUAL SPANISH CONTENT: {\"title\":\"Pie de página\",\"body\":\"FOM · La oficina y la carretera, conectadas.\",\"links\":[\"Plataforma web\",\"App\",\"Funciones\",\"Seguridad\",\"Áreas\",\"Quiénes somos\",\"Qué ofrecemos\",\"Beneficios\",\"Preguntas frecuentes\",\"Contacto\",\"contacto@fom.app\"],\"copyright\":\"© 2026 FOM\"}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT REAL SCREEN CORRECTION: Any monitor or tablet in this composition must faithfully show the actual Resumen screenshot supplied as the LAST reference. Preserve the Administration FOM sidebar, three top cards, map and selected vehicle panel. Do not invent a simplified interface. Keep Spanish page text unchanged and legible, no invented social icons.",
+    "file": "10-preguntas/08-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-2a00b0ab-f0ee-46b9-b866-7374b7e0aaec.png"
+  },
+  {
+    "page": "11-contacto",
+    "pageName": "Contacto",
+    "id": "02",
+    "title": "Solicita tu demostración",
+    "kind": "section",
+    "content": {
+      "heading": "Solicita tu demostración",
+      "body": "Agenda una demostración en vivo de la plataforma FOM adaptada al tamaño de tu operación. Un especialista te muestra el sistema con datos de ejemplo y responde tus dudas antes de cualquier compromiso.",
+      "bullets": [
+        {
+          "label": "Sin costo",
+          "text": "La demostración es gratuita y sin obligación de contratar."
+        },
+        {
+          "label": "En vivo",
+          "text": "Sesión guiada de 30 a 45 minutos por videollamada o presencial en Caracas."
+        },
+        {
+          "label": "A tu medida",
+          "text": "Ajustamos el ejemplo a tu tipo de flota, sea de 15, 40 o 120 unidades."
+        },
+        {
+          "label": "Con tu equipo",
+          "text": "Invita a los responsables de operaciones y administración para que evalúen juntos."
+        }
+      ],
+      "stat": {
+        "value": "48 h",
+        "label": "Tiempo promedio para agendar la demostración"
+      }
+    },
+    "guide": "Left text4benefits withicons and48h metric card; RIGHT complete compact contact form. Fields Nombre, Empresa, Correo, Tamaño de la flota, Cuéntanos qué necesitas; blue button Preparar solicitud por correo; small note Se abrirá tu aplicación de correo para revisar y enviar la solicitud.",
+    "refs": [
+      "C:/Users/home/Downloads/fom/output/rediseno-completo-v6/11-contacto.png",
+      "C:/Users/home/Downloads/fom/src/assets/marketing/real/panel-resumen.webp"
+    ],
+    "prompt": "Generate ONE complete website SECTION design mockup in horizontal landscape 16:9, approximately1920x1080 desktop viewport. This is NOT an entire page, NOT a vertical page and NOT a contact sheet. PAGE \"Contacto\", SECTION \"Solicita tu demostración\". FIRST reference is approved long-page proposal: find this specific section and preserve its distinctive composition, color, photography subject and design details while expanding it to fill one readable viewport. Do not reproduce unrelated sections. All additional references are ORIGINAL CURRENT FOM screenshots; fit them faithfully into the depicted physical device, preserving real UI/data/colors. Do not design fictional app or dashboard screens. Mark device imagery \"Datos de demostración\".\nART DIRECTION: Left text4benefits withicons and48h metric card; RIGHT complete compact contact form. Fields Nombre, Empresa, Correo, Tamaño de la flota, Cuéntanos qué necesitas; blue button Preparar solicitud por correo; small note Se abrirá tu aplicación de correo para revisar y enviar la solicitud.\nVISUAL SYSTEM: deep navy-black #071019, FOM blue #349bfa, white headings and muted blue secondary text; restrained Spline Sans-like typography, blue outlined semantic icons each appropriate to its meaning, subtle thin bordered translucent navy metric cards when supplied. Photo-led editorial composition with realistic optics, natural imperfections, restrained fine film grain. Vehicles on dry paved roads or depots, never water. People only where specified, candid rear/side view rather than glossy portraits. No added people or ornamental shapes. Preserve the reference's structural richness instead of generic equal text/image boxes. Realistic lighting, sharp readable letters. No sitewide header or footer in this internal-section frame. Entire canvas is this one section.\nEXACT FACTUAL SPANISH CONTENT: {\"heading\":\"Solicita tu demostración\",\"body\":\"Agenda una demostración en vivo de la plataforma FOM adaptada al tamaño de tu operación. Un especialista te muestra el sistema con datos de ejemplo y responde tus dudas antes de cualquier compromiso.\",\"bullets\":[{\"label\":\"Sin costo\",\"text\":\"La demostración es gratuita y sin obligación de contratar.\"},{\"label\":\"En vivo\",\"text\":\"Sesión guiada de 30 a 45 minutos por videollamada o presencial en Caracas.\"},{\"label\":\"A tu medida\",\"text\":\"Ajustamos el ejemplo a tu tipo de flota, sea de 15, 40 o 120 unidades.\"},{\"label\":\"Con tu equipo\",\"text\":\"Invita a los responsables de operaciones y administración para que evalúen juntos.\"}],\"stat\":{\"value\":\"48 h\",\"label\":\"Tiempo promedio para agendar la demostración\"}}\nUse supplied titles verbatim. Include all supplied facts, bullets and metric. Long paragraphs may use short exact excerpts to preserve readability without altering claims. Do not add new claims, numbers, contact details, social links, prices, awards or legal links. Only existing page information. It must look like the approved proposal thoughtfully expanded, not a new unrelated design. Output only finished section image, no browser chrome or caption outside design.\nSTRICT REAL SCREEN CORRECTION: Any monitor or tablet in this composition must faithfully show the actual Resumen screenshot supplied as the LAST reference. Preserve the Administration FOM sidebar, three top cards, map and selected vehicle panel. Do not invent a simplified interface. Keep Spanish page text unchanged and legible, no invented social icons.",
+    "file": "11-contacto/02-v2.png",
+    "status": "complete",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-22fb4bdc-0971-427f-b6ff-f8ad46ac768e.png"
+  }
+]

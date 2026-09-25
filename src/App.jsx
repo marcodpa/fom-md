@@ -6,6 +6,7 @@ import './styles/marketing-backgrounds.css'
 import './styles/fom-v6.css'
 
 const Marketing = lazy(() => import('./pages/ReferenceMarketing'))
+const HomeV7 = lazy(() => import('./pages/HomeV7'))
 const Entrar = lazy(() => import('./pages/Entrar'))
 const CambiarClaveInicial = lazy(() => import('./pages/CambiarClaveInicial'))
 const Consola = lazy(() => import('./panel/Consola'))
@@ -36,13 +37,13 @@ function ScrollTop() {
 export default function App() {
   const { pathname } = useLocation()
   const esConsola = pathname === '/entrar' || pathname === '/cambiar-clave-inicial' || pathname.startsWith('/panel')
-  return <div id="top" className={esConsola ? undefined : 'marketing-v2'}>
+  return <div id="top" className={esConsola ? undefined : `marketing-v2${pathname === '/' ? ' home-v7-shell' : ''}`}>
     <a className="skip-link" href="#contenido">Saltar al contenido</a>
     {!esConsola && <MarketingHeader />}
     <ScrollTop />
     <Suspense fallback={<div className="route-loading" role="status" style={{ padding: '120px 5%' }}>Cargando…</div>}>
       <Routes>
-        <Route path="/" element={<Marketing />} />
+        <Route path="/" element={<HomeV7 />} />
         {['plataforma','funciones','seguridad','areas','contacto','preguntas-frecuentes','app','beneficios','quienes-somos','que-ofrecemos'].map(path => <Route key={path} path={'/' + path} element={<Marketing />} />)}
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cambiar-clave-inicial" element={<CambiarClaveInicial />} />

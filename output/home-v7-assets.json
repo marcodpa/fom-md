@@ -1,0 +1,82 @@
+{
+  "method": "built-in image_gen",
+  "assets": [
+    {
+      "id": "01",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep every physical monitor or phone including its exact screen content, geometry, edges, position, angle and size. Do NOT remove screens or physical FOM marks. Remove only WEBSITE overlay text, UI cards, icons, separators/buttons and demonstration caption outside devices. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/01.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-de246c27-c994-434b-a1cb-987fad58f8c1.png",
+      "file": "src/assets/marketing/home-v7/01.png"
+    },
+    {
+      "id": "02",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep every physical monitor or phone including its exact screen content, geometry, edges, position, angle and size. Do NOT remove screens or physical FOM marks. Remove only WEBSITE overlay text, UI cards, icons, separators/buttons and demonstration caption outside devices. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/02.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-618ce7c2-c461-4dd3-a9d5-ad5cd943f670.png",
+      "file": "src/assets/marketing/home-v7/02.png"
+    },
+    {
+      "id": "03",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep every physical monitor or phone including its exact screen content, geometry, edges, position, angle and size. Do NOT remove screens or physical FOM marks. Remove only WEBSITE overlay text, UI cards, icons, separators/buttons and demonstration caption outside devices. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/03.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-b477e90f-a36a-438b-96df-b3d45973227b.png",
+      "file": "src/assets/marketing/home-v7/03.png"
+    },
+    {
+      "id": "04",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep every physical monitor or phone including its exact screen content, geometry, edges, position, angle and size. Do NOT remove screens or physical FOM marks. Remove only WEBSITE overlay text, UI cards, icons, separators/buttons and demonstration caption outside devices. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/04.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-eaef07a7-5402-4331-8054-f79487af71ff.png",
+      "file": "src/assets/marketing/home-v7/04.png"
+    },
+    {
+      "id": "05",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep every physical monitor or phone including its exact screen content, geometry, edges, position, angle and size. Do NOT remove screens or physical FOM marks. Remove only WEBSITE overlay text, UI cards, icons, separators/buttons and demonstration caption outside devices. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/05.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-1314c359-3e02-44d7-930b-af8c7de4b61e.png",
+      "file": "src/assets/marketing/home-v7/05.png"
+    },
+    {
+      "id": "06",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep every physical monitor or phone including its exact screen content, geometry, edges, position, angle and size. Do NOT remove screens or physical FOM marks. Remove only WEBSITE overlay text, UI cards, icons, separators/buttons and demonstration caption outside devices. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/06.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-02b6e32a-8967-4925-9efe-5e828d904c68.png",
+      "file": "src/assets/marketing/home-v7/06.png"
+    },
+    {
+      "id": "07",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep every physical monitor or phone including its exact screen content, geometry, edges, position, angle and size. Do NOT remove screens or physical FOM marks. Remove only WEBSITE overlay text, UI cards, icons, separators/buttons and demonstration caption outside devices. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/07.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-a9f497ee-00b0-435a-b4c5-63879bb2de75.png",
+      "file": "src/assets/marketing/home-v7/07.png"
+    },
+    {
+      "id": "08",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep every physical monitor or phone including its exact screen content, geometry, edges, position, angle and size. Do NOT remove screens or physical FOM marks. Remove only WEBSITE overlay text, UI cards, icons, separators/buttons and demonstration caption outside devices. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/08.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-b2a61725-b7d0-439e-9320-da2d6a94da23.png",
+      "file": "src/assets/marketing/home-v7/08.png"
+    },
+    {
+      "id": "09",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Remove the entire form box and all labels/fields/buttons and headline. Reconstruct underlying dark road/sunset scene in its place, leaving dark negative space suitable for a HTML form on right. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/09.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-ea86eb8e-f8f8-4536-ab70-8173a5bd1268.png",
+      "file": "src/assets/marketing/home-v7/09.png"
+    },
+    {
+      "id": "10",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep exact truck highway photograph across upper half. Remove all FAQ panels/borders/icons/text from lower half leaving plain very dark navy, retaining original composition. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/10.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-2a5f5c24-c1e7-40d2-8ece-483acc4d82d2.png",
+      "file": "src/assets/marketing/home-v7/10.png"
+    },
+    {
+      "id": "11",
+      "prompt": "Use case: precise-object-edit. Asset type: photographic background plate for faithful HTML implementation. Image1 is EDIT TARGET. Remove website overlay typography and UI from this exact design, yielding only clean photographic background. Preserve EXACT full16:9 composition, framing, camera, lighting, dark gradient regions, people, hands, trucks, desks, devices, physical branding and all object coordinates. Do not redesign, reframe, zoom, shift or add objects. All headings/body/navigation/logos outside physical scene/buttons/feature cards/icons/form fields and outer demonstration labels must disappear; reconstruct covered background naturally. Keep highway convoy photo in exact top 53.5% and plain dark navy bottom46.5%; remove ALL footer content including lines/logo/icons/text. Do not extend photo into bottom. No new text. This is background extraction not a new creative interpretation. Keep photographic grain and original imperfections.",
+      "reference": "C:/Users/home/Downloads/fom/output/laminas-secciones-v7/01-inicio/11.png",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0d497-c968-7302-a3a7-380b5d2c1f11\\exec-f07160d2-b995-4bf7-81c3-929010382346.png",
+      "file": "src/assets/marketing/home-v7/11.png"
+    }
+  ]
+}

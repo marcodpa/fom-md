@@ -1,0 +1,257 @@
+{
+  "tool": "build-phase",
+  "version": 2,
+  "startedAt": "2026-09-24T18:11:33.725Z",
+  "comp": "output/laminas-secciones-v7/01-inicio/01.png",
+  "direction": null,
+  "breakpoint": "1672x941",
+  "artifact": null,
+  "phase": "sections",
+  "phases": {
+    "comps": {
+      "status": "skipped",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [
+        {
+          "at": "2026-09-24T18:11:33.725Z",
+          "text": "started with an approved comp; the comp round happened before this state (surface round or manual)"
+        }
+      ],
+      "gate": null,
+      "forced": null
+    },
+    "spec": {
+      "status": "closed",
+      "openedAt": "2026-09-24T18:11:33.725Z",
+      "closedAt": "2026-09-24T18:25:13.081Z",
+      "attempts": 2,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "7 regions, 1 plates, 4 text regions measured",
+        "at": "2026-09-24T18:25:13.080Z"
+      },
+      "forced": null
+    },
+    "plates": {
+      "status": "closed",
+      "openedAt": "2026-09-24T18:25:13.081Z",
+      "closedAt": "2026-09-24T18:28:27.954Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "1/1 plates",
+        "at": "2026-09-24T18:28:27.954Z"
+      },
+      "forced": null
+    },
+    "hero": {
+      "status": "closed",
+      "openedAt": "2026-09-24T18:28:27.954Z",
+      "closedAt": "2026-09-24T18:53:16.614Z",
+      "attempts": 3,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "hero 87% (match)",
+        "score": 0.8704,
+        "verdict": "match",
+        "report": ".impeccable/review/diff/hero/report.json",
+        "sideBySide": "C:/Users/home/Downloads/fom/.impeccable/review/diff/hero/side-by-side.png",
+        "worst": [
+          "kicker drift 61%",
+          "body drift 74%",
+          "cta drift 75%"
+        ],
+        "worstIds": [
+          "kicker",
+          "body",
+          "cta"
+        ],
+        "worstCrops": [
+          {
+            "id": "kicker",
+            "verdict": "drift",
+            "score": {
+              "overall": 0.61,
+              "structure": 0.6124,
+              "color": 0.7452,
+              "colorIntersection": 0.5968,
+              "paletteMatch": 0.8251,
+              "detail": 0.6391,
+              "detailRaw": 0.7745,
+              "detailAdded": 0.2708,
+              "bands": 0.2167
+            },
+            "file": ".impeccable/review/diff/hero/regions/kicker.png"
+          },
+          {
+            "id": "body",
+            "verdict": "drift",
+            "score": {
+              "overall": 0.7424,
+              "structure": 0.7276,
+              "color": 0.7762,
+              "colorIntersection": 0.6069,
+              "paletteMatch": 0.8674,
+              "detail": 0.6972,
+              "detailRaw": 0.8275,
+              "detailAdded": 0.2604,
+              "bands": 0.8
+            },
+            "file": ".impeccable/review/diff/hero/regions/body.png"
+          },
+          {
+            "id": "cta",
+            "verdict": "drift",
+            "score": {
+              "overall": 0.7495,
+              "structure": 0.7716,
+              "color": 0.8399,
+              "colorIntersection": 0.7253,
+              "paletteMatch": 0.9015,
+              "detail": 0.5417,
+              "detailRaw": 0.6302,
+              "detailAdded": 0.1771,
+              "bands": 0.8
+            },
+            "file": ".impeccable/review/diff/hero/regions/cta.png"
+          }
+        ],
+        "advisories": [
+          "(advisory, above the 72% bar; fix in the polish pass before responsive) 2 readings:",
+          "  text body: the face renders 56% heavier than the comp's (ink density 0.63 vs 0.40); drop a weight step or use the ranked face",
+          "  control cta: its rule sits 57px into the box in the comp and 64px in the build (+7px), so the strip is taller than the comp's; match the height, not only the position"
+        ],
+        "regionVerdicts": {
+          "scene": "match",
+          "navigation": "drift",
+          "kicker": "drift",
+          "headline": "drift",
+          "body": "drift",
+          "cta": "drift",
+          "demo": "drift"
+        },
+        "at": "2026-09-24T18:53:16.614Z"
+      },
+      "forced": null,
+      "readingsSeen": {
+        "text body: cap height 9.1px in the build, 19.9px in the comp (-54%); set font-size so the cap height renders at 19.9px": 3,
+        "text body: ink is #f6f4f5 in the build, #764b46 in the comp; use the comp's colour": 3,
+        "control cta: its rule sits 57px into the box in the comp and 13px in the build (-44px), so the strip is shorter than the comp's; match the height, not only the position": 3,
+        "text body: the face renders 56% heavier than the comp's (ink density 0.63 vs 0.40); drop a weight step or use the ranked face": 1,
+        "control cta: its rule sits 57px into the box in the comp and 64px in the build (+7px), so the strip is taller than the comp's; match the height, not only the position": 1
+      },
+      "records": 1,
+      "history": [
+        {
+          "at": "2026-09-24T18:44:55.951Z",
+          "score": 0.8544,
+          "worstIds": [
+            "headline",
+            "body",
+            "kicker"
+          ],
+          "regionVerdicts": {
+            "scene": "match",
+            "navigation": "drift",
+            "kicker": "drift",
+            "headline": "drift",
+            "body": "drift",
+            "cta": "drift",
+            "demo": "drift"
+          },
+          "artifactHash": "394a2ac3bf83"
+        },
+        {
+          "at": "2026-09-24T18:50:41.851Z",
+          "score": 0.8544,
+          "worstIds": [
+            "headline",
+            "body",
+            "kicker"
+          ],
+          "regionVerdicts": {
+            "scene": "match",
+            "navigation": "drift",
+            "kicker": "drift",
+            "headline": "drift",
+            "body": "drift",
+            "cta": "drift",
+            "demo": "drift"
+          },
+          "artifactHash": "394a2ac3bf83"
+        },
+        {
+          "at": "2026-09-24T18:53:16.614Z",
+          "score": 0.8704,
+          "worstIds": [
+            "kicker",
+            "body",
+            "cta"
+          ],
+          "regionVerdicts": {
+            "scene": "match",
+            "navigation": "drift",
+            "kicker": "drift",
+            "headline": "drift",
+            "body": "drift",
+            "cta": "drift",
+            "demo": "drift"
+          },
+          "artifactHash": "394a2ac3bf83"
+        }
+      ]
+    },
+    "sections": {
+      "status": "open",
+      "openedAt": "2026-09-24T18:53:16.614Z",
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "motion": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "responsive": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "review": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    }
+  },
+  "finish": null,
+  "plates": {
+    "scene": {
+      "status": "ok",
+      "score": 0.8395,
+      "size": "1672x941"
+    }
+  }
+}

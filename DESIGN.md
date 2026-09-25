@@ -449,3 +449,46 @@ Con prefers-reduced-motion: reduce no se crea la secuencia fijada y el contenido
 - **Don't** redibujar el producto a partir de textos pequeños o interfaces inventadas en los mockups.
 - **Don't** presentar fotografías ilustrativas como documentación de clientes.
 - **Don't** convertir las reglas históricas de bandas claras, tipografías o maquetas SVG en restricciones para el marketing v6 ya aprobado.
+
+---
+
+# Inicio FOM v7, extensión de alcance local
+
+## Overview
+
+**Creative North Star: "La oficina y la carretera, conectadas"**
+
+Esta extensión documenta exclusivamente Inicio, implementado en `src/pages/HomeV7.jsx` y `src/styles/home-v7.css`, incluyendo su cabecera local. La autoridad visual son las once láminas aprobadas `output/laminas-secciones-v7/01-inicio/01.png` a `11.png`. Conserva el mundo fotográfico y cinematográfico oscuro, con una composición propia por sección. No sustituye los tokens del frontmatter v6 ni las normas del panel, autenticación u otras páginas.
+
+## Colors
+
+Los valores locales son fondo nocturno (`--h7-bg: #06121c`), tinta clara (`--h7-ink: #f6f8fb`), texto secundario (`--h7-muted: #b4cbe3`) y acento azul (`--h7-blue: #32a8ff`). El CTA usa (`#008bff`) y hover (`#0679d8`); el foco visible usa (`#65bbff`), contorno de (3px) y separación de (5px). Son decisiones de Inicio v7, sin cambio de paleta global.
+
+## Typography
+
+Spline Sans con alternativa sans-serif. Títulos de peso (600), interlineado base (1.08) y tracking (-.025em). El h1 de escritorio usa (3.42vw), tracking (-.028em) y saltos de línea explícitos; los títulos de sección se ajustan a cada lámina sobre una base de (3.7vw). El cuerpo base usa (1.65vw / 1.38). En móvil el h1 usa (clamp(28px,6.7vw,48px) / 1.15), h2 (34px) y cuerpo (17px / 1.5); las listas usan cuerpo de (16px). Esta escala no reemplaza la escala v6.
+
+## Layout
+
+En escritorio cada escena parte de una relación (1672 / 941), con texto HTML superpuesto y posiciones propias para reproducir su referencia. La alternancia depende de cada fotografía. A (760px) o menos, las secciones principales, el formulario y las preguntas pasan a una columna y altura natural; el texto precede a la fotografía. Se conservan pequeñas rejillas internas de servicios y dos columnas de enlaces en el pie. El margen de texto móvil es (6%). La cabecera local tiene mínimo de (64px), altura de escritorio (4.9vw) y móvil (64px).
+
+## Elevation & Depth
+
+La profundidad procede de la fotografía y de capturas originales del panel y la app proyectadas en perspectiva mediante `screenProjection`. La escala se recalcula con ResizeObserver. El recorte de oclusión de la escena del operador conserva su figura por delante de la pantalla. Las fotografías son ilustrativas; las capturas llevan identificación de datos de demostración. No sustituirlas por interfaces inventadas ni aplanar texto o controles dentro de imágenes.
+
+## Shapes
+
+Los CTA y preguntas usan esquinas de (12px), los campos (10px) y el formulario (20px), reducido a (16px) en móvil. La proyección de pantalla usa esquinas de (3px) y la variante de teléfono radio elíptico (100px / 48px), aplicado antes de la transformación de perspectiva.
+
+## Components
+
+El texto, enlaces, listas y formulario permanecen en HTML. El formulario compartido prepara un correo y nunca confirma un envío inexistente. Las preguntas usan `details` y `summary` nativos; la primera aparece abierta y el enlace lleva a la página completa de preguntas. El CTA responde con desplazamiento vertical de (-2px) y transición de (.2s), desactivada con movimiento reducido. Esta página no hereda la secuencia GSAP consola-a-teléfono del Inicio v6.
+
+## Do's and Don'ts
+
+- **Do** mantener las once composiciones aprobadas y las capturas reales proyectadas sobre cada dispositivo.
+- **Do** conservar contenido seleccionable, foco visible, controles de teclado y adaptación móvil en flujo natural.
+- **Don't** extender estos valores al panel, autenticación ni al resto del marketing v6.
+- **Don't** interpretar esta documentación como una nueva propuesta visual o una corrección de las referencias aprobadas.
+
+La revisión visual de viewport individual fue comprobada por el agente principal. La captura larga por stitching tiene una salvedad de montaje; no se presenta como verificación pixel a pixel de toda la página.

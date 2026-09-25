@@ -3,6 +3,27 @@
   "generatedAt": "2026-09-23T18:32:08.328Z",
   "title": "Design System: FOM marketing v6",
   "extensions": {
+    "inicioV7": {
+      "scope": "Inicio solamente: .home-v7 y .home-v7-shell; conserva panel, autenticación y marketing v6.",
+      "sources": ["src/pages/HomeV7.jsx", "src/styles/home-v7.css"],
+      "approvedReferences": "output/laminas-secciones-v7/01-inicio/01.png a 11.png",
+      "northStar": "La oficina y la carretera, conectadas",
+      "localTokens": {
+        "colors": { "background": "#06121c", "ink": "#f6f8fb", "muted": "#b4cbe3", "accent": "#32a8ff", "button": "#008bff", "buttonHover": "#0679d8", "focus": "#65bbff" },
+        "typography": { "family": "'Spline Sans',sans-serif", "headingWeight": 600, "headingLineHeight": 1.08, "headingTracking": "-.025em", "desktopDisplay": "3.42vw", "desktopBody": "1.65vw", "mobileDisplay": "clamp(28px,6.7vw,48px)", "mobileHeadline": "34px", "mobileBody": "17px", "mobileBodyLineHeight": 1.5 },
+        "rounded": { "button": "12px", "question": "12px", "field": "10px", "form": "20px", "mobileForm": "16px" },
+        "layout": { "desktopSceneAspectRatio": "1672/941", "stackMax": "760px", "mobileTextGutter": "6%" },
+        "motion": { "buttonTransition": "background .2s,transform .2s", "buttonHover": "translateY(-2px)", "reducedMotion": "Transitions disabled; no v6 GSAP hero sequence." }
+      },
+      "rules": [
+        "Dark cinematic photography follows the eleven approved individual section references.",
+        "Original app and panel screenshots are perspective projected and identified as demonstration data.",
+        "Copy, links, contact form and native details/summary FAQ remain HTML.",
+        "Main sections, form and FAQ stack at widths <=760px; internal service and footer grids remain compact.",
+        "The contact form prepares an email, without claiming delivery."
+      ],
+      "verification": "Individual viewport visually verified by the principal agent; full-page stitching carries an assembly caveat, not pixel-perfect full-page certification."
+    },
     "shadows": [
       {
         "name": "marketing-monitor",
