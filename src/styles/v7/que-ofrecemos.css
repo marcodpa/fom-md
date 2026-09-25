@@ -1,0 +1,119 @@
+/* Qué ofrecemos — geometry measured on output/laminas-secciones-v7/08-que-ofrecemos (1672 × 941). */
+/* Kicker: blue rule before the uppercase label, as in every slide of this page. */
+.v7-ofrecemos .v7-kicker{align-items:flex-start;text-transform:uppercase;letter-spacing:.22em}
+.v7-ofrecemos .v7-copy>.v7-kicker{margin-top:0}
+.v7-ofrecemos .v7-kicker:after{order:-1;align-self:flex-start;margin-top:.62em;border-top-width:3px}
+/* Round outlined icons with a two-line caption */
+.qo-points{list-style:none;margin:0;padding:0;display:flex}
+.qo-points li{display:flex;flex-direction:column;align-items:center;text-align:center}
+.qo-ring{display:grid;place-items:center;border:1.5px solid #2a8cf0;border-radius:50%;background:#06121c66;color:var(--v7-blue)}
+.qo-ring .v7-glyph{width:54%;height:54%;stroke-width:2.1}
+.qo-label{display:block;color:#e2eaf3;line-height:1.24;letter-spacing:.004em}
+.v7-ofrecemos :is(.qo-tagline,.qo-footer-kicker,.v7-footer-statement){text-transform:uppercase;letter-spacing:.2em}
+
+/* Plain text link with arrow under a paragraph */
+.qo-link{display:inline-flex;align-items:center;gap:.5em;color:#3aa9ff!important;font-weight:500}
+.qo-link .v7-glyph{width:1.1em;height:1.1em;color:currentColor;transition:transform .2s}
+.qo-link:hover .v7-glyph{transform:translateX(4px)}
+
+@media(min-width:761px){
+ /* 01 Hero: panel Resumen on the desk monitor, title and three points left */
+ .qo-01 .v7-copy{left:calc(73*var(--u));top:calc(142*var(--u));width:calc(600*var(--u))}
+ .qo-01 .v7-kicker{font-size:calc(14.5*var(--u));line-height:1.38;gap:calc(24*var(--u));color:#c7d5e4!important}
+ .qo-01 .v7-kicker:after{width:calc(30*var(--u))}
+ .qo-01 h1{font-size:calc(61*var(--u));line-height:1.025;letter-spacing:-.025em;margin-top:calc(27*var(--u));white-space:nowrap}
+ .qo-01 .v7-copy>p:not(.v7-kicker){font-size:calc(23.6*var(--u));line-height:1.31;margin-top:calc(33*var(--u));color:#c3d3e6}
+ .qo-01 .v7-button{margin-top:calc(28*var(--u));padding:calc(18*var(--u)) calc(30*var(--u));font-size:calc(17*var(--u));gap:calc(26*var(--u))}
+ .qo-01 .qo-points{margin:calc(35*var(--u)) 0 0 calc(-24*var(--u));gap:calc(16*var(--u))}
+ .qo-01 .qo-points li{width:calc(150*var(--u))}
+ .qo-01 .qo-ring{width:calc(70*var(--u));height:calc(70*var(--u))}
+ .qo-01 .qo-label{margin-top:calc(14*var(--u));font-size:calc(16.8*var(--u))}
+ .qo-tabs{left:calc(930*var(--u));top:calc(800*var(--u))}
+ .qo-01 .v7-demo{right:calc(48*var(--u));bottom:calc(26*var(--u));font-size:calc(16.5*var(--u))}
+
+
+ /* 02 Offer groups: linked cards on the app background (no photo) */
+ .v7-ofrecemos .qo-02{padding:calc(150*var(--u)) calc(66*var(--u)) calc(140*var(--u))}
+ .qo-02 h2{font-size:calc(64*var(--u));letter-spacing:-.025em}
+ .qo-02 .qo-cards{margin-top:calc(56*var(--u));gap:calc(24*var(--u));max-width:calc(1380*var(--u))}
+ .qo-02 .v7-card{padding:calc(36*var(--u));gap:calc(14*var(--u));min-height:calc(330*var(--u))}
+ .v7-ofrecemos .qo-02 .v7-card h3{font-size:calc(30*var(--u))}
+ .v7-ofrecemos .qo-02 .v7-card p{font-size:calc(19.5*var(--u))}
+ .qo-02 .v7-card-more{font-size:calc(18*var(--u))}
+ .qo-more{display:flex;flex-wrap:wrap;gap:calc(10*var(--u));margin-top:calc(40*var(--u))}
+ .qo-more a{padding:calc(10*var(--u)) calc(20*var(--u));border:1px solid #24597f;border-radius:999px;font-size:calc(17*var(--u));color:#bcd5ee;transition:border-color .2s,color .2s}
+ .qo-more a:hover{border-color:#2c9cff;color:#fff}
+
+ /* 03 Inspector with the phone, copy right over the truck tyre */
+ .qo-03 .v7-copy{left:calc(1120*var(--u));top:calc(252*var(--u));width:calc(530*var(--u))}
+ .qo-03 .v7-kicker{font-size:calc(15*var(--u));gap:calc(31*var(--u));color:#7fb3ee!important}
+ .qo-03 .v7-kicker:after{width:calc(40*var(--u))}
+ .qo-03 h2{font-size:calc(68*var(--u));line-height:.985;letter-spacing:-.025em;margin-top:calc(21*var(--u));white-space:nowrap}
+ .qo-03 .v7-copy>p:not(.v7-kicker){font-size:calc(34*var(--u));line-height:1.28;margin-top:calc(25*var(--u));color:#8fbcf0;white-space:nowrap}
+ .qo-03 .qo-link{margin-top:calc(34*var(--u));font-size:calc(22*var(--u))}
+ .qo-03 .v7-demo{right:calc(30*var(--u));bottom:calc(32*var(--u));font-size:calc(15.5*var(--u))}
+
+
+ /* 04 Alertas: shorter framed section, laptop photo in a rounded frame */
+ .v7-ofrecemos .qo-04{grid-template-columns:minmax(0,1fr) calc(820*var(--u));gap:calc(70*var(--u));padding:calc(140*var(--u)) calc(66*var(--u)) calc(130*var(--u))}
+ .qo-04 h2{font-size:calc(62*var(--u));line-height:1.05;letter-spacing:-.025em}
+ .qo-04 .v7-copy>p{font-size:calc(24*var(--u));line-height:1.45;margin-top:calc(24*var(--u));color:#b6cce6}
+ .qo-04 .qo-link{margin-top:calc(30*var(--u));font-size:calc(21*var(--u))}
+ .qo-04 .v7-demo{right:calc(66*var(--u));bottom:calc(92*var(--u));font-size:calc(13.5*var(--u))}
+
+ /* 05 Closing CTA over the dusk road */
+ .qo-05 .v7-copy{left:calc(88*var(--u));top:calc(300*var(--u));width:calc(700*var(--u))}
+ .qo-05 h2{font-size:calc(67*var(--u));line-height:.97;letter-spacing:-.012em;white-space:nowrap}
+ .qo-05 .v7-copy>p{font-size:calc(32.8*var(--u));line-height:1.39;margin-top:calc(26*var(--u));color:#b8cdf0}
+ .qo-05 .v7-button{margin-top:calc(30*var(--u));width:calc(442*var(--u));height:calc(81*var(--u));padding:0;font-size:calc(24*var(--u));gap:calc(34*var(--u));border-radius:calc(12*var(--u))}
+ .qo-tagline{position:absolute;z-index:1;left:calc(1432*var(--u));top:calc(720*var(--u));padding-left:calc(25*var(--u));border-left:2px solid var(--v7-blue);font-size:calc(15*var(--u))!important;line-height:1.87!important;color:#c3d2e2!important}
+
+ /* 06 Footer: road photo band, links band with the brand at left */
+ .qo-06 .v7-footer-hero{display:none}
+ .qo-06 .v7-footer-statement{left:calc(1412*var(--u));top:calc(364*var(--u));padding-left:calc(28*var(--u));border-left:2px solid var(--v7-blue);line-height:1.74!important}
+ .qo-06 .v7-footer-links{left:calc(65*var(--u));right:calc(60*var(--u));top:calc(620*var(--u));grid-template-columns:calc(471*var(--u)) calc(232*var(--u)) calc(294*var(--u)) 1fr}
+ .qo-06 .v7-footer-brand{margin-top:calc(6*var(--u))}
+ .qo-06 .v7-footer-brand .m-brand{font-size:calc(48*var(--u));gap:calc(20*var(--u))}
+ .qo-06 .v7-footer-brand .m-brand svg path{fill:currentColor}
+ .qo-06 .v7-footer-brand .m-brand svg circle{fill:#07131d;stroke:none}
+ .qo-06 .v7-footer-brand .m-brand svg{width:calc(38*var(--u));height:calc(50*var(--u))}
+ .qo-06 .v7-footer-brand p{margin-top:calc(14*var(--u));font-size:calc(22*var(--u))}
+ .qo-06 .v7-footer-links h2{font-size:calc(18.5*var(--u));margin:calc(6*var(--u)) 0 calc(5*var(--u))}
+ .qo-06 .v7-footer-links nav{gap:calc(8*var(--u))}
+ .qo-06 .v7-footer-links nav a{font-size:calc(19.5*var(--u))}
+ .qo-06 .v7-footer-links nav a[href^=mailto]{font-size:calc(22*var(--u));font-weight:400}
+ .qo-footer-kicker{position:absolute;z-index:1;right:calc(60*var(--u));top:calc(636*var(--u));text-align:right;font-size:calc(14.5*var(--u))!important;line-height:2.03!important;color:#8faccb!important}
+ .qo-06 .v7-copyright{left:calc(65*var(--u));right:calc(65*var(--u));top:calc(837*var(--u));padding-top:calc(26*var(--u));font-size:calc(17*var(--u))}
+}
+@media(max-width:760px){
+ .v7-ofrecemos br.qo-d{display:none}
+ .v7-ofrecemos .v7-kicker{font-size:12.5px;letter-spacing:.16em;line-height:1.5;margin-bottom:16px}
+ .v7-ofrecemos .v7-kicker:after{margin-top:.72em;width:28px}
+ .qo-points{margin-top:28px;gap:8px}
+ .qo-points li{flex:1 1 0;min-width:0}
+ .qo-ring{width:56px;height:56px}
+ .qo-label{margin-top:10px;font-size:14px}
+ .v7-ofrecemos .v7-button+.qo-points{margin-top:32px}
+ .qo-01{--m-w:160%;--m-x:-50%;padding-top:64px}
+ .qo-03{--m-w:175%;--m-x:-24%}
+ .qo-05{--m-w:175%;--m-x:-50%}
+ .qo-01 .qo-tabs{order:2;margin-top:12px;align-self:center}
+ .qo-link{margin-top:18px;font-size:16px;min-height:44px}
+ .qo-more{margin:22px 6% 0;display:flex;flex-wrap:wrap;gap:8px}.qo-more a{padding:10px 16px;border:1px solid #24597f;border-radius:999px;font-size:15px;color:#bcd5ee}
+ .qo-02 .v7-copy{padding-top:48px}
+ /* The kit's base .v7-cards / .is-framed rules come after its phone rules; restate them here. */
+ .v7-ofrecemos .qo-02 .v7-cards{grid-template-columns:1fr;gap:12px;margin:24px 6% 0}
+ .v7-ofrecemos .qo-02 .v7-card{padding:20px;gap:10px}
+ .v7-ofrecemos .qo-02 .v7-card h3{font-size:20px}.v7-ofrecemos .qo-02 .v7-card p{font-size:15.5px}
+ .v7-ofrecemos .qo-02 .v7-card small{font-size:12px}.v7-ofrecemos .qo-02 .v7-card-more{font-size:15px}
+ .v7-ofrecemos .qo-02 .v7-card-icon{width:40px;height:40px}
+ .v7-ofrecemos .qo-04.is-framed{display:flex;flex-direction:column;align-items:stretch;padding:0 0 40px}
+ .v7-ofrecemos .qo-04>.v7-copy{padding:40px 6% 0}
+ .v7-ofrecemos .qo-04>.v7-frame{order:2;margin:24px 6% 0;aspect-ratio:4/3;border-radius:16px}
+ .v7-ofrecemos .qo-04>.v7-frame>.v7-plate{left:-30%}
+ .v7-ofrecemos .qo-04 .v7-copy>p{font-size:17px;line-height:1.5;margin-top:16px}
+ .v7-ofrecemos .v7-tabs{padding:4px;gap:4px}
+ .v7-ofrecemos .v7-tabs button{font-size:14px;padding:8px 14px;gap:8px}
+ .qo-tagline{font-size:12px;line-height:1.8;padding-left:14px;border-left:2px solid var(--v7-blue);color:#c3d2e2!important}
+ .qo-footer-kicker{display:none}
+}
