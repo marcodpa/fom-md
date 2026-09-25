@@ -1,0 +1,127 @@
+/* Preguntas frecuentes — hero and footer geometry measured on output/laminas-secciones-v7/10-preguntas
+   (1672 × 941); the help center and the closing section are normal web layout on the app background. */
+.v7-preguntas .pq-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.v7-preguntas .pq-kicker{text-transform:uppercase;letter-spacing:.14em;color:#a9c5e2}
+.v7-preguntas .v7-demo,.v7-preguntas .pq-demo-note{text-transform:uppercase;letter-spacing:.2em;line-height:1.5;color:#aec2d6}
+
+/* ---------- Help center: sticky index + search, topic groups ---------- */
+.v7-preguntas .pq-help{--hdr:max(4.9vw,64px);display:grid;grid-template-columns:calc(390*var(--u)) minmax(0,1fr);gap:calc(90*var(--u));align-items:start;overflow:clip;padding:calc(120*var(--u)) calc(90*var(--u)) calc(150*var(--u)) calc(68*var(--u))}
+.v7-preguntas .pq-help .v7-backdrop-globe{top:calc(560*var(--u));right:-14%;width:min(58%,900px);opacity:.45}
+.v7-preguntas .pq-help>.pq-aside{position:sticky;top:calc(var(--hdr) + 28px);display:flex;flex-direction:column;gap:calc(22*var(--u))}
+.v7-preguntas .pq-aside-title{font-size:max(15px,calc(17*var(--u)));font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#8cc4ff}
+.v7-preguntas .pq-search{display:flex;align-items:center;gap:12px;height:max(48px,calc(56*var(--u)));padding:0 max(16px,calc(20*var(--u)));border:1.5px solid #2a4d6c;border-radius:999px;background:#08141fe6;transition:border-color .2s}
+.v7-preguntas .pq-search:focus-within{border-color:#3aa6ff}
+.v7-preguntas .pq-search:has(input:focus-visible){outline:3px solid #65bbff;outline-offset:4px}
+.v7-preguntas .pq-search .v7-glyph{flex:none;width:20px;height:20px;color:#b8cde2}
+.v7-preguntas .pq-search input{flex:1;min-width:0;height:100%;padding:0;border:0;background:none;color:var(--v7-ink);font:inherit;font-size:max(16px,calc(17.5*var(--u)));outline:none}
+.v7-preguntas .pq-search input::placeholder{color:#94abc4;opacity:1}
+.v7-preguntas .pq-search input::-webkit-search-cancel-button{filter:invert(.7)}
+.v7-preguntas .pq-count{font-size:max(14px,calc(15.5*var(--u)));color:#8fb0cf}
+.v7-preguntas .pq-nav{display:flex;flex-direction:column;gap:4px;padding:calc(10*var(--u));border:1px solid #1b3043;border-radius:calc(16*var(--u));background:#08131dcc;backdrop-filter:blur(6px)}
+.v7-preguntas .pq-nav a{display:flex;align-items:center;gap:14px;min-height:48px;padding:0 max(12px,calc(16*var(--u)));border-radius:10px;font-size:max(15px,calc(17.5*var(--u)));color:#dfe8f2;transition:background .2s,color .2s}
+.v7-preguntas .pq-nav a:hover{background:#12304f;color:#fff}
+.v7-preguntas .pq-nav a.is-active{background:linear-gradient(90deg,#123457,#0f2b49);color:#3aa6ff;font-weight:500}
+.v7-preguntas .pq-nav a.is-empty{opacity:.45}
+.v7-preguntas .pq-nav .v7-glyph{flex:none;width:22px;height:22px;color:#2c9cff}
+.v7-preguntas .pq-nav span{flex:1}
+.v7-preguntas .pq-nav small{min-width:26px;padding:2px 8px;border-radius:999px;background:#0f2438;font-size:13px;text-align:center;color:#9fc1e4}
+
+.v7-preguntas .pq-groups{display:grid;gap:calc(100*var(--u))}
+.v7-preguntas .pq-group{scroll-margin-top:calc(var(--hdr) + 24px)}
+.v7-preguntas .pq-group-head{display:flex;align-items:center;gap:calc(24*var(--u));margin-bottom:calc(28*var(--u))}
+.v7-preguntas .pq-group-icon{flex:none;display:grid;place-items:center;width:max(48px,calc(64*var(--u)));height:max(48px,calc(64*var(--u)));border:1.5px solid #2a86e0;border-radius:calc(14*var(--u));background:#0b1d30cc}
+.v7-preguntas .pq-group-icon .v7-glyph{width:55%;height:55%}
+.v7-preguntas .pq-group-head h3{font-size:max(26px,calc(40*var(--u)));letter-spacing:-.015em}
+.v7-preguntas .pq-group-head p{margin-top:6px;font-size:max(15px,calc(18.5*var(--u)));color:#b7cde3}
+.v7-preguntas .pq-none{font-size:max(15px,calc(17*var(--u)));color:#8fb0cf}
+
+/* FAQ cards: chevron instead of the kit's plus, open question in blue */
+.v7-preguntas .pq-faq.v7-faq-list{position:relative;inset:auto;gap:calc(12*var(--u))}
+.v7-preguntas .pq-faq.v7-faq-list details{border-color:#233a50;border-radius:calc(12*var(--u));background:#08121ce6}
+.v7-preguntas .pq-faq.v7-faq-list details[open]{border-color:#2a86e0;background:#0b1b2cf2}
+.v7-preguntas .pq-faq.v7-faq-list summary{gap:20px;padding:max(14px,calc(20*var(--u))) max(16px,calc(24*var(--u)));font-size:max(16px,calc(19.5*var(--u)));font-weight:500;color:#eef3f8}
+.v7-preguntas .pq-faq.v7-faq-list details[open] summary{color:#3aa6ff}
+.v7-preguntas .pq-faq .v7-plus{display:none}
+.v7-preguntas .pq-faq.v7-faq-list summary>span{transform:none!important;color:inherit;font-size:inherit}
+.v7-preguntas .pq-faq.v7-faq-list summary::after{content:'';display:block;flex:none;width:.5em;height:.5em;margin:0 .2em -.1em 0;border:solid #cfdcea;border-width:0 .11em .11em 0;transform:translateY(-.3em) rotate(45deg);transition:transform .2s}
+.v7-preguntas .pq-faq.v7-faq-list details[open] summary::after{border-color:#3aa6ff;transform:translateY(.1em) rotate(-135deg)}
+.v7-preguntas .pq-faq.v7-faq-list details>p{max-width:72ch;margin:0 max(16px,calc(24*var(--u))) max(16px,calc(24*var(--u)));padding-top:0;border-top:0;font-size:max(15.5px,calc(17.5*var(--u)));line-height:1.6;color:#c2d3e5}
+.v7-preguntas .pq-empty{padding:calc(32*var(--u));border:1.5px solid #233a50;border-radius:calc(14*var(--u));background:#08121ce6}
+.v7-preguntas .pq-empty p:first-child{font-size:max(20px,calc(28*var(--u)));font-weight:600;color:var(--v7-ink)}
+.v7-preguntas .pq-empty p+p{margin-top:8px;font-size:max(15px,calc(17.5*var(--u)))}
+.v7-preguntas .pq-empty button{margin-top:18px;padding:10px 18px;min-height:44px;border:1.5px solid #2a86e0;border-radius:10px;background:none;color:#3aa6ff;font:inherit;font-size:16px;cursor:pointer}
+.v7-preguntas .pq-empty button:hover{background:#0f2336}
+
+/* ---------- 07 closing: framed photo of the driver with the app ---------- */
+.v7-preguntas .pq-07{grid-template-columns:minmax(0,1fr) calc(720*var(--u));padding-top:calc(110*var(--u));padding-bottom:calc(130*var(--u))}
+.v7-preguntas .pq-07-media{position:relative}
+.v7-preguntas .pq-demo-note{display:block;margin-top:12px;text-align:right;font-size:max(11px,calc(13*var(--u)))}
+
+@media(min-width:761px){
+ /* 01 Hero: laptop with Resumen on the desk, title left */
+ .pq-01 .v7-copy{left:calc(87*var(--u));top:calc(256*var(--u));width:calc(620*var(--u))}
+ .pq-01 .pq-kicker{font-size:calc(17*var(--u));letter-spacing:.18em}
+ .pq-01 h1{font-size:calc(78*var(--u));line-height:1.02;margin-top:calc(34*var(--u))}
+ .pq-01 .v7-copy>p:not(.pq-kicker){font-size:calc(28.5*var(--u));line-height:1.5;margin-top:calc(26*var(--u));color:#b8d3f0}
+ .pq-01 .v7-demo{left:calc(1516*var(--u));top:calc(873*var(--u));right:auto;bottom:auto;font-size:calc(13.5*var(--u))}
+
+ .pq-07 .pq-kicker{font-size:calc(17*var(--u));letter-spacing:.33em;color:#b5cbe0}
+ .pq-07 h2{font-size:calc(84*var(--u));line-height:1.07;letter-spacing:-.02em;margin-top:calc(30*var(--u))}
+ .pq-07 .v7-copy>p:not(.pq-kicker){font-size:calc(28.7*var(--u));margin-top:calc(22*var(--u));color:#a9cdf5}
+ .pq-07 .v7-button{margin-top:calc(40*var(--u));padding:calc(20*var(--u)) calc(38*var(--u));font-size:calc(21.6*var(--u));border-radius:calc(12*var(--u))}
+
+ /* 08 Footer: supervisor with the tablet, link band below */
+ .pq-08 .v7-footer-hero{display:none}
+ .pq-08 .v7-demo{left:calc(1507*var(--u));top:calc(505*var(--u));right:auto;bottom:auto;font-size:calc(14*var(--u))}
+ .pq-08 .v7-footer-links{left:calc(72*var(--u));right:calc(62*var(--u));top:calc(650*var(--u));grid-template-columns:calc(451*var(--u)) calc(253*var(--u)) calc(317*var(--u)) 1fr}
+ .pq-08 .v7-footer-links:before,.pq-08 .v7-footer-links:after{content:'';position:absolute;top:calc(7*var(--u));height:calc(166*var(--u));border-left:1px solid #20364a}
+ .pq-08 .v7-footer-links:before{left:calc(409*var(--u))}
+ .pq-08 .v7-footer-links:after{left:calc(1253*var(--u))}
+ .pq-08 .v7-footer-brand{padding-top:calc(36*var(--u))}
+ .pq-08 .v7-footer-brand .m-brand{font-size:calc(59*var(--u));gap:calc(22*var(--u))}
+ .pq-08 .v7-footer-brand .m-brand svg{width:calc(38*var(--u));height:calc(50*var(--u))}
+ .pq-08 .v7-footer-brand p{margin-top:calc(14*var(--u));font-size:calc(21.4*var(--u));color:#a7c7ea}
+ .pq-08 .v7-footer-links nav{gap:0;padding-left:calc(64*var(--u))}
+ .v7-preguntas .pq-08 .v7-footer-links h2{position:relative;font-size:calc(17.8*var(--u));margin:calc(4*var(--u)) 0 calc(20*var(--u))}
+ .pq-08 .v7-footer-links h2:before{content:'';position:absolute;left:calc(-64*var(--u));top:50%;width:calc(36*var(--u));height:calc(36*var(--u));transform:translateY(-50%);background:#2c9cff;-webkit-mask:var(--pq-icon) center/contain no-repeat;mask:var(--pq-icon) center/contain no-repeat}
+ .pq-08 nav[aria-label=Plataforma] h2{--pq-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2.5' y='3.5' width='19' height='13' rx='1.5'/%3E%3Cpath d='M12 16.5V21m-4.5 0h9'/%3E%3C/svg%3E")}
+ .pq-08 nav[aria-label=Información] h2{--pq-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2.5H6.5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8Z'/%3E%3Cpath d='M14 2.5V8h5.5M8.5 13h7m-7 4h5'/%3E%3C/svg%3E")}
+ .pq-08 nav[aria-label=Contacto] h2{--pq-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'%3E%3Crect x='2.5' y='5' width='19' height='14' rx='2'/%3E%3Cpath d='m3 6.5 9 6.5 9-6.5'/%3E%3C/svg%3E")}
+ .pq-08 .v7-footer-links nav a{font-size:calc(16.2*var(--u));line-height:calc(26.5*var(--u));min-height:0}
+ .pq-08 .v7-footer-links nav a[href^=mailto]{font-size:calc(16.4*var(--u))}
+ .pq-08 .v7-footer-statement{left:calc(1368*var(--u));top:calc(708*var(--u));width:calc(252*var(--u));text-align:center}
+ .v7-preguntas .pq-08 .v7-footer-statement{font-size:calc(14.5*var(--u))!important;line-height:1.62!important;letter-spacing:.2em}
+ .pq-08 .v7-copyright{left:calc(70*var(--u));right:calc(67*var(--u));top:calc(855*var(--u));padding-top:calc(26*var(--u));font-size:calc(15.1*var(--u))}
+}
+
+@media(max-width:760px){
+ .v7-preguntas .pq-br{display:none}
+ .v7-preguntas .pq-kicker{font-size:13px;letter-spacing:.14em;margin:0 0 14px}
+ .v7-preguntas .v7-demo{letter-spacing:.12em;font-size:10.5px}
+ .pq-01{--m-w:160%;--m-x:-57%;padding-top:64px}
+
+ /* Help center: index becomes a horizontal scroller above the groups */
+ .v7-preguntas .pq-help{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:44px 0 48px}
+ .v7-preguntas .pq-help .v7-backdrop-globe{top:220px;right:-60%;width:130%}
+ .v7-preguntas .pq-help>.pq-aside{order:1;position:sticky!important;top:64px!important;z-index:3;margin:0;padding:12px 6% 12px;gap:10px;background:#06111bf2;box-shadow:0 14px 24px -18px #000}
+ .v7-preguntas .pq-help>.pq-aside,.v7-preguntas .pq-aside>*{min-width:0}
+ .v7-preguntas .pq-aside-title{font-size:13px}
+ .v7-preguntas .pq-count{font-size:13px}
+ .v7-preguntas .pq-nav{flex-direction:row;overflow-x:auto;gap:8px;padding:0;border:0;background:none;backdrop-filter:none;scrollbar-width:none;margin:0 -6.4%;padding:0 6.4%}
+ .v7-preguntas .pq-nav::-webkit-scrollbar{display:none}
+ .v7-preguntas .pq-nav a{flex:none;min-height:44px;gap:8px;padding:0 12px;border:1px solid #213a51;font-size:15px}
+ .v7-preguntas .pq-nav .v7-glyph{width:18px;height:18px}
+ .v7-preguntas .pq-help>.pq-groups{order:2;margin:28px 6% 0;gap:52px}
+ .v7-preguntas .pq-group{scroll-margin-top:262px}
+ .v7-preguntas .pq-group-head{gap:14px;margin-bottom:18px}
+ .v7-preguntas .pq-group-head h3{font-size:26px}
+
+ /* Closing: copy, then the framed photo */
+ .pq-07{padding-top:8px}
+ .v7-preguntas .pq-07>.pq-07-media{order:2;margin:24px 6% 0}
+ .v7-preguntas .pq-07-media .v7-frame{width:100%;aspect-ratio:4/3}
+ .v7-preguntas .pq-07-media .v7-frame>.v7-plate{left:-32%!important}
+ .pq-07 .v7-button{margin-top:26px}
+ .pq-08 .v7-footer-links:before,.pq-08 .v7-footer-links:after{display:none}
+ .v7-preguntas .pq-08>.v7-demo{position:absolute!important;top:8px!important;right:6%!important;left:auto!important;bottom:auto!important;margin:0}
+}

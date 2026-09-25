@@ -1,14 +1,18 @@
 # FOM: relevo para implementar las páginas restantes
 
-Última actualización: 25 de septiembre de 2026. Lee este documento antes de modificar la web.
+Última actualización: 25 de septiembre de 2026 (tarde). Lee este documento antes de modificar la web.
 
 ## Estado real y objetivo
 
 Repositorio: https://github.com/marcodpa/fom-md · Rama de trabajo: `codex/rediseno-v6-fiel`.
 
-El commit `e3b7c17` contiene **Inicio implementado con sus 11 secciones** y las propuestas de todas las páginas. Las **otras 10 páginas todavía usan el diseño anterior**. Hay 90 láminas seleccionadas: 11 de Inicio y 79 pendientes de implementar. No confundir tener las imágenes con tener la web implementada. Inicio tiene implementación y revisión técnica; no registrar aprobación final del usuario, que no ha confirmado esa aprobación.
+**Las once páginas están implementadas** y pendientes de la revisión final del usuario (no registrar aprobación que no haya dado). Inicio (`HomeV7`) no cambió. Las otras diez viven en `src/pages/v7/<Página>.jsx` + `src/styles/v7/<página>.css`, sobre el kit común `src/components/v7/V7Kit.jsx` + `src/styles/v7-kit.css`.
 
-Objetivo de continuación: aplicar fielmente cada sección de las diez páginas restantes según sus láminas v7, con componentes reales, contenido existente y pantallas originales de la app/panel. Este relevo documenta ese trabajo; no afirma que esté realizado.
+Cómo se hicieron: primero cada sección se reprodujo fiel a su lámina v7 (foto limpia extraída de la propia lámina, capturas originales proyectadas en cada pantalla, texto HTML real). Después el usuario dijo que parecía «una diapositiva de PowerPoint» y pidió, y aprobó en Plataforma, una **segunda pasada web**: fundidos entre secciones y aparición al hacer scroll; dispositivos fijos mientras cambian de captura (`StickyTour`); pantallas con pestañas (`DeviceTabs`); menos fotos; tarjetas y párrafos en lugar de viñetas; secciones con el fondo de la app (el globo de `/entrar`); y en App del conductor un solo teléfono que viaja entre las fotos al hacer scroll (GSAP). Por eso varias láminas ya no se corresponden una a una con una sección: el plan indica en `note` qué se unió o cambió.
+
+Método, herramientas y reglas: [output/V7-METODO.md](output/V7-METODO.md). Estado por sección: [output/PLAN-IMPLEMENTACION-V7.md](output/PLAN-IMPLEMENTACION-V7.md). Evidencia (lámina arriba, web abajo; móvil; capturas de scroll en vivo): `output/evidencia-v7/<página>/`.
+
+Pendiente: revisión del usuario página por página; la animación histórica «dashboard que se convierte en móvil» sigue sin hacerse (no es la del teléfono viajero de /app).
 
 ## Texto que el usuario puede dar a otra IA
 
@@ -35,7 +39,7 @@ npm ci
 npm run dev -- --host 127.0.0.1 --port 5174
 ```
 
-Web: http://127.0.0.1:5174/ · Galería: http://127.0.0.1:5174/output/laminas-secciones-v7/index.html
+Web: http://127.0.0.1:5174/ (en el escritorio de Claude también arranca con la configuración `fom-web` de `.claude/launch.json`) · Galería: http://127.0.0.1:5174/output/laminas-secciones-v7/index.html
 
 El servidor debe quedar ejecutándose. Los secretos y archivos `.env` no están versionados; no publicarlos. Para la maquetación pública se usan capturas locales. Si se necesita backend autenticado, consultar la configuración existente sin inventar credenciales.
 

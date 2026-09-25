@@ -9,6 +9,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Tu flota conectada. Tu operación, bajo control.",
       "body": "La oficina y la carretera, en una misma plataforma."
@@ -28,6 +29,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Todo ese control. Ahora en tu mano.",
       "body": "De la vista completa de tu flota a la unidad que acompaña a tu conductor.",
@@ -52,6 +54,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "La operación se entiende mejor cuando todos ven lo mismo.",
       "body": "FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas. Seguimiento, cuidado del vehículo y comunicación forman parte de una misma operación.",
@@ -72,6 +75,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Toda la operación. Una sola vista.",
       "body": "Vehículos, alertas y mantenimiento conectados para decidir con claridad.",
@@ -96,6 +100,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "La operación también viaja con tu equipo.",
       "body": "FOM DRIVER conecta al conductor con su unidad y con la oficina. Inicio, inspección y perfil en una misma app.",
@@ -120,6 +125,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Del primer chequeo al próximo servicio.",
       "body": "Un recorrido conectado: revisar, reportar y dar seguimiento.",
@@ -142,6 +148,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Conducir mejor empieza por entender cada viaje.",
       "body": "Un índice claro para acompañar al conductor y atender lo que necesita mejorar.",
@@ -166,6 +173,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Un mismo control. Cada zona de tu flota.",
       "body": "Organiza unidades por área y consulta su ubicación desde la consola."
@@ -185,6 +193,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Hablemos de tu operación",
       "body": "Cuéntanos cómo trabajas y coordinamos una demostración.",
@@ -211,6 +220,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Preguntas frecuentes",
       "faqs": [
@@ -246,6 +256,7 @@
     "status": "implemented-awaiting-user-review",
     "implementation": "src/pages/HomeV7.jsx",
     "evidence": [],
+    "note": null,
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -274,9 +285,12 @@
     "id": "01",
     "title": "Toda tu flota en un solo panel",
     "image": "output/laminas-secciones-v7/02-plataforma/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Toda tu flota en un solo panel",
       "body": "Un panel web para supervisar desde la computadora y una app para el conductor en la calle, sobre los mismos datos. Para 10 o cientos de unidades, con la misma sencillez."
@@ -293,9 +307,12 @@
     "id": "02",
     "title": "Un panel único para toda la flota",
     "image": "output/laminas-secciones-v7/02-plataforma/02.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Unida con 04 en un recorrido fijo del portátil (Resumen, Centro de control, Vehículos).",
     "content": {
       "heading": "Un panel único para toda la flota",
       "body": "FOM reúne la información de cada vehículo en una sola interfaz accesible desde el navegador. No hay módulos sueltos ni ventanas separadas, todo se gestiona desde el mismo lugar. El supervisor ve el estado general de la flota apenas inicia sesión.",
@@ -334,9 +351,12 @@
     "id": "03",
     "title": "Panel en la oficina, app en la calle",
     "image": "output/laminas-secciones-v7/02-plataforma/03.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Teléfono con pestañas de la app (Inicio, Inspección, Mantenimiento, Perfil).",
     "content": {
       "heading": "Panel en la oficina, app en la calle",
       "body": "FOM son dos caras del mismo sistema. El supervisor trabaja desde la computadora con el panel completo, y el conductor lleva la app en el teléfono. Lo que hace uno lo ve el otro: la inspección que firma el conductor aparece en el panel, y la orden de trabajo que abre el supervisor le llega al conductor.",
@@ -375,9 +395,12 @@
     "id": "04",
     "title": "Mapa general en vivo",
     "image": "output/laminas-secciones-v7/02-plataforma/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Unida con 02 en el recorrido fijo del portátil.",
     "content": {
       "heading": "Mapa general en vivo",
       "body": "El mapa muestra la ubicación de todas las unidades sobre una vista única y actualizada. Es la foto completa de la flota en tiempo real, pensada para coordinar desde una sola pantalla. Cada unidad aparece con su identificación y estado.",
@@ -416,9 +439,12 @@
     "id": "05",
     "title": "Captura y resguardo de datos",
     "image": "output/laminas-secciones-v7/02-plataforma/05.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Sin foto: fondo de la app y tarjetas con párrafo.",
     "content": {
       "heading": "Captura y resguardo de datos",
       "body": "Los dispositivos GPS envían su información a los servidores de FOM de forma continua a través de la red celular. Cada dato recibido se registra y se conserva para consultas posteriores. La plataforma mantiene el historial disponible sin que el cliente administre servidores.",
@@ -455,9 +481,12 @@
     "id": "06",
     "title": "Roles y permisos que reflejan tu organización",
     "image": "output/laminas-secciones-v7/02-plataforma/06-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Sección enmarcada más corta con tarjetas de roles.",
     "content": {
       "heading": "Roles y permisos que reflejan tu organización",
       "body": "Cada persona entra directo a la vista que le corresponde. FOM separa a quien supervisa la operación de la empresa, a quien maneja su flota propia y a quien conduce, con una jerarquía de mando clara.",
@@ -494,9 +523,12 @@
     "id": "07",
     "title": "Seguridad de datos y escalabilidad",
     "image": "output/laminas-secciones-v7/02-plataforma/07.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Seguridad de datos y escalabilidad",
       "body": "La información viaja y se almacena cifrada, con respaldos periódicos que protegen el historial de la flota. La plataforma está pensada para crecer, de una decena a cientos de unidades, sin cambiar de sistema. La disponibilidad se mantiene alta para que el panel esté siempre accesible.",
@@ -537,9 +569,12 @@
     "id": "08",
     "title": "Preguntas frecuentes",
     "image": "output/laminas-secciones-v7/02-plataforma/08.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Preguntas sobre el fondo de la app, sin foto.",
     "content": {
       "title": "Preguntas frecuentes",
       "faqs": [
@@ -572,9 +607,12 @@
     "id": "09",
     "title": "Conoce FOM con tu equipo",
     "image": "output/laminas-secciones-v7/02-plataforma/09.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Conoce FOM con tu equipo",
       "body": "La oficina y la carretera, conectadas.",
@@ -590,9 +628,12 @@
     "id": "10",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/02-plataforma/10.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Plataforma.jsx",
+    "evidence": [
+      "output/evidencia-v7/02-plataforma/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -621,9 +662,12 @@
     "id": "01",
     "title": "Tu unidad y tu jornada, en tu teléfono.",
     "image": "output/laminas-secciones-v7/03-app/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/AppConductor.jsx",
+    "evidence": [
+      "output/evidencia-v7/03-app/"
+    ],
+    "note": "Un solo teléfono viaja entre las fotos 01–04 al hacer scroll (GSAP).",
     "content": {
       "title": "Tu unidad y tu jornada, en tu teléfono.",
       "body": "Consulta el estado del vehículo, realiza la inspección y revisa tu perfil desde la app que acompaña al conductor."
@@ -640,9 +684,12 @@
     "id": "02",
     "title": "Una inspección que queda registrada.",
     "image": "output/laminas-secciones-v7/03-app/02.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/AppConductor.jsx",
+    "evidence": [
+      "output/evidencia-v7/03-app/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Una inspección que queda registrada.",
       "body": "Revisa los puntos de la unidad y registra su condición desde el teléfono. La información permite dar seguimiento a los hallazgos desde la oficina. Lista de revisión por vehículo. Registro de observaciones y fallas. Historial disponible para la operación."
@@ -659,9 +706,12 @@
     "id": "03",
     "title": "El estado de tu unidad, a mano.",
     "image": "output/laminas-secciones-v7/03-app/03.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/AppConductor.jsx",
+    "evidence": [
+      "output/evidencia-v7/03-app/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "El estado de tu unidad, a mano.",
       "body": "Desde Inicio, el conductor consulta la información de su vehículo y encuentra accesos a inspecciones, mantenimiento y alertas."
@@ -678,9 +728,12 @@
     "id": "04",
     "title": "Conoce tu índice de manejo.",
     "image": "output/laminas-secciones-v7/03-app/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/AppConductor.jsx",
+    "evidence": [
+      "output/evidencia-v7/03-app/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Conoce tu índice de manejo.",
       "body": "Consulta tus datos, documentos y el índice de conducción. Sus indicadores ayudan a entender qué aspectos del manejo requieren atención."
@@ -697,9 +750,12 @@
     "id": "05",
     "title": "La oficina y el conductor, conectados.",
     "image": "output/laminas-secciones-v7/03-app/05.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/AppConductor.jsx",
+    "evidence": [
+      "output/evidencia-v7/03-app/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "La oficina y el conductor, conectados.",
       "body": "Conoce el panel web y la app con una demostración de FOM."
@@ -717,9 +773,12 @@
     "id": "06",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/03-app/06-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/AppConductor.jsx",
+    "evidence": [
+      "output/evidencia-v7/03-app/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -751,9 +810,12 @@
     "id": "01",
     "title": "Control diario de tu flota, sin puntos ciegos",
     "image": "output/laminas-secciones-v7/04-funciones/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Control diario de tu flota, sin puntos ciegos",
       "body": "Rastreo GPS en vivo, telemática del vehículo, mantenimiento preventivo, reportes y alertas operativas. El supervisor los trabaja desde el panel web y el conductor aporta desde la app."
@@ -768,9 +830,12 @@
     "id": "02",
     "title": "Rastreo GPS en tiempo real",
     "image": "output/laminas-secciones-v7/04-funciones/02.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Rastreo GPS en tiempo real",
       "body": "Ubica cada unidad en el mapa con actualización constante y sigue la operación tal como ocurre en la calle. La posición, la velocidad y el estado de encendido llegan al panel para que el despachador decida sin llamar al conductor.",
@@ -809,9 +874,12 @@
     "id": "03",
     "title": "Telemática y diagnóstico del vehículo",
     "image": "output/laminas-secciones-v7/04-funciones/03.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Telemática y diagnóstico del vehículo",
       "body": "Lee los datos que envía el vehículo para saber cómo se está usando, no solo dónde está. El motor, la batería y el kilometraje quedan registrados para cada unidad de forma automática.",
@@ -850,9 +918,12 @@
     "id": "04",
     "title": "Mantenimiento preventivo",
     "image": "output/laminas-secciones-v7/04-funciones/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Mantenimiento preventivo",
       "body": "Programa el servicio por kilometraje o por fecha desde el panel y deja que el sistema avise antes de que se cumpla el plazo. Cuando el conductor detecta una falla, la reporta con foto desde la app y llega al panel como orden de trabajo. Cada intervención queda documentada con su costo y su responsable.",
@@ -889,9 +960,12 @@
     "id": "05",
     "title": "Reportes y analítica de operación",
     "image": "output/laminas-secciones-v7/04-funciones/05.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Reportes y analítica de operación",
       "body": "Convierte los datos del día en reportes que se leen en minutos y se comparten con la gerencia. Cada indicador se puede filtrar por vehículo, conductor o rango de fechas.",
@@ -930,9 +1004,12 @@
     "id": "06",
     "title": "Alertas operativas",
     "image": "output/laminas-secciones-v7/04-funciones/06.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Alertas operativas",
       "body": "Recibe avisos automáticos cuando algo se sale de lo esperado en la operación diaria. Cada alerta llega al panel del supervisor, y el conductor ve en su app las que le corresponden a su unidad.",
@@ -971,9 +1048,12 @@
     "id": "07",
     "title": "Preguntas frecuentes",
     "image": "output/laminas-secciones-v7/04-funciones/07.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Preguntas frecuentes",
       "faqs": [
@@ -1006,9 +1086,12 @@
     "id": "08",
     "title": "Conoce FOM con tu equipo",
     "image": "output/laminas-secciones-v7/04-funciones/08.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Conoce FOM con tu equipo",
       "body": "La oficina y la carretera, conectadas.",
@@ -1024,9 +1107,12 @@
     "id": "09",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/04-funciones/09.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Funciones.jsx",
+    "evidence": [
+      "output/evidencia-v7/04-funciones/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -1055,9 +1141,12 @@
     "id": "01",
     "title": "Conductores protegidos, vehículos cuidados",
     "image": "output/laminas-secciones-v7/05-seguridad/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Conductores protegidos, vehículos cuidados",
       "body": "FOM detecta eventos de riesgo al volante, apoya el coaching del conductor y responde a emergencias sin exponer la privacidad de tu equipo. El conductor actúa desde su app y el supervisor revisa desde el panel."
@@ -1074,9 +1163,12 @@
     "id": "02",
     "title": "Detección de eventos de conducción",
     "image": "output/laminas-secciones-v7/05-seguridad/02.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Detección de eventos de conducción",
       "body": "FOM identifica maniobras de riesgo en tiempo real usando el acelerómetro y la velocidad del vehículo. Cada evento queda registrado con hora, ubicación y severidad para revisarlo después. Así puedes actuar sobre los patrones, no solo sobre incidentes aislados.",
@@ -1117,9 +1209,12 @@
     "id": "03",
     "title": "Seguridad basada en video",
     "image": "output/laminas-secciones-v7/05-seguridad/03.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Seguridad basada en video",
       "body": "La cámara a bordo graba de forma continua y guarda automáticamente los segundos previos y posteriores a cada evento de riesgo. El clip queda asociado al evento, así el supervisor ve qué pasó en la vía en lugar de solo un punto en el mapa. El video convierte una discusión en un hecho verificable.",
@@ -1156,9 +1251,12 @@
     "id": "04",
     "title": "Coaching y cambio de comportamiento",
     "image": "output/laminas-secciones-v7/05-seguridad/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Coaching y cambio de comportamiento",
       "body": "Los eventos no sirven de nada si no se traducen en mejoras. FOM entrega al conductor retroalimentación clara sobre sus propias maniobras y al supervisor un resumen semanal por conductor. El objetivo es corregir hábitos, no castigar.",
@@ -1197,9 +1295,12 @@
     "id": "05",
     "title": "Puntaje de manejo seguro",
     "image": "output/laminas-secciones-v7/05-seguridad/05.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Puntaje de manejo seguro",
       "body": "Cada conductor recibe un puntaje de 0 a 100 que resume su comportamiento al volante. El puntaje pondera la frecuencia y severidad de los eventos según los kilómetros recorridos, para que sea justo entre quien maneja mucho y quien maneja poco. Es una cifra simple para conversar con el equipo.",
@@ -1238,9 +1339,12 @@
     "id": "06",
     "title": "Botón SOS, emergencias y privacidad",
     "image": "output/laminas-secciones-v7/05-seguridad/06.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Botón SOS, emergencias y privacidad",
       "body": "El conductor cuenta con un botón SOS en su app para pedir ayuda ante robo, accidente o problema de salud. La alerta llega de inmediato al panel del supervisor con la ubicación del vehículo. Al mismo tiempo, FOM cuida la privacidad del conductor con reglas claras sobre qué se graba y quién lo ve.",
@@ -1283,9 +1387,12 @@
     "id": "07",
     "title": "Preguntas frecuentes",
     "image": "output/laminas-secciones-v7/05-seguridad/07-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Preguntas frecuentes",
       "faqs": [
@@ -1320,9 +1427,12 @@
     "id": "08",
     "title": "Conoce FOM con tu equipo",
     "image": "output/laminas-secciones-v7/05-seguridad/08.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Conduce un futuro seguro con FOM",
       "body": "La oficina y la carretera, conectadas.",
@@ -1338,9 +1448,12 @@
     "id": "09",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/05-seguridad/09.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Seguridad.jsx",
+    "evidence": [
+      "output/evidencia-v7/05-seguridad/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -1369,9 +1482,12 @@
     "id": "01",
     "title": "Organiza tu flota por zona, sede o contrato",
     "image": "output/laminas-secciones-v7/06-areas/01-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Areas.jsx",
+    "evidence": [
+      "output/evidencia-v7/06-areas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Organiza tu flota por zona, sede o contrato",
       "body": "Agrupa vehículos, define geocercas con alertas de entrada y salida, y controla el acceso por área. Todo se configura desde el panel web y ordena lo que cada persona ve, en la computadora y en la app."
@@ -1386,9 +1502,12 @@
     "id": "02",
     "title": "Agrupa la flota como opera tu empresa",
     "image": "output/laminas-secciones-v7/06-areas/02.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Areas.jsx",
+    "evidence": [
+      "output/evidencia-v7/06-areas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Agrupa la flota como opera tu empresa",
       "body": "Cada operación se estructura distinto. FOM te permite organizar los vehículos por zona geográfica, por empresa o sede, o por contrato de servicio, para que cada responsable vea solo lo que le corresponde. Una flota mediana de 80 a 150 unidades se ordena en minutos.",
@@ -1431,9 +1550,12 @@
     "id": "03",
     "title": "Geocercas y zonas con alertas de entrada y salida",
     "image": "output/laminas-secciones-v7/06-areas/03.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Areas.jsx",
+    "evidence": [
+      "output/evidencia-v7/06-areas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Geocercas y zonas con alertas de entrada y salida",
       "body": "Dibuja geocercas desde el panel sobre patios, muelles, pozos y rutas de la Costa Oriental. Cada zona genera alertas automáticas cuando una unidad entra o sale, con registro de hora y grupo. Así confirmas cumplimiento sin llamar a cada conductor.",
@@ -1476,9 +1598,12 @@
     "id": "04",
     "title": "Visibilidad de una operación multi-sitio",
     "image": "output/laminas-secciones-v7/06-areas/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Areas.jsx",
+    "evidence": [
+      "output/evidencia-v7/06-areas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Visibilidad de una operación multi-sitio",
       "body": "Cuando trabajas en varios municipios a la vez, necesitas ver todo en un solo tablero. FOM reúne las zonas y grupos de la Costa Oriental en una vista única, y te deja filtrar por sede o contrato cuando quieres enfocarte. El coordinador ve el conjunto, cada jefe de patio ve lo suyo.",
@@ -1515,9 +1640,12 @@
     "id": "05",
     "title": "Control de acceso por área",
     "image": "output/laminas-secciones-v7/06-areas/05.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Areas.jsx",
+    "evidence": [
+      "output/evidencia-v7/06-areas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Control de acceso por área",
       "body": "No todos los usuarios deben ver toda la flota. Con FOM asignas a cada persona las zonas, sedes o contratos que le competen. El jefe de patio de Ciudad Ojeda ve sus unidades, el coordinador general ve todo.",
@@ -1560,9 +1688,12 @@
     "id": "06",
     "title": "Preguntas frecuentes",
     "image": "output/laminas-secciones-v7/06-areas/06.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Areas.jsx",
+    "evidence": [
+      "output/evidencia-v7/06-areas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Preguntas frecuentes",
       "faqs": [
@@ -1595,9 +1726,12 @@
     "id": "07",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/06-areas/07.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Areas.jsx",
+    "evidence": [
+      "output/evidencia-v7/06-areas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -1626,9 +1760,12 @@
     "id": "01",
     "title": "Una forma más clara de cuidar y coordinar tu flota.",
     "image": "output/laminas-secciones-v7/07-quienes-somos/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QuienesSomos.jsx",
+    "evidence": [
+      "output/evidencia-v7/07-quienes-somos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Una forma más clara de cuidar y coordinar tu flota.",
       "body": "FOM es una plataforma para conectar a las personas, los vehículos y la información de una operación en movimiento."
@@ -1645,9 +1782,12 @@
     "id": "02",
     "title": "La oficina y la carretera, conectadas.",
     "image": "output/laminas-secciones-v7/07-quienes-somos/02.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QuienesSomos.jsx",
+    "evidence": [
+      "output/evidencia-v7/07-quienes-somos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "La oficina y la carretera, conectadas.",
       "body": "Una flota genera decisiones a cada momento: dónde está una unidad, qué necesita para salir y qué ocurrió en el camino. FOM reúne esas respuestas en el panel web y en la app del conductor. El objetivo es que cada persona encuentre la información que necesita para actuar: supervisores desde la consola y conductores desde su teléfono."
@@ -1664,9 +1804,12 @@
     "id": "03",
     "title": "De cada dato a una acción concreta.",
     "image": "output/laminas-secciones-v7/07-quienes-somos/03-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QuienesSomos.jsx",
+    "evidence": [
+      "output/evidencia-v7/07-quienes-somos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "De cada dato a una acción concreta.",
       "body": "Los recorridos, las alertas, las inspecciones y el mantenimiento comparten una misma vista de la operación. Así es más sencillo revisar lo que pasa y dar seguimiento sin perder el contexto."
@@ -1681,9 +1824,12 @@
     "id": "04",
     "title": "Una operación más conectada.",
     "image": "output/laminas-secciones-v7/07-quienes-somos/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QuienesSomos.jsx",
+    "evidence": [
+      "output/evidencia-v7/07-quienes-somos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Una operación más conectada.",
       "cards": [
@@ -1713,9 +1859,12 @@
     "id": "05",
     "title": "Conoce la operación detrás de cada pantalla.",
     "image": "output/laminas-secciones-v7/07-quienes-somos/05-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QuienesSomos.jsx",
+    "evidence": [
+      "output/evidencia-v7/07-quienes-somos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Conoce la operación detrás de cada pantalla.",
       "body": "Hablemos de tu flota",
@@ -1731,9 +1880,12 @@
     "id": "06",
     "title": "Preguntas frecuentes",
     "image": "output/laminas-secciones-v7/07-quienes-somos/06.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QuienesSomos.jsx",
+    "evidence": [
+      "output/evidencia-v7/07-quienes-somos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Preguntas frecuentes",
       "faqs": [
@@ -1761,9 +1913,12 @@
     "id": "07",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/07-quienes-somos/07.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QuienesSomos.jsx",
+    "evidence": [
+      "output/evidencia-v7/07-quienes-somos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -1792,9 +1947,12 @@
     "id": "01",
     "title": "Una plataforma para seguir, cuidar y entender tu flota.",
     "image": "output/laminas-secciones-v7/08-que-ofrecemos/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QueOfrecemos.jsx",
+    "evidence": [
+      "output/evidencia-v7/08-que-ofrecemos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Una plataforma para seguir, cuidar y entender tu flota.",
       "body": "Herramientas conectadas para el trabajo diario, desde el panel de control hasta la app del conductor."
@@ -1811,9 +1969,12 @@
     "id": "02",
     "title": "Ubicación y recorridos",
     "image": "output/laminas-secciones-v7/08-que-ofrecemos/02.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QueOfrecemos.jsx",
+    "evidence": [
+      "output/evidencia-v7/08-que-ofrecemos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Ubicación y recorridos",
       "body": "Consulta dónde están las unidades y revisa sus trayectos desde el centro de control."
@@ -1830,9 +1991,12 @@
     "id": "03",
     "title": "Inspecciones y mantenimiento",
     "image": "output/laminas-secciones-v7/08-que-ofrecemos/03.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QueOfrecemos.jsx",
+    "evidence": [
+      "output/evidencia-v7/08-que-ofrecemos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Inspecciones y mantenimiento",
       "body": "El conductor revisa la unidad desde la app; la oficina consulta hallazgos y da seguimiento al servicio."
@@ -1849,9 +2013,12 @@
     "id": "04",
     "title": "Alertas, seguridad y reportes",
     "image": "output/laminas-secciones-v7/08-que-ofrecemos/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QueOfrecemos.jsx",
+    "evidence": [
+      "output/evidencia-v7/08-que-ofrecemos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Alertas, seguridad y reportes",
       "body": "Los avisos y los datos de la flota ayudan a priorizar lo que requiere atención y a entender cada recorrido."
@@ -1868,9 +2035,12 @@
     "id": "05",
     "title": "Ve cómo encaja FOM con tu operación.",
     "image": "output/laminas-secciones-v7/08-que-ofrecemos/05.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QueOfrecemos.jsx",
+    "evidence": [
+      "output/evidencia-v7/08-que-ofrecemos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Ve cómo encaja FOM con tu operación.",
       "body": "Revisamos tu flota y te mostramos el panel y la app en una demostración."
@@ -1885,9 +2055,12 @@
     "id": "06",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/08-que-ofrecemos/06-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/QueOfrecemos.jsx",
+    "evidence": [
+      "output/evidencia-v7/08-que-ofrecemos/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -1916,9 +2089,12 @@
     "id": "01",
     "title": "Más claridad para cada decisión de tu flota.",
     "image": "output/laminas-secciones-v7/09-beneficios/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Más claridad para cada decisión de tu flota.",
       "body": "FOM conecta el trabajo de campo con la oficina para que la información sirva al seguimiento diario de la operación."
@@ -1933,9 +2109,12 @@
     "id": "02",
     "title": "Visibilidad de la operación",
     "image": "output/laminas-secciones-v7/09-beneficios/02.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Visibilidad de la operación",
       "body": "Consulta ubicación, estado y responsable de cada unidad desde una misma vista."
@@ -1952,9 +2131,12 @@
     "id": "03",
     "title": "Cuidado de cada vehículo",
     "image": "output/laminas-secciones-v7/09-beneficios/03.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Cuidado de cada vehículo",
       "body": "Reúne inspecciones, hallazgos y órdenes de mantenimiento para dar seguimiento a lo que necesita cada unidad."
@@ -1971,9 +2153,12 @@
     "id": "04",
     "title": "Comunicación desde el campo",
     "image": "output/laminas-secciones-v7/09-beneficios/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Comunicación desde el campo",
       "body": "El conductor registra información desde su teléfono y la oficina la consulta en la plataforma."
@@ -1990,9 +2175,12 @@
     "id": "05",
     "title": "Atención a las alertas",
     "image": "output/laminas-secciones-v7/09-beneficios/05.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Atención a las alertas",
       "body": "Encuentra los avisos que requieren revisión y consulta el contexto de los eventos."
@@ -2009,9 +2197,12 @@
     "id": "06",
     "title": "Organización por áreas",
     "image": "output/laminas-secciones-v7/09-beneficios/06.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Organización por áreas",
       "body": "Agrupa unidades por zona, sede o contrato para consultar la parte de la flota que te corresponde."
@@ -2026,9 +2217,12 @@
     "id": "07",
     "title": "Información para decidir",
     "image": "output/laminas-secciones-v7/09-beneficios/07-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Información para decidir",
       "body": "Consulta reportes e historial para revisar la operación y planificar los siguientes pasos."
@@ -2045,9 +2239,12 @@
     "id": "08",
     "title": "Encuentra las herramientas para tu operación.",
     "image": "output/laminas-secciones-v7/09-beneficios/08.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Encuentra las herramientas para tu operación.",
       "body": "Conoce el panel web y la app con una demostración de FOM."
@@ -2062,9 +2259,12 @@
     "id": "09",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/09-beneficios/09.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Beneficios.jsx",
+    "evidence": [
+      "output/evidencia-v7/09-beneficios/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -2093,9 +2293,12 @@
     "id": "01",
     "title": "Preguntas frecuentes.",
     "image": "output/laminas-secciones-v7/10-preguntas/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Preguntas.jsx",
+    "evidence": [
+      "output/evidencia-v7/10-preguntas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Preguntas frecuentes.",
       "body": "Explora las preguntas sobre la plataforma, las funciones y la puesta en marcha."
@@ -2112,9 +2315,12 @@
     "id": "02",
     "title": "Plataforma",
     "image": "output/laminas-secciones-v7/10-preguntas/02-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Preguntas.jsx",
+    "evidence": [
+      "output/evidencia-v7/10-preguntas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Plataforma",
       "faqs": [
@@ -2148,9 +2354,12 @@
     "id": "03",
     "title": "Funciones",
     "image": "output/laminas-secciones-v7/10-preguntas/03-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Preguntas.jsx",
+    "evidence": [
+      "output/evidencia-v7/10-preguntas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Funciones",
       "faqs": [
@@ -2184,9 +2393,12 @@
     "id": "04",
     "title": "Seguridad",
     "image": "output/laminas-secciones-v7/10-preguntas/04-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Preguntas.jsx",
+    "evidence": [
+      "output/evidencia-v7/10-preguntas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Seguridad",
       "faqs": [
@@ -2220,9 +2432,12 @@
     "id": "05",
     "title": "Áreas",
     "image": "output/laminas-secciones-v7/10-preguntas/05-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Preguntas.jsx",
+    "evidence": [
+      "output/evidencia-v7/10-preguntas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Áreas",
       "faqs": [
@@ -2256,9 +2471,12 @@
     "id": "06",
     "title": "Contacto",
     "image": "output/laminas-secciones-v7/10-preguntas/06-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Preguntas.jsx",
+    "evidence": [
+      "output/evidencia-v7/10-preguntas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Contacto",
       "faqs": [
@@ -2292,9 +2510,12 @@
     "id": "07",
     "title": "¿Aún tienes preguntas?",
     "image": "output/laminas-secciones-v7/10-preguntas/07.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Preguntas.jsx",
+    "evidence": [
+      "output/evidencia-v7/10-preguntas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "¿Aún tienes preguntas?",
       "body": "La oficina y la carretera, conectadas.",
@@ -2312,9 +2533,12 @@
     "id": "08",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/10-preguntas/08-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Preguntas.jsx",
+    "evidence": [
+      "output/evidencia-v7/10-preguntas/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",
@@ -2345,9 +2569,12 @@
     "id": "01",
     "title": "Empieza a controlar tu flota con FOM",
     "image": "output/laminas-secciones-v7/11-contacto/01.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Contacto.jsx",
+    "evidence": [
+      "output/evidencia-v7/11-contacto/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Empieza a controlar tu flota con FOM",
       "body": "Solicita una demostración sin costo, conoce los equipos y coordina la instalación. Te acompañamos desde el primer contacto hasta tener toda tu flota en línea."
@@ -2364,9 +2591,12 @@
     "id": "02",
     "title": "Solicita tu demostración",
     "image": "output/laminas-secciones-v7/11-contacto/02-v2.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Contacto.jsx",
+    "evidence": [
+      "output/evidencia-v7/11-contacto/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Solicita tu demostración",
       "body": "Agenda una demostración en vivo de la plataforma FOM adaptada al tamaño de tu operación. Un especialista te muestra el sistema con datos de ejemplo y responde tus dudas antes de cualquier compromiso.",
@@ -2405,9 +2635,12 @@
     "id": "03",
     "title": "Qué pasa después de solicitarla",
     "image": "output/laminas-secciones-v7/11-contacto/03.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Contacto.jsx",
+    "evidence": [
+      "output/evidencia-v7/11-contacto/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Qué pasa después de solicitarla",
       "body": "El proceso desde tu solicitud hasta el arranque es claro y ordenado. Cada etapa tiene un responsable asignado y tiempos definidos para que sepas siempre en qué punto estás.",
@@ -2444,9 +2677,12 @@
     "id": "04",
     "title": "Canales de contacto",
     "image": "output/laminas-secciones-v7/11-contacto/04.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Contacto.jsx",
+    "evidence": [
+      "output/evidencia-v7/11-contacto/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Canales de contacto",
       "body": "Puedes escribirnos por el canal que te resulte más cómodo. Atendemos consultas comerciales, coordinación de instalaciones y soporte por vías separadas para que cada solicitud llegue al equipo correcto.",
@@ -2483,9 +2719,12 @@
     "id": "05",
     "title": "Instalación e implementación",
     "image": "output/laminas-secciones-v7/11-contacto/05.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Contacto.jsx",
+    "evidence": [
+      "output/evidencia-v7/11-contacto/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Instalación e implementación",
       "body": "La colocación de los equipos la realiza nuestro personal técnico en tu sede o en un punto acordado. Coordinamos por lotes para no detener tu operación y validamos cada unidad antes de darla por lista. Al cerrar el arranque entregamos los accesos al panel web y dejamos la app instalada en el teléfono de cada conductor.",
@@ -2522,9 +2761,12 @@
     "id": "06",
     "title": "Soporte, autoservicio y cobertura",
     "image": "output/laminas-secciones-v7/11-contacto/06.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Contacto.jsx",
+    "evidence": [
+      "output/evidencia-v7/11-contacto/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "heading": "Soporte, autoservicio y cobertura",
       "body": "Después del arranque sigues acompañado. Cuentas con soporte técnico, materiales de autoservicio y presencia en las principales ciudades del país para atender crecimientos o traslados de tu flota.",
@@ -2565,9 +2807,12 @@
     "id": "07",
     "title": "Preguntas frecuentes",
     "image": "output/laminas-secciones-v7/11-contacto/07.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Contacto.jsx",
+    "evidence": [
+      "output/evidencia-v7/11-contacto/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Preguntas frecuentes",
       "faqs": [
@@ -2600,9 +2845,12 @@
     "id": "08",
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/11-contacto/08.png",
-    "status": "pending",
-    "implementation": null,
-    "evidence": [],
+    "status": "implemented-awaiting-user-review",
+    "implementation": "src/pages/v7/Contacto.jsx",
+    "evidence": [
+      "output/evidencia-v7/11-contacto/"
+    ],
+    "note": "Ver evidencia de la página: la segunda pasada web puede haber unido, enmarcado o quitado la foto de esta lámina.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",

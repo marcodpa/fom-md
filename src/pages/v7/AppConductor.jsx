@@ -66,7 +66,8 @@ function AppTraveller() {
   useGSAP(() => {
     const mm = gsap.matchMedia()
     mm.add('(min-width: 761px) and (prefers-reduced-motion: no-preference)', () => {
-      const el = phone.current, root = el.parentElement
+      const el = phone.current, root = el?.parentElement
+      if (!root) return
       const imgs = [...el.querySelectorAll('img')]
       let anchors = [], spans = []
       // A flight starts when the next section's top enters the viewport and ends when
@@ -74,12 +75,14 @@ function AppTraveller() {
       const measure = () => {
         anchors = STOPS.map(stop => {
           const plateEl = root.querySelector(stop.plate)
+          if (!plateEl) return { ready: false, shot: stop.shot, section: null, corners: stop.corners }
           const [x, y] = offsetIn(plateEl, root)
           const k = plateEl.offsetWidth / PLATE_W
           return { ready: k > 0.05, shot: stop.shot, section: plateEl.closest('.v7-section'), corners: stop.corners.map(([cx, cy]) => [x + cx * k, y + cy * k]) }
         })
         const top = root.getBoundingClientRect().top + scrollY
         let last = -Infinity
+        if (!anchors.every(a => a.ready)) { spans = []; return }
         spans = anchors.slice(1).map(({ section: s }) => {
           const end = top + s.offsetTop + s.offsetHeight / 2 - innerHeight / 2
           const start = Math.min(Math.max(top + s.offsetTop - innerHeight, last), end - 200)

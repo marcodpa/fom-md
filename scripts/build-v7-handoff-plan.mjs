@@ -21,6 +21,7 @@ const plan = selected.map(job => {
     status: prior?.status ?? (job.page === '01-inicio' ? 'implemented-awaiting-user-review' : 'pending'),
     implementation: prior?.implementation ?? (job.page === '01-inicio' ? 'src/pages/HomeV7.jsx' : null),
     evidence: prior?.evidence ?? [],
+    note: prior?.note ?? null,
     content: entry.content, guide: entry.guide,
     realScreenshots: (entry.refs || []).map(relative).filter(ref => ref.startsWith('src/assets/marketing/real/')),
   }
@@ -31,7 +32,7 @@ fs.writeFileSync(planPath, JSON.stringify(plan, null, 2) + '\n')
 const groups = Object.groupBy(plan, item => item.page)
 let md = '# Plan de implementación v7 — las 90 secciones\n\n'
 md += 'Leer primero [CONTINUAR-REDISENO.md](../CONTINUAR-REDISENO.md). Fuente: selección de la galería y manifest.json, verificados entre sí.\n\n'
-md += 'Estado inicial: Inicio implementado, pendiente de revisión final del usuario; otras diez páginas pendientes. Actualizar `plan-implementacion-v7.json` conforme se implementa y regenerar con `node scripts/build-v7-handoff-plan.mjs`; el script conserva estado, implementación y evidencia existentes. No marcar terminada una sección por tener su PNG.\n\n'
+md += 'Estado: las once páginas implementadas y pendientes de revisión final del usuario. Las diez páginas nuevas siguen sus láminas y después recibieron la «segunda pasada» web pedida por el usuario (ver V7-METODO.md): algunas láminas se unieron en recorridos o se convirtieron en secciones sin foto. Actualizar `plan-implementacion-v7.json` conforme se implementa y regenerar con `node scripts/build-v7-handoff-plan.mjs`; el script conserva estado, implementación y evidencia existentes. No marcar terminada una sección por tener su PNG.\n\n'
 md += '| Página | Ruta | Secciones |\n| --- | --- | --- |\n'
 for (const items of Object.values(groups)) md += `| ${items[0].pageName} | \`${items[0].route}\` | ${items.length} |\n`
 for (const items of Object.values(groups)) {
