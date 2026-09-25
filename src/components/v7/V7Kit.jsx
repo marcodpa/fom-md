@@ -391,7 +391,7 @@ const FOOTER_GROUPS = [
  * Footer for the v7 pages: photo band with the large brand and tagline, then the
  * link columns. Layout specifics per page live in the page stylesheet.
  */
-export function V7Footer({ plateId, screens, demo = false, className = '', taglineBreak = true, statement = <>La oficina<br />y la carretera,<br />conectadas.</>, children }) {
+export function V7Footer({ plateId, screens, demo = false, className = '', taglineBreak = true, statement = null, children }) {
   const ref = useReveal()
   const { pathname } = useLocation()
   return <footer ref={ref} className={`v7-section v7-footer ${className}`}>

@@ -300,3 +300,7 @@ a.v7-card:hover,.v7-card:hover{border-color:#2c8ee0;transform:translateY(-3px);b
  .v7-footer-links nav[aria-label=Contacto]{grid-column:1/-1}
  .v7-copyright{order:3;margin:22px 6% 0!important;padding-top:18px;font-size:13px}
 }
+
+/* No eyebrow labels or slogan tags above headings (user request; impeccable craft floor):
+   the heading speaks for itself. */
+.v7-page :is(.v7-kicker,.v7-footer-statement,.fn-tagline,.fn-statement,.ar-motto,.qo-footer-kicker,.qo-tagline,.bn-kicker,.bn-statement,.ct-tagline,.sg-tagline,.pq-kicker,.pq-aside-title){display:none!important}

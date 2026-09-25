@@ -28,7 +28,7 @@
  .qo-01 .qo-points li{width:calc(150*var(--u))}
  .qo-01 .qo-ring{width:calc(70*var(--u));height:calc(70*var(--u))}
  .qo-01 .qo-label{margin-top:calc(14*var(--u));font-size:max(16px,calc(16.8*var(--u)*.92))}
- .qo-tabs{left:calc(930*var(--u));top:calc(800*var(--u))}
+ .qo-tabs{left:calc(74*var(--u));top:calc(728*var(--u))}
  .qo-01 .v7-demo{right:calc(48*var(--u));bottom:calc(26*var(--u));font-size:max(16px,calc(16.5*var(--u)*.92))}
 
 
