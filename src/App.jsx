@@ -4,9 +4,23 @@ import MarketingHeader from './components/marketing/MarketingChrome'
 import './styles/marketing.css'
 import './styles/marketing-backgrounds.css'
 import './styles/fom-v6.css'
+import './styles/v7-header.css'
 
 const Marketing = lazy(() => import('./pages/ReferenceMarketing'))
 const HomeV7 = lazy(() => import('./pages/HomeV7'))
+// v7 pages, one per route, implemented from output/laminas-secciones-v7.
+const V7_PAGES = {
+  plataforma: lazy(() => import('./pages/v7/Plataforma')),
+  app: lazy(() => import('./pages/v7/AppConductor')),
+  funciones: lazy(() => import('./pages/v7/Funciones')),
+  seguridad: lazy(() => import('./pages/v7/Seguridad')),
+  areas: lazy(() => import('./pages/v7/Areas')),
+  'quienes-somos': lazy(() => import('./pages/v7/QuienesSomos')),
+  'que-ofrecemos': lazy(() => import('./pages/v7/QueOfrecemos')),
+  beneficios: lazy(() => import('./pages/v7/Beneficios')),
+  'preguntas-frecuentes': lazy(() => import('./pages/v7/Preguntas')),
+  contacto: lazy(() => import('./pages/v7/Contacto')),
+}
 const Entrar = lazy(() => import('./pages/Entrar'))
 const CambiarClaveInicial = lazy(() => import('./pages/CambiarClaveInicial'))
 const Consola = lazy(() => import('./panel/Consola'))
@@ -37,14 +51,18 @@ function ScrollTop() {
 export default function App() {
   const { pathname } = useLocation()
   const esConsola = pathname === '/entrar' || pathname === '/cambiar-clave-inicial' || pathname.startsWith('/panel')
-  return <div id="top" className={esConsola ? undefined : `marketing-v2${pathname === '/' ? ' home-v7-shell' : ''}`}>
+  const v7 = pathname === '/' || Boolean(V7_PAGES[pathname.slice(1)])
+  return <div id="top" className={esConsola ? undefined : `marketing-v2${v7 ? ' v7-shell' : ''}`}>
     <a className="skip-link" href="#contenido">Saltar al contenido</a>
     {!esConsola && <MarketingHeader />}
     <ScrollTop />
     <Suspense fallback={<div className="route-loading" role="status" style={{ padding: '120px 5%' }}>Cargando…</div>}>
       <Routes>
         <Route path="/" element={<HomeV7 />} />
-        {['plataforma','funciones','seguridad','areas','contacto','preguntas-frecuentes','app','beneficios','quienes-somos','que-ofrecemos'].map(path => <Route key={path} path={'/' + path} element={<Marketing />} />)}
+        {['plataforma','funciones','seguridad','areas','contacto','preguntas-frecuentes','app','beneficios','quienes-somos','que-ofrecemos'].map(path => {
+          const Page = V7_PAGES[path] || Marketing
+          return <Route key={path} path={'/' + path} element={<Page />} />
+        })}
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cambiar-clave-inicial" element={<CambiarClaveInicial />} />
         <Route path="/panel/*" element={<Consola />} />

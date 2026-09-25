@@ -1,0 +1,10 @@
+/* Header for every v7 marketing route (Inicio and the ten pages). */
+.marketing-v2.v7-shell>.m-header{height:4.9vw;min-height:64px;background:#06121ceb;padding-inline:4.2%;border-bottom:1px solid #28394b;font-family:'Spline Sans',sans-serif}
+.marketing-v2.v7-shell>.m-header .m-brand{font-size:2.8vw;gap:12px}.v7-shell>.m-header .m-brand svg{width:2.5vw;height:2.5vw}
+.marketing-v2.v7-shell>.m-header nav{font-size:1.22vw;gap:3.8vw}.v7-shell>.m-header nav>a{height:100%;display:flex;align-items:center;position:relative}
+.v7-shell>.m-header nav>a.active:after{content:'';position:absolute;bottom:-1.5vw;left:-1.6vw;right:-1.6vw;height:3px;background:#249fff}
+.marketing-v2.v7-shell>.m-header .m-login{font-size:1.16vw;border:0;padding:0}.v7-shell>.m-header .m-login:after{content:' →';font-size:1.7em;margin-left:12px}
+@media(min-width:761px) and (max-width:1180px){.marketing-v2.v7-shell>.m-header nav{font-size:15px}.marketing-v2.v7-shell>.m-header .m-brand{font-size:32px}.marketing-v2.v7-shell>.m-header .m-login{font-size:14px}.v7-shell>.m-header nav>a.active:after{display:none}}
+@media(max-width:760px){.marketing-v2.v7-shell>.m-header{height:64px;padding-inline:6%}.marketing-v2.v7-shell>.m-header .m-brand{font-size:28px}.v7-shell>.m-header .m-brand svg{width:28px;height:28px}.marketing-v2.v7-shell>.m-header .m-login{font-size:12px}.marketing-v2.v7-shell>.m-header nav{font-size:16px}.v7-shell>.m-header nav>a.active:after{display:none}}
+/* The active group (Plataforma / Información) is underlined like a direct link. */
+@media(min-width:1181px){.v7-shell>.m-header .m-nav-group{height:100%;display:flex;align-items:center}.v7-shell>.m-header .m-nav-trigger{position:relative;height:100%}.v7-shell>.m-header .m-nav-trigger.active:after{content:"";position:absolute;bottom:-1px;left:-1.6vw;right:-1.6vw;height:3px;background:#249fff}}
