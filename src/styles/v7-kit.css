@@ -20,6 +20,9 @@
 .v7-page .v7-screen>img{position:absolute;inset:0;display:block;max-width:none;width:100%;height:100%;object-fit:fill;opacity:0;transition:opacity .45s ease}
 .v7-page .v7-screen>img:only-child,.v7-page .v7-screen>img.is-active{opacity:1}
 .v7-screen.is-phone{border-radius:110px/52px}
+/* Drawn phone body for plates whose physical phone was removed (Plate screen option `body`) */
+.v7-device-body{position:absolute;left:-46px;top:-26px;width:1092px;height:1052px;transform-origin:46px 26px;border-radius:150px/72px;background:linear-gradient(145deg,#2b3440,#0b0f14 38%,#161c24);box-shadow:inset 0 0 0 6px #3a4553,inset 0 0 0 16px #05070a,0 40px 90px -30px #000}
+.v7-page .v7-foreground{position:absolute;inset:0;z-index:2}
 .v7-demo{position:absolute;z-index:2;right:calc(40*var(--u));bottom:calc(30*var(--u));font-size:calc(13.5*var(--u));color:#b3c4d5}
 
 /* Text blocks */

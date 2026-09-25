@@ -31,8 +31,11 @@ const toPercent = ([x, y]) => `${(x / PLATE_W * 100).toFixed(3)}% ${(y / PLATE_H
  * `src` may be a list of captures: the one at index `active` is shown (cross-fade),
  * which is how DeviceTabs and StickyTour switch what the device displays.
  * `clip` is a polygon in slide coordinates used when a person or object sits in front of the screen.
+ * `body: true` draws the phone itself (dark frame and bezel) around the screen, for photos
+ * whose physical phone was removed from the plate. `foreground` polygons repeat those parts of
+ * the photo (e.g. fingers) above the devices.
  */
-export function Plate({ id, screens = [], priority = false, className = '', active = 0 }) {
+export function Plate({ id, screens = [], priority = false, className = '', active = 0, foreground = [] }) {
   const frame = useRef(null)
   useLayoutEffect(() => {
     const el = frame.current
@@ -46,12 +49,15 @@ export function Plate({ id, screens = [], priority = false, className = '', acti
     <img className="v7-photo" src={plate(id)} width={PLATE_W} height={PLATE_H} alt="" loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} decoding="async" />
     {screens.map((s, i) => {
       const sources = Array.isArray(s.src) ? s.src : [s.src]
+      const matrix = `scale(var(--plate-scale)) matrix3d(${screenProjection(s.corners).join(',')})`
       return <div key={i} className="v7-screen-layer" style={s.clip ? { clipPath: `polygon(${s.clip.map(toPercent).join(',')})` } : undefined}>
-        <div className={`v7-screen${s.phone ? ' is-phone' : ''}`} style={{ transform: `scale(var(--plate-scale)) matrix3d(${screenProjection(s.corners).join(',')})`, borderRadius: s.radius }}>
+        {s.body && <div className="v7-device-body" style={{ transform: matrix }} />}
+        <div className={`v7-screen${s.phone ? ' is-phone' : ''}`} style={{ transform: matrix, borderRadius: s.radius }}>
           {sources.map((src, n) => <img key={src} src={src} className={n === (sources.length > 1 ? active : 0) ? 'is-active' : undefined} aria-hidden={sources.length > 1 && n !== active ? true : undefined} alt={s.alt || `Captura original ${s.phone ? 'de la app del conductor' : 'del panel web'} FOM. Datos de demostración.`} width={s.phone ? 390 : 1430} height={s.phone ? 844 : 953} loading={priority && n === 0 ? 'eager' : 'lazy'} decoding="async" />)}
         </div>
       </div>
     })}
+    {foreground.map((poly, i) => <img key={i} className="v7-photo v7-foreground" src={plate(id)} alt="" aria-hidden="true" loading={priority ? 'eager' : 'lazy'} decoding="async" style={{ clipPath: `polygon(${poly.map(toPercent).join(',')})` }} />)}
   </div>
 }
 

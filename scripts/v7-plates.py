@@ -8,6 +8,8 @@ masked regions are reconstructed from their own surroundings with OpenCV.
 Mask modes, in 1672x941 slide coordinates:
   text  [x, y, w, h]  removes only glyph-like strokes inside the box (keeps texture)
   block [x, y, w, h]  replaces the whole box (cards, buttons, icons, headers)
+  poly  [[x, y], ...] replaces a polygon (e.g. a physical phone the page redraws itself)
+  keep  [[x, y], ...] polygons protected from every mask (e.g. fingers in front of that phone)
 
 Masks live in scripts/v7-plates/<page>.json, keyed by '<page>/<id>'.
 
@@ -96,6 +98,10 @@ def build(key, spec):
         mask |= text_mask(img, box)
     for box in spec.get('block', []):
         mask |= block_mask(img, box)
+    for poly in spec.get('poly', []):
+        cv2.fillPoly(mask, [np.int32(poly)], 255)
+    for poly in spec.get('keep', []):
+        cv2.fillPoly(mask, [np.int32(poly)], 0)
     mask = cv2.dilate(mask, np.ones((3, 3), np.uint8))
     seed = sum(map(ord, key))
     plate = reconstruct(img, mask, seed) if mask.any() else img
