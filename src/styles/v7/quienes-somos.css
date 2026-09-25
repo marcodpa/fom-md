@@ -1,0 +1,108 @@
+/* Quiénes somos — geometry measured on output/laminas-secciones-v7/07-quienes-somos (1672 × 941). */
+.v7-quienes .v7-kicker{text-transform:uppercase;letter-spacing:.2em}
+.v7-quienes .v7-kicker:after{display:none}
+
+/* Backdrops fade in from the section above instead of starting on a hard edge. */
+.v7-quienes .is-plain>.v7-backdrop{-webkit-mask-image:linear-gradient(transparent,#000 22%,#000 82%,transparent);mask-image:linear-gradient(transparent,#000 22%,#000 82%,transparent)}
+
+/* 06 FAQ: answers aligned with the question text, no rule between them. */
+.v7-quienes .qs-faq details>p{border-top:0}
+
+@media(min-width:761px){
+ /* 01 Hero: supervisor at the monitor with Resumen */
+ .qs-01 .v7-copy{left:calc(76*var(--u));top:calc(169*var(--u));width:calc(600*var(--u))}
+ .qs-01 .v7-kicker{font-size:calc(18*var(--u));letter-spacing:.16em}
+ .qs-01 h1{font-size:calc(59*var(--u));line-height:.93;margin-top:calc(24*var(--u));white-space:nowrap}
+ .qs-01 .v7-copy>p:not(.v7-kicker){font-size:calc(22*var(--u));line-height:1.34;margin-top:calc(12*var(--u));color:#c3d9f0;white-space:nowrap}
+
+ /* 02 Framed: the story in normal paragraphs, the driver with the app in a frame */
+ .v7-section.qs-02{grid-template-columns:minmax(0,1fr) calc(640*var(--u));gap:calc(96*var(--u));padding:calc(140*var(--u)) calc(80*var(--u)) calc(130*var(--u))}
+ .qs-02 h2{font-size:calc(58*var(--u));line-height:1.02;margin-top:calc(18*var(--u))}
+ .qs-02 .v7-copy>p:not(.v7-kicker){font-size:calc(24*var(--u));line-height:1.6;color:#bccfe6;max-width:calc(720*var(--u))}
+ .qs-02 h2+p{margin-top:calc(34*var(--u))!important}
+ .qs-02 .v7-copy>p+p{margin-top:calc(20*var(--u))}
+ .qs-02 .v7-demo{right:calc(80*var(--u));bottom:calc(92*var(--u))}
+
+ /* 03 Paragraphs on the app background */
+ .v7-section.qs-03{padding:calc(190*var(--u)) calc(96*var(--u)) calc(190*var(--u))}
+ .qs-03 .v7-copy{max-width:calc(860*var(--u))!important}
+ .qs-03 h2{font-size:calc(76*var(--u));line-height:1.02;margin-top:calc(18*var(--u))}
+ .qs-03 .v7-copy>p:not(.v7-kicker){font-size:calc(28*var(--u));line-height:1.55;color:#c3d6ec;margin-top:calc(30*var(--u))}
+ .qs-03 .v7-copy>p+p{margin-top:calc(18*var(--u))!important;color:#9fbfe0}
+
+ /* 04 Principles as text cards */
+ .v7-section.qs-04{padding:calc(120*var(--u)) calc(80*var(--u)) calc(140*var(--u));border-top:1px solid #10263a}
+ .qs-04 .v7-copy{max-width:none!important;text-align:center}
+ .qs-04 .v7-kicker{justify-content:center}
+ .qs-04 h2{font-size:calc(64*var(--u));margin-top:calc(16*var(--u))}
+ .qs-04 .v7-cards{margin-top:calc(64*var(--u));gap:calc(28*var(--u))}
+ .qs-04 .v7-card{padding:calc(40*var(--u)) calc(38*var(--u)) calc(44*var(--u));gap:calc(16*var(--u))}
+ .qs-04 .v7-card-icon{width:calc(64*var(--u));height:calc(64*var(--u))}
+ .v7-quienes .qs-04 .v7-card h3{font-size:calc(32*var(--u));margin-top:calc(8*var(--u))}
+ .v7-quienes .qs-04 .v7-card p{font-size:calc(22*var(--u))}
+
+ /* 05 Closing road at dusk */
+ .qs-05 .v7-copy{left:calc(94*var(--u));top:calc(335*var(--u))}
+ .qs-05 h2{font-size:calc(73*var(--u));line-height:1.11;letter-spacing:0;white-space:nowrap}
+ .qs-05 .v7-button{margin-top:calc(31*var(--u));width:calc(361*var(--u));height:calc(78*var(--u));padding:0;font-size:calc(23*var(--u));font-weight:600;gap:calc(30*var(--u));border-radius:calc(12*var(--u))}
+
+ /* 06 FAQ on the app background: intro left, questions right */
+ .v7-section.qs-06{display:grid;grid-template-columns:calc(560*var(--u)) minmax(0,1fr);gap:calc(90*var(--u));align-items:start;padding:calc(130*var(--u)) calc(80*var(--u)) calc(130*var(--u))}
+ .qs-06 .v7-backdrop-globe{opacity:.4}
+ .qs-06 h2{font-size:calc(62*var(--u));line-height:1.02;margin-top:calc(18*var(--u))}
+ .qs-06 .v7-copy>p:not(.v7-kicker){font-size:calc(22*var(--u));line-height:1.55;margin-top:calc(24*var(--u));color:#a9c3e2}
+ .v7-quienes .qs-06 .v7-faq-list{margin:0;grid-template-columns:1fr;gap:calc(18*var(--u))}
+ .v7-quienes .qs-06 .v7-faq-list summary{font-size:calc(24*var(--u));font-weight:600}
+ .v7-quienes .qs-06 .v7-faq-list details>p{margin-left:calc(98*var(--u));padding-top:0;font-size:calc(20*var(--u));line-height:1.5}
+
+ /* 07 Footer: brand and tagline over the road, three link columns with icons */
+ .qs-07 .v7-footer-hero{left:calc(69*var(--u));top:calc(351*var(--u))}
+ .qs-07 .v7-footer-hero .m-brand{font-size:calc(75*var(--u));gap:calc(6*var(--u));font-weight:700}
+ .qs-07 .v7-footer-hero .m-brand svg{width:calc(93*var(--u));height:calc(93*var(--u))}
+ .qs-07 .v7-footer-hero .m-brand svg path{fill:currentColor}
+ .qs-07 .v7-footer-hero .m-brand svg circle{fill:#0b1622;stroke:none}
+ .qs-07 .v7-footer-hero>p{margin:calc(2*var(--u)) 0 0 calc(19*var(--u));font-size:calc(38*var(--u));color:#b0c3dc;white-space:nowrap}
+ .qs-07 .v7-footer-statement{left:calc(1280*var(--u));top:calc(634*var(--u));width:calc(316*var(--u));text-align:center;font-size:calc(16*var(--u))!important;line-height:1.8!important;letter-spacing:.3em}
+ .qs-07 .v7-footer-links{left:calc(88*var(--u));right:calc(88*var(--u));top:calc(538*var(--u));padding-top:calc(46*var(--u));border-top:1px solid #1f3446;grid-template-columns:calc(95*var(--u)) calc(389*var(--u)) calc(425*var(--u)) 1fr}
+ .qs-07 .v7-footer-brand{visibility:hidden}
+ .qs-07 .v7-footer-links nav{gap:calc(7.5*var(--u))}
+ .v7-quienes .qs-07 .v7-footer-links h2{font-size:calc(24*var(--u));margin:0 0 calc(6*var(--u))}
+ .qs-07 .v7-footer-links nav a{font-size:calc(22*var(--u))}
+ .qs-07 .v7-footer-links nav a[href="/quienes-somos"]{color:#2ea6ff}
+ .qs-07 .v7-copyright{top:calc(826*var(--u));padding-top:calc(36*var(--u));left:calc(97*var(--u));right:calc(88*var(--u))}
+ .qs-foot-icons{position:absolute;z-index:1;inset:0;pointer-events:none}
+ .qs-foot-icons .v7-glyph{position:absolute;top:calc(578*var(--u));width:calc(52*var(--u));height:calc(46*var(--u))}
+ .qs-foot-icons .v7-glyph:nth-child(1){left:calc(94*var(--u))}
+ .qs-foot-icons .v7-glyph:nth-child(2){left:calc(502*var(--u))}
+ .qs-foot-icons .v7-glyph:nth-child(3){left:calc(918*var(--u))}
+}
+@media(max-width:760px){
+ .v7-quienes .qs-br{display:none}
+ .v7-quienes .v7-copy>p{white-space:normal!important}
+ .qs-01{--m-w:150%;--m-x:-40%;padding-top:64px}
+ .qs-05{--m-w:175%;--m-x:-40%}
+ .qs-02 .v7-copy>p+p,.qs-03 .v7-copy>p+p{margin-top:14px}
+ .qs-02 .v7-frame{aspect-ratio:1/1!important}
+ .qs-02 .v7-demo{order:3}
+ .qs-03 .v7-copy{padding-top:56px;padding-bottom:40px}
+ .qs-03 h2{font-size:clamp(30px,8.4vw,40px)}
+ .qs-03 .v7-copy>p:not(.v7-kicker){font-size:18px}
+ .qs-05 .v7-button{margin-top:26px}
+ .v7-quienes .qs-06 .v7-faq-list details>p{margin-left:64px}
+ .qs-foot-icons{display:none}
+ /* The kit's desktop rules for framed/plain sections and cards sit after its phone block,
+    so they are restated here for this page. */
+ .v7-quienes .v7-section.is-framed,.v7-quienes .v7-section.is-plain{display:flex;flex-direction:column;padding:0 0 44px}
+ .v7-quienes .v7-section.qs-06{display:flex}
+ .v7-quienes .v7-section.is-plain>.v7-copy,.v7-quienes .v7-section.is-framed>.v7-copy{max-width:none!important}
+ .v7-quienes .qs-02 .v7-frame{margin:24px 6% 0;align-self:stretch;width:88%!important}
+ .v7-quienes .qs-04 .v7-copy{text-align:left}.v7-quienes .qs-04 .v7-kicker{justify-content:flex-start}
+ .v7-quienes .v7-cards{grid-template-columns:1fr;gap:12px}
+ .v7-quienes .qs-04 .v7-card{padding:20px;gap:10px}
+ .v7-quienes .qs-04 .v7-card-icon{width:40px;height:40px}
+ .v7-quienes .qs-04 .v7-card h3{font-size:19px;margin-top:4px}
+ .v7-quienes .qs-04 .v7-card p{font-size:15.5px}
+ .v7-quienes .qs-06 .v7-faq-list{margin:24px 6% 0}
+ .v7-quienes .v7-section.is-plain>.v7-backdrop{position:absolute!important;inset:0!important;width:auto!important;margin:0!important}
+ .v7-quienes .qs-03 .v7-backdrop-globe{top:auto;bottom:-40%;transform:none}
+}
