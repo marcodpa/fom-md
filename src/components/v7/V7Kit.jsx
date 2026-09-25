@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { screenProjection } from '../../lib/screenProjection'
 import { Icono } from '../../panel/Iconos'
 import { Brand } from '../marketing/MarketingChrome'
+import GloboCanvas from '../GloboCanvas'
 import '../../styles/v7-kit.css'
 
 // Slides and plates share one coordinate system: 1672 × 941.
@@ -123,6 +124,26 @@ export function Frame({ plateId, screens, active, x = '-30%', ratio = '4 / 5', c
   return <div className={`v7-frame ${className}`} style={{ '--frame-x': x, '--frame-ratio': ratio }}>
     <Plate id={plateId} screens={screens} active={active} />
   </div>
+}
+
+/**
+ * The app's own background (the dotted globe and night sky of the sign-in screen), for
+ * sections without a photograph. `side` places the globe: 'right' (default), 'left' or 'center'.
+ * Use at most one or two per page: the globe is an animated canvas.
+ */
+export function AppBackdrop({ side = 'right' }) {
+  return <div className={`v7-backdrop is-${side}`} aria-hidden="true"><div className="v7-backdrop-globe"><GloboCanvas /></div></div>
+}
+
+/**
+ * Cards with a short title and a normal paragraph (not bullets), optionally a link.
+ * items: [{ icon?, title, text, to?, kicker? }]. `columns` sets the grid.
+ */
+export function TextCards({ items, columns = 3, className = '' }) {
+  return <div className={`v7-cards ${className}`} style={{ '--cards': columns }}>{items.map(item => {
+    const body = <>{item.icon && <span className="v7-card-icon"><V7Icon name={item.icon} /></span>}{item.kicker && <small>{item.kicker}</small>}<h3>{item.title}</h3><p>{item.text}</p>{item.to && <span className="v7-card-more">Ver más <Arrow /></span>}</>
+    return item.to ? <Link key={item.title} to={item.to} className="v7-card">{body}</Link> : <article key={item.title} className="v7-card">{body}</article>
+  })}</div>
 }
 
 /** Marks a section `is-in` the first time it enters the viewport (drives the reveal motion). */
@@ -250,7 +271,7 @@ export function Features({ items, className = '', boxed = true }) {
 /** Bordered translucent metric card, e.g. "80+ unidades visibles en una vista". */
 export function StatCard({ icon, value, label, className = '' }) {
   return <div className={`v7-stat ${className}`}>
-    <V7Icon name={icon} />
+    {icon && <V7Icon name={icon} />}
     <p><strong>{value}</strong><span>{label}</span></p>
   </div>
 }
@@ -287,13 +308,13 @@ const FOOTER_GROUPS = [
  * Footer for the v7 pages: photo band with the large brand and tagline, then the
  * link columns. Layout specifics per page live in the page stylesheet.
  */
-export function V7Footer({ plateId, className = '', statement = <>La oficina<br />y la carretera,<br />conectadas.</>, children }) {
+export function V7Footer({ plateId, className = '', taglineBreak = true, statement = <>La oficina<br />y la carretera,<br />conectadas.</>, children }) {
   const ref = useReveal()
   return <footer ref={ref} className={`v7-section v7-footer ${className}`}>
     <Plate id={plateId} />
     <div className="v7-footer-hero">
       <span className="v7-footer-mark" aria-hidden="true"><Brand /></span>
-      <p>La oficina y la carretera,<br />conectadas.</p>
+      <p>La oficina y la carretera,{taglineBreak ? <br /> : ' '}conectadas.</p>
     </div>
     {statement && <p className="v7-footer-statement" aria-hidden="true">{statement}</p>}
     {children}

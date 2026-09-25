@@ -39,3 +39,20 @@ Si Python no encuentra `cv2` tras instalarlo (entornos con `site-packages` de us
 - Un solo `h1` por página (el héroe), `h2` por sección, `aria-labelledby` en cada sección, textos alternativos de capturas con «Datos de demostración».
 - El formulario de contacto es `ContactForm` (prepara un correo; no envía). No inventar teléfonos, precios, clientes, garantías ni cifras: solo las de `pages.js`/manifiesto.
 - No cambiar `/entrar`, `/panel/*`, autenticación ni backend.
+
+## Segunda pasada: que se sienta web, no diapositivas (pedido del usuario, 25-09-2026)
+
+El usuario aprobó la dirección probada en Plataforma y pidió aplicarla en todas las páginas: **variar**, usar **tarjetas y párrafos normales** en lugar de viñetas en todas partes, **quitar fotos** para que no todo sea imagen, y usar en algunas secciones **el fondo de la app** (el globo de puntos y el cielo de la pantalla de inicio de sesión).
+
+Piezas del kit para eso:
+
+| Pieza | Uso |
+| --- | --- |
+| Movimiento y fundidos | Automáticos en toda sección `V7Section`: fundido entre fotos, textos y tarjetas que aparecen al bajar, respuesta al ratón. |
+| `StickyTour` | Foto y dispositivo fijos mientras los pasos pasan; cada paso cambia la captura. Para varias secciones que muestran el mismo tipo de dispositivo. |
+| `DeviceTabs` + `src` en lista | Un dispositivo que cambia de captura real al tocar una pestaña. |
+| `Frame` + clase `is-framed` | Sección más corta con la foto en un marco redondeado. |
+| `AppBackdrop` + clase `is-plain` | Sección sin foto con el fondo de la app (máximo una o dos por página: el globo es un lienzo animado). |
+| `TextCards` | Tarjetas con título y párrafo (no viñetas), opcionalmente con enlace. |
+
+Criterios: como máximo la mitad de las secciones con foto a pantalla completa; nunca dos secciones seguidas con el mismo patrón; las listas de viñetas se convierten en párrafos o tarjetas conservando las frases reales; se conserva todo el contenido factual y las capturas originales.

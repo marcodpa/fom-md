@@ -2,7 +2,7 @@
 // two laptops) are joined in one pinned tour; slide 06 is a shorter framed section.
 import { useState } from 'react'
 import { PAGES } from '../../content/pages'
-import { V7Section, Features, StatCard, DemoButton, FaqList, MailPrompt, V7Footer, StickyTour, DeviceTabs, Frame, usePageTitle } from '../../components/v7/V7Kit'
+import { V7Section, Features, StatCard, DemoButton, FaqList, MailPrompt, V7Footer, StickyTour, DeviceTabs, Frame, AppBackdrop, TextCards, usePageTitle } from '../../components/v7/V7Kit'
 import panel from '../../assets/marketing/real/panel-resumen.webp'
 import map from '../../assets/marketing/real/panel-mapa.webp'
 import fleet from '../../assets/marketing/real/panel-flota.webp'
@@ -15,6 +15,7 @@ import '../../styles/v7/plataforma.css'
 const page = PAGES.plataforma
 const [single, split, live, capture, roles, security] = page.sections
 const withIcons = (section, icons) => section.bullets.map((b, i) => [icons[i], b.label, b.text])
+const asCards = (section, icons) => section.bullets.map((b, i) => ({ icon: icons[i], title: b.label, text: b.text }))
 
 const APP_TABS = [{ label: 'Inicio', icon: 'phone' }, { label: 'Inspección', icon: 'clipboard' }, { label: 'Mantenimiento', icon: 'wrench' }, { label: 'Perfil', icon: 'user' }]
 
@@ -45,19 +46,21 @@ export default function Plataforma() {
       <div className="v7-copy">
         <h2 id="pf-03-title">{split.heading}</h2>
         <p>{split.body}</p>
-        <Features items={withIcons(split, ['monitor', 'phone', 'database', 'wifiOff'])} />
+        <TextCards columns={2} className="pf-03-cards" items={asCards(split, ['monitor', 'phone', 'database', 'wifiOff'])} />
       </div>
       <StatCard className="is-open" icon="phone" value={split.stat.value} label={<>la misma operación desde<br />la computadora y el teléfono</>} />
       <DeviceTabs className="pf-app-tabs" label="Pantallas de la app del conductor" tabs={APP_TABS} active={appView} onChange={setAppView} />
     </V7Section>
 
-    <V7Section className="pf-05" plateId="02-plataforma/05" labelledBy="pf-05-title">
+    <V7Section className="pf-05 is-plain" labelledBy="pf-05-title">
+      <AppBackdrop side="right" />
       <div className="v7-copy">
+        <p className="v7-kicker">Datos</p>
         <h2 id="pf-05-title">{capture.heading}</h2>
         <p>{capture.body}</p>
-        <Features items={withIcons(capture, ['fileSend', 'database', 'antenna', 'cloud'])} />
       </div>
-      <StatCard icon="database" value={capture.stat.value} label={capture.stat.label} />
+      <TextCards columns={4} items={asCards(capture, ['fileSend', 'database', 'antenna', 'cloud'])} />
+      <StatCard className="pf-05-stat" icon="database" value={capture.stat.value} label={capture.stat.label} />
     </V7Section>
 
     <V7Section className="pf-06 is-framed" labelledBy="pf-06-title">
@@ -80,13 +83,13 @@ export default function Plataforma() {
       <StatCard className="is-open" icon="clock" value={security.stat.value} label={security.stat.label} />
     </V7Section>
 
-    <V7Section className="pf-08" id="preguntas" plateId="02-plataforma/08" demo labelledBy="pf-08-title"
-      screens={[{ phone: true, src: appHome, corners: [[1462, 571], [1497, 574], [1470, 650], [1433, 646]], clip: [[1458, 569], [1498, 572], [1481, 613]] }]}>
+    <V7Section className="pf-08 is-plain" id="preguntas" labelledBy="pf-08-title">
+      <AppBackdrop side="center" />
       <div className="v7-copy">
         <h2 id="pf-08-title">Preguntas frecuentes</h2>
         <p>Resuelve tus dudas principales.</p>
       </div>
-      <FaqList columns={2} open="all" items={page.faqs.map((f, i) => ({ ...f, icon: ['monitor', 'users', 'chart', 'database'][i] }))} className="pf-faq" />
+      <FaqList columns={2} open="first" items={page.faqs.map((f, i) => ({ ...f, icon: ['monitor', 'users', 'chart', 'database'][i] }))} className="pf-faq" />
       <MailPrompt />
     </V7Section>
 
