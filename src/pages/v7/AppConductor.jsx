@@ -123,7 +123,6 @@ function AppTraveller() {
         // Fingers lie over the phone only while it is (nearly) docked at their stop.
         hands.current.forEach((hand, j) => { if (hand) hand.style.opacity = Math.max(0, 1 - Math.abs(state.u - j) * 6).toFixed(3) })
         try { el.style.transform = `matrix3d(${screenProjection(corners).join(',')})` } catch { return }
-        el.style.setProperty('--flight', flight.toFixed(3))
         const fade = Math.min(Math.max((t - 0.44) / 0.12, 0), 1)
         // The outgoing capture stays opaque underneath while the next one fades in on top.
         imgs.forEach((img, n) => {

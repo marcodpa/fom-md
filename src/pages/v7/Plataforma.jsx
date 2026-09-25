@@ -33,8 +33,8 @@ export default function Plataforma() {
       </div>
     </V7Section>
 
-    <StickyTour id="pf-tour" className="pf-tour" label="Recorrido por el panel web" plateId="02-plataforma/02"
-      screen={{ corners: [[719, 158], [1562, 153], [1550, 728], [716, 722]] }} srcs={[panel, map, fleet]}
+    <StickyTour id="pf-tour" className="pf-tour" label="Recorrido por el panel web" plateId="02-plataforma/04"
+      screen={{ corners: [[720, 95], [1584, 88], [1577, 748], [689, 730]], clip: [[600, 40], [1640, 40], [1640, 592], [1560, 596], [1535, 602], [1526, 615], [1526, 800], [600, 800]] }} srcs={[panel, map, fleet]}
       steps={[
         { tab: 'Resumen', icon: 'gauge', kicker: 'Panel web', title: single.heading, body: single.body, items: withIcons(single, ['gauge', 'monitor', 'layout', 'users']), stat: { icon: 'globe', ...single.stat } },
         { tab: 'Centro de control', icon: 'pin', kicker: 'Mapa en vivo', title: live.heading, body: live.body, items: withIcons(live, ['pin', 'scan', 'filter', 'cluster']), stat: { icon: 'box', ...live.stat } },

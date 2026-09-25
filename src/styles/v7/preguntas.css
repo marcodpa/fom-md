@@ -17,7 +17,7 @@
 .v7-preguntas .pq-search input::placeholder{color:#94abc4;opacity:1}
 .v7-preguntas .pq-search input::-webkit-search-cancel-button{filter:invert(.7)}
 .v7-preguntas .pq-count{font-size:max(14px,calc(15.5*var(--u)));color:#8fb0cf}
-.v7-preguntas .pq-nav{display:flex;flex-direction:column;gap:4px;padding:calc(10*var(--u));border:1px solid #1b3043;border-radius:calc(16*var(--u));background:#08131dcc;backdrop-filter:blur(6px)}
+.v7-preguntas .pq-nav{display:flex;flex-direction:column;gap:4px;padding:calc(10*var(--u));border:1px solid #1b3043;border-radius:calc(16*var(--u));background:#08131dcc;}
 .v7-preguntas .pq-nav a{display:flex;align-items:center;gap:14px;min-height:48px;padding:0 max(12px,calc(16*var(--u)));border-radius:10px;font-size:max(15px,calc(17.5*var(--u)));color:#dfe8f2;transition:background .2s,color .2s}
 .v7-preguntas .pq-nav a:hover{background:#12304f;color:#fff}
 .v7-preguntas .pq-nav a.is-active{background:linear-gradient(90deg,#123457,#0f2b49);color:#3aa6ff;font-weight:500}
@@ -107,7 +107,7 @@
  .v7-preguntas .pq-help>.pq-aside,.v7-preguntas .pq-aside>*{min-width:0}
  .v7-preguntas .pq-aside-title{font-size:13px}
  .v7-preguntas .pq-count{font-size:13px}
- .v7-preguntas .pq-nav{flex-direction:row;overflow-x:auto;gap:8px;padding:0;border:0;background:none;backdrop-filter:none;scrollbar-width:none;margin:0 -6.4%;padding:0 6.4%}
+ .v7-preguntas .pq-nav{flex-direction:row;overflow-x:auto;gap:8px;padding:0;border:0;background:none;scrollbar-width:none;margin:0 -6.4%;padding:0 6.4%}
  .v7-preguntas .pq-nav::-webkit-scrollbar{display:none}
  .v7-preguntas .pq-nav a{flex:none;min-height:44px;gap:8px;padding:0 12px;border:1px solid #213a51;font-size:15px}
  .v7-preguntas .pq-nav .v7-glyph{width:18px;height:18px}

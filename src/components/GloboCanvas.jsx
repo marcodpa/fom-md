@@ -36,14 +36,16 @@ function aVector(lat, lng) {
   return { x: Math.cos(f) * Math.sin(l), y: -Math.sin(f), z: Math.cos(f) * Math.cos(l) }
 }
 
-export default function GloboCanvas() {
+// `still`: pinta un solo cuadro (fondos de la web publicitaria, donde el giro de ~110 s
+// no se aprecia y animar miles de puntos encarecía el scroll).
+export default function GloboCanvas({ still = false }) {
   const lienzo = useRef(null)
 
   useEffect(() => {
     const canvas = lienzo.current
     if (!canvas) return undefined
     const ctx = canvas.getContext('2d')
-    const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const quieto = still || window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     let ancho = 0
     let alto = 0
@@ -274,7 +276,7 @@ export default function GloboCanvas() {
       ro.disconnect()
       document.removeEventListener('visibilitychange', alVolver)
     }
-  }, [])
+  }, [still])
 
   return <canvas ref={lienzo} className="lg-globo" aria-hidden="true" />
 }

@@ -15,7 +15,7 @@
 .v7-app{position:relative}
 .ap-traveller{display:none}
 .v7-app.ap-travel>.ap-traveller{display:block;position:absolute;left:0;top:0;width:1000px;height:1000px;transform-origin:0 0;z-index:3;pointer-events:none;will-change:transform}
-.ap-traveller-body{position:absolute;left:-46px;top:-26px;width:1092px;height:1052px;border-radius:150px/72px;background:linear-gradient(145deg,#2b3440,#0b0f14 38%,#161c24);box-shadow:inset 0 0 0 6px #3a4553,inset 0 0 0 16px #05070a,0 calc(40px + var(--flight,0)*80px) calc(90px + var(--flight,0)*100px) -30px #000}
+.ap-traveller-body{position:absolute;left:-46px;top:-26px;width:1092px;height:1052px;border-radius:150px/72px;background:linear-gradient(145deg,#2b3440,#0b0f14 38%,#161c24);box-shadow:inset 0 0 0 6px #3a4553,inset 0 0 0 16px #05070a,0 50px 110px -30px #000c}
 .ap-traveller-screen{position:absolute;inset:0;overflow:hidden;border-radius:110px/52px;background:#0a0d12}
 .ap-traveller-screen>img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:fill;opacity:0}
 .v7-static .ap-traveller{display:none!important}

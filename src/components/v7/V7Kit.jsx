@@ -139,7 +139,17 @@ export function Frame({ plateId, screens, active, x = '-30%', ratio = '4 / 5', c
  * Use at most one or two per page: the globe is an animated canvas.
  */
 export function AppBackdrop({ side = 'right' }) {
-  return <div className={`v7-backdrop is-${side}`} aria-hidden="true"><div className="v7-backdrop-globe"><GloboCanvas /></div></div>
+  // The globe canvas only exists while its section is near the viewport.
+  const ref = useRef(null)
+  const [live, setLive] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof IntersectionObserver === 'undefined') return setLive(true)
+    const observer = new IntersectionObserver(([entry]) => setLive(entry.isIntersecting), { rootMargin: '200px 0px' })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  return <div ref={ref} className={`v7-backdrop is-${side}`} aria-hidden="true"><div className="v7-backdrop-globe">{live && <GloboCanvas still />}</div></div>
 }
 
 /**
@@ -170,7 +180,9 @@ function drift() {
 function onDriftScroll() { if (!driftFrame) driftFrame = requestAnimationFrame(drift) }
 function useDrift(ref) {
   useEffect(() => {
-    const plateEl = ref.current?.querySelector(':scope > .v7-plate')
+    // Only the first section (the hero) drifts: moving every photo made scrolling feel heavy.
+    const section = ref.current
+    const plateEl = section?.previousElementSibling ? null : section?.querySelector(':scope > .v7-plate')
     if (!plateEl || matchMedia('(prefers-reduced-motion: reduce)').matches) return
     if (!drifting.size) { addEventListener('scroll', onDriftScroll, { passive: true }); addEventListener('resize', onDriftScroll) }
     drifting.add(plateEl)

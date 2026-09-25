@@ -18,7 +18,7 @@
 
 /* Channel cards (section 04) */
 .ct-channels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
-.ct-channel{display:flex;align-items:flex-start;height:100%;border:1.5px solid #1f4462;background:#07131ecc;backdrop-filter:blur(4px)}
+.ct-channel{display:flex;align-items:flex-start;height:100%;border:1.5px solid #1f4462;background:#07131ecc;}
 .ct-channel .v7-glyph{flex:none}
 .ct-channel .v7-glyph.is-green{color:#27c46b}
 .ct-channel p{color:var(--v7-muted)}
