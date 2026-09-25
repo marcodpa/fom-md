@@ -23,28 +23,8 @@
  .qs-02 .v7-copy>p+p{margin-top:calc(20*var(--u))}
  .qs-02 .v7-demo{right:calc(80*var(--u));bottom:calc(92*var(--u))}
 
- /* 03 Paragraphs on the app background */
- .v7-section.qs-03{padding:calc(190*var(--u)) calc(96*var(--u)) calc(190*var(--u))}
- .qs-03 .v7-copy{max-width:calc(860*var(--u))!important}
- .qs-03 h2{font-size:calc(76*var(--u)*.72);line-height:1.02;margin-top:calc(18*var(--u))}
- .qs-03 .v7-copy>p:not(.v7-kicker){font-size:calc(28*var(--u)*.86);line-height:1.55;color:#c3d6ec;margin-top:calc(30*var(--u))}
- .qs-03 .v7-copy>p+p{margin-top:calc(18*var(--u))!important;color:#9fbfe0}
 
- /* 04 Principles as text cards */
- .v7-section.qs-04{padding:calc(120*var(--u)) calc(80*var(--u)) calc(140*var(--u));border-top:1px solid #10263a}
- .qs-04 .v7-copy{max-width:none!important;text-align:center}
- .qs-04 .v7-kicker{justify-content:center}
- .qs-04 h2{font-size:calc(64*var(--u)*.72);margin-top:calc(16*var(--u))}
- .qs-04 .v7-cards{margin-top:calc(64*var(--u));gap:calc(28*var(--u))}
- .qs-04 .v7-card{padding:calc(40*var(--u)) calc(38*var(--u)) calc(44*var(--u));gap:calc(16*var(--u))}
- .qs-04 .v7-card-icon{width:calc(64*var(--u));height:calc(64*var(--u))}
- .v7-quienes .qs-04 .v7-card h3{font-size:calc(32*var(--u)*.86);margin-top:calc(8*var(--u))}
- .v7-quienes .qs-04 .v7-card p{font-size:max(16px,calc(22*var(--u)*.92))}
 
- /* 05 Closing road at dusk */
- .qs-05 .v7-copy{left:calc(94*var(--u));top:calc(335*var(--u))}
- .qs-05 h2{font-size:calc(73*var(--u)*.72);line-height:1.11;letter-spacing:0;white-space:nowrap}
- .qs-05 .v7-button{margin-top:calc(31*var(--u));width:calc(361*var(--u));height:calc(78*var(--u));padding:0;font-size:max(16px,calc(23*var(--u)*.92));font-weight:600;gap:calc(30*var(--u));border-radius:calc(12*var(--u))}
 
  /* 06 FAQ on the app background: intro left, questions right */
  .v7-section.qs-06{display:grid;grid-template-columns:calc(560*var(--u)) minmax(0,1fr);gap:calc(90*var(--u));align-items:start;padding:calc(130*var(--u)) calc(80*var(--u)) calc(130*var(--u))}
@@ -80,14 +60,9 @@
  .v7-quienes .qs-br{display:none}
  .v7-quienes .v7-copy>p{white-space:normal!important}
  .qs-01{--m-w:150%;--m-x:-40%;padding-top:64px}
- .qs-05{--m-w:175%;--m-x:-40%}
- .qs-02 .v7-copy>p+p,.qs-03 .v7-copy>p+p{margin-top:14px}
+ .qs-02 .v7-copy>p+p{margin-top:14px}
  .qs-02 .v7-frame{aspect-ratio:1/1!important}
  .qs-02 .v7-demo{order:3}
- .qs-03 .v7-copy{padding-top:56px;padding-bottom:40px}
- .qs-03 h2{font-size:clamp(30px,8.4vw,40px)}
- .qs-03 .v7-copy>p:not(.v7-kicker){font-size:18px}
- .qs-05 .v7-button{margin-top:26px}
  .v7-quienes .qs-06 .v7-faq-list details>p{margin-left:64px}
  .qs-foot-icons{display:none}
  /* The kit's desktop rules for framed/plain sections and cards sit after its phone block,
@@ -96,13 +71,48 @@
  .v7-quienes .v7-section.qs-06{display:flex}
  .v7-quienes .v7-section.is-plain>.v7-copy,.v7-quienes .v7-section.is-framed>.v7-copy{max-width:none!important}
  .v7-quienes .qs-02 .v7-frame{margin:24px 6% 0;align-self:stretch;width:88%!important}
- .v7-quienes .qs-04 .v7-copy{text-align:left}.v7-quienes .qs-04 .v7-kicker{justify-content:flex-start}
  .v7-quienes .v7-cards{grid-template-columns:1fr;gap:12px}
- .v7-quienes .qs-04 .v7-card{padding:20px;gap:10px}
- .v7-quienes .qs-04 .v7-card-icon{width:40px;height:40px}
- .v7-quienes .qs-04 .v7-card h3{font-size:19px;margin-top:4px}
- .v7-quienes .qs-04 .v7-card p{font-size:15.5px}
  .v7-quienes .qs-06 .v7-faq-list{margin:24px 6% 0}
  .v7-quienes .v7-section.is-plain>.v7-backdrop{position:absolute!important;inset:0!important;width:auto!important;margin:0!important}
- .v7-quienes .qs-03 .v7-backdrop-globe{top:auto;bottom:-40%;transform:none}
+}
+
+/* 03 «De cada dato a una acción concreta.» (extra/07-quienes-somos-dato-accion): the FOM truck
+   seen from above on the right, copy and three image cards on the dark left. The section may
+   grow taller than the slide when the text needs it; the photo then simply covers. */
+.qs-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.v7-quienes .qs-step{position:relative;overflow:hidden;background:linear-gradient(170deg,#0c1c2cf5,#07121df5);border-color:#1f3f5a}
+.v7-quienes .qs-step:hover{border-color:#2c8ee0}
+.qs-step-icon{display:block;color:var(--v7-blue)}
+.qs-step-icon .v7-glyph{width:100%;height:100%}
+.v7-quienes .qs-step h3{font-weight:600}
+.v7-quienes .qs-step p{color:#a9c3de}
+.qs-step-media{margin-top:auto;overflow:hidden;aspect-ratio:4/3;background:#0a1622}
+.v7-page .qs-step-media img{display:block;width:100%;height:100%;max-width:none;object-fit:cover;transform:scale(1.001);transition:transform 1.8s cubic-bezier(.2,.7,.2,1)}
+.qs-step:hover .qs-step-media img{transform:scale(1.09)}
+@media(prefers-reduced-motion:reduce){.v7-quienes .qs-step{transform:none!important}.qs-step:hover .qs-step-media img{transform:none}}
+
+@media(min-width:761px){
+ /* No side padding: it would shrink the container width that --u is measured on. */
+ .v7-section.qs-03{aspect-ratio:auto;min-height:calc(941*var(--u));display:flex;flex-direction:column;padding:calc(118*var(--u)) 0 calc(58*var(--u))}
+ .qs-03>.v7-plate:before{content:'';display:block;top:0;bottom:0;height:auto;background:linear-gradient(var(--v7-bg),#06121c00 12%),linear-gradient(90deg,#06121ce6 0,#06121cb3 34%,#06121c00 62%)}
+ .qs-03>.v7-copy{position:relative;width:calc(680*var(--u));margin-left:calc(70*var(--u))}
+ .qs-03 h2{font-size:calc(76*var(--u)*.76);line-height:1.02;letter-spacing:-.02em}
+ .qs-03 .v7-copy>p{font-size:max(16px,calc(26*var(--u)*.86));line-height:1.42;color:#b5cbe2;margin-top:calc(26*var(--u));max-width:calc(600*var(--u))}
+ .qs-03 .v7-copy>p+p{margin-top:calc(16*var(--u))}
+ .qs-03 .qs-steps{position:relative;z-index:1;width:calc(944*var(--u));gap:calc(20*var(--u));margin:auto 0 0 calc(70*var(--u));padding-top:calc(34*var(--u))}
+ .v7-quienes .qs-step{gap:calc(8*var(--u));padding:calc(22*var(--u)) calc(20*var(--u)) calc(4*var(--u));border-radius:calc(14*var(--u))}
+ .qs-step-icon{width:calc(38*var(--u));height:calc(38*var(--u));min-width:26px;min-height:26px;margin-bottom:calc(10*var(--u))}
+ .v7-quienes .qs-step h3{font-size:max(17px,calc(24*var(--u)*.86))}
+ .v7-quienes .qs-step p{font-size:max(16px,calc(17*var(--u)*.92));line-height:1.4}
+ .qs-step-media{margin:calc(14*var(--u)) calc(-16*var(--u)) 0;border-radius:calc(10*var(--u))}
+}
+@media(max-width:760px){
+ .qs-03{--m-w:240%;--m-x:-135%}
+ .qs-03 .v7-copy>p:not(.v7-kicker){font-size:17px}
+ .v7-quienes .qs-03>.qs-steps{grid-template-columns:1fr;gap:12px;margin:22px 6% 0}
+ .v7-quienes .qs-step{padding:18px 18px 4px;gap:6px;border-radius:14px}
+ .qs-step-icon{width:28px;height:28px;margin-bottom:6px}
+ .v7-quienes .qs-step h3{font-size:19px}
+ .v7-quienes .qs-step p{font-size:15.5px;line-height:1.45}
+ .qs-step-media{margin:12px -14px 0;aspect-ratio:16/9;border-radius:10px}
 }

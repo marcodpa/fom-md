@@ -1,16 +1,17 @@
 // Beneficios, from output/laminas-secciones-v7/09-beneficios. Slides 02, 05 and 07 (the panel on a
-// big monitor) are joined in one pinned tour; 03 is a framed section with app tabs; 06 sits on the
-// app background with its map in a frame.
+// big monitor) are joined in one tour; 03 is a framed section with app tabs. The aerial map of slide
+// 06 moved to Áreas (user idea 6): its benefit, «Organización por áreas», is a tour step on the
+// monitor with the map capture (its «Todas las áreas» filter).
 // Texts come from the Beneficios branch of ReferenceMarketing (BENEFITS) and the manifest.
 import { useState } from 'react'
-import { V7Section, Plate, Features, DemoButton, V7Footer, V7Icon, StickyTour, DeviceTabs, Frame, AppBackdrop, TextCards, usePageTitle } from '../../components/v7/V7Kit'
+import { V7Section, Features, V7Footer, V7Icon, StickyTour, DeviceTabs, Frame, DemoButton, usePageTitle } from '../../components/v7/V7Kit'
 import fleet from '../../assets/marketing/real/panel-flota.webp'
 import inspection from '../../assets/marketing/real/app-inspeccion.webp'
 import service from '../../assets/marketing/real/app-mantenimiento.webp'
 import appHome from '../../assets/marketing/real/app-inicio.webp'
 import alerts from '../../assets/marketing/real/panel-alertas.webp'
 import reports from '../../assets/marketing/real/panel-reportes.webp'
-import unit from '../../assets/marketing/v7/09-beneficios/06-unidad.webp'
+import map from '../../assets/marketing/real/panel-mapa.webp'
 import '../../styles/v7/beneficios.css'
 
 // Icons drawn in the slides that the kit does not have (24 × 24 strokes).
@@ -34,9 +35,6 @@ function Chips({ items, className = '' }) {
   return <ul className={`bn-chips ${className}`}>{items.map(([icon, label]) => <li key={label}><V7Icon name={icon} />{label}</li>)}</ul>
 }
 
-// Illustrative place labels over the aerial photo of slide 06 (the pins stay in the photo).
-const PLACES = [['Zona norte', 318, 173, 145], ['Almacén', 150, 398, 121], ['Patio central', 471, 459, 150], ['Acceso principal', 664, 688, 188]]
-
 const [visibility, care, field, alertsB, areas, decide] = BENEFITS
 const tourStep = (b, tab, icon, kicker) => ({ tab, icon, kicker, title: b.title, body: b.body, children: <Chips items={b.items} /> })
 const APP_TABS = [{ label: 'Inspección', icon: 'clipboard' }, { label: 'Mantenimiento', icon: 'wrench' }]
@@ -56,11 +54,12 @@ export default function Beneficios() {
     </V7Section>
 
     <StickyTour sticky={false} id="bn-tour" className="bn-tour" label="Beneficios en el panel web" plateId="09-beneficios/07"
-      screen={{ corners: [[605, 121], [1604, 80], [1601, 774], [585, 745]] }} srcs={[fleet, alerts, reports]}
+      screen={{ corners: [[605, 121], [1604, 80], [1601, 774], [585, 745]] }} srcs={[fleet, map, alerts, reports]}
       steps={[
-        tourStep(visibility, 'Visibilidad de la operación', 'pin', 'Beneficio · Vehículos'),
-        tourStep(alertsB, 'Atención a las alertas', bellRays, 'Beneficio · Alertas'),
-        tourStep(decide, 'Información para decidir', barsIcon, 'Beneficio · Reportes'),
+        tourStep(visibility, 'Vehículos', 'pin', 'Beneficio · Vehículos'),
+        tourStep(areas, 'Áreas', gridIcon, 'Beneficio · Áreas'),
+        tourStep(alertsB, 'Alertas', bellRays, 'Beneficio · Alertas'),
+        tourStep(decide, 'Reportes', barsIcon, 'Beneficio · Reportes'),
       ]} />
 
     <V7Section className="bn-03 is-framed" demo labelledBy="bn-03-title">
@@ -84,32 +83,6 @@ export default function Beneficios() {
         <h2 id="bn-04-title">{field.title}</h2>
         <p>{field.body}</p>
         <Features boxed={false} items={field.items} />
-      </div>
-    </V7Section>
-
-    <V7Section className="bn-06 is-plain" demo labelledBy="bn-06-title">
-      <AppBackdrop side="right" />
-      <div className="bn-mapframe">
-        <div className="bn-mapinner">
-          <Plate id="09-beneficios/06" />
-          <div className="bn-map" aria-hidden="true">
-            {PLACES.map(([label, x, y, w]) => <span key={label} className="bn-place" style={{ '--x': x, '--y': y, '--w': w }}>{label}</span>)}
-            <div className="bn-unit">
-              <img src={unit} alt="" width="284" height="200" loading="lazy" decoding="async" />
-              <div>
-                <strong>FOM-024</strong>
-                <span className="bn-unit-state">En marcha</span>
-                <p><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-7.1 7-12.5a7 7 0 1 0-14 0C5 14.9 12 22 12 22Z" /><circle cx="12" cy="9.5" r="2.5" /></svg><span><small>Última ubicación</small>Zona norte<br />Hoy, 08:42</span></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="v7-copy">
-        <p className="v7-kicker">Beneficio · Áreas</p>
-        <h2 id="bn-06-title">{areas.title}</h2>
-        <p>{areas.body}</p>
-        <TextCards columns={1} items={areas.items.map(([icon, title]) => ({ icon, title }))} />
       </div>
     </V7Section>
 

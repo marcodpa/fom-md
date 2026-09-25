@@ -1,10 +1,14 @@
 // Quiénes somos, from output/laminas-secciones-v7/07-quienes-somos. Second pass: the story
-// reads like an About page — 02 framed, 03 paragraphs on the app background, 04 text cards,
-// FAQ without photo; hero, closing road and footer keep their full photographs.
+// reads like an About page — 02 framed; 03 is the truck on the highway with the three
+// principles as image cards (user idea 7, it absorbed the old principles section); FAQ on the
+// app background; hero and footer keep their full photographs.
 import { PAGES } from '../../content/pages'
-import { V7Section, DemoButton, FaqList, V7Footer, V7Icon, Frame, AppBackdrop, TextCards, usePageTitle } from '../../components/v7/V7Kit'
+import { V7Section, FaqList, V7Footer, V7Icon, Frame, AppBackdrop, tilt, usePageTitle } from '../../components/v7/V7Kit'
 import panel from '../../assets/marketing/real/panel-resumen.webp'
 import appHome from '../../assets/marketing/real/app-inicio.webp'
+import connectImg from '../../assets/marketing/v7/07-quienes-somos/conectar.webp'
+import understandImg from '../../assets/marketing/v7/07-quienes-somos/entender.webp'
+import actImg from '../../assets/marketing/v7/07-quienes-somos/actuar.webp'
 import '../../styles/v7/quienes-somos.css'
 
 // Same answers the current page shows (ABOUT_FAQ in ReferenceMarketing).
@@ -17,11 +21,14 @@ const FAQ = [
 const bolt = <path d="M13.5 2.5 4.5 13.5h6.5l-1 8 9-11h-6.5Z" fill="currentColor" />
 const bars = <path d="M5 20v-5M10 20v-8M15 20v-10M20 20V4" strokeWidth="3.4" strokeLinecap="butt" />
 
+// The three principles as image cards (user idea 7, extra/07-quienes-somos-dato-accion): the
+// Conectar and Actuar pictures are cut from that proposal; Entender shows the real map capture.
 const PRINCIPLES = [
-  { icon: 'link', title: 'Conectar', text: 'Vehículos, conductores y responsables en un mismo flujo.' },
-  { icon: bars, title: 'Entender', text: 'Ubicación, historial y estado claros para cada rol.' },
-  { icon: bolt, title: 'Actuar', text: 'Alertas e inspecciones que permiten atender lo importante.' },
+  { icon: 'link', title: 'Conectar', text: 'Vehículos, conductores y responsables en un mismo flujo.', image: connectImg, w: 285, h: 213, alt: 'Camión en una autopista al atardecer.' },
+  { icon: bars, title: 'Entender', text: 'Ubicación, historial y estado claros para cada rol.', image: understandImg, w: 900, h: 675, alt: 'Detalle de la captura original del centro de control FOM con unidades en el mapa. Datos de demostración.' },
+  { icon: bolt, title: 'Actuar', text: 'Alertas e inspecciones que permiten atender lo importante.', image: actImg, w: 285, h: 213, alt: 'Inspección de un neumático con una lista de revisión.' },
 ]
+function untilt(e) { e.currentTarget.style.removeProperty('--rx'); e.currentTarget.style.removeProperty('--ry') }
 
 export default function QuienesSomos() {
   usePageTitle('Quiénes somos')
@@ -47,22 +54,20 @@ export default function QuienesSomos() {
         screens={[{ phone: true, src: appHome, corners: [[1303, 298], [1545, 298], [1511, 858], [1266, 850]] }]} />
     </V7Section>
 
-    <V7Section className="qs-03 is-plain" labelledBy="qs-03-title">
-      <AppBackdrop side="right" />
+    <V7Section className="qs-03" plateId="07-quienes-somos/03" labelledBy="qs-03-title">
       <div className="v7-copy">
-        <p className="v7-kicker">Todo en contexto</p>
         <h2 id="qs-03-title">De cada dato a una acción concreta.</h2>
         <p>Los recorridos, las alertas, las inspecciones y el mantenimiento comparten una misma vista de la operación.</p>
         <p>Así es más sencillo revisar lo que pasa y dar seguimiento sin perder el contexto.</p>
       </div>
-    </V7Section>
-
-    <V7Section className="qs-04 is-plain" labelledBy="qs-04-title">
-      <div className="v7-copy">
-        <p className="v7-kicker">Nuestros principios</p>
-        <h2 id="qs-04-title">Una operación más conectada.</h2>
+      <div className="qs-steps">
+        {PRINCIPLES.map(item => <article key={item.title} className="v7-card qs-step" onPointerMove={tilt} onPointerLeave={untilt}>
+          <span className="qs-step-icon"><V7Icon name={item.icon} /></span>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+          <div className="qs-step-media"><img src={item.image} alt={item.alt} width={item.w} height={item.h} loading="lazy" decoding="async" /></div>
+        </article>)}
       </div>
-      <TextCards columns={3} className="qs-cards" items={PRINCIPLES} />
     </V7Section>
 
     <V7Section className="qs-06 is-plain" id="preguntas" labelledBy="qs-06-title">

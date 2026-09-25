@@ -8,24 +8,7 @@
 .bn-chips li{display:flex;align-items:center;gap:calc(10*var(--u));padding:calc(10*var(--u)) calc(18*var(--u));border:1px solid #24597f;border-radius:999px;background:#0a1a29b3;font-size:max(16px,calc(17*var(--u)*.92));color:#dbe7f3}
 .bn-chips .v7-glyph{width:calc(22*var(--u));height:calc(22*var(--u));flex:none}
 
-/* 06 map in a rounded frame: the inner box keeps the slide proportions (only its map half shows) */
-.bn-mapframe{position:relative;overflow:hidden;aspect-ratio:1060/941;border-radius:calc(22*var(--u));border:1px solid #1e3b52;box-shadow:0 40px 90px -50px #000}
-.bn-mapinner{position:absolute;left:0;top:0;height:100%;aspect-ratio:1672/941}
-.bn-06 .v7-card p:empty{display:none}
 
-/* 06 map labels and unit card: laid over the photo in their own 1672-wide frame, so the
-   same geometry works on the desktop section and on the cropped photo on phones. */
-.bn-map{position:absolute;inset:0;z-index:1;container-type:inline-size;pointer-events:none}
-.bn-map>*{--k:calc(100cqw / 1672);position:absolute}
-.bn-place{left:calc((var(--x) + var(--w) / 2)*var(--k));top:calc(var(--y)*var(--k));transform:translateX(-50%);min-width:calc(var(--w)*var(--k));height:calc(45*var(--k));display:grid;place-items:center;border:1px solid #3a5470;border-radius:calc(6*var(--k));background:#0b1724f2;color:#f3f7fb;font-size:calc(20*var(--k));line-height:1;white-space:nowrap}
-.bn-place:nth-child(2){height:calc(38*var(--k));font-size:calc(19*var(--k))}
-.bn-unit{left:calc(682*var(--k));top:calc(262*var(--k));width:calc(349*var(--k));height:calc(176*var(--k));display:flex;gap:calc(26*var(--k));padding:calc(15*var(--k)) calc(12*var(--k));border:1.5px solid #4a7fb4;border-radius:calc(9*var(--k));background:#0b1826ee;box-shadow:0 0 0 1px #0a1522}
-.v7-page .bn-unit img{width:calc(142*var(--k));height:calc(100*var(--k));border-radius:calc(8*var(--k));object-fit:cover;max-width:none}
-.bn-unit strong{display:block;margin-top:calc(8*var(--k));font-size:calc(23*var(--k));line-height:1.1;font-weight:600;color:#fff}
-.bn-unit-state{display:block;margin-top:calc(6*var(--k));font-size:calc(21*var(--k));line-height:1.2;color:#7fb2ea}
-.v7-page .bn-unit p{white-space:nowrap;display:flex;gap:calc(8*var(--k));margin-top:calc(20*var(--k));font-size:calc(16.5*var(--k));line-height:1.38;color:#eef4fa;letter-spacing:0}
-.bn-unit p svg{width:calc(19*var(--k));height:calc(22*var(--k));flex:none;fill:none;stroke:#3aa0ff;stroke-width:2}
-.bn-unit small{display:block;font-size:inherit;color:#a8c8ec}
 
 @media(min-width:761px){
  /* 01 Hero: pickup on the mountain road at dusk */
@@ -42,6 +25,7 @@
  .bn-tour h2{font-size:calc(56*var(--u)*.78);line-height:1.02}
  .bn-tour .v7-tour-card>p:not(.v7-kicker){font-size:max(16px,calc(21*var(--u)*.92));line-height:1.5}
  .bn-tour .v7-tour-tabs{left:calc(640*var(--u));bottom:calc(34*var(--u))}
+ .bn-tour .v7-tour-tabs button{white-space:nowrap}
  .bn-tour .bn-chips{margin-top:calc(30*var(--u))}
 
  /* 03 Framed: text and app tabs left, technician and phones in a rounded frame */
@@ -62,13 +46,6 @@
  .bn-04 .v7-features h3{font-size:calc(26*var(--u)*.86)}
  .bn-04 .v7-demo{right:calc(110*var(--u));bottom:calc(82*var(--u));font-size:max(16px,calc(18*var(--u)*.92))}
 
- /* 06 App background: aerial map in a frame on the left, copy and cards on the right */
- .bn-06{display:grid;grid-template-columns:calc(860*var(--u)) minmax(0,1fr);gap:calc(80*var(--u));align-items:center}
- .bn-06 h2{font-size:calc(58*var(--u)*.78);line-height:1.02}
- .bn-06 .v7-copy>p:not(.v7-kicker){font-size:max(16px,calc(22*var(--u)*.92));line-height:1.5;margin-top:calc(22*var(--u))}
- .bn-06 .v7-cards{margin-top:calc(34*var(--u));gap:calc(12*var(--u))}
- .bn-06 .v7-card{flex-direction:row;align-items:center;gap:calc(20*var(--u));padding:calc(18*var(--u)) calc(22*var(--u))}
- .bn-06 .v7-demo{right:calc(68*var(--u));bottom:calc(60*var(--u))}
 
  /* 08 Closing road: truck at dusk */
  .bn-08 .v7-copy{left:calc(70*var(--u));top:calc(191*var(--u));width:calc(700*var(--u))}
@@ -100,37 +77,29 @@
  .bn-03 .v7-frame{--frame-x:-33%!important}
  .bn-03 .bn-app-tabs{margin-top:22px;align-self:flex-start}
  .bn-04{--m-w:170%;--m-x:-30%}
- .v7-beneficios .bn-06>.v7-demo{order:4}
  .bn-08{--m-w:180%;--m-x:-72%}
  .v7-beneficios .bn-kicker{font-size:14px;margin-bottom:14px}
  .v7-beneficios .bn-statement{display:none}
  .v7-beneficios .v7-features h3{font-size:17px}
- .bn-place,.bn-place:nth-child(2){height:max(calc(45*var(--k)),22px);padding:0 8px;font-size:max(calc(20*var(--k)),11.5px)}
- /* The card keeps covering its place in the photo and grows up and left so it stays readable. */
- .bn-unit{left:auto;top:auto;right:calc(639*var(--k));bottom:calc(501*var(--k));width:auto;height:auto;min-width:calc(352*var(--k));min-height:calc(180*var(--k));padding:8px;gap:10px;border-radius:8px}
- .v7-page .bn-unit img{width:64px;height:45px;border-radius:6px}
- .bn-unit strong{margin-top:2px;font-size:13.5px}.bn-unit-state{margin-top:2px;font-size:12.5px}
- .v7-page .bn-unit p{margin-top:8px;gap:5px;font-size:11px}.bn-unit p svg{width:12px;height:14px}
 }
 @media(max-width:760px){
  .bn-chips{gap:8px;margin-top:20px!important}.bn-chips li{font-size:14px;padding:7px 12px;gap:8px}.bn-chips .v7-glyph{width:16px;height:16px}
- .bn-mapframe{border-radius:14px}
- .bn-06 .v7-card{flex-direction:row;align-items:center}
 }
-@media(min-width:761px){.v7-beneficios .bn-06>.v7-demo{position:absolute!important;left:calc(760*var(--u));right:auto;bottom:calc(92*var(--u))}}
 @media(min-width:761px){.bn-tour .v7-tour-stage>.v7-demo{left:calc(68*var(--u));right:auto;bottom:calc(46*var(--u))}}
 /* Phones: the kit's desktop rules for tabs, tour, framed/plain sections and cards come after its
    phone block and win there, so this page restates the phone values with its own prefix. */
 @media(max-width:760px){
  .v7-beneficios .v7-tabs{position:relative}
- .v7-beneficios .v7-tabs button{font-size:14px;padding:8px 12px;gap:8px;min-height:40px}
+ .v7-beneficios .v7-tabs button{font-size:14px;padding:8px 10px;gap:6px;min-height:40px}
+ .v7-beneficios .bn-tour .v7-tabs{flex-wrap:nowrap;justify-content:space-between;transform:none;right:auto!important}
+ .v7-beneficios .bn-tour .v7-tabs button .v7-glyph{display:none}
+ .v7-beneficios .bn-tour .v7-tour-stage>.v7-demo{top:10px;bottom:auto}
  .v7-beneficios .v7-tour-stage>.v7-plate{position:relative;top:0;width:var(--m-w);margin-left:var(--m-x)}
  .v7-beneficios .v7-tour-step{width:auto;min-height:0;padding:34px 6% 30px;display:block}
  .v7-beneficios .v7-tour-card>p:not(.v7-kicker){font-size:16.5px;line-height:1.5;margin-top:14px}
  .v7-beneficios .v7-tour-card .v7-kicker{margin-bottom:10px}
  .v7-beneficios .bn-03.is-framed{display:flex;flex-direction:column;align-items:stretch;padding:0 0 40px}
  .v7-beneficios .bn-03>.v7-demo{order:3}
- .v7-beneficios .bn-06.is-plain{padding:0 0 44px}
  .v7-beneficios .v7-cards{grid-template-columns:1fr;gap:10px;margin-top:22px}
  .v7-beneficios .v7-card{padding:14px 16px;gap:14px;border-radius:14px}
  .v7-beneficios .v7-card h3{font-size:17px}
