@@ -36,3 +36,4 @@ output/design-review/public-redesign-backup/
 
 # Entorno aislado para capturar la app, sin datos de producción.
 output/app-capture-runtime/
+scripts/__pycache__/
