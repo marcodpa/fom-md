@@ -1,5 +1,7 @@
 # FOM — Fleet Operations & Maintenance · Landing cinematográfica
 
+> **Relevo del rediseño v7 (25/09/2026):** leer [CONTINUAR-REDISENO.md](CONTINUAR-REDISENO.md) y el [plan de las 90 secciones](output/PLAN-IMPLEMENTACION-V7.md). En la rama `codex/rediseno-v6-fiel`, Inicio está implementado; las otras diez páginas siguen pendientes de aplicar. La descripción histórica de abajo no describe íntegramente el Inicio actual.
+
 Experiencia web 3D controlada por scroll para presentar **FOM**, la plataforma de
 control y monitoreo de flotas. El contenido, la paleta y la terminología están tomados
 de la app real (`control-flotas-main`: Expo + Supabase): mapa en vivo, estados

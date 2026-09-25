@@ -1,5 +1,7 @@
 # Continuar FOM desde casa
 
+Guía completa para otra IA: [CONTINUAR-REDISENO.md](../CONTINUAR-REDISENO.md). Mapa de todas las páginas y referencias: [PLAN-IMPLEMENTACION-V7.md](PLAN-IMPLEMENTACION-V7.md).
+
 Rama: `codex/rediseno-v6-fiel`.
 
 ## Estado entregado
