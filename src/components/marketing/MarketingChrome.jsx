@@ -13,7 +13,7 @@ export default function MarketingHeader() {
   const { pathname, hash } = useLocation()
   const close = () => { setOpen(false); setGroup(null) }
   useEffect(() => { setOpen(false); setGroup(null) }, [pathname, hash])
-  // Compact header and reading progress once the page scrolls.
+  // Compact header once the page scrolls.
   useEffect(() => {
     let frame = 0
     const update = () => {
@@ -21,8 +21,6 @@ export default function MarketingHeader() {
       const el = header.current
       if (!el) return
       el.classList.toggle('is-scrolled', scrollY > 12)
-      const max = document.documentElement.scrollHeight - innerHeight
-      el.style.setProperty('--progress', max > 0 ? (scrollY / max).toFixed(4) : 0)
     }
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
     update()
