@@ -328,7 +328,6 @@ export function CountUp({ value }) {
     if (!el || !match || matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return
     const target = Number(match[2].replace(/\./g, ''))
     const format = n => match[1] + (match[2].includes('.') ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : String(n)) + match[3]
-    el.textContent = format(0)
     let frame
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return

@@ -1,8 +1,9 @@
 // Plataforma web, from output/laminas-secciones-v7/02-plataforma. Slides 02 and 04 (the
-// two laptops) are joined in one pinned tour; slide 06 is a shorter framed section.
+// two laptops) are joined in one pinned tour; slide 06 became the roles-and-permissions matrix
+// of the user's proposal (extra/02-plataforma-roles), photo plate 02-plataforma/roles.
 import { useState } from 'react'
 import { PAGES } from '../../content/pages'
-import { V7Section, Features, StatCard, DemoButton, FaqList, MailPrompt, V7Footer, StickyTour, DeviceTabs, Frame, AppBackdrop, TextCards, usePageTitle } from '../../components/v7/V7Kit'
+import { V7Section, Features, StatCard, DemoButton, FaqList, MailPrompt, V7Footer, StickyTour, DeviceTabs, AppBackdrop, TextCards, V7Icon, CountUp, usePageTitle } from '../../components/v7/V7Kit'
 import panel from '../../assets/marketing/real/panel-resumen.webp'
 import map from '../../assets/marketing/real/panel-mapa.webp'
 import fleet from '../../assets/marketing/real/panel-flota.webp'
@@ -18,6 +19,68 @@ const withIcons = (section, icons) => section.bullets.map((b, i) => [icons[i], b
 const asCards = (section, icons) => section.bullets.map((b, i) => ({ icon: icons[i], title: b.label, text: b.text }))
 
 const APP_TABS = [{ label: 'Inicio', icon: 'phone' }, { label: 'Inspección', icon: 'clipboard' }, { label: 'Mantenimiento', icon: 'wrench' }, { label: 'Perfil', icon: 'user' }]
+
+/* Roles matrix (proposal output/laminas-secciones-v7/extra/02-plataforma-roles.webp) with the three
+   real roles. Every mark comes from the roles section of pages.js: `yes` = the text grants it,
+   `no` = the text excludes it, `null` = the text does not say (a neutral dash, never a claim). */
+const ROLES = [
+  { name: 'Supervisor de empresa', note: 'Panel operativo de su empresa', icon: 'building' },
+  { name: 'Supervisor personal', note: 'Vista de su flota propia', icon: 'truck' },
+  { name: 'Conductor', note: 'App del conductor', icon: 'steering' },
+]
+const PERMISSIONS = [
+  ['layout', 'Panel operativo de la empresa', ['yes', 'no', null]],
+  ['map', 'Mapa en vivo', ['yes', 'yes', null]],
+  ['chart', 'Reportes', ['yes', null, null]],
+  ['wrench', 'Órdenes de trabajo', ['yes', null, 'yes']],
+  ['users', 'Gestión de sus conductores', ['yes', null, null]],
+  ['bell', 'Alertas y documentos', [null, 'yes', null]],
+  ['clipboard', 'Inspección diaria y jornada', [null, null, 'yes']],
+  ['settings', 'Acceso al panel de administración', [null, null, 'no']],
+]
+const MARK_TEXT = { yes: 'Incluido', no: 'Sin acceso', null: 'No se especifica' }
+function Mark({ value, quiet = false }) {
+  const label = quiet ? null : <span className="pf-sr">{MARK_TEXT[value]}</span>
+  if (value === 'yes') return <span className="pf-mark is-yes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.2" pathLength="1" transform="rotate(-90 12 12)" /><path d="m7.6 12.3 3 3 5.8-6.2" pathLength="1" /></svg>{label}</span>
+  if (value === 'no') return <span className="pf-mark is-no"><V7Icon name="lock" />{label}</span>
+  return <span className="pf-mark is-none"><i aria-hidden="true" />{label}</span>
+}
+function RoleMatrix({ stat }) {
+  // Hovering any cell of a role lights that whole column (no re-render: a data attribute).
+  const hot = e => { const col = e.target.closest?.('[data-col]')?.dataset.col; if (col) e.currentTarget.dataset.hot = col; else delete e.currentTarget.dataset.hot }
+  const cold = e => { delete e.currentTarget.dataset.hot }
+  return <>
+    <div className="pf-matrix-wrap">
+      <table className="pf-matrix" onPointerOver={hot} onPointerLeave={cold}>
+        <caption className="pf-sr">Permisos de cada rol en FOM</caption>
+        <colgroup><col /><col /><col /><col /></colgroup>
+        <thead><tr>
+          <td className="pf-matrix-intro"><CountUp value={stat.value} /><p>{stat.label}</p></td>
+          {ROLES.map((r, c) => <th key={r.name} scope="col" data-col={c + 1}>
+            <span className="pf-role-icon"><V7Icon name={r.icon} /></span>
+            <strong>{r.name}</strong><small>{r.note}</small>
+          </th>)}
+        </tr></thead>
+        <tbody>{PERMISSIONS.map(([icon, label, cells], i) => <tr key={label} style={{ '--i': i }}>
+          <th scope="row"><V7Icon name={icon} />{label}</th>
+          {cells.map((v, c) => <td key={c} data-col={c + 1} style={{ '--c': c }}><Mark value={v} /></td>)}
+        </tr>)}</tbody>
+      </table>
+      <ul className="pf-legend" aria-label="Leyenda">
+        <li><Mark value="yes" quiet /> Incluido</li>
+        <li><Mark value="no" quiet /> Sin acceso</li>
+        <li><Mark value={null} quiet /> No se especifica</li>
+      </ul>
+    </div>
+    <div className="pf-role-cards">
+      <StatCard icon="team" value={stat.value} label={stat.label} />
+      {ROLES.map((r, c) => <article key={r.name} className="pf-role-card">
+        <header><span className="pf-role-icon"><V7Icon name={r.icon} /></span><div><h3>{r.name}</h3><p>{r.note}</p></div></header>
+        <ul>{PERMISSIONS.filter(([, , cells]) => cells[c]).map(([, label, cells]) => <li key={label} className={cells[c] === 'no' ? 'is-no' : ''}><Mark value={cells[c]} />{label}</li>)}</ul>
+      </article>)}
+    </div>
+  </>
+}
 
 export default function Plataforma() {
   usePageTitle('Plataforma web')
@@ -63,15 +126,16 @@ export default function Plataforma() {
       <StatCard className="pf-05-stat" icon="database" value={capture.stat.value} label={capture.stat.label} />
     </V7Section>
 
-    <V7Section className="pf-06 is-framed" labelledBy="pf-06-title">
+    <V7Section className="pf-06" plateId="02-plataforma/roles" labelledBy="pf-06-title" motion="rise">
       <div className="v7-copy">
-        <h2 id="pf-06-title">Roles y permisos que reflejan<br />tu organización</h2>
+        <h2 id="pf-06-title">Roles y permisos que reflejan{' '}<br />tu organización</h2>
         <p>{roles.body}</p>
-        <Features className="is-cards" boxed={false} items={withIcons(roles, ['supervisor', 'users', 'driver', 'hierarchy'])} />
-        <StatCard icon="team" value={roles.stat.value} label={roles.stat.label} />
       </div>
-      <Frame plateId="02-plataforma/06" x="-96%" ratio="4 / 5"
-        screens={[{ src: panel, corners: [[1290, 470], [1428, 482], [1392, 628], [1255, 612]], clip: [[1282, 462], [1440, 470], [1440, 580], [1408, 584], [1398, 620], [1340, 640], [1318, 640]] }]} />
+      <RoleMatrix stat={roles.stat} />
+      <div className="pf-roles-rule">
+        <V7Icon name="hierarchy" />
+        <div><h3>{roles.bullets[3].label}</h3><p>{roles.bullets[3].text}</p></div>
+      </div>
     </V7Section>
 
     <V7Section className="pf-07" plateId="02-plataforma/07" labelledBy="pf-07-title">
