@@ -1,0 +1,138 @@
+/* Beneficios — geometry measured on output/laminas-secciones-v7/09-beneficios (1672 × 941). */
+.v7-beneficios .v7-features h3{font-weight:400;letter-spacing:0;color:#e3ecf5}
+.v7-beneficios .bn-kicker{text-transform:uppercase;letter-spacing:.2em;color:#8fb2dc!important}
+.v7-beneficios .bn-statement{position:absolute;z-index:1;text-transform:uppercase;letter-spacing:.2em;color:#a9c1da!important}
+
+/* Short facts as chips */
+.bn-chips{list-style:none;display:flex;flex-wrap:wrap;gap:calc(10*var(--u));margin:0;padding:0}
+.bn-chips li{display:flex;align-items:center;gap:calc(10*var(--u));padding:calc(10*var(--u)) calc(18*var(--u));border:1px solid #24597f;border-radius:999px;background:#0a1a29b3;font-size:calc(17*var(--u));color:#dbe7f3}
+.bn-chips .v7-glyph{width:calc(22*var(--u));height:calc(22*var(--u));flex:none}
+
+/* 06 map in a rounded frame: the inner box keeps the slide proportions (only its map half shows) */
+.bn-mapframe{position:relative;overflow:hidden;aspect-ratio:1060/941;border-radius:calc(22*var(--u));border:1px solid #1e3b52;box-shadow:0 40px 90px -50px #000}
+.bn-mapinner{position:absolute;left:0;top:0;height:100%;aspect-ratio:1672/941}
+.bn-06 .v7-card p:empty{display:none}
+
+/* 06 map labels and unit card: laid over the photo in their own 1672-wide frame, so the
+   same geometry works on the desktop section and on the cropped photo on phones. */
+.bn-map{position:absolute;inset:0;z-index:1;container-type:inline-size;pointer-events:none}
+.bn-map>*{--k:calc(100cqw / 1672);position:absolute}
+.bn-place{left:calc((var(--x) + var(--w) / 2)*var(--k));top:calc(var(--y)*var(--k));transform:translateX(-50%);min-width:calc(var(--w)*var(--k));height:calc(45*var(--k));display:grid;place-items:center;border:1px solid #3a5470;border-radius:calc(6*var(--k));background:#0b1724f2;color:#f3f7fb;font-size:calc(20*var(--k));line-height:1;white-space:nowrap}
+.bn-place:nth-child(2){height:calc(38*var(--k));font-size:calc(19*var(--k))}
+.bn-unit{left:calc(682*var(--k));top:calc(262*var(--k));width:calc(349*var(--k));height:calc(176*var(--k));display:flex;gap:calc(26*var(--k));padding:calc(15*var(--k)) calc(12*var(--k));border:1.5px solid #4a7fb4;border-radius:calc(9*var(--k));background:#0b1826ee;box-shadow:0 0 0 1px #0a1522}
+.v7-page .bn-unit img{width:calc(142*var(--k));height:calc(100*var(--k));border-radius:calc(8*var(--k));object-fit:cover;max-width:none}
+.bn-unit strong{display:block;margin-top:calc(8*var(--k));font-size:calc(23*var(--k));line-height:1.1;font-weight:600;color:#fff}
+.bn-unit-state{display:block;margin-top:calc(6*var(--k));font-size:calc(21*var(--k));line-height:1.2;color:#7fb2ea}
+.v7-page .bn-unit p{white-space:nowrap;display:flex;gap:calc(8*var(--k));margin-top:calc(20*var(--k));font-size:calc(16.5*var(--k));line-height:1.38;color:#eef4fa;letter-spacing:0}
+.bn-unit p svg{width:calc(19*var(--k));height:calc(22*var(--k));flex:none;fill:none;stroke:#3aa0ff;stroke-width:2}
+.bn-unit small{display:block;font-size:inherit;color:#a8c8ec}
+
+@media(min-width:761px){
+ /* 01 Hero: pickup on the mountain road at dusk */
+ .bn-01 .v7-copy{left:calc(80*var(--u));top:calc(189*var(--u));width:calc(700*var(--u))}
+ .bn-01 .bn-kicker{font-size:calc(19.5*var(--u))}
+ .bn-01 h1{font-size:calc(83*var(--u));line-height:.94;letter-spacing:-.025em;margin-top:calc(38*var(--u));white-space:nowrap}
+ .bn-01 .v7-copy>p:not(.bn-kicker){font-size:calc(26.5*var(--u));line-height:1.33;margin-top:calc(10*var(--u));color:#bfd2e6;width:calc(600*var(--u))}
+ .bn-01 .v7-button{margin-top:calc(24*var(--u));width:calc(378*var(--u));height:calc(64*var(--u));padding:0;font-size:calc(21*var(--u));gap:calc(24*var(--u))}
+ .bn-01 .bn-statement{left:calc(1466*var(--u));top:calc(282*var(--u));font-size:calc(18.5*var(--u));line-height:1.64;padding-bottom:calc(26*var(--u))}
+ .bn-01 .bn-statement:after{content:'';position:absolute;left:0;bottom:0;width:calc(68*var(--u));border-top:1.5px solid #5d7fa2}
+
+ /* Tour (slides 02, 05, 07 joined): the Reportes monitor stays pinned, steps on the dark left */
+ .bn-tour .v7-tour-step{width:calc(540*var(--u))}
+ .bn-tour h2{font-size:calc(56*var(--u));line-height:1.02}
+ .bn-tour .v7-tour-card>p:not(.v7-kicker){font-size:calc(21*var(--u));line-height:1.5}
+ .bn-tour .v7-tour-tabs{left:calc(640*var(--u));bottom:calc(34*var(--u))}
+ .bn-tour .bn-chips{margin-top:calc(30*var(--u))}
+
+ /* 03 Framed: text and app tabs left, technician and phones in a rounded frame */
+ .bn-03 h2{font-size:calc(58*var(--u));line-height:1.02}
+ .bn-03 .v7-copy>p:not(.v7-kicker){font-size:calc(22*var(--u));line-height:1.5;margin-top:calc(22*var(--u));max-width:calc(700*var(--u))}
+ .bn-03 .bn-chips{margin-top:calc(30*var(--u))}
+ .bn-03 .bn-app-tabs{position:relative;display:inline-flex;margin-top:calc(40*var(--u))}
+ .bn-03 .v7-demo{right:calc(68*var(--u));bottom:calc(70*var(--u))}
+
+ /* 04 Driver in the parked cab, text right (full-bleed slide) */
+ .v7-beneficios .bn-04 h2{line-height:.96;letter-spacing:-.022em}
+ .bn-04 .v7-copy{left:calc(1104*var(--u));top:calc(172*var(--u));width:calc(540*var(--u))}
+ .bn-04 h2{font-size:calc(65*var(--u))}
+ .bn-04 .v7-copy>p{font-size:calc(30*var(--u));line-height:1.32;margin-top:calc(20*var(--u));color:#a3c3ea}
+ .bn-04 .v7-features{margin-top:calc(40*var(--u));gap:calc(30*var(--u))}
+ .bn-04 .v7-features li{grid-template-columns:calc(66*var(--u)) 1fr;gap:calc(42*var(--u))}
+ .bn-04 .v7-features .v7-icon{width:calc(66*var(--u));height:calc(60*var(--u))}
+ .bn-04 .v7-features h3{font-size:calc(26*var(--u))}
+ .bn-04 .v7-demo{right:calc(110*var(--u));bottom:calc(82*var(--u));font-size:calc(18*var(--u))}
+
+ /* 06 App background: aerial map in a frame on the left, copy and cards on the right */
+ .bn-06{display:grid;grid-template-columns:calc(860*var(--u)) minmax(0,1fr);gap:calc(80*var(--u));align-items:center}
+ .bn-06 h2{font-size:calc(58*var(--u));line-height:1.02}
+ .bn-06 .v7-copy>p:not(.v7-kicker){font-size:calc(22*var(--u));line-height:1.5;margin-top:calc(22*var(--u))}
+ .bn-06 .v7-cards{margin-top:calc(34*var(--u));gap:calc(12*var(--u))}
+ .bn-06 .v7-card{flex-direction:row;align-items:center;gap:calc(20*var(--u));padding:calc(18*var(--u)) calc(22*var(--u))}
+ .bn-06 .v7-demo{right:calc(68*var(--u));bottom:calc(60*var(--u))}
+
+ /* 08 Closing road: truck at dusk */
+ .bn-08 .v7-copy{left:calc(70*var(--u));top:calc(191*var(--u));width:calc(700*var(--u))}
+ .bn-08 .bn-kicker{font-size:calc(19*var(--u));letter-spacing:.08em}
+ .bn-08 h2{font-size:calc(76*var(--u));line-height:.985;letter-spacing:-.022em;margin-top:calc(26*var(--u));white-space:nowrap}
+ .bn-08 .v7-copy>p:not(.bn-kicker){font-size:calc(32.5*var(--u));line-height:1.14;margin-top:calc(16*var(--u));color:#b9cde3;width:calc(580*var(--u))}
+ .bn-08 .v7-button{margin-top:calc(38*var(--u));width:calc(406*var(--u));height:calc(68*var(--u));padding:0;font-size:calc(21*var(--u));gap:calc(30*var(--u))}
+ .bn-08 .bn-statement{left:calc(1389*var(--u));top:calc(195*var(--u));font-size:calc(18*var(--u));line-height:1.78}
+
+ /* 09 Footer: brand and tagline over the road, three link columns with separators */
+ .bn-09 .v7-footer-hero{left:calc(90*var(--u));top:calc(322*var(--u))}
+ .bn-09 .v7-footer-hero .m-brand{font-size:calc(74*var(--u));gap:calc(28*var(--u))}
+ .bn-09 .v7-footer-hero .m-brand svg{width:calc(62*var(--u));height:calc(82*var(--u))}
+ .bn-09 .v7-footer-hero>p{margin-top:calc(16*var(--u));font-size:calc(31*var(--u));line-height:1.2;white-space:nowrap;color:#a9c9ee}
+ .bn-09 .v7-footer-statement{left:calc(1352*var(--u));top:calc(94*var(--u));font-size:calc(16*var(--u))!important;line-height:1.66!important}
+ .bn-09 .v7-footer-links{left:calc(93*var(--u));right:calc(93*var(--u));top:calc(596*var(--u));grid-template-columns:calc(333*var(--u)) calc(482*var(--u)) 1fr}
+ .bn-09 .v7-footer-brand{display:none}
+ .bn-09 .v7-footer-links nav{gap:calc(9*var(--u))}
+ .bn-09 .v7-footer-links nav+nav{padding-left:calc(100*var(--u));border-left:1px solid #2a4560;min-height:calc(174*var(--u));margin-top:calc(8*var(--u))}
+ .bn-09 .v7-footer-links nav:last-child{padding-left:calc(104*var(--u))}
+ .v7-beneficios .bn-09 .v7-footer-links h2{font-size:calc(21*var(--u));margin:0 0 calc(10*var(--u))}
+ .bn-09 .v7-footer-links nav+nav h2{margin-top:calc(-8*var(--u))}
+ .bn-09 .v7-footer-links nav a{font-size:calc(20*var(--u))}
+ .bn-09 .v7-copyright{left:calc(93*var(--u));right:calc(93*var(--u));top:calc(825*var(--u));padding-top:calc(32*var(--u));border-top-color:#28506f;font-size:calc(17*var(--u))}
+}
+@media(max-width:760px){
+ .bn-01{--m-w:175%;--m-x:-70%;padding-top:64px}
+ .bn-tour{--m-w:150%;--m-x:-50%}
+ .bn-03 .v7-frame{--frame-x:-33%!important}
+ .bn-03 .bn-app-tabs{margin-top:22px;align-self:flex-start}
+ .bn-04{--m-w:170%;--m-x:-30%}
+ .v7-beneficios .bn-06>.v7-demo{order:4}
+ .bn-08{--m-w:180%;--m-x:-72%}
+ .v7-beneficios .bn-kicker{font-size:14px;margin-bottom:14px}
+ .v7-beneficios .bn-statement{display:none}
+ .v7-beneficios .v7-features h3{font-size:17px}
+ .bn-place,.bn-place:nth-child(2){height:max(calc(45*var(--k)),22px);padding:0 8px;font-size:max(calc(20*var(--k)),11.5px)}
+ /* The card keeps covering its place in the photo and grows up and left so it stays readable. */
+ .bn-unit{left:auto;top:auto;right:calc(639*var(--k));bottom:calc(501*var(--k));width:auto;height:auto;min-width:calc(352*var(--k));min-height:calc(180*var(--k));padding:8px;gap:10px;border-radius:8px}
+ .v7-page .bn-unit img{width:64px;height:45px;border-radius:6px}
+ .bn-unit strong{margin-top:2px;font-size:13.5px}.bn-unit-state{margin-top:2px;font-size:12.5px}
+ .v7-page .bn-unit p{margin-top:8px;gap:5px;font-size:11px}.bn-unit p svg{width:12px;height:14px}
+}
+@media(max-width:760px){
+ .bn-chips{gap:8px;margin-top:20px!important}.bn-chips li{font-size:14px;padding:7px 12px;gap:8px}.bn-chips .v7-glyph{width:16px;height:16px}
+ .bn-mapframe{border-radius:14px}
+ .bn-06 .v7-card{flex-direction:row;align-items:center}
+}
+@media(min-width:761px){.v7-beneficios .bn-06>.v7-demo{position:absolute!important;left:calc(760*var(--u));right:auto;bottom:calc(92*var(--u))}}
+@media(min-width:761px){.bn-tour .v7-tour-stage>.v7-demo{left:calc(68*var(--u));right:auto;bottom:calc(46*var(--u))}}
+/* Phones: the kit's desktop rules for tabs, tour, framed/plain sections and cards come after its
+   phone block and win there, so this page restates the phone values with its own prefix. */
+@media(max-width:760px){
+ .v7-beneficios .v7-tabs{position:relative}
+ .v7-beneficios .v7-tabs button{font-size:14px;padding:8px 12px;gap:8px;min-height:40px}
+ .v7-beneficios .v7-tour-stage>.v7-plate{position:relative;top:0;width:var(--m-w);margin-left:var(--m-x)}
+ .v7-beneficios .v7-tour-step{width:auto;min-height:0;padding:34px 6% 30px;display:block}
+ .v7-beneficios .v7-tour-card>p:not(.v7-kicker){font-size:16.5px;line-height:1.5;margin-top:14px}
+ .v7-beneficios .v7-tour-card .v7-kicker{margin-bottom:10px}
+ .v7-beneficios .bn-03.is-framed{display:flex;flex-direction:column;align-items:stretch;padding:0 0 40px}
+ .v7-beneficios .bn-03>.v7-demo{order:3}
+ .v7-beneficios .bn-06.is-plain{padding:0 0 44px}
+ .v7-beneficios .v7-cards{grid-template-columns:1fr;gap:10px;margin-top:22px}
+ .v7-beneficios .v7-card{padding:14px 16px;gap:14px;border-radius:14px}
+ .v7-beneficios .v7-card h3{font-size:17px}
+ .v7-beneficios .v7-card-icon{width:36px;height:36px}
+}
