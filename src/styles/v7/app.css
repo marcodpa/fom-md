@@ -1,0 +1,105 @@
+/* App del conductor — geometry measured on output/laminas-secciones-v7/03-app (1672 × 941). */
+.v7-app .v7-kicker{text-transform:uppercase;letter-spacing:.17em;color:#9cc3ea!important}
+.v7-app .v7-copy>.v7-kicker{margin-top:0}
+.v7-app .ap-pillars{list-style:none;margin:0;padding:0;display:grid}
+.v7-app .ap-pillars li{display:flex;align-items:center;text-transform:uppercase;letter-spacing:.2em;color:#c9d9ea}
+.v7-app .ap-pillars .v7-icon{border:1.5px solid #2a95e8;border-radius:calc(7*var(--u));background:#06141dc4}
+.v7-app .ap-pillars .v7-glyph{width:80%;height:80%}
+/* The footer photo is drawn by V7Footer; this second plate only carries the projected screens. */
+.v7-app .ap-footer-screens .v7-photo{visibility:hidden}
+.v7-app .ap-note{color:#d4e3f2}
+.v7-app .ap-03>.v7-demo{position:absolute}
+
+/* Travelling phone (desktop, motion allowed). A 1000 × 1000 plane in <main> coordinates,
+   projected by matrix3d onto the current four corners; the body sits just outside the screen. */
+.v7-app{position:relative}
+.ap-traveller{display:none}
+.v7-app.ap-travel>.ap-traveller{display:block;position:absolute;left:0;top:0;width:1000px;height:1000px;transform-origin:0 0;z-index:3;pointer-events:none;will-change:transform}
+.ap-traveller-body{position:absolute;inset:-16px -34px;border-radius:150px/72px;background:linear-gradient(135deg,#2a2f36,#0b0d10 30%,#07080a 70%,#30353c);box-shadow:0 0 0 3px #454b53,0 calc(var(--flight,0)*90px) calc(40px + var(--flight,0)*120px) calc(var(--flight,0)*10px) #000c;opacity:var(--body,0)}
+.ap-traveller-screen{position:absolute;inset:0;overflow:hidden;border-radius:110px/52px;background:#0a0d12}
+.ap-traveller-screen>img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:fill;opacity:0}
+.v7-static .ap-traveller{display:none!important}
+/* Filled pin, as drawn in the footer slide. */
+.v7-app .ap-06 .m-brand svg{color:#1380ff}
+.v7-app .ap-06 .m-brand svg path{fill:currentColor}
+.v7-app .ap-06 .m-brand svg circle{fill:#081522;stroke:none;r:3px}
+
+@media(min-width:761px){
+ /* 01 Hero: hand holding the phone beside the parked truck */
+ .ap-01 .v7-copy{left:calc(101*var(--u));top:calc(166*var(--u));width:calc(520*var(--u))}
+ .ap-01 .v7-kicker{font-size:calc(18*var(--u));gap:calc(27*var(--u))}
+ .ap-01 h1{font-size:calc(72*var(--u));line-height:.96;margin-top:calc(24*var(--u));letter-spacing:-.012em;white-space:nowrap}
+ .ap-01 .v7-copy>p:not(.v7-kicker){font-size:calc(25*var(--u));line-height:1.44;margin-top:calc(14*var(--u));width:calc(462*var(--u));color:#c3d6ea}
+ .ap-01 .v7-button{margin-top:calc(30*var(--u));width:calc(360*var(--u));height:calc(64*var(--u));padding:0 calc(26*var(--u));font-size:calc(20.5*var(--u));gap:calc(24*var(--u))}
+ .ap-01 .ap-pillars{margin-top:calc(34*var(--u));gap:calc(15*var(--u))}
+ .ap-01 .ap-pillars li{gap:calc(25*var(--u));font-size:calc(15*var(--u))}
+ .ap-01 .ap-pillars .v7-icon{width:calc(54*var(--u));height:calc(42*var(--u))}
+ .ap-01 .v7-demo{left:calc(1458*var(--u));right:auto;bottom:calc(50*var(--u));font-size:calc(15*var(--u));color:#c4d6e8}
+
+ /* 02 Inspection: text left, large phone centre, driver checking the tyre */
+ .ap-02 .v7-copy{left:calc(67*var(--u));top:calc(128*var(--u));width:calc(560*var(--u))}
+ .ap-02 .v7-kicker{font-size:calc(19*var(--u));gap:calc(24*var(--u))}
+ .ap-02 .v7-kicker:after{width:calc(52*var(--u))}
+ .ap-02 h2{font-size:calc(65*var(--u));line-height:1;margin-top:calc(20*var(--u));white-space:nowrap}
+ .ap-02 .v7-copy>p:not(.v7-kicker){font-size:calc(24*var(--u));line-height:1.4;margin-top:calc(18*var(--u));width:calc(506*var(--u));color:#b9d2ec}
+ .v7-app .ap-02 .v7-copy>.ap-note{margin-top:calc(26*var(--u));padding-top:calc(22*var(--u));border-top:1px solid #24597f;font-size:calc(21*var(--u));color:#d4e3f2}
+ .ap-02 .v7-demo{right:calc(32*var(--u));bottom:calc(28*var(--u));font-size:calc(17*var(--u));color:#c4d6e8}
+
+ /* 03 Inicio: shorter framed section, copy left and the phone photo in a frame right */
+ .ap-03.is-framed{grid-template-columns:minmax(0,1fr) calc(520*var(--u));gap:calc(110*var(--u));padding:calc(110*var(--u)) calc(120*var(--u)) calc(110*var(--u)) calc(74*var(--u))}
+ .ap-03 .v7-kicker{font-size:calc(18*var(--u));gap:calc(30*var(--u))}
+ .ap-03 .v7-kicker:after{width:calc(56*var(--u))}
+ .ap-03 h2{font-size:calc(64*var(--u));line-height:1.04;margin-top:calc(20*var(--u))}
+ .ap-03 .v7-copy>p:not(.v7-kicker){font-size:calc(24.5*var(--u));line-height:1.5;margin-top:calc(20*var(--u));max-width:calc(640*var(--u));color:#c3d6ea}
+ .v7-app .ap-03 .v7-copy>.ap-note{padding:calc(18*var(--u)) calc(22*var(--u));border-left:2px solid var(--v7-blue);background:#0a1826aa;font-size:calc(21*var(--u));color:#d4e3f2}
+ .ap-03 .v7-demo{right:calc(120*var(--u));bottom:calc(64*var(--u));font-size:calc(14*var(--u));color:#c4d6e8}
+
+ /* 04 Profile: driving index on the phone, driver reading it in the cab */
+ .ap-04 .v7-copy{left:calc(66*var(--u));top:calc(166*var(--u));width:calc(570*var(--u))}
+ .ap-04 .v7-kicker{font-size:calc(16.5*var(--u));gap:calc(28*var(--u))}
+ .ap-04 h2{font-size:calc(68*var(--u));line-height:1.02;margin-top:calc(26*var(--u));white-space:nowrap}
+ .ap-04 .v7-copy>p:not(.v7-kicker){font-size:calc(25.5*var(--u));line-height:1.52;margin-top:calc(14*var(--u));width:calc(515*var(--u));color:#b9d2ec}
+ .ap-04 .ap-04-cards{margin-top:calc(26*var(--u));gap:calc(12*var(--u));width:calc(520*var(--u))}
+ .ap-04 .ap-04-cards .v7-card{display:grid;grid-template-columns:calc(44*var(--u)) 1fr;column-gap:calc(18*var(--u));row-gap:calc(2*var(--u));align-items:center;padding:calc(14*var(--u)) calc(20*var(--u))}
+ .ap-04 .ap-04-cards .v7-card-icon{grid-row:span 2;width:calc(44*var(--u));height:calc(44*var(--u))}
+ .v7-app .ap-04 .ap-04-cards h3{font-size:calc(19*var(--u))}
+ .v7-app .ap-04 .ap-04-cards p{font-size:calc(17*var(--u));line-height:1.4}
+ .ap-04 .v7-demo{right:calc(34*var(--u));bottom:calc(38*var(--u));font-size:calc(13.5*var(--u));letter-spacing:.14em;text-transform:uppercase;color:#c4d6e8}
+
+ /* 05 Office and driver: plain section on the app's own background */
+ .ap-05.is-plain{padding:calc(150*var(--u)) calc(79*var(--u)) calc(150*var(--u))}
+ .ap-05 .v7-kicker{font-size:calc(17*var(--u));gap:calc(24*var(--u))}
+ .ap-05 .v7-kicker:after{width:calc(50*var(--u))}
+ .ap-05 h2{font-size:calc(69*var(--u));line-height:1.04;margin-top:calc(22*var(--u));max-width:calc(620*var(--u))}
+ .ap-05 .v7-copy>p:not(.v7-kicker){font-size:calc(26.5*var(--u));line-height:1.43;margin-top:calc(22*var(--u));max-width:calc(490*var(--u));color:#b9d2ec}
+ .ap-05 .v7-button{margin-top:calc(36*var(--u));padding:calc(24*var(--u)) calc(34*var(--u));font-size:calc(22.5*var(--u));gap:calc(28*var(--u));border-radius:calc(12*var(--u))}
+
+ /* 06 Footer: supervisor at the map, phone in hand; link band over the road */
+ .ap-06 .v7-footer-hero{left:calc(88*var(--u));top:calc(455*var(--u))}
+ .ap-06 .v7-footer-hero .m-brand{font-size:calc(92*var(--u));gap:calc(9*var(--u))}
+ .ap-06 .v7-footer-hero .m-brand svg{width:calc(110*var(--u));height:calc(110*var(--u));margin:calc(-10*var(--u)) 0 calc(-10*var(--u)) calc(-23*var(--u))}
+ .ap-06 .v7-footer-hero>p{margin-top:calc(16*var(--u));font-size:calc(27*var(--u));color:#a9c9ec;white-space:nowrap}
+ .ap-06 .v7-footer-statement{left:auto;right:calc(72*var(--u));top:calc(682*var(--u));text-align:right;font-size:calc(16*var(--u))!important;line-height:1.6!important;letter-spacing:.24em;color:#7fb3e8!important}
+ .ap-06 .v7-footer-links{left:calc(80*var(--u));top:calc(672*var(--u));grid-template-columns:calc(433*var(--u)) calc(234*var(--u)) calc(261*var(--u)) 1fr}
+ .ap-06 .v7-footer-brand .m-brand{font-size:calc(50*var(--u));gap:calc(9*var(--u))}
+ .ap-06 .v7-footer-brand .m-brand svg{width:calc(64*var(--u));height:calc(64*var(--u));margin:calc(-8*var(--u)) 0 calc(-8*var(--u)) calc(-13*var(--u))}
+ .ap-06 .v7-footer-brand p{margin-top:calc(10*var(--u));font-size:calc(20*var(--u))}
+ .ap-06 .v7-footer-links nav{gap:calc(4*var(--u))}
+ .v7-app .ap-06 .v7-footer-links h2{font-size:calc(18.5*var(--u));margin:calc(2*var(--u)) 0 calc(6*var(--u))}
+ .ap-06 .v7-footer-links nav a{font-size:calc(18.5*var(--u))}
+ .ap-06 .v7-demo{right:calc(40*var(--u));bottom:auto;top:calc(604*var(--u));font-size:calc(13.5*var(--u))}
+ .ap-06 .v7-copyright{left:calc(80*var(--u));top:calc(880*var(--u));padding-top:0;border-top:0}
+}
+@media(max-width:760px){
+ .ap-01{--m-w:185%;--m-x:-58%;padding-top:64px}
+ .ap-02{--m-w:165%;--m-x:-40%}
+ .v7-app .ap-03 .v7-frame{--frame-x:-19%!important}
+ .ap-04{--m-w:165%;--m-x:-36%}
+ .v7-app .ap-pillars{grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+ .v7-app .ap-pillars li{gap:12px;font-size:12.5px;letter-spacing:.14em}
+ .v7-app .ap-pillars .v7-icon{width:40px;height:32px;border-radius:7px}
+ .v7-app .v7-copy .v7-button{display:inline-flex}
+ /* Footer: the screens plate sits exactly on the footer photo. */
+ .v7-app .ap-06>.v7-demo{order:1;margin-top:-4px}
+ .v7-app .ap-06>.ap-footer-screens{position:absolute!important;inset:0 auto auto 0!important;width:100%;aspect-ratio:1672/941;margin:0;order:0;z-index:0}
+}
