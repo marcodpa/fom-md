@@ -7,9 +7,11 @@
     "title": "Tu flota conectada. Tu operación, bajo control.",
     "image": "output/laminas-secciones-v7/01-inicio/01.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Tu flota conectada. Tu operación, bajo control.",
       "body": "La oficina y la carretera, en una misma plataforma."
@@ -27,9 +29,11 @@
     "title": "Todo ese control. Ahora en tu mano.",
     "image": "output/laminas-secciones-v7/01-inicio/02.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Todo ese control. Ahora en tu mano.",
       "body": "De la vista completa de tu flota a la unidad que acompaña a tu conductor.",
@@ -52,9 +56,11 @@
     "title": "La operación se entiende mejor cuando todos ven lo mismo.",
     "image": "output/laminas-secciones-v7/01-inicio/03.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "La operación se entiende mejor cuando todos ven lo mismo.",
       "body": "FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas. Seguimiento, cuidado del vehículo y comunicación forman parte de una misma operación.",
@@ -73,9 +79,11 @@
     "title": "Toda la operación. Una sola vista.",
     "image": "output/laminas-secciones-v7/01-inicio/04.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Toda la operación. Una sola vista.",
       "body": "Vehículos, alertas y mantenimiento conectados para decidir con claridad.",
@@ -98,9 +106,11 @@
     "title": "La operación también viaja con tu equipo.",
     "image": "output/laminas-secciones-v7/01-inicio/05.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "La operación también viaja con tu equipo.",
       "body": "FOM DRIVER conecta al conductor con su unidad y con la oficina. Inicio, inspección y perfil en una misma app.",
@@ -123,9 +133,11 @@
     "title": "Del primer chequeo al próximo servicio.",
     "image": "output/laminas-secciones-v7/01-inicio/06.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Del primer chequeo al próximo servicio.",
       "body": "Un recorrido conectado: revisar, reportar y dar seguimiento.",
@@ -146,9 +158,11 @@
     "title": "Conducir mejor empieza por entender cada viaje.",
     "image": "output/laminas-secciones-v7/01-inicio/07.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Conducir mejor empieza por entender cada viaje.",
       "body": "Un índice claro para acompañar al conductor y atender lo que necesita mejorar.",
@@ -171,9 +185,11 @@
     "title": "Un mismo control. Cada zona de tu flota.",
     "image": "output/laminas-secciones-v7/01-inicio/08.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Un mismo control. Cada zona de tu flota.",
       "body": "Organiza unidades por área y consulta su ubicación desde la consola."
@@ -191,9 +207,11 @@
     "title": "Hablemos de tu operación",
     "image": "output/laminas-secciones-v7/01-inicio/09.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Hablemos de tu operación",
       "body": "Cuéntanos cómo trabajas y coordinamos una demostración.",
@@ -218,9 +236,11 @@
     "title": "Preguntas frecuentes",
     "image": "output/laminas-secciones-v7/01-inicio/10.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Preguntas frecuentes",
       "faqs": [
@@ -254,9 +274,11 @@
     "title": "Pie de página",
     "image": "output/laminas-secciones-v7/01-inicio/11.png",
     "status": "implemented-awaiting-user-review",
-    "implementation": "src/pages/HomeV7.jsx",
-    "evidence": [],
-    "note": null,
+    "implementation": "src/pages/v7/Inicio.jsx",
+    "evidence": [
+      "output/evidencia-v7/01-inicio/"
+    ],
+    "note": "Rehecha con el kit v7 y la segunda pasada web (HomeV7.jsx se conserva como historia). Ver evidencia.",
     "content": {
       "title": "Pie de página",
       "body": "FOM · La oficina y la carretera, conectadas.",

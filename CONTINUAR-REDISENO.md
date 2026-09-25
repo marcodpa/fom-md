@@ -6,11 +6,13 @@
 
 Repositorio: https://github.com/marcodpa/fom-md · Rama de trabajo: `codex/rediseno-v6-fiel`.
 
-**Las once páginas están implementadas** y pendientes de la revisión final del usuario (no registrar aprobación que no haya dado). Inicio (`HomeV7`) no cambió. Las otras diez viven en `src/pages/v7/<Página>.jsx` + `src/styles/v7/<página>.css`, sobre el kit común `src/components/v7/V7Kit.jsx` + `src/styles/v7-kit.css`.
+**Las once páginas están implementadas** y pendientes de la revisión final del usuario (no registrar aprobación que no haya dado). Inicio también se rehízo con el kit (`src/pages/v7/Inicio.jsx`; `HomeV7.jsx` queda como historia y ya no tiene ruta). Las páginas viven en `src/pages/v7/<Página>.jsx` + `src/styles/v7/<página>.css`, sobre el kit común `src/components/v7/V7Kit.jsx` + `src/styles/v7-kit.css`.
 
 Cómo se hicieron: primero cada sección se reprodujo fiel a su lámina v7 (foto limpia extraída de la propia lámina, capturas originales proyectadas en cada pantalla, texto HTML real). Después el usuario dijo que parecía «una diapositiva de PowerPoint» y pidió, y aprobó en Plataforma, una **segunda pasada web**: fundidos entre secciones y aparición al hacer scroll; dispositivos fijos mientras cambian de captura (`StickyTour`); pantallas con pestañas (`DeviceTabs`); menos fotos; tarjetas y párrafos en lugar de viñetas; secciones con el fondo de la app (el globo de `/entrar`); y en App del conductor un solo teléfono que viaja entre las fotos al hacer scroll (GSAP). Por eso varias láminas ya no se corresponden una a una con una sección: el plan indica en `note` qué se unió o cambió.
 
 Método, herramientas y reglas: [output/V7-METODO.md](output/V7-METODO.md). Estado por sección: [output/PLAN-IMPLEMENTACION-V7.md](output/PLAN-IMPLEMENTACION-V7.md). Evidencia (lámina arriba, web abajo; móvil; capturas de scroll en vivo): `output/evidencia-v7/<página>/`.
+
+Ajustes posteriores pedidos por el usuario: tipografía más pequeña en todo el sitio (guía *typeset* de la skill impeccable, cuerpo ≥16 px), header compacto con botón «Solicitar demo» y barra de progreso, sin etiquetas pequeñas sobre los títulos ni eslóganes, el recorrido fijo solo en Plataforma (las demás usan pestañas sin fijar), animaciones variadas por sección (seis entradas alternas, profundidad de fotos, cifras que cuentan, tarjetas inclinables), y en /app los teléfonos de las fotos borrados para que el teléfono viajero sea el único. En Inicio, el eslogan inventado pintado en el camión de la foto 05 se borró a mano sobre `src/assets/marketing/v7/01-inicio/05.webp` (copia de `home-v7/05.webp`).
 
 Pendiente: revisión del usuario página por página; la animación histórica «dashboard que se convierte en móvil» sigue sin hacerse (no es la del teléfono viajero de /app).
 

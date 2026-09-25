@@ -1,0 +1,134 @@
+/* Inicio — geometry measured on output/laminas-secciones-v7/01-inicio (1672 × 941). */
+.v7-inicio .in-facts b{color:var(--v7-ink);font-weight:600}
+.v7-inicio .in-all-questions{display:inline-flex;align-items:center;gap:14px;color:#65bdff}
+.v7-inicio .in-all-questions:hover{text-decoration:underline}
+.v7-inicio .in-footer-demo{color:#2ea6ff;font-weight:600}
+.v7-inicio .in-footer-demo:hover{text-decoration:underline}
+/* The kit's cards highlight the app screen that the phone is showing */
+.in-app-cards[data-active="0"] .v7-card:nth-child(1),.in-app-cards[data-active="1"] .v7-card:nth-child(2),.in-app-cards[data-active="2"] .v7-card:nth-child(3){border-color:#2c9cff;box-shadow:0 0 0 1px #2c9cff55}
+
+/* Demo form (MarketingSections ContactForm), on the road photo */
+.v7-inicio .m-contact-form{z-index:1;display:grid;grid-template-columns:1fr 1fr;margin:0;background:#081522ed;border:1.5px solid #2f5a7c;box-shadow:none;color:var(--v7-ink)}
+.v7-inicio .m-contact-form>h2,.v7-inicio .m-contact-form>p:not([role=status]){display:none}
+.v7-inicio .m-contact-form label{display:flex;flex-direction:column;color:#eef5fc;font-weight:400}
+.v7-inicio .m-contact-form :is(label:nth-of-type(5),button,small,[role=status]){grid-column:1/-1}
+.v7-inicio .m-contact-form :is(input,select,textarea){width:100%;max-width:100%;margin:0;background:#0b1a28;border:1px solid #2f4d67;color:#f1f6fb;font:inherit;caret-color:#36aaff;box-shadow:none}
+.v7-inicio .m-contact-form :is(input,select,textarea):hover{border-color:#3f6b8f}
+.v7-inicio .m-contact-form :is(input,select,textarea):focus{border-color:#2c9cff;outline:2px solid #2c9cff55;outline-offset:1px}
+.v7-inicio .m-contact-form textarea{resize:vertical}
+.v7-inicio .m-contact-form select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e6f0fa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9em center;background-size:1.15em;padding-right:2.6em}
+.v7-inicio .m-contact-form button{display:flex;align-items:center;justify-content:center;width:100%;margin:0;background:#138bff;color:#fff;border:0;font:inherit;font-weight:500;letter-spacing:0;cursor:pointer;transition:background .2s}
+.v7-inicio .m-contact-form button:hover{background:#0679d8}
+.v7-inicio .m-contact-form small{display:block;text-align:center;color:#b5cbe0;line-height:1.4}
+.v7-inicio .m-contact-form [role=status]{margin:0;background:#0e2333;color:#b4e4ce;border-radius:10px;line-height:1.45}
+.v7-inicio .m-contact-form [role=status] a{color:#3aa9ff;text-decoration:underline}
+.v7-motion .in-09 .m-contact-form{opacity:0;transform:translateY(28px);transition:opacity .7s .2s ease,transform .8s .2s cubic-bezier(.2,.7,.2,1)}
+.v7-motion .in-09.is-in .m-contact-form{opacity:1;transform:none}
+
+@media(min-width:761px){
+ /* 01 Hero: monitor on the desk facing the road, title left */
+ .in-01 .v7-copy{left:calc(70*var(--u));top:calc(250*var(--u));width:calc(690*var(--u))}
+ .in-01 h1{font-size:calc(52*var(--u));white-space:nowrap}
+ .in-01 .v7-copy>p{font-size:calc(22*var(--u));margin-top:calc(14*var(--u));color:#b4cbe3}
+ .in-01 .v7-button{margin-top:calc(34*var(--u));font-size:calc(19*var(--u))}
+
+ /* 02 Phone in hand: shorter framed section, three paragraph cards */
+ .in-02 h2{font-size:calc(50*var(--u));line-height:1.04}
+ .in-02 .v7-copy>p{font-size:calc(21*var(--u));line-height:1.4;margin-top:calc(20*var(--u));color:#32a8ff;max-width:calc(760*var(--u))}
+ .in-02 .v7-cards{margin-top:calc(46*var(--u))}
+ .in-02 .v7-demo{right:calc(70*var(--u));bottom:calc(88*var(--u))}
+
+ /* 03 Operator at the map monitor: the woman covers the left of the screen */
+ .in-03 .v7-copy{left:calc(1050*var(--u));top:calc(140*var(--u));width:calc(590*var(--u))}
+ .in-03 h2{font-size:calc(42*var(--u));line-height:1.08}
+ .in-03 .v7-copy>p{font-size:calc(19*var(--u));line-height:1.4;margin-top:calc(22*var(--u))}
+ .in-03 .in-services{margin-top:calc(28*var(--u));gap:calc(12*var(--u))}
+ .in-03 .v7-card{padding:calc(20*var(--u)) calc(18*var(--u));gap:calc(10*var(--u));background:linear-gradient(160deg,#0d1f31d9,#07131fd9)}
+ .in-03 .v7-card-icon{width:calc(42*var(--u));height:calc(42*var(--u))}
+ .in-03 .v7-card h3{font-size:calc(21*var(--u))}.in-03 .v7-card p{font-size:calc(16*var(--u));line-height:1.45}.in-03 .v7-card-more{font-size:calc(15*var(--u))}
+ .in-03 .v7-copy>p.in-note{font-size:calc(18*var(--u));margin-top:calc(36*var(--u));color:#b4cbe3}
+ .in-03 .in-note:before{content:'';display:block;width:calc(52*var(--u));border-top:2px solid #139cff;margin-bottom:calc(16*var(--u))}
+
+ /* 04+08 Office console: framed monitor with tabs on the left, both texts on the right */
+ .in-04.is-framed{grid-template-columns:calc(860*var(--u)) minmax(0,1fr)}
+ .in-console{position:relative}
+ .in-console-tabs{left:50%;bottom:calc(26*var(--u));transform:translateX(-50%)}
+ .in-console .v7-demo{right:calc(22*var(--u));bottom:calc(-34*var(--u))}
+ .in-04 .v7-copy{display:grid;gap:calc(26*var(--u))}
+ .in-view{padding:calc(6*var(--u)) 0 calc(6*var(--u)) calc(28*var(--u));border-left:2px solid #1f4462;transition:border-color .3s}
+ .in-view.is-active{border-left-color:var(--v7-blue)}
+ .in-view h2{font-size:calc(42*var(--u));line-height:1.06}
+ .in-view>p:not(.in-facts){font-size:calc(20*var(--u));line-height:1.45;margin-top:calc(14*var(--u));color:#32a8ff}
+ .in-view>p.in-facts{font-size:calc(17*var(--u));line-height:1.6;margin-top:calc(12*var(--u));color:#9fc1e4}
+
+ /* 05 Technician with the app, text right; tabs under the phone */
+ .in-05 .v7-copy{left:calc(975*var(--u));top:calc(120*var(--u));width:calc(640*var(--u))}
+ .in-05 h2{font-size:calc(46*var(--u));line-height:1.06}
+ .in-05 .v7-copy>p{font-size:calc(20*var(--u));line-height:1.42;margin-top:calc(22*var(--u));color:#32a8ff}
+ .in-05 .v7-cards{margin-top:calc(40*var(--u));gap:calc(14*var(--u))}
+ .in-05 .v7-card{padding:calc(24*var(--u)) calc(22*var(--u))}
+ .in-05 .v7-card h3{font-size:calc(22*var(--u))}.in-05 .v7-card p{font-size:calc(17*var(--u))}
+ .in-app-tabs{left:calc(452*var(--u));top:calc(812*var(--u))}
+
+ /* 06 First check to next service: app background, three numbered cards */
+ .in-06 h2{font-size:calc(50*var(--u));line-height:1.04}
+ .in-06 .v7-copy>p{font-size:calc(21*var(--u));margin-top:calc(20*var(--u));color:#32a8ff}
+ .in-06 .v7-cards{max-width:calc(1180*var(--u));margin-top:calc(56*var(--u))}
+ .in-06 .v7-card{padding:calc(34*var(--u)) calc(32*var(--u))}
+
+ /* 07 Driver profile with the driving index: copy left, framed phone right */
+ .in-07 h2{font-size:calc(46*var(--u));line-height:1.06}
+ .in-07 .v7-copy>p{font-size:calc(20*var(--u));line-height:1.42;margin-top:calc(20*var(--u));color:#32a8ff;max-width:calc(820*var(--u))}
+ .in-07 .v7-cards{margin-top:calc(46*var(--u))}
+ .in-07 .v7-demo{right:calc(70*var(--u));bottom:calc(88*var(--u))}
+
+ /* 09 Contact on the road at dusk: copy left, form right */
+ .in-09 .v7-copy{left:calc(87*var(--u));top:calc(179*var(--u));width:calc(690*var(--u))}
+ .in-09 h2{font-size:calc(58*var(--u));line-height:1.05}
+ .in-09 .v7-copy>p{font-size:calc(24*var(--u));line-height:1.38;margin-top:calc(18*var(--u));color:#32a8ff;max-width:calc(560*var(--u))}
+ .in-09 .m-contact-form{position:absolute;right:calc(50*var(--u));top:calc(150*var(--u));width:calc(774*var(--u));padding:calc(38*var(--u));gap:calc(24*var(--u)) calc(26*var(--u));border-radius:calc(20*var(--u));scroll-margin-top:calc(4.9vw + 22px)}
+ .in-09 .m-contact-form label{gap:calc(8*var(--u));font-size:calc(18*var(--u))}
+ .in-09 .m-contact-form :is(input,select,textarea){min-height:calc(56*var(--u));padding:calc(12*var(--u)) calc(16*var(--u));font-size:max(13px,calc(17*var(--u)));border-radius:calc(10*var(--u))}
+ .in-09 .m-contact-form textarea{height:calc(110*var(--u))}
+ .in-09 .m-contact-form button{min-height:calc(70*var(--u));border-radius:calc(12*var(--u));font-size:calc(21*var(--u))}
+ .in-09 .m-contact-form small{font-size:calc(16*var(--u))}
+ .in-09 .m-contact-form [role=status]{padding:calc(12*var(--u)) calc(14*var(--u));font-size:calc(16*var(--u))}
+
+ /* 10 FAQ: app background, two columns */
+ .in-10 h2{font-size:calc(54*var(--u))}
+ .in-10 .v7-copy>p{font-size:calc(21*var(--u));margin-top:calc(12*var(--u));color:#93b9e5}
+ .in-10 .v7-faq-list{position:relative;max-width:calc(1200*var(--u))}
+ .in-10 .in-all-questions{margin-top:calc(34*var(--u));font-size:calc(19*var(--u))}
+
+ /* 11 Footer on the trucks at dusk */
+ .in-11 .in-footer-demo{position:absolute;z-index:1;left:calc(1194*var(--u));top:calc(730*var(--u));font-size:calc(19*var(--u))}
+}
+@media(max-width:760px){
+ .in-01{--m-w:165%;--m-x:-58%;padding-top:68px}
+ .in-02 .v7-frame{--frame-x:-34%!important}
+ .in-03{--m-w:165%;--m-x:-18%}
+ .in-04.is-framed>.in-console{order:2;margin:24px 6% 0;display:flex;flex-direction:column;align-items:center;gap:10px}
+ .in-console>.v7-frame{width:100%;aspect-ratio:4/3;--frame-x:-40%!important}
+ .in-console>.in-console-tabs{position:relative;left:auto;bottom:auto;transform:none}
+ .in-console>.v7-demo{position:relative;right:auto;bottom:auto;align-self:flex-end;margin:0}
+ .in-04 .v7-copy{display:grid;gap:26px}
+ .in-view{padding:2px 0 2px 16px}
+ .in-view>p:not(.in-facts){font-size:17px;line-height:1.5;margin-top:12px;color:#32a8ff}
+ .in-view>p.in-facts{font-size:15.5px;line-height:1.55;margin-top:10px}
+ .in-05{--m-w:220%;--m-x:-60%}
+ .in-05 .in-app-tabs{order:2;margin-top:12px;align-self:center}
+ .in-07 .v7-frame{--frame-x:0%!important}
+ .in-07 .v7-demo{order:3}
+ .in-02 .v7-demo{order:3}
+ .in-09{--m-w:170%;--m-x:-15%}
+ .v7-inicio .m-contact-form{order:4;margin:20px 6% 0;grid-template-columns:1fr;gap:16px;padding:22px;border-radius:16px;scroll-margin-top:84px}
+ .v7-inicio .m-contact-form label{gap:8px;font-size:15px}
+ .v7-inicio .m-contact-form :is(input,select,textarea){font-size:16px;padding:12px;min-height:48px;border-radius:10px}
+ .v7-inicio .m-contact-form textarea{min-height:110px}
+ .v7-inicio .m-contact-form button{min-height:50px;padding:14px 12px;font-size:16px;border-radius:10px}
+ .v7-inicio .m-contact-form small{font-size:13px}
+ .v7-inicio .m-contact-form [role=status]{padding:12px;font-size:14px}
+ .in-10 .in-all-questions{order:4;margin:22px 6% 0;font-size:15px}
+ .in-11 .in-footer-demo{order:4;margin:18px 6% 0!important;font-size:15.5px;min-height:40px;display:flex;align-items:center}
+ .in-11 .v7-copyright{order:5}
+}

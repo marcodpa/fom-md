@@ -7,7 +7,7 @@ import './styles/fom-v6.css'
 import './styles/v7-header.css'
 
 const Marketing = lazy(() => import('./pages/ReferenceMarketing'))
-const HomeV7 = lazy(() => import('./pages/HomeV7'))
+const Inicio = lazy(() => import('./pages/v7/Inicio'))
 // v7 pages, one per route, implemented from output/laminas-secciones-v7.
 const V7_PAGES = {
   plataforma: lazy(() => import('./pages/v7/Plataforma')),
@@ -58,7 +58,7 @@ export default function App() {
     <ScrollTop />
     <Suspense fallback={<div className="route-loading" role="status" style={{ padding: '120px 5%' }}>Cargando…</div>}>
       <Routes>
-        <Route path="/" element={<HomeV7 />} />
+        <Route path="/" element={<Inicio />} />
         {['plataforma','funciones','seguridad','areas','contacto','preguntas-frecuentes','app','beneficios','quienes-somos','que-ofrecemos'].map(path => {
           const Page = V7_PAGES[path] || Marketing
           return <Route key={path} path={'/' + path} element={<Page />} />
