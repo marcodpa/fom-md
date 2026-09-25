@@ -1,7 +1,7 @@
 // Section-by-section screenshots of a v7 route, for comparison with its slides.
 // Drives a local Chrome through the DevTools protocol (no extra dependencies).
 //
-// node scripts/v7-shots.mjs <route> <outDir> [--width 1672] [--height 941] [--mobile]
+// node scripts/v7-shots.mjs <route> <outDir> [--width 1672] [--height 941] [--mobile] [--scroll <y>]
 //
 // Writes <outDir>/<nn>.png for every top-level <section>/<footer> in <main>, plus
 // report.json with each section's box and the page's horizontal overflow.
@@ -47,8 +47,18 @@ try {
   await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile })
   await send('Page.navigate', { url: base + route })
   await sleep(2500)
+  const at = opt('scroll', null)
+  if (at !== null) {
+    // One live viewport (motion on) at a scroll position, e.g. to review section seams.
+    await evaluate(`scrollTo(0, ${Number(at)})`)
+    await sleep(2600)
+    const { data } = await send('Page.captureScreenshot', { format: 'png' })
+    writeFileSync(join(out, `scroll-${at}.png`), Buffer.from(data, 'base64'))
+    console.log(join(out, `scroll-${at}.png`))
+    process.exit(0)
+  }
   // Force lazy photos to load, then wait for fonts and images.
-  await evaluate(`(async()=>{document.querySelectorAll('img[loading=lazy]').forEach(i=>i.loading='eager');await document.fonts.ready;await Promise.all([...document.images].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));await Promise.all([...document.images].map(i=>i.decode().catch(()=>0)));return true})()`)
+  await evaluate(`(async()=>{document.documentElement.classList.add('v7-static');document.querySelectorAll('.v7-section').forEach(s=>s.classList.add('is-in'));document.querySelectorAll('img[loading=lazy]').forEach(i=>i.loading='eager');await document.fonts.ready;await Promise.all([...document.images].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));await Promise.all([...document.images].map(i=>i.decode().catch(()=>0)));return true})()`)
   await sleep(800)
   const boxes = await evaluate(`[...document.querySelectorAll('main > section, main > footer, main > header, #contenido > section, #contenido > footer')].filter((e,i,a)=>a.indexOf(e)===i).map(e=>{const r=e.getBoundingClientRect();return {id:e.id||e.className.split(' ').slice(-1)[0],y:r.top+scrollY,h:r.height}})`)
   const overflow = await evaluate('document.documentElement.scrollWidth - innerWidth')

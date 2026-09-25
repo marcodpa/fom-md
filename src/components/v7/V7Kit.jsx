@@ -1,7 +1,7 @@
 // Shared pieces for the v7 marketing pages. Every section keeps its own
 // composition in its page stylesheet; these helpers only provide the photo
 // plate, the projected original screenshots and repeated controls.
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { screenProjection } from '../../lib/screenProjection'
 import { Icono } from '../../panel/Iconos'
@@ -27,9 +27,11 @@ const toPercent = ([x, y]) => `${(x / PLATE_W * 100).toFixed(3)}% ${(y / PLATE_H
 /**
  * Photo plus original FOM captures projected into its physical screens.
  * screens: [{ src, corners: [tl,tr,br,bl], phone?, clip?: [[x,y]...], radius?, alt? }]
+ * `src` may be a list of captures: the one at index `active` is shown (cross-fade),
+ * which is how DeviceTabs and StickyTour switch what the device displays.
  * `clip` is a polygon in slide coordinates used when a person or object sits in front of the screen.
  */
-export function Plate({ id, screens = [], priority = false, className = '' }) {
+export function Plate({ id, screens = [], priority = false, className = '', active = 0 }) {
   const frame = useRef(null)
   useLayoutEffect(() => {
     const el = frame.current
@@ -41,18 +43,109 @@ export function Plate({ id, screens = [], priority = false, className = '' }) {
   }, [])
   return <div className={`v7-plate ${className}`} ref={frame}>
     <img className="v7-photo" src={plate(id)} width={PLATE_W} height={PLATE_H} alt="" loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} decoding="async" />
-    {screens.map((s, i) => <div key={i} className="v7-screen-layer" style={s.clip ? { clipPath: `polygon(${s.clip.map(toPercent).join(',')})` } : undefined}>
-      <div className={`v7-screen${s.phone ? ' is-phone' : ''}`} style={{ transform: `scale(var(--plate-scale)) matrix3d(${screenProjection(s.corners).join(',')})`, borderRadius: s.radius }}>
-        <img src={s.src} alt={s.alt || `Captura original ${s.phone ? 'de la app del conductor' : 'del panel web'} FOM. Datos de demostración.`} width={s.phone ? 390 : 1430} height={s.phone ? 844 : 953} loading={priority ? 'eager' : 'lazy'} decoding="async" />
+    {screens.map((s, i) => {
+      const sources = Array.isArray(s.src) ? s.src : [s.src]
+      return <div key={i} className="v7-screen-layer" style={s.clip ? { clipPath: `polygon(${s.clip.map(toPercent).join(',')})` } : undefined}>
+        <div className={`v7-screen${s.phone ? ' is-phone' : ''}`} style={{ transform: `scale(var(--plate-scale)) matrix3d(${screenProjection(s.corners).join(',')})`, borderRadius: s.radius }}>
+          {sources.map((src, n) => <img key={src} src={src} className={n === (sources.length > 1 ? active : 0) ? 'is-active' : undefined} aria-hidden={sources.length > 1 && n !== active ? true : undefined} alt={s.alt || `Captura original ${s.phone ? 'de la app del conductor' : 'del panel web'} FOM. Datos de demostración.`} width={s.phone ? 390 : 1430} height={s.phone ? 844 : 953} loading={priority && n === 0 ? 'eager' : 'lazy'} decoding="async" />)}
+        </div>
       </div>
-    </div>)}
+    })}
   </div>
 }
 
+/**
+ * Buttons that change what a device shows. tabs: [{ label, icon? }]. Arrow keys move
+ * between tabs, as in any tab list.
+ */
+export function DeviceTabs({ tabs, active, onChange, label, className = '' }) {
+  const keys = e => {
+    const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
+    if (!step) return
+    e.preventDefault()
+    const next = (active + step + tabs.length) % tabs.length
+    onChange(next)
+    e.currentTarget.querySelectorAll('[role=tab]')[next]?.focus()
+  }
+  return <div className={`v7-tabs ${className}`} role="tablist" aria-label={label} onKeyDown={keys}>
+    {tabs.map((tab, i) => <button key={tab.label} type="button" role="tab" aria-selected={i === active} tabIndex={i === active ? 0 : -1} onClick={() => onChange(i)}>
+      {tab.icon && <V7Icon name={tab.icon} />}<span>{tab.label}</span>
+    </button>)}
+  </div>
+}
+
+/**
+ * Scroll story: the photo and its device stay pinned while the steps scroll over the
+ * dark side of the picture; each step switches the device to its own capture. The tabs
+ * jump to a step, so the tour also works by clicking.
+ * steps: [{ tab, icon?, kicker?, title, body, items?, stat?, children? }], srcs: one capture per step.
+ */
+export function StickyTour({ id, className = '', plateId, screen, srcs, steps, label, demo = true }) {
+  const [active, setActive] = useState(0)
+  const stepRefs = useRef([])
+  const ref = useReveal()
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) if (entry.isIntersecting) setActive(Number(entry.target.dataset.step))
+    }, { rootMargin: '-45% 0px -45% 0px' })
+    stepRefs.current.forEach(el => el && observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+  const go = i => { setActive(i); stepRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
+  return <section ref={ref} id={id} className={`v7-section v7-tour ${className}`} aria-label={label} style={{ '--steps': steps.length }}>
+    <div className="v7-tour-stage">
+      <Plate id={plateId} screens={[{ ...screen, src: srcs }]} active={active} />
+      <DeviceTabs className="v7-tour-tabs" label={`${label}: vistas`} tabs={steps.map(s => ({ label: s.tab, icon: s.icon }))} active={active} onChange={go} />
+      {demo && <small className="v7-demo">Datos de demostración</small>}
+    </div>
+    <div className="v7-tour-steps">
+      {steps.map((step, i) => <article key={step.tab} ref={el => { stepRefs.current[i] = el }} data-step={i} className={`v7-tour-step${i === active ? ' is-active' : ''}`} aria-labelledby={`${id}-step-${i}`}>
+        <div className="v7-tour-card">
+          {step.kicker && <p className="v7-kicker">{step.kicker}</p>}
+          <h2 id={`${id}-step-${i}`}>{step.title}</h2>
+          <p>{step.body}</p>
+          {step.items && <Features items={step.items} className="is-compact" />}
+          {step.stat && <StatCard icon={step.stat.icon} value={step.stat.value} label={step.stat.label} className="is-inline" />}
+          {step.children}
+        </div>
+      </article>)}
+    </div>
+  </section>
+}
+
+/**
+ * The photo inside a rounded frame instead of full-bleed, for shorter sections that
+ * break the one-screen-per-slide rhythm. `x` shifts the photo horizontally (e.g. '-45%')
+ * to keep the person or device in the frame; `ratio` is the frame's aspect ratio.
+ */
+export function Frame({ plateId, screens, active, x = '-30%', ratio = '4 / 5', className = '' }) {
+  return <div className={`v7-frame ${className}`} style={{ '--frame-x': x, '--frame-ratio': ratio }}>
+    <Plate id={plateId} screens={screens} active={active} />
+  </div>
+}
+
+/** Marks a section `is-in` the first time it enters the viewport (drives the reveal motion). */
+function useReveal() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof IntersectionObserver === 'undefined') return el?.classList.add('is-in')
+    el.closest('.v7-page')?.classList.add('v7-motion')
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { el.classList.add('is-in'); observer.disconnect() }
+    }, { threshold: 0.18 })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  return ref
+}
+
 /** One full-viewport section: photo plate, optional shade and the HTML composition on top. */
-export function V7Section({ as: Tag = 'section', id, className = '', plateId, screens, priority, demo = false, labelledBy, children }) {
-  return <Tag id={id} className={`v7-section ${className}`} aria-labelledby={labelledBy}>
-    {plateId && <Plate id={plateId} screens={screens} priority={priority} />}
+export function V7Section({ as: Tag = 'section', id, className = '', plateId, screens, active, priority, demo = false, labelledBy, children }) {
+  const ref = useReveal()
+  return <Tag ref={ref} id={id} className={`v7-section ${className}`} aria-labelledby={labelledBy}>
+    {plateId && <Plate id={plateId} screens={screens} active={active} priority={priority} />}
     {children}
     {demo && <small className="v7-demo">Datos de demostración</small>}
   </Tag>
@@ -195,7 +288,8 @@ const FOOTER_GROUPS = [
  * link columns. Layout specifics per page live in the page stylesheet.
  */
 export function V7Footer({ plateId, className = '', statement = <>La oficina<br />y la carretera,<br />conectadas.</>, children }) {
-  return <footer className={`v7-section v7-footer ${className}`}>
+  const ref = useReveal()
+  return <footer ref={ref} className={`v7-section v7-footer ${className}`}>
     <Plate id={plateId} />
     <div className="v7-footer-hero">
       <span className="v7-footer-mark" aria-hidden="true"><Brand /></span>
