@@ -81,7 +81,7 @@ const TILES = [
   </div> },
   { key: 'tele', tab: 'Telemetría', icon: 'gauge', title: 'Telemetría', text: 'Estado de la unidad en tiempo real.', to: '#fn-telematica', visual: <div className="fn-tele">
     <div><small>Velocidad</small><p><CountUp value="54" /><span>km/h</span></p><V7Icon name="gauge" /></div>
-    <div className="fn-fuel" style={{ '--v': 0.72 }}><small>Combustible</small><p><CountUp value="72" /><span>%</span></p><V7Icon name="fuel" /><span className="fn-meter"><i /></span></div>
+    <div className="fn-fuel fn-odometer"><small>Kilometraje</small><p><CountUp value="84.230" /><span>km</span></p><V7Icon name="route" /></div>
   </div> },
   { key: 'mant', tab: 'Mantenimiento', icon: 'wrench', title: 'Mantenimiento', text: 'Consulta próximos servicios.', to: '#fn-mantenimiento', visual: <div className="fn-order">
     <span className="fn-order-icon"><V7Icon name="wrench" /></span>
