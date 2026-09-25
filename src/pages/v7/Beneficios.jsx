@@ -113,16 +113,6 @@ export default function Beneficios() {
       </div>
     </V7Section>
 
-    <V7Section className="bn-08" plateId="09-beneficios/08" labelledBy="bn-08-title">
-      <div className="v7-copy">
-        <p className="bn-kicker">Beneficios</p>
-        <h2 id="bn-08-title">Encuentra las<br />herramientas para<br />tu operación.</h2>
-        <p>Conoce el panel web y la app con una demostración de FOM.</p>
-        <DemoButton />
-      </div>
-      <p className="bn-statement" aria-hidden="true">La oficina<br />y la carretera,<br />conectadas.</p>
-    </V7Section>
-
     <V7Footer plateId="09-beneficios/09" className="bn-09" taglineBreak={false} statement={<>Flotas que mantienen<br />el mundo en movimiento</>} />
   </main>
 }

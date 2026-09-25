@@ -65,13 +65,6 @@ export default function QuienesSomos() {
       <TextCards columns={3} className="qs-cards" items={PRINCIPLES} />
     </V7Section>
 
-    <V7Section className="qs-05" plateId="07-quienes-somos/05" labelledBy="qs-05-title">
-      <div className="v7-copy">
-        <h2 id="qs-05-title">Conoce la operación<br />detrás de cada pantalla.</h2>
-        <DemoButton>Hablemos de tu flota</DemoButton>
-      </div>
-    </V7Section>
-
     <V7Section className="qs-06 is-plain" id="preguntas" labelledBy="qs-06-title">
       <AppBackdrop side="left" />
       <div className="v7-copy">

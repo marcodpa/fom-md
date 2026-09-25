@@ -107,16 +107,6 @@ export default function Funciones() {
       <MailPrompt />
     </V7Section>
 
-    <V7Section className="fn-08" plateId="04-funciones/08" labelledBy="fn-08-title">
-      <div className="v7-copy">
-        <p className="v7-kicker">Funciones</p>
-        <h2 id="fn-08-title">Conoce FOM<br />con tu equipo</h2>
-        <p>La oficina y la carretera, conectadas.</p>
-        <DemoButton />
-      </div>
-      <p className="fn-tagline" aria-hidden="true"><span>Flotas que mantienen<br />el mundo en movimiento</span></p>
-    </V7Section>
-
     <V7Footer plateId="04-funciones/09" className="fn-09" taglineBreak={false} statement={<>Flotas que mantienen<br />el mundo en movimiento</>} />
   </main>
 }

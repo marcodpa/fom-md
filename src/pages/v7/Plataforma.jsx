@@ -93,14 +93,6 @@ export default function Plataforma() {
       <MailPrompt />
     </V7Section>
 
-    <V7Section className="pf-09" plateId="02-plataforma/09" labelledBy="pf-09-title">
-      <div className="v7-copy">
-        <h2 id="pf-09-title">Conoce FOM<br />con tu equipo</h2>
-        <p>La oficina y la carretera, conectadas.</p>
-        <DemoButton />
-      </div>
-    </V7Section>
-
     <V7Footer plateId="02-plataforma/10" />
   </main>
 }

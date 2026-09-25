@@ -82,15 +82,6 @@ export default function QueOfrecemos() {
         screens={[{ src: alerts, corners: [[703, 107], [1583, 77], [1590, 746], [683, 741]], clip: [[650, 30], [1660, 30], [1660, 718], [1560, 718], [1500, 721], [1474, 728], [1470, 780], [650, 780]], alt: 'Captura original de las alertas del panel web FOM. Datos de demostración.' }]} />
     </V7Section>
 
-    <V7Section className="qo-05" plateId="08-que-ofrecemos/05" labelledBy="qo-05-title">
-      <div className="v7-copy">
-        <h2 id="qo-05-title">Ve cómo encaja FOM<br className="qo-d" /> con tu operación.</h2>
-        <p>Revisamos tu flota y te mostramos<br className="qo-d" /> el panel y la app en una demostración.</p>
-        <DemoButton />
-      </div>
-      <p className="qo-tagline" aria-hidden="true">La oficina<br />y la carretera,<br />conectadas.</p>
-    </V7Section>
-
     <V7Footer className="qo-06" plateId="08-que-ofrecemos/06">
       <p className="qo-footer-kicker" aria-hidden="true">Flotas que mantienen<br />el mundo en movimiento</p>
     </V7Footer>

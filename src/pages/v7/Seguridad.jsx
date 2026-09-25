@@ -84,15 +84,6 @@ export default function Seguridad() {
       <MailPrompt />
     </V7Section>
 
-    <V7Section className="sg-08" plateId="05-seguridad/08" labelledBy="sg-08-title">
-      <div className="v7-copy">
-        <p className="v7-kicker">Seguridad</p>
-        <h2 id="sg-08-title">Conduce un futuro<br />seguro con FOM</h2>
-        <p>La oficina y la carretera, conectadas.</p>
-        <DemoButton />
-      </div>
-    </V7Section>
-
     <V7Footer plateId="05-seguridad/09" className="sg-09" statement={null} taglineBreak={false} />
   </main>
 }
