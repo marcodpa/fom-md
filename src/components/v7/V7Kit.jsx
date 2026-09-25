@@ -2,7 +2,7 @@
 // composition in its page stylesheet; these helpers only provide the photo
 // plate, the projected original screenshots and repeated controls.
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { screenProjection } from '../../lib/screenProjection'
 import { Icono } from '../../panel/Iconos'
 import { Brand } from '../marketing/MarketingChrome'
@@ -308,10 +308,12 @@ const FOOTER_GROUPS = [
  * Footer for the v7 pages: photo band with the large brand and tagline, then the
  * link columns. Layout specifics per page live in the page stylesheet.
  */
-export function V7Footer({ plateId, className = '', taglineBreak = true, statement = <>La oficina<br />y la carretera,<br />conectadas.</>, children }) {
+export function V7Footer({ plateId, screens, demo = false, className = '', taglineBreak = true, statement = <>La oficina<br />y la carretera,<br />conectadas.</>, children }) {
   const ref = useReveal()
+  const { pathname } = useLocation()
   return <footer ref={ref} className={`v7-section v7-footer ${className}`}>
-    <Plate id={plateId} />
+    <Plate id={plateId} screens={screens} />
+    {demo && <small className="v7-demo">Datos de demostración</small>}
     <div className="v7-footer-hero">
       <span className="v7-footer-mark" aria-hidden="true"><Brand /></span>
       <p>La oficina y la carretera,{taglineBreak ? <br /> : ' '}conectadas.</p>
@@ -320,7 +322,7 @@ export function V7Footer({ plateId, className = '', taglineBreak = true, stateme
     {children}
     <div className="v7-footer-links">
       <div className="v7-footer-brand"><Link to="/" aria-label="FOM — inicio"><Brand /></Link><p>La oficina y la carretera, conectadas.</p></div>
-      {FOOTER_GROUPS.map(([name, links]) => <nav key={name} aria-label={name}><h2>{name}</h2>{links.map(([label, to]) => <Link key={to} to={to}>{label}</Link>)}</nav>)}
+      {FOOTER_GROUPS.map(([name, links]) => <nav key={name} aria-label={name}><h2>{name}</h2>{links.map(([label, to]) => <Link key={to} to={to} aria-current={pathname === to ? 'page' : undefined}>{label}</Link>)}</nav>)}
       <nav aria-label="Contacto"><h2><Link to="/contacto">Contacto</Link></h2><a href="mailto:contacto@fom.app">contacto@fom.app</a></nav>
     </div>
     <small className="v7-copyright">© {new Date().getFullYear()} FOM. Todos los derechos reservados.</small>

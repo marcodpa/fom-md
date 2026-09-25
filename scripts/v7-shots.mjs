@@ -58,7 +58,7 @@ try {
     process.exit(0)
   }
   // Force lazy photos to load, then wait for fonts and images.
-  await evaluate(`(async()=>{document.documentElement.classList.add('v7-static');document.querySelectorAll('.v7-section').forEach(s=>s.classList.add('is-in'));document.querySelectorAll('img[loading=lazy]').forEach(i=>i.loading='eager');await document.fonts.ready;await Promise.all([...document.images].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));await Promise.all([...document.images].map(i=>i.decode().catch(()=>0)));return true})()`)
+  await evaluate(`(async()=>{document.querySelectorAll('vite-error-overlay').forEach(e=>e.remove());document.documentElement.classList.add('v7-static');document.querySelectorAll('.v7-section').forEach(s=>s.classList.add('is-in'));document.querySelectorAll('img[loading=lazy]').forEach(i=>i.loading='eager');await document.fonts.ready;await Promise.all([...document.images].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));await Promise.all([...document.images].map(i=>i.decode().catch(()=>0)));return true})()`)
   await sleep(800)
   const boxes = await evaluate(`[...document.querySelectorAll('main > section, main > footer, main > header, #contenido > section, #contenido > footer')].filter((e,i,a)=>a.indexOf(e)===i).map(e=>{const r=e.getBoundingClientRect();return {id:e.id||e.className.split(' ').slice(-1)[0],y:r.top+scrollY,h:r.height}})`)
   const overflow = await evaluate('document.documentElement.scrollWidth - innerWidth')
