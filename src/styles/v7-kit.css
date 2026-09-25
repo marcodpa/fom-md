@@ -305,3 +305,27 @@ a.v7-card:hover,.v7-card:hover{border-color:#2c8ee0;transform:translateY(-3px);b
 /* No eyebrow labels or slogan tags above headings (user request; impeccable craft floor):
    the heading speaks for itself. */
 .v7-page :is(.v7-kicker,.v7-footer-statement,.fn-tagline,.fn-statement,.ar-motto,.qo-footer-kicker,.qo-tagline,.bn-kicker,.bn-statement,.ct-tagline,.sg-tagline,.pq-kicker,.pq-aside-title){display:none!important}
+
+/* Shared footer, same photo on every page. Rules are !important because older page sheets still position
+   their former photo footers absolutely. */
+.v7-page .v7-footer.is-shared{aspect-ratio:auto!important;min-height:0!important;height:auto!important;display:block!important;padding:clamp(180px,22vw,340px) clamp(20px,5vw,88px) 32px!important;background:var(--v7-bg)}
+.v7-page .v7-footer.is-shared>.v7-footer-photo{position:absolute!important;inset:0 0 auto 0!important;height:100%!important;overflow:hidden;z-index:0}
+.v7-footer-photo img{display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center top}
+.v7-footer-photo:after{content:'';position:absolute;inset:0;background:linear-gradient(#06121c00 20%,#06121cd9 48%,var(--v7-bg) 64%)}
+.v7-page .v7-footer.is-shared>:not(.v7-footer-photo){z-index:1}
+.v7-page .v7-footer.is-shared>:not(.v7-footer-photo){position:relative!important;inset:auto!important;left:auto!important;top:auto!important;right:auto!important;width:auto!important;margin:0!important;transform:none!important}
+.v7-page .v7-footer.is-shared>.v7-plate,.v7-page .v7-footer.is-shared>.v7-footer-hero,.v7-page .v7-footer.is-shared>.v7-footer-statement{display:none!important}
+.v7-footer.is-shared .v7-footer-top{display:flex!important;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;padding-bottom:40px!important;border-bottom:1px solid #ffffff12}
+.v7-footer.is-shared .v7-footer-brand{display:block!important}
+.v7-footer.is-shared .v7-footer-brand .m-brand{font-size:44px;gap:12px}.v7-footer.is-shared .v7-footer-brand .m-brand svg{width:34px;height:40px}
+.v7-footer.is-shared .v7-footer-brand p{margin-top:10px;font-size:17px;color:#a7c7ea}
+.v7-footer.is-shared .v7-footer-cta{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.v7-footer.is-shared .v7-footer-cta p{font-size:17px;color:#d6e4f2}
+.v7-footer.is-shared .v7-footer-cta .v7-button{font-size:15px;padding:12px 20px;margin:0}
+.v7-page .v7-footer.is-shared .v7-footer-links{display:grid!important;grid-template-columns:repeat(3,minmax(0,220px));gap:32px!important;padding:36px 0 40px!important}
+.v7-page .v7-footer.is-shared .v7-footer-links h2{font-size:14px;letter-spacing:.02em;margin:0 0 8px;color:#fff}
+.v7-page .v7-footer.is-shared .v7-footer-links nav{display:flex;flex-direction:column;gap:6px}
+.v7-page .v7-footer.is-shared .v7-footer-links nav a{font-size:15px;min-height:28px;display:flex;align-items:center;color:#a9c0d6}
+.v7-page .v7-footer.is-shared .v7-footer-links nav a:before{display:none!important}
+.v7-page .v7-footer.is-shared .v7-copyright{display:block;padding-top:22px!important;border-top:1px solid #ffffff12;font-size:13px;color:#8aa3bb}
+@media(max-width:760px){.v7-page .v7-footer.is-shared{padding:150px 6% 28px!important}.v7-page .v7-footer.is-shared>.v7-footer-photo{margin:0!important;width:100%!important;order:0}.v7-footer-photo img{height:auto;aspect-ratio:1672/941}.v7-page .v7-footer.is-shared .v7-footer-links{grid-template-columns:1fr 1fr}.v7-footer.is-shared .v7-footer-links nav[aria-label=Contacto]{grid-column:1/-1}.v7-footer.is-shared .v7-footer-brand .m-brand{font-size:36px}}
