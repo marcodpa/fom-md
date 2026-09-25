@@ -9,6 +9,7 @@ Mask modes, in 1672x941 slide coordinates:
   text  [x, y, w, h]  removes only glyph-like strokes inside the box (keeps texture)
   block [x, y, w, h]  replaces the whole box (cards, buttons, icons, headers)
   poly  [[x, y], ...] replaces a polygon (e.g. a physical phone the page redraws itself)
+  line  {"points": [[x, y], ...], "width": 7} erases a thin drawn line (leader lines over a photo)
   keep  [[x, y], ...] polygons protected from every mask (e.g. fingers in front of that phone)
 
 Masks live in scripts/v7-plates/<page>.json, keyed by '<page>/<id>'.
@@ -100,6 +101,8 @@ def build(key, spec):
         mask |= block_mask(img, box)
     for poly in spec.get('poly', []):
         cv2.fillPoly(mask, [np.int32(poly)], 255)
+    for line in spec.get('line', []):
+        cv2.polylines(mask, [np.int32(line['points'])], False, 255, int(line.get('width', 7)))
     for poly in spec.get('keep', []):
         cv2.fillPoly(mask, [np.int32(poly)], 0)
     mask = cv2.dilate(mask, np.ones((3, 3), np.uint8))

@@ -114,3 +114,45 @@
  .v7-funciones .v7-stat.is-inline{padding:14px 16px}.v7-funciones .v7-stat.is-inline strong{font-size:26px}.v7-funciones .v7-stat.is-inline span{font-size:14px}.v7-funciones .v7-stat.is-inline>.v7-glyph{width:38px;height:38px}
  .fn-tour .fn-facts{font-size:15px;line-height:1.55;margin-top:14px;padding-top:14px;border-top:1px solid #1f4462}
 }
+
+/* Telemática in X-ray: the photo is the stage; callouts, leader lines and pulses are HTML/SVG. */
+.fn-xray .fn-xray-stage{position:absolute;inset:0}
+.fn-xray .fn-xray-stage>.v7-plate{position:absolute;inset:0}
+.fn-xray:before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#06121c 0,#06121cf0 26%,#06121c80 38%,#06121c00 50%)}
+.fn-xray-lines{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+.fn-xray-lines polyline{fill:none;stroke:#d7e7f7;stroke-width:1.6;vector-effect:non-scaling-stroke;opacity:.75;stroke-dasharray:1;stroke-dashoffset:0;transition:stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1),stroke .25s,opacity .25s}
+.fn-xray-lines circle{fill:#3aa9ff;stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;transition:fill .25s}
+.fn-xray-lines g:nth-child(2) circle{fill:#f5a623}
+.fn-xray-lines .fn-xray-pulse{fill:none;stroke:#3aa9ff;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:fn-pulse 2.4s ease-out infinite}
+.fn-xray-lines g:nth-child(2) .fn-xray-pulse{stroke:#f5a623}
+@keyframes fn-pulse{from{opacity:.9;transform:scale(1)}to{opacity:0;transform:scale(3.4)}}
+.fn-xray-lines g.is-focus polyline{stroke:#6cc0ff;opacity:1}
+.v7-motion .fn-xray:not(.is-in) .fn-xray-lines polyline{stroke-dashoffset:1}
+.fn-xray-callout{position:absolute;z-index:3;left:calc(var(--x)*var(--u));top:calc(var(--y)*var(--u));width:calc(196*var(--u));min-height:calc(60*var(--u));display:flex;align-items:center;gap:calc(12*var(--u));padding:calc(10*var(--u)) calc(14*var(--u));border:1px solid #ffffff1f;border-radius:calc(14*var(--u));background:#0a1520e6;box-shadow:0 18px 40px -20px #000;transition:border-color .25s,transform .35s cubic-bezier(.16,1,.3,1),opacity .6s,box-shadow .25s}
+.fn-xray-callout .v7-icon{width:calc(40*var(--u));height:calc(40*var(--u));min-width:28px;min-height:28px;border-radius:50%;border:1px solid #ffffff1f}
+.fn-xray-callout .v7-icon .v7-glyph{width:58%;height:58%}
+.fn-xray-callout small{display:block;font-size:max(12px,calc(14*var(--u)));color:#9fb8d0}
+.fn-xray-callout strong{display:block;font-size:max(15px,calc(21*var(--u)));font-weight:600;color:#fff;letter-spacing:-.01em}
+.fn-xray-callout.is-focus{border-color:#3aa9ff;box-shadow:0 18px 50px -18px #2c9cffaa;transform:translateY(-3px)}
+.v7-motion .fn-xray:not(.is-in) .fn-xray-callout{opacity:0;transform:translateY(14px)}
+.v7-motion .fn-xray.is-in .fn-xray-callout{transition-delay:calc(.6s + var(--i)*.12s),calc(.6s + var(--i)*.12s),0s,0s}
+.fn-xray>.v7-copy{position:absolute;z-index:3;left:calc(66*var(--u));top:calc(130*var(--u));width:calc(500*var(--u))}
+.fn-xray h2{font-size:calc(56*var(--u)*.78);line-height:1.04}
+.fn-xray .v7-copy>p:not(.fn-xray-note){font-size:max(16px,calc(20*var(--u)*.92));line-height:1.5;margin-top:calc(16*var(--u))}
+.fn-xray-list{list-style:none;margin:calc(28*var(--u)) 0 0;padding:0;display:grid}
+.fn-xray-list li{display:grid;grid-template-columns:calc(52*var(--u)) 1fr;gap:calc(18*var(--u));align-items:start;padding:calc(14*var(--u)) calc(10*var(--u));border-top:1px solid #ffffff14;border-radius:calc(10*var(--u));cursor:default;outline:none;transition:background .25s}
+.fn-xray-list li:hover,.fn-xray-list li.is-focus,.fn-xray-list li:focus-visible{background:#2c9cff14}
+.fn-xray-list .v7-icon{width:calc(52*var(--u));height:calc(52*var(--u));min-width:36px;min-height:36px;border-radius:50%;border:1px solid #2a95e866}
+.fn-xray-list .v7-icon .v7-glyph{width:52%;height:52%}
+.fn-xray-list h3{font-size:max(16px,calc(19*var(--u)*.92))}
+.fn-xray-list p{font-size:max(14px,calc(15.5*var(--u)*.95));line-height:1.45;margin-top:calc(4*var(--u));color:var(--v7-muted)}
+.fn-xray-note{margin-top:calc(20*var(--u))!important;font-size:max(13px,calc(14*var(--u)))!important;color:#8fa9c2!important}
+.fn-xray-note strong{color:#fff}
+@media(max-width:760px){
+ .fn-xray{--m-w:150%;--m-x:-48%}
+ .fn-xray:before{display:none}
+ .fn-xray .fn-xray-stage{position:relative!important;order:2;aspect-ratio:1672/941;width:var(--m-w)!important;margin:10px 0 0 var(--m-x)!important}
+ .fn-xray-callout{display:none}
+ .fn-xray>.v7-copy{order:1}
+ .fn-xray-list li{grid-template-columns:40px 1fr;gap:14px;padding:12px 4px}
+}

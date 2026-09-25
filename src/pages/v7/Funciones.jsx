@@ -2,7 +2,8 @@
 // (map, reports, alerts) share one pinned laptop tour on the 05 plate; telemática is a framed
 // section; the FAQ drops its photo for the app background.
 import { PAGES } from '../../content/pages'
-import { V7Section, StatCard, DemoButton, FaqList, MailPrompt, V7Footer, StickyTour, Frame, AppBackdrop, TextCards, usePageTitle } from '../../components/v7/V7Kit'
+import { useState } from 'react'
+import { V7Section, Plate, CountUp, V7Icon, StatCard, DemoButton, FaqList, MailPrompt, V7Footer, StickyTour, Frame, AppBackdrop, TextCards, usePageTitle } from '../../components/v7/V7Kit'
 import map from '../../assets/marketing/real/panel-mapa.webp'
 import appHome from '../../assets/marketing/real/app-inicio.webp'
 import reports from '../../assets/marketing/real/panel-reportes.webp'
@@ -22,6 +23,45 @@ const money = <><circle cx="12" cy="12" r="9.5" /><path d="M15 8.8c-.6-.9-1.7-1.
 const history = <><path d="M14 2.5H6.5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2H11" /><path d="M14 2.5V8h5.5M14 2.5 19.5 8v3M8 12h6M8 15.5h3" /><circle cx="17" cy="17.5" r="3.5" /><path d="M17 16v1.7l1.1.8" /></>
 
 const split = value => { const [first, ...rest] = value.split(' '); return <>{first}<br />{rest.join(' ')}</> }
+
+// Telemática: the Hilux in X-ray (user-supplied proposal, cleaned in scripts/v7-plates) with
+// callouts tied to its real parts. Values are the demo data of the original app capture
+// (Toyota Hilux U-014: motor 89 °C, odómetro 84.230 km); the battery has no demo value.
+const XRAY = [
+  { key: 'battery', dot: [1203, 408], elbow: [1314, 234], box: [1318, 198], label: 'Voltaje de batería', value: 'Vigilado' },
+  { key: 'engine', dot: [935, 353], elbow: [875, 226], box: [668, 196], label: 'Motor', value: '89 °C' },
+  { key: 'odometer', dot: [1203, 684], elbow: [1352, 720], box: [1390, 690], label: 'Odómetro', value: '84.230 km' },
+  { key: 'codes', dot: [1003, 520], elbow: [960, 830], box: [600, 800], label: 'Códigos de falla', value: 'Al aparecer' },
+]
+
+function TelematicsXray() {
+  const [focus, setFocus] = useState(null)
+  const icons = [battery, 'engine', 'speed', 'alert']
+  return <V7Section className="fn-03 fn-xray" labelledBy="fn-03-title" motion="blur">
+    <div className="v7-plate fn-xray-stage" data-focus={focus ?? undefined}>
+      <Plate id="04-funciones/telematica" />
+      <svg className="fn-xray-lines" viewBox="0 0 1672 941" preserveAspectRatio="none" aria-hidden="true">
+        {XRAY.map(p => <g key={p.key} className={focus === p.key ? 'is-focus' : undefined}>
+          <polyline points={`${p.dot.join(',')} ${p.elbow.join(',')} ${p.box[0] + (p.box[0] > p.elbow[0] ? 0 : 196)},${p.elbow[1]}`} pathLength="1" />
+          <circle cx={p.dot[0]} cy={p.dot[1]} r="7" /><circle className="fn-xray-pulse" cx={p.dot[0]} cy={p.dot[1]} r="7" />
+        </g>)}
+      </svg>
+      {XRAY.map((p, i) => <div key={p.key} className={`fn-xray-callout${focus === p.key ? ' is-focus' : ''}`} style={{ '--x': p.box[0], '--y': p.box[1], '--i': i }}
+        onPointerEnter={() => setFocus(p.key)} onPointerLeave={() => setFocus(null)}>
+        <span className="v7-icon"><V7Icon name={icons[i]} /></span><span><small>{p.label}</small><CountUp value={p.value} /></span>
+      </div>)}
+    </div>
+    <div className="v7-copy">
+      <h2 id="fn-03-title">{telematics.heading}</h2>
+      <p>{telematics.body}</p>
+      <ul className="fn-xray-list">{telematics.bullets.map((b, i) => <li key={b.label} className={focus === XRAY[i].key ? 'is-focus' : undefined}
+        onPointerEnter={() => setFocus(XRAY[i].key)} onPointerLeave={() => setFocus(null)} onFocus={() => setFocus(XRAY[i].key)} onBlur={() => setFocus(null)} tabIndex={0}>
+        <span className="v7-icon"><V7Icon name={icons[i]} /></span><div><h3>{b.label}</h3><p>{b.text}</p></div>
+      </li>)}</ul>
+      <p className="fn-xray-note"><strong>{telematics.stat.value}</strong> {telematics.stat.label.toLowerCase()} · Datos de demostración de la unidad Toyota Hilux U-014</p>
+    </div>
+  </V7Section>
+}
 
 export default function Funciones() {
   usePageTitle('Funciones')
@@ -46,17 +86,7 @@ export default function Funciones() {
         { tab: 'Alertas', icon: 'bell', kicker: 'Avisos', title: alerting.heading, body: alerting.body, stat: { icon: 'bell', ...alerting.stat }, children: <Facts section={alerting} /> },
       ]} />
 
-    <V7Section className="fn-03 is-framed" demo labelledBy="fn-03-title">
-      <div className="v7-copy">
-        <p className="v7-kicker">Telemática</p>
-        <h2 id="fn-03-title">{telematics.heading}</h2>
-        <p>{telematics.body}</p>
-        <TextCards columns={2} items={asCards(telematics, [battery, 'engine', 'speed', 'alert'])} />
-        <StatCard icon="clock" value={telematics.stat.value} label={telematics.stat.label} />
-      </div>
-      <Frame plateId="04-funciones/03" x="-112%" ratio="4 / 5"
-        screens={[{ phone: true, src: appHome, corners: [[1103, 107], [1410, 116], [1356, 845], [1030, 818]] }]} />
-    </V7Section>
+    <TelematicsXray />
 
     <V7Section className="fn-04" plateId="04-funciones/04" labelledBy="fn-04-title">
       <div className="v7-copy">

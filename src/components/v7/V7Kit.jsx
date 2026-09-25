@@ -320,7 +320,7 @@ export function Features({ items, className = '', boxed = true }) {
 }
 
 /** Counts a leading number up to its real value once visible ("80+", "12 meses", "5.000 km"). */
-function CountUp({ value }) {
+export function CountUp({ value }) {
   const ref = useRef(null)
   const match = typeof value === 'string' && value.match(/^(\D*?)(\d{1,3}(?:\.\d{3})*|\d+)(?![\d/-])(.*)$/)
   useEffect(() => {
