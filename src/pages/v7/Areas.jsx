@@ -27,7 +27,7 @@ export default function Areas() {
       </div>
     </V7Section>
 
-    <StickyTour id="ar-tour" className="ar-tour" label="Grupos y geocercas en el panel web" plateId="06-areas/02"
+    <StickyTour sticky={false} id="ar-tour" className="ar-tour" label="Grupos y geocercas en el panel web" plateId="06-areas/02"
       screen={{ corners: [[642, 136], [1604, 119], [1598, 801], [628, 775]] }} srcs={[fleet, map]}
       steps={[
         { tab: 'Vehículos', icon: 'truck', kicker: 'Gestión de flotas', title: groups.heading, body: groups.body, stat: { icon: grid, ...groups.stat },

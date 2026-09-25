@@ -14,80 +14,80 @@
 @media(min-width:761px){
  /* 01 Hero: dusk road, monitor with Eventos y SOS */
  .sg-01 .v7-copy{left:calc(74*var(--u));top:calc(216*var(--u));width:calc(680*var(--u))}
- .sg-01 .v7-kicker{font-size:calc(18.5*var(--u))}
- .sg-01 h1{font-size:calc(58.5*var(--u));line-height:.99;margin-top:calc(20*var(--u));white-space:nowrap}
- .sg-01 .v7-copy>p:not(.v7-kicker){font-size:calc(23*var(--u));line-height:1.37;margin-top:calc(18*var(--u));width:calc(655*var(--u));letter-spacing:.01em;color:#c9d9ea}
- .sg-01 .v7-button{margin-top:calc(24*var(--u));padding:calc(20*var(--u)) calc(30*var(--u));font-size:calc(21.5*var(--u));gap:calc(28*var(--u))}
- .sg-01 .sg-tagline{left:calc(75*var(--u));top:calc(772*var(--u));padding-top:calc(22*var(--u));border-top:1.5px solid #3f76ad;font-size:calc(18.5*var(--u));line-height:1.52;letter-spacing:.22em;color:#6fa8e6}
+ .sg-01 .v7-kicker{font-size:max(16px,calc(18.5*var(--u)*.92))}
+ .sg-01 h1{font-size:calc(58.5*var(--u)*.78);line-height:.99;margin-top:calc(20*var(--u));white-space:nowrap}
+ .sg-01 .v7-copy>p:not(.v7-kicker){font-size:max(16px,calc(23*var(--u)*.92));line-height:1.37;margin-top:calc(18*var(--u));width:calc(655*var(--u));letter-spacing:.01em;color:#c9d9ea}
+ .sg-01 .v7-button{margin-top:calc(24*var(--u));padding:calc(20*var(--u)) calc(30*var(--u));font-size:max(16px,calc(21.5*var(--u)*.92));gap:calc(28*var(--u))}
+ .sg-01 .sg-tagline{left:calc(75*var(--u));top:calc(772*var(--u));padding-top:calc(22*var(--u));border-top:1.5px solid #3f76ad;font-size:max(16px,calc(18.5*var(--u)*.92));line-height:1.52;letter-spacing:.22em;color:#6fa8e6}
  .sg-01 .v7-demo{right:calc(40*var(--u));bottom:calc(24*var(--u))}
 
 
  /* 02 Event detection: app background, five event cards */
  .sg-02{padding-top:calc(120*var(--u));padding-bottom:calc(120*var(--u))}
  .sg-02>.v7-copy{max-width:calc(900*var(--u))}
- .sg-02 h2{font-size:calc(60*var(--u))}
- .sg-02 .v7-copy>p{font-size:calc(22*var(--u));line-height:1.5;margin-top:calc(22*var(--u))}
+ .sg-02 h2{font-size:calc(60*var(--u)*.72)}
+ .sg-02 .v7-copy>p{font-size:max(16px,calc(22*var(--u)*.92));line-height:1.5;margin-top:calc(22*var(--u))}
  .v7-section.is-plain>.sg-02-stat{position:absolute;right:calc(68*var(--u));top:calc(130*var(--u));margin:0;background:#0b1c2ccc}
  .sg-02-cards{margin-top:calc(60*var(--u));gap:calc(16*var(--u))}
  .sg-02-cards .v7-card{padding:calc(26*var(--u)) calc(24*var(--u))}
- .v7-seguridad .sg-02-cards h3{font-size:calc(21*var(--u))}
- .v7-seguridad .sg-02-cards p{font-size:calc(16.5*var(--u))}
+ .v7-seguridad .sg-02-cards h3{font-size:max(16px,calc(21*var(--u)*.92))}
+ .v7-seguridad .sg-02-cards p{font-size:max(16px,calc(16.5*var(--u)*.92))}
 
  /* 03 Dashcam at the windshield, text and cards right */
  .sg-03 .v7-copy{left:calc(838*var(--u));top:calc(90*var(--u));width:calc(770*var(--u))}
- .sg-03 h2{font-size:calc(55*var(--u));line-height:1.02;width:calc(470*var(--u))}
- .sg-03 .v7-copy>p{font-size:calc(21*var(--u));line-height:1.45;margin-top:calc(24*var(--u));color:#b4cdea}
+ .sg-03 h2{font-size:calc(55*var(--u)*.78);line-height:1.02;width:calc(470*var(--u))}
+ .sg-03 .v7-copy>p{font-size:max(16px,calc(21*var(--u)*.92));line-height:1.45;margin-top:calc(24*var(--u));color:#b4cdea}
  .sg-03-cards{margin-top:calc(32*var(--u));gap:calc(14*var(--u))}
  .sg-03-cards .v7-card{padding:calc(20*var(--u)) calc(22*var(--u));gap:calc(8*var(--u));background:linear-gradient(160deg,#0d1f31d9,#07131fd9)}
  .sg-03-cards .v7-card-icon{width:calc(40*var(--u));height:calc(40*var(--u))}
- .v7-seguridad .sg-03-cards h3{font-size:calc(20*var(--u))}
- .v7-seguridad .sg-03-cards p{font-size:calc(16*var(--u));line-height:1.45}
+ .v7-seguridad .sg-03-cards h3{font-size:max(16px,calc(20*var(--u)*.92))}
+ .v7-seguridad .sg-03-cards p{font-size:max(16px,calc(16*var(--u)*.92));line-height:1.45}
  .sg-03 .v7-stat{left:calc(1350*var(--u));top:calc(80*var(--u));width:calc(280*var(--u));height:calc(150*var(--u));padding:0 calc(26*var(--u));border-color:#4c647c;background:#16222ec2}
- .sg-03 .v7-stat strong{font-size:calc(58*var(--u))}
- .sg-03 .v7-stat span{font-size:calc(17*var(--u));line-height:1.45;color:#c3d6ea;white-space:nowrap}
+ .sg-03 .v7-stat strong{font-size:calc(58*var(--u)*.78)}
+ .sg-03 .v7-stat span{font-size:max(16px,calc(17*var(--u)*.92));line-height:1.45;color:#c3d6ea;white-space:nowrap}
 
  /* 04 Coaching: shorter framed section, driver photo in the frame */
- .sg-04 h2{font-size:calc(56*var(--u));line-height:1.04}
- .sg-04 .v7-copy>p:not(.v7-kicker){font-size:calc(21*var(--u));line-height:1.5;margin-top:calc(22*var(--u));max-width:calc(840*var(--u))}
- .sg-04 .v7-kicker{font-size:calc(17*var(--u));margin-bottom:calc(18*var(--u))}
+ .sg-04 h2{font-size:calc(56*var(--u)*.78);line-height:1.04}
+ .sg-04 .v7-copy>p:not(.v7-kicker){font-size:max(16px,calc(21*var(--u)*.92));line-height:1.5;margin-top:calc(22*var(--u));max-width:calc(840*var(--u))}
+ .sg-04 .v7-kicker{font-size:max(16px,calc(17*var(--u)*.92));margin-bottom:calc(18*var(--u))}
  .sg-04-cards{margin-top:calc(40*var(--u));gap:calc(14*var(--u))}
  .sg-04-cards .v7-card{padding:calc(22*var(--u))}
- .v7-seguridad .sg-04-cards h3{font-size:calc(20*var(--u))}
- .v7-seguridad .sg-04-cards p{font-size:calc(16*var(--u));line-height:1.5}
+ .v7-seguridad .sg-04-cards h3{font-size:max(16px,calc(20*var(--u)*.92))}
+ .v7-seguridad .sg-04-cards p{font-size:max(16px,calc(16*var(--u)*.92));line-height:1.5}
  .sg-04 .v7-demo{right:calc(68*var(--u));bottom:calc(70*var(--u))}
 
  /* 05+06 Pinned tour on the driver photo: Perfil (score) then Inicio (SOS) */
  .sg-tour .v7-tour-tabs{left:auto;right:calc(70*var(--u));bottom:auto;top:calc(150*var(--u))}
  .sg-tour .v7-tour-step{width:calc(700*var(--u))}
- .sg-tour h2{font-size:calc(52*var(--u));line-height:1.04}
- .sg-tour .v7-tour-card>p:not(.v7-kicker){font-size:calc(19.5*var(--u));line-height:1.5}
- .sg-tour .v7-tour-card>p.sg-tour-more{font-size:calc(17*var(--u));color:#9fc1e4;margin-top:calc(20*var(--u))}
+ .sg-tour h2{font-size:calc(52*var(--u)*.78);line-height:1.04}
+ .sg-tour .v7-tour-card>p:not(.v7-kicker){font-size:max(16px,calc(19.5*var(--u)*.92));line-height:1.5}
+ .sg-tour .v7-tour-card>p.sg-tour-more{font-size:max(16px,calc(17*var(--u)*.92));color:#9fc1e4;margin-top:calc(20*var(--u))}
  .sg-tour .v7-demo{right:calc(420*var(--u));bottom:calc(24*var(--u))}
 
  /* 07 FAQ on the app background, two columns */
- .sg-07 h2{font-size:calc(72*var(--u))}
- .sg-07 .v7-copy>p{font-size:calc(28*var(--u));margin-top:calc(12*var(--u));color:#93b9e5}
+ .sg-07 h2{font-size:calc(72*var(--u)*.72)}
+ .sg-07 .v7-copy>p{font-size:calc(28*var(--u)*.86);margin-top:calc(12*var(--u));color:#93b9e5}
  .sg-07 .v7-faq-list{position:relative;margin-top:calc(50*var(--u));max-width:calc(1300*var(--u))}
  .sg-07 .v7-mail{position:relative;margin-top:calc(40*var(--u));width:max-content}
 
  /* 08 Closing: truck on the mountain road at dusk */
  .sg-08 .v7-copy{left:calc(96*var(--u));top:calc(180*var(--u))}
- .sg-08 .v7-kicker{font-size:calc(18.5*var(--u));letter-spacing:.34em}
- .sg-08 h2{font-size:calc(86*var(--u));line-height:1;margin-top:calc(26*var(--u));letter-spacing:-.02em}
- .sg-08 .v7-copy>p:not(.v7-kicker){font-size:calc(36*var(--u));margin-top:calc(22*var(--u));color:#a9cdf5}
- .sg-08 .v7-button{margin-top:calc(40*var(--u));padding:calc(25*var(--u)) calc(38*var(--u));font-size:calc(23.5*var(--u));gap:calc(38*var(--u))}
+ .sg-08 .v7-kicker{font-size:max(16px,calc(18.5*var(--u)*.92));letter-spacing:.34em}
+ .sg-08 h2{font-size:calc(86*var(--u)*.72);line-height:1;margin-top:calc(26*var(--u));letter-spacing:-.02em}
+ .sg-08 .v7-copy>p:not(.v7-kicker){font-size:calc(36*var(--u)*.86);margin-top:calc(22*var(--u));color:#a9cdf5}
+ .sg-08 .v7-button{margin-top:calc(40*var(--u));padding:calc(25*var(--u)) calc(38*var(--u));font-size:max(16px,calc(23.5*var(--u)*.92));gap:calc(38*var(--u))}
 
  /* 09 Footer: brand over the road photo, three link columns */
  .sg-09 .v7-footer-hero{left:calc(78*var(--u));top:calc(256*var(--u))}
- .sg-09 .v7-footer-hero .m-brand{font-size:calc(88*var(--u));gap:calc(32*var(--u))}
+ .sg-09 .v7-footer-hero .m-brand{font-size:calc(88*var(--u)*.72);gap:calc(32*var(--u))}
  .sg-09 .v7-footer-hero .m-brand svg{width:calc(68*var(--u));height:calc(90*var(--u))}
- .sg-09 .v7-footer-hero>p{margin-top:calc(22*var(--u));font-size:calc(40*var(--u));color:#a9c8f0}
+ .sg-09 .v7-footer-hero>p{margin-top:calc(22*var(--u));font-size:calc(40*var(--u)*.78);color:#a9c8f0}
  .sg-09 .v7-footer-links{left:calc(263*var(--u));right:calc(60*var(--u));top:calc(640*var(--u));grid-template-columns:calc(440*var(--u)) calc(437*var(--u)) 1fr}
  .sg-09 .v7-footer-brand{display:none}
- .v7-seguridad .sg-09 .v7-footer-links h2{font-size:calc(21*var(--u));margin:calc(4*var(--u)) 0 calc(10*var(--u))}
+ .v7-seguridad .sg-09 .v7-footer-links h2{font-size:max(16px,calc(21*var(--u)*.92));margin:calc(4*var(--u)) 0 calc(10*var(--u))}
  .sg-09 .v7-footer-links nav{gap:calc(6*var(--u))}
- .sg-09 .v7-footer-links nav a{font-size:calc(21*var(--u));min-height:calc(25*var(--u))}
- .sg-09 .v7-copyright{left:calc(40*var(--u));right:calc(40*var(--u));top:calc(865*var(--u));padding-top:calc(24*var(--u));border-color:#2c4a66;font-size:calc(17*var(--u))}
+ .sg-09 .v7-footer-links nav a{font-size:max(16px,calc(21*var(--u)*.92));min-height:calc(25*var(--u))}
+ .sg-09 .v7-copyright{left:calc(40*var(--u));right:calc(40*var(--u));top:calc(865*var(--u));padding-top:calc(24*var(--u));border-color:#2c4a66;font-size:max(16px,calc(17*var(--u)*.92))}
 }
 @media(max-width:760px){
  /* The kit's phone rules for cards, framed/plain sections and the tour come before their

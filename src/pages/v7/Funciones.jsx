@@ -37,7 +37,7 @@ export default function Funciones() {
       <p className="fn-statement" aria-hidden="true">La oficina<br />y la carretera<br />conectadas</p>
     </V7Section>
 
-    <StickyTour id="fn-tour" className="fn-tour" label="Recorrido por las funciones del panel" plateId="04-funciones/05"
+    <StickyTour sticky={false} id="fn-tour" className="fn-tour" label="Recorrido por las funciones del panel" plateId="04-funciones/05"
       screen={{ corners: [[813, 192], [1592, 160], [1582, 683], [766, 700]], clip: [[740, 130], [1640, 130], [1640, 684], [1540, 684], [1528, 692], [1526, 740], [740, 740]] }}
       srcs={[map, reports, alerts]}
       steps={[

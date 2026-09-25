@@ -55,7 +55,7 @@ export default function Beneficios() {
       <p className="bn-statement" aria-hidden="true">Flotas<br />que mantienen<br />el mundo<br />en movimiento</p>
     </V7Section>
 
-    <StickyTour id="bn-tour" className="bn-tour" label="Beneficios en el panel web" plateId="09-beneficios/07"
+    <StickyTour sticky={false} id="bn-tour" className="bn-tour" label="Beneficios en el panel web" plateId="09-beneficios/07"
       screen={{ corners: [[605, 121], [1604, 80], [1601, 774], [585, 745]] }} srcs={[fleet, alerts, reports]}
       steps={[
         tourStep(visibility, 'Visibilidad de la operación', 'pin', 'Beneficio · Vehículos'),

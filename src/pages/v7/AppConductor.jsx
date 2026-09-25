@@ -6,7 +6,8 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import { screenProjection } from '../../lib/screenProjection'
-import { V7Section, Plate, V7Icon, DemoButton, V7Footer, Frame, AppBackdrop, TextCards, usePageTitle, PLATE_W } from '../../components/v7/V7Kit'
+import { V7Section, Plate, V7Icon, DemoButton, V7Footer, Frame, AppBackdrop, TextCards, usePageTitle, plate, PLATE_W, PLATE_H } from '../../components/v7/V7Kit'
+import masks from '../../../scripts/v7-plates/03-app.json'
 import appHome from '../../assets/marketing/real/app-inicio.webp'
 import appCheck from '../../assets/marketing/real/app-inspeccion.webp'
 import appProfile from '../../assets/marketing/real/app-perfil.webp'
@@ -26,14 +27,14 @@ const PROFILE_CARDS = [['Índice de manejo seguro', BARS], ['Mis documentos', 'd
 
 // Screens measured on each slide (tl, tr, br, bl); `clip` keeps hands, heads and phones in front.
 const SCREENS = {
-  hero: [{ phone: true, src: appHome, corners: [[867, 108], [1192, 131], [1129, 880], [785, 846]] }],
+  hero: [{ phone: true, body: true, src: appHome, corners: [[867, 108], [1192, 131], [1129, 880], [785, 846]] }],
   inspection: [
-    { phone: true, src: appCheck, corners: [[717, 76], [1050, 75], [1047, 864], [703, 872]] },
+    { phone: true, body: true, src: appCheck, corners: [[717, 76], [1050, 75], [1047, 864], [703, 872]] },
     { phone: true, src: appCheck, corners: [[1518, 503], [1577, 510], [1526, 685], [1438, 675]], clip: [[1483, 490], [1600, 490], [1600, 583], [1543, 587], [1528, 585], [1517, 588], [1507, 602], [1493, 620], [1482, 640], [1474, 657], [1472, 687], [1420, 687], [1420, 490]] },
   ],
-  home: [{ phone: true, src: appHome, corners: [[712, 57], [1047, 63], [1030, 822], [689, 826]] }],
+  home: [{ phone: true, body: true, src: appHome, corners: [[712, 57], [1047, 63], [1030, 822], [689, 826]] }],
   profile: [
-    { phone: true, src: appProfile, alt: 'Captura original del perfil en la app del conductor FOM con el índice de manejo seguro. Datos de demostración.', corners: [[672, 68], [1013, 72], [1000, 862], [646, 871]] },
+    { phone: true, body: true, src: appProfile, alt: 'Captura original del perfil en la app del conductor FOM con el índice de manejo seguro. Datos de demostración.', corners: [[672, 68], [1013, 72], [1000, 862], [646, 871]] },
     { phone: true, src: appProfile, alt: '', corners: [[1188, 387], [1307, 375], [1368, 631], [1249, 643]], clip: [[1150, 350], [1400, 350], [1400, 532], [1343, 550], [1300, 577], [1260, 603], [1227, 650], [1150, 650]] },
   ],
   footer: [
@@ -45,11 +46,14 @@ const SCREENS = {
 // Travelling phone: the anchors are the phones of sections 01–04, in order. Each anchor
 // names the section's plate and the screen corners measured on its slide.
 const STOPS = [
-  { plate: '.ap-01 > .v7-plate', corners: SCREENS.hero[0].corners, shot: 0 },
-  { plate: '.ap-02 > .v7-plate', corners: SCREENS.inspection[0].corners, shot: 1 },
-  { plate: '.ap-03 .v7-frame > .v7-plate', corners: SCREENS.home[0].corners, shot: 0 },
-  { plate: '.ap-04 > .v7-plate', corners: SCREENS.profile[0].corners, shot: 2 },
+  { plate: '.ap-01 > .v7-plate', id: '03-app/01', corners: SCREENS.hero[0].corners, shot: 0, fingers: true },
+  { plate: '.ap-02 > .v7-plate', id: '03-app/02', corners: SCREENS.inspection[0].corners, shot: 1 },
+  { plate: '.ap-03 .v7-frame > .v7-plate', id: '03-app/03', corners: SCREENS.home[0].corners, shot: 0, fingers: true },
+  { plate: '.ap-04 > .v7-plate', id: '03-app/04', corners: SCREENS.profile[0].corners, shot: 2 },
 ]
+// The photo phones were erased from the plates (poly masks); the fingers that held them are
+// the plate's protected `keep` polygons, repeated above the docked phone.
+const fingerClip = poly => `polygon(${poly.map(([x, y]) => `${(x / PLATE_W * 100).toFixed(3)}% ${(y / PLATE_H * 100).toFixed(3)}%`).join(',')})`
 const SHOTS = [appHome, appCheck, appProfile]
 const offsetIn = (el, root) => { let x = 0, y = 0; for (let n = el; n && n !== root; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop } return [x, y] }
 const smooth = t => t * t * (3 - 2 * t)
@@ -59,10 +63,11 @@ const centre = corners => corners.reduce(([x, y], c) => [x + c[0] / 4, y + c[1] 
  * One phone in <main> coordinates. Between two anchors its eight corner numbers are
  * interpolated (screenProjection keeps the perspective), it lifts, grows a little and
  * swings towards the photo side, and its capture cross-fades to the next one. When
- * docked it lies exactly on the photo's phone, over the identical static capture.
+ * docked it sits in the empty hand of the photo (the photo phone was erased from the plate).
  */
 function AppTraveller() {
   const phone = useRef(null)
+  const hands = useRef([])
   useGSAP(() => {
     const mm = gsap.matchMedia()
     mm.add('(min-width: 761px) and (prefers-reduced-motion: no-preference)', () => {
@@ -78,6 +83,8 @@ function AppTraveller() {
           if (!plateEl) return { ready: false, shot: stop.shot, section: null, corners: stop.corners }
           const [x, y] = offsetIn(plateEl, root)
           const k = plateEl.offsetWidth / PLATE_W
+          const hand = hands.current[STOPS.indexOf(stop)]
+          if (hand) Object.assign(hand.style, { left: `${x}px`, top: `${y}px`, width: `${plateEl.offsetWidth}px`, height: `${plateEl.offsetHeight}px` })
           return { ready: k > 0.05, shot: stop.shot, section: plateEl.closest('.v7-section'), corners: stop.corners.map(([cx, cy]) => [x + cx * k, y + cy * k]) }
         })
         const top = root.getBoundingClientRect().top + scrollY
@@ -113,9 +120,10 @@ function AppTraveller() {
           const x = c[0] + (to.corners[n][0] - c[0]) * t, y = c[1] + (to.corners[n][1] - c[1]) * t
           return [cx + (x - cx) * scale + dx, cy + (y - cy) * scale + dy]
         })
+        // Fingers lie over the phone only while it is (nearly) docked at their stop.
+        hands.current.forEach((hand, j) => { if (hand) hand.style.opacity = Math.max(0, 1 - Math.abs(state.u - j) * 6).toFixed(3) })
         try { el.style.transform = `matrix3d(${screenProjection(corners).join(',')})` } catch { return }
         el.style.setProperty('--flight', flight.toFixed(3))
-        el.style.setProperty('--body', Math.min(1, flight * 4).toFixed(3))
         const fade = Math.min(Math.max((t - 0.44) / 0.12, 0), 1)
         // The outgoing capture stays opaque underneath while the next one fades in on top.
         imgs.forEach((img, n) => {
@@ -140,10 +148,15 @@ function AppTraveller() {
     })
     return () => mm.revert()
   }, { scope: phone })
-  return <div className="ap-traveller" ref={phone} aria-hidden="true">
-    <span className="ap-traveller-body" />
-    <span className="ap-traveller-screen">{SHOTS.map(src => <img key={src} src={src} alt="" width="390" height="844" decoding="async" />)}</span>
-  </div>
+  return <>
+    <div className="ap-traveller" ref={phone} aria-hidden="true">
+      <span className="ap-traveller-body" />
+      <span className="ap-traveller-screen">{SHOTS.map(src => <img key={src} src={src} alt="" width="390" height="844" decoding="async" />)}</span>
+    </div>
+    {STOPS.map((stop, i) => stop.fingers && <div key={stop.id} className="ap-hand" ref={node => { hands.current[i] = node }} aria-hidden="true">
+      {masks[stop.id].keep.map((poly, n) => <img key={n} src={plate(stop.id)} alt="" decoding="async" style={{ clipPath: fingerClip(poly) }} />)}
+    </div>)}
+  </>
 }
 
 export default function AppConductor() {

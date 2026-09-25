@@ -13,6 +13,22 @@ export default function MarketingHeader() {
   const { pathname, hash } = useLocation()
   const close = () => { setOpen(false); setGroup(null) }
   useEffect(() => { setOpen(false); setGroup(null) }, [pathname, hash])
+  // Compact header and reading progress once the page scrolls.
+  useEffect(() => {
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const el = header.current
+      if (!el) return
+      el.classList.toggle('is-scrolled', scrollY > 12)
+      const max = document.documentElement.scrollHeight - innerHeight
+      el.style.setProperty('--progress', max > 0 ? (scrollY / max).toFixed(4) : 0)
+    }
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
+    update()
+    addEventListener('scroll', onScroll, { passive: true })
+    return () => { removeEventListener('scroll', onScroll); cancelAnimationFrame(frame) }
+  }, [pathname])
   useEffect(() => {
     const outside = e => { if (!header.current?.contains(e.target)) { setOpen(false); setGroup(null) } }
     document.addEventListener('pointerdown', outside)
@@ -33,7 +49,7 @@ export default function MarketingHeader() {
       </div>)}
       {link('/contacto', 'Contacto')}
     </nav>
-    <div className="m-header-actions"><Link className="m-login" to="/entrar">Iniciar sesión</Link><button aria-label={open ? 'Cerrar menú' : 'Abrir menú'} aria-controls="marketing-nav" aria-expanded={open} className="m-menu" onClick={() => { setOpen(v => !v); setGroup(null) }}><Icono nombre={open ? 'cerrar' : 'menu'} /></button></div>
+    <div className="m-header-actions"><Link className="m-login" to="/entrar">Iniciar sesión</Link><Link className="m-header-cta" to="/contacto#solicitud-demo">Solicitar demo</Link><button aria-label={open ? 'Cerrar menú' : 'Abrir menú'} aria-controls="marketing-nav" aria-expanded={open} className="m-menu" onClick={() => { setOpen(v => !v); setGroup(null) }}><Icono nombre={open ? 'cerrar' : 'menu'} /></button></div>
   </header>
 }
 export function MarketingFooter() {

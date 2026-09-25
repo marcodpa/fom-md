@@ -65,7 +65,7 @@ export default function Seguridad() {
         screens={[{ phone: true, src: appHome, corners: [[903, 362], [1078, 350], [1128, 725], [955, 742]] }]} />
     </V7Section>
 
-    <StickyTour id="sg-tour" className="sg-tour" label="La app del conductor" plateId="05-seguridad/06"
+    <StickyTour sticky={false} id="sg-tour" className="sg-tour" label="La app del conductor" plateId="05-seguridad/06"
       screen={{ phone: true, corners: [[1348, 300], [1602, 304], [1567, 872], [1282, 866]] }} srcs={[appProfile, appHome]}
       steps={[
         { tab: 'Perfil', icon: 'user', title: score.heading, body: score.body, stat: { icon: 'gauge', ...score.stat },

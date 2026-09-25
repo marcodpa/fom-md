@@ -84,23 +84,24 @@ export function DeviceTabs({ tabs, active, onChange, label, className = '' }) {
 /**
  * Scroll story: the photo and its device stay pinned while the steps scroll over the
  * dark side of the picture; each step switches the device to its own capture. The tabs
- * jump to a step, so the tour also works by clicking.
+ * jump to a step, so the tour also works by clicking. With `sticky={false}` it is a normal
+ * section instead: nothing pins, the tabs switch the device and show that step's text.
  * steps: [{ tab, icon?, kicker?, title, body, items?, stat?, children? }], srcs: one capture per step.
  */
-export function StickyTour({ id, className = '', plateId, screen, srcs, steps, label, demo = true }) {
+export function StickyTour({ id, className = '', plateId, screen, srcs, steps, label, demo = true, sticky = true }) {
   const [active, setActive] = useState(0)
   const stepRefs = useRef([])
   const ref = useReveal()
   useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return
+    if (!sticky || typeof IntersectionObserver === 'undefined') return
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) if (entry.isIntersecting) setActive(Number(entry.target.dataset.step))
     }, { rootMargin: '-45% 0px -45% 0px' })
     stepRefs.current.forEach(el => el && observer.observe(el))
     return () => observer.disconnect()
-  }, [])
-  const go = i => { setActive(i); stepRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
-  return <section ref={ref} id={id} className={`v7-section v7-tour ${className}`} aria-label={label} style={{ '--steps': steps.length }}>
+  }, [sticky])
+  const go = i => { setActive(i); if (sticky) stepRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
+  return <section ref={ref} id={id} className={`v7-section v7-tour${sticky ? '' : ' is-tabbed'} ${className}`} aria-label={label} style={{ '--steps': steps.length }}>
     <div className="v7-tour-stage">
       <Plate id={plateId} screens={[{ ...screen, src: srcs }]} active={active} />
       <DeviceTabs className="v7-tour-tabs" label={`${label}: vistas`} tabs={steps.map(s => ({ label: s.tab, icon: s.icon }))} active={active} onChange={go} />
@@ -148,15 +149,46 @@ export function AppBackdrop({ side = 'right' }) {
 export function TextCards({ items, columns = 3, className = '' }) {
   return <div className={`v7-cards ${className}`} style={{ '--cards': columns }}>{items.map(item => {
     const body = <>{item.icon && <span className="v7-card-icon"><V7Icon name={item.icon} /></span>}{item.kicker && <small>{item.kicker}</small>}<h3>{item.title}</h3><p>{item.text}</p>{item.to && <span className="v7-card-more">Ver más <Arrow /></span>}</>
-    return item.to ? <Link key={item.title} to={item.to} className="v7-card">{body}</Link> : <article key={item.title} className="v7-card">{body}</article>
+    return item.to ? <Link key={item.title} to={item.to} className="v7-card" onPointerMove={tilt} onPointerLeave={untilt}>{body}</Link> : <article key={item.title} className="v7-card" onPointerMove={tilt} onPointerLeave={untilt}>{body}</article>
   })}</div>
 }
 
+/* Photo depth: every full-bleed plate drifts a little slower than the page. One passive
+   scroll listener for the whole site; disabled with reduced motion. */
+const drifting = new Set()
+let driftFrame = 0
+function drift() {
+  driftFrame = 0
+  const vh = innerHeight
+  drifting.forEach(el => {
+    const r = el.parentElement.getBoundingClientRect()
+    if (r.bottom < -vh || r.top > 2 * vh) return
+    const p = (r.top + r.height / 2 - vh / 2) / (vh + r.height)
+    el.style.translate = `0 ${(p * -7).toFixed(2)}%`
+  })
+}
+function onDriftScroll() { if (!driftFrame) driftFrame = requestAnimationFrame(drift) }
+function useDrift(ref) {
+  useEffect(() => {
+    const plateEl = ref.current?.querySelector(':scope > .v7-plate')
+    if (!plateEl || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (!drifting.size) { addEventListener('scroll', onDriftScroll, { passive: true }); addEventListener('resize', onDriftScroll) }
+    drifting.add(plateEl)
+    plateEl.classList.add('is-drifting')
+    drift()
+    return () => { drifting.delete(plateEl); if (!drifting.size) { removeEventListener('scroll', onDriftScroll); removeEventListener('resize', onDriftScroll) } }
+  }, [])
+}
+
 /** Marks a section `is-in` the first time it enters the viewport (drives the reveal motion). */
-function useReveal() {
+const MOTIONS = ['rise', 'wipe', 'zoom', 'curtain', 'blur', 'slide']
+function useReveal(motion) {
   const ref = useRef(null)
   useEffect(() => {
     const el = ref.current
+    // Each section enters differently from its neighbour (ui-ux-pro-max: vary timing and motion
+    // by context); a page can force one with the `motion` prop.
+    if (el?.parentElement) el.dataset.motion = motion || MOTIONS[[...el.parentElement.children].indexOf(el) % MOTIONS.length]
     if (!el || typeof IntersectionObserver === 'undefined') return el?.classList.add('is-in')
     el.closest('.v7-page')?.classList.add('v7-motion')
     const observer = new IntersectionObserver(([entry]) => {
@@ -169,10 +201,11 @@ function useReveal() {
 }
 
 /** One full-viewport section: photo plate, optional shade and the HTML composition on top. */
-export function V7Section({ as: Tag = 'section', id, className = '', plateId, screens, active, priority, demo = false, labelledBy, children }) {
-  const ref = useReveal()
+export function V7Section({ as: Tag = 'section', id, className = '', plateId, screens, active, foreground, priority, demo = false, labelledBy, motion, children }) {
+  const ref = useReveal(motion)
+  useDrift(ref)
   return <Tag ref={ref} id={id} className={`v7-section ${className}`} aria-labelledby={labelledBy}>
-    {plateId && <Plate id={plateId} screens={screens} active={active} priority={priority} />}
+    {plateId && <Plate id={plateId} screens={screens} active={active} foreground={foreground} priority={priority} />}
     {children}
     {demo && <small className="v7-demo">Datos de demostración</small>}
   </Tag>
@@ -274,16 +307,60 @@ export function Features({ items, className = '', boxed = true }) {
   </li>)}</ul>
 }
 
+/** Counts a leading number up to its real value once visible ("80+", "12 meses", "5.000 km"). */
+function CountUp({ value }) {
+  const ref = useRef(null)
+  const match = typeof value === 'string' && value.match(/^(\D*?)(\d{1,3}(?:\.\d{3})*|\d+)(?![\d/-])(.*)$/)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || !match || matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return
+    const target = Number(match[2].replace(/\./g, ''))
+    const format = n => match[1] + (match[2].includes('.') ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : String(n)) + match[3]
+    el.textContent = format(0)
+    let frame
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      if (document.documentElement.classList.contains('v7-static')) { el.textContent = value; return }
+      const start = performance.now(), duration = 1400
+      const tick = now => {
+        const t = Math.min(1, (now - start) / duration), eased = 1 - Math.pow(1 - t, 4)
+        el.textContent = format(Math.round(target * eased))
+        if (t < 1) frame = requestAnimationFrame(tick)
+      }
+      frame = requestAnimationFrame(tick)
+    }, { threshold: 0.6 })
+    observer.observe(el)
+    return () => { observer.disconnect(); cancelAnimationFrame(frame); el.textContent = value }
+  }, [value])
+  return <strong ref={ref} aria-label={typeof value === 'string' ? value : undefined}>{value}</strong>
+}
+
+/** Pointer tilt for cards: a few degrees towards the cursor. */
+export function tilt(e) {
+  const el = e.currentTarget, r = el.getBoundingClientRect()
+  el.style.setProperty('--rx', `${((e.clientY - r.top) / r.height - 0.5) * -6}deg`)
+  el.style.setProperty('--ry', `${((e.clientX - r.left) / r.width - 0.5) * 8}deg`)
+}
+function untilt(e) { e.currentTarget.style.removeProperty('--rx'); e.currentTarget.style.removeProperty('--ry') }
+
 /** Bordered translucent metric card, e.g. "80+ unidades visibles en una vista". */
 export function StatCard({ icon, value, label, className = '' }) {
-  return <div className={`v7-stat ${className}`}>
+  return <div className={`v7-stat ${className}`} onPointerMove={tilt} onPointerLeave={untilt}>
     {icon && <V7Icon name={icon} />}
-    <p><strong>{value}</strong><span>{label}</span></p>
+    <p><CountUp value={value} /><span>{label}</span></p>
   </div>
 }
 
+function magnet(e) {
+  const el = e.currentTarget, r = el.getBoundingClientRect()
+  el.style.setProperty('--mx', `${(e.clientX - r.left - r.width / 2) * 0.18}px`)
+  el.style.setProperty('--my', `${(e.clientY - r.top - r.height / 2) * 0.3}px`)
+}
+function unmagnet(e) { e.currentTarget.style.removeProperty('--mx'); e.currentTarget.style.removeProperty('--my') }
+
 export function DemoButton({ to = DEMO_ROUTE, children = 'Solicitar una demostración', className = '' }) {
-  return <Link className={`v7-button ${className}`} to={to}>{children}<Arrow /></Link>
+  return <Link className={`v7-button ${className}`} to={to} onPointerMove={magnet} onPointerLeave={unmagnet}>{children}<Arrow /></Link>
 }
 
 /**
