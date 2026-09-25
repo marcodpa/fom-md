@@ -9,8 +9,9 @@ stage=$(cd -- "$(dirname -- "$0")" && pwd)
 config=/etc/nginx/sites-available/fom-mobile.conf
 release=/var/www/fom-web/releases/20260925-web-v7
 backup=/var/backups/fom-web/20260925-web-v7-$(date +%Y%m%dT%H%M%S)-$$
-# Config that the 2026-09-21 publication left active (ops/deploy/fom-mobile.after.conf).
-expected=d2c491752f8706cd9ad040150aaa38b39d90ea2b9a162055700ddb07e5ad76aa
+# Config active since the 2026-09-22 re-publication of the original site
+# (ops/deploy/public-original-v2/fom-mobile.after.conf, root releases/20260921-public-original-v2).
+expected=2148712f66ec3f2828ea831d5904faa4419763200e756d8a12b68f21a9fb17a7
 test "$(sha256sum "$config" | cut -d ' ' -f1)" = "$expected" || { echo 'Nginx cambió desde la preparación; revisar antes de publicar.' >&2; exit 1; }
 test ! -e "$backup"
 cd "$stage"
