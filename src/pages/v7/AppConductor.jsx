@@ -5,9 +5,7 @@ import { useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { screenProjection } from '../../lib/screenProjection'
-import { V7Section, Plate, V7Icon, DemoButton, V7Footer, Frame, AppBackdrop, TextCards, usePageTitle, plate, PLATE_W, PLATE_H } from '../../components/v7/V7Kit'
-import masks from '../../../scripts/v7-plates/03-app.json'
+import { V7Section, Plate, V7Icon, DemoButton, V7Footer, Frame, AppBackdrop, TextCards, usePageTitle, PLATE_W } from '../../components/v7/V7Kit'
 import appHome from '../../assets/marketing/real/app-inicio.webp'
 import appCheck from '../../assets/marketing/real/app-inspeccion.webp'
 import appProfile from '../../assets/marketing/real/app-perfil.webp'
@@ -46,28 +44,20 @@ const SCREENS = {
 // Travelling phone: the anchors are the phones of sections 01–04, in order. Each anchor
 // names the section's plate and the screen corners measured on its slide.
 const STOPS = [
-  { plate: '.ap-01 > .v7-plate', id: '03-app/01', corners: SCREENS.hero[0].corners, shot: 0, fingers: true },
+  { plate: '.ap-01 > .v7-plate', id: '03-app/01', corners: SCREENS.hero[0].corners, shot: 0 },
   { plate: '.ap-02 > .v7-plate', id: '03-app/02', corners: SCREENS.inspection[0].corners, shot: 1 },
-  { plate: '.ap-03 .v7-frame > .v7-plate', id: '03-app/03', corners: SCREENS.home[0].corners, shot: 0, fingers: true },
+  { plate: '.ap-03 .v7-frame > .v7-plate', id: '03-app/03', corners: SCREENS.home[0].corners, shot: 0 },
   { plate: '.ap-04 > .v7-plate', id: '03-app/04', corners: SCREENS.profile[0].corners, shot: 2 },
 ]
-// The photo phones were erased from the plates (poly masks); the fingers that held them are
-// the plate's protected `keep` polygons, repeated above the docked phone.
-const fingerClip = poly => `polygon(${poly.map(([x, y]) => `${(x / PLATE_W * 100).toFixed(3)}% ${(y / PLATE_H * 100).toFixed(3)}%`).join(',')})`
 const SHOTS = [appHome, appCheck, appProfile]
 const offsetIn = (el, root) => { let x = 0, y = 0; for (let n = el; n && n !== root; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop } return [x, y] }
 const smooth = t => t * t * (3 - 2 * t)
 const centre = corners => corners.reduce(([x, y], c) => [x + c[0] / 4, y + c[1] / 4], [0, 0])
 
-/**
- * One phone in <main> coordinates. Between two anchors its eight corner numbers are
- * interpolated (screenProjection keeps the perspective), it lifts, grows a little and
- * swings towards the photo side, and its capture cross-fades to the next one. When
- * docked it sits in the empty hand of the photo (the photo phone was erased from the plate).
- */
+/** A rigid device follows measured centres. Only its pose changes; the screen
+ * keeps its original 390 × 844 aspect ratio throughout the scroll journey. */
 function AppTraveller() {
   const phone = useRef(null)
-  const hands = useRef([])
   useGSAP(() => {
     const mm = gsap.matchMedia()
     mm.add('(min-width: 761px) and (prefers-reduced-motion: no-preference)', () => {
@@ -83,8 +73,6 @@ function AppTraveller() {
           if (!plateEl) return { ready: false, shot: stop.shot, section: null, corners: stop.corners }
           const [x, y] = offsetIn(plateEl, root)
           const k = plateEl.offsetWidth / PLATE_W
-          const hand = hands.current[STOPS.indexOf(stop)]
-          if (hand) Object.assign(hand.style, { left: `${x}px`, top: `${y}px`, width: `${plateEl.offsetWidth}px`, height: `${plateEl.offsetHeight}px` })
           return { ready: k > 0.05, shot: stop.shot, section: plateEl.closest('.v7-section'), corners: stop.corners.map(([cx, cy]) => [x + cx * k, y + cy * k]) }
         })
         const top = root.getBoundingClientRect().top + scrollY
@@ -112,49 +100,55 @@ function AppTraveller() {
         const i = Math.min(Math.floor(u), anchors.length - 2), t = smooth(u - i)
         const from = anchors[i], to = anchors[i + 1]
         const flight = Math.sin(Math.PI * t)
-        const w = to.corners[1][0] - to.corners[0][0]
         const [fx, fy] = centre(from.corners), [tx, ty] = centre(to.corners)
-        const cx = fx + (tx - fx) * t, cy = fy + (ty - fy) * t
-        const scale = 1 + 0.07 * flight, dx = 0.6 * w * flight, dy = -0.06 * w * flight
-        const corners = from.corners.map((c, n) => {
-          const x = c[0] + (to.corners[n][0] - c[0]) * t, y = c[1] + (to.corners[n][1] - c[1]) * t
-          return [cx + (x - cx) * scale + dx, cy + (y - cy) * scale + dy]
-        })
-        // Fingers lie over the phone only while it is (nearly) docked at their stop.
-        hands.current.forEach((hand, j) => { if (hand) hand.style.opacity = Math.max(0, 1 - Math.abs(state.u - j) * 6).toFixed(3) })
-        try { el.style.transform = `matrix3d(${screenProjection(corners).join(',')})` } catch { return }
-        const fade = Math.min(Math.max((t - 0.44) / 0.12, 0), 1)
-        // The outgoing capture stays opaque underneath while the next one fades in on top.
+        const height = a => (Math.hypot(a.corners[3][0] - a.corners[0][0], a.corners[3][1] - a.corners[0][1]) + Math.hypot(a.corners[2][0] - a.corners[1][0], a.corners[2][1] - a.corners[1][1])) / 2
+        const scaleFor = a => Math.min(height(a) / 844, (innerHeight - 90) * .88 / 900)
+        const scale = scaleFor(from) + (scaleFor(to) - scaleFor(from)) * t
+        const cx = fx + (tx - fx) * t
+        const cy = fy + (ty - fy) * t
+        const yaw = [-12, 5, -8, 4]
+        const roll = [-5, 1, -3, 0]
+        // A restrained turn and lift: no rubber-sheet corner interpolation or bounce.
+        const ry = yaw[i] + (yaw[i + 1] - yaw[i]) * t
+        const rz = roll[i] + (roll[i + 1] - roll[i]) * t
+        el.style.transform = `translate3d(${cx}px,${cy - 12 * flight}px,0) perspective(1600px) rotateY(${ry}deg) rotateX(${2 * flight}deg) rotateZ(${rz}deg) scale(${scale}) translate(-50%,-50%)`
+        const glass = el.querySelector('.ap-traveller-glass')
+        glass.style.transform = `translate3d(${ry * 1.5}px,0,0)`
+        glass.style.opacity = .22 + flight * .12
+        const fade = smooth(Math.min(Math.max((t - .28) / .44, 0), 1))
+        // Native-style page transition: opaque screens slide, so text never ghosts through.
         imgs.forEach((img, n) => {
           img.style.zIndex = n === to.shot ? 2 : n === from.shot ? 1 : 0
-          img.style.opacity = n === to.shot ? (n === from.shot ? 1 : fade) : n === from.shot ? 1 : 0
+          img.style.opacity = n === to.shot || n === from.shot ? 1 : 0
+          const slide = from.shot === to.shot ? 0 : n === to.shot ? (1 - fade) * 100 : -fade * 22
+          img.style.transform = `translate3d(${slide}%,0,0)`
         })
       }
-      const follow = gsap.quickTo(state, 'u', { duration: 0.6, ease: 'power3.out', onUpdate: render })
+      const follow = gsap.quickTo(state, 'u', { duration: 0.35, ease: 'none', onUpdate: render })
       measure()
       state.u = position(scrollY)
       render()
-      root.classList.add('ap-travel')
+      if (anchors.every(a => a.ready)) root.classList.add('ap-travel')
       const trigger = ScrollTrigger.create({
         trigger: root, start: 0, end: 'max',
         onUpdate: () => follow(position(scrollY)),
-        onRefresh: () => { measure(); state.u = position(scrollY); follow(state.u); render() },
+        onRefresh: () => { follow.tween.pause(); measure(); state.u = position(scrollY); render() },
       })
       // Photos and fonts change section heights after the first layout.
       const resize = new ResizeObserver(() => ScrollTrigger.refresh())
       resize.observe(root)
-      return () => { resize.disconnect(); trigger.kill(); root.classList.remove('ap-travel') }
+      return () => { resize.disconnect(); follow.tween.kill(); trigger.kill(); root.classList.remove('ap-travel') }
     })
     return () => mm.revert()
   }, { scope: phone })
   return <>
     <div className="ap-traveller" ref={phone} aria-hidden="true">
       <span className="ap-traveller-body" />
-      <span className="ap-traveller-screen">{SHOTS.map(src => <img key={src} src={src} alt="" width="390" height="844" decoding="async" />)}</span>
+      <span className="ap-traveller-buttons" />
+      <span className="ap-traveller-speaker" /><span className="ap-traveller-camera" />
+      <span className="ap-traveller-screen">{SHOTS.map(src => <img key={src} src={src} alt="" width="390" height="844" decoding="async" />)}<span className="ap-traveller-glass" /></span>
     </div>
-    {STOPS.map((stop, i) => stop.fingers && <div key={stop.id} className="ap-hand" ref={node => { hands.current[i] = node }} aria-hidden="true">
-      {masks[stop.id].keep.map((poly, n) => <img key={n} src={plate(stop.id)} alt="" decoding="async" style={{ clipPath: fingerClip(poly) }} />)}
-    </div>)}
+
   </>
 }
 

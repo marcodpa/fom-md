@@ -139,6 +139,11 @@
 .fn-xray-list p{font-size:max(14px,calc(15.5*var(--u)*.95));line-height:1.45;margin-top:calc(4*var(--u));color:var(--v7-muted)}
 .fn-xray-note{margin-top:calc(20*var(--u))!important;font-size:max(13px,calc(14*var(--u)))!important;color:#8fa9c2!important}
 .fn-xray-note strong{color:#fff}
+@media(min-width:761px){
+ .fn-xray{aspect-ratio:auto;min-height:calc(941*var(--u));padding:calc(130*var(--u)) 0 calc(50*var(--u))}
+ .fn-xray>.v7-copy{position:relative;top:auto}
+ .fn-xray .fn-xray-stage{bottom:auto;aspect-ratio:1672/941}
+}
 @media(max-width:760px){
  .fn-xray{--m-w:150%;--m-x:-48%}
  .fn-xray:before{display:none}

@@ -88,6 +88,12 @@ def reconstruct(img, mask, seed):
 
 
 def build(key, spec):
+    # Image-editor repairs must never be replaced by the old rectangular inpaint masks.
+    if spec.get('repaired'):
+        target = OUT / f'{key}.webp'
+        if not target.exists():
+            raise SystemExit(f'Falta la fotografía reparada {target}; restaurar desde Git.')
+        return target
     source = SLIDES / spec['file']
     img = cv2.imread(str(source), cv2.IMREAD_COLOR)
     if img is None:

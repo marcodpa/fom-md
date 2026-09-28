@@ -63,7 +63,7 @@
  .pq-01 .pq-kicker{font-size:max(16px,calc(17*var(--u)*.92));letter-spacing:.18em}
  .pq-01 h1{font-size:calc(78*var(--u)*.72);line-height:1.02;margin-top:calc(34*var(--u))}
  .pq-01 .v7-copy>p:not(.pq-kicker){font-size:calc(28.5*var(--u)*.86);line-height:1.5;margin-top:calc(26*var(--u));color:#b8d3f0}
- .pq-01 .v7-demo{left:calc(1516*var(--u));top:calc(873*var(--u));right:auto;bottom:auto;font-size:max(13px,calc(13.5*var(--u)*.95))}
+ .pq-01 .v7-demo{left:auto;top:auto;right:calc(40*var(--u));bottom:calc(30*var(--u));font-size:max(13px,calc(13.5*var(--u)*.95))}
 
  .pq-07 .pq-kicker{font-size:max(16px,calc(17*var(--u)*.92));letter-spacing:.33em;color:#b5cbe0}
  .pq-07 h2{font-size:calc(84*var(--u)*.72);line-height:1.07;letter-spacing:-.02em;margin-top:calc(30*var(--u))}

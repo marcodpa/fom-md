@@ -1521,6 +1521,23 @@ Object.assign(repoApi, {
 
   /** Transferencias de personas y vehículos entre entes, a doble control. */
   transferencias: {
+    /** Read candidates from the selected, server-authorized tenant, never the session fleet. */
+    async opciones({ tipo, origenId }) {
+      if (!origenId) return []
+      const lista = []
+      let desplazamiento = 0
+      while (true) {
+        const parametros = { enteId: origenId, limite: 200, desplazamiento }
+        const r = await (tipo === 'identidad' ? api.directorio(parametros) : api.vehiculos(parametros))
+        const items = r?.items ?? []
+        lista.push(...items)
+        desplazamiento += items.length
+        if (!items.length || desplazamiento >= (r?.page?.total ?? desplazamiento)) break
+      }
+      return tipo === 'identidad'
+        ? lista.filter(p => p.role !== 'admin_fom').map(p => ({ id: p.userId, nombre: `${p.displayName} · ${p.email}`, empresaId: origenId }))
+        : lista.map(v => ({ id: v.id, nombre: `${v.alias || v.fleetNumber || v.code} · ${v.plate || 'Sin placa'}`, empresaId: origenId }))
+    },
     identidad: {
       async listar({ estado = '' } = {}) {
         const r = await api.transferenciasDeIdentidad({ status: estado })

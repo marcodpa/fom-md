@@ -282,7 +282,7 @@ export default function Funciones() {
     </V7Section>
 
     <StickyTour sticky={false} id="fn-tour" className="fn-tour" label="Reportes y alertas en el panel" plateId="04-funciones/05"
-      screen={{ corners: [[813, 192], [1592, 160], [1582, 683], [766, 700]], clip: [[740, 130], [1640, 130], [1640, 684], [1540, 684], [1528, 692], [1526, 740], [740, 740]] }}
+      screen={{ corners: [[813, 192], [1592, 160], [1576, 713], [773, 675]], clip: [[740, 130], [1640, 130], [1640, 684], [1540, 684], [1528, 692], [1526, 740], [740, 740]] }}
       srcs={[reports, alerts]}
       steps={[
         { tab: 'Reportes', icon: 'chart', title: reporting.heading, body: reporting.body, stat: { icon: 'document', ...reporting.stat }, children: <Facts section={reporting} /> },

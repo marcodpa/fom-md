@@ -43,14 +43,13 @@ export default function Beneficios() {
   usePageTitle('Beneficios')
   const [appView, setAppView] = useState(0)
   return <main id="contenido" className="v7-page v7-beneficios">
-    <V7Section className="bn-01" plateId="09-beneficios/01" priority labelledBy="bn-title">
+    <V7Section className="bn-01" plateId="09-beneficios/carretera-urbana" priority labelledBy="bn-title">
       <div className="v7-copy">
         <p className="bn-kicker">Beneficios</p>
         <h1 id="bn-title">Más claridad para<br />cada decisión de<br />tu flota.</h1>
         <p>FOM conecta el trabajo de campo con la oficina para que la información sirva al seguimiento diario de la operación.</p>
         <DemoButton />
       </div>
-      <p className="bn-statement" aria-hidden="true">Flotas<br />que mantienen<br />el mundo<br />en movimiento</p>
     </V7Section>
 
     <StickyTour sticky={false} id="bn-tour" className="bn-tour" label="Beneficios en el panel web" plateId="09-beneficios/07"

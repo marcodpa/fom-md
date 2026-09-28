@@ -23,8 +23,7 @@ const I = {
 export default function Contacto() {
   usePageTitle('Contacto')
   return <main id="contenido" className="v7-page v7-contacto">
-    <V7Section className="ct-01" plateId="11-contacto/01" priority demo labelledBy="ct-title"
-      screens={[{ src: panel, corners: [[736, 207], [1414, 252], [1410, 754], [736, 756]], clip: [[700, 170], [1440, 170], [1440, 515], [1405, 522], [1375, 545], [1355, 580], [1347, 620], [1337, 660], [1318, 700], [1300, 740], [1285, 770], [700, 770]] }]}>
+    <V7Section className="ct-01" plateId="11-contacto/reunion" priority labelledBy="ct-title">
       <div className="v7-copy">
         <p className="v7-kicker">{page.eyebrow}</p>
         <h1 id="ct-title">Empieza a controlar<br />tu flota con FOM</h1>
@@ -40,8 +39,8 @@ export default function Contacto() {
         <h2 id="ct-02-title">Solicita tu<br />demostración</h2>
         <p>{demo.body}</p>
         <Features items={demo.bullets.map((b, i) => [['pin', 'video', I.sliders, 'users'][i], b.label, b.text])} />
+        <StatCard icon="calendar" value={demo.stat.value} label={<>Tiempo promedio para agendar<br />la demostración.</>} />
       </div>
-      <StatCard icon="calendar" value={demo.stat.value} label={<>Tiempo promedio para agendar<br />la demostración.</>} />
       <ContactForm />
     </V7Section>
 

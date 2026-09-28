@@ -21,7 +21,7 @@ const matches = (faq, query) => !query || normalize(`${faq.q} ${faq.a}`).include
 
 // Physical screens measured on the slides (tl, tr, br, bl) and what sits in front of them.
 const SCREENS = {
-  '01': [{ src: panel, corners: [[739, 187], [1540, 168], [1532, 759], [710, 728]] }],
+  '01': [{ src: panel, corners: [[740, 185], [1545, 151], [1531, 766], [711, 732]] }],
   // Driver's thumb covers the lower right edge of the tablet.
   '07': [{ phone: true, radius: '40px/20px', src: appHome, corners: [[1112, 201], [1407, 209], [1372, 818], [1100, 797]], clip: [[1080, 180], [1440, 180], [1440, 640], [1400, 648], [1390, 667], [1377, 693], [1370, 727], [1363, 760], [1353, 793], [1333, 813], [1320, 840], [1080, 840]] }],
   // Supervisor's shoulder hides the lower left corner, his right hand the lower right; the footer band cuts it at y 602.

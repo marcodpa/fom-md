@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -142,14 +142,15 @@ export default function Transferencias() {
         </Tarjeta></aside></div>
       </div>
 
-      <ModalNueva
+      {creando && <ModalNueva
+        key={pestana}
         tipo={pestana}
         abierto={creando}
         empresas={empresas.datos ?? []}
         admin={esAdminFom(actor)}
         alCerrar={() => setCreando(false)}
         guardar={(datos) => actuar(() => modulo().crear(datos), 'Transferencia abierta: falta que origen libere y destino acepte.')}
-      />
+      />}
       <ModalCierre cierre={cerrando} alCerrar={() => setCerrando(null)} confirmar={(motivo) => actuar(() => modulo().decidir(cerrando.t, cerrando.paso, motivo), cerrando.paso === 'rejection' ? 'Transferencia rechazada.' : 'Transferencia cancelada.')} />
     </>
   )
@@ -160,13 +161,27 @@ function ModalNueva({ tipo, abierto, empresas, admin, alCerrar, guardar }) {
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
   const set = (k) => (e) => setD((x) => ({ ...x, [k]: e.target.value }))
-  // Personas de toda la plataforma para el administrador; la gente del
-  // propio ente para un supervisor. Vehículos: los del ente de la sesión.
-  const personas = useDatos(() => (admin ? repo.admin.plataforma.personas({ limite: 200 }) : repo.admin.usuarios.listar({})), [admin])
-  const vehiculos = useDatos(() => repo.vehiculos.listar(), [])
+  const [opciones, setOpciones] = useState([])
+  const [cargando, setCargando] = useState(false)
+  const [errorCarga, setErrorCarga] = useState('')
+  const [intento, setIntento] = useState(0)
+  useEffect(() => {
+    let vigente = true
+    setOpciones([])
+    setErrorCarga('')
+    if (!d.origenId) { setCargando(false); return }
+    setCargando(true)
+    repo.transferencias.opciones({ tipo, origenId: d.origenId })
+      .then(lista => { if (vigente) setOpciones(lista) })
+      .catch(e => { if (vigente) setErrorCarga(e.message || 'No se pudo cargar la empresa.') })
+      .finally(() => { if (vigente) setCargando(false) })
+    return () => { vigente = false }
+  }, [tipo, d.origenId, intento])
+  const opcionesOrigen = opciones.filter(o => o.empresaId === d.origenId)
 
   async function confirmar() {
-    if (!d.sujeto) return setError(tipo === 'identidad' ? 'Elige la persona.' : 'Elige el vehículo.')
+    if (!d.origenId) return setError('Elige primero la empresa de origen.')
+    if (cargando || errorCarga || !opcionesOrigen.some(o => o.id === d.sujeto)) return setError(tipo === 'identidad' ? 'Elige la persona.' : 'Elige el vehículo.')
     if (!d.origenId || !d.destinoId || d.origenId === d.destinoId) return setError('Origen y destino tienen que ser entes distintos.')
     if (tipo === 'vehiculo' && !d.codigoDestino.trim()) return setError('Di el código que tendrá el vehículo en el destino.')
     if (d.motivo.trim().length < 3) return setError('Escribe el motivo.')
@@ -181,35 +196,34 @@ function ModalNueva({ tipo, abierto, empresas, admin, alCerrar, guardar }) {
     if (ok) alCerrar()
   }
 
-  const opcionesPersona = (personas.datos ?? []).filter((p) => p.rol !== 'admin_fom')
   return (
     <Modal titulo={tipo === 'identidad' ? 'Transferir una persona' : 'Transferir un vehículo'} abierto={abierto} alCerrar={alCerrar} ancho={560}>
-      <Campo etiqueta={tipo === 'identidad' ? 'Persona' : 'Vehículo'} error={error}>
-        <select className="pnl-input" value={d.sujeto} onChange={(e) => {
-          const id = e.target.value
-          const p = tipo === 'identidad' ? opcionesPersona.find((x) => (x.userId ?? x.id) === id) : null
-          setD((x) => ({ ...x, sujeto: id, origenId: p?.empresaId ?? x.origenId }))
+      <Campo etiqueta="Empresa de origen" ayuda="Primero elige la empresa de la que sale la transferencia." error={error}>
+        <select className="pnl-input" value={d.origenId} disabled={guardando} onChange={e => {
+          const origenId = e.target.value
+          setD(x => ({ ...x, origenId, sujeto: '', destinoId: '', codigoDestino: '' }))
+          setOpciones([])
+          setCargando(Boolean(origenId))
+          setError('')
         }}>
-          <option value="">Elige…</option>
-          {tipo === 'identidad'
-            ? opcionesPersona.map((p) => <option key={p.id} value={p.userId ?? p.id}>{p.nombre} · {p.email}{p.empresaNombre ? ` · ${p.empresaNombre}` : ''}</option>)
-            : (vehiculos.datos ?? []).map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
+          <option value="">Elige la empresa de origen…</option>
+          {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
         </select>
       </Campo>
-      <div className="pnl-grid k2">
-        <Campo etiqueta="Ente de origen">
-          <select className="pnl-input" value={d.origenId} onChange={set('origenId')}>
-            <option value="">Elige…</option>
-            {empresas.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-          </select>
-        </Campo>
-        <Campo etiqueta="Ente de destino">
-          <select className="pnl-input" value={d.destinoId} onChange={set('destinoId')}>
-            <option value="">Elige…</option>
-            {empresas.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-          </select>
-        </Campo>
-      </div>
+      {d.origenId && <Campo etiqueta={tipo === 'identidad' ? 'Persona de esta empresa' : 'Vehículo de esta empresa'}>
+        <select className="pnl-input" value={d.sujeto} disabled={guardando || cargando || Boolean(errorCarga) || !opcionesOrigen.length} onChange={set('sujeto')}>
+          <option value="">{cargando ? 'Cargando…' : opcionesOrigen.length ? 'Elige…' : 'No hay elementos disponibles'}</option>
+          {opcionesOrigen.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+        </select>
+        {errorCarga && <p role="alert" className="pnl-campo-error">{errorCarga} <button type="button" className="pnl-btn sutil" onClick={() => setIntento(x => x + 1)}>Reintentar</button></p>}
+        {!cargando && !errorCarga && !opcionesOrigen.length && <p role="status">{tipo === 'identidad' ? 'Esta empresa no tiene personas disponibles para transferir.' : 'Esta empresa no tiene vehículos disponibles para transferir.'}</p>}
+      </Campo>}
+      <Campo etiqueta="Empresa de destino">
+        <select className="pnl-input" value={d.destinoId} onChange={set('destinoId')} disabled={guardando || !d.sujeto}>
+          <option value="">Elige la empresa de destino…</option>
+          {empresas.filter(e => e.id !== d.origenId).map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+        </select>
+      </Campo>
       {tipo === 'identidad' ? (
         <Campo etiqueta="Rol en el destino" ayuda={admin ? 'Solo el administrador FOM puede entregar a alguien como supervisor.' : undefined}>
           <select className="pnl-input" value={d.rolDestino} onChange={set('rolDestino')}>
@@ -226,7 +240,7 @@ function ModalNueva({ tipo, abierto, empresas, admin, alCerrar, guardar }) {
       </Campo>
       <div style={PIE}>
         <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
-        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>{guardando ? 'Abriendo…' : 'Abrir transferencia'}</button>
+        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando || cargando || Boolean(errorCarga) || !d.sujeto || !d.destinoId}>{guardando ? 'Abriendo…' : 'Abrir transferencia'}</button>
       </div>
     </Modal>
   )

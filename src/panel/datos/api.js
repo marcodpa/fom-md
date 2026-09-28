@@ -315,10 +315,11 @@ export const api = {
   // el del aparato y no el de la unidad.
 
   /** Vehículos de la empresa, con su estado en vivo. */
-  vehiculos: ({ limite = 200, desplazamiento = 0, q = '' } = {}) => {
+  vehiculos: ({ limite = 200, desplazamiento = 0, q = '', enteId = '' } = {}) => {
     const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
     if (q) p.set('q', q)
-    return pedir(`${CONSOLA}/vehicles?${p}`)
+    const ruta = enteId ? `${CONSOLA}/tenants/${enteId}/vehicles` : `${CONSOLA}/vehicles`
+    return pedir(`${ruta}?${p}`)
   },
 
   /** Ficha de un vehículo, con su última situación conocida. */

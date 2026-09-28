@@ -1,0 +1,61 @@
+{
+  "tool": "image_gen.imagegen",
+  "date": "2026-09-28",
+  "note": "Propuestas generadas con capturas como referencia; no son capturas de la web implementada.",
+  "sections": [
+    {
+      "key": "01-panel-app",
+      "refs": [
+        "panel-resumen",
+        "app-inicio"
+      ],
+      "prompt": "Create ONE finished high-end FOM website SECTION design screenshot, landscape 1672x941. Not a photo alone, not a moodboard, not multiple sections, no full-page sheet. Dark navy #06131d, off-white headings, restrained FOM azure #148cff, muted blue-gray copy. Strong Spanish typography, editorial asymmetric layout, generous whitespace, premium fleet operations identity matching supplied FOM screenshots. No navbar, no footer, no fake user metrics, no stock testimonials. Never a row of 3 generic feature cards. Insert the supplied REAL app/dashboard screenshots as faithfully as possible, retain their actual interface, text and numbers; no invented app UI. Surrounding marketing typography crisp and perfectly readable. No surreal glossy 3D or colored glow. Tiny unobtrusive bottom label 'Propuesta de diseño · Capturas actuales · Datos de demostración'. SECTION 1 — centered product composition. Top left big 2-line headline 'Todo ese control.\\nAhora en tu mano.' Top right a small paragraph 'La oficina y el conductor, conectados con la misma información.' Lower central 2/3: wide desktop/browser displaying supplied panel-resumen screenshot at left-center, phone displaying supplied app-inicio at right slightly overlapping its edge, no hands, straight frontal screens, realistic restrained device frames. Devices grounded with a very subtle soft cast shadow. Fine blue connecting line between device edges illustrates connection but never crosses either screen. Below devices one typographic line 'Panel web en la oficina  ↔  App del conductor en campo'. Spacious neutral navy product stage, no cards outside real screenshots. No added vehicle photos.",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-ea37cdfd-3016-43e1-9516-424d83fa0175.png",
+      "file": "01-panel-app.png",
+      "title": "Panel y app conectados"
+    },
+    {
+      "key": "02-servicios",
+      "refs": [
+        "panel-mapa"
+      ],
+      "prompt": "Create ONE finished high-end FOM website SECTION design screenshot, landscape 1672x941. Not a photo alone, not a moodboard, not multiple sections, no full-page sheet. Dark navy #06131d, off-white headings, restrained FOM azure #148cff, muted blue-gray copy. Strong Spanish typography, editorial asymmetric layout, generous whitespace, premium fleet operations identity matching supplied FOM screenshots. No navbar, no footer, no fake user metrics, no stock testimonials. Never a row of 3 generic feature cards. Insert the supplied REAL app/dashboard screenshots as faithfully as possible, retain their actual interface, text and numbers; no invented app UI. Surrounding marketing typography crisp and perfectly readable. No surreal glossy 3D or colored glow. Tiny unobtrusive bottom label 'Propuesta de diseño · Capturas actuales · Datos de demostración'. SECTION 2 — reversed asymmetric editorial split, large real panel-mapa screenshot occupies LEFT 60% within a subtle desktop frame, slight workshop window photograph texture in far background only, no people. RIGHT 36% heading 'Una operación.\\nToda la información.' Below an editorial vertical index of three rows with thin horizontal rules, NO cards or boxes: 'Seguimiento' active in bright blue with text 'Ubicación, recorridos y estado de cada vehículo.' and small link 'Explorar plataforma →'; second row 'Cuidado' with text 'Inspecciones, documentos y mantenimiento.'; third row 'Decisiones' with text 'Alertas, seguridad y reportes para la operación.' Visible small plus on collapsed rows. Large tasteful type, active row readable, plenty of breathing room. One image supports entire index.",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-693f97a8-1881-49d1-b14a-2ec23f265c9c.png",
+      "file": "02-servicios.png",
+      "title": "Servicios sin tarjetas"
+    },
+    {
+      "key": "03-tres-moviles",
+      "refs": [
+        "app-inicio",
+        "app-inspeccion",
+        "app-perfil"
+      ],
+      "prompt": "Create ONE finished high-end FOM website SECTION design screenshot, landscape 1672x941. Not a photo alone, not a moodboard, not multiple sections, no full-page sheet. Dark navy #06131d, off-white headings, restrained FOM azure #148cff, muted blue-gray copy. Strong Spanish typography, editorial asymmetric layout, generous whitespace, premium fleet operations identity matching supplied FOM screenshots. No navbar, no footer, no fake user metrics, no stock testimonials. Never a row of 3 generic feature cards. Insert the supplied REAL app/dashboard screenshots as faithfully as possible, retain their actual interface, text and numbers; no invented app UI. Surrounding marketing typography crisp and perfectly readable. No surreal glossy 3D or colored glow. Tiny unobtrusive bottom label 'Propuesta de diseño · Capturas actuales · Datos de demostración'. SECTION 3 — beautiful spacious three-phone gallery matching approved product stage. Top broad two-line heading 'La operación también\\nviaja con tu equipo.' at left, small right text 'FOM DRIVER conecta al conductor con su unidad y con la oficina.' Below are exactly THREE tall front-facing phones, equally legible side by side with generous gaps. Use supplied screenshots left app-inicio, middle app-inspeccion, right app-perfil WITHOUT altering their content. Phones centered over nearly black navy full-width background; extremely subtle out-of-focus depot truck silhouette only at far left edge, NO people and no hand. Phone screens large, accurate aspect ratio. Plain labels under them 'Inicio', 'Inspección', 'Perfil', no explanatory cards. All three phones and labels fully in frame.",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-229f3781-dcac-4f8c-8eb7-d60b2e2a6cd8.png",
+      "file": "03-tres-moviles.png",
+      "title": "Tres pantallas de la app"
+    },
+    {
+      "key": "04-recorrido",
+      "refs": [
+        "app-inspeccion",
+        "app-mantenimiento"
+      ],
+      "prompt": "Create ONE finished high-end FOM website SECTION design screenshot, landscape 1672x941. Not a photo alone, not a moodboard, not multiple sections, no full-page sheet. Dark navy #06131d, off-white headings, restrained FOM azure #148cff, muted blue-gray copy. Strong Spanish typography, editorial asymmetric layout, generous whitespace, premium fleet operations identity matching supplied FOM screenshots. No navbar, no footer, no fake user metrics, no stock testimonials. Never a row of 3 generic feature cards. Insert the supplied REAL app/dashboard screenshots as faithfully as possible, retain their actual interface, text and numbers; no invented app UI. Surrounding marketing typography crisp and perfectly readable. No surreal glossy 3D or colored glow. Tiny unobtrusive bottom label 'Propuesta de diseño · Capturas actuales · Datos de demostración'. SECTION 4 — editorial process story, NOT a row of cards. At top left heading 'Del primer chequeo\\nal próximo servicio.' Top right short paragraph 'Un recorrido conectado: revisar, reportar y dar seguimiento.' Center/bottom a thin azure path with four dots steps staggered along it: 'Inspección', 'Reporte de falla', 'Mantenimiento', 'Historial'. Two large portrait screenshot fragments, from supplied app-inspeccion and app-mantenimiento, placed at opposite sides of the path, straight and sharp; they are screenshot crops as visual evidence, not four framed cards. Small labels 'El conductor revisa la unidad.' and 'La oficina consulta y da seguimiento.' Use open typographic layout with plenty negative space, distinct silhouette from 3-phone gallery; pale line connects stages without crossing text or images. No invented order IDs or statistics. Navy ground, subtle photographic closeup of truck tire in extreme bottom right only, no hands.",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-b46d3813-a633-45a9-94bb-5847b7d5c45e.png",
+      "file": "04-recorrido.png",
+      "title": "Del chequeo al mantenimiento"
+    },
+    {
+      "key": "05-indice",
+      "refs": [
+        "app-perfil"
+      ],
+      "prompt": "Create ONE finished high-end FOM website SECTION design screenshot, landscape 1672x941. Not a photo alone, not a moodboard, not multiple sections, no full-page sheet. Dark navy #06131d, off-white headings, restrained FOM azure #148cff, muted blue-gray copy. Strong Spanish typography, editorial asymmetric layout, generous whitespace, premium fleet operations identity matching supplied FOM screenshots. No navbar, no footer, no fake user metrics, no stock testimonials. Never a row of 3 generic feature cards. Insert the supplied REAL app/dashboard screenshots as faithfully as possible, retain their actual interface, text and numbers; no invented app UI. Surrounding marketing typography crisp and perfectly readable. No surreal glossy 3D or colored glow. Tiny unobtrusive bottom label 'Propuesta de diseño · Capturas actuales · Datos de demostración'. SECTION 5 — editorial asymmetric detail spotlight. Huge heading at top-left 'Conducir mejor empieza\\npor entender cada viaje.' Below left narrow explanatory column with three plain text passages separated by whitespace (NOT cards): 'Índice de manejo seguro' / 'Consulta el indicador de tu perfil.'; 'Eventos de manejo' / 'Revisa excesos de velocidad, frenadas y aceleraciones.'; 'Información del conductor' / 'Tu perfil y tus documentos en un mismo lugar.' RIGHT center dominant faithful enlarged crop of the actual supplied profile's INDEX CARD with YELLOW 76/100, 'Puedes mejorar', events values 1.2, 0.8, 0.5. Below it an overlapping smaller complete actual profile screenshot in a thin realistic phone, showing José Marruffo. Preserve actual yellow status not green94. Fine leader annotations outside crop, one key visual card ONLY because it is the real product artifact, no extra feature boxes. Dim restrained navy spotlight, realistic soft shadow, no people.",
+      "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-6bfd37c6-ee72-45d5-b6e3-dedf86d582bf.png",
+      "file": "05-indice.png",
+      "title": "Índice de conducción"
+    }
+  ]
+}

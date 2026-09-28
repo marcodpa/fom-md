@@ -186,40 +186,22 @@ a.v7-card:hover,.v7-card:hover{border-color:#2c8ee0;transform:translateY(-3px);b
 .v7-section:not(:first-child)>.v7-plate::before,.v7-section:not(.v7-footer)>.v7-plate::after{content:'';position:absolute;left:0;right:0;z-index:1;pointer-events:none;height:12%}
 .v7-section:not(:first-child)>.v7-plate::before{top:0;background:linear-gradient(var(--v7-bg),#06121c00)}
 .v7-section:not(.v7-footer)>.v7-plate::after{bottom:0;background:linear-gradient(#06121c00,var(--v7-bg))}
-/* Entrance variants, alternated per section (data-motion set by V7Section) */
-.v7-motion .v7-section>.v7-plate{transition:transform 1.6s cubic-bezier(.16,1,.3,1),clip-path 1.3s cubic-bezier(.77,0,.18,1),filter 1.4s cubic-bezier(.16,1,.3,1)}
-.v7-motion .v7-section[data-motion=rise]:not(.is-in)>.v7-plate{transform:scale(1.045)}
-.v7-motion .v7-section[data-motion=wipe]:not(.is-in)>.v7-plate{clip-path:inset(0 0 0 100%)}
-.v7-motion .v7-section[data-motion=zoom]:not(.is-in)>.v7-plate{transform:scale(1.18);filter:blur(6px) brightness(.6)}
-.v7-motion .v7-section[data-motion=curtain]:not(.is-in)>.v7-plate{clip-path:inset(14% 10% 14% 10% round 28px)}
-.v7-motion .v7-section[data-motion=blur]:not(.is-in)>.v7-plate{filter:brightness(.35) saturate(.6)}
-.v7-motion .v7-section[data-motion=slide]:not(.is-in)>.v7-plate{transform:translateX(6%)}
-.v7-motion .v7-section[data-motion=wipe]:not(.is-in) .v7-copy>*,.v7-motion .v7-section[data-motion=slide]:not(.is-in) .v7-copy>*{transform:translateX(-48px)}
-.v7-motion .v7-section[data-motion=blur]:not(.is-in) :is(.v7-copy>*,.v7-card,.v7-features li){filter:blur(5px);transform:none}
-.v7-motion .v7-section[data-motion=blur] :is(.v7-copy>*,.v7-card,.v7-features li){transition:opacity .9s ease,filter 1s cubic-bezier(.16,1,.3,1),transform .8s}
-.v7-motion .v7-section[data-motion=zoom]:not(.is-in) :is(.v7-card,.v7-stat){transform:scale(.92)}
-.v7-motion .v7-section[data-motion=curtain]:not(.is-in) :is(.v7-card,.v7-stat,.v7-features li){transform:perspective(900px) rotateX(18deg) translateY(30px)}
-.v7-motion .v7-section .v7-screen-layer{opacity:0;transition:opacity .9s .35s ease}
-.v7-motion .v7-section.is-in .v7-screen-layer{opacity:1}
-.v7-motion .v7-section :is(.v7-copy>*,.v7-card,.v7-features li,.v7-stat,.v7-faq-list>details,.v7-mail,.v7-footer-hero,.v7-footer-links>*){opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
-.v7-motion .v7-section.is-in :is(.v7-copy>*,.v7-card,.v7-features li,.v7-stat,.v7-faq-list>details,.v7-mail,.v7-footer-hero,.v7-footer-links>*){opacity:1;transform:none}
-.v7-motion .v7-section.is-in .v7-copy>:nth-child(2){transition-delay:.08s}.v7-motion .v7-section.is-in .v7-copy>:nth-child(3){transition-delay:.16s}.v7-motion .v7-section.is-in .v7-copy>:nth-child(4){transition-delay:.24s}
-.v7-motion .v7-section.is-in .v7-features li:nth-child(1){transition-delay:.25s}.v7-motion .v7-section.is-in .v7-features li:nth-child(2){transition-delay:.33s}.v7-motion .v7-section.is-in .v7-features li:nth-child(3){transition-delay:.41s}.v7-motion .v7-section.is-in .v7-features li:nth-child(4){transition-delay:.49s}.v7-motion .v7-section.is-in .v7-features li:nth-child(5){transition-delay:.57s}
-.v7-motion .v7-section.is-in :is(.v7-stat,.v7-mail){transition-delay:.45s}
-.v7-motion .v7-section.is-in .v7-faq-list>details:nth-child(2){transition-delay:.08s}.v7-motion .v7-section.is-in .v7-faq-list>details:nth-child(3){transition-delay:.16s}.v7-motion .v7-section.is-in .v7-faq-list>details:nth-child(4){transition-delay:.24s}
+/* Text shade belongs to the live composition, never painted as erased blocks in a photo. */
+@media(min-width:761px){
+ .v7-section:is(.pf-01,.qo-01,.pq-01,.ct-01,.ct-02,.qs-01,.bn-01,.ap-01)>.v7-plate::before{content:'';position:absolute;inset:0;z-index:1;height:auto;pointer-events:none;background:linear-gradient(90deg,#06121cc9 0%,#06121c99 24%,#06121c00 45%)}
+}
+/* Keep photos and their projected screens together. Only copy enters, with a
+   short unmasked rise; no brightness flash or independent device fade. */
+.v7-motion .v7-section .v7-copy{transition:opacity .5s ease,translate .6s cubic-bezier(.16,1,.3,1)}
+.v7-motion .v7-section:not(.is-in) .v7-copy{opacity:.7;translate:0 12px}
+.v7-motion .v7-section.is-in .v7-copy{opacity:1;translate:0 0}
 .v7-features li .v7-icon{transition:transform .25s ease,box-shadow .25s ease,background .25s ease}
 .v7-features li:hover .v7-icon{transform:translateY(-2px);box-shadow:0 0 0 1px #2c9cff55,0 10px 28px -10px #2c9cffaa}
 .v7-stat{transition:border-color .25s ease,box-shadow .25s ease}.v7-stat:hover{border-color:#3aa9ff;box-shadow:0 18px 50px -24px #2c9cffaa}
 .v7-page .v7-faq-list details{transition:border-color .2s ease,background .2s ease}.v7-page .v7-faq-list details:hover{border-color:#2f7fc0;background:#0a1826f2}
 .v7-button{box-shadow:0 14px 36px -16px #138bffcc}
-/* More motion, each with its own job:
-   headings wipe up from a mask, screens power on, plates drift (JS), cards tilt, the demo
-   button leans towards the pointer and FAQ answers open smoothly. */
+/* Hero depth and restrained pointer feedback. Device layers remain registered. */
 .v7-plate.is-drifting{scale:1.06;will-change:translate}
-.v7-motion .v7-section :is(.v7-copy>h1,.v7-copy>h2,.v7-tour-card>h2){opacity:1;clip-path:inset(0 0 100% 0);transform:translateY(40%);transition:clip-path 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1)}
-.v7-motion .v7-section.is-in :is(.v7-copy>h1,.v7-copy>h2,.v7-tour-card>h2){clip-path:inset(0 0 -20% 0);transform:none}
-.v7-motion .v7-section .v7-screen-layer{filter:brightness(1.8);transition:opacity .9s .35s ease,filter 1.2s .35s cubic-bezier(.2,.7,.2,1)}
-.v7-motion .v7-section.is-in .v7-screen-layer{filter:none}
 .v7-card,.v7-stat{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .35s cubic-bezier(.2,.7,.2,1),border-color .25s,box-shadow .25s,background .25s}
 .v7-motion .v7-section.is-in :is(.v7-card,.v7-stat){transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
 .v7-button{translate:var(--mx,0) var(--my,0);transition:background .2s,translate .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
@@ -233,7 +215,13 @@ a.v7-card:hover,.v7-card:hover{border-color:#2c8ee0;transform:translateY(-3px);b
 /* Screenshots (scripts/v7-shots.mjs) and reduced-motion users see the final state. */
 .v7-static .v7-page *,.v7-static .v7-page *::before,.v7-static .v7-page *::after{transition:none!important;animation:none!important}
 .v7-static .v7-plate.is-drifting{translate:none!important;scale:1!important}
-@media(prefers-reduced-motion:reduce){.v7-page *{transition:none!important;scroll-behavior:auto}.v7-motion .v7-section :is(.v7-copy>h1,.v7-copy>h2,.v7-tour-card>h2){clip-path:none;transform:none}.v7-motion .v7-section .v7-screen-layer{filter:none}.v7-motion .v7-section>.v7-plate,.v7-motion .v7-section :is(.v7-copy>*,.v7-card,.v7-features li,.v7-stat,.v7-faq-list>details,.v7-mail,.v7-footer-hero,.v7-footer-links>*){transform:none;opacity:1}.v7-motion .v7-section .v7-screen-layer{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+ .v7-page *,.v7-page *::before,.v7-page *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+ .v7-motion .v7-section .v7-copy{opacity:1;translate:none}
+ .v7-plate.is-drifting{translate:none!important;scale:1!important}
+ .v7-card,.v7-stat{transform:none!important}
+ .v7-button{translate:none!important}
+}
 
 /* Phones and narrow tablets: every section stacks text, photo and controls. */
 @media(max-width:760px){
@@ -339,3 +327,9 @@ a.v7-card:hover,.v7-card:hover{border-color:#2c8ee0;transform:translateY(-3px);b
 /* No small uppercase labels inside cards either (user request). */
 .v7-page .v7-card>small{display:none}
 .v7-app .ap-pillars li{text-transform:none!important;letter-spacing:0!important}
+/* Shared illuminated navy surface, matching the approved Inicio proposal. */
+.v7-page{--v7-surface:radial-gradient(ellipse at 73% 38%,#14334c88 0%,#0c233644 35%,transparent 70%),linear-gradient(135deg,#06121c,#081925 58%,#06121c);background-image:var(--v7-surface)}
+.v7-page .v7-section{background-image:var(--v7-surface)}
+.v7-page .v7-backdrop{background:var(--v7-surface)}
+.v7-inicio :is(.hs-connected,.hs-driving,.hs-services-copy){background-image:var(--v7-surface)}
+.v7-page.v7-inicio :is(.hs-connected,.hs-driving,.hs-services-copy){background-image:var(--v7-surface)}

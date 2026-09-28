@@ -100,7 +100,7 @@ export function StickyTour({ id, className = '', plateId, screen, srcs, steps, l
     stepRefs.current.forEach(el => el && observer.observe(el))
     return () => observer.disconnect()
   }, [sticky])
-  const go = i => { setActive(i); if (sticky) stepRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
+  const go = i => { setActive(i); if (sticky) stepRefs.current[i]?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' }) }
   return <section ref={ref} id={id} className={`v7-section v7-tour${sticky ? '' : ' is-tabbed'} ${className}`} aria-label={label} style={{ '--steps': steps.length }}>
     <div className="v7-tour-stage">
       <Plate id={plateId} screens={[{ ...screen, src: srcs }]} active={active} />
@@ -183,29 +183,37 @@ function useDrift(ref) {
     // Only the first section (the hero) drifts: moving every photo made scrolling feel heavy.
     const section = ref.current
     const plateEl = section?.previousElementSibling ? null : section?.querySelector(':scope > .v7-plate')
-    if (!plateEl || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    // A travelling device is measured in page coordinates; its photo must share those coordinates.
+    if (!plateEl || section.closest('.v7-app') || matchMedia('(prefers-reduced-motion: reduce)').matches) return
     if (!drifting.size) { addEventListener('scroll', onDriftScroll, { passive: true }); addEventListener('resize', onDriftScroll) }
     drifting.add(plateEl)
     plateEl.classList.add('is-drifting')
     drift()
-    return () => { drifting.delete(plateEl); if (!drifting.size) { removeEventListener('scroll', onDriftScroll); removeEventListener('resize', onDriftScroll) } }
+    return () => {
+      drifting.delete(plateEl)
+      plateEl.classList.remove('is-drifting')
+      plateEl.style.removeProperty('translate')
+      if (!drifting.size) {
+        removeEventListener('scroll', onDriftScroll); removeEventListener('resize', onDriftScroll)
+        cancelAnimationFrame(driftFrame); driftFrame = 0
+      }
+    }
   }, [])
 }
 
 /** Marks a section `is-in` the first time it enters the viewport (drives the reveal motion). */
-const MOTIONS = ['rise', 'wipe', 'zoom', 'curtain', 'blur', 'slide']
 function useReveal(motion) {
   const ref = useRef(null)
   useEffect(() => {
     const el = ref.current
-    // Each section enters differently from its neighbour (ui-ux-pro-max: vary timing and motion
-    // by context); a page can force one with the `motion` prop.
-    if (el?.parentElement) el.dataset.motion = motion || MOTIONS[[...el.parentElement.children].indexOf(el) % MOTIONS.length]
+    if (el) el.dataset.motion = motion || 'rise'
     if (!el || typeof IntersectionObserver === 'undefined') return el?.classList.add('is-in')
     el.closest('.v7-page')?.classList.add('v7-motion')
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) { el.classList.add('is-in'); observer.disconnect() }
-    }, { threshold: 0.18 })
+    // Tall pinned tours can never reach an 18% intersection on small screens.
+    // Reveal before content enters view; keep photographic layers visible throughout.
+    }, { threshold: 0, rootMargin: '0px 0px 80px 0px' })
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
@@ -349,6 +357,7 @@ export function CountUp({ value }) {
 
 /** Pointer tilt for cards: a few degrees towards the cursor. */
 export function tilt(e) {
+  if (e.pointerType !== 'mouse' || matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const el = e.currentTarget, r = el.getBoundingClientRect()
   el.style.setProperty('--rx', `${((e.clientY - r.top) / r.height - 0.5) * -6}deg`)
   el.style.setProperty('--ry', `${((e.clientX - r.left) / r.width - 0.5) * 8}deg`)
@@ -364,6 +373,7 @@ export function StatCard({ icon, value, label, className = '' }) {
 }
 
 function magnet(e) {
+  if (e.pointerType !== 'mouse' || matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const el = e.currentTarget, r = el.getBoundingClientRect()
   el.style.setProperty('--mx', `${(e.clientX - r.left - r.width / 2) * 0.18}px`)
   el.style.setProperty('--my', `${(e.clientY - r.top - r.height / 2) * 0.3}px`)
