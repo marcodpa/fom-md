@@ -1,0 +1,179 @@
+diff --git a/src/console-api/console-session.guard.ts b/src/console-api/console-session.guard.ts
+index 7d3ac3a..163b4c0 100644
+--- a/src/console-api/console-session.guard.ts
++++ b/src/console-api/console-session.guard.ts
+@@ -1,5 +1,6 @@
+ import {
+   CanActivate,
++  BadRequestException,
+   ExecutionContext,
+   ForbiddenException,
+   Injectable,
+@@ -12,6 +13,7 @@ import {
+   setCurrentConsoleSessionToken,
+ } from '../authentication/actor-context';
+ import { ConsoleCredentialService } from './console-credential.service';
++import { TenantScopeService } from './tenant-scope.service';
+ 
+ const SESSION_COOKIE = '__Host-fom_session';
+ 
+@@ -30,11 +32,11 @@ type RequestLike = {
+  * `SameSite=Strict`, que el navegador no puede leer y que el servidor puede
+  * revocar. Es la misma decisión que ya tomó la superficie móvil con su Bearer.
+  *
+- * EL `tenantId` NO SE ACEPTA DEL CLIENTE, ni por cabecera, ni por parámetro, ni
+- * por cuerpo. Se deriva de las membresías activas del usuario dueño de la
+- * sesión. El actor viaja después por almacenamiento de contexto, no como
+- * argumento, de modo que un servicio no puede recibir por descuido un tenant
+- * que venía del navegador: no hay forma de pasárselo.
++ * El usuario y el rol proceden exclusivamente de la sesión. Solo un
++ * administrador de plataforma puede solicitar otra empresa por cabecera;
++ * TenantScopeService valida su existencia y alcance escribible antes de
++ * establecer el contexto de recursos de esta petición. La cookie y las
++ * membresías del administrador no se modifican.
+  *
+  * Un usuario con dos membresías activas se rechaza en vez de elegir por él.
+  * Adivinar la empresa equivocada mostraría datos de otro cliente, y eso es peor
+@@ -46,6 +48,7 @@ export class ConsoleSessionGuard implements CanActivate {
+     private readonly sessions: AuthSessionService,
+     private readonly actors: ActorContextService,
+     private readonly credentials: ConsoleCredentialService,
++    private readonly scopes: TenantScopeService,
+   ) {}
+ 
+   async canActivate(context: ExecutionContext): Promise<boolean> {
+@@ -70,7 +73,21 @@ export class ConsoleSessionGuard implements CanActivate {
+       );
+     }
+ 
+-    setCurrentActor(await this.actors.resolveByUserId(session.userId));
++    const actor = await this.actors.resolveByUserId(session.userId);
++    setCurrentActor(actor);
++    const selected = request.headers['x-fom-console-tenant'];
++    if (selected !== undefined) {
++      if (!this.scopes.isPlatformAdministrator(actor)) {
++        throw new ForbiddenException('Only a FOM administrator can select a company context');
++      }
++      if (typeof selected !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(selected)) {
++        throw new BadRequestException('Invalid company context');
++      }
++      const scope = await this.scopes.requireWritable(selected);
++      // The authenticated identity and role remain unchanged. Only the resource
++      // company changes, after checking platform authority and existence.
++      setCurrentActor({ ...actor, tenantId: scope.tenantId });
++    }
+     setCurrentConsoleSessionToken(token);
+     return true;
+   }
+diff --git a/src/console-api/console.controller.ts b/src/console-api/console.controller.ts
+index 4088034..fcc2176 100644
+--- a/src/console-api/console.controller.ts
++++ b/src/console-api/console.controller.ts
+@@ -16,6 +16,7 @@ import {
+ } from '@nestjs/swagger';
+ import { ConsoleFleetService } from './console-fleet.service';
+ import { ConsoleSessionGuard } from './console-session.guard';
++import { currentActor } from '../authentication/actor-context';
+ import {
+   DailyMetricsQueryDto,
+   DriverAssignmentQueryDto,
+@@ -58,6 +59,13 @@ export class ConsoleController {
+     private readonly positions: GpsPositionQueryService,
+   ) {}
+ 
++  @Get('company-context')
++  @Header('Cache-Control', 'no-store')
++  companyContext() {
++    const actor = currentActor()!;
++    return { tenantId: actor.tenantId, role: actor.role };
++  }
++
+   @Get('vehicles')
+   @ApiOperation({
+     summary: 'Vehículos de la empresa de la sesión, con su estado en vivo',
+diff --git a/test/console-api.test.js b/test/console-api.test.js
+index 4721486..ee3df74 100644
+--- a/test/console-api.test.js
++++ b/test/console-api.test.js
+@@ -125,11 +125,11 @@ test('el cambio inicial limpia la cookie y exige una sesión nueva', async () =>
+   assert.match(response.headers['set-cookie'], /Max-Age=0/u);
+ });
+ 
+-test('el tenantId no se acepta del cliente en ninguna forma', () => {
++test('el tenantId no se acepta en los DTO operativos; la selección admin se valida en el guard', () => {
+   // Ni como parámetro de consulta declarado...
+   assert.doesNotMatch(dto, /tenantId/u);
+   // ...ni como parámetro de ruta, ni leído de cabeceras en el controlador.
+-  assert.doesNotMatch(controller, /tenantId/u);
++  assert.match(controller, /return \{ tenantId: actor\.tenantId, role: actor\.role \}/u);
+ 
+   // El servicio lo obtiene SOLO del actor. Que no exista ninguna firma que lo
+   // reciba es lo que hace imposible pasárselo por descuido.
+diff --git a/test/console-company-context.test.js b/test/console-company-context.test.js
+new file mode 100644
+index 0000000..992e7e4
+--- /dev/null
++++ b/test/console-company-context.test.js
+@@ -0,0 +1,62 @@
++'use strict';
++const assert = require('node:assert/strict');
++const { test } = require('node:test');
++const { ConsoleSessionGuard } = require('../dist/console-api/console-session.guard');
++const { ConsoleController } = require('../dist/console-api/console.controller');
++const { runWithActorStore, currentActor } = require('../dist/authentication/actor-context');
++const home = '10000000-0000-4000-8000-000000000001';
++const target = '10000000-0000-4000-8000-000000000002';
++function setup(role = 'admin_fom', exists = true) {
++  const actor = {userId:'person',tenantId:home,role,platformAdmin:role==='admin_fom'};
++  let queries = 0;
++  const scopes = {
++    isPlatformAdministrator: a => a.role === 'admin_fom' || a.platformAdmin,
++    requireWritable: async id => {
++      queries++;
++      assert.deepEqual(currentActor(),actor);
++      if(!exists) {const e=new Error('Not found');e.status=404;throw e;}
++      return {tenantId:id,writable:true};
++    },
++  };
++  const guard = new ConsoleSessionGuard(
++    {authenticate:async()=>({userId:actor.userId})},
++    {resolveByUserId:async()=>actor},
++    {mustChangePassword:async()=>false},scopes);
++  return {guard,actor,queries:()=>queries};
++}
++function context(selected) {
++  return {switchToHttp:()=>({getRequest:()=>({headers:{cookie:'__Host-fom_session=test',...(selected===undefined?{}:{'x-fom-console-tenant':selected})}})})};
++}
++test('admin selects a verified resource company while keeping identity and authority',async()=>{
++  const s=setup();
++  await runWithActorStore(async()=>{
++    await s.guard.canActivate(context(target));
++    assert.deepEqual(currentActor(),{...s.actor,tenantId:target});
++    assert.deepEqual(new ConsoleController({},{}).companyContext(),{tenantId:target,role:'admin_fom'});
++  });
++  assert.equal(s.queries(),1);
++});
++for(const role of ['supervisor','conductor','usuario','operator']) {
++  test(`${role} cannot select another company`,async()=>{
++    const s=setup(role);
++    await runWithActorStore(async()=>{
++      await assert.rejects(s.guard.canActivate(context(target)),e=>e.status===403);
++      assert.deepEqual(currentActor(),s.actor);
++    });
++    assert.equal(s.queries(),0);
++  });
++}
++test('invalid and missing companies never replace the actor context',async()=>{
++  for(const id of ['bad',target]) {
++    const s=setup('admin_fom',false);
++    await runWithActorStore(async()=>{
++      await assert.rejects(s.guard.canActivate(context(id)),e=>e.status===(id==='bad'?400:404));
++      assert.deepEqual(currentActor(),s.actor);
++    });
++  }
++});
++test('company context is request local and does not change the next global request',async()=>{
++  const s=setup();
++  await runWithActorStore(async()=>{await s.guard.canActivate(context(target));assert.equal(currentActor().tenantId,target);});
++  await runWithActorStore(async()=>{await s.guard.canActivate(context());assert.deepEqual(currentActor(),s.actor);});
++});

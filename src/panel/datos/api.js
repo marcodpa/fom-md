@@ -71,15 +71,22 @@ function claveIdempotente() {
 }
 
 const lecturasEnCurso = new Map()
+let empresaGestionId = null
+export function empresaGestionActualId() { return empresaGestionId }
+export function fijarEmpresaGestion(id) {
+  empresaGestionId = id || null
+  lecturasEnCurso.clear()
+}
 export function pedir(ruta, opciones = {}) {
   if ((opciones.metodo || 'GET') !== 'GET' || opciones.señal) return pedirUnaVez(ruta, opciones)
-  if (lecturasEnCurso.has(ruta)) return lecturasEnCurso.get(ruta)
-  const peticion = pedirUnaVez(ruta, opciones).finally(() => lecturasEnCurso.delete(ruta))
-  lecturasEnCurso.set(ruta, peticion)
+  const clave = `${empresaGestionId || ''}:${ruta}`
+  if (lecturasEnCurso.has(clave)) return lecturasEnCurso.get(clave)
+  const peticion = pedirUnaVez(ruta, opciones).finally(() => lecturasEnCurso.delete(clave))
+  lecturasEnCurso.set(clave, peticion)
   return peticion
 }
 
-async function pedirUnaVez(ruta, { metodo = 'GET', cuerpo, señal, idempotente = false } = {}) {
+async function pedirUnaVez(ruta, { metodo = 'GET', cuerpo, señal, idempotente = false, empresaContexto = empresaGestionId } = {}) {
   if (!HAY_API) throw new Error('La API real no está configurada en este entorno.')
 
   let respuesta
@@ -87,13 +94,14 @@ async function pedirUnaVez(ruta, { metodo = 'GET', cuerpo, señal, idempotente =
     const mutacion = !['GET', 'HEAD', 'OPTIONS'].includes(metodo.toUpperCase())
     respuesta = await fetch(`${BASE}${ruta}`, {
       method: metodo,
-      headers: mutacion
-        ? {
+      headers: {
+            ...(empresaContexto && ruta.startsWith('/api/v1/console/') && !ruta.startsWith('/api/v1/console/auth/') ? { 'x-fom-console-tenant': empresaContexto } : {}),
+            ...(mutacion ? {
             'content-type': 'application/json',
             'x-fom-csrf': 'fom-browser-v1',
             ...(idempotente ? { 'idempotency-key': claveIdempotente() } : {}),
-          }
-        : undefined,
+          } : {}),
+      },
       body: cuerpo ? JSON.stringify(cuerpo) : undefined,
       signal: señal,
       // En desarrollo la guarda el proxy; publicada, la cookie HttpOnly viaja
@@ -144,6 +152,7 @@ const CONSOLA = '/api/v1/console'
 const INTERNA = '/gps-console-internal/api'
 
 export const api = {
+  contextoEmpresa: (id) => pedirUnaVez(`${CONSOLA}/company-context`, { empresaContexto: id }),
   // Acceso por la superficie de consola. No usa `/auth/*`: ese controlador
   // exige el token interno y FOM-TEST no lo tiene configurado, así que
   // responde 503. Estas tres sí funcionan solo con la sesión, igual que el

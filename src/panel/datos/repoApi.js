@@ -11,7 +11,7 @@
 // "0 km/h" cuando en realidad no sabe la velocidad miente, y nadie se entera.
 // ============================================================
 
-import { api } from './api'
+import { api, empresaGestionActualId } from './api'
 import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
@@ -86,10 +86,12 @@ function comoUnidad(v) {
 const VENTANA_COMPARTIDA_MS = 3000
 let enVuelo = null
 let enVueloDesde = 0
+let enVueloEmpresa = null
 
 async function flota(q = '') {
   const ahora = Date.now()
-  if (!q && enVuelo && ahora - enVueloDesde < VENTANA_COMPARTIDA_MS) {
+  const empresaContexto = empresaGestionActualId()
+  if (!q && enVuelo && enVueloEmpresa === empresaContexto && ahora - enVueloDesde < VENTANA_COMPARTIDA_MS) {
     return enVuelo
   }
   const peticion = api.vehiculos({ q })
@@ -97,11 +99,12 @@ async function flota(q = '') {
     .then(conPosicionDirecta)
   if (!q) {
     enVueloDesde = ahora
+    enVueloEmpresa = empresaContexto
     enVuelo = peticion
     // Un fallo no debe quedar cacheado: el siguiente intento tiene que salir
     // de verdad al servidor.
     peticion.catch(() => {
-      enVuelo = null
+      if (enVuelo === peticion) enVuelo = null
     })
   }
   return peticion

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { entrarEmpresa } from '../auth'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -20,6 +22,7 @@ function cargar(q, tipo) {
 }
 
 export default function AdminEmpresas() {
+  const navegar = useNavigate()
   const sesion = useSesion()
   const actor = sesion?.perfil
   const [q, setQ] = useState('')
@@ -27,6 +30,20 @@ export default function AdminEmpresas() {
   const [creando, setCreando] = useState(false)
   const [predeDe, setPredeDe] = useState(null) // empresa cuyo listado de compañías se edita
   const [aviso, setAviso] = useState('')
+  const [entrando, setEntrando] = useState(false)
+
+  const gestionar = async (empresa) => {
+    setEntrando(true)
+    setAviso('')
+    try {
+      await entrarEmpresa(empresa)
+      navegar('/panel')
+    } catch (e) {
+      setAviso(e.message)
+    } finally {
+      setEntrando(false)
+    }
+  }
 
   const { datos, estado, error, recargar } = useDatos(() => cargar(q, tipo), [q, tipo])
 
@@ -77,6 +94,8 @@ export default function AdminEmpresas() {
             alternarServicio={alternarServicio}
             eliminar={eliminar}
             abrirPredefinidas={setPredeDe}
+            gestionar={gestionar}
+            entrando={entrando}
           />
         )}
       </div>
@@ -87,7 +106,7 @@ export default function AdminEmpresas() {
   )
 }
 
-function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eliminar, abrirPredefinidas }) {
+function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando }) {
   const [seleccionId, setSeleccionId] = useState(null)
   const seleccion = lista.find(e => e.id === seleccionId) ?? lista[0]
   const operativas = lista.filter((e) => !e.respaldo)
@@ -193,6 +212,9 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
         {seleccion ? <>
           <span className="pnl-metrica-icono"><Icono nombre="empresa" tam={28} /></span>
           <h3>{seleccion.nombre}</h3>
+          <button type="button" className="pnl-btn primario" disabled={entrando} onClick={() => gestionar(seleccion)}>
+            {entrando ? 'Comprobando acceso…' : 'Entrar a empresa'}
+          </button>
           <Tag color={seleccion.servicioActivo ? 'verde' : 'ambar'}>{seleccion.servicioActivo ? 'Servicio activo' : 'Servicio suspendido'}</Tag>
           <Datos items={[
             {etiqueta:'Tipo de ente',valor:seleccion.tipoEtiqueta || etiqueta('company_tipo', seleccion.tipo)},

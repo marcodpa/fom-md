@@ -19,7 +19,7 @@
 //   {perfil}  -> sesión activa
 // ============================================================
 
-import { api, HAY_API } from './datos/api'
+import { api, HAY_API, fijarEmpresaGestion } from './datos/api'
 import { iniciales as inicialesDe } from './datos/formato'
 import { esAdminFom, etiquetaRolSesion, rolCanonico, tipoEmpresaDe } from './roles'
 
@@ -76,6 +76,7 @@ function avisar() {
 }
 
 function fijar(nueva) {
+  fijarEmpresaGestion(nueva?.perfil?.empresaGestion?.id)
   sesion = nueva
   avisar()
 }
@@ -219,6 +220,28 @@ export function sesionActual() {
 /** Perfil activo, o null. */
 export function perfilActual() {
   return sesion?.perfil ?? null
+}
+
+/** Select a resource company without changing the administrator's identity. */
+export async function entrarEmpresa(empresa) {
+  if (!esAdminFom(sesion?.perfil)) throw new Error('Solo el administrador FOM puede entrar a otra empresa.')
+  if (!empresa?.id) throw new Error('Selecciona una empresa.')
+  if (HAY_API) {
+    const contexto = await api.contextoEmpresa(empresa.id)
+    if (contexto?.tenantId !== empresa.id) throw new Error('El servidor no confirmó la empresa seleccionada.')
+  }
+  const perfil = sesion.perfil
+  const original = sesion.perfilGlobal ?? perfil
+  fijar({ ...sesion, perfilGlobal: original, perfil: {
+    ...perfil, empresaId: empresa.id, empresa: empresa.nombre, empresaTipo: empresa.tipo,
+    empresaGestion: { id: empresa.id, nombre: empresa.nombre },
+  } })
+}
+
+export function salirEmpresa() {
+  if (!sesion?.perfilGlobal) return
+  const { perfilGlobal, ...resto } = sesion
+  fijar({ ...resto, perfil: perfilGlobal })
 }
 
 /** Refleja un nombre confirmado por el servidor sin cambiar rol ni alcance. */

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { cerrarSesion, esAdminFom, resolverSesion } from './auth'
+import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
 import { Icono } from './Iconos'
@@ -133,7 +133,9 @@ function inicioDe(area) {
 }
 
 function Lateral({ perfil, abierto, cerrar, sinLeer }) {
-  const menu = MENU_POR_AREA[areaDe(perfil)] ?? MENU_POR_AREA.conductor
+  const menu = esAdminFom(perfil) && perfil.empresaGestion
+    ? [MENU_ADMIN, ...MENU]
+    : MENU_POR_AREA[areaDe(perfil)] ?? MENU_POR_AREA.conductor
   return (
     <aside id="panel-navigation" className={`pnl-side${abierto ? ' abierto' : ''}`} onKeyDown={e => { if (e.key === 'Escape') cerrar() }}>
       <div className="pnl-side-top">
@@ -158,8 +160,9 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
       </div>
 
       <div className={`pnl-empresa${esAdminFom(perfil) ? ' es-admin' : ''}`}>
-        <b>{esAdminFom(perfil) ? 'Administración FOM' : perfil.empresa}</b>
-        <span>{esAdminFom(perfil) ? 'Acceso global · Todas las empresas' : perfil.sede}</span>
+        <b>{perfil.empresaGestion?.nombre || (esAdminFom(perfil) ? 'Administración FOM' : perfil.empresa)}</b>
+        <span>{perfil.empresaGestion ? 'Gestionando como administrador FOM' : esAdminFom(perfil) ? 'Acceso global · Todas las empresas' : perfil.sede}</span>
+        {perfil.empresaGestion && <Link className="pnl-btn sutil" to="/panel/admin/empresas" onClick={() => { salirEmpresa(); cerrar() }}>Salir de empresa</Link>}
       </div>
 
       <nav className="pnl-nav" aria-label="Módulos">
@@ -270,7 +273,7 @@ export default function Consola() {
   // `pathname` viene del router, no del `window`: asi la guarda vuelve a
   // evaluarse en cada navegacion y no solo al cargar la pagina.
   const primerTramo = pathname.replace(/^\/panel\/?/u, '').split('/')[0]
-  if (area === 'admin' && primerTramo !== 'admin' && primerTramo !== 'mi-perfil') {
+  if (area === 'admin' && !perfil.empresaGestion && primerTramo !== 'admin' && primerTramo !== 'mi-perfil') {
     return <Navigate to="/panel/admin/plataforma" replace />
   }
   if (primerTramo !== 'mi-perfil' && permitidas && !permitidas.includes(primerTramo)) {
@@ -317,7 +320,7 @@ export default function Consola() {
           <Icono nombre="menu" />
         </button>
 
-        <Routes>
+        <Routes key={perfil.empresaGestion?.id || 'global'}>
           <Route path="mi-perfil" element={<MiPerfil />} />
           {/* El inicio depende del area: el conductor abre en SU unidad, no en
               el resumen de toda la flota. */}
