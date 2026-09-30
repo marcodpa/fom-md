@@ -1,0 +1,78 @@
+diff --git a/src/console-api/console-directory.controller.ts b/src/console-api/console-directory.controller.ts
+index 5c15f3e..46bd282 100644
+--- a/src/console-api/console-directory.controller.ts
++++ b/src/console-api/console-directory.controller.ts
+@@ -21,6 +21,7 @@ import {
+ import { ConsoleDirectoryService } from './console-directory.service';
+ import { ConsoleSessionGuard } from './console-session.guard';
+ import { ConsoleBrowserMutationGuard } from './console-browser-mutation.guard';
++import { requireFomAdminActor } from './console-roles';
+ import {
+   AssignDriverDto,
+   CreateDirectoryUserDto,
+@@ -85,6 +86,27 @@ export class ConsoleDirectoryController {
+     return this.directory.createUser(dto);
+   }
+ 
++  @Post('tenants/:tenantId/users')
++  @Header('Cache-Control', 'no-store')
++  createTenantUser(
++    @Param('tenantId', new ParseUUIDPipe({ version: '4' })) tenantId: string,
++    @Body() dto: CreateDirectoryUserDto,
++  ) {
++    requireFomAdminActor();
++    return this.directory.createUser(dto, undefined, tenantId);
++  }
++
++  @Patch('tenants/:tenantId/users/:userId')
++  @Header('Cache-Control', 'no-store')
++  updateTenantMembership(
++    @Param('tenantId', new ParseUUIDPipe({ version: '4' })) tenantId: string,
++    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
++    @Body() dto: UpdateMembershipDto,
++  ) {
++    requireFomAdminActor();
++    return this.directory.updateMembership(userId, dto, tenantId);
++  }
++
+   @Patch('users/:userId')
+   @ApiOperation({
+     summary: 'Administrar a una persona: perfil, suspension o revocacion',
+diff --git a/test/console-tenant-users.test.js b/test/console-tenant-users.test.js
+new file mode 100644
+index 0000000..d6ced1f
+--- /dev/null
++++ b/test/console-tenant-users.test.js
+@@ -0,0 +1,32 @@
++'use strict';
++const assert = require('node:assert/strict');
++const { test } = require('node:test');
++const { ConsoleDirectoryController } = require('../dist/console-api/console-directory.controller');
++const { runWithActorStore, setCurrentActor, currentActor } = require('../dist/authentication/actor-context');
++const home = '10000000-0000-4000-8000-000000000001';
++const target = '10000000-0000-4000-8000-000000000002';
++function actor(role, fn) {
++  return runWithActorStore(() => {
++    setCurrentActor({ userId: '20000000-0000-4000-8000-000000000001', tenantId: home, role, platformAdmin: role === 'admin_fom' });
++    return fn();
++  });
++}
++test('el administrador dirige el cambio a la membresía elegida sin sustituir su sesión', () => {
++  const dto = { role: 'supervisor', reason: 'cambio solicitado' };
++  const service = { updateMembership: (...args) => args };
++  const controller = new ConsoleDirectoryController(service);
++  actor('admin_fom', () => {
++    assert.deepEqual(controller.updateTenantMembership(target, 'person', dto), ['person', dto, target]);
++    assert.equal(currentActor().tenantId, home);
++  });
++});
++test('el alta global lleva explícitamente la empresa destino', () => {
++  const controller = new ConsoleDirectoryController({ createUser: (...args) => args });
++  actor('admin_fom', () => assert.deepEqual(controller.createTenantUser(target, {role:'conductor'}), [{role:'conductor'}, undefined, target]));
++});
++for (const role of ['supervisor', 'conductor', 'usuario']) {
++  test(`${role} no puede usar la administración global`, () => {
++    const controller = new ConsoleDirectoryController({ updateMembership() { throw Error('No debe llegar al servicio'); } });
++    actor(role, () => assert.throws(() => controller.updateTenantMembership(target, 'person', {role:'supervisor'}), error => error.getStatus?.() === 403));
++  });
++}

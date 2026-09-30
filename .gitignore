@@ -38,3 +38,9 @@ output/design-review/public-redesign-backup/
 output/app-capture-runtime/
 scripts/__pycache__/
 ops/deploy-*/*.tar.gz
+
+# Evidencia local de sesiones reales y registro de operaciones de prueba.
+docs/qa-dashboard/asignacion-confirmacion.png
+docs/qa-dashboard/plantilla-verificada.png
+docs/qa-dashboard/roles-plataforma.png
+docs/qa-dashboard/ejecucion.json
