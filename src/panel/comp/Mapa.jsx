@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import MapaLibre from './MapaLibre'
+import FichaUnidad from './FichaUnidad'
+import { vehicleMarkerUrl } from './vehicleMarker'
 import MapaGoogle, { hayClaveMaps } from './MapaGoogle'
 
 // ============================================================
@@ -184,14 +186,7 @@ function MapaEsquema({
                 }
               }}
             >
-              <circle className="pnl-pin-halo" r="16" />
-              <circle className="pnl-pin-dot" r="5.5" />
-              {(sel || sobre === v.id) && (
-                <g className="pnl-pin-tag" transform="translate(12 -10)">
-                  <rect x="0" y="-13" rx="6" width={Math.max(78, v.alias.length * 8.4)} height="24" />
-                  <text x="9" y="3">{v.alias}</text>
-                </g>
-              )}
+              <image href={vehicleMarkerUrl(v, sel)} x="-26" y="-40" width="174" height="76" />
             </g>
           )
         })}
@@ -220,28 +215,6 @@ function MapaEsquema({
   )
 }
 
-function MapaDetalle({ vehiculo: v, alCerrar, fijado }) {
-  if (!v) return null
-  return (
-    <div className="pnl-mapa-detalle">
-      <div className="pnl-mapa-detalle-top">
-        <span className={`pnl-tag ${v.estadoMarcha === 'en_marcha' ? 'verde' : 'gris'}`}>
-          {v.estadoMarcha === 'en_marcha' ? 'En marcha' : 'Detenida'}
-        </span>
-        {fijado && (
-          <button type="button" onClick={alCerrar} aria-label="Cerrar detalle del vehículo">
-            ✕
-          </button>
-        )}
-      </div>
-      <b>{v.alias}</b>
-      <span>
-        {v.marca} {v.modelo} · {v.placa}
-      </span>
-      <div className="pnl-mapa-detalle-pie">
-        <span>{v.conductorNombre ?? 'Sin conductor'}</span>
-        {v.estadoMarcha === 'en_marcha' && <em>{v.velocidadKmh} km/h</em>}
-      </div>
-    </div>
-  )
+function MapaDetalle({ vehiculo, alCerrar, fijado }) {
+  return <FichaUnidad unidad={vehiculo} variante="flotante" alCerrar={fijado ? alCerrar : undefined} />
 }

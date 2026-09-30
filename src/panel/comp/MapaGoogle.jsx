@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import FichaUnidad, { estadoUnidad } from './FichaUnidad'
+import { vehicleMarkerUrl, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
 
 // ============================================================
 // MAPA REAL DE GOOGLE MAPS
@@ -60,11 +62,6 @@ const ESTILO_CLARO = [
 // Centro por defecto: Costa Oriental del Lago
 const CENTRO = { lat: 10.32, lng: -71.42 }
 
-function colorDe(v, seleccionado, tokens) {
-  if (seleccionado) return tokens.primario
-  return v.estadoMarcha === 'en_marcha' ? tokens.exito : tokens.tenue
-}
-
 export default function MapaGoogle({
   vehiculos = [],
   seleccionado = null,
@@ -72,6 +69,8 @@ export default function MapaGoogle({
   ficha = true,
   leyenda = true,
   recorrido = null,
+  espacioFicha = false,
+  alVerRecorrido,
   alto = 'clamp(320px, 52vh, 560px)',
 }) {
   const contenedor = useRef(null)
@@ -79,7 +78,6 @@ export default function MapaGoogle({
   const marcadores = useRef(new Map())
   const linea = useRef(null)
   const [estado, setEstado] = useState('cargando') // cargando | listo | error
-  const [sobre, setSobre] = useState(null)
 
   // Colores vivos del tema, para que los marcadores sigan el esquema
   const tokens = useMemo(() => {
@@ -93,7 +91,7 @@ export default function MapaGoogle({
     }
   }, [estado])
 
-  const esquema = document.documentElement.getAttribute('data-tema') === 'oscuro' ? 'oscuro' : 'claro'
+  const esquema = 'oscuro'
 
   // Crear el mapa una sola vez
   useEffect(() => {
@@ -133,30 +131,22 @@ export default function MapaGoogle({
     const vistos = new Set()
 
     vehiculos
-      .filter((v) => v.lat != null && v.lng != null)
+      .filter(validPosition)
       .forEach((v) => {
         vistos.add(v.id)
         const sel = seleccionado === v.id
-        const icono = {
-          path: maps.SymbolPath.CIRCLE,
-          scale: sel ? 9 : 7,
-          fillColor: colorDe(v, sel, tokens),
-          fillOpacity: 1,
-          strokeColor: tokens.superficie,
-          strokeWeight: 2.5,
-        }
+        const icono = { url: vehicleMarkerUrl(v, sel), scaledSize: new maps.Size(...MARKER_SIZE), anchor: new maps.Point(...MARKER_ANCHOR) }
         let m = marcadores.current.get(v.id)
         if (!m) {
           m = new maps.Marker({
             map: mapa.current,
             position: { lat: v.lat, lng: v.lng },
-            title: `${v.alias} · ${v.placa}`,
+            title: `${v.placa || v.alias} · ${estadoUnidad(v).texto}`,
             icon: icono,
           })
-          m.addListener('mouseover', () => setSobre(v.id))
-          m.addListener('mouseout', () => setSobre(null))
           marcadores.current.set(v.id, m)
         } else {
+          m.setTitle(`${v.placa || v.alias} · ${estadoUnidad(v).texto}`)
           m.setPosition({ lat: v.lat, lng: v.lng })
           m.setIcon(icono)
         }
@@ -176,7 +166,7 @@ export default function MapaGoogle({
     // Encuadrar la flota la primera vez que hay unidades
     if (!mapa.current.__encuadrado && vistos.size) {
       const limites = new maps.LatLngBounds()
-      vehiculos.filter((v) => v.lat != null).forEach((v) => limites.extend({ lat: v.lat, lng: v.lng }))
+      vehiculos.filter(validPosition).forEach((v) => limites.extend({ lat: v.lat, lng: v.lng }))
       mapa.current.fitBounds(limites, 48)
       mapa.current.__encuadrado = true
     }
@@ -186,8 +176,11 @@ export default function MapaGoogle({
   useEffect(() => {
     if (estado !== 'listo' || !seleccionado || !mapa.current) return
     const v = vehiculos.find((x) => x.id === seleccionado)
-    if (v?.lat != null) mapa.current.panTo({ lat: v.lat, lng: v.lng })
-  }, [seleccionado, vehiculos, estado])
+    if (validPosition(v)) {
+      mapa.current.panTo({ lat: v.lat, lng: v.lng })
+      if (ficha || espacioFicha) mapa.current.panBy(contenedor.current.clientWidth > 600 ? -175 : 0, contenedor.current.clientWidth > 600 ? 0 : contenedor.current.clientHeight * .18)
+    }
+  }, [seleccionado, vehiculos, estado, ficha, espacioFicha])
 
   // Trazado del recorrido del día
   useEffect(() => {
@@ -199,19 +192,19 @@ export default function MapaGoogle({
     if (!recorrido?.length) return
     linea.current = new window.google.maps.Polyline({
       map: mapa.current,
-      path: recorrido.map((p) => ({ lat: p.lat, lng: p.lng })),
+      path: recorrido.filter(validPosition).map((p) => ({ lat: p.lat, lng: p.lng })),
       strokeColor: tokens.primario,
       strokeOpacity: 0.9,
       strokeWeight: 4,
     })
   }, [recorrido, estado, tokens])
 
-  const activo = sobre ?? seleccionado
+  const activo = seleccionado
   const vehiculoActivo = vehiculos.find((v) => v.id === activo)
-  const enMarcha = vehiculos.filter((v) => v.estadoMarcha === 'en_marcha').length
+  const estadosVisibles = [...new Map(vehiculos.map(v => { const e = estadoUnidad(v); return [e.clave, e] })).values()]
 
   return (
-    <div className="pnl-mapa" style={{ height: alto }}>
+    <div className="pnl-mapa fleet-map" style={{ height: alto }}>
       <div ref={contenedor} className="pnl-mapa-lienzo" />
 
       {estado === 'cargando' && (
@@ -223,38 +216,10 @@ export default function MapaGoogle({
         </div>
       )}
 
-      {leyenda && <div className="pnl-mapa-leyenda">
-        <span className="pnl-mapa-vivo">
-          <i />
-          En vivo
-        </span>
-        <span>{vehiculos.length} unidades</span>
-        <span className="sep">·</span>
-        <span>{enMarcha} en marcha</span>
-      </div>}
+      {leyenda && estadosVisibles.length > 0 && <div className="fleet-map-legend" aria-label="Estados de los vehículos">{estadosVisibles.map(e => <span className={e.color} key={e.clave}><i />{e.texto}</span>)}</div>}
 
-      {ficha && vehiculoActivo && (
-        <div className="pnl-mapa-detalle">
-          <div className="pnl-mapa-detalle-top">
-            <span className={`pnl-tag ${vehiculoActivo.estadoMarcha === 'en_marcha' ? 'verde' : 'gris'}`}>
-              {vehiculoActivo.estadoMarcha === 'en_marcha' ? 'En marcha' : 'Detenida'}
-            </span>
-            {seleccionado === activo && (
-              <button type="button" onClick={() => alSeleccionar?.(null)} aria-label="Cerrar detalle del vehículo">
-                ✕
-              </button>
-            )}
-          </div>
-          <b>{vehiculoActivo.alias}</b>
-          <span>
-            {vehiculoActivo.marca} {vehiculoActivo.modelo} · {vehiculoActivo.placa}
-          </span>
-          <div className="pnl-mapa-detalle-pie">
-            <span>{vehiculoActivo.conductorNombre ?? 'Sin conductor'}</span>
-            {vehiculoActivo.estadoMarcha === 'en_marcha' && <em>{vehiculoActivo.velocidadKmh} km/h</em>}
-          </div>
-        </div>
-      )}
+      {ficha && vehiculoActivo && <FichaUnidad unidad={vehiculoActivo} variante="flotante" alVerRecorrido={alVerRecorrido} alCerrar={() => alSeleccionar?.(null)} />}
+
     </div>
   )
 }

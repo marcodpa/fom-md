@@ -29,6 +29,7 @@ export default function ProgramaInspecciones() {
   const [aviso, setAviso] = useState('')
   const [ocupado, setOcupado] = useState(false)
   const [programando, setProgramando] = useState(false)
+  const [creandoPlantilla, setCreandoPlantilla] = useState(false)
   const [cancelando, setCancelando] = useState(null)
   const [moviendo, setMoviendo] = useState(null) // { h, destino }
 
@@ -45,6 +46,7 @@ export default function ProgramaInspecciones() {
       setAviso(exito)
       citas.recargar()
       hallazgos.recargar()
+      plantillas.recargar()
       return true
     } catch (e) {
       setAviso(e?.message || 'No se pudo completar la acción.')
@@ -167,12 +169,12 @@ export default function ProgramaInspecciones() {
         )}
 
         {pestana === 'plantillas' && (
-          <Tarjeta titulo="Plantillas" sinCuerpo>
+          <Tarjeta titulo="Plantillas" sinCuerpo accion={<button className="pnl-btn primario" onClick={() => setCreandoPlantilla(true)}>Nueva plantilla</button>}>
             {plantillas.estado === 'cargando' && <Cargando filas={3} />}
             {plantillas.estado === 'error' && <ErrorCarga onReintentar={plantillas.recargar} error={plantillas.error} />}
             {plantillas.estado === 'ok' && (plantillas.datos.length === 0 ? (
               <div className="pnl-card-cuerpo">
-                <Vacio icono="documento" titulo="Sin plantillas" texto="Las plantillas se publican desde la consola de FOM; el panel las usa para programar citas." />
+                <Vacio icono="documento" titulo="Sin plantillas" texto="Crea una plantilla con los puntos a revisar y publícala para programar inspecciones." />
               </div>
             ) : (
               <div className="pnl-filas">
@@ -186,6 +188,8 @@ export default function ProgramaInspecciones() {
                         <span>{t.puntos} {t.puntos === 1 ? 'punto' : 'puntos'} a revisar</span>
                       </div>
                       <Tag color={esC}>{esT}</Tag>
+                      {t.estado === 'borrador' && <button className="pnl-btn" disabled={ocupado} onClick={() => actuar(() => repo.programaInspecciones.cambiarPlantilla(t, 'publicada'), 'Plantilla publicada.')}>Publicar</button>}
+                      {t.estado !== 'archivada' && <button className="pnl-btn sutil" disabled={ocupado} onClick={() => actuar(() => repo.programaInspecciones.cambiarPlantilla(t, 'archivada'), 'Plantilla archivada.')}>Archivar</button>}
                     </div>
                   )
                 })}
@@ -195,11 +199,41 @@ export default function ProgramaInspecciones() {
         )}
       </div>
 
+      <ModalPlantilla abierto={creandoPlantilla} alCerrar={() => setCreandoPlantilla(false)} alGuardar={plantillas.recargar} />
       <ModalProgramar abierto={programando} plantillas={(plantillas.datos ?? []).filter((t) => t.estado === 'publicada')} alCerrar={() => setProgramando(false)} guardar={(datos) => actuar(() => repo.programaInspecciones.programar(datos), 'Inspección programada.')} />
       <ModalMotivo titulo="Cancelar la cita" abierto={Boolean(cancelando)} alCerrar={() => setCancelando(null)} confirmar={(motivo) => actuar(() => repo.programaInspecciones.cancelar(cancelando.id, motivo), 'Cita cancelada.')} />
       <ModalMotivo titulo={moviendo ? ({ en_seguimiento: 'Dar seguimiento al hallazgo', resuelto: 'Resolver el hallazgo', descartado: 'Descartar el hallazgo' })[moviendo.destino] : ''} abierto={Boolean(moviendo)} alCerrar={() => setMoviendo(null)} confirmar={(nota) => actuar(() => repo.programaInspecciones.moverHallazgo(moviendo.h, moviendo.destino, nota), 'Hallazgo actualizado.')} />
     </>
   )
+}
+
+function ModalPlantilla({ abierto, alCerrar, alGuardar }) {
+  const [codigo, setCodigo] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [version, setVersion] = useState('1')
+  const [puntos, setPuntos] = useState([{ nombre: '', critico: false }])
+  const [error, setError] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+  async function guardar() {
+    if (puntos.some(p => p.nombre.trim().length < 2)) return setError('Cada punto necesita un nombre de al menos dos caracteres.')
+    setError(''); setOcupado(true)
+    try {
+      await repo.programaInspecciones.crearPlantilla({ codigo, nombre, version, puntos })
+      alGuardar(); alCerrar(); setCodigo(''); setNombre(''); setVersion('1'); setPuntos([{ nombre: '', critico: false }])
+    } catch (e) { setError(e.message) } finally { setOcupado(false) }
+  }
+  return <Modal titulo="Nueva plantilla de inspección" abierto={abierto} alCerrar={alCerrar} ancho={600}>
+    <Campo etiqueta="Código" error={error}><input aria-label="Código de plantilla" className="pnl-input" maxLength={50} value={codigo} onChange={e => setCodigo(e.target.value)} /></Campo>
+    <Campo etiqueta="Nombre"><input aria-label="Nombre de plantilla" className="pnl-input" maxLength={120} value={nombre} onChange={e => setNombre(e.target.value)} /></Campo>
+    <Campo etiqueta="Versión"><input aria-label="Versión de plantilla" type="number" min="1" step="1" className="pnl-input" value={version} onChange={e => setVersion(e.target.value)} /></Campo>
+    {puntos.map((p, i) => <fieldset key={i} className="pnl-card-cuerpo"><legend>Punto {i + 1}</legend>
+      <input aria-label={`Nombre del punto ${i + 1}`} className="pnl-input" maxLength={160} value={p.nombre} onChange={e => setPuntos(xs => xs.map((x, j) => j === i ? { ...x, nombre: e.target.value } : x))} />
+      <label><input type="checkbox" checked={p.critico} onChange={e => setPuntos(xs => xs.map((x, j) => j === i ? { ...x, critico: e.target.checked } : x))} /> Punto crítico</label>
+      {puntos.length > 1 && <button className="pnl-btn sutil" onClick={() => setPuntos(xs => xs.filter((_, j) => j !== i))}>Quitar punto {i + 1}</button>}
+    </fieldset>)}
+    <button className="pnl-btn" disabled={puntos.length >= 200 || ocupado} onClick={() => setPuntos(xs => [...xs, { nombre: '', critico: false }])}>Añadir punto</button>
+    <div style={PIE}><button className="pnl-btn sutil" disabled={ocupado} onClick={alCerrar}>Cancelar</button><button className="pnl-btn primario" disabled={ocupado} onClick={guardar}>{ocupado ? 'Guardando…' : 'Crear borrador'}</button></div>
+  </Modal>
 }
 
 function ModalProgramar({ abierto, plantillas, alCerrar, guardar }) {
@@ -213,7 +247,7 @@ function ModalProgramar({ abierto, plantillas, alCerrar, guardar }) {
     if (!d.vehiculoId || !d.plantillaId || !d.asignadoA || !d.fecha) return setError('Faltan datos: unidad, plantilla, persona y fecha.')
     setGuardando(true)
     setError('')
-    const ok = await guardar({ ...d, fecha: new Date(d.fecha).toISOString() })
+    const ok = await guardar(d)
     setGuardando(false)
     if (ok) {
       setD({ vehiculoId: '', plantillaId: '', asignadoA: '', fecha: '' })
@@ -241,7 +275,7 @@ function ModalProgramar({ abierto, plantillas, alCerrar, guardar }) {
         </select>
       </Campo>
       <Campo etiqueta="Cuándo">
-        <input className="pnl-input" type="datetime-local" value={d.fecha} onChange={set('fecha')} />
+        <input className="pnl-input" type="date" value={d.fecha} onChange={set('fecha')} />
       </Campo>
       <div style={PIE}>
         <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>

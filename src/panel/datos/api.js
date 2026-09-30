@@ -28,8 +28,7 @@ function traducir(estado, cuerpo) {
     if (String(detalle || '').includes('Initial password change pending')) {
       return 'Debes cambiar la contraseña temporal antes de usar la consola.'
     }
-    // El caso real más frecuente: la API exige exactamente una membresía activa.
-    return 'Tu usuario no tiene un ente activo asignado, o tiene más de uno.'
+    return 'Tu sesión no tiene permiso para esta operación. Revisa el rol y la empresa asignada a tu cuenta.'
   }
   if (estado === 404) {
     // Nest responde «Cannot POST /ruta» cuando la RUTA no existe, y un 404
@@ -71,7 +70,16 @@ function claveIdempotente() {
   return `${s(8)}-${s(4)}-4${s(3)}-${variante}${s(3)}-${s(12)}`
 }
 
-export async function pedir(ruta, { metodo = 'GET', cuerpo, señal, idempotente = false } = {}) {
+const lecturasEnCurso = new Map()
+export function pedir(ruta, opciones = {}) {
+  if ((opciones.metodo || 'GET') !== 'GET' || opciones.señal) return pedirUnaVez(ruta, opciones)
+  if (lecturasEnCurso.has(ruta)) return lecturasEnCurso.get(ruta)
+  const peticion = pedirUnaVez(ruta, opciones).finally(() => lecturasEnCurso.delete(ruta))
+  lecturasEnCurso.set(ruta, peticion)
+  return peticion
+}
+
+async function pedirUnaVez(ruta, { metodo = 'GET', cuerpo, señal, idempotente = false } = {}) {
   if (!HAY_API) throw new Error('La API real no está configurada en este entorno.')
 
   let respuesta
@@ -157,8 +165,8 @@ export const api = {
     if (q) p.set('q', q)
     return pedir(`${CONSOLA}/users?${p}`)
   },
-  crearUsuario: ({ email, displayName, role, temporaryPassword }) =>
-    pedir(`${CONSOLA}/users`, {
+  crearUsuario: ({ email, displayName, role, temporaryPassword, tenantId }) =>
+    pedir(`${CONSOLA}${tenantId ? `/tenants/${encodeURIComponent(tenantId)}` : ''}/users`, {
       metodo: 'POST',
       cuerpo: { email, displayName, role, temporaryPassword },
     }),
@@ -169,18 +177,18 @@ export const api = {
    * `vehicleId` viaja en el cuerpo y no en la ruta porque el supervisor abre
    * la orden eligiendo la unidad en un desplegable, no navegando a ella.
    */
-  crearOdt: ({ vehicleId, description, kind, severity, failureType, location }) =>
+  crearOdt: ({ vehicleId, description, kind, severity, failureType, location, maintenanceActionId, alertEventId }) =>
     pedir(`${CONSOLA}/work-orders`, {
       metodo: 'POST',
-      cuerpo: { vehicleId, description, kind, severity, failureType, location },
+      cuerpo: { vehicleId, description, kind, severity, failureType, location, maintenanceActionId, alertEventId },
       idempotente: true,
     }),
 
   // --- Escrituras del directorio (#219 de fom-core) ------------------------
 
   /** Cambiar perfil o estado de una persona en el ente. */
-  actualizarMiembro: (userId, { role, status, reason }) =>
-    pedir(`${CONSOLA}/users/${userId}`, {
+  actualizarMiembro: (userId, { role, status, reason, tenantId }) =>
+    pedir(`${CONSOLA}${tenantId ? `/tenants/${encodeURIComponent(tenantId)}` : ''}/users/${encodeURIComponent(userId)}`, {
       metodo: 'PATCH',
       cuerpo: { role, status, reason },
     }),
@@ -337,7 +345,7 @@ export const api = {
   areas: () => pedir(`${CONSOLA}/areas?limit=200`),
 
   /** Conductores con asignación vigente. Sin datos personales. */
-  conductores: () => pedir(`${CONSOLA}/drivers?limit=200`),
+  conductores: ({ desplazamiento = 0 } = {}) => pedir(`${CONSOLA}/drivers?limit=200&offset=${desplazamiento}`),
 
   // --- Operación y cumplimiento (tablas de #170 y #171) --------------------
 
@@ -353,6 +361,7 @@ export const api = {
   odt: (odtId) => pedir(`${CONSOLA}/work-orders/${odtId}`),
 
   /** Inspecciones realizadas. */
+  inspeccion: (id) => pedir(`${CONSOLA}/inspections/${id}`),
   inspecciones: ({ vehiculoId = '', limite = 100 } = {}) => {
     const p = new URLSearchParams({ limit: limite })
     if (vehiculoId) p.set('vehicleId', vehiculoId)
@@ -406,6 +415,12 @@ function consulta(valores) {
 }
 
 Object.assign(api, {
+  pagosServicio: (tenantId, { offset = 0 } = {}) => pedir(`${CONSOLA}/tenants/${tenantId}/service-payments?limit=200&offset=${offset}`),
+  crearPagoServicio: (tenantId, cuerpo) => pedir(`${CONSOLA}/tenants/${tenantId}/service-payments`, { metodo: 'POST', cuerpo }),
+  moverPagoServicio: (tenantId, id, cuerpo) => pedir(`${CONSOLA}/tenants/${tenantId}/service-payments/${id}/status`, { metodo: 'PATCH', cuerpo }),
+  abonarPagoServicio: (tenantId, id, cuerpo) => pedir(`${CONSOLA}/tenants/${tenantId}/service-payments/${id}/receipts`, { metodo: 'POST', cuerpo, idempotente: true }),
+  crearPlantillaInspeccion: (cuerpo) => pedir(`${CONSOLA}/inspection-templates`, { metodo: 'POST', cuerpo }),
+  moverPlantillaInspeccion: (id, cuerpo) => pedir(`${CONSOLA}/inspection-templates/${id}/status`, { metodo: 'PATCH', cuerpo }),
   // --- Alertas y SOS -------------------------------------------------------
   eventosDeAlerta: ({ status, severity, vehicleId, limit = 100, offset = 0 } = {}) =>
     pedir(`${CONSOLA}/alert-events${consulta({ status, severity, vehicleId, limit, offset })}`),

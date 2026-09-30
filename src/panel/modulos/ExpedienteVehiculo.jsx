@@ -81,6 +81,9 @@ export default function ExpedienteVehiculo() {
   const [pestana, setPestana] = useState('resumen')
   const [pinSeleccionado, setPinSeleccionado] = useState(null)
   const [guardado, setGuardado] = useState('')
+  const [conductorElegido, setConductorElegido] = useState(null)
+  const [asignandoConductor, setAsignandoConductor] = useState(false)
+  useEffect(() => { setConductorElegido(null) }, [id])
 
   // Modal de nueva ODT
   const [modalOdt, setModalOdt] = useState(false)
@@ -131,13 +134,18 @@ export default function ExpedienteVehiculo() {
   }
 
   async function cambiarConductor(valor) {
+    if (asignandoConductor) return
+    setAsignandoConductor(true)
     setErrorForma('')
     try {
       await repo.vehiculos.asignarConductor(id, valor || null)
       await recargar()
-      avisarGuardado('Conductor asignado')
+      setConductorElegido(null)
+      avisarGuardado(valor ? 'Conductor asignado' : 'Asignación retirada')
     } catch (e) {
       setErrorForma(e.message)
+    } finally {
+      setAsignandoConductor(false)
     }
   }
 
@@ -301,17 +309,26 @@ export default function ExpedienteVehiculo() {
                       </select>
                     </Campo>
 
-                    <Campo etiqueta="Conductor principal" ayuda="Solo aparece el personal habilitado para conducir." error={errorForma}>
+                    <Campo etiqueta="Conductor principal" ayuda="Elige al conductor y pulsa Asignar. Se sustituirá la asignación anterior de esta unidad." error={errorForma}>
                       <select
                         className="pnl-select"
-                        value={v.conductorPrincipalId ?? ''}
-                        onChange={(e) => cambiarConductor(e.target.value)}
+                        value={conductorElegido ?? v.conductorPrincipalId ?? ''}
+                        disabled={asignandoConductor}
+                        onChange={(e) => { setConductorElegido(e.target.value); setErrorForma('') }}
                       >
                         <option value="">Sin conductor</option>
                         {(conductores.datos ?? []).map((p) => (
                           <option key={p.id} value={p.id}>{p.nombre}</option>
                         ))}
                       </select>
+                      {conductorElegido !== null && conductorElegido !== (v.conductorPrincipalId ?? '') && (
+                        <div className="pnl-chips">
+                          <button type="button" className="pnl-btn primario" disabled={asignandoConductor} onClick={() => cambiarConductor(conductorElegido)}>
+                            {asignandoConductor ? 'Guardando…' : conductorElegido ? 'Asignar' : 'Quitar asignación'}
+                          </button>
+                          <button type="button" className="pnl-btn sutil" disabled={asignandoConductor} onClick={() => { setConductorElegido(null); setErrorForma('') }}>Cancelar</button>
+                        </div>
+                      )}
                     </Campo>
                   </div>
                 </Tarjeta>

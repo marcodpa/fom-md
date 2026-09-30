@@ -492,3 +492,11 @@ El texto, enlaces, listas y formulario permanecen en HTML. El formulario compart
 - **Don't** interpretar esta documentación como una nueva propuesta visual o una corrección de las referencias aprobadas.
 
 La revisión visual de viewport individual fue comprobada por el agente principal. La captura larga por stitching tiene una salvedad de montaje; no se presenta como verificación pixel a pixel de toda la página.
+
+
+## Mapas de flota · diseño aprobado 2026-09-29
+
+Para el centro de control y los mapas interactivos de vehículos prevalece
+[docs/mapas/DESIGN.md](docs/mapas/DESIGN.md). Define la ficha, los marcadores
+con placa, estados y rumbo, los recursos compartidos y la adaptación nativa
+para Juan. Sus tokens pertenecen al panel de mapas; no cambian el marketing.

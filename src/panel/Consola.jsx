@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { cerrarSesion, esAdminFom } from './auth'
+import { cerrarSesion, esAdminFom, resolverSesion } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
 import { Icono } from './Iconos'
@@ -84,7 +84,7 @@ const MENU_ADMIN = {
 // las rutas salgan de la MISMA lista es lo que impide que una pantalla quede
 // alcanzable por la barra de direcciones sin estar en el menu.
 const MENU_POR_AREA = {
-  admin: [MENU_ADMIN, ...MENU],
+  admin: [MENU_ADMIN],
   operativo: MENU,
   gerencial: [
     {
@@ -126,6 +126,7 @@ const RUTAS_POR_AREA = {
 }
 
 function inicioDe(area) {
+  if (area === 'admin') return '/panel/admin/plataforma'
   if (area === 'gerencial') return '/panel/personal'
   if (area === 'personal') return '/panel/mapa'
   return '/panel'
@@ -157,8 +158,8 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
       </div>
 
       <div className={`pnl-empresa${esAdminFom(perfil) ? ' es-admin' : ''}`}>
-        <b>{perfil.empresa}</b>
-        <span>{perfil.sede}</span>
+        <b>{esAdminFom(perfil) ? 'Administración FOM' : perfil.empresa}</b>
+        <span>{esAdminFom(perfil) ? 'Acceso global · Todas las empresas' : perfil.sede}</span>
       </div>
 
       <nav className="pnl-nav" aria-label="Módulos">
@@ -230,6 +231,7 @@ export default function Consola() {
 
   // Contador del globo de alertas: se recalcula al navegar y cuando algo cambia.
   useEffect(() => {
+    if (!sesion?.perfil || esAdminFom(sesion.perfil)) return
     let vivo = true
     const leer = () =>
       repo.alertas.listar({ soloSinLeer: true }).then((l) => vivo && setSinLeer(l.length)).catch(() => {})
@@ -239,7 +241,7 @@ export default function Consola() {
       vivo = false
       baja()
     }
-  }, [pathname])
+  }, [pathname, sesion?.perfil?.id])
 
   useEffect(() => {
     document.title = 'Consola FOM'
@@ -258,6 +260,7 @@ export default function Consola() {
     )
   }
   if (!sesion) return <Navigate to="/entrar" replace />
+  if (sesion.errorConexion) return <div className="pnl-cargando-sesion" role="alert"><p>{sesion.errorConexion}</p><button className="pnl-btn" onClick={resolverSesion}>Reintentar conexión</button></div>
   if (sesion.debeCambiarClave) return <Navigate to="/cambiar-clave-inicial" replace />
 
   const { perfil } = sesion
@@ -267,6 +270,9 @@ export default function Consola() {
   // `pathname` viene del router, no del `window`: asi la guarda vuelve a
   // evaluarse en cada navegacion y no solo al cargar la pagina.
   const primerTramo = pathname.replace(/^\/panel\/?/u, '').split('/')[0]
+  if (area === 'admin' && primerTramo !== 'admin' && primerTramo !== 'mi-perfil') {
+    return <Navigate to="/panel/admin/plataforma" replace />
+  }
   if (primerTramo !== 'mi-perfil' && permitidas && !permitidas.includes(primerTramo)) {
     return <Navigate to={inicioDe(area)} replace />
   }
@@ -290,13 +296,13 @@ export default function Consola() {
 
       <main className="pnl-main" id="contenido">
         <div className="pnl-topbar">
-          <span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{perfil.empresa}</span>
+          <span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{esAdminFom(perfil) && pathname.includes('/admin/') ? 'Administración global FOM' : perfil.empresa}</span>
           <div className="pnl-topbar-derecha">
             <span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span>
-            <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={`Alertas: ${sinLeer} sin leer`}>
+            {!esAdminFom(perfil) && <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={`Alertas: ${sinLeer} sin leer`}>
               <Icono nombre="campana" tam={21} />
               {sinLeer > 0 && <span>{sinLeer}</span>}
-            </Link>
+            </Link>}
             <Link to="/panel/mi-perfil" className="pnl-topbar-perfil" aria-label="Mi perfil"><i className="pnl-avatar">{perfil.iniciales}</i><b>{perfil.nombre}</b></Link>
           </div>
         </div>

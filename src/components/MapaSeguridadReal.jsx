@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { vehicleMarkerSvg, MARKER_SIZE, MARKER_ANCHOR } from '../panel/comp/vehicleMarker'
+import '../styles/fleet-map.css'
 
 // ============================================================
 // MAPA REAL DEL CENTRO DE SEGURIDAD
@@ -52,13 +54,8 @@ const UNIDADES = [
 
 const COLOR = { verde: '#3dd68c', ambar: '#f5c242' }
 
-function pinUnidad(tono) {
-  return L.divIcon({
-    className: 'pnl-marcador',
-    html: `<i class="pnl-marcador-punto pulsa" style="--c:${COLOR[tono]};--b:#0a1119;--t:16px"></i>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-  })
+function pinUnidad(tono, index) {
+  return L.divIcon({ className:'fleet-marker', html:vehicleMarkerSvg({ alias:`Demo 0${index + 1}`, conectado:true, estadoMarcha:tono === 'verde' ? 'en_marcha' : 'parada' }), iconSize:MARKER_SIZE, iconAnchor:MARKER_ANCHOR })
 }
 
 function etiqueta(texto, tono, ancho) {
@@ -123,8 +120,8 @@ export default function MapaSeguridadReal() {
     }).addTo(m)
 
     // Unidades
-    UNIDADES.forEach(([pos, tono]) => {
-      L.marker(pos, { icon: pinUnidad(tono), interactive: false }).addTo(m)
+    UNIDADES.forEach(([pos, tono], index) => {
+      L.marker(pos, { icon: pinUnidad(tono, index), interactive: false }).addTo(m)
     })
 
     // Encuadre de toda la operación

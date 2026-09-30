@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
+import { vehicleMarkerSvg, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
+import '../../styles/fleet-map.css'
 
 // ============================================================
 // MAPA REAL Y GRATUITO (Leaflet + OpenStreetMap)
-// Calles reales de la Costa Oriental del Lago, sin clave de API, sin cuenta
-// de facturación y sin límite de tarjeta. Es la alternativa libre a Google
-// Maps: el mapa es de verdad, solo cambia quién dibuja las teselas.
+// Servicio público sin garantía de disponibilidad. Respetar la política de
+// teselas: identificación del sitio, caché del navegador y atribución visible.
 //
 // La atribución a OpenStreetMap es OBLIGATORIA por su licencia (ODbL) y va
 // siempre visible en la esquina del mapa.
@@ -26,12 +27,12 @@ import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 // y un modo menos que se puede romper por su cuenta.
 const TESELAS = {
   claro: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     atribucion: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 19,
   },
   oscuro: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     atribucion: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 19,
   },
@@ -50,6 +51,7 @@ const TESELAS = {
  * última: si no, dos animaciones pelean por el mismo marcador.
  */
 function deslizar(marcador, destino, ms = 1200) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { marcador.setLatLng(destino); return () => {} }
   const origen = marcador.getLatLng()
   const dLat = destino[0] - origen.lat
   const dLng = destino[1] - origen.lng
@@ -87,20 +89,8 @@ function leerTokens() {
   }
 }
 
-/** Marcador circular, del mismo lenguaje visual que el resto de la consola. */
-function iconoUnidad(v, seleccionado, tokens) {
-  // Un solo criterio de estado para el pin, la etiqueta y la ficha.
-  const estado = estadoUnidad(v)
-  const vivo = estado.color === 'verde'
-  const color = seleccionado ? tokens.primario : vivo ? tokens.exito : tokens.tenue
-  const tam = seleccionado ? 20 : 16
-  const pulso = estado.clave === 'en_marcha' || estado.clave === 'reportando' ? ' pulsa' : ''
-  return L.divIcon({
-    className: 'pnl-marcador',
-    html: `<i class="pnl-marcador-punto${pulso}" style="--c:${color};--b:${tokens.superficie};--t:${tam}px"></i>`,
-    iconSize: [tam, tam],
-    iconAnchor: [tam / 2, tam / 2],
-  })
+function iconoUnidad(v, seleccionado) {
+  return L.divIcon({ className: `fleet-marker${seleccionado ? ' selected' : ''}`, html: vehicleMarkerSvg(v, seleccionado), iconSize: MARKER_SIZE, iconAnchor: MARKER_ANCHOR })
 }
 
 export default function MapaLibre({
@@ -113,6 +103,8 @@ export default function MapaLibre({
   leyenda = true,
   ficha = true,
   recorrido = null,
+  alVerRecorrido,
+  espacioFicha = false,
   alto = 'clamp(320px, 52vh, 560px)',
 }) {
   const contenedor = useRef(null)
@@ -124,7 +116,6 @@ export default function MapaLibre({
   const animaciones = useRef(new Map())
   const linea = useRef(null)
   const encuadrado = useRef(false)
-  const [sobre, setSobre] = useState(null)
   const [fallaTeselas, setFallaTeselas] = useState(false)
 
   const esquema = 'oscuro'
@@ -135,9 +126,10 @@ export default function MapaLibre({
     mapa.current = L.map(contenedor.current, {
       center: CENTRO,
       zoom: 9,
-      zoomControl: true,
+      zoomControl: false,
       attributionControl: true,
     })
+    L.control.zoom({ position: 'bottomright' }).addTo(mapa.current)
     const animacionesActivas = animaciones.current
     return () => {
       animacionesActivas.forEach((cancelar) => cancelar())
@@ -162,7 +154,8 @@ export default function MapaLibre({
     capa.current = L.tileLayer(t.url, {
       attribution: t.atribucion,
       maxZoom: t.maxZoom,
-      subdomains: t.subdominios || 'abc',
+      // OSM necesita el origen real del sitio; no enviar rutas del panel.
+      referrerPolicy: 'strict-origin',
     })
     capa.current.on('tileerror', () => {
       fallos += 1
@@ -186,24 +179,21 @@ export default function MapaLibre({
   // Marcadores de las unidades
   useEffect(() => {
     if (!mapa.current) return
-    const tokens = leerTokens()
     const vistos = new Set()
 
     vehiculos
-      .filter((v) => v.lat != null && v.lng != null)
+      .filter(validPosition)
       .forEach((v) => {
         vistos.add(v.id)
         const sel = seleccionado === v.id
         let m = marcadores.current.get(v.id)
         if (!m) {
           m = L.marker([v.lat, v.lng], {
-            icon: iconoUnidad(v, sel, tokens),
+            icon: iconoUnidad(v, sel),
             title: `${v.alias} · ${v.placa}`,
             keyboard: true,
             alt: `${v.alias || v.placa}, ${estadoUnidad(v).texto}`,
           })
-          m.on('mouseover', () => setSobre(v.id))
-          m.on('mouseout', () => setSobre(null))
           m.addTo(mapa.current)
           marcadores.current.set(v.id, m)
         } else {
@@ -212,14 +202,21 @@ export default function MapaLibre({
             animaciones.current.get(v.id)?.()
             animaciones.current.set(v.id, deslizar(m, [v.lat, v.lng]))
           }
-          m.setIcon(iconoUnidad(v, sel, tokens))
+          m.setIcon(iconoUnidad(v, sel))
         }
         m.off('click').on('click', () => alSeleccionar?.(seleccionado === v.id ? null : v.id))
         m.setZIndexOffset(sel ? 1000 : 0)
+        const elemento = m.getElement()
+        if (elemento) {
+          elemento.setAttribute('aria-label', `${v.placa || v.alias || 'Sin placa'}, ${estadoUnidad(v).texto}`)
+          elemento.setAttribute('aria-pressed', String(sel))
+        }
       })
 
     marcadores.current.forEach((m, id) => {
       if (!vistos.has(id)) {
+        animaciones.current.get(id)?.()
+        animaciones.current.delete(id)
         m.remove()
         marcadores.current.delete(id)
       }
@@ -227,7 +224,7 @@ export default function MapaLibre({
 
     // Encuadrar toda la flota la primera vez
     if (!encuadrado.current && vistos.size) {
-      const puntos = vehiculos.filter((v) => v.lat != null).map((v) => [v.lat, v.lng])
+      const puntos = vehiculos.filter(validPosition).map((v) => [v.lat, v.lng])
       if (puntos.length) {
         // Una sola unidad: centrarla a un zoom de ciudad. Encuadrar «los
         // límites» de un único punto depende del tamaño que tenga el lienzo
@@ -243,8 +240,18 @@ export default function MapaLibre({
   useEffect(() => {
     if (!mapa.current || !seleccionado) return
     const v = vehiculos.find((x) => x.id === seleccionado)
-    if (v?.lat != null) mapa.current.panTo([v.lat, v.lng])
-  }, [seleccionado, vehiculos])
+    const centrar = () => {
+      if (!validPosition(v) || !mapa.current) return
+      const size = mapa.current.getSize()
+      const punto = mapa.current.project([v.lat, v.lng])
+      const offset = (ficha || espacioFicha) ? (size.x > 600 ? L.point(-175, 0) : L.point(0, size.y * .18)) : L.point(0, 0)
+      mapa.current.panTo(mapa.current.unproject(punto.add(offset)), { animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches })
+    }
+    centrar()
+    const m = mapa.current
+    m.on('resize', centrar)
+    return () => m.off('resize', centrar)
+  }, [seleccionado, vehiculos, ficha, espacioFicha])
 
   // Recorrido del día
   useEffect(() => {
@@ -255,7 +262,7 @@ export default function MapaLibre({
     }
     if (!recorrido?.length) return
     linea.current = L.polyline(
-      recorrido.map((p) => [p.lat, p.lng]),
+      recorrido.filter(validPosition).map((p) => [p.lat, p.lng]),
       { color: leerTokens().primario, weight: 4, opacity: 0.9 }
     ).addTo(mapa.current)
   }, [recorrido, esquema])
@@ -267,16 +274,33 @@ export default function MapaLibre({
     return () => observer.disconnect()
   }, [alto])
 
-  const activo = sobre ?? seleccionado
-  const v = vehiculos.find((x) => x.id === activo)
-  const enMarcha = vehiculos.filter((x) => x.estadoMarcha === 'en_marcha').length
-  // La base real no guarda velocidad: no se puede contar cuántas van en
-  // marcha, solo cuántos equipos están reportando.
-  const sabeMarcha = vehiculos.some((x) => x.estadoMarcha != null)
-  const reportando = vehiculos.filter((x) => x.conectado).length
+  // Ocultar solo etiquetas que colisionan, conservando cada vehículo seleccionable.
+  useEffect(() => {
+    const m = mapa.current
+    if (!m) return
+    const ordenar = () => {
+      const cajas = []
+      const orden = [...vehiculos].sort((a, b) => Number(b.id === seleccionado) - Number(a.id === seleccionado))
+      orden.filter(validPosition).forEach(v => {
+        const elemento = marcadores.current.get(v.id)?.getElement()
+        if (!elemento) return
+        const p = m.latLngToContainerPoint([v.lat, v.lng])
+        const caja = { x: p.x + 20, y: p.y - 37, w: 125, h: 48 }
+        const choque = cajas.some(c => caja.x < c.x + c.w && caja.x + caja.w > c.x && caja.y < c.y + c.h && caja.y + caja.h > c.y)
+        elemento.classList.toggle('is-muted', choque && v.id !== seleccionado)
+        if (!choque || v.id === seleccionado) cajas.push(caja)
+      })
+    }
+    ordenar()
+    m.on('zoomend moveend', ordenar)
+    return () => m.off('zoomend moveend', ordenar)
+  }, [vehiculos, seleccionado])
+
+  const v = vehiculos.find((x) => x.id === seleccionado)
+  const estados = [...new Map(vehiculos.map(v => { const e = estadoUnidad(v); return [e.clave, e] })).values()]
 
   return (
-    <div className={`pnl-mapa${esquema === 'oscuro' ? ' oscuro' : ''}`} style={{ height: alto }}>
+    <div className={`pnl-mapa fleet-map${esquema === 'oscuro' ? ' oscuro' : ''}`} style={{ height: alto }}>
       <div ref={contenedor} className="pnl-mapa-lienzo" />
 
       {fallaTeselas && (
@@ -285,21 +309,14 @@ export default function MapaLibre({
         </div>
       )}
 
-      {leyenda && <div className="pnl-mapa-leyenda">
-        <span className="pnl-mapa-vivo">
-          <i />
-          En vivo
-        </span>
-        <span>{vehiculos.length} unidades</span>
-        <span className="sep">·</span>
-        <span>{sabeMarcha ? `${enMarcha} en marcha` : `${reportando} reportando`}</span>
-      </div>}
+      {leyenda && estados.length > 0 && <div className="fleet-map-legend" aria-label="Estados de los vehículos">{estados.map(e => <span className={e.color} key={e.clave}><i />{e.texto}</span>)}</div>}
 
       {ficha && v && (
         <FichaUnidad
           unidad={v}
           variante="flotante"
-          alCerrar={seleccionado === activo ? () => alSeleccionar?.(null) : undefined}
+          alCerrar={() => alSeleccionar?.(null)}
+          alVerRecorrido={alVerRecorrido}
         />
       )}
     </div>

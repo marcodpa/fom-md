@@ -61,9 +61,9 @@ export default function Entrar() {
     // Contra la base real la sesión se resuelve preguntando al servidor, así
     // que puede llegar después de pintar: hay que quedarse escuchando.
     const actual = sesionActual()
-    if (actual) navegar(actual.debeCambiarClave ? '/cambiar-clave-inicial' : '/panel', { replace: true })
+    if (actual?.perfil) navegar(actual.debeCambiarClave ? '/cambiar-clave-inicial' : '/panel', { replace: true })
     const baja = alCambiar((s) => {
-      if (s) navegar(s.debeCambiarClave ? '/cambiar-clave-inicial' : '/panel', { replace: true })
+      if (s?.perfil) navegar(s.debeCambiarClave ? '/cambiar-clave-inicial' : '/panel', { replace: true })
     })
     return () => {
       baja()

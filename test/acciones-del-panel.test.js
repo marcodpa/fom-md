@@ -66,6 +66,34 @@ async function repositorioConectado() {
   return modulo.repo
 }
 
+test('contratos verificados: vínculos, identificadores, ciclos, fechas y errores visibles', async () => {
+  const repo = await repositorioConectado()
+  const original = globalThis.fetch
+  const llamadas = []
+  try {
+    globalThis.fetch = async (url, opts = {}) => {
+      llamadas.push({ url, body: JSON.parse(opts.body || '{}') })
+      const data = url.endsWith('/vehicles') ? { vehicleId: 'vehiculo-real' } : url.endsWith('/tenants') ? { tenantId: 'empresa-real' } : { workOrder: { id: 'odt-real' } }
+      return new Response(JSON.stringify(data), { status: 200 })
+    }
+    assert.equal((await repo.vehiculos.crear({ alias: 'QA' })).id, 'vehiculo-real')
+    assert.equal((await repo.admin.empresas.crear({ nombre: 'QA', tipo: 'estandar' })).id, 'empresa-real')
+    await repo.planes.odtDesdeAccion({ id: 'accion', vehiculoId: 'vehiculo', titulo: 'QA' })
+    assert.equal(llamadas.at(-1).body.maintenanceActionId, 'accion')
+    await assert.rejects(repo.planes.crearAccion({ vehiculoId: 'v', tipo: 'preventive', venceKm: 1000 }), /plan y un número de ciclo/)
+    await repo.planes.crearAccion({ vehiculoId: 'v', planId: 'p', ciclo: 2, titulo: 'QA', venceKm: 0, costo: 0 })
+    assert.equal(llamadas.at(-1).body.cycleOrdinal, 2)
+    assert.equal(llamadas.at(-1).body.costAmount, 0)
+    assert.equal(llamadas.at(-1).body.dueOdometerKm, 0)
+    await repo.programaInspecciones.programar({ fecha: '2026-10-01T12:00:00.000Z' })
+    assert.equal(llamadas.at(-1).body.scheduledFor, '2026-10-01')
+    await repo.reglas.crear({ tipo: 'velocidad', umbralKmh: 90, vehiculoIds: ['v'] })
+    assert.deepEqual(llamadas.at(-1).body.vehicleIds, ['v'])
+    globalThis.fetch = async () => new Response(JSON.stringify({ message: 'Fallo comprobable' }), { status: 500 })
+    for (const fn of [repo.odts.listar, repo.documentos.listar, repo.inspecciones.listar, repo.reglas.listar, repo.alertas.listar]) await assert.rejects(fn(), /Fallo comprobable/)
+  } finally { globalThis.fetch = original }
+})
+
 test('toda acción que invoca el panel existe en el repositorio conectado', async () => {
   const repo = await repositorioConectado()
   const acciones = accionesInvocadas()
@@ -101,7 +129,6 @@ test('lo que no tiene servidor avisa sin salir a la red', async () => {
     ['admin.gps.probarPanico', () => repo.admin.gps.probarPanico('g')],
     ['admin.usuarios.eliminarDefinitivo', () => repo.admin.usuarios.eliminarDefinitivo('u')],
     ['admin.usuarios.mover', () => repo.admin.usuarios.mover('u', 'e')],
-    ['admin.pagos.registrar', () => repo.admin.pagos.registrar({})],
     ['costos.registrar', () => repo.costos.registrar({})],
   ]
 
@@ -233,4 +260,27 @@ test('todo motivo que viaja al servidor cumple su patrón', async () => {
   } finally {
     globalThis.fetch = original
   }
+})
+
+test('administración global conserva empresa destino y nunca reintenta en la empresa de sesión', async () => {
+  const repo = await repositorioConectado()
+  const original = globalThis.fetch
+  const llamadas = []
+  try {
+    globalThis.fetch = async (url, opts = {}) => {
+      llamadas.push({url, body: JSON.parse(opts.body || '{}')})
+      return new Response(JSON.stringify({userId:'persona',displayName:'QA',items:[],page:{total:0}}), {status:200})
+    }
+    await repo.admin.usuarios.cambiar('persona', {rol:'supervisor',empresaId:'empresa-elegida'})
+    assert.equal(llamadas.at(-1).url, '/fom-api/api/v1/console/tenants/empresa-elegida/users/persona')
+    assert.equal(llamadas.at(-1).body.role, 'supervisor')
+    await repo.admin.usuarios.crear({nombre:'QA',email:'qa@example.invalid',rol:'conductor',empresaDestinoId:'otra-empresa'})
+    assert.equal(llamadas.at(-1).url, '/fom-api/api/v1/console/tenants/otra-empresa/users')
+    await repo.admin.plataforma.personas({empresa:{id:'otra-empresa',nombre:'QA'},limite:50,desde:50})
+    assert.match(llamadas.at(-1).url, /tenants\/otra-empresa\/directory\?limit=50&offset=50/)
+    let fallos = 0
+    globalThis.fetch = async () => { fallos++; return new Response(JSON.stringify({message:'Not found'}),{status:404}) }
+    await assert.rejects(repo.admin.usuarios.cambiar('persona',{rol:'supervisor',empresaId:'ajena'}))
+    assert.equal(fallos, 1)
+  } finally { globalThis.fetch = original }
 })

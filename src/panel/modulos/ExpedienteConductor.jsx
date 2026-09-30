@@ -250,6 +250,21 @@ function FichaDatos({ persona: p }) {
 }
 
 function UnidadAsignada({ persona: p, unidades, cargandoFlota, guardado, alAsignar, alQuitar }) {
+  const [elegida, setElegida] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+  const [error, setError] = useState('')
+  useEffect(() => { setElegida(''); setError('') }, [p.id])
+  const guardar = async (quitar = false) => {
+    if (ocupado || (!quitar && !elegida)) return
+    setOcupado(true)
+    setError('')
+    try {
+      if (quitar) await alQuitar()
+      else await alAsignar(elegida)
+      setElegida('')
+    } catch (e) { setError(e.message || 'No se pudo guardar la asignación.') }
+    finally { setOcupado(false) }
+  }
   return (
     <Tarjeta
       titulo="Unidad asignada"
@@ -281,13 +296,14 @@ function UnidadAsignada({ persona: p, unidades, cargandoFlota, guardado, alAsign
 
       <Campo
         etiqueta={p.unidad ? 'Cambiar de unidad' : 'Asignar una unidad'}
-        ayuda="Queda como conductor principal de la unidad que elijas."
+        ayuda="Elige una unidad y pulsa Asignar para guardar el cambio."
+        error={error}
       >
         <select
           className="pnl-select"
-          value=""
-          disabled={cargandoFlota || unidades.length === 0}
-          onChange={(e) => alAsignar(e.target.value)}
+          value={elegida}
+          disabled={ocupado || cargandoFlota || unidades.length === 0}
+          onChange={(e) => { setElegida(e.target.value); setError('') }}
         >
           <option value="">
             {cargandoFlota ? 'Cargando la flota…' : 'Elegir una unidad…'}
@@ -300,10 +316,16 @@ function UnidadAsignada({ persona: p, unidades, cargandoFlota, guardado, alAsign
             </option>
           ))}
         </select>
+        {elegida && elegida !== p.unidad?.id && (
+          <div className="pnl-chips">
+            <button type="button" className="pnl-btn primario" disabled={ocupado} onClick={() => guardar()}>{ocupado ? 'Asignando…' : 'Asignar'}</button>
+            <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => { setElegida(''); setError('') }}>Cancelar</button>
+          </div>
+        )}
       </Campo>
 
       {p.unidad && (
-        <button type="button" className="pnl-btn sutil" onClick={alQuitar}>
+        <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => guardar(true)}>
           <Icono nombre="cerrar" tam={16} />
           Quitar asignación
         </button>

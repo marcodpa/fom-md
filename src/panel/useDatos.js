@@ -12,21 +12,24 @@ export function useDatos(cargar, deps = [], refrescarCada = 0) {
   const [estado, setEstado] = useState('cargando') // cargando | ok | error
   const [error, setError] = useState(null)
   const vivo = useRef(true)
+  const peticion = useRef(0)
   const fnRef = useRef(cargar)
   fnRef.current = cargar
 
   const ejecutar = useCallback((silencioso = false) => {
-    if (!silencioso) setEstado((e) => (e === 'ok' ? 'ok' : 'cargando'))
+    const actual = ++peticion.current
+    const cargarActual = fnRef.current
+    if (!silencioso) setEstado('cargando')
     return Promise.resolve()
-      .then(() => fnRef.current())
+      .then(() => cargarActual())
       .then((r) => {
-        if (!vivo.current) return
+        if (!vivo.current || actual !== peticion.current) return
         setDatos(r)
         setEstado('ok')
         setError(null)
       })
       .catch((e) => {
-        if (!vivo.current) return
+        if (!vivo.current || actual !== peticion.current) return
         setError(e)
         setEstado('error')
       })
@@ -38,6 +41,7 @@ export function useDatos(cargar, deps = [], refrescarCada = 0) {
     ejecutar()
     return () => {
       vivo.current = false
+      peticion.current += 1
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import repo from '../datos/repo'
+import repo, { CONECTADO } from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import { Cabecera, Campo, Cargando, Chips, Datos, ErrorCarga, Kpi, Tag, Tarjeta, Vacio } from '../comp/ui'
@@ -135,11 +135,11 @@ export default function Reportes() {
     const ids = new Set(vehiculos.map((v) => v.id))
     const corte = Date.now() - dias * 86400000
 
-    const kmTotal = vehiculos.reduce((a, v) => a + (v.km ?? 0), 0)
+    const kmTotal = vehiculos.every(v => v.km != null) ? vehiculos.reduce((a, v) => a + Number(v.km), 0) : null
     const enMarcha = vehiculos.filter((v) => v.estadoMarcha === 'en_marcha').length
-    const indice = vehiculos.length
+    const indice = vehiculos.length && vehiculos.every(v => v.indiceSeguro != null)
       ? Math.round(vehiculos.reduce((a, v) => a + (v.indiceSeguro ?? 0), 0) / vehiculos.length)
-      : 0
+      : null
 
     const odts = d.odts.filter(
       (o) => ids.has(o.vehiculoId) && new Date(o.creadaEn).getTime() >= corte
@@ -152,20 +152,22 @@ export default function Reportes() {
     })
 
     const eventos = d.eventos.filter((e) => ids.has(e.vehiculoId))
-    const score = f.eventosPor100(eventos.length, kmTotal)
+    // El odómetro acumulado no es distancia recorrida dentro del período.
+    const score = CONECTADO ? null : f.eventosPor100(eventos.length, kmTotal)
     const conConductor = vehiculos.filter((v) => v.conductorPrincipalId).length
     const identificacion = vehiculos.length
       ? Math.round((conConductor / vehiculos.length) * 100)
       : 0
 
     const conductores = areaId
-      ? d.conductores.filter((p) => p.unidad && ids.has(p.unidad.id))
+      ? d.conductores.filter((p) => p.unidad && ids.has(typeof p.unidad === 'string' ? p.unidad : p.unidad.id))
       : d.conductores
 
     return {
       kmTotal,
       enMarcha,
-      detenidas: vehiculos.length - enMarcha,
+      detenidas: vehiculos.filter(v => v.estadoMarcha === 'parada').length,
+      marchaDesconocida: vehiculos.filter(v => v.estadoMarcha == null).length,
       indice,
       odts,
       abiertas: odts.filter((o) => o.estado === 'abierta').length,
@@ -332,14 +334,14 @@ function Operacion({ vehiculos, c }) {
           titulo="En marcha"
           valor={f.numero(c.enMarcha)}
           icono="velocidad"
-          nota={`${c.detenidas} detenidas`}
+          nota={`${c.detenidas} detenidas · ${c.marchaDesconocida} sin dato de marcha`}
         />
-        <Kpi titulo="Kilometraje total" valor={f.km(c.kmTotal)} icono="mapa" />
+        <Kpi titulo="Odómetros acumulados" valor={c.kmTotal == null ? 'Sin dato completo' : f.km(c.kmTotal)} icono="mapa" />
         <Kpi
           titulo="Índice de manejo seguro"
-          valor={`${c.indice}`}
+          valor={c.indice == null ? 'Sin dato' : `${c.indice}`}
           icono="escudo"
-          tono={TONO_KPI[rango]}
+          tono={c.indice == null ? '' : TONO_KPI[rango]}
           nota="Promedio de la flota"
         />
       </div>
@@ -372,7 +374,7 @@ function Mantenimiento({ c, resumen }) {
         <Kpi titulo="Costo total" valor={f.moneda(c.costoOdts)} icono="reporte" />
         <Kpi
           titulo="Tiempo promedio de resolución"
-          valor={f.duracion((resumen?.horasPromedioResolucion ?? 0) * 60)}
+          valor={resumen?.horasPromedioResolucion == null ? 'Sin dato' : f.duracion(resumen.horasPromedioResolucion * 60)}
           icono="reloj"
           nota="Sobre las ODT cerradas"
         />
@@ -400,9 +402,9 @@ function Seguridad({ c }) {
     <div className="pnl-grid k2">
       <Tarjeta
         titulo="Score general de conducción"
-        accion={<Semaforo rango={c.rangoScore} />}
+        accion={c.score == null ? null : <Semaforo rango={c.rangoScore} />}
       >
-        <div className="pnl-grid k2">
+        {c.score == null ? <p>No hay una métrica validada de eventos y kilómetros del mismo período. No se asigna una puntuación de seguridad.</p> : <div className="pnl-grid k2">
           <Anillo
             valor={anilloScore}
             texto={conComa(c.score, 2)}
@@ -416,7 +418,7 @@ function Seguridad({ c }) {
               { etiqueta: 'Óptimo', valor: 'Menor a 1,5 eventos por cada 100 km' },
             ]}
           />
-        </div>
+        </div>}
       </Tarjeta>
 
       <Tarjeta

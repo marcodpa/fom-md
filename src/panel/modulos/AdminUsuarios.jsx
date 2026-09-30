@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import repo, { DIRECTORIO_REAL } from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -7,15 +8,10 @@ import {
 } from '../comp/ui'
 import * as f from '../datos/formato'
 import { ROLES_ASIGNABLES, etiquetaRol } from '../datos/catalogos'
-import { areaDe } from '../roles'
 import { Icono } from '../Iconos'
 
-// ============================================================
-// USUARIOS DEL SISTEMA (solo Administrador FOM)
-// Toda la gente de todas las empresas. Las reglas duras vienen del
-// repositorio (jerarquía de rango, rol vs tipo de ente, Desempleados C.A.);
-// aquí solo se muestran sus mensajes tal cual.
-// ============================================================
+// Gente pertenece a la empresa de la sesión. El directorio global vive
+// en «Toda la plataforma» y no se mezcla con esta vista.
 
 /** El tipo de documento en palabras: los códigos son para agrupar, no para leer. */
 function etiquetaDocumento(tipo) {
@@ -77,13 +73,13 @@ function exportarCSV(lista) {
 
 function cargar(q, empresaId, rol) {
   if (DIRECTORIO_REAL) {
-    // Las empresas al alcance viajan en paralelo y se toleran: solo sirven
-    // para que la compañia elija a cual de sus contratistas mirar.
+    // El servidor resuelve la empresa desde la sesión, sin un ente elegible.
     return Promise.all([
-      repo.admin.usuarios.listar({ q, rol, enteId: empresaId || '' }),
+      repo.admin.usuarios.listar({ q, rol }),
       repo.admin.empresas.listar().catch(() => []),
     ]).then(([lista, empresas]) => ({ lista, empresas }))
   }
+  if (!empresaId) return Promise.resolve({ lista: [], empresas: [] })
   return Promise.all([
     repo.admin.usuarios.listar({ q, empresaId, rol }),
     repo.admin.empresas.listar({}),
@@ -94,9 +90,18 @@ export default function AdminUsuarios() {
   const sesion = useSesion()
   const actor = sesion?.perfil
   const [q, setQ] = useState('')
-  const [empresaId, setEmpresaId] = useState('')
+  const empresaId = actor?.empresaId
   const [rol, setRol] = useState('')
-  const [creando, setCreando] = useState(false)
+  const [parametros, setParametros] = useSearchParams()
+  const [creando, setCreando] = useState(() => parametros.get('nuevo') === '1')
+  const cerrarCreacion = () => {
+    setCreando(false)
+    if (parametros.has('nuevo')) {
+      const siguientes = new URLSearchParams(parametros)
+      siguientes.delete('nuevo')
+      setParametros(siguientes, { replace: true })
+    }
+  }
   const [moviendo, setMoviendo] = useState(null)
   const [claveDe, setClaveDe] = useState(null) // {nombre, clave} tras restablecer
   const [aviso, setAviso] = useState('')
@@ -157,26 +162,8 @@ export default function AdminUsuarios() {
     <>
       <Cabecera
         titulo="Gente"
-        bajada={DIRECTORIO_REAL
-          ? 'Quién es, qué maneja y qué papel le vence. Todo en un sitio.'
-          : 'Todas las cuentas de todas las empresas, con las reglas de mando de la app.'}
+        bajada={`Personal de ${actor?.empresa || 'tu empresa'}. Consulta sus roles, unidades y documentos.`}
       >
-        {/* La compañia elige a cual de sus contratistas mirar. Es su unica
-            forma de ver gente ajena, y es solo lectura: quien administra a un
-            contratista es el contratista. */}
-        {areaDe(actor) === 'gerencial' && (
-          <select
-            className="pnl-select"
-            value={empresaId}
-            onChange={(e) => setEmpresaId(e.target.value)}
-            aria-label="Contratista"
-          >
-            <option value="">Elige un contratista…</option>
-            {(datos?.empresas ?? []).filter((e) => e.alcance === 'contractor').map((e) => (
-              <option key={e.id} value={e.id}>{e.nombre}</option>
-            ))}
-          </select>
-        )}
         <button
           type="button"
           className="pnl-btn"
@@ -202,8 +189,6 @@ export default function AdminUsuarios() {
             datos={datos}
             q={q}
             setQ={setQ}
-            empresaId={empresaId}
-            setEmpresaId={setEmpresaId}
             rol={rol}
             setRol={setRol}
             aviso={aviso}
@@ -225,7 +210,7 @@ export default function AdminUsuarios() {
           <ModalCrear
             abierto={creando}
             empresas={datos.empresas}
-            alCerrar={() => setCreando(false)}
+            alCerrar={cerrarCreacion}
             alGuardar={recargar}
             directorioReal={DIRECTORIO_REAL}
             actor={actor}
@@ -264,20 +249,19 @@ export default function AdminUsuarios() {
 }
 
 function Contenido({
-  datos, q, setQ, empresaId, setEmpresaId, rol, setRol, aviso,
+  datos, q, setQ, rol, setRol, aviso,
   restablecerClave, aDesempleados, eliminarDefinitivo, abrirMover, directorioReal,
   actor, suspender, reactivar, revocarAcceso,
 }) {
-  const { lista, empresas } = datos
-  const desempleados = lista.filter((p) => p.esDesempleado).length
+  const { lista } = datos
 
   return (
     <>
       <div className="pnl-grid k4">
         <Kpi titulo="Cuentas" valor={lista.length} icono="gente" nota="En el filtro actual" />
         <Kpi titulo="Conductores" valor={lista.filter((p) => p.conduce).length} icono="camion" nota="Con permiso de manejo" />
-        <Kpi titulo="Clave temporal" valor={lista.filter((p) => p.claveTemporal).length} icono="escudo" tono="aviso" nota="Deben cambiarla al entrar" />
-        <Kpi titulo="En Desempleados" valor={desempleados} icono="empresa" tono={desempleados > 0 ? 'aviso' : 'ok'} nota="Cuentas fuera de empresa" />
+        <Kpi titulo="Perfiles completos" valor={lista.filter((p) => p.perfilCompleto).length} icono="gente" nota="Información personal completa" />
+        <Kpi titulo="Documentos por atender" valor={lista.filter((p) => p.papelesPendientes > 0 || (p.documentoDias != null && p.documentoDias <= 30)).length} icono="documento" tono="aviso" nota="Personas con vencimientos" />
       </div>
 
       {aviso && <p className="pnl-campo-error" role="alert">{aviso}</p>}
@@ -288,26 +272,12 @@ function Contenido({
         sinCuerpo
       >
         <div className="pnl-card-cuerpo">
-          {!directorioReal && <div className="pnl-chips">
-            <select
-              className="pnl-input"
-              value={empresaId}
-              onChange={(e) => setEmpresaId(e.target.value)}
-              aria-label="Filtrar por empresa"
-            >
-              <option value="">Todas las empresas</option>
-              {empresas.map((e) => (
-                <option key={e.id} value={e.id}>{e.nombre}</option>
-              ))}
-            </select>
-          </div>}
           <Chips
             opciones={directorioReal
               ? [
                   { v: '', t: 'Todos' },
                   { v: 'conductor', t: 'Conductores' },
                   { v: 'supervisor', t: 'Supervisores' },
-                  { v: 'operator', t: 'Operadores' },
                   { v: 'usuario', t: 'Usuarios' },
                 ]
               : [
@@ -464,6 +434,41 @@ function Contenido({
  * repite aqui para no pintar botones que el servidor va a rechazar; la que
  * manda sigue siendo la del servidor.
  */
+export function ModalCambiarRol({ persona, alCerrar, alGuardar }) {
+  const [rol, setRol] = useState(persona.rol)
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState('')
+  const opciones = [{v:'supervisor',t:'Supervisor'}, {v:'conductor',t:'Conductor'}, {v:'usuario',t:'Usuario'}]
+  const guardar = async () => {
+    if (guardando || rol === persona.rol || !opciones.some(o => o.v === rol)) return
+    setGuardando(true)
+    setError('')
+    try {
+      if (!persona.empresaId || !persona.userId) throw new Error('Selecciona una persona y su empresa desde Toda la plataforma.')
+      await repo.admin.usuarios.cambiar(persona.userId, {rol, empresaId: persona.empresaId, motivo:'cambio-de-rol-desde-plataforma'})
+      await alGuardar()
+      alCerrar()
+    } catch (e) { setError(e.message || 'No se pudo cambiar el rol.') }
+    finally { setGuardando(false) }
+  }
+  return <Modal titulo="Cambiar rol" abierto alCerrar={() => { if (!guardando) alCerrar() }} ancho={480}>
+    <p><b>{persona.nombre}</b> · {persona.email}</p>
+    <p>Empresa: <b>{persona.empresaNombre}</b></p>
+    <p>Rol actual: <b>{persona.rolEtiqueta || persona.rol}</b></p>
+    <Campo etiqueta="Nuevo rol" error={error}>
+      <select className="pnl-input" aria-label="Nuevo rol" value={rol} disabled={guardando} onChange={e => { setRol(e.target.value); setError('') }}>
+        {!opciones.some(o => o.v === rol) && <option value={rol} disabled>Selecciona un rol</option>}
+        {opciones.map(o => <option key={o.v} value={o.v}>{o.t}</option>)}
+      </select>
+    </Campo>
+    <p className="pnl-campo-ayuda">Al confirmar cambiarán sus permisos en esta empresa. El servidor valida si sus asignaciones permiten el cambio.</p>
+    <div className="pnl-chips">
+      <button type="button" className="pnl-btn primario" disabled={guardando || rol === persona.rol || !opciones.some(o => o.v === rol)} onClick={guardar}>{guardando ? 'Guardando…' : 'Confirmar cambio'}</button>
+      <button type="button" className="pnl-btn sutil" disabled={guardando} onClick={alCerrar}>Cancelar</button>
+    </div>
+  </Modal>
+}
+
 const RANGO = { admin_fom: 4, supervisor: 3 }
 function puedeAdministrar(actor, objetivo) {
   if (!actor || !objetivo) return false
@@ -500,11 +505,12 @@ function generarClaveTemporal() {
   return caracteres.join('')
 }
 
-function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, directorioReal }) {
+export function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, directorioReal, global = false, empresaInicial = '' }) {
   const [nombre, setNombre] = useState('')
   const [apellido, setApellido] = useState('')
   const [email, setEmail] = useState('')
-  const [empresaId, setEmpresaId] = useState('')
+  const [empresaDemoId, setEmpresaId] = useState(empresaInicial)
+  const empresaId = directorioReal && !global ? actor?.empresaId : empresaDemoId
   const [rol, setRol] = useState('conductor')
   const [conduce, setConduce] = useState(false)
   const [clave, setClave] = useState(() => generarClaveTemporal())
@@ -532,9 +538,11 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, directorioR
       if (directorioReal && clave.length < 16) {
         throw new Error('La contraseña temporal debe tener al menos 16 caracteres.')
       }
+      if (global && !empresaId) throw new Error('Selecciona la empresa de la persona.')
       const nombreCompleto = [nombre, directorioReal ? apellido : ''].filter(Boolean).join(' ').trim()
       const r = await repo.admin.usuarios.crear({
         nombre: nombreCompleto, email, rol, empresaId, conduce, clave,
+        empresaDestinoId: global ? empresaId : undefined,
       }, actor)
       await alGuardar()
       setCreado({ nombre: r.nombre, clave: r.clave, claveCreada: r.claveCreada !== false })
@@ -549,17 +557,16 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, directorioR
     ? [
         { v: 'supervisor', t: 'Supervisor' },
         { v: 'conductor', t: 'Conductor' },
-        { v: 'operator', t: 'Operador' },
         { v: 'usuario', t: 'Usuario' },
       ]
     : [
         { v: 'conductor', t: 'Conductor' },
-        { v: 'operator', t: 'Operador' },
         { v: 'usuario', t: 'Usuario' },
       ]
 
   return (
     <Modal titulo="Nuevo usuario" abierto={abierto} alCerrar={cerrar} ancho={520}>
+      {directorioReal && !global && !creado && <p className="pnl-campo-ayuda">La cuenta se creará en {actor?.empresa || 'la empresa de tu sesión'}.</p>}
       {creado ? (
         <>
           {creado.clave ? (
@@ -589,7 +596,7 @@ function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, directorioR
           <Campo etiqueta="Correo">
             <input type="email" className="pnl-input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="persona@empresa.com" />
           </Campo>
-          {!directorioReal && <Campo etiqueta="Empresa">
+          {(!directorioReal || global) && <Campo etiqueta="Empresa">
             <select className="pnl-input" value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
               <option value="">Selecciona el ente…</option>
               {destinos.map((e) => (

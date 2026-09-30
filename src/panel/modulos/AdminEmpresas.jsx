@@ -47,7 +47,7 @@ export default function AdminEmpresas() {
   }
 
   const eliminar = (e) => {
-    if (!window.confirm(`¿Eliminar el ente ${e.nombre}? Esta acción queda en auditoría.`)) return
+    if (!window.confirm(`¿Retirar de operación ${e.nombre}? Se suspenderá su servicio y se conservará el historial.`)) return
     accion(() => repo.admin.empresas.eliminar(e.id, actor))
   }
 
@@ -92,7 +92,8 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
   const seleccion = lista.find(e => e.id === seleccionId) ?? lista[0]
   const operativas = lista.filter((e) => !e.respaldo)
   const activas = operativas.filter((e) => e.servicioActivo).length
-  const deudaTotal = operativas.reduce((a, e) => a + e.deuda, 0)
+  const deudaTotal = operativas.every(e => Number.isFinite(e.deuda)) ? operativas.reduce((a, e) => a + e.deuda, 0) : null
+  const usuariosTotal = lista.every(e => Number.isFinite(e.usuarios)) ? lista.reduce((a, e) => a + e.usuarios, 0) : 'Sin dato'
 
   return (
     <>
@@ -100,7 +101,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
         <Kpi titulo="Entes en el sistema" valor={operativas.length} icono="empresa" nota="Sin contar el de respaldo" />
         <Kpi titulo="Con servicio activo" valor={activas} icono="check" tono="ok" nota={`${operativas.length - activas} suspendidos`} />
         <Kpi titulo="Deuda acumulada" valor={f.moneda(deudaTotal)} icono="costos" tono={deudaTotal > 0 ? 'malo' : 'ok'} nota="Cuotas pendientes y vencidas" />
-        <Kpi titulo="Usuarios totales" valor={lista.reduce((a, e) => a + e.usuarios, 0)} icono="gente" nota="En todas las empresas" />
+        <Kpi titulo="Usuarios totales" valor={usuariosTotal} icono="gente" nota="En todas las empresas" />
       </div>
 
       {aviso && <p className="pnl-campo-error" role="alert">{aviso}</p>}
@@ -151,7 +152,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
                     </td>
                     <td>
                       <Tag color={e.respaldo ? 'gris' : color('company_tipo', e.tipo)}>
-                        {e.respaldo ? 'Respaldo' : e.tipoEtiqueta}
+                        {e.respaldo ? 'Respaldo' : e.tipoEtiqueta || etiqueta('company_tipo', e.tipo)}
                       </Tag>
                     </td>
                     <td>
@@ -160,10 +161,10 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
                         <span>{e.telefono || e.email || ''}</span>
                       </div>
                     </td>
-                    <td className="num">{e.usuarios}</td>
-                    <td className="num">{e.vehiculos}</td>
+                    <td className="num">{e.usuarios ?? '—'}</td>
+                    <td className="num">{e.vehiculos ?? '—'}</td>
                     <td>
-                      {e.deuda > 0 ? (
+                      {!Number.isFinite(e.deuda) ? <Tag color="gris">Consultar pagos</Tag> : e.deuda > 0 ? (
                         <Tag color="rojo">{f.moneda(e.deuda)} · {e.pagosPendientes} cuotas</Tag>
                       ) : (
                         <Tag color="verde" plano>Al día</Tag>
@@ -194,7 +195,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
           <h3>{seleccion.nombre}</h3>
           <Tag color={seleccion.servicioActivo ? 'verde' : 'ambar'}>{seleccion.servicioActivo ? 'Servicio activo' : 'Servicio suspendido'}</Tag>
           <Datos items={[
-            {etiqueta:'Tipo de ente',valor:seleccion.tipoEtiqueta},
+            {etiqueta:'Tipo de ente',valor:seleccion.tipoEtiqueta || etiqueta('company_tipo', seleccion.tipo)},
             {etiqueta:'Usuarios',valor:seleccion.usuarios},
             {etiqueta:'Vehículos',valor:seleccion.vehiculos},
             {etiqueta:'Saldo',valor:f.moneda(seleccion.deuda)},
@@ -205,7 +206,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
           {!seleccion.respaldo && <div className="pnl-chips">
             {seleccion.tipo === 'estandar' && <button type="button" className="pnl-btn" onClick={() => abrirPredefinidas(seleccion)}>Compañías asociadas</button>}
             <button type="button" className="pnl-btn" onClick={() => alternarServicio(seleccion)}>{seleccion.servicioActivo ? 'Suspender servicio' : 'Reactivar servicio'}</button>
-            <button type="button" className="pnl-btn sutil" onClick={() => eliminar(seleccion)}>Eliminar ente</button>
+            <button type="button" className="pnl-btn sutil" onClick={() => eliminar(seleccion)}>Retirar de operación</button>
           </div>}
         </> : <Vacio icono="empresa" titulo="Selecciona un ente" texto="Consulta su información y servicio." />}
       </Tarjeta></aside></div>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="174" height="76" viewBox="0 0 174 76">
+    <g class="fleet-marker-label">
+      <rect x="46" y="3" width="125" height="46" rx="12" fill="#0b1927" stroke="#a1afbf" stroke-width="1"/>
+      <circle cx="58" cy="18" r="4" fill="#a1afbf"/>
+      <text x="69" y="23" fill="#f5f8fc" font-family="Arial,sans-serif" font-size="13" font-weight="700">AC219FD</text>
+      <text x="69" y="39" fill="#a1afbf" font-family="Arial,sans-serif" font-size="11">Sin señal</text>
+    </g>
+    <g transform="rotate(0 26 40)">
+
+      <rect x="11" y="26" width="5" height="10" rx="2" fill="#070e16"/>
+      <rect x="36" y="26" width="5" height="10" rx="2" fill="#070e16"/>
+      <rect x="12" y="48" width="4" height="10" rx="1" fill="#070e16"/>
+      <rect x="36" y="48" width="4" height="10" rx="1" fill="#070e16"/>
+      <rect x="15" y="18" width="22" height="44" rx="7" fill="#e4e9ef" stroke="#4b5968" stroke-width="1.5"/>
+      <path d="M18 29 Q26 25 34 29 L33 36 L19 36Z" fill="#203344"/>
+      <path d="M18 47 L34 47 L33 57 L19 57Z" fill="#344658"/>
+      <rect x="19" y="37" width="14" height="9" rx="2" fill="#fafcff"/>
+      <path d="M17 23h5m8 0h5" stroke="#fff" stroke-width="2"/>
+
+    </g>
+  </svg>

@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import repo from '../datos/repo'
+import repo, { CONECTADO } from '../datos/repo'
 import { useDatos } from '../useDatos'
 import {
   Buscador, Cabecera, Cargando, Chips, Datos, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
@@ -33,6 +33,7 @@ function hash(texto) {
  * inspección muestra siempre exactamente el mismo checklist.
  */
 function checklistDe(insp) {
+  if (CONECTADO) return insp.respuestas ?? []
   const items = repo.inspecciones.itemsPlantilla(insp.tipoVehiculo)
   const porHash = (arr) => [...arr].sort((a, b) => hash(insp.id + a.id) - hash(insp.id + b.id))
 
@@ -212,8 +213,8 @@ function Contenido({ datos, fecha, setFecha, resultado, setResultado, q, setQ, a
           {fallasPorCategoria.length === 0 ? (
             <Vacio
               icono="escudo"
-              titulo="Sin fallas críticas"
-              texto="Ninguna inspección del período mostrado reportó fallas críticas."
+              titulo={CONECTADO ? 'Detalle en cada inspección' : 'Sin fallas críticas'}
+              texto={CONECTADO ? 'Abre una inspección para consultar las respuestas reales y sus observaciones.' : 'Ninguna inspección del período mostrado reportó fallas críticas.'}
             />
           ) : (
             <BarrasH datos={fallasPorCategoria} formato={(n) => f.numero(n)} />
@@ -324,7 +325,8 @@ function Contenido({ datos, fecha, setFecha, resultado, setResultado, q, setQ, a
 }
 
 function DetalleInspeccion({ inspeccion, alCerrar }) {
-  const grupos = useMemo(() => (inspeccion ? porCategoria(checklistDe(inspeccion)) : []), [inspeccion])
+  const detalleReal = useDatos(() => inspeccion && CONECTADO ? repo.inspecciones.obtener(inspeccion.id) : Promise.resolve([]), [inspeccion?.id])
+  const grupos = useMemo(() => porCategoria(CONECTADO ? detalleReal.datos ?? [] : inspeccion ? checklistDe(inspeccion) : []), [inspeccion, detalleReal.datos])
   if (!inspeccion) return null
 
   return (
@@ -348,6 +350,8 @@ function DetalleInspeccion({ inspeccion, alCerrar }) {
       />
 
       <div className="pnl-checklist">
+        {CONECTADO && detalleReal.estado === 'cargando' && <Cargando filas={3} />}
+        {CONECTADO && detalleReal.estado === 'error' && <ErrorCarga error={detalleReal.error} onReintentar={detalleReal.recargar} />}
         {grupos.map((g) => (
           <Fragment key={g.categoria}>
             <div className="pnl-check-cat">{g.categoria}</div>
@@ -356,6 +360,7 @@ function DetalleInspeccion({ inspeccion, alCerrar }) {
                 <div className="pnl-fila-txt">
                   <b>{it.nombre}</b>
                   {it.critico && <span>Crítico</span>}
+                  {it.nota && <span>{it.nota}</span>}
                 </div>
                 <Tag color={color('inspeccion_item_estado', it.estadoItem)}>
                   {etiqueta('inspeccion_item_estado', it.estadoItem)}
@@ -368,8 +373,7 @@ function DetalleInspeccion({ inspeccion, alCerrar }) {
 
       <div className="pnl-fila-txt">
         <span>
-          El detalle por ítem se reconstruye a partir del resultado registrado. Cuando la app guarde
-          cada respuesta, se mostrará tal cual la envió el conductor.
+          {CONECTADO ? 'Respuestas registradas por el conductor. Si no hay respuestas disponibles, no se completa el checklist con datos supuestos.' : 'Checklist ilustrativo del modo de demostración.'}
         </span>
       </div>
     </Modal>

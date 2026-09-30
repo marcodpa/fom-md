@@ -1,0 +1,67 @@
+/* Shared FOM fleet map contract. See docs/mapas/DESIGN.md. */
+.fleet-card {
+  --fleet-ink:#f3f7fc; --fleet-muted:#b7c7d9; --fleet-line:#263b4d;
+  color:var(--fleet-ink); font-family:'Spline Sans',sans-serif;
+  display:flex; flex-direction:column; min-width:0; text-align:left;
+  font-size:14px; line-height:1.4; container-type:inline-size;
+}
+.fleet-card * { box-sizing:border-box; }
+.fleet-card-content { min-height:0; overflow:auto; scrollbar-width:thin; scrollbar-color:#39566e #0b1927; }
+.fleet-card-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.fleet-card-heading h2 { margin:0; font-size:17px; line-height:1.3; font-weight:600; }
+.fleet-card-close { display:grid; place-items:center; flex:none; width:44px; height:44px; margin:-8px -8px -8px 0; border:0; border-radius:10px; background:transparent; color:var(--fleet-muted); cursor:pointer; }
+.fleet-card-close:hover { background:#173147; color:#fff; }
+.fleet-status { display:inline-flex; align-items:center; gap:7px; align-self:flex-start; padding:4px 10px; font-size:12px; font-weight:500; border:1px solid currentColor; border-radius:20px; color:#a1afbf; }
+.fleet-status.verde { color:#35e888; background:#0d3028; }
+.fleet-status.ambar { color:#ffbf43; background:#312617; }
+.fleet-status i { width:8px; height:8px; background:currentColor; border-radius:50%; }
+.fleet-plate { margin:14px 0 0; font-size:32px; font-weight:700; line-height:1.1; letter-spacing:-.025em; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
+.fleet-description { margin:6px 0 0; font-size:13px; color:var(--fleet-muted); }
+.fleet-vehicle-image { margin:12px 0 14px; border-bottom:1px solid var(--fleet-line); background:radial-gradient(ellipse at 50% 65%,#243c4d 0%,#0c192600 70%); }
+.fleet-vehicle-image img { display:block; width:100%; height:144px; object-fit:contain; }
+.fleet-vehicle-image figcaption { text-align:right; color:var(--fleet-muted); font-size:10px; padding:0 0 10px; }
+.fleet-speed { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+.fleet-speed strong { font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; }
+.fleet-speed small { font-size:18px; }
+.fleet-facts { margin:0; display:grid; gap:10px; }
+.fleet-facts > div,.fleet-metrics > div { display:flex; align-items:center; gap:11px; min-width:0; }
+.fleet-facts svg,.fleet-metrics svg { flex:none; }
+.fleet-facts dt { font-size:12px; color:var(--fleet-muted); }
+.fleet-facts dd { margin:2px 0 0; overflow-wrap:anywhere; font-size:13px; }
+.fleet-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:16px 0 0; }
+.fleet-metrics > div { border:1px solid #203448; background:#10202f; padding:11px; border-radius:10px; }
+.fleet-metrics dt { font-size:11px; color:var(--fleet-muted); }
+.fleet-metrics dd { margin:3px 0 0; font-size:13px; font-weight:600; overflow-wrap:anywhere; }
+.fleet-extra { margin-top:12px; color:var(--fleet-muted); font-size:12px; }
+.fleet-extra summary { padding:8px 0; cursor:pointer; }
+.fleet-extra dl { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 0; }
+.fleet-extra dd { margin:3px 0 0; color:var(--fleet-ink); overflow-wrap:anywhere; }
+.fleet-actions { display:grid; gap:8px; margin-top:12px; flex:none; }
+.fleet-card .fleet-action { width:100%; min-height:44px; display:flex; justify-content:center; align-items:center; gap:10px; padding:10px 14px; background:transparent; border:1px solid #168fff; border-radius:10px; color:#f3f7fc; text-decoration:none; font:inherit; font-weight:500; cursor:pointer; }
+.fleet-card .fleet-action.primary { background:#0075e6; border-color:#0075e6; }
+.fleet-card .fleet-action:hover { background:#173957; }
+.fleet-card .fleet-action.primary:hover { background:#0065cb; }
+.fleet-card :is(button,a,summary):focus-visible,.fleet-marker:focus-visible { outline:3px solid #85c9ff; outline-offset:3px; }
+.fleet-card ::selection { background:#24619a; color:#fff; }
+.fleet-card.flotante { position:absolute; z-index:500; left:16px; top:16px; width:min(340px,calc(100% - 32px)); max-height:calc(100% - 50px); overflow:auto; overscroll-behavior:contain; padding:18px; border:1px solid #263b4d; border-radius:14px; background:#0b1927f5; scrollbar-width:thin; scrollbar-color:#39566e #0b1927; }
+.fleet-marker { background:none; border:0; }
+.fleet-marker > svg { overflow:visible; filter:drop-shadow(0 3px 4px #0005); }
+.fleet-marker.is-muted .fleet-marker-label { visibility:hidden; }
+.fleet-marker.is-muted:hover .fleet-marker-label,.fleet-marker:focus .fleet-marker-label { visibility:visible; }
+.fleet-map-legend { position:absolute; bottom:28px; left:50%; transform:translateX(-50%); z-index:450; display:flex; align-items:center; gap:16px; padding:10px 16px; border-radius:12px; background:#0b1927ed; border:1px solid #263b4d; color:#c6d4e3; font:12px 'Spline Sans',sans-serif; white-space:nowrap; }
+.fleet-map-legend span { display:flex; gap:6px; align-items:center; }
+.fleet-map-legend i { width:8px; height:8px; border-radius:50%; background:#35e888; }
+.fleet-map-legend .ambar i { background:#ffbf43; }
+.fleet-map-legend .gris i { background:#a1afbf; }
+.pnl-mapa.fleet-map { background:#0b1927; }
+.fom-dark .pnl-mapa.fleet-map.oscuro .leaflet-tile-pane,.fom-site .pnl-mapa.fleet-map.oscuro .leaflet-tile-pane,.pnl-mapa.fleet-map.oscuro .leaflet-tile-pane { filter:invert(1) grayscale(1) sepia(.55) hue-rotate(166deg) saturate(2) brightness(.85) contrast(.92); }
+.fleet-map .leaflet-control-zoom a { background:#0b1927; color:#f3f7fc; border-color:#263b4d; }
+.fleet-map .leaflet-control-attribution { background:#0b1927e8; color:#b7c7d9; }
+.fleet-map .leaflet-control-attribution a { color:#85c9ff; }
+@media(max-width:600px) {
+  .fleet-card.flotante { top:auto; bottom:38px; max-height:45%; padding:14px; }
+  .fleet-card.flotante .fleet-vehicle-image { display:none; }
+  .fleet-map-legend { font-size:10px; gap:9px; padding:8px 10px; }
+  .fleet-card .fleet-plate { font-size:28px; }
+}
+@media(prefers-reduced-motion:reduce) { .fleet-marker { transition:none!important; } }

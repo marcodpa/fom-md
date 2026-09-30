@@ -1,0 +1,14 @@
+diff --git a/src/console-api/console-service-payments.service.ts b/src/console-api/console-service-payments.service.ts
+--- a/src/console-api/console-service-payments.service.ts
++++ b/src/console-api/console-service-payments.service.ts
+@@ -344,8 +344,8 @@
+         paymentId,
+         targetTenantId: tenantId,
+         changes: {
+-          before: dto.expectedStatus,
+-          after: dto.status,
++          before: { status: dto.expectedStatus },
++          after: { status: dto.status },
+           reason: dto.reason,
+           externalReferenceChanged: dto.externalReference !== undefined,
+         },

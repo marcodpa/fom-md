@@ -77,7 +77,7 @@ export default function Seguridad() {
             valor={activas == null ? '—' : f.numero(activas)}
             icono="alerta"
             tono={activas > 0 ? 'malo' : 'ok'}
-            nota={activas > 0 ? 'Alguien pidió ayuda y nadie ha respondido' : 'Nadie está pidiendo ayuda'}
+            nota={activas == null ? 'Pendiente de consultar al servidor' : activas > 0 ? 'Alguien pidió ayuda y nadie ha respondido' : 'Nadie está pidiendo ayuda'}
           />
           <Kpi
             titulo={`Eventos ${ESTADO_EVENTO[estadoEvento]?.toLowerCase() ?? ''}`}
@@ -237,28 +237,35 @@ export default function Seguridad() {
         )}
       </div>
 
-      <ModalRegla abierto={nuevaRegla} alCerrar={() => setNuevaRegla(false)} guardar={(umbral) => actuar(() => repo.reglas.crear({ tipo: 'velocidad', umbralKmh: umbral }), 'Regla creada.')} />
+      <ModalRegla abierto={nuevaRegla} alCerrar={() => setNuevaRegla(false)} guardar={(umbral, vehiculoIds) => actuar(() => repo.reglas.crear({ tipo: 'velocidad', umbralKmh: umbral, vehiculoIds }), 'Regla creada y asignada a las unidades seleccionadas.')} />
     </>
   )
 }
 
 function ModalRegla({ abierto, alCerrar, guardar }) {
+  const unidades = useDatos(() => repo.vehiculos.listar(), [])
+  const [vehiculoIds, setVehiculoIds] = useState([])
   const [umbral, setUmbral] = useState('90')
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
   async function confirmar() {
     const n = Number(umbral)
     if (!Number.isFinite(n) || n < 10 || n > 250) return setError('Un límite entre 10 y 250 km/h.')
+    if (!vehiculoIds.length) return setError('Selecciona al menos una unidad para que la regla pueda generar alertas.')
     setGuardando(true)
     setError('')
-    const ok = await guardar(n)
+    const ok = await guardar(n, vehiculoIds)
     setGuardando(false)
-    if (ok) alCerrar()
+    if (ok) { setVehiculoIds([]); alCerrar() }
   }
   return (
     <Modal titulo="Nueva regla de velocidad" abierto={abierto} alCerrar={alCerrar} ancho={440}>
       <Campo etiqueta="Velocidad máxima (km/h)" error={error} ayuda="Cuando una unidad la supere, el servidor crea el evento y el aviso.">
         <input type="number" className="pnl-input" min="10" max="250" value={umbral} onChange={(e) => setUmbral(e.target.value)} />
+      </Campo>
+      <Campo etiqueta="Unidades cubiertas">
+        {unidades.estado === 'error' && <ErrorCarga error={unidades.error} onReintentar={unidades.recargar} />}
+        {(unidades.datos ?? []).map(v => <label key={v.id} style={{ display: 'block', marginBottom: 8 }}><input type="checkbox" checked={vehiculoIds.includes(v.id)} onChange={e => setVehiculoIds(ids => e.target.checked ? [...ids, v.id] : ids.filter(id => id !== v.id))} /> {v.alias} · {v.placa}</label>)}
       </Campo>
       <div className="pnl-chips">
         <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>{guardando ? 'Guardando…' : 'Crear regla'}</button>

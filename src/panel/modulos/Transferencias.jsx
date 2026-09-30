@@ -18,7 +18,7 @@ import { Icono } from '../Iconos'
 // ============================================================
 
 const ESTADO = { pending: ['En curso', 'ambar'], completed: ['Completada', 'verde'], rejected: ['Rechazada', 'rojo'], cancelled: ['Cancelada', 'gris'] }
-const ROLES_DESTINO = [['conductor', 'Conductor'], ['operator', 'Operador'], ['usuario', 'Usuario']]
+const ROLES_DESTINO = [['conductor', 'Conductor'], ['usuario', 'Usuario']]
 const PIE = { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }
 
 function paso(t) {
@@ -221,7 +221,7 @@ function ModalNueva({ tipo, abierto, empresas, admin, alCerrar, guardar }) {
       <Campo etiqueta="Empresa de destino">
         <select className="pnl-input" value={d.destinoId} onChange={set('destinoId')} disabled={guardando || !d.sujeto}>
           <option value="">Elige la empresa de destino…</option>
-          {empresas.filter(e => e.id !== d.origenId).map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+          {empresas.filter(e => e.id !== d.origenId && e.servicioActivo).map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
         </select>
       </Campo>
       {tipo === 'identidad' ? (

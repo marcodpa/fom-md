@@ -22,6 +22,8 @@ export default function CentroControl() {
   const [areaId, setAreaId] = useState('')
   const [seleccionado, setSeleccionado] = useState(null)
   const [listaAbierta, setListaAbierta] = useState(false)
+  const [viendoRecorrido, setViendoRecorrido] = useState(false)
+  useEffect(() => setViendoRecorrido(false), [seleccionado])
 
   const areas = useDatos(() => repo.areas(), [])
   // Seguimiento en vivo: se vuelve a preguntar por la flota cada 15 segundos.
@@ -38,7 +40,8 @@ export default function CentroControl() {
   // arma aquí — flota sobre el mapa y se alimenta de la lista.
   const detalle = useDatos(
     () => (seleccionado ? repo.vehiculos.obtener(seleccionado) : Promise.resolve(null)),
-    [seleccionado]
+    [seleccionado],
+    15000
   )
 
   const lista = useMemo(() => flota.datos ?? [], [flota.datos])
@@ -70,13 +73,16 @@ export default function CentroControl() {
         (sabeMarcha ? `${enMarcha} en marcha` : `${reportando} reportando`)
       : 'Dónde está cada unidad, en tiempo real.'
 
-  const unidad = detalle.datos?.id === seleccionado ? detalle.datos : null
+  const unidadLista = lista.find(v => v.id === seleccionado)
+  const unidadDetalle = detalle.datos?.id === seleccionado ? detalle.datos : null
+  const unidad = unidadLista ? { ...unidadDetalle, ...unidadLista, recorrido: unidadDetalle?.recorrido } : null
+  const estadosVisibles = [...new Map(lista.map(v => { const e = estadoUnidad(v); return [e.clave, e] })).values()]
 
   return (
     <section className="control-map" aria-label="Centro de control">
       <div className="control-map-canvas">
         <Mapa vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado}
-          recorrido={unidad?.recorrido ?? null} alto="100%" ficha={false} leyenda={false} />
+          recorrido={viendoRecorrido ? unidad?.recorrido : null} alto="100%" ficha={false} leyenda={false} espacioFicha />
       </div>
       <div className="control-search">
         <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}</p></div>
@@ -109,9 +115,12 @@ export default function CentroControl() {
         <ListaUnidades vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado} />
       </aside>}
       {seleccionado && <aside className="control-panel control-unit" aria-label="Detalle de la unidad">
-        <FichaUnidad unidad={unidad ?? lista.find(v => v.id === seleccionado)} alCerrar={() => setSeleccionado(null)} />
+        <FichaUnidad unidad={unidad} alCerrar={() => setSeleccionado(null)} alVerRecorrido={() => setViendoRecorrido(v => !v)} viendoRecorrido={viendoRecorrido} />
+        {viendoRecorrido && detalle.estado === 'cargando' && <p className="control-detail-note" role="status">Cargando recorrido…</p>}
+        {viendoRecorrido && detalle.estado === 'ok' && !unidad?.recorrido?.length && <p className="control-detail-note" role="status">No hay posiciones registradas para el recorrido de hoy.</p>}
         {detalle.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={detalle.recargar}>Reintentar</button></p>}
       </aside>}
+      {estadosVisibles.length > 0 && <div className="fleet-map-legend" aria-label="Estados de los vehículos">{estadosVisibles.map(e => <span className={e.color} key={e.clave}><i />{e.texto}</span>)}</div>}
       <div className="control-live"><i />Actualización cada 15 s<span>Selecciona una unidad en el mapa</span></div>
     </section>
   )

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { normalizarCodigoPlan, validarCodigoPlan } from '../datos/codigoPlan'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -204,10 +205,12 @@ function ModalPlan({ abierto, alCerrar, guardar }) {
   const set = (k) => (e) => setD((x) => ({ ...x, [k]: e.target.value }))
   async function confirmar() {
     if (!d.codigo.trim() || !d.servicio.trim()) return setError('Código y servicio son obligatorios.')
+    let codigo
+    try { codigo = validarCodigoPlan(normalizarCodigoPlan(d.codigo)) } catch (e) { return setError(e.message) }
     if (!d.cadaKm && !d.cadaDias) return setError('Di cada cuántos kilómetros o cada cuántos días.')
     setGuardando(true)
     setError('')
-    const ok = await guardar({ ...d, codigo: d.codigo.trim().toLowerCase() })
+    const ok = await guardar({ ...d, codigo })
     setGuardando(false)
     if (ok) {
       setD({ codigo: '', servicio: '', descripcion: '', estrategia: 'fixed', cadaKm: '', cadaDias: '', criticidad: 'medium' })
@@ -216,8 +219,8 @@ function ModalPlan({ abierto, alCerrar, guardar }) {
   }
   return (
     <Modal titulo="Nuevo plan de mantenimiento" abierto={abierto} alCerrar={alCerrar} ancho={560}>
-      <Campo etiqueta="Código" error={error} ayuda="Corto y sin espacios, p. ej. aceite-5000.">
-        <input className="pnl-input" value={d.codigo} onChange={set('codigo')} placeholder="aceite-5000" />
+      <Campo etiqueta="Código" error={error} ayuda={normalizarCodigoPlan(d.codigo) ? `Se guardará como: ${normalizarCodigoPlan(d.codigo)}` : 'De 2 a 80 caracteres. Convertimos espacios y acentos, por ejemplo: revisión motor → revision-motor.'}>
+        <input className="pnl-input" value={d.codigo} onChange={set('codigo')} onBlur={() => setD(x => ({ ...x, codigo: normalizarCodigoPlan(x.codigo) }))} placeholder="aceite-5000" />
       </Campo>
       <Campo etiqueta="Servicio">
         <input className="pnl-input" value={d.servicio} onChange={set('servicio')} placeholder="Cambio de aceite y filtro" />
@@ -301,6 +304,7 @@ function ModalAccion({ abierto, vehiculos, planes, alCerrar, guardar }) {
   async function confirmar() {
     if (!d.vehiculoId) return setError('Elige la unidad.')
     if (d.titulo.trim().length < 3) return setError('Ponle un título de al menos 3 letras.')
+    if (d.venceKm === '' && !d.venceEn) return setError('Indica el kilometraje o la fecha de vencimiento.')
     setGuardando(true)
     setError('')
     const ok = await guardar(d)
@@ -318,12 +322,15 @@ function ModalAccion({ abierto, vehiculos, planes, alCerrar, guardar }) {
           {vehiculos.map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
         </select>
       </Campo>
-      <Campo etiqueta="Plan (opcional)">
+      <Campo etiqueta={d.tipo === 'preventive' ? 'Plan (obligatorio)' : 'Plan (opcional)'}>
         <select className="pnl-input" value={d.planId} onChange={set('planId')}>
           <option value="">Sin plan</option>
           {planes.map((p) => <option key={p.id} value={p.id}>{p.servicio}</option>)}
         </select>
       </Campo>
+      {d.tipo === 'preventive' && <Campo etiqueta="Número de ciclo" ayuda="Número de servicio dentro del plan: 1 para el primero, 2 para el siguiente…">
+        <input className="pnl-input" type="number" min="1" step="1" value={d.ciclo ?? ''} onChange={set('ciclo')} />
+      </Campo>}
       <Campo etiqueta="Título">
         <input className="pnl-input" value={d.titulo} onChange={set('titulo')} placeholder="Cambio de pastillas delanteras" />
       </Campo>

@@ -12,6 +12,8 @@
 // ============================================================
 
 import { api } from './api'
+import { asignarPrincipal } from './asignarConductor'
+import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
 
 /**
@@ -281,12 +283,13 @@ export const repoApi = {
         return lista
       },
 
-      async crear({ nombre, email, rol, clave }) {
+      async crear({ nombre, email, rol, clave, empresaDestinoId }) {
         const r = await api.crearUsuario({
           email,
           displayName: nombre,
           role: rol,
           temporaryPassword: clave,
+          tenantId: empresaDestinoId,
         })
         return {
           id: r.userId,
@@ -305,11 +308,12 @@ export const repoApi = {
        * `revoked` es terminal por diseño del ciclo de vida: de ahi no se
        * vuelve. Suspender, en cambio, se deshace.
        */
-      async cambiar(id, { rol, estado, motivo: razon } = {}) {
+      async cambiar(id, { rol, estado, motivo: razon, empresaId } = {}) {
         await api.actualizarMiembro(id, {
           role: rol || undefined,
           status: estado || undefined,
           reason: motivo(razon),
+          tenantId: empresaId,
         })
         return true
       },
@@ -379,7 +383,7 @@ export const repoApi = {
   },
 
   vehiculos: {
-    async listar({ q = '' } = {}) {
+    async listar({ q = '', areaId = '' } = {}) {
       const [lista, conductores] = await Promise.all([
         flota(q),
         // Los conductores no son imprescindibles para pintar el mapa: si esa
@@ -389,6 +393,7 @@ export const repoApi = {
       ])
       const porVehiculo = conductoresPorVehiculo(conductores)
       return lista
+        .filter(v => !areaId || v.areaId === areaId)
         .map((v) => {
           const c = porVehiculo.get(v.id)
           return c
@@ -459,25 +464,25 @@ export const repoApi = {
         }))
         .reverse()
         .reduce(sinDeriva, [])
-    } catch {
-      return []
-    }
+    } catch (error) {
+        throw error
+      }
   },
 
   /** Áreas reales. Ya no se devuelve una lista vacía. */
   async areas() {
     try {
       const r = await api.areas()
-      return (r?.items ?? []).map((a) => ({
+      return (r?.items ?? []).filter(a => a.status !== 'archived').map((a) => ({
         id: a.id,
         nombre: a.name,
         tipo: a.kind,
         estado: a.status,
         vehiculos: a.vehicleCount,
       }))
-    } catch {
-      return []
-    }
+    } catch (error) {
+        throw error
+      }
   },
 
   /** Conductores con asignación vigente. Sin cédula ni teléfono: ver #168. */
@@ -492,9 +497,9 @@ export const repoApi = {
         vehiculo: c.vehiclePlate || c.vehicleCode,
         desde: c.validFrom,
       }))
-    } catch {
-      return []
-    }
+    } catch (error) {
+        throw error
+      }
   },
 
   // --- Operación y cumplimiento --------------------------------------------
@@ -608,13 +613,14 @@ export const repoApi = {
       return lista
     },
 
-    async actualizarPerfil(userId, { cedula, telefono, direccion, nacimiento }) {
+    async actualizarPerfil(userId, { nombre, cedula, telefono, direccion, nacimiento }) {
       // El servidor exige `v-12345678` / `e-1234567` y `+584141234567`. La
       // gente escribe «V12345678» y «0414-1234567»: se traduce aquí, no se
       // rechaza.
       const ced = cedula === undefined || cedula === '' ? undefined : normalizarCedula(cedula)
       const tel = telefono === undefined || telefono === '' ? undefined : normalizarTelefono(telefono)
       const r = await api.actualizarPerfil(userId, {
+        displayName: nombre,
         nationalId: ced,
         phone: tel,
         address: direccion,
@@ -698,7 +704,7 @@ export const repoApi = {
   // ser reglas de alerta: ahora son PLANES de mantenimiento, con su propio
   // módulo en el servidor que el panel todavía no tiene.
   reglasEscritura: {
-    async crear({ tipo, umbralKmh, activa = true }) {
+    async crear({ tipo, umbralKmh, activa = true, vehiculoIds = [] }) {
       if (tipo !== 'velocidad') {
         throw new Error(MANTENIMIENTO_ES_PLAN)
       }
@@ -706,16 +712,18 @@ export const repoApi = {
         ruleType: 'velocidad',
         thresholdKph: Number(umbralKmh),
         isActive: activa,
+        vehicleIds: vehiculoIds,
       })
       return { id: r?.alertRule?.id ?? null }
     },
-    async set(reglaId, { umbralKmh, umbralKm, servicio, activa }) {
+    async set(reglaId, { umbralKmh, umbralKm, servicio, activa, vehiculoIds }) {
       if (umbralKm !== undefined || servicio !== undefined) {
         throw new Error(MANTENIMIENTO_ES_PLAN)
       }
       await api.actualizarRegla(reglaId, {
         thresholdKph: umbralKmh === undefined ? undefined : Number(umbralKmh),
         isActive: activa,
+        vehicleIds: vehiculoIds,
       })
       return true
     },
@@ -794,7 +802,7 @@ export const repoApi = {
      * «estandar» es un contratista, «predefinida» es una compania (la que
      * cuelga contratistas de si misma) y «personal» es la de una persona.
      */
-    async listar() {
+    async listar({ q = '', tipo = '' } = {}) {
       const r = await api.entes()
       return (r?.items ?? []).map((t) => ({
         id: t.id,
@@ -815,7 +823,7 @@ export const repoApi = {
         creadoEn: t.createdAt ?? null,
         // «home» es el ente propio; «contractor», uno colgado de mi compañia.
         alcance: t.scopeKind ?? 'home',
-      }))
+      })).filter(t => (!tipo || t.tipo === tipo) && (!q.trim() || [t.nombre, t.rif, t.contacto, t.email].some(v => String(v ?? '').toLowerCase().includes(q.trim().toLowerCase()))))
     },
 
     async crear({ nombre, tipo, rif, contacto, telefono, email }) {
@@ -832,7 +840,7 @@ export const repoApi = {
         email: email || undefined,
         contactName: contacto || undefined,
       })
-      return { id: r?.tenant?.id ?? null }
+      return { id: r?.tenantId ?? r?.tenant?.id ?? null }
     },
 
     /** Suspender o reactivar el servicio de un ente. */
@@ -883,7 +891,7 @@ export const repoApi = {
     // Tipos que admite el servidor: ubicacion | sector | contrato.
     async crear(tenantId, { nombre, tipo = 'ubicacion' }) {
       const r = await api.crearArea(tenantId, { name: nombre, kind: tipo })
-      return { id: r?.area?.id ?? null }
+      return { id: r?.areaId ?? r?.area?.id ?? null }
     },
     async set(areaId, { nombre, tipo, estado }) {
       await api.actualizarArea(areaId, {
@@ -914,14 +922,10 @@ export const repoApi = {
         modelYear: anio ? Number(anio) : undefined,
         vehicleType: tipo || undefined,
       })
-      const id = r?.vehicle?.id ?? null
+      const id = r?.vehicleId ?? r?.vehicle?.id ?? null
+      if (!id) throw new Error('El servidor no devolvió el identificador del vehículo creado. Revisa la flota antes de reintentar.')
       if (id && areaId) await api.actualizarVehiculo(id, { areaId })
-      if (gpsId) {
-        throw new Error(
-          'La unidad quedo creada, pero el GPS se asocia desde la app de ' +
-            'campo al comisionar el equipo. Registrala ahi para vincularlo.',
-        )
-      }
+      if (gpsId) await api.instalarEquipoGps(gpsId, { vehicleId: id })
       return { id }
     },
 
@@ -950,6 +954,7 @@ export const repoApi = {
      * es la que deja rastro de quien manejo y hasta cuando.
      */
     async asignarConductor(id, userId, { rol = 'principal', pin } = {}) {
+      if (rol === 'principal') return asignarPrincipal(api, id, userId)
       if (!userId) {
         // Quitar = REVOCAR la asignación vigente, con fecha y rastro, que es
         // el paso de la app. Se busca la asignación abierta de la unidad.
@@ -961,11 +966,18 @@ export const repoApi = {
       }
       // AssignDriverDto: userId, role, pin. No admite `reason`: mandarlo
       // es un 400 «property reason should not exist».
-      await api.asignarConductor(id, {
-        userId,
-        role: rol,
-        pin: pin || undefined,
-      })
+      try {
+        await api.asignarConductor(id, {
+          userId,
+          role: rol,
+          pin: pin || undefined,
+        })
+      } catch (error) {
+        if (error.message?.includes('already has an active principal driver')) {
+          throw new Error('Esta unidad ya tiene conductor principal. Selecciona «Sin conductor» y confirma «Quitar asignación»; después elige al nuevo conductor y pulsa «Asignar».')
+        }
+        throw error
+      }
       return true
     },
 
@@ -1072,8 +1084,8 @@ export const repoApi = {
             [o.descripcion, o.vehiculoNombre].join(' ').toLowerCase().includes(t))
         }
         return lista
-      } catch {
-        return []
+      } catch (error) {
+        throw error
       }
     },
 
@@ -1144,6 +1156,10 @@ export const repoApi = {
   },
 
   inspecciones: {
+    async obtener(id) {
+      const r = await api.inspeccion(id)
+      return (r.findings ?? []).map(i => ({ id: i.id, nombre: i.name, categoria: i.category, critico: i.isCritical, estadoItem: i.itemState, nota: i.note, evidencias: i.evidence ?? [] }))
+    },
     /**
      * Unidades sin inspección de hoy: la flota menos las que ya tienen una
      * inspección con fecha de hoy. Es una LECTURA; antes caía en el rechazo
@@ -1158,7 +1174,7 @@ export const repoApi = {
       const revisadas = new Set(hechas.filter((i) => String(i.fecha ?? '').slice(0, 10) === hoy).map((i) => i.vehiculoId))
       return flota.filter((v) => !revisadas.has(v.id))
     },
-    async listar({ vehiculoId = '' } = {}) {
+    async listar({ vehiculoId = '', fecha = '', q = '' } = {}) {
       try {
         const r = await api.inspecciones({ vehiculoId })
         return (r?.items ?? []).map((i) => ({
@@ -1167,13 +1183,15 @@ export const repoApi = {
           fecha: i.inspectionDate,
           ubicacion: i.location,
           enviadaEn: i.submittedAt,
+          creadaEn: i.submittedAt ?? i.inspectionDate,
           vehiculoId: i.vehicleId,
           vehiculoNombre: [i.vehicleCode, i.vehiclePlate].filter(Boolean).join(' · ') || '—',
           conductorNombre: i.driverName || '—',
           plantilla: i.templateName,
-        }))
-      } catch {
-        return []
+        })).filter(i => !fecha || String(i.fecha).slice(0, 10) === fecha)
+          .filter(i => !q || `${i.vehiculoNombre} ${i.conductorNombre}`.toLowerCase().includes(q.toLowerCase()))
+      } catch (error) {
+        throw error
       }
     },
   },
@@ -1221,13 +1239,26 @@ export const repoApi = {
           .filter((d) => !ambito || d.ambito === ambito)
           .filter((d) => !estado || d.estado === estado)
           .filter((d) => !t || [d.tipo, d.titular, d.numero].join(' ').toLowerCase().includes(t))
-      } catch {
-        return []
+      } catch (error) {
+        throw error
       }
     },
   },
 
   alertas: {
+    async eventos({ dias = 30 } = {}) {
+      const corte = Date.now() - dias * 86400000
+      const items = []
+      let offset = 0
+      while (true) {
+        const r = await api.eventosDeAlerta({ limit: 200, offset })
+        const page = r.items ?? []
+        items.push(...page)
+        offset += page.length
+        if (!page.length || offset >= (r.page?.total ?? offset)) break
+      }
+      return items.filter(e => new Date(e.occurredAt).getTime() >= corte).map(e => ({ id: e.id, vehiculoId: e.vehicleId, vehiculo: e.vehicleId ? { id: e.vehicleId, alias: e.vehicleCode || e.vehiclePlate } : null, clave: e.ruleType === 'velocidad' ? 'exceso_velocidad' : 'condicion', nombre: e.ruleType === 'velocidad' ? 'Exceso de velocidad' : 'Condición de telemetría', severidad: e.severity === 'critical' ? 'alta' : e.severity === 'warning' ? 'media' : 'baja', valor: e.observedValue, creadaEn: e.occurredAt, conductorNombre: e.driverName ?? 'Sin dato', ubicacion: e.location ?? 'Sin dato' }))
+    },
     async listar({ soloSinLeer = false } = {}) {
       try {
         const r = await api.notificaciones({ soloSinLeer })
@@ -1240,8 +1271,8 @@ export const repoApi = {
           leidaEn: n.readAt,
           creadaEn: n.createdAt,
         }))
-      } catch {
-        return []
+      } catch (error) {
+        throw error
       }
     },
   },
@@ -1259,8 +1290,8 @@ export const repoApi = {
           activa: g.isActive,
           vehiculos: g.vehicleCount,
         }))
-      } catch {
-        return []
+      } catch (error) {
+        throw error
       }
     },
   },
@@ -1273,7 +1304,7 @@ export const repoApi = {
       repoApi.vehiculos.listar(),
       repoApi.areas().catch(() => []),
       // Si los contadores fallan, el panel muestra el resto igual.
-      api.resumenOperacion().catch(() => ({})),
+      api.resumenOperacion(),
     ])
     const reportando = lista.filter((v) => v.conectado).length
     const sabeMarcha = lista.some((v) => v.estadoMarcha != null)
@@ -1434,7 +1465,7 @@ Object.assign(repoApi, {
     async guardar({ id, codigo, servicio, descripcion, estrategia, cadaKm, cadaDias, criticidad, activo = true }) {
       const planId = id || uuid()
       const r = await api.guardarPlanDeMantenimiento(planId, {
-        code: codigo,
+        code: validarCodigoPlan(normalizarCodigoPlan(codigo)),
         serviceName: servicio,
         description: descripcion || undefined,
         strategy: estrategia,
@@ -1447,8 +1478,8 @@ Object.assign(repoApi, {
     },
     async cubrirUnidad(planId, vehiculoId, { ultimoServicioKm, proximoKm, proximaFecha } = {}) {
       await api.cubrirUnidadEnPlan(planId, vehiculoId, {
-        lastServiceOdometerKm: ultimoServicioKm ? Number(ultimoServicioKm) : undefined,
-        nextDueOdometerKm: proximoKm ? Number(proximoKm) : undefined,
+        lastServiceOdometerKm: ultimoServicioKm === undefined || ultimoServicioKm === null || ultimoServicioKm === '' ? undefined : Number(ultimoServicioKm),
+        nextDueOdometerKm: proximoKm === undefined || proximoKm === null || proximoKm === '' ? undefined : Number(proximoKm),
         nextDueAt: proximaFecha ? new Date(proximaFecha).toISOString() : undefined,
         enabled: true,
       })
@@ -1480,19 +1511,26 @@ Object.assign(repoApi, {
         moneda: a.costCurrency ?? null,
       }))
     },
-    async crearAccion({ vehiculoId, planId, tipo = 'preventive', titulo, detalle, relevancia = 'medium', venceKm, venceEn, costo, moneda }) {
+    async crearAccion({ vehiculoId, planId, ciclo, tipo = 'preventive', titulo, detalle, relevancia = 'medium', venceKm, venceEn, costo, moneda }) {
+      if ((venceKm === undefined || venceKm === null || venceKm === '') && !venceEn) {
+        throw new Error('Indica cuándo vence la acción: kilometraje, fecha o ambos.')
+      }
+      if (tipo === 'preventive' && (!planId || !Number.isInteger(Number(ciclo)) || Number(ciclo) < 1)) {
+        throw new Error('Una acción preventiva necesita un plan y un número de ciclo mayor que cero.')
+      }
       const actionId = uuid()
       await api.guardarAccionDeMantenimiento(actionId, {
         vehicleId: vehiculoId,
         planId: planId || undefined,
         kind: tipo,
+        cycleOrdinal: tipo === 'preventive' ? Number(ciclo) : undefined,
         title: titulo,
         detail: detalle || undefined,
         relevance: relevancia,
-        dueOdometerKm: venceKm ? Number(venceKm) : undefined,
+        dueOdometerKm: venceKm === undefined || venceKm === null || venceKm === '' ? undefined : Number(venceKm),
         dueAt: venceEn ? new Date(venceEn).toISOString() : undefined,
-        costAmount: costo ? Number(costo) : undefined,
-        costCurrency: costo ? moneda || 'USD' : undefined,
+        costAmount: costo === undefined || costo === null || costo === '' ? undefined : Number(costo),
+        costCurrency: costo === undefined || costo === null || costo === '' ? undefined : moneda || 'USD',
       })
       return { id: actionId }
     },
@@ -1590,16 +1628,18 @@ Object.assign(repoApi, {
 
   /** Personas de TODOS los entes: una fila por membresía. Solo administrador FOM. */
   plataforma: {
-    async personas({ q = '', limite = 50, desde = 0 } = {}) {
-      const r = await api.personasDePlataforma({ q, limit: limite, offset: desde })
+    async personas({ q = '', limite = 50, desde = 0, empresa = null } = {}) {
+      const r = empresa
+        ? await api.directorio({ q, limite, desplazamiento: desde, enteId: empresa.id })
+        : await api.personasDePlataforma({ q, limit: limite, offset: desde })
       const lista = (r?.items ?? []).map((u) => ({
-        id: `${u.userId}:${u.tenantId}`,
+        id: `${u.userId}:${empresa?.id ?? u.tenantId}`,
         userId: u.userId,
         nombre: u.displayName,
         email: u.email,
-        empresaId: u.tenantId,
-        empresaCodigo: u.tenantCode,
-        empresaNombre: u.tenantName,
+        empresaId: empresa?.id ?? u.tenantId,
+        empresaCodigo: empresa?.codigo ?? u.tenantCode,
+        empresaNombre: empresa?.nombre ?? u.tenantName,
         rol: u.role,
         estado: u.status,
       }))
@@ -1610,6 +1650,15 @@ Object.assign(repoApi, {
 
   /** Programa de inspecciones: plantillas, citas y hallazgos con seguimiento. */
   programaInspecciones: {
+    async crearPlantilla({ codigo, nombre, version = 1, puntos }) {
+      const code = normalizarCodigoPlan(codigo).slice(0, 50)
+      if (!code || nombre.trim().length < 2 || !puntos.length) throw new Error('Completa código, nombre y al menos un punto de inspección.')
+      const r = await api.crearPlantillaInspeccion({ code, name: nombre.trim(), version: Number(version), items: puntos.map((p, i) => ({ code: `punto-${i + 1}`, category: p.categoria || 'General', name: p.nombre.trim(), isCritical: Boolean(p.critico), displayOrder: i + 1, vehicleTypes: [] })) })
+      return { id: r?.template?.id ?? r?.id ?? r?.templateId }
+    },
+    async cambiarPlantilla(plantilla, estado) {
+      return api.moverPlantillaInspeccion(plantilla.id, { expectedStatus: plantilla.estado, status: estado })
+    },
     async plantillas({ estado = '' } = {}) {
       const r = await api.plantillasDeInspeccion({ status: estado })
       return (r?.items ?? []).map((t) => ({
@@ -1634,7 +1683,7 @@ Object.assign(repoApi, {
         vehicleId: vehiculoId,
         templateId: plantillaId,
         assignedUserId: asignadoA,
-        scheduledFor: fecha,
+        scheduledFor: String(fecha).slice(0, 10),
       })
       return { id: r?.schedule?.id ?? null }
     },

@@ -18,11 +18,10 @@ import { Icono } from '../Iconos'
 function cargar(empresaId, estadoPago) {
   return Promise.all([
     repo.admin.pagos.listar({}),
-    repo.admin.pagos.listar({ empresaId, estado: estadoPago }),
     repo.admin.empresas.listar({}),
-  ]).then(([todos, lista, empresas]) => ({
+  ]).then(([todos, empresas]) => ({
     todos,
-    lista,
+    lista: todos.filter(p => (!empresaId || p.empresaId === empresaId) && (!estadoPago || p.estado === estadoPago)),
     empresas: empresas.filter((e) => !e.respaldo),
   }))
 }
@@ -42,15 +41,17 @@ export default function AdminPagos() {
       ? `¿Marcar pagada la cuota ${p.periodo} de ${p.empresaNombre}?`
       : `¿Marcar vencida la cuota ${p.periodo} de ${p.empresaNombre}?`
     if (!window.confirm(texto)) return
+    const referencia = nuevo === 'pagado' ? window.prompt('Referencia del abono recibido (no realiza un cobro bancario):') : undefined
+    if (nuevo === 'pagado' && !referencia) return
     setAviso('')
-    repo.admin.pagos.actualizarEstado(p.id, nuevo, actor).then(recargar).catch((e) => setAviso(e.message))
+    repo.admin.pagos.actualizarEstado(p.id, nuevo, actor, { ...p, referencia }).then(recargar).catch((e) => setAviso(e.message))
   }
 
   return (
     <>
       <Cabecera
         titulo="Pagos del servicio"
-        bajada="Cuotas mensuales de FOM por ente: registra, cobra y suspende con criterio."
+        bajada="Registro administrativo de cuotas y pagos informados. Esta web no procesa cobros ni mueve dinero."
       >
         <button type="button" className="pnl-btn primario" onClick={() => setRegistrando(true)}>
           <Icono nombre="mas" tam={16} />
@@ -92,15 +93,15 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
   const [seleccionId, setSeleccionId] = useState(null)
   const seleccion = lista.find(p => p.id === seleccionId) ?? lista[0]
 
-  const suma = (e) => todos.filter((p) => p.estado === e).reduce((a, p) => a + p.monto, 0)
+  const suma = (e) => todos.filter((p) => p.estado === e && p.moneda === 'USD').reduce((a, p) => a + (e === 'pagado' ? p.monto : p.saldo ?? p.monto), 0)
   const cuenta = (e) => (e ? todos.filter((p) => p.estado === e).length : todos.length)
 
   return (
     <>
       <div className="pnl-grid k4">
-        <Kpi titulo="Vencido" valor={f.moneda(suma('vencido'))} icono="alerta" tono={suma('vencido') > 0 ? 'malo' : 'ok'} nota={`${cuenta('vencido')} cuotas vencidas`} />
-        <Kpi titulo="Pendiente" valor={f.moneda(suma('pendiente'))} icono="reloj" tono={suma('pendiente') > 0 ? 'aviso' : 'ok'} nota={`${cuenta('pendiente')} por cobrar`} />
-        <Kpi titulo="Cobrado" valor={f.moneda(suma('pagado'))} icono="check" tono="ok" nota={`${cuenta('pagado')} cuotas pagadas`} />
+        <Kpi titulo="Vencido (USD)" valor={f.moneda(suma('vencido'))} icono="alerta" tono={suma('vencido') > 0 ? 'malo' : 'ok'} nota={`${cuenta('vencido')} cuotas vencidas`} />
+        <Kpi titulo="Pendiente (USD)" valor={f.moneda(suma('pendiente'))} icono="reloj" tono={suma('pendiente') > 0 ? 'aviso' : 'ok'} nota={`${cuenta('pendiente')} por cobrar`} />
+        <Kpi titulo="Cobrado (USD)" valor={f.moneda(suma('pagado'))} icono="check" tono="ok" nota={`${cuenta('pagado')} cuotas pagadas`} />
         <Kpi titulo="Cuotas registradas" valor={todos.length} icono="costos" nota="En todo el sistema" />
       </div>
 
@@ -167,7 +168,7 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
                     <td>{p.nota || '—'}</td>
                     <td className="num">
                       <div className="pnl-chips">
-                        {p.estado !== 'pagado' && (
+                        {['pendiente', 'vencido'].includes(p.estado) && (
                           <button type="button" className="pnl-btn sutil" onClick={() => cambiarEstado(p, 'pagado')}>
                             <Icono nombre="check" tam={14} />
                             Pagada
@@ -189,7 +190,7 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
       </Tarjeta><aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle de la cuota">
         {seleccion ? <><h3>{seleccion.empresaNombre}</h3><Tag color={color('pago_estado',seleccion.estado)}>{etiqueta('pago_estado',seleccion.estado)}</Tag>
         <Datos items={[{etiqueta:'Período',valor:seleccion.periodo},{etiqueta:'Monto',valor:f.moneda(seleccion.monto)},{etiqueta:'Moneda',valor:seleccion.moneda},{etiqueta:'Pagado el',valor:seleccion.pagadoEn ? f.fecha(seleccion.pagadoEn) : 'Pendiente'},{etiqueta:'Nota',valor:seleccion.nota || '—'}]} />
-        <div className="pnl-chips">{seleccion.estado !== 'pagado' && <button className="pnl-btn primario" onClick={()=>cambiarEstado(seleccion,'pagado')}>Marcar pagada</button>}{seleccion.estado === 'pendiente' && <button className="pnl-btn" onClick={()=>cambiarEstado(seleccion,'vencido')}>Marcar vencida</button>}</div></> : <Vacio icono="costos" titulo="Sin cuota seleccionada" texto="Aquí verás su período, monto y estado." />}
+        <div className="pnl-chips">{['pendiente', 'vencido'].includes(seleccion.estado) && <button className="pnl-btn primario" onClick={()=>cambiarEstado(seleccion,'pagado')}>Marcar pagada</button>}{seleccion.estado === 'pendiente' && <button className="pnl-btn" onClick={()=>cambiarEstado(seleccion,'vencido')}>Marcar vencida</button>}</div></> : <Vacio icono="costos" titulo="Sin cuota seleccionada" texto="Aquí verás su período, monto y estado." />}
       </Tarjeta></aside></div>
     </>
   )
@@ -199,6 +200,7 @@ function ModalRegistrar({ abierto, empresas, alCerrar, alGuardar, actor }) {
   const [empresaId, setEmpresaId] = useState('')
   const [periodo, setPeriodo] = useState('')
   const [monto, setMonto] = useState('')
+  const [venceEn, setVenceEn] = useState('')
   const [nota, setNota] = useState('')
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -212,7 +214,7 @@ function ModalRegistrar({ abierto, empresas, alCerrar, alGuardar, actor }) {
     setGuardando(true)
     setError('')
     try {
-      await repo.admin.pagos.registrar({ empresaId, monto: Number(monto), periodo, nota }, actor)
+      await repo.admin.pagos.registrar({ empresaId, monto: Number(monto), periodo, venceEn, nota }, actor)
       await alGuardar()
       cerrar()
     } catch (e) {
@@ -238,6 +240,7 @@ function ModalRegistrar({ abierto, empresas, alCerrar, alGuardar, actor }) {
       <Campo etiqueta="Monto (USD)">
         <input type="number" min="1" className="pnl-input" value={monto} onChange={(e) => setMonto(e.target.value)} placeholder="780" />
       </Campo>
+      <Campo etiqueta="Fecha de vencimiento"><input aria-label="Fecha de vencimiento" type="date" className="pnl-input" value={venceEn} onChange={e => setVenceEn(e.target.value)} /></Campo>
       <Campo etiqueta="Nota (opcional)">
         <input type="text" className="pnl-input" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Transferencia, referencia…" />
       </Campo>

@@ -166,7 +166,7 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
         <Kpi titulo="Equipos" valor={lista.length} icono="pin" nota="Inventario y flota" />
         <Kpi titulo="Sin verificar" valor={sinVerificar} icono="alerta" tono={sinVerificar > 0 ? 'aviso' : 'ok'} nota={sinVerificar > 0 ? 'Pendientes de ping' : 'Todo verificado'} />
         <Kpi titulo="Libres verificados" valor={libres} icono="check" tono="ok" nota="Listos para una unidad" />
-        <Kpi titulo="Instalados" valor={instalados} icono="camion" nota="Reportando en la flota" />
+        <Kpi titulo="Instalados" valor={instalados} icono="camion" nota="Asignados a una unidad; no implica señal" />
       </div>
 
       <div className="pnl-admin-dividido"><Tarjeta
@@ -203,7 +203,7 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
                       <td>{instalado ? g.vehiculoNombre : 'En inventario'}</td>
                       <td>
                         <div className="pnl-chips">
-                          {g.verificado ? (
+                          {g.estado === 'inactive' ? <Tag color="gris">Inactivo</Tag> : g.verificado ? (
                             <Tag color="verde">Verificado</Tag>
                           ) : (
                             <Tag color="ambar">Sin verificar</Tag>
@@ -213,7 +213,7 @@ function Contenido({ datos, q, setQ, filas, verificar, asociar, probarPanico }) 
                         </div>
                       </td>
                       <td className="num">
-                        {!instalado && (
+                        {!instalado && g.estado !== 'inactive' && (
                           <div className="pnl-chips">
                             {!g.verificado && (
                               <button

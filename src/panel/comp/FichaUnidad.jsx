@@ -1,62 +1,9 @@
 import { Link } from 'react-router-dom'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
-import VehicleVisual from '../../components/VehicleVisual'
-
-// ============================================================
-// FICHA DE UNIDAD
-// ------------------------------------------------------------
-// Una sola ficha para los dos sitios donde se mira una unidad: flotando sobre
-// el mapa al seleccionar un pin, y en la columna del Centro de control. Antes
-// eran cuatro maquetados distintos —uno en cada componente de mapa y otro en
-// la tarjeta de telemetría— con el mismo contenido escrito de cuatro formas.
-// Cuando cambió la regla del estado de marcha hubo que corregirla en tres
-// archivos y en uno se olvidó.
-//
-// Dos criterios que la gobiernan:
-//
-//   La PLACA manda. Es lo que el supervisor dice por radio y lo que lleva
-//   pintado el vehículo. El alias interno va debajo, no encima.
-//
-//   Una fila sin dato no se dibuja. La versión anterior mostraba «Sin
-//   conductor» y un pie vacío porque la base no guarda conductores todavía;
-//   media ficha era relleno. Aquí solo aparece lo que existe, y si no hay
-//   nada que mostrar se dice por qué.
-// ============================================================
-
-/**
- * Estado que se puede AFIRMAR de una unidad, con el mejor dato disponible.
- *
- * La cascada es deliberada y va de lo más preciso a lo más pobre:
- *
- *   1. ENCENDIDO. El GPS reporta el estado de la línea de contacto. Es el dato
- *      que pide la operación: verde encendido, gris apagado.
- *   2. VELOCIDAD. Si no hay encendido pero sí velocidad, marcha o parada.
- *   3. CONEXIÓN. Si no hay ninguno de los dos —el caso de HOY— lo único que
- *      consta es si el equipo reportó hace poco. Y no es lo mismo: una
- *      camioneta estacionada con el motor apagado sigue reportando cada minuto.
- *
- * Hoy `ignition` y `velocidadKmh` llegan siempre nulos porque esas columnas no
- * existen todavía en la base: son parte de la migración de telemetría que está
- * pendiente de aplicar. En cuanto entre, el verde y el gris pasan a significar
- * encendido y apagado sin tocar una línea de esta función.
- */
-export function estadoUnidad(v) {
-  if (v?.ignition === true) {
-    return { clave: 'encendido', texto: 'Encendido', color: 'verde' }
-  }
-  if (v?.ignition === false) {
-    return { clave: 'apagado', texto: 'Apagado', color: 'gris' }
-  }
-  if (v?.estadoMarcha) {
-    return v.estadoMarcha === 'en_marcha'
-      ? { clave: 'en_marcha', texto: 'En marcha', color: 'verde' }
-      : { clave: 'parada', texto: 'Detenida', color: 'gris' }
-  }
-  return v?.conectado
-    ? { clave: 'reportando', texto: 'Reportando', color: 'verde' }
-    : { clave: 'sin_senal', texto: 'Sin señal', color: 'gris' }
-}
+import { estadoUnidad } from '../datos/estadoUnidad'
+import '../../styles/fleet-map.css'
+export { estadoUnidad } from '../datos/estadoUnidad'
 
 /** Filas de datos: se descartan las que no tienen valor. */
 function datosDe(v) {
@@ -84,68 +31,36 @@ function datosDe(v) {
   return filas.filter(([, valor]) => valor != null && valor !== '')
 }
 
-/**
- * @param {object}   unidad     Vehículo enriquecido del repositorio.
- * @param {'flotante'|'panel'} variante  Sobre el mapa, o en la columna.
- * @param {function} alCerrar   Si se pasa, aparece el botón de cerrar.
- * @param {boolean}  conEnlace  Enlace al expediente (se oculta si ya estás en él).
- */
-export default function FichaUnidad({
-  unidad: v,
-  variante = 'panel',
-  alCerrar,
-  conEnlace = true,
-}) {
+export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, conEnlace = true, alVerRecorrido, viendoRecorrido = false }) {
   if (!v) return null
-
   const estado = estadoUnidad(v)
-  const datos = datosDe(v)
-  const descripcion = [v.marca, v.modelo, v.anio].filter(Boolean).join(' ')
-
-  return (
-    <article className={`pnl-ficha ${variante}`} aria-label={`Unidad ${v.placa}`}>
-      <header className="pnl-ficha-top">
-        <span className={`pnl-ficha-estado ${estado.color}`}>
-          <i aria-hidden="true" />
-          {estado.texto}
-        </span>
-        {alCerrar && (
-          <button type="button" className="pnl-ficha-cerrar" onClick={alCerrar}
-            aria-label={`Cerrar la ficha de ${v.placa}`}>
-            <Icono nombre="cerrar" tam={14} />
-          </button>
-        )}
-      </header>
-
-      {/* La placa es el identificador que se usa en voz alta. */}
-      <p className="pnl-ficha-placa">{v.placa}</p>
-      <p className="pnl-ficha-sub">
-        {v.alias && v.alias !== v.placa && <span className="alias">{v.alias}</span>}
-        {descripcion && <span>{descripcion}</span>}
-      </p>
-
-      {variante === 'panel' && <VehicleVisual modelo={v.modelo ?? ''} />}
-      {datos.length > 0 ? (
-        <dl className="pnl-ficha-datos">
-          {datos.map(([etiqueta, valor]) => (
-            <div key={etiqueta}>
-              <dt>{etiqueta}</dt>
-              <dd>{valor}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : (
-        <p className="pnl-ficha-vacio">
-          Este equipo todavía no ha reportado ninguna posición.
-        </p>
-      )}
-
-      {conEnlace && (
-        <Link to={`/panel/flota/${v.id}`} className="pnl-ficha-accion">
-          Ver expediente
-          <Icono nombre="ver" tam={14} />
-        </Link>
-      )}
-    </article>
-  )
+  const descripcion = [v.alias, [v.marca, v.modelo, v.anio].filter(Boolean).join(' ')].filter(Boolean).join(' · ')
+  const extras = datosDe(v).filter(([k]) => !['Velocidad', 'Última señal', 'Conductor', 'Ubicación', 'Odómetro'].includes(k))
+  const filas = [
+    ['reloj', 'Última señal', v.ultimoReporte ? f.desde(v.ultimoReporte) : 'Sin reportes'],
+    ['gente', 'Conductor', v.conductorNombre && v.conductorNombre !== 'Sin asignar' ? v.conductorNombre : 'Sin conductor asignado'],
+    ['pin', 'Ubicación', v.ubicacionTexto || (Number.isFinite(v.lat) && Number.isFinite(v.lng) ? `${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}` : 'Sin posición disponible')],
+  ]
+  return <article className={`fleet-card ${variante}`} aria-label={`Vehículo ${v.placa || v.alias || ''}`}>
+    <header className="fleet-card-heading"><h2>Vehículo seleccionado</h2>
+      {alCerrar && <button type="button" className="fleet-card-close" aria-label="Cerrar ficha del vehículo" onClick={alCerrar}><Icono nombre="cerrar" tam={20} /></button>}
+    </header>
+    <div className="fleet-card-content">
+    <span className={`fleet-status ${estado.color}`}><i />{estado.texto}</span>
+    <h3 className="fleet-plate">{v.placa || 'Sin placa'}</h3>
+    {descripcion && <p className="fleet-description">{descripcion}</p>}
+    <figure className="fleet-vehicle-image">
+      <img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" />
+      <figcaption>Imagen de referencia</figcaption>
+    </figure>
+    <div className="fleet-speed"><Icono nombre="velocidad" tam={25} /><strong>{v.velocidadKmh == null ? 'Sin velocidad GPS' : f.numero(v.velocidadKmh)}{v.velocidadKmh != null && <small> km/h</small>}</strong></div>
+    <dl className="fleet-facts">{filas.map(([icono, etiqueta, valor]) => <div key={etiqueta}><Icono nombre={icono} tam={19} /><div><dt>{etiqueta}</dt><dd>{valor}</dd></div></div>)}</dl>
+    <dl className="fleet-metrics"><div><Icono nombre="mapa" tam={22} /><div><dt>Odómetro</dt><dd>{v.km == null ? 'Sin dato' : f.km(v.km)}</dd></div></div><div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg><div><dt>GPS</dt><dd>{v.conectado === true ? 'Conectado' : v.conectado === false ? 'Sin señal' : 'Sin dato'}</dd></div></div></dl>
+    {extras.length > 0 && <details className="fleet-extra"><summary>Más información</summary><dl>{extras.map(([k, val]) => <div key={k}><dt>{k}</dt><dd>{val}</dd></div>)}</dl></details>}
+    </div>
+    {(conEnlace || alVerRecorrido) && <div className="fleet-actions">
+      {conEnlace && <Link className="fleet-action primary" to={`/panel/flota/${encodeURIComponent(v.id)}`}><Icono nombre="documento" tam={18} />Ver expediente</Link>}
+      {alVerRecorrido && <button type="button" className="fleet-action" onClick={alVerRecorrido} aria-pressed={viendoRecorrido}><Icono nombre="mapa" tam={18} />{viendoRecorrido ? 'Ocultar recorrido' : 'Ver recorrido'}</button>}
+    </div>}
+  </article>
 }

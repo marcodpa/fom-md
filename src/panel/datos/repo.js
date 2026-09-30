@@ -21,6 +21,7 @@
 
 import { HAY_API } from './api'
 import repoApi from './repoApi'
+import { pagosApi } from './pagosApi'
 import repoSemilla, { alCambiarDatos, reiniciarDatos } from './repoSemilla'
 
 /** ¿Qué módulos están leyendo de la base real? Útil para avisarlo en pantalla. */
@@ -61,8 +62,8 @@ const FALTA_ALERTAS_ANTIGUO =
   'aviso, o «marcar todos».'
 
 const FALTA_ARCHIVOS =
-  'Adjuntar el archivo del documento todavía no existe: falta la subida de ' +
-  'archivos en el servidor. El documento sí se registra con su vencimiento, ' +
+  'Adjuntar archivos todavía no está integrado en este panel. ' +
+  'El documento sí se registra con su vencimiento, ' +
   'que es lo que se vigila.'
 
 const FALTA_INSPECCIONES =
@@ -74,18 +75,9 @@ const FALTA_GPS_CAMPO =
   'delante: se hacen desde la app de campo, al comisionarlo. Registrarlo y ' +
   'asociarlo a una unidad sí se hace desde aquí.'
 
-const FALTA_EVENTOS =
-  'El histórico de eventos de alerta (excesos de velocidad, frenadas) ' +
-  'todavía no se sirve desde el servidor: las tablas existen, la consulta ' +
-  'de consola no. Sin ella, el índice de manejo seguro no se puede calcular.'
-
 const FALTA_COSTOS =
   'Cargar costos todavía no existe en el servidor como módulo propio: hoy ' +
   'el costo se registra al cerrar la orden de trabajo que lo generó.'
-
-const FALTA_PAGOS =
-  'La facturación no existe todavía en el servidor: no hay tablas de pagos ' +
-  'ni superficie que las sirva. Lo que se ve aquí no es real.'
 
 /**
  * Igual que la anterior pero DICIENDO QUÉ FALTA.
@@ -159,6 +151,7 @@ const repo = HAY_API
         actualizarPerfil: repoApi.gente.actualizarPerfil,
       },
       costos: conRespaldoParcial(repoSemilla.costos, {}, {
+        resumen: FALTA_COSTOS,
         registrar: FALTA_COSTOS,
         actualizar: FALTA_COSTOS,
         crear: FALTA_COSTOS,
@@ -192,11 +185,7 @@ const repo = HAY_API
           repoApi.gpsEscritura,
           { verificar: FALTA_GPS_CAMPO, probarPanico: FALTA_GPS_CAMPO },
         ),
-        pagos: conRespaldoParcial(repoSemilla.admin.pagos, {}, {
-          registrar: FALTA_PAGOS,
-          actualizar: FALTA_PAGOS,
-          actualizarEstado: FALTA_PAGOS,
-        }),
+        pagos: pagosApi,
         // Bitácora real desde `GET /audit`.
         auditoria: repoApi.auditoria,
       },
@@ -242,6 +231,7 @@ const repo = HAY_API
         repoSemilla.inspecciones,
         {
           listar: repoApi.inspecciones.listar,
+          obtener: repoApi.inspecciones.obtener,
           pendientesHoy: repoApi.inspecciones.pendientesHoy,
           // Catálogo de puntos del checklist: es síncrono y no toca el
           // servidor, así que se conserva tal cual.
@@ -259,13 +249,12 @@ const repo = HAY_API
       ),
       alertas: conRespaldoParcial(
         repoSemilla.alertas,
-        { listar: repoApi.alertas.listar, ...repoApi.avisosEscritura },
+        { listar: repoApi.alertas.listar, eventos: repoApi.alertas.eventos, ...repoApi.avisosEscritura },
         {
           marcar: FALTA_ALERTAS_ANTIGUO,
           // Es una LECTURA, y le tocaba el aviso genérico de escritura: decía
           // «el bloque de escritura está pendiente» sobre algo que solo lee.
           // Un mensaje que describe mal el problema estorba más que uno corto.
-          eventos: FALTA_EVENTOS,
         },
       ),
       reglas: conRespaldoParcial(

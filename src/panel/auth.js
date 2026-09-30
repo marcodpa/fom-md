@@ -187,7 +187,7 @@ async function resolverNombreDeEmpresa(perfil) {
 }
 
 /** Le pregunta al servidor si hay sesión viva. */
-async function resolverSesion() {
+export async function resolverSesion() {
   try {
     const r = await api.sesion()
     fijar(
@@ -199,9 +199,9 @@ async function resolverSesion() {
           }
         : null,
     )
-  } catch {
-    // 401 o servidor caído: en ambos casos, no hay sesión utilizable.
-    fijar(null)
+  } catch (error) {
+    // Un límite temporal o una caída de red no revoca la sesión.
+    fijar(error.estado === 401 ? null : { errorConexion: error.message })
   }
 }
 
