@@ -32,3 +32,19 @@ con sesiones administrativas reales después de publicar el backend.
 El parche backend de esta capacidad se entrega en
 `backend-company-context.patch`; su base es la rama
 `codex/web-platform-roles-main` de fom-core (PR 557).
+
+## Revisión del 1 de octubre de 2026
+
+La fila completa de Empresas ahora selecciona su detalle. La selección vive
+en el componente padre para conservarse durante la carga de filtros y búsqueda;
+al cambiar de empresa se limpia el aviso de la operación anterior. Se verificó
+en el navegador seleccionar otra empresa pulsando una celda de tipo, buscarla
+y quitar la búsqueda sin perder la selección. Compilación y 28 pruebas web PASS.
+
+La entrada real sigue pendiente: el endpoint público company-context continúa
+respondiendo 404. PR 557 permanece abierta como borrador con ambos trabajos de
+CI en verde. El usuario SSH de automatización requiere contraseña para sudo;
+no se ha integrado ni desplegado el backend desde esta revisión. La publicación
+web antigua por sí sola no activa esta capacidad. La verificación completa local
+del backend no fue PASS en Windows (incluye pruebas de herramientas Bash y
+otros fallos); no se presenta como una verificación completa exitosa.

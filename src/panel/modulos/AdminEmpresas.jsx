@@ -31,6 +31,12 @@ export default function AdminEmpresas() {
   const [predeDe, setPredeDe] = useState(null) // empresa cuyo listado de compañías se edita
   const [aviso, setAviso] = useState('')
   const [entrando, setEntrando] = useState(false)
+  const [seleccionId, setSeleccionId] = useState(null)
+
+  const seleccionarEmpresa = (id) => {
+    setSeleccionId(id)
+    setAviso('')
+  }
 
   const gestionar = async (empresa) => {
     setEntrando(true)
@@ -96,6 +102,8 @@ export default function AdminEmpresas() {
             abrirPredefinidas={setPredeDe}
             gestionar={gestionar}
             entrando={entrando}
+            seleccionId={seleccionId}
+            setSeleccionId={seleccionarEmpresa}
           />
         )}
       </div>
@@ -106,8 +114,7 @@ export default function AdminEmpresas() {
   )
 }
 
-function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando }) {
-  const [seleccionId, setSeleccionId] = useState(null)
+function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando, seleccionId, setSeleccionId }) {
   const seleccion = lista.find(e => e.id === seleccionId) ?? lista[0]
   const operativas = lista.filter((e) => !e.respaldo)
   const activas = operativas.filter((e) => e.servicioActivo).length
@@ -162,7 +169,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
               </thead>
               <tbody>
                 {lista.map((e) => (
-                  <tr key={e.id} className={seleccion?.id === e.id ? 'seleccionada' : ''}>
+                  <tr key={e.id} className={seleccion?.id === e.id ? 'seleccionada' : ''} onClick={() => setSeleccionId(e.id)} style={{ cursor: 'pointer' }}>
                     <td>
                       <div className="pnl-doble">
                         <button className="pnl-table-action" type="button" aria-pressed={seleccion?.id === e.id} onClick={() => setSeleccionId(e.id)}>{e.nombre}</button>
