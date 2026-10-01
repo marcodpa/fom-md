@@ -18,6 +18,10 @@ test('rechaza repeticiones, claves comunes y el propio correo', () => {
   assert.match(validarClave('Marco1!x', 'marco@fom.app'), /correo/)
   assert.equal(validarClave('Rt7#k', 'marco@fom.app'), null)
 })
+test('una frase larga con una palabra común sí es válida; una corta no', () => {
+  assert.equal(validarClave('Clave-nueva-segura-2026'), null)
+  assert.match(validarClave('Clave1!'), /común/)
+})
 test('no admite espacios en los extremos ni claves enormes', () => {
   assert.match(validarClave(' Ab1!x'), /espacios/)
   assert.match(validarClave('Ab1!' + 'x'.repeat(130)), /128/)

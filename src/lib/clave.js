@@ -19,7 +19,7 @@ export function validarClave(valor, correo = '') {
   if (!/[^A-Za-z0-9]/.test(v)) return 'Incluye al menos un símbolo (ej. !, @, #).'
   if (/(.)\1\1/i.test(v)) return 'No repitas el mismo carácter tres veces seguidas.'
   const bajo = v.toLowerCase()
-  if (COMUNES.some(c => bajo.includes(c))) return 'Esa clave es demasiado común: elige otra.'
+  if (v.length < 12 && COMUNES.some(c => bajo.includes(c))) return 'Esa clave corta es demasiado común: elige otra.'
   const usuario = String(correo).split('@')[0].toLowerCase()
   if (usuario.length >= 3 && bajo.includes(usuario)) return 'La contraseña no puede contener tu correo.'
   return null

@@ -101,7 +101,7 @@ index a2e6efb..c2ed8b8 100644
                    secureTextEntry
                    editable={!ocupado}
 diff --git a/src/lib/validate.ts b/src/lib/validate.ts
-index 6912050..baabf23 100644
+index 6912050..8c99283 100644
 --- a/src/lib/validate.ts
 +++ b/src/lib/validate.ts
 @@ -68,19 +68,29 @@ export function validarTelefono(numero: string, longitudEsperada?: number): stri
@@ -133,7 +133,7 @@ index 6912050..baabf23 100644
    if (!/[^A-Za-z0-9]/.test(v)) return 'Incluye al menos un carácter especial (ej. !, @, #).';
 +  if (/(.)\1\1/i.test(v)) return 'No repitas el mismo carácter tres veces seguidas.';
 +  const bajo = v.toLowerCase();
-+  if (CLAVES_COMUNES.some((c) => bajo.includes(c))) return 'Esa clave es demasiado común: elige otra.';
++  if (v.length < 12 && CLAVES_COMUNES.some((c) => bajo.includes(c))) return 'Esa clave es demasiado común: elige otra.';
 +  const usuario = correo.split('@')[0].toLowerCase();
 +  if (usuario.length >= 3 && bajo.includes(usuario)) return 'La contraseña no puede contener tu correo.';
    return null;

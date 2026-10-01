@@ -7,3 +7,7 @@ correo). Se aplica con `git apply` dentro de `fom-driver-juan`. Misma regla que 
 
 IMPORTANTE: el mínimo de 16 lo exige también el servidor (fom-core). Hasta que Juan lo cambie allí
 (de 16 a 5), el servidor rechazará las claves cortas aunque la pantalla las acepte.
+
+Actualización (2026-10-01): el servidor ya tiene la misma política en el PR #557 de fom-core
+(`src/authentication/password-policy.ts`, commit 8a27b11). Cuando ese PR se despliegue, las tres
+capas (servidor, web, app) coinciden. Las claves comunes solo se revisan por debajo de 12 caracteres.
