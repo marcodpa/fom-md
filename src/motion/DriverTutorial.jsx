@@ -147,7 +147,7 @@ export default function DriverTutorial({ playing = true, exportMode = false }) {
         <linearGradient id="tBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#47a8ff" /><stop offset="1" stopColor="#0f5fc2" /></linearGradient>
         <linearGradient id="tBlue2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#2c9cff" /><stop offset="1" stopColor="#0b4a9c" /></linearGradient>
         {['s1', 's2', 's3', 's4', 's5'].map(id => <clipPath key={id} id={id}><circle cx="360" cy="790" r="0" /></clipPath>)}
-        <clipPath id="screenClip"><rect width="390" height="844" rx="44" /></clipPath>
+        <clipPath id="screenClip"><rect width="390" height="844" rx="52" /></clipPath>
         <radialGradient id="tVig" cx=".5" cy=".5" r=".75"><stop offset=".6" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".45" /></radialGradient>
       </defs>
 
@@ -166,7 +166,11 @@ export default function DriverTutorial({ playing = true, exportMode = false }) {
       {STEPS.map(caption)}
 
       <g id="phone">
-        <rect x="132" y="312" width="456" height="960" rx="68" fill={INK} stroke={BONE} strokeWidth="9" />
+        {/* Marco de iPhone: titanio, bisel negro, botones laterales e isla dinámica */}
+        <rect x="126" y="448" width="6" height="64" rx="3" fill="#6f747d" /><rect x="126" y="540" width="6" height="104" rx="3" fill="#6f747d" /><rect x="126" y="668" width="6" height="104" rx="3" fill="#6f747d" />
+        <rect x="588" y="590" width="6" height="150" rx="3" fill="#6f747d" />
+        <rect x="132" y="312" width="456" height="960" rx="84" fill="#050507" stroke="#9a9ea8" strokeWidth="6" />
+        <rect x="140" y="320" width="440" height="944" rx="76" fill="none" stroke="#1a1b20" strokeWidth="4" />
         <g transform={`translate(${OX} ${OY}) scale(${K})`}>
           <g clipPath="url(#screenClip)">
             <image id="scr1" href={inicio} width="390" height="844" />
@@ -187,7 +191,7 @@ export default function DriverTutorial({ playing = true, exportMode = false }) {
             <g id="touch"><circle r="30" fill="#fff" opacity=".22" /><circle className="core" r="14" fill="#fff" opacity=".9" /><circle r="30" fill="none" stroke="#fff" strokeWidth="3" opacity=".8" /></g>
           </g>
         </g>
-        <rect x="290" y="326" width="140" height="18" rx="9" fill={BONE} opacity=".3" />
+        <rect x="298" y="340" width="124" height="34" rx="17" fill="#000" /><circle cx="404" cy="357" r="7" fill="#0d1620" />
       </g>
 
       <g id="sendDot" opacity="0"><path d={PIN} fill={BLUE} stroke={INK} strokeWidth="6" strokeLinejoin="round" /><circle r="11" fill={BONE} /></g>
