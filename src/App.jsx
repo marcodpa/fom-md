@@ -24,6 +24,7 @@ const V7_PAGES = {
 const Entrar = lazy(() => import('./pages/Entrar'))
 const CambiarClaveInicial = lazy(() => import('./pages/CambiarClaveInicial'))
 const Consola = lazy(() => import('./panel/Consola'))
+const MotionPage = lazy(() => import('./motion/MotionPage'))
 if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
 
 function ScrollTop() {
@@ -50,7 +51,7 @@ function ScrollTop() {
 
 export default function App() {
   const { pathname } = useLocation()
-  const esConsola = pathname === '/entrar' || pathname === '/cambiar-clave-inicial' || pathname.startsWith('/panel')
+  const esConsola = pathname === '/motion' || pathname === '/entrar' || pathname === '/cambiar-clave-inicial' || pathname.startsWith('/panel')
   const v7 = pathname === '/' || Boolean(V7_PAGES[pathname.slice(1)])
   return <div id="top" className={esConsola ? undefined : `marketing-v2${v7 ? ' v7-shell' : ''}`}>
     <a className="skip-link" href="#contenido">Saltar al contenido</a>
@@ -63,6 +64,7 @@ export default function App() {
           const Page = V7_PAGES[path] || Marketing
           return <Route key={path} path={'/' + path} element={<Page />} />
         })}
+        <Route path="/motion" element={<MotionPage />} />
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cambiar-clave-inicial" element={<CambiarClaveInicial />} />
         <Route path="/panel/*" element={<Consola />} />
