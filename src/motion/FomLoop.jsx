@@ -191,7 +191,7 @@ export default function FomLoop({ playing = true, exportMode = false, onTimeline
     tl.to({}, { duration: 0 }, DURATION) // pad so the timeline is exactly DURATION long
     render(0)
     if (onTimeline) onTimeline(tl)
-    if (exportMode) { window.__fomSeek = (t) => { tl.time(t, false); render(t) }; window.__fomLoopReady = true }
+    if (exportMode) { window.__fomSeek = (t) => { tl.time(t, false); render(t) }; window.__fomDuration = DURATION; window.__fomLoopReady = true }
     else if (playing) tl.repeat(-1).play(0)
   }, { scope: root, dependencies: [exportMode] })
 

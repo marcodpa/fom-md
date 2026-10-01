@@ -36,6 +36,15 @@
         "5174"
       ],
       "port": 5174
+    },
+    {
+      "name": "fom-driver-demo",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set EXPO_NO_DOTENV=1&& set CI=1&& node C:/Users/home/Downloads/fom-driver-juan/node_modules/expo/bin/cli start C:/Users/home/AppData/Local/Temp/claude/C--Users-home-Downloads-fom/319831be-955a-4d15-af0d-273b19dfd9fb/scratchpad/driver-runtime --web --port 8099 --clear"
+      ],
+      "port": 8099
     }
   ]
 }
