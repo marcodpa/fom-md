@@ -544,7 +544,9 @@ export function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, dire
       const nombreCompleto = [nombre, directorioReal ? apellido : ''].filter(Boolean).join(' ').trim()
       const r = await repo.admin.usuarios.crear({
         nombre: nombreCompleto, email, rol, empresaId, conduce, clave,
-        empresaDestinoId: global ? empresaId : undefined,
+        // La ruta «por empresa» (/tenants/:id/users) aún no está en el servidor publicado: si la empresa
+        // elegida es la de la propia sesión se usa la ruta de siempre (/users), que sí existe.
+        empresaDestinoId: global && empresaId !== actor?.empresaId ? empresaId : undefined,
       }, actor)
       await alGuardar()
       setCreado({ nombre: r.nombre, clave: r.clave, claveCreada: r.claveCreada !== false })
