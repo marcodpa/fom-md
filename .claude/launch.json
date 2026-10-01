@@ -45,6 +45,20 @@
         "set EXPO_NO_DOTENV=1&& set CI=1&& node C:/Users/home/Downloads/fom-driver-juan/node_modules/expo/bin/cli start C:/Users/home/AppData/Local/Temp/claude/C--Users-home-Downloads-fom/319831be-955a-4d15-af0d-273b19dfd9fb/scratchpad/driver-runtime --web --port 8099 --clear"
       ],
       "port": 8099
+    },
+    {
+      "name": "fom-demo-video",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--mode",
+        "demo",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5191"
+      ],
+      "port": 5191
     }
   ]
 }
