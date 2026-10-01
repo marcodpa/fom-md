@@ -29,6 +29,7 @@ export default function Planes() {
   const [q, setQ] = useState('')
   const [estado, setEstado] = useState('pending')
   const [aviso, setAviso] = useState('')
+  const [fallo, setFallo] = useState('') // error de la última acción: se enseña dentro del cuadro abierto
   const [ocupado, setOcupado] = useState(false)
   const [nuevoPlan, setNuevoPlan] = useState(false)
   const [cubriendo, setCubriendo] = useState(null)
@@ -42,6 +43,7 @@ export default function Planes() {
   async function actuar(fn, exito) {
     setOcupado(true)
     setAviso('')
+    setFallo('')
     try {
       await fn()
       setAviso(exito)
@@ -49,7 +51,7 @@ export default function Planes() {
       acciones.recargar()
       return true
     } catch (e) {
-      setAviso(e?.message || 'No se pudo completar la acción.')
+      setFallo(e?.message || 'No se pudo completar la acción.')
       return false
     } finally {
       setOcupado(false)
@@ -74,7 +76,8 @@ export default function Planes() {
       </Cabecera>
 
       <div className="pnl-cuerpo">
-        {aviso && <p className="pnl-campo-error" role="status">{aviso}</p>}
+        {aviso && <p className="pnl-campo-error" role="status" style={{ color: 'var(--e-exito)' }}>{aviso}</p>}
+        {fallo && !nuevoPlan && !cubriendo && !nuevaAccion && !moviendo && <p className="pnl-campo-error" role="alert">{fallo}</p>}
 
         {planes.estado === 'ok' && planes.datos.length > 0 && <div className="pnl-grid k2 pnl-plan-preview">
           {planes.datos.slice(0, 2).map(p => <Tarjeta key={p.id} titulo={p.servicio} accion={<Tag color={p.activo ? 'verde' : 'gris'}>{p.activo ? 'Activo' : 'Apagado'}</Tag>}>
@@ -190,15 +193,15 @@ export default function Planes() {
         )}
       </div>
 
-      <ModalPlan abierto={nuevoPlan} alCerrar={() => setNuevoPlan(false)} guardar={(datos) => actuar(() => repo.planes.guardar(datos), 'Plan guardado.')} />
-      <ModalCubrir plan={cubriendo} vehiculos={vehiculos.datos ?? []} alCerrar={() => setCubriendo(null)} guardar={(vehiculoId, datos) => actuar(() => repo.planes.cubrirUnidad(cubriendo.id, vehiculoId, datos), 'Unidad cubierta por el plan.')} />
-      <ModalAccion abierto={nuevaAccion} vehiculos={vehiculos.datos ?? []} planes={planes.datos ?? []} alCerrar={() => setNuevaAccion(false)} guardar={(datos) => actuar(() => repo.planes.crearAccion(datos), 'Acción creada.')} />
-      <ModalMover paso={moviendo} alCerrar={() => setMoviendo(null)} confirmar={(nota) => actuar(() => repo.planes.moverAccion(moviendo.accion, moviendo.destino, nota), 'Acción actualizada.')} />
+      <ModalPlan fallo={fallo} abierto={nuevoPlan} alCerrar={() => setNuevoPlan(false)} guardar={(datos) => actuar(() => repo.planes.guardar(datos), 'Plan guardado.')} />
+      <ModalCubrir fallo={fallo} plan={cubriendo} vehiculos={vehiculos.datos ?? []} alCerrar={() => setCubriendo(null)} guardar={(vehiculoId, datos) => actuar(() => repo.planes.cubrirUnidad(cubriendo.id, vehiculoId, datos), 'Unidad cubierta por el plan.')} />
+      <ModalAccion fallo={fallo} abierto={nuevaAccion} vehiculos={vehiculos.datos ?? []} planes={planes.datos ?? []} alCerrar={() => setNuevaAccion(false)} guardar={(datos) => actuar(() => repo.planes.crearAccion(datos), 'Acción creada.')} />
+      <ModalMover fallo={fallo} paso={moviendo} alCerrar={() => setMoviendo(null)} confirmar={(nota) => actuar(() => repo.planes.moverAccion(moviendo.accion, moviendo.destino, nota), 'Acción actualizada.')} />
     </>
   )
 }
 
-function ModalPlan({ abierto, alCerrar, guardar }) {
+function ModalPlan({ abierto, alCerrar, guardar, fallo }) {
   const [d, setD] = useState({ codigo: '', servicio: '', descripcion: '', estrategia: 'fixed', cadaKm: '', cadaDias: '', criticidad: 'medium' })
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -219,7 +222,7 @@ function ModalPlan({ abierto, alCerrar, guardar }) {
   }
   return (
     <Modal titulo="Nuevo plan de mantenimiento" abierto={abierto} alCerrar={alCerrar} ancho={560}>
-      <Campo etiqueta="Código" error={error} ayuda={normalizarCodigoPlan(d.codigo) ? `Se guardará como: ${normalizarCodigoPlan(d.codigo)}` : 'De 2 a 80 caracteres. Convertimos espacios y acentos, por ejemplo: revisión motor → revision-motor.'}>
+      <Campo etiqueta="Código" error={error || fallo} ayuda={normalizarCodigoPlan(d.codigo) ? `Se guardará como: ${normalizarCodigoPlan(d.codigo)}` : 'De 2 a 80 caracteres. Convertimos espacios y acentos, por ejemplo: revisión motor → revision-motor.'}>
         <input className="pnl-input" value={d.codigo} onChange={set('codigo')} onBlur={() => setD(x => ({ ...x, codigo: normalizarCodigoPlan(x.codigo) }))} placeholder="aceite-5000" />
       </Campo>
       <Campo etiqueta="Servicio">
@@ -254,7 +257,7 @@ function ModalPlan({ abierto, alCerrar, guardar }) {
   )
 }
 
-function ModalCubrir({ plan, vehiculos, alCerrar, guardar }) {
+function ModalCubrir({ plan, vehiculos, alCerrar, guardar, fallo }) {
   const [vehiculoId, setVehiculoId] = useState('')
   const [d, setD] = useState({ ultimoServicioKm: '', proximoKm: '', proximaFecha: '' })
   const [error, setError] = useState('')
@@ -270,7 +273,7 @@ function ModalCubrir({ plan, vehiculos, alCerrar, guardar }) {
   }
   return (
     <Modal titulo={plan ? `Cubrir una unidad con «${plan.servicio}»` : ''} abierto={Boolean(plan)} alCerrar={alCerrar} ancho={520}>
-      <Campo etiqueta="Unidad" error={error}>
+      <Campo etiqueta="Unidad" error={error || fallo}>
         <select className="pnl-input" value={vehiculoId} onChange={(e) => setVehiculoId(e.target.value)}>
           <option value="">Elige…</option>
           {vehiculos.map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
@@ -295,7 +298,7 @@ function ModalCubrir({ plan, vehiculos, alCerrar, guardar }) {
   )
 }
 
-function ModalAccion({ abierto, vehiculos, planes, alCerrar, guardar }) {
+function ModalAccion({ abierto, vehiculos, planes, alCerrar, guardar, fallo }) {
   const vacio = { vehiculoId: '', planId: '', tipo: 'preventive', titulo: '', detalle: '', relevancia: 'medium', venceKm: '', venceEn: '', costo: '', moneda: 'USD' }
   const [d, setD] = useState(vacio)
   const [error, setError] = useState('')
@@ -316,7 +319,7 @@ function ModalAccion({ abierto, vehiculos, planes, alCerrar, guardar }) {
   }
   return (
     <Modal titulo="Nueva acción de mantenimiento" abierto={abierto} alCerrar={alCerrar} ancho={560}>
-      <Campo etiqueta="Unidad" error={error}>
+      <Campo etiqueta="Unidad" error={error || fallo}>
         <select className="pnl-input" value={d.vehiculoId} onChange={set('vehiculoId')}>
           <option value="">Elige…</option>
           {vehiculos.map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
@@ -374,7 +377,7 @@ function ModalAccion({ abierto, vehiculos, planes, alCerrar, guardar }) {
 
 const TITULO_MOVER = { in_progress: 'Iniciar la acción', completed: 'Dar la acción por completada', dismissed: 'Descartar la acción' }
 
-function ModalMover({ paso, alCerrar, confirmar }) {
+function ModalMover({ paso, alCerrar, confirmar, fallo }) {
   const [nota, setNota] = useState('')
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -392,7 +395,7 @@ function ModalMover({ paso, alCerrar, confirmar }) {
   return (
     <Modal titulo={paso ? TITULO_MOVER[paso.destino] : ''} abierto={Boolean(paso)} alCerrar={alCerrar} ancho={480}>
       {paso && <p style={{ margin: '0 0 12px', color: 'var(--e-texto-2)' }}>{paso.accion.titulo} · {paso.accion.vehiculo}</p>}
-      <Campo etiqueta="Nota" error={error} ayuda="Qué se hizo o por qué se descarta.">
+      <Campo etiqueta="Nota" error={error || fallo} ayuda="Qué se hizo o por qué se descarta.">
         <textarea className="pnl-input" rows={3} value={nota} onChange={(e) => setNota(e.target.value)} />
       </Campo>
       <div style={PIE}>
