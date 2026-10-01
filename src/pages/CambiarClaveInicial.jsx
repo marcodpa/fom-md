@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { MIN_CLAVE, REGLAS_CLAVE, validarClave } from '../lib/clave'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { completarCambioInicial } from '../panel/auth'
 import { useSesion } from '../panel/useSesion'
@@ -8,7 +9,7 @@ import { Icono } from '../panel/Iconos'
 
 function CampoClave({ titulo, valor, cambiar, nueva = false }) {
   const [visible, setVisible] = useState(false)
-  return <label className="password-field"><span>{titulo}</span><div><input type={visible ? 'text' : 'password'} value={valor} onChange={e => cambiar(e.target.value)} autoComplete={nueva ? 'new-password' : 'current-password'} minLength={nueva ? 16 : undefined} required /><button type="button" aria-label={`${visible ? 'Ocultar' : 'Mostrar'} ${titulo.toLowerCase()}`} aria-pressed={visible} onClick={() => setVisible(v => !v)}><Icono nombre="ver" tam={20} /></button></div></label>
+  return <label className="password-field"><span>{titulo}</span><div><input type={visible ? 'text' : 'password'} value={valor} onChange={e => cambiar(e.target.value)} autoComplete={nueva ? 'new-password' : 'current-password'} minLength={nueva ? MIN_CLAVE : undefined} required /><button type="button" aria-label={`${visible ? 'Ocultar' : 'Mostrar'} ${titulo.toLowerCase()}`} aria-pressed={visible} onClick={() => setVisible(v => !v)}><Icono nombre="ver" tam={20} /></button></div></label>
 }
 
 export default function CambiarClaveInicial() {
@@ -34,8 +35,9 @@ export default function CambiarClaveInicial() {
   const enviar = async (e) => {
     e.preventDefault()
     setError('')
-    if (nueva.length < 16) {
-      setError('La nueva contraseña debe tener al menos 16 caracteres.')
+    const problema = validarClave(nueva, sesion?.email)
+    if (problema) {
+      setError(problema)
       return
     }
     if (nueva !== repetida) {
@@ -80,7 +82,7 @@ export default function CambiarClaveInicial() {
               <CampoClave titulo="Contraseña temporal" valor={actual} cambiar={setActual} />
               <CampoClave titulo="Nueva contraseña" valor={nueva} cambiar={setNueva} nueva />
               <CampoClave titulo="Repite la nueva contraseña" valor={repetida} cambiar={setRepetida} nueva />
-              <p className="password-help">Mínimo 16 caracteres.</p>
+              <p className="password-help">{REGLAS_CLAVE}</p>
               {error && <div className="password-error" role="alert">{error}</div>}
               <button type="submit" className="site-button primary" disabled={guardando}>
                 {guardando ? 'Guardando…' : 'Cambiar y volver a entrar'}

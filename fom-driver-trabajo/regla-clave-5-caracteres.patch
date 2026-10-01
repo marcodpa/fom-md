@@ -1,0 +1,141 @@
+diff --git a/src/app/cambiar-clave.tsx b/src/app/cambiar-clave.tsx
+index 95babac..27193b3 100644
+--- a/src/app/cambiar-clave.tsx
++++ b/src/app/cambiar-clave.tsx
+@@ -13,7 +13,7 @@ import { ScreenHeader } from '@/components/screen-header';
+ import { TextField } from '@/components/text-field';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+-import { MIN_CLAVE } from '@/lib/validate';
++import { MIN_CLAVE, validarClave } from '@/lib/validate';
+ import { cambiarMiClave, crearMiClave, tomarClaveTemporal } from '@/services';
+ import { useLoginDestino } from '@/session';
+ import { useTheme } from '@/theme';
+@@ -62,8 +62,9 @@ export default function CambiarClaveScreen() {
+       setError('Escribe tu contraseña actual.');
+       return;
+     }
+-    if (clave.trim().length < MIN_CLAVE) {
+-      setError(`La clave debe tener al menos ${MIN_CLAVE} caracteres.`);
++    const errClave = validarClave(clave);
++    if (errClave) {
++      setError(errClave);
+       return;
+     }
+     if (clave !== confirmar) {
+@@ -115,7 +116,7 @@ export default function CambiarClaveScreen() {
+                   label="Nueva contraseña"
+                   value={clave}
+                   onChangeText={setClave}
+-                  placeholder={`Mínimo ${MIN_CLAVE} caracteres`}
++                  placeholder={`Mínimo ${MIN_CLAVE} caracteres, con mayúscula, número y símbolo`}
+                   autoCapitalize="none"
+                   secureTextEntry
+                   editable={!ocupado}
+diff --git a/src/app/fom-conexion.tsx b/src/app/fom-conexion.tsx
+index 2318086..38cee30 100644
+--- a/src/app/fom-conexion.tsx
++++ b/src/app/fom-conexion.tsx
+@@ -30,7 +30,7 @@ import {
+   type SondeoRuta,
+ } from '@/lib/fom-api';
+ import { fomConfigurado, FOM_API_URL } from '@/lib/origen';
+-import { MIN_CLAVE } from '@/lib/validate';
++import { MIN_CLAVE, validarClave } from '@/lib/validate';
+ import { getPosicionVehiculoFom, getVehiculosFom } from '@/services';
+ import { useTheme } from '@/theme';
+ import type { PosicionVehiculo, Vehicle } from '@/types';
+@@ -187,8 +187,9 @@ export default function FomConexionScreen() {
+    */
+   async function onCambiarTemporal() {
+     setError(null);
+-    if (claveNueva.length < MIN_CLAVE) {
+-      setError(`La clave nueva debe tener al menos ${MIN_CLAVE} caracteres.`);
++    const errClave = validarClave(claveNueva);
++    if (errClave) {
++      setError(errClave);
+       return;
+     }
+     if (claveNueva !== claveRepetida) {
+@@ -372,7 +373,7 @@ ${r.cuerpo}`;
+                       nombre="fomClaveNueva"
+                       value={claveNueva}
+                       onChangeText={setClaveNueva}
+-                      placeholder={`Mínimo ${MIN_CLAVE} caracteres`}
++                      placeholder={`Mínimo ${MIN_CLAVE} caracteres, con mayúscula, número y símbolo`}
+                       secureTextEntry
+                       autoCapitalize="none"
+                     />
+diff --git a/src/app/recuperar.tsx b/src/app/recuperar.tsx
+index a2e6efb..c2ed8b8 100644
+--- a/src/app/recuperar.tsx
++++ b/src/app/recuperar.tsx
+@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/skeleton';
+ import { TextField } from '@/components/text-field';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+-import { MIN_CLAVE } from '@/lib/validate';
++import { MIN_CLAVE, validarClave } from '@/lib/validate';
+ import { confirmarRecuperacionDeClave } from '@/services';
+ import { useTheme } from '@/theme';
+ 
+@@ -65,8 +65,9 @@ export default function RecuperarScreen() {
+   async function onGuardar() {
+     if (ocupado || !token) return;
+     setError(null);
+-    if (clave.trim().length < MIN_CLAVE) {
+-      setError(`La clave debe tener al menos ${MIN_CLAVE} caracteres.`);
++    const errClave = validarClave(clave);
++    if (errClave) {
++      setError(errClave);
+       return;
+     }
+     if (clave !== confirmar) {
+@@ -119,7 +120,7 @@ export default function RecuperarScreen() {
+                   label="Nueva contraseña"
+                   value={clave}
+                   onChangeText={setClave}
+-                  placeholder={`Mínimo ${MIN_CLAVE} caracteres`}
++                  placeholder={`Mínimo ${MIN_CLAVE} caracteres, con mayúscula, número y símbolo`}
+                   autoCapitalize="none"
+                   secureTextEntry
+                   editable={!ocupado}
+diff --git a/src/lib/validate.ts b/src/lib/validate.ts
+index 6912050..baabf23 100644
+--- a/src/lib/validate.ts
++++ b/src/lib/validate.ts
+@@ -68,19 +68,29 @@ export function validarTelefono(numero: string, longitudEsperada?: number): stri
+   return null;
+ }
+ 
+-/** Mínimo de una contraseña: el de fom-core (de 16 a 256 caracteres). */
+-export const MIN_CLAVE = 16;
++/** Mínimo de una contraseña. fom-core debe aceptar el mismo mínimo: si exige más, rechazará la clave. */
++export const MIN_CLAVE = 5;
++export const MAX_CLAVE = 128;
++const CLAVES_COMUNES = ['password', 'contrasena', 'contraseña', 'qwerty', 'admin', 'clave', 'flotas', '12345', 'abcde', 'fom2026', 'samfor'];
+ 
+ /**
+- * Contraseña fuerte: al menos 16 caracteres, una mayúscula, un número y un
+- * carácter especial.
++ * Contraseña: al menos 5 caracteres, con una mayúscula, un número y un símbolo, sin tres
++ * caracteres iguales seguidos, sin claves comunes y sin el correo adentro.
++ * (Misma regla que el panel web: fom/src/lib/clave.js.)
+  */
+-export function validarClave(valor: string): string | null {
++export function validarClave(valor: string, correo = ''): string | null {
+   const v = valor;
+   if (v.length < MIN_CLAVE) return `La contraseña debe tener al menos ${MIN_CLAVE} caracteres.`;
++  if (v.length > MAX_CLAVE) return `La contraseña no puede pasar de ${MAX_CLAVE} caracteres.`;
++  if (v !== v.trim()) return 'La contraseña no puede empezar ni terminar con espacios.';
+   if (!/[A-Z]/.test(v)) return 'Incluye al menos una letra mayúscula.';
+   if (!/\d/.test(v)) return 'Incluye al menos un número.';
+   if (!/[^A-Za-z0-9]/.test(v)) return 'Incluye al menos un carácter especial (ej. !, @, #).';
++  if (/(.)\1\1/i.test(v)) return 'No repitas el mismo carácter tres veces seguidas.';
++  const bajo = v.toLowerCase();
++  if (CLAVES_COMUNES.some((c) => bajo.includes(c))) return 'Esa clave es demasiado común: elige otra.';
++  const usuario = correo.split('@')[0].toLowerCase();
++  if (usuario.length >= 3 && bajo.includes(usuario)) return 'La contraseña no puede contener tu correo.';
+   return null;
+ }
+ 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { REGLAS_CLAVE, validarClave } from '../../lib/clave'
 import { useSearchParams } from 'react-router-dom'
 import repo, { DIRECTORIO_REAL } from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -535,8 +536,9 @@ export function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, dire
         throw new Error('Escribe el nombre y el apellido.')
       }
       if (!/.+@.+\..+/.test(email)) throw new Error('Escribe un correo válido.')
-      if (directorioReal && clave.length < 16) {
-        throw new Error('La contraseña temporal debe tener al menos 16 caracteres.')
+      if (directorioReal) {
+        const problema = validarClave(clave, email)
+        if (problema) throw new Error(problema.replace('La contraseña', 'La contraseña temporal'))
       }
       if (global && !empresaId) throw new Error('Selecciona la empresa de la persona.')
       const nombreCompleto = [nombre, directorioReal ? apellido : ''].filter(Boolean).join(' ').trim()
@@ -623,7 +625,7 @@ export function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, dire
             </label>
           </Campo>}
           {directorioReal && (
-            <Campo etiqueta="Contraseña temporal" ayuda="Mínimo 16 caracteres. La persona deberá cambiarla al entrar.">
+            <Campo etiqueta="Contraseña temporal" ayuda={`${REGLAS_CLAVE} La persona deberá cambiarla al entrar.`}>
               <div className="pnl-chips">
                 <input
                   type="text"
