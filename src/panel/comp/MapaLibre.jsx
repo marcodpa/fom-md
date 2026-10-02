@@ -156,6 +156,9 @@ export default function MapaLibre({
     mapa.current = L.map(contenedor.current, {
       center: CENTRO,
       zoom: 9,
+      // Se puede acercar mucho más allá de lo que trae el mapa: para ver dónde quedó parado un carro vale
+      // más una imagen ampliada que un tope. Pasado el nivel nativo las teselas se agrandan, no se bloquean.
+      maxZoom: 22,
       zoomControl: false,
       attributionControl: true,
     })
@@ -214,7 +217,8 @@ export default function MapaLibre({
     }
     capa.current = L.tileLayer(t.url, {
       attribution: t.atribucion,
-      maxZoom: t.maxZoom,
+      maxNativeZoom: t.maxZoom,
+      maxZoom: 22,
       // OSM necesita el origen real del sitio; no enviar rutas del panel.
       referrerPolicy: 'strict-origin',
     })
