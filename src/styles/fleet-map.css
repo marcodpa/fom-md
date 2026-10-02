@@ -47,7 +47,7 @@
 .fleet-marker { background:none; border:0; }
 .fleet-marker > svg { overflow:visible; filter:drop-shadow(0 3px 4px #0005); transform:scale(var(--marcador-k,1)); transform-origin:26px 40px; transition:transform .2s ease; }
 /* El elegido no se achica tanto, y muy lejos solo él (o el que tocas) lleva etiqueta. */
-.fleet-marker.selected > svg { transform:scale(max(var(--marcador-k,1), .85)); }
+.fleet-marker.selected > svg { transform:scale(max(var(--marcador-k,1), .9)); }
 .fleet-map[data-zoom="lejos"] .fleet-marker:not(.selected) .fleet-marker-label { visibility:hidden; }
 .fleet-map[data-zoom="lejos"] .fleet-marker:not(.selected):hover .fleet-marker-label { visibility:visible; }
 .fleet-marker.is-muted .fleet-marker-label { visibility:hidden; }

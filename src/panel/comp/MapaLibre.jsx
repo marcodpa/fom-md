@@ -156,9 +156,8 @@ export default function MapaLibre({
     mapa.current = L.map(contenedor.current, {
       center: CENTRO,
       zoom: 9,
-      // Se puede acercar mucho más allá de lo que trae el mapa: para ver dónde quedó parado un carro vale
-      // más una imagen ampliada que un tope. Pasado el nivel nativo las teselas se agrandan, no se bloquean.
-      maxZoom: 22,
+      // Tope de acercamiento: nivel 19, el último que trae el mapa. Más allá solo se agranda la imagen.
+      maxZoom: 19,
       zoomControl: false,
       attributionControl: true,
     })
@@ -169,7 +168,8 @@ export default function MapaLibre({
     const mapaVivo = mapa.current
     const ajustarMarcadores = () => {
       const z = mapaVivo.getZoom()
-      const k = z >= 15 ? 1 : z >= 14 ? 0.85 : z >= 13 ? 0.7 : z >= 12 ? 0.58 : 0.46
+      // Crece poco a poco con el zoom y se queda en 0,85: a escala de calle el carro a tamaño completo era más ancho que la calle.
+      const k = Math.max(0.4, Math.min(0.85, 0.4 + (z - 9) * 0.075))
       raiz.style.setProperty('--marcador-k', String(k))
       raiz.dataset.zoom = z <= 12 ? 'lejos' : 'cerca'
     }
@@ -218,7 +218,7 @@ export default function MapaLibre({
     capa.current = L.tileLayer(t.url, {
       attribution: t.atribucion,
       maxNativeZoom: t.maxZoom,
-      maxZoom: 22,
+      maxZoom: 19,
       // OSM necesita el origen real del sitio; no enviar rutas del panel.
       referrerPolicy: 'strict-origin',
     })
