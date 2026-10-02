@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { build } from 'vite'
 
-test('la empresa seleccionada viaja en lecturas y escrituras, sin cambiar la autenticación', async () => {
+// Issue 567: la empresa elegida por el administrador viaja en la RUTA (`/tenants/{id}/...`),
+// nunca en una cabecera, y lo que aún no tiene ruta así se rechaza antes de salir.
+test('la empresa elegida viaja en la ruta, no en una cabecera, y la autenticación no cambia', async () => {
   const output = await build({configFile:false,logLevel:'silent',
     define:{'import.meta.env.VITE_FOM_API':JSON.stringify('/fom-api')},
     build:{write:false,lib:{entry:'src/panel/datos/api.js',formats:['es']},minify:false}})
@@ -17,22 +19,30 @@ test('la empresa seleccionada viaja en lecturas y escrituras, sin cambiar la aut
   try {
     mod.fijarEmpresaGestion('empresa-a')
     await mod.api.vehiculos()
-    await mod.api.actualizarPerfil('persona',{phone:'123'})
     await mod.api.sesion()
-    assert.equal(requests[0].options.headers['x-fom-console-tenant'],'empresa-a')
-    assert.equal(requests[1].options.headers['x-fom-console-tenant'],'empresa-a')
-    assert.equal(requests[1].options.headers['x-fom-csrf'],'fom-browser-v1')
-    assert.equal(requests[2].options.headers['x-fom-console-tenant'],undefined)
+    assert.match(requests[0].url, /\/api\/v1\/console\/tenants\/empresa-a\/vehicles\?/)
+    assert.match(requests[1].url, /\/api\/v1\/console\/auth\/session$/)
+    for (const r of requests) assert.equal(r.options.headers['x-fom-console-tenant'], undefined)
+
+    // Una escritura sin ruta por empresa no sale: caería en la empresa propia del administrador.
+    const antes = requests.length
+    await assert.rejects(mod.api.actualizarPerfil('persona', { phone: '123' }), (e) => e.estado === 501)
+    assert.equal(requests.length, antes)
+
     mod.fijarEmpresaGestion('empresa-b')
     await mod.api.vehiculos()
-    assert.equal(requests[3].options.headers['x-fom-console-tenant'],'empresa-b')
+    assert.match(requests.at(-1).url, /tenants\/empresa-b\/vehicles/)
+
     mod.fijarEmpresaGestion(null)
     await mod.api.vehiculos()
-    assert.equal(requests[4].options.headers['x-fom-console-tenant'],undefined)
-    // Validating a new selection must not overwrite the existing one.
+    assert.match(requests.at(-1).url, /\/api\/v1\/console\/vehicles\?/)
+    assert.doesNotMatch(requests.at(-1).url, /tenants/)
+
+    // Validar una selección nueva no pisa la que ya está.
     mod.fijarEmpresaGestion('empresa-a')
     await mod.api.contextoEmpresa('empresa-b')
-    assert.equal(requests[5].options.headers['x-fom-console-tenant'],'empresa-b')
-    assert.equal(mod.empresaGestionActualId(),'empresa-a')
+    assert.match(requests.at(-1).url, /\/api\/v1\/console\/tenants\/empresa-b\/company-context$/)
+    assert.equal(requests.at(-1).options.headers['x-fom-console-tenant'], undefined)
+    assert.equal(mod.empresaGestionActualId(), 'empresa-a')
   } finally {globalThis.fetch=original}
 })

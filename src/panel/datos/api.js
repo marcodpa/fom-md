@@ -10,6 +10,7 @@
 // Si `VITE_FOM_API` está vacío, `HAY_API` es false y el panel trabaja con la
 // semilla local. Así el sitio nunca depende de que el túnel esté arriba.
 // ============================================================
+import { aRutaPorEnte, SIN_RUTA_POR_ENTE } from './rutaPorEnte'
 
 const BASE = (import.meta.env?.VITE_FOM_API || '').replace(/\/+$/, '')
 
@@ -86,8 +87,17 @@ export function pedir(ruta, opciones = {}) {
   return peticion
 }
 
-async function pedirUnaVez(ruta, { metodo = 'GET', cuerpo, señal, idempotente = false, empresaContexto = empresaGestionId } = {}) {
+async function pedirUnaVez(rutaPedida, { metodo = 'GET', cuerpo, señal, idempotente = false, empresaContexto = empresaGestionId } = {}) {
   if (!HAY_API) throw new Error('La API real no está configurada en este entorno.')
+
+  // Dentro de una empresa ajena la empresa viaja en la ruta (Issue 567); lo que aún no tiene
+  // ruta así no sale: devolvería los datos de la empresa del administrador como si fueran de otra.
+  const ruta = aRutaPorEnte(rutaPedida, metodo, empresaContexto)
+  if (ruta === null) {
+    const error = new Error(SIN_RUTA_POR_ENTE)
+    error.estado = 501
+    throw error
+  }
 
   let respuesta
   try {
@@ -95,7 +105,6 @@ async function pedirUnaVez(ruta, { metodo = 'GET', cuerpo, señal, idempotente =
     respuesta = await fetch(`${BASE}${ruta}`, {
       method: metodo,
       headers: {
-            ...(empresaContexto && ruta.startsWith('/api/v1/console/') && !ruta.startsWith('/api/v1/console/auth/') ? { 'x-fom-console-tenant': empresaContexto } : {}),
             ...(mutacion ? {
             'content-type': 'application/json',
             'x-fom-csrf': 'fom-browser-v1',
@@ -152,7 +161,7 @@ const CONSOLA = '/api/v1/console'
 const INTERNA = '/gps-console-internal/api'
 
 export const api = {
-  contextoEmpresa: (id) => pedirUnaVez(`${CONSOLA}/company-context`, { empresaContexto: id }),
+  contextoEmpresa: (id) => pedirUnaVez(`${CONSOLA}/tenants/${encodeURIComponent(id)}/company-context`, { empresaContexto: null }),
   // Acceso por la superficie de consola. No usa `/auth/*`: ese controlador
   // exige el token interno y FOM-TEST no lo tiene configurado, así que
   // responde 503. Estas tres sí funcionan solo con la sesión, igual que el
