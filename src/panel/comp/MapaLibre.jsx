@@ -3,6 +3,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 import { vehicleMarkerSvg, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
+import { pintarCola, pintarRuta } from './rutaLeaflet'
 import '../../styles/fleet-map.css'
 
 // ============================================================
@@ -103,6 +104,12 @@ export default function MapaLibre({
   leyenda = true,
   ficha = true,
   recorrido = null,
+  // Recorrido con sus viajes y paradas (ver datos/recorrido.js), la cola de los últimos
+  // minutos y un lugar al que llevar la vista.
+  viajes = null,
+  paradas = null,
+  cola = null,
+  foco = null,
   alVerRecorrido,
   espacioFicha = false,
   alto = 'clamp(320px, 52vh, 560px)',
@@ -115,6 +122,10 @@ export default function MapaLibre({
   // posiciones seguidas no se peleen por mover el mismo marcador.
   const animaciones = useRef(new Map())
   const linea = useRef(null)
+  const rutaCapa = useRef(null)
+  const colaCapa = useRef(null)
+  const rutaFirma = useRef('')
+  const colaFirma = useRef(null)
   const encuadrado = useRef(false)
   const [fallaTeselas, setFallaTeselas] = useState(false)
 
@@ -266,6 +277,52 @@ export default function MapaLibre({
       { color: leerTokens().primario, weight: 4, opacity: 0.9 }
     ).addTo(mapa.current)
   }, [recorrido, esquema])
+
+  // Recorrido con viajes (inicio y fin), paradas y hora de cada punto
+  useEffect(() => {
+    if (!mapa.current) return undefined
+    rutaCapa.current?.remove()
+    rutaCapa.current = null
+    if (!viajes?.length && !paradas?.length) return undefined
+    const { grupo, limites } = pintarRuta(L, mapa.current, { viajes: viajes ?? [], paradas: paradas ?? [], color: leerTokens().primario })
+    rutaCapa.current = grupo
+    // Encuadra el recorrido una vez por unidad y rango, no en cada refresco.
+    const firma = `${seleccionado}|${viajes?.[0]?.inicio?.hora}|${viajes?.length}|${paradas?.length}`
+    if (limites.length > 1 && firma !== rutaFirma.current) {
+      rutaFirma.current = firma
+      const ancho = mapa.current.getSize().x
+      mapa.current.fitBounds(L.latLngBounds(limites), { paddingTopLeft: [ancho > 600 ? 440 : 30, 110], paddingBottomRight: [40, 60], maxZoom: 16 })
+    }
+    return () => {
+      grupo.remove()
+    }
+  }, [viajes, paradas, seleccionado])
+
+  // Cola: los últimos minutos de camino de la unidad elegida, sin pedir el recorrido
+  useEffect(() => {
+    if (!mapa.current) return undefined
+    colaCapa.current?.remove()
+    colaCapa.current = null
+    if (!cola || cola.length < 2) return undefined
+    const util = cola.filter(validPosition)
+    const grupo = pintarCola(L, mapa.current, util, leerTokens().primario)
+    colaCapa.current = grupo
+    // Al elegir una unidad, la vista abarca de dónde viene y dónde está: una vez por unidad.
+    if (colaFirma.current !== seleccionado && util.length > 1) {
+      colaFirma.current = seleccionado
+      const ancho = mapa.current.getSize().x
+      mapa.current.fitBounds(L.latLngBounds(util.map((p) => [p.lat, p.lng])), { paddingTopLeft: [ancho > 600 ? 440 : 30, 110], paddingBottomRight: [60, 80], maxZoom: 15, animate: true })
+    }
+    return () => {
+      grupo.remove()
+    }
+  }, [cola, seleccionado])
+
+  // Llevar la vista a un punto (una parada o un viaje de la lista)
+  useEffect(() => {
+    if (!mapa.current || !foco) return
+    mapa.current.flyTo([foco.lat, foco.lng], Math.max(mapa.current.getZoom(), 16), { duration: 0.8 })
+  }, [foco])
 
   // El contenedor cambia de tamaño al abrirse el módulo: recalcular
   useEffect(() => {

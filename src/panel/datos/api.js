@@ -347,8 +347,8 @@ export const api = {
     pedir(`${CONSOLA}/vehicles/${vehiculoId}/position/latest`),
 
   /** Recorrido del vehículo. El rango va sobre la hora de RECEPCIÓN. */
-  recorrido: (vehiculoId, limite = 200) =>
-    pedir(`${CONSOLA}/vehicles/${vehiculoId}/positions?limit=${limite}`),
+  recorrido: (vehiculoId, limite = 200, desde = null) =>
+    pedir(`${CONSOLA}/vehicles/${vehiculoId}/positions?limit=${limite}${desde ? `&from=${encodeURIComponent(desde)}` : ''}`),
 
   /** Áreas de la empresa, con cuántas unidades tiene cada una. */
   areas: () => pedir(`${CONSOLA}/areas?limit=200`),

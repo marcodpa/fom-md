@@ -14,7 +14,7 @@
 
 import {
   AREAS, AUDITORIA, COSTOS, DOCUMENTOS, EMPRESA, EMPRESAS, EVENTOS, GPS_LIBRES,
-  INSPECCIONES, NOTIFICACIONES, ODTS, PAGOS, PERFILES, REGLAS, VEHICULOS, recorridoDe,
+  INSPECCIONES, NOTIFICACIONES, ODTS, PAGOS, PERFILES, REGLAS, VEHICULOS, recorridoDe, recorridoDetalladoDe,
 } from './semilla'
 import {
   CLAVE_POR_DEFECTO, DESEMPLEADOS_ID, ETIQUETA, ITEMS_INSPECCION, ROLES_ASIGNABLES,
@@ -624,6 +624,8 @@ export const repo = {
 
   /** Serie de posiciones del día para dibujar el recorrido. */
   recorrido: (vehiculoId) => responder(recorridoDe(vehiculoId), 80),
+  recorridoDetallado: (vehiculoId, { horas = 24 } = {}) => responder(recorridoDetalladoDe(vehiculoId, horas), 120),
+  colaReciente: (vehiculoId) => responder(recorridoDetalladoDe(vehiculoId, 24).puntos.slice(-60), 60),
 
   // ============================================================
   // ADMINISTRACIÓN FOM — espejo de las Edge Functions de la app.

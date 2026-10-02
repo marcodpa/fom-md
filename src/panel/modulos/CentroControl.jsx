@@ -6,6 +6,8 @@ import {
 } from '../comp/ui'
 import Mapa from '../comp/Mapa'
 import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
+import PanelRecorrido from '../comp/PanelRecorrido'
+import { analizar, COLA_MIN, ultimosMinutos } from '../datos/recorrido'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import '../../styles/control-map.css'
@@ -23,7 +25,9 @@ export default function CentroControl() {
   const [seleccionado, setSeleccionado] = useState(null)
   const [listaAbierta, setListaAbierta] = useState(false)
   const [viendoRecorrido, setViendoRecorrido] = useState(false)
-  useEffect(() => setViendoRecorrido(false), [seleccionado])
+  const [horas, setHoras] = useState(24)
+  const [foco, setFoco] = useState(null)
+  useEffect(() => { setViendoRecorrido(false); setFoco(null) }, [seleccionado])
 
   const areas = useDatos(() => repo.areas(), [])
   // Seguimiento en vivo: se vuelve a preguntar por la flota cada 15 segundos.
@@ -43,6 +47,22 @@ export default function CentroControl() {
     [seleccionado],
     15000
   )
+
+  // Sin pedir el recorrido: los últimos minutos de camino de la unidad elegida, para saber de
+  // dónde viene. Se renueva con el mismo ritmo que la flota.
+  const cola = useDatos(
+    () => (seleccionado ? repo.colaReciente(seleccionado) : Promise.resolve([])),
+    [seleccionado],
+    15000
+  )
+  const colaPuntos = useMemo(() => ultimosMinutos(cola.datos ?? [], COLA_MIN), [cola.datos])
+  // Al pedir el recorrido: el rango completo, con viajes, paradas y la hora de cada punto.
+  const dia = useDatos(
+    () => (seleccionado && viendoRecorrido ? repo.recorridoDetallado(seleccionado, { horas }) : Promise.resolve(null)),
+    [seleccionado, viendoRecorrido, horas],
+    60000
+  )
+  const analisis = useMemo(() => (viendoRecorrido && dia.datos ? analizar(dia.datos.puntos) : null), [viendoRecorrido, dia.datos])
 
   const lista = useMemo(() => flota.datos ?? [], [flota.datos])
   const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
@@ -82,7 +102,8 @@ export default function CentroControl() {
     <section className="control-map" aria-label="Centro de control">
       <div className="control-map-canvas">
         <Mapa vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado}
-          recorrido={viendoRecorrido ? unidad?.recorrido : null} alto="100%" ficha={false} leyenda={false} espacioFicha />
+          cola={seleccionado && !viendoRecorrido ? colaPuntos : null} viajes={analisis?.viajes} paradas={analisis?.paradas} foco={foco}
+          alto="100%" ficha={false} leyenda={false} espacioFicha />
       </div>
       <div className="control-search">
         <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}</p></div>
@@ -114,10 +135,11 @@ export default function CentroControl() {
         <div className="control-panel-heading"><h2>Unidades <span>{lista.length}</span></h2><button type="button" aria-label="Cerrar lista de unidades" onClick={() => setListaAbierta(false)}><Icono nombre="cerrar" /></button></div>
         <ListaUnidades vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado} />
       </aside>}
-      {seleccionado && <aside className="control-panel control-unit" aria-label="Detalle de la unidad">
+      {seleccionado && <aside className={`control-panel control-unit${viendoRecorrido ? ' con-ruta' : ''}`} aria-label="Detalle de la unidad">
         <FichaUnidad unidad={unidad} alCerrar={() => setSeleccionado(null)} alVerRecorrido={() => setViendoRecorrido(v => !v)} viendoRecorrido={viendoRecorrido} />
-        {viendoRecorrido && detalle.estado === 'cargando' && <p className="control-detail-note" role="status">Cargando recorrido…</p>}
-        {viendoRecorrido && detalle.estado === 'ok' && !unidad?.recorrido?.length && <p className="control-detail-note" role="status">No hay posiciones registradas para el recorrido de hoy.</p>}
+        {!viendoRecorrido && colaPuntos.length > 1 && <p className="control-detail-note ruta-cola-nota" role="status">Línea punteada: los últimos {COLA_MIN} min de camino. Pulsa «Ver recorrido» para el día completo.</p>}
+        {viendoRecorrido && <PanelRecorrido analisis={analisis} horas={horas} alCambiarHoras={setHoras} cargando={dia.estado === 'cargando'} truncado={dia.datos?.truncado} alEnfocar={(p) => setFoco({ ...p, clave: Date.now() })} />}
+        {viendoRecorrido && dia.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={dia.recargar}>Reintentar</button></p>}
         {detalle.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={detalle.recargar}>Reintentar</button></p>}
       </aside>}
       {estadosVisibles.length > 0 && <div className="fleet-map-legend" aria-label="Estados de los vehículos">{estadosVisibles.map(e => <span className={e.color} key={e.clave}><i />{e.texto}</span>)}</div>}

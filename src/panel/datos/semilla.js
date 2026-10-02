@@ -450,6 +450,63 @@ export function recorridoDe(vehiculoId, puntos = 26) {
   return salida
 }
 
+/**
+ * Un día de trabajo simulado con puntos CRUDOS (uno por minuto al rodar, uno cada dos al
+ * estar parada, con la deriva de ~10 m de un GPS quieto): sale de un punto de partida,
+ * hace dos paradas largas y termina en la posición actual de la unidad. Si la unidad
+ * figura detenida, el día termina con una tercera parada, todavía en curso.
+ */
+export function recorridoDetalladoDe(vehiculoId, horas = 24) {
+  const v = vehPorId[vehiculoId]
+  if (!v) return { puntos: [], truncado: false }
+  const r = rng(vehiculoId.split('').reduce((a, c) => a + c.charCodeAt(0) * 31, 11))
+  const finEnMarcha = v.estadoMarcha === 'en_marcha'
+  const inicioLat = v.lat - 0.06
+  const inicioLng = v.lng - 0.055
+  // Sitios de las paradas, repartidos entre la salida y el destino.
+  const sitios = [0.34, 0.68].map((k) => ({
+    lat: inicioLat + (v.lat - inicioLat) * k + (r() - 0.5) * 0.006,
+    lng: inicioLng + (v.lng - inicioLng) * k + (r() - 0.5) * 0.006,
+  }))
+  const duraciones = [Math.round(14 + r() * 16), Math.round(22 + r() * 25)] // minutos parada
+  const rodar = [Math.round(18 + r() * 8), Math.round(16 + r() * 8), Math.round(12 + r() * 10)] // minutos de cada viaje
+  const puntos = []
+  const fin = AHORA
+  const total =
+    rodar.reduce((a, b) => a + b, 0) + duraciones.reduce((a, b) => a + b, 0) + (finEnMarcha ? 0 : 12)
+  let t = fin - total * 60000
+  let lat = inicioLat
+  let lng = inicioLng
+  const empujar = (la, ln, vel) => puntos.push({ lat: la, lng: ln, velocidadKmh: vel, hora: new Date(t).toISOString() })
+
+  const viaje = (destino, minutos) => {
+    for (let m = 0; m < minutos; m++) {
+      const k = (m + 1) / minutos
+      const la = lat + (destino.lat - lat) * k + (r() - 0.5) * 0.0006
+      const ln = lng + (destino.lng - lng) * k + (r() - 0.5) * 0.0006
+      empujar(la, ln, Math.round(34 + r() * 52))
+      t += 60000
+    }
+    lat = destino.lat
+    lng = destino.lng
+  }
+  const parar = (minutos) => {
+    for (let m = 0; m <= minutos; m += 2) {
+      empujar(lat + (r() - 0.5) * 0.00018, lng + (r() - 0.5) * 0.00018, 0)
+      t += 120000
+    }
+  }
+  empujar(lat, lng, 0)
+  viaje(sitios[0], rodar[0])
+  parar(duraciones[0])
+  viaje(sitios[1], rodar[1])
+  parar(duraciones[1])
+  viaje({ lat: v.lat, lng: v.lng }, rodar[2])
+  if (!finEnMarcha) parar(12)
+  const desde = AHORA - horas * 3600000
+  return { puntos: puntos.filter((p) => Date.parse(p.hora) >= desde), truncado: false }
+}
+
 // --- Costos por categoría (mismas 9 categorías del costService) ------------
 export const CATEGORIAS_COSTO = [
   { clave: 'combustible', nombre: 'Combustible', clase: 'producto' },

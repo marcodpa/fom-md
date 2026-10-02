@@ -199,6 +199,8 @@ const repo = HAY_API
         ...repoApi.vehiculosEscritura,
       },
       recorrido: repoApi.recorrido,
+      recorridoDetallado: repoApi.recorridoDetallado,
+      colaReciente: repoApi.colaReciente,
       resumen: repoApi.resumen,
 
       // Áreas y conductores pasan a ser reales: los sirve `/api/v1/console`

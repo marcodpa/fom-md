@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 import { vehicleMarkerUrl, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
+import * as f from '../datos/formato'
+import { puntoEnRuta } from '../datos/recorrido'
 
 // ============================================================
 // MAPA REAL DE GOOGLE MAPS
@@ -69,6 +71,10 @@ export default function MapaGoogle({
   ficha = true,
   leyenda = true,
   recorrido = null,
+  viajes = null,
+  paradas = null,
+  cola = null,
+  foco = null,
   espacioFicha = false,
   alVerRecorrido,
   alto = 'clamp(320px, 52vh, 560px)',
@@ -77,6 +83,8 @@ export default function MapaGoogle({
   const mapa = useRef(null)
   const marcadores = useRef(new Map())
   const linea = useRef(null)
+  const capasRuta = useRef([])
+  const colaFirma = useRef(null)
   const [estado, setEstado] = useState('cargando') // cargando | listo | error
 
   // Colores vivos del tema, para que los marcadores sigan el esquema
@@ -198,6 +206,71 @@ export default function MapaGoogle({
       strokeWeight: 4,
     })
   }, [recorrido, estado, tokens])
+
+  // Recorrido con viajes (inicio y fin), paradas y hora de cada punto
+  useEffect(() => {
+    if (estado !== 'listo' || !window.google?.maps) return undefined
+    const g = window.google.maps
+    const limpiar = () => { capasRuta.current.forEach((c) => c.setMap(null)); capasRuta.current = [] }
+    limpiar()
+    if (!viajes?.length && !paradas?.length) return undefined
+    const info = new g.InfoWindow()
+    const etiqueta = (letra, fondo, texto) => ({
+      label: { text: letra, color: '#06101a', fontWeight: '700', fontSize: '13px' },
+      icon: { path: g.SymbolPath.CIRCLE, scale: 13, fillColor: fondo, fillOpacity: 1, strokeColor: '#071019', strokeWeight: 3 },
+      title: texto,
+    })
+    const limites = new g.LatLngBounds()
+    for (const v of viajes ?? []) {
+      const trazo = v.puntos.map((p) => ({ lat: p.lat, lng: p.lng }))
+      trazo.forEach((p) => limites.extend(p))
+      const linea = new g.Polyline({ map: mapa.current, path: trazo, strokeColor: tokens.primario, strokeOpacity: 0.95, strokeWeight: 5 })
+      linea.addListener('click', (e) => {
+        const p = puntoEnRuta(v.puntos, { lat: e.latLng.lat(), lng: e.latLng.lng() })
+        info.setContent(`<strong>${f.hora(p.hora)}</strong><br>${f.fechaCorta(p.hora)}${p.velocidadKmh == null ? '' : `<br>${f.velocidad(p.velocidadKmh)}`}<br>Viaje ${v.numero}`)
+        info.setPosition({ lat: p.lat, lng: p.lng })
+        info.open(mapa.current)
+      })
+      capasRuta.current.push(linea)
+      const cerca = (l) => (paradas ?? []).some((x) => Math.abs(x.lat - l.lat) < 0.0014 && Math.abs(x.lng - l.lng) < 0.0014)
+      if (!cerca(v.inicio)) capasRuta.current.push(new g.Marker({ map: mapa.current, position: v.inicio, ...etiqueta('A', '#34d399', `Inicio ${f.hora(v.inicio.hora)}`) }))
+      if (!v.fin.enCurso && !cerca(v.fin)) capasRuta.current.push(new g.Marker({ map: mapa.current, position: v.fin, ...etiqueta('B', '#f87171', `Fin ${f.hora(v.fin.hora)}`) }))
+    }
+    for (const p of paradas ?? []) {
+      limites.extend({ lat: p.lat, lng: p.lng })
+      const m = new g.Marker({ map: mapa.current, position: { lat: p.lat, lng: p.lng }, ...etiqueta('P', '#fbbf24', `Estacionada ${f.duracion(p.minutos)}`) })
+      m.addListener('click', () => {
+        info.setContent(`<strong>Estacionada ${f.duracion(p.minutos)}</strong><br>Llegó ${f.hora(p.desde)} · Salió ${f.hora(p.hasta)}`)
+        info.open(mapa.current, m)
+      })
+      capasRuta.current.push(m)
+    }
+    if (!limites.isEmpty()) mapa.current.fitBounds(limites, { top: 110, left: 440, right: 40, bottom: 60 })
+    return () => { limpiar(); info.close() }
+  }, [viajes, paradas, estado, tokens])
+
+  // Cola: los últimos minutos de camino de la unidad elegida
+  useEffect(() => {
+    if (estado !== 'listo' || !window.google?.maps) return undefined
+    const g = window.google.maps
+    if (!cola || cola.length < 2) return undefined
+    const util = cola.filter(validPosition).map((p) => ({ lat: p.lat, lng: p.lng }))
+    const trazo = new g.Polyline({
+      map: mapa.current, path: util, strokeOpacity: 0,
+      icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, strokeColor: tokens.primario, scale: 3 }, offset: '0', repeat: '12px' }],
+    })
+    if (colaFirma.current !== seleccionado && util.length > 1) {
+      colaFirma.current = seleccionado
+      const l = new g.LatLngBounds()
+      util.forEach((p) => l.extend(p))
+      mapa.current.fitBounds(l, { top: 110, left: 440, right: 60, bottom: 80 })
+    }
+    return () => trazo.setMap(null)
+  }, [cola, estado, tokens, seleccionado])
+
+  useEffect(() => {
+    if (estado === 'listo' && foco && mapa.current) { mapa.current.panTo({ lat: foco.lat, lng: foco.lng }); mapa.current.setZoom(Math.max(mapa.current.getZoom() ?? 0, 16)) }
+  }, [foco, estado])
 
   const activo = seleccionado
   const vehiculoActivo = vehiculos.find((v) => v.id === activo)

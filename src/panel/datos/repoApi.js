@@ -256,6 +256,20 @@ function sinDeriva(acum, p, i, todos) {
   return acum
 }
 
+/** Filas de posiciones del servidor (más nuevas primero) → puntos válidos, del más antiguo al más nuevo. */
+function puntosDe(filas) {
+  return filas
+    .filter((p) => p.positionValid && p.latitude != null && p.longitude != null)
+    .map((p) => ({
+      lat: p.latitude,
+      lng: p.longitude,
+      velocidadKmh: p.telemetry?.speedKph ?? null,
+      rumbo: p.telemetry?.headingDeg ?? null,
+      hora: p.eventTime || p.receivedAt,
+    }))
+    .reverse()
+}
+
 export const repoApi = {
   admin: {
     usuarios: {
@@ -470,6 +484,27 @@ export const repoApi = {
     } catch (error) {
         throw error
       }
+  },
+
+  /**
+   * Posiciones CRUDAS de las últimas `horas`, del más antiguo al más reciente. Sin el filtro
+   * de deriva: para saber cuánto tiempo estuvo estacionada la unidad hacen falta justo los
+   * puntos que ese filtro borra. `truncado` avisa de que el servidor cortó en el límite y
+   * faltan los puntos más viejos del rango.
+   */
+  async recorridoDetallado(vehiculoId, { horas = 24, limite = 1000 } = {}) {
+    if (!vehiculoId) return { puntos: [], truncado: false }
+    const desde = new Date(Date.now() - horas * 3600000).toISOString()
+    const r = await api.recorrido(vehiculoId, limite, desde)
+    const filas = r?.positions ?? []
+    return { puntos: puntosDe(filas), truncado: filas.length >= limite }
+  },
+
+  /** Las últimas posiciones de la unidad, para dibujar de dónde viene sin pedir el día entero. */
+  async colaReciente(vehiculoId, limite = 60) {
+    if (!vehiculoId) return []
+    const r = await api.recorrido(vehiculoId, limite)
+    return puntosDe(r?.positions ?? [])
   },
 
   /** Áreas reales. Ya no se devuelve una lista vacía. */
