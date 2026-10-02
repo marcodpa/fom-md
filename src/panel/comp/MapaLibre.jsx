@@ -138,6 +138,8 @@ export default function MapaLibre({
   const paradasRef = useRef(paradas)
   viajesRef.current = viajes
   paradasRef.current = paradas
+  const vehiculosRef = useRef(vehiculos)
+  vehiculosRef.current = vehiculos
   const rutaCapa = useRef(null)
   const resaltarRef = useRef(null)
   const viajeActivoRef = useRef(viajeActivo)
@@ -301,7 +303,18 @@ export default function MapaLibre({
     }
   }, [vehiculos, seleccionado, alSeleccionar, esquema])
 
-  // La vista NO se mueve sola: ni al elegir una unidad ni al refrescar. Solo la mueve quien la usa.
+  // Al ELEGIR una unidad se centra en ella (una sola vez, sin tocar el zoom). Los refrescos de la flota
+  // no mueven nada: la vista solo la mueve quien la usa.
+  useEffect(() => {
+    if (!mapa.current || !seleccionado) return
+    const v = vehiculosRef.current.find((x) => x.id === seleccionado)
+    if (!validPosition(v)) return
+    const size = mapa.current.getSize()
+    const punto = mapa.current.project([v.lat, v.lng])
+    const offset = (ficha || espacioFicha) ? (size.x > 600 ? L.point(-175, 0) : L.point(0, size.y * .18)) : L.point(0, 0)
+    mapa.current.panTo(mapa.current.unproject(punto.add(offset)), { animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seleccionado])
 
   // Recorrido con viajes (inicio y fin), paradas y hora de cada punto
   useEffect(() => {

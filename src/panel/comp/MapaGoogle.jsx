@@ -83,6 +83,8 @@ export default function MapaGoogle({
   const mapa = useRef(null)
   const marcadores = useRef(new Map())
   const linea = useRef(null)
+  const vehiculosRef = useRef(vehiculos)
+  vehiculosRef.current = vehiculos
   const capasRuta = useRef([])
   const [estado, setEstado] = useState('cargando') // cargando | listo | error
 
@@ -179,7 +181,15 @@ export default function MapaGoogle({
     }
   }, [vehiculos, seleccionado, estado, tokens, alSeleccionar])
 
-  // La vista NO se mueve sola: ni al elegir una unidad ni al refrescar. Solo la mueve quien la usa.
+  // Al ELEGIR una unidad se centra en ella (una sola vez, sin tocar el zoom). Los refrescos no mueven nada.
+  useEffect(() => {
+    if (estado !== 'listo' || !seleccionado || !mapa.current) return
+    const v = vehiculosRef.current.find((x) => x.id === seleccionado)
+    if (!validPosition(v)) return
+    mapa.current.panTo({ lat: v.lat, lng: v.lng })
+    if (ficha || espacioFicha) mapa.current.panBy(contenedor.current.clientWidth > 600 ? -175 : 0, contenedor.current.clientWidth > 600 ? 0 : contenedor.current.clientHeight * .18)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seleccionado, estado])
 
   // Trazado del recorrido del día
   useEffect(() => {
