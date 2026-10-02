@@ -59,6 +59,20 @@
         "5191"
       ],
       "port": 5191
+    },
+    {
+      "name": "fom-web-test",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--mode",
+        "test",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5175"
+      ],
+      "port": 5175
     }
   ]
 }
