@@ -265,6 +265,7 @@ function puntosDe(filas) {
       lng: p.longitude,
       velocidadKmh: p.telemetry?.speedKph ?? null,
       rumbo: p.telemetry?.headingDeg ?? null,
+      ignition: p.telemetry?.ignition ?? null,
       hora: p.eventTime || p.receivedAt,
     }))
     .reverse()

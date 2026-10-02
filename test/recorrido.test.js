@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { analizar, detectarParadas, distanciaM, puntoEnRuta, ultimosMinutos } from '../src/panel/datos/recorrido.js'
+import { analizar, colaReciente, compactarQuietud, detectarParadas, distanciaM, puntoEnRuta, ultimosMinutos } from '../src/panel/datos/recorrido.js'
 
 // Un punto cada minuto a partir de las 08:00; ~111 m por cada 0,001° de latitud.
 const T0 = Date.parse('2026-10-02T08:00:00Z')
@@ -89,4 +89,70 @@ test('el punto más cercano de la ruta da la hora de ese tramo', () => {
 test('los puntos se ordenan aunque lleguen del más nuevo al más viejo', () => {
   const al_reves = jornada().reverse()
   assert.equal(analizar(al_reves).viajes.length, 2)
+})
+
+test('cola: si en 5 minutos se movió, son esos 5 minutos', () => {
+  const puntos = []
+  for (let m = 0; m <= 20; m++) puntos.push(pt(m, 10 + m * 0.002))
+  const c = colaReciente(puntos)
+  assert.equal(c.ampliada, false)
+  assert.equal(c.puntos.length, 6)
+})
+
+test('cola: una unidad detenida muestra su último trayecto, no una línea invisible', () => {
+  // rueda 10 min y lleva 20 parada (deriva de ~11 m)
+  const puntos = []
+  for (let m = 0; m <= 10; m++) puntos.push(pt(m, 10 + m * 0.002))
+  for (let m = 11; m <= 30; m++) puntos.push(pt(m, 10.02 + (m % 2) * 0.0001))
+  const c = colaReciente(puntos)
+  assert.equal(c.ampliada, true)
+  assert.ok(c.puntos.length >= 2)
+  // llega hasta el último punto y llega a cubrir camino real
+  assert.equal(c.puntos.at(-1).hora, puntos.at(-1).hora)
+  assert.ok(distanciaM(c.puntos[0], c.puntos.at(-1)) >= 100)
+})
+
+test('cola: sin movimiento alguno en la última hora no hay nada que dibujar', () => {
+  const puntos = []
+  for (let m = 0; m <= 90; m++) puntos.push(pt(m, 10 + (m % 2) * 0.0001))
+  assert.deepEqual(colaReciente(puntos), { puntos: [], ampliada: false })
+})
+
+// Deriva realista: un GPS parado baila ~50-60 m alrededor del sitio, con velocidad 0-6 km/h.
+function ruido(min, lat, lng) {
+  const a = (min * 2.399) % (2 * Math.PI)
+  const r = 0.0003 + ((min * 7) % 5) * 0.00005 // 33-55 m
+  return { lat: lat + Math.sin(a) * r, lng: lng + Math.cos(a) * r, hora: new Date(T0 + min * 60000).toISOString(), velocidadKmh: (min * 3) % 7 }
+}
+
+test('deriva: una nube de puntos de un GPS parado se colapsa a un solo punto', () => {
+  const nube = []
+  for (let m = 0; m < 11; m++) nube.push(ruido(m, 10.1, -71.4))
+  assert.equal(compactarQuietud(nube).length, 1)
+})
+
+test('deriva: un carro parado 11 min no se dibuja como una nube en la cola', () => {
+  const puntos = []
+  for (let m = 0; m <= 10; m++) puntos.push(pt(m, 10 + m * 0.002))
+  for (let m = 11; m <= 22; m++) puntos.push(ruido(m, 10.02, -71.4))
+  const c = colaReciente(puntos)
+  // el recorrido anterior y UN punto de la parada, no los doce puntos de ruido
+  assert.ok(c.puntos.length <= 8, String(c.puntos.length))
+  assert.ok(c.puntos.length >= 2)
+})
+
+test('deriva: una parada con ruido de ~55 m sigue siendo UNA parada de 12 min', () => {
+  const puntos = []
+  for (let m = 0; m <= 10; m++) puntos.push(pt(m, 10 + m * 0.002))
+  for (let m = 11; m <= 23; m++) puntos.push(ruido(m, 10.02, -71.4))
+  for (let m = 24; m <= 34; m++) puntos.push(pt(m, 10.02 + (m - 23) * 0.002))
+  const { paradas } = analizar(puntos)
+  assert.equal(paradas.length, 1)
+  assert.ok(paradas[0].minutos >= 11)
+})
+
+test('deriva: lo que se mueve de verdad no se colapsa', () => {
+  const rodando = []
+  for (let m = 0; m <= 10; m++) rodando.push({ ...pt(m, 10 + m * 0.002), velocidadKmh: 45 })
+  assert.equal(compactarQuietud(rodando).length, 11)
 })

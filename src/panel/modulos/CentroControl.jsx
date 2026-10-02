@@ -7,7 +7,7 @@ import {
 import Mapa from '../comp/Mapa'
 import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
 import PanelRecorrido from '../comp/PanelRecorrido'
-import { analizar, COLA_MIN, ultimosMinutos } from '../datos/recorrido'
+import { analizar, COLA_MIN, colaReciente } from '../datos/recorrido'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import '../../styles/control-map.css'
@@ -70,7 +70,8 @@ export default function CentroControl() {
     [seleccionado],
     15000
   )
-  const colaPuntos = useEstable(useMemo(() => ultimosMinutos(cola.datos ?? [], COLA_MIN), [cola.datos]), firmaPuntos)
+  const colaInfo = useEstable(useMemo(() => colaReciente(cola.datos ?? []), [cola.datos]), (c) => `${firmaPuntos(c.puntos)}|${c.ampliada}`)
+  const colaPuntos = colaInfo?.puntos ?? []
   // Al pedir el recorrido: el rango completo, con viajes, paradas y la hora de cada punto.
   const dia = useDatos(
     () => (seleccionado && viendoRecorrido ? repo.recorridoDetallado(seleccionado, { horas }) : Promise.resolve(null)),
@@ -153,7 +154,7 @@ export default function CentroControl() {
       </aside>}
       {seleccionado && <aside className={`control-panel control-unit${viendoRecorrido ? ' con-ruta' : ''}`} aria-label="Detalle de la unidad">
         <FichaUnidad unidad={unidad} alCerrar={() => setSeleccionado(null)} alVerRecorrido={() => setViendoRecorrido(v => !v)} viendoRecorrido={viendoRecorrido} />
-        {!viendoRecorrido && colaPuntos.length > 1 && <p className="control-detail-note ruta-cola-nota" role="status">Línea punteada: los últimos {COLA_MIN} min de camino. Pulsa «Ver recorrido» para el día completo.</p>}
+        {!viendoRecorrido && colaPuntos.length > 1 && <p className="control-detail-note ruta-cola-nota" role="status">{colaInfo?.ampliada ? 'Línea punteada: su último trayecto (ahora está detenida).' : `Línea punteada: los últimos ${COLA_MIN} min de camino.`} Pulsa «Ver recorrido» para el día completo.</p>}
         {viendoRecorrido && <PanelRecorrido analisis={analisis} horas={horas} alCambiarHoras={setHoras} cargando={dia.estado === 'cargando'} truncado={dia.datos?.truncado} alEnfocar={(p) => setFoco({ ...p, clave: Date.now() })} />}
         {viendoRecorrido && dia.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={dia.recargar}>Reintentar</button></p>}
         {detalle.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={detalle.recargar}>Reintentar</button></p>}

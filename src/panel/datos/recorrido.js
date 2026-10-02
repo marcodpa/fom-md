@@ -8,8 +8,9 @@
 
 /** Una unidad que se queda en el mismo sitio al menos esto (minutos) está estacionada. */
 export const MIN_PARADA_MIN = 5
-/** «El mismo sitio»: radio, en metros, alrededor del punto donde empezó la parada. */
-export const RADIO_PARADA_M = 60
+/** «El mismo sitio»: radio, en metros, alrededor del centro de los puntos de la parada. Un GPS parado
+ * baila decenas de metros alrededor de su sitio real; con menos radio una parada se rompe en pedazos. */
+export const RADIO_PARADA_M = 100
 /** Un viaje más corto que esto (metros) es ruido del GPS, no un viaje. */
 const MIN_VIAJE_M = 150
 /** Ventana de la cola que se muestra sin pedir el recorrido completo. */
@@ -42,6 +43,57 @@ function largo(puntos) {
 }
 
 /**
+ * Último índice del grupo que empieza en `i`: los puntos seguidos que no se alejan más de `radioM`
+ * del CENTRO del grupo (se recalcula al sumar cada punto) y cumplen `admite`.
+ */
+function barrido(p, i, radioM, admite = () => true) {
+  let sLat = p[i].lat
+  let sLng = p[i].lng
+  let n = 1
+  let j = i
+  while (j + 1 < p.length && admite(p[j + 1])) {
+    if (distanciaM({ lat: sLat / n, lng: sLng / n }, p[j + 1]) > radioM) break
+    j++
+    sLat += p[j].lat
+    sLng += p[j].lng
+    n++
+  }
+  return j
+}
+
+/**
+ * Colapsa a UN punto cada racha de puntos quietos (sin velocidad, a ≤ `velMax` km/h o con el motor
+ * apagado) que bailan dentro de `radioM`. Es la deriva de un GPS parado: sin esto, una unidad
+ * detenida se dibuja como una nube de puntos y parece que anduvo.
+ */
+export function compactarQuietud(puntos, { radioM = RADIO_PARADA_M, velMax = 8 } = {}) {
+  const p = validos(puntos)
+  const quieto = (x) => x.ignition === false || x.velocidadKmh == null || x.velocidadKmh <= velMax
+  const salida = []
+  let i = 0
+  while (i < p.length) {
+    if (!quieto(p[i])) {
+      salida.push(p[i++])
+      continue
+    }
+    const j = barrido(p, i, radioM, quieto)
+    if (j > i) {
+      const grupo = p.slice(i, j + 1)
+      salida.push({
+        ...p[j],
+        lat: grupo.reduce((s, x) => s + x.lat, 0) / grupo.length,
+        lng: grupo.reduce((s, x) => s + x.lng, 0) / grupo.length,
+        velocidadKmh: 0,
+      })
+    } else {
+      salida.push(p[i])
+    }
+    i = j + 1
+  }
+  return salida
+}
+
+/**
  * Busca los tramos en que la unidad no salió de un radio de `radioM` durante al menos
  * `minParadaMin` minutos. Devuelve cada parada con su sitio (centro de los puntos),
  * cuándo empezó y terminó, cuánto duró, y los índices de los puntos que abarca.
@@ -51,8 +103,7 @@ export function detectarParadas(puntos, { minParadaMin = MIN_PARADA_MIN, radioM 
   const paradas = []
   let i = 0
   while (i < p.length) {
-    let j = i
-    while (j + 1 < p.length && distanciaM(p[i], p[j + 1]) <= radioM) j++
+    const j = barrido(p, i, radioM)
     if (j > i && minutosEntre(p[i], p[j]) >= minParadaMin) {
       const tramo = p.slice(i, j + 1)
       const lat = tramo.reduce((s, x) => s + x.lat, 0) / tramo.length
@@ -98,7 +149,7 @@ export function analizar(puntos, opciones) {
     const ultimo = tramo.at(-1)
     viajes.push({
       numero: viajes.length + 1,
-      puntos: tramo,
+      puntos: compactarQuietud(tramo),
       distanciaM: distancia,
       minutos: minutosEntre(tramo[0], ultimo),
       inicio: { lat: tramo[0].lat, lng: tramo[0].lng, hora: tramo[0].hora },
@@ -116,6 +167,28 @@ export function ultimosMinutos(puntos, min = COLA_MIN) {
   const cola = p.filter((x) => tiempo(x) >= corte)
   // Con un solo punto no hay línea que dibujar; se suma el anterior si lo hay.
   return cola.length < 2 && p.length >= 2 ? p.slice(-2) : cola
+}
+
+/**
+ * La cola que se dibuja al elegir una unidad: sus últimos `min` minutos. Si en ese lapso casi no se
+ * movió (estacionada, o reportando desde el mismo sitio), cinco minutos no enseñan de dónde viene:
+ * se amplía hacia atrás hasta su último trayecto, `minM` metros de camino o `maxMin` minutos.
+ * `ampliada` avisa de que la línea cubre más de `min` minutos.
+ */
+export function colaReciente(puntos, { min = COLA_MIN, minM = 120, maxMin = 60 } = {}) {
+  const p = compactarQuietud(puntos)
+  if (p.length < 2) return { puntos: [], ampliada: false }
+  const fin = tiempo(p.at(-1))
+  const base = p.filter((x) => tiempo(x) >= fin - min * 60000)
+  // Se mide cuánto SE ALEJÓ del punto actual, no el camino recorrido: la deriva de un GPS parado
+  // suma metros de zigzag sin ir a ninguna parte.
+  const lejos = (tramo) => tramo.reduce((m, x) => Math.max(m, distanciaM(x, p.at(-1))), 0)
+  if (base.length >= 2 && lejos(base) >= minM) return { puntos: base, ampliada: false }
+  let i = p.length - 1
+  while (i > 0 && lejos(p.slice(i)) < minM && fin - tiempo(p[i - 1]) <= maxMin * 60000) i--
+  const amplia = p.slice(i)
+  if (amplia.length < 2 || lejos(amplia) < 20) return { puntos: [], ampliada: false }
+  return { puntos: amplia, ampliada: true }
 }
 
 /** El punto del trazado más cercano a un lugar (donde se hizo clic). */

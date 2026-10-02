@@ -83,10 +83,7 @@ export default function MapaGoogle({
   const mapa = useRef(null)
   const marcadores = useRef(new Map())
   const linea = useRef(null)
-  const vehiculosRef = useRef(vehiculos)
-  vehiculosRef.current = vehiculos
   const capasRuta = useRef([])
-  const colaFirma = useRef(null)
   const [estado, setEstado] = useState('cargando') // cargando | listo | error
 
   // Colores vivos del tema, para que los marcadores sigan el esquema
@@ -182,16 +179,7 @@ export default function MapaGoogle({
     }
   }, [vehiculos, seleccionado, estado, tokens, alSeleccionar])
 
-  // Centrar en la unidad seleccionada
-  useEffect(() => {
-    if (estado !== 'listo' || !seleccionado || !mapa.current) return
-    // Solo al elegir la unidad: mover la vista en cada refresco le quita el mapa a quien lo mira.
-    const v = vehiculosRef.current.find((x) => x.id === seleccionado)
-    if (validPosition(v)) {
-      mapa.current.panTo({ lat: v.lat, lng: v.lng })
-      if (ficha || espacioFicha) mapa.current.panBy(contenedor.current.clientWidth > 600 ? -175 : 0, contenedor.current.clientWidth > 600 ? 0 : contenedor.current.clientHeight * .18)
-    }
-  }, [seleccionado, estado, ficha, espacioFicha])
+  // La vista NO se mueve sola: ni al elegir una unidad ni al refrescar. Solo la mueve quien la usa.
 
   // Trazado del recorrido del día
   useEffect(() => {
@@ -248,7 +236,6 @@ export default function MapaGoogle({
       })
       capasRuta.current.push(m)
     }
-    if (!limites.isEmpty()) mapa.current.fitBounds(limites, { top: 110, left: 440, right: 40, bottom: 60 })
     return () => { limpiar(); info.close() }
   }, [viajes, paradas, estado, tokens])
 
@@ -256,19 +243,12 @@ export default function MapaGoogle({
   useEffect(() => {
     if (estado !== 'listo' || !window.google?.maps) return undefined
     const g = window.google.maps
-    if (!seleccionado) colaFirma.current = null
     if (!cola || cola.length < 2) return undefined
     const util = cola.filter(validPosition).map((p) => ({ lat: p.lat, lng: p.lng }))
     const trazo = new g.Polyline({
       map: mapa.current, path: util, strokeOpacity: 0,
       icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, strokeColor: tokens.primario, scale: 3 }, offset: '0', repeat: '12px' }],
     })
-    if (colaFirma.current !== seleccionado && util.length > 1) {
-      colaFirma.current = seleccionado
-      const l = new g.LatLngBounds()
-      util.forEach((p) => l.extend(p))
-      mapa.current.fitBounds(l, { top: 110, left: 440, right: 60, bottom: 80 })
-    }
     return () => trazo.setMap(null)
   }, [cola, estado, tokens, seleccionado])
 

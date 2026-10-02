@@ -122,16 +122,12 @@ export default function MapaLibre({
   // posiciones seguidas no se peleen por mover el mismo marcador.
   const animaciones = useRef(new Map())
   const linea = useRef(null)
-  const vehiculosRef = useRef(vehiculos)
   const viajesRef = useRef(viajes)
   const paradasRef = useRef(paradas)
   viajesRef.current = viajes
   paradasRef.current = paradas
-  vehiculosRef.current = vehiculos
   const rutaCapa = useRef(null)
   const colaCapa = useRef(null)
-  const rutaFirma = useRef('')
-  const colaFirma = useRef(null)
   const encuadrado = useRef(false)
   const [fallaTeselas, setFallaTeselas] = useState(false)
 
@@ -147,6 +143,18 @@ export default function MapaLibre({
       attributionControl: true,
     })
     L.control.zoom({ position: 'bottomright' }).addTo(mapa.current)
+    // Los carros se achican al alejar el mapa y, muy lejos, se apagan las etiquetas: a escala de región
+    // un carro de tamaño completo tapa a los vecinos y al propio mapa.
+    const raiz = contenedor.current.parentElement
+    const mapaVivo = mapa.current
+    const ajustarMarcadores = () => {
+      const z = mapaVivo.getZoom()
+      const k = z >= 15 ? 1 : z >= 14 ? 0.85 : z >= 13 ? 0.7 : z >= 12 ? 0.58 : 0.46
+      raiz.style.setProperty('--marcador-k', String(k))
+      raiz.dataset.zoom = z <= 12 ? 'lejos' : 'cerca'
+    }
+    mapaVivo.on('zoomend', ajustarMarcadores)
+    ajustarMarcadores()
     const animacionesActivas = animaciones.current
     return () => {
       animacionesActivas.forEach((cancelar) => cancelar())
@@ -253,38 +261,7 @@ export default function MapaLibre({
     }
   }, [vehiculos, seleccionado, alSeleccionar, esquema])
 
-  // Centrar en la unidad seleccionada
-  useEffect(() => {
-    if (!mapa.current || !seleccionado) return
-    // Se centra al ELEGIR la unidad, no en cada refresco de la flota: cada 15 s llegan posiciones
-    // nuevas y mover la vista cada vez le quita el mapa a quien lo está mirando.
-    const centrar = () => {
-      const v = vehiculosRef.current.find((x) => x.id === seleccionado)
-      if (!validPosition(v) || !mapa.current) return
-      const size = mapa.current.getSize()
-      const punto = mapa.current.project([v.lat, v.lng])
-      const offset = (ficha || espacioFicha) ? (size.x > 600 ? L.point(-175, 0) : L.point(0, size.y * .18)) : L.point(0, 0)
-      mapa.current.panTo(mapa.current.unproject(punto.add(offset)), { animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches })
-    }
-    centrar()
-    const m = mapa.current
-    m.on('resize', centrar)
-    return () => m.off('resize', centrar)
-  }, [seleccionado, ficha, espacioFicha])
-
-  // Recorrido del día
-  useEffect(() => {
-    if (!mapa.current) return
-    if (linea.current) {
-      linea.current.remove()
-      linea.current = null
-    }
-    if (!recorrido?.length) return
-    linea.current = L.polyline(
-      recorrido.filter(validPosition).map((p) => [p.lat, p.lng]),
-      { color: leerTokens().primario, weight: 4, opacity: 0.9 }
-    ).addTo(mapa.current)
-  }, [recorrido, esquema])
+  // La vista NO se mueve sola: ni al elegir una unidad ni al refrescar. Solo la mueve quien la usa.
 
   // Recorrido con viajes (inicio y fin), paradas y hora de cada punto
   useEffect(() => {
@@ -292,15 +269,8 @@ export default function MapaLibre({
     rutaCapa.current?.remove()
     rutaCapa.current = null
     if (!viajes?.length && !paradas?.length) return undefined
-    const { grupo, limites } = pintarRuta(L, mapa.current, { viajes: viajes ?? [], paradas: paradas ?? [], color: leerTokens().primario })
+    const { grupo } = pintarRuta(L, mapa.current, { viajes: viajes ?? [], paradas: paradas ?? [], color: leerTokens().primario })
     rutaCapa.current = grupo
-    // Encuadra el recorrido una vez por unidad y rango, no en cada refresco.
-    const firma = `${seleccionado}|${viajes?.[0]?.inicio?.hora}|${viajes?.length}|${paradas?.length}`
-    if (limites.length > 1 && firma !== rutaFirma.current) {
-      rutaFirma.current = firma
-      const ancho = mapa.current.getSize().x
-      mapa.current.fitBounds(L.latLngBounds(limites), { paddingTopLeft: [ancho > 600 ? 440 : 30, 110], paddingBottomRight: [40, 60], maxZoom: 16 })
-    }
     return () => {
       grupo.remove()
     }
@@ -311,17 +281,10 @@ export default function MapaLibre({
     if (!mapa.current) return undefined
     colaCapa.current?.remove()
     colaCapa.current = null
-    if (!seleccionado) colaFirma.current = null
     if (!cola || cola.length < 2) return undefined
     const util = cola.filter(validPosition)
     const grupo = pintarCola(L, mapa.current, util, leerTokens().primario)
     colaCapa.current = grupo
-    // Al elegir una unidad, la vista abarca de dónde viene y dónde está: una vez por unidad.
-    if (colaFirma.current !== seleccionado && util.length > 1) {
-      colaFirma.current = seleccionado
-      const ancho = mapa.current.getSize().x
-      mapa.current.fitBounds(L.latLngBounds(util.map((p) => [p.lat, p.lng])), { paddingTopLeft: [ancho > 600 ? 440 : 30, 110], paddingBottomRight: [60, 80], maxZoom: 15, animate: true })
-    }
     return () => {
       grupo.remove()
     }

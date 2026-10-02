@@ -49,7 +49,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
       if (!p) return
       popupAbierto = true
       sonda.remove()
-      L.popup({ className: 'ruta-popup', closeButton: true, offset: [0, -4] })
+      L.popup({ className: 'ruta-popup', closeButton: true, offset: [0, -4], autoPan: false })
         .setLatLng([p.lat, p.lng])
         .setContent(
           `<strong>${esc(f.hora(p.hora))}</strong><span>${esc(f.fechaCorta(p.hora))}</span>` +
@@ -64,7 +64,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
         icon: icono(L, pin('inicio', 'A', `Inicio ${f.hora(viaje.inicio.hora)}`), 150),
         zIndexOffset: 400,
       })
-        .bindPopup(`<strong>Inicio del viaje ${viaje.numero}</strong><span>${esc(f.fechaHora(viaje.inicio.hora))}</span>`, { className: 'ruta-popup' })
+        .bindPopup(`<strong>Inicio del viaje ${viaje.numero}</strong><span>${esc(f.fechaHora(viaje.inicio.hora))}</span>`, { className: 'ruta-popup', autoPan: false })
         .addTo(grupo)
     }
 
@@ -76,7 +76,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
         .bindPopup(
           `<strong>Fin del viaje ${viaje.numero}</strong><span>${esc(f.fechaHora(viaje.fin.hora))}</span>` +
             `<span>${esc(f.duracion(viaje.minutos))} · ${esc((viaje.distanciaM / 1000).toFixed(1))} km</span>`,
-          { className: 'ruta-popup' },
+          { className: 'ruta-popup', autoPan: false },
         )
         .addTo(grupo)
     }
@@ -92,7 +92,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
         `<strong>Estacionada ${esc(f.duracion(parada.minutos))}</strong>` +
           `<span>${esc(f.hora(parada.desde))} → ${esc(f.hora(parada.hasta))}</span>` +
           `<span>${esc(f.fechaCorta(parada.desde))}</span>`,
-        { className: 'ruta-popup' },
+        { className: 'ruta-popup', autoPan: false },
       )
       .addTo(grupo)
   }
@@ -103,7 +103,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
 export function pintarCola(L, mapa, puntos, color = '#349bfa') {
   const grupo = L.layerGroup().addTo(mapa)
   const trazo = puntos.map((p) => [p.lat, p.lng])
-  L.polyline(trazo, { color, weight: 4, opacity: 0.6, dashArray: '2 9', lineCap: 'round' }).addTo(grupo)
+  L.polyline(trazo, { color, weight: 6, opacity: 0.9, dashArray: '1 11', lineCap: 'round' }).addTo(grupo)
   const primero = puntos[0]
   L.circleMarker(trazo[0], { radius: 5, color, weight: 2, fillColor: '#0b1824', fillOpacity: 1 })
     .bindTooltip(`Hace unos minutos · ${f.hora(primero.hora)}`, { direction: 'top', className: 'ruta-hora' })
