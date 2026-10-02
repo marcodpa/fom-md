@@ -207,6 +207,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    // MapLibre arranca su worker desde una URL relativa a su propio archivo; si Vite lo pre-empaqueta
+    // en dev, esa URL se rompe y el mapa vectorial queda en blanco.
+    optimizeDeps: { exclude: ['maplibre-gl'] },
     // 5173 por defecto; si el entorno impone un PORT (varias sesiones a la vez),
     // se respeta para no chocar con otro servidor ya levantado.
     server: {

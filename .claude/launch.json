@@ -73,6 +73,21 @@
         "5175"
       ],
       "port": 5175
+    },
+    {
+      "name": "fom-dist-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--mode",
+        "demo",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5193"
+      ],
+      "port": 5193
     }
   ]
 }

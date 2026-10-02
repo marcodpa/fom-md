@@ -40,6 +40,16 @@ const TESELAS = {
 }
 
 /**
+ * Mapa VECTORIAL opcional. Con `VITE_MAPA_ESTILO` (la URL de un estilo MapLibre/Mapbox GL, por ejemplo
+ * el de OpenFreeMap o el de MapTiler) las calles se dibujan en vectores, con más detalle y nitidez en
+ * cualquier zoom, en lugar de las teselas de imagen de OpenStreetMap. Es el mismo tipo de estilo que
+ * el catálogo de mapas del servidor (`/maps/*`) entrega a la app, para que web y app muestren un solo mapa.
+ * Sin esa variable todo sigue como antes.
+ */
+const ESTILO_VECTORIAL = import.meta.env?.VITE_MAPA_ESTILO || ''
+const ATRIBUCION_VECTORIAL = import.meta.env?.VITE_MAPA_ATRIBUCION || '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+
+/**
  * Lleva un marcador de su posición actual a la nueva deslizándose.
  *
  * Los equipos reportan cada uno a cinco minutos, así que sin esto el punto
@@ -183,6 +193,25 @@ export default function MapaLibre({
     if (capa.current) capa.current.remove()
     let fallos = 0
     let cargoAlguna = false
+    if (ESTILO_VECTORIAL) {
+      // Carga perezosa: el motor vectorial pesa y solo se baja si hay un estilo configurado.
+      let cancelado = false
+      // El worker se pide con `?worker&url`: Vite lo empaqueta con sus dependencias y la URL sirve igual
+      // en desarrollo que en producción (la ruta relativa que trae MapLibre se rompe al empaquetar).
+      Promise.all([import('maplibre-gl'), import('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'), import('@maplibre/maplibre-gl-leaflet'), import('maplibre-gl/dist/maplibre-gl.css')])
+        .then(([maplibregl, { default: urlWorker }, { maplibreGL }]) => {
+          maplibregl.setWorkerUrl(urlWorker)
+          if (cancelado || !mapa.current) return
+          capa.current = maplibreGL({ style: ESTILO_VECTORIAL, attribution: ATRIBUCION_VECTORIAL })
+          capa.current.addTo(mapa.current)
+        })
+        .catch(() => setFallaTeselas(true))
+      return () => {
+        cancelado = true
+        capa.current?.remove()
+        capa.current = null
+      }
+    }
     capa.current = L.tileLayer(t.url, {
       attribution: t.atribucion,
       maxZoom: t.maxZoom,
