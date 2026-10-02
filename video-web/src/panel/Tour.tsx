@@ -87,9 +87,12 @@ export const Tour: React.FC<TourCfg> = (cfg) => {
       <div style={{ position: 'absolute', left: 1540, top: WY, width: 320 }}>
         <div style={{ fontSize: 17, fontWeight: 600, letterSpacing: '0.12em', color: C.muted, marginBottom: 16, opacity: entra }}>EN ESTA PANTALLA</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {cfg.puntos.map((p, i) => (
-            <PuntoNota key={i} p={p} t={t} activo={i === ultimoActivo(cfg.puntos, t)} />
-          ))}
+          {cfg.puntos.map((p, i) => {
+            const act = ultimoActivo(cfg.puntos, t)
+            // Caben seis notas en la columna: las más viejas se van quitando para que entren las nuevas.
+            if (i < act - 5) return null
+            return <PuntoNota key={i} p={p} t={t} activo={i === act} />
+          })}
         </div>
       </div>
       <div style={{ position: 'absolute', left: 1540, bottom: 62, width: 320, fontSize: 15, color: '#7f93a8', lineHeight: 1.4 }}>Video real del panel de FOM con datos de demostración.</div>
