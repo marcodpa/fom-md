@@ -83,6 +83,8 @@ export default function MapaGoogle({
   const mapa = useRef(null)
   const marcadores = useRef(new Map())
   const linea = useRef(null)
+  const vehiculosRef = useRef(vehiculos)
+  vehiculosRef.current = vehiculos
   const capasRuta = useRef([])
   const colaFirma = useRef(null)
   const [estado, setEstado] = useState('cargando') // cargando | listo | error
@@ -183,12 +185,13 @@ export default function MapaGoogle({
   // Centrar en la unidad seleccionada
   useEffect(() => {
     if (estado !== 'listo' || !seleccionado || !mapa.current) return
-    const v = vehiculos.find((x) => x.id === seleccionado)
+    // Solo al elegir la unidad: mover la vista en cada refresco le quita el mapa a quien lo mira.
+    const v = vehiculosRef.current.find((x) => x.id === seleccionado)
     if (validPosition(v)) {
       mapa.current.panTo({ lat: v.lat, lng: v.lng })
       if (ficha || espacioFicha) mapa.current.panBy(contenedor.current.clientWidth > 600 ? -175 : 0, contenedor.current.clientWidth > 600 ? 0 : contenedor.current.clientHeight * .18)
     }
-  }, [seleccionado, vehiculos, estado, ficha, espacioFicha])
+  }, [seleccionado, estado, ficha, espacioFicha])
 
   // Trazado del recorrido del día
   useEffect(() => {
@@ -253,6 +256,7 @@ export default function MapaGoogle({
   useEffect(() => {
     if (estado !== 'listo' || !window.google?.maps) return undefined
     const g = window.google.maps
+    if (!seleccionado) colaFirma.current = null
     if (!cola || cola.length < 2) return undefined
     const util = cola.filter(validPosition).map((p) => ({ lat: p.lat, lng: p.lng }))
     const trazo = new g.Polyline({

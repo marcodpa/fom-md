@@ -110,6 +110,7 @@
 .leaflet-tooltip.ruta-hora::before{display:none}
 .leaflet-tooltip.ruta-hora b{font-size:14px}
 .leaflet-tooltip.ruta-hora small{display:block;color:#9fb4c9;font-size:11px}
+.leaflet-tooltip.ruta-hora{white-space:nowrap;pointer-events:none}
 .leaflet-popup.ruta-popup .leaflet-popup-content-wrapper{background:#0b1927;color:#f3f7fc;border:1px solid #349bfa;border-radius:12px}
 .leaflet-popup.ruta-popup .leaflet-popup-tip{background:#0b1927}
 .leaflet-popup.ruta-popup .leaflet-popup-content{margin:12px 14px;font:500 13px/1.45 system-ui,sans-serif}

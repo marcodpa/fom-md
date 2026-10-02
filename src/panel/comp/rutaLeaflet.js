@@ -15,7 +15,7 @@ function icono(L, html, ancho = 130) {
 /** El texto de un punto del trazado: la hora y, si se sabe, la velocidad. */
 function textoPunto(p, viaje) {
   const vel = p.velocidadKmh == null ? '' : ` · ${f.velocidad(p.velocidadKmh)}`
-  return `<b>${esc(f.hora(p.hora))}</b>${vel}<small>Viaje ${viaje.numero} · ${esc(f.fechaCorta(p.hora))}</small>`
+  return `<b>${esc(f.hora(p.hora))}</b>${vel}`
 }
 
 /**
@@ -41,7 +41,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
       if (!p || popupAbierto) return
       sonda.setLatLng([p.lat, p.lng])
       if (!mapa.hasLayer(sonda)) sonda.addTo(mapa)
-      sonda.unbindTooltip().bindTooltip(textoPunto(p, viaje), { permanent: true, direction: 'top', offset: [0, -10], className: 'ruta-hora' }).openTooltip()
+      sonda.unbindTooltip().bindTooltip(textoPunto(p, viaje), { permanent: true, direction: 'bottom', offset: [0, 12], className: 'ruta-hora' }).openTooltip()
     })
     zona.on('mouseout', () => sonda.remove())
     zona.on('click', (e) => {
@@ -85,7 +85,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
   for (const parada of paradas) {
     limites.push([parada.lat, parada.lng])
     L.marker([parada.lat, parada.lng], {
-      icon: icono(L, pin('parada', 'P', `Estacionada ${f.duracion(parada.minutos)}`, `Llegó ${f.hora(parada.desde)} · Salió ${f.hora(parada.hasta)}`), 210),
+      icon: icono(L, pin('parada', 'P', f.duracion(parada.minutos)), 100),
       zIndexOffset: 300,
     })
       .bindPopup(

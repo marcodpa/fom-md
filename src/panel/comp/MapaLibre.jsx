@@ -122,6 +122,12 @@ export default function MapaLibre({
   // posiciones seguidas no se peleen por mover el mismo marcador.
   const animaciones = useRef(new Map())
   const linea = useRef(null)
+  const vehiculosRef = useRef(vehiculos)
+  const viajesRef = useRef(viajes)
+  const paradasRef = useRef(paradas)
+  viajesRef.current = viajes
+  paradasRef.current = paradas
+  vehiculosRef.current = vehiculos
   const rutaCapa = useRef(null)
   const colaCapa = useRef(null)
   const rutaFirma = useRef('')
@@ -250,8 +256,10 @@ export default function MapaLibre({
   // Centrar en la unidad seleccionada
   useEffect(() => {
     if (!mapa.current || !seleccionado) return
-    const v = vehiculos.find((x) => x.id === seleccionado)
+    // Se centra al ELEGIR la unidad, no en cada refresco de la flota: cada 15 s llegan posiciones
+    // nuevas y mover la vista cada vez le quita el mapa a quien lo está mirando.
     const centrar = () => {
+      const v = vehiculosRef.current.find((x) => x.id === seleccionado)
       if (!validPosition(v) || !mapa.current) return
       const size = mapa.current.getSize()
       const punto = mapa.current.project([v.lat, v.lng])
@@ -262,7 +270,7 @@ export default function MapaLibre({
     const m = mapa.current
     m.on('resize', centrar)
     return () => m.off('resize', centrar)
-  }, [seleccionado, vehiculos, ficha, espacioFicha])
+  }, [seleccionado, ficha, espacioFicha])
 
   // Recorrido del día
   useEffect(() => {
@@ -303,6 +311,7 @@ export default function MapaLibre({
     if (!mapa.current) return undefined
     colaCapa.current?.remove()
     colaCapa.current = null
+    if (!seleccionado) colaFirma.current = null
     if (!cola || cola.length < 2) return undefined
     const util = cola.filter(validPosition)
     const grupo = pintarCola(L, mapa.current, util, leerTokens().primario)
@@ -344,14 +353,16 @@ export default function MapaLibre({
         const p = m.latLngToContainerPoint([v.lat, v.lng])
         const caja = { x: p.x + 20, y: p.y - 37, w: 125, h: 48 }
         const choque = cajas.some(c => caja.x < c.x + c.w && caja.x + caja.w > c.x && caja.y < c.y + c.h && caja.y + caja.h > c.y)
-        elemento.classList.toggle('is-muted', choque && v.id !== seleccionado)
+        // Con el recorrido a la vista, las etiquetas de las demás unidades se apagan: tapan la ruta.
+        const enRuta = Boolean(viajesRef.current?.length || paradasRef.current?.length)
+        elemento.classList.toggle('is-muted', (choque || enRuta) && v.id !== seleccionado)
         if (!choque || v.id === seleccionado) cajas.push(caja)
       })
     }
     ordenar()
     m.on('zoomend moveend', ordenar)
     return () => m.off('zoomend moveend', ordenar)
-  }, [vehiculos, seleccionado])
+  }, [vehiculos, seleccionado, viajes, paradas])
 
   const v = vehiculos.find((x) => x.id === seleccionado)
   const estados = [...new Map(vehiculos.map(v => { const e = estadoUnidad(v); return [e.clave, e] })).values()]
