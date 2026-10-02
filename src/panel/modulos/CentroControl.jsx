@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import {
@@ -17,6 +17,21 @@ const ESTADOS = [
   { v: 'en_marcha', t: 'En marcha' },
   { v: 'parada', t: 'Detenidas' },
 ]
+
+/**
+ * Conserva el MISMO objeto mientras su contenido no cambie. Cada refresco trae objetos nuevos aunque
+ * los datos sean iguales; sin esto el mapa borra y vuelve a dibujar la ruta, cierra los globos que el
+ * usuario abrió y parpadea cada 15 s. Con esto, lo que no cambió no se toca.
+ */
+function useEstable(valor, firma) {
+  const guardado = useRef({ f: undefined, v: valor })
+  const f = valor == null ? null : firma(valor)
+  if (f !== guardado.current.f) guardado.current = { f, v: valor }
+  return guardado.current.v
+}
+const firmaFlota = (lista) => lista.map((v) => `${v.id}:${v.lat}:${v.lng}:${v.estadoMarcha}:${v.velocidadKmh}:${v.ultimoReporte}:${v.conectado}`).join('|')
+const firmaPuntos = (p) => `${p.length}|${p[0]?.hora}|${p.at(-1)?.hora}|${p.at(-1)?.lat}|${p.at(-1)?.lng}`
+const firmaAnalisis = (a) => `${firmaPuntos(a.puntos)}|${a.viajes.length}|${a.paradas.length}`
 
 export default function CentroControl() {
   const [q, setQ] = useState('')
@@ -55,16 +70,17 @@ export default function CentroControl() {
     [seleccionado],
     15000
   )
-  const colaPuntos = useMemo(() => ultimosMinutos(cola.datos ?? [], COLA_MIN), [cola.datos])
+  const colaPuntos = useEstable(useMemo(() => ultimosMinutos(cola.datos ?? [], COLA_MIN), [cola.datos]), firmaPuntos)
   // Al pedir el recorrido: el rango completo, con viajes, paradas y la hora de cada punto.
   const dia = useDatos(
     () => (seleccionado && viendoRecorrido ? repo.recorridoDetallado(seleccionado, { horas }) : Promise.resolve(null)),
     [seleccionado, viendoRecorrido, horas],
     60000
   )
-  const analisis = useMemo(() => (viendoRecorrido && dia.datos ? analizar(dia.datos.puntos) : null), [viendoRecorrido, dia.datos])
+  const analisis = useEstable(useMemo(() => (viendoRecorrido && dia.datos ? analizar(dia.datos.puntos) : null), [viendoRecorrido, dia.datos]), firmaAnalisis)
 
-  const lista = useMemo(() => flota.datos ?? [], [flota.datos])
+  const datosFlota = useEstable(flota.datos, firmaFlota)
+  const lista = useMemo(() => datosFlota ?? [], [datosFlota])
   const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
 
   // Si un filtro deja fuera la unidad abierta, se cierra el detalle.
