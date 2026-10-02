@@ -8,7 +8,7 @@ const RANGOS = [6, 12, 24]
  * Lo que explica el recorrido del mapa: el rango, un resumen y la línea de tiempo con cada
  * viaje (inicio y fin) y cada parada. Cada renglón lleva el mapa a ese lugar.
  */
-export default function PanelRecorrido({ analisis, horas, alCambiarHoras, cargando, truncado, alEnfocar }) {
+export default function PanelRecorrido({ analisis, horas, alCambiarHoras, cargando, truncado, alEnfocar, viajeActivo, alElegirViaje }) {
   const linea = useMemo(() => {
     if (!analisis) return []
     const viajes = analisis.viajes.map((v) => ({ clave: `v${v.numero}`, tipo: 'viaje', desde: v.inicio.hora, v }))
@@ -39,7 +39,7 @@ export default function PanelRecorrido({ analisis, horas, alCambiarHoras, cargan
         {linea.map((it) =>
           it.tipo === 'viaje' ? (
             <li key={it.clave}>
-              <button type="button" className="ruta-item viaje" onClick={() => alEnfocar?.({ lat: it.v.inicio.lat, lng: it.v.inicio.lng })}>
+              <button type="button" className={`ruta-item viaje${viajeActivo === it.v.numero ? ' activo' : ''}`} aria-pressed={viajeActivo === it.v.numero} onClick={() => { const quita = viajeActivo === it.v.numero; alElegirViaje?.(quita ? null : it.v.numero); if (!quita) alEnfocar?.({ lat: it.v.inicio.lat, lng: it.v.inicio.lng, limites: it.v.puntos.map((p) => [p.lat, p.lng]) }) }}>
                 <i aria-hidden="true">A</i>
                 <span>
                   <b>Viaje {it.v.numero}</b>

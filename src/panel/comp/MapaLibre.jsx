@@ -110,6 +110,8 @@ export default function MapaLibre({
   paradas = null,
   cola = null,
   foco = null,
+  viajeActivo = null,
+  alElegirViaje,
   alVerRecorrido,
   espacioFicha = false,
   alto = 'clamp(320px, 52vh, 560px)',
@@ -127,6 +129,11 @@ export default function MapaLibre({
   viajesRef.current = viajes
   paradasRef.current = paradas
   const rutaCapa = useRef(null)
+  const resaltarRef = useRef(null)
+  const viajeActivoRef = useRef(viajeActivo)
+  const alElegirViajeRef = useRef(alElegirViaje)
+  viajeActivoRef.current = viajeActivo
+  alElegirViajeRef.current = alElegirViaje
   const colaCapa = useRef(null)
   const encuadrado = useRef(false)
   const [fallaTeselas, setFallaTeselas] = useState(false)
@@ -269,12 +276,19 @@ export default function MapaLibre({
     rutaCapa.current?.remove()
     rutaCapa.current = null
     if (!viajes?.length && !paradas?.length) return undefined
-    const { grupo } = pintarRuta(L, mapa.current, { viajes: viajes ?? [], paradas: paradas ?? [], color: leerTokens().primario })
-    rutaCapa.current = grupo
+    const { grupo, resaltar } = pintarRuta(L, mapa.current, { viajes: viajes ?? [], paradas: paradas ?? [], color: leerTokens().primario, alElegirViaje: (n) => alElegirViajeRef.current?.(n) })
+    rutaCapa.current = grupo
+    resaltarRef.current = resaltar
+    resaltar(viajeActivoRef.current)
     return () => {
       grupo.remove()
     }
   }, [viajes, paradas, seleccionado])
+
+  // Resaltar el viaje elegido en la lista sin volver a dibujar nada
+  useEffect(() => {
+    resaltarRef.current?.(viajeActivo)
+  }, [viajeActivo])
 
   // Cola: los últimos minutos de camino de la unidad elegida, sin pedir el recorrido
   useEffect(() => {
@@ -293,6 +307,11 @@ export default function MapaLibre({
   // Llevar la vista a un punto (una parada o un viaje de la lista)
   useEffect(() => {
     if (!mapa.current || !foco) return
+    if (foco.limites?.length > 1) {
+      const ancho = mapa.current.getSize().x
+      mapa.current.fitBounds(L.latLngBounds(foco.limites), { paddingTopLeft: [ancho > 600 ? 440 : 30, 110], paddingBottomRight: [60, 80], maxZoom: 17, duration: 0.8 })
+      return
+    }
     mapa.current.flyTo([foco.lat, foco.lng], Math.max(mapa.current.getZoom(), 16), { duration: 0.8 })
   }, [foco])
 

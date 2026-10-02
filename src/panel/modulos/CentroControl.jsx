@@ -42,7 +42,8 @@ export default function CentroControl() {
   const [viendoRecorrido, setViendoRecorrido] = useState(false)
   const [horas, setHoras] = useState(24)
   const [foco, setFoco] = useState(null)
-  useEffect(() => { setViendoRecorrido(false); setFoco(null) }, [seleccionado])
+  const [viajeActivo, setViajeActivo] = useState(null)
+  useEffect(() => { setViendoRecorrido(false); setFoco(null); setViajeActivo(null) }, [seleccionado])
 
   const areas = useDatos(() => repo.areas(), [])
   // Seguimiento en vivo: se vuelve a preguntar por la flota cada 15 segundos.
@@ -119,7 +120,7 @@ export default function CentroControl() {
     <section className="control-map" aria-label="Centro de control">
       <div className="control-map-canvas">
         <Mapa vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado}
-          cola={seleccionado && !viendoRecorrido ? colaPuntos : null} viajes={analisis?.viajes} paradas={analisis?.paradas} foco={foco}
+          cola={seleccionado && !viendoRecorrido ? colaPuntos : null} viajes={analisis?.viajes} paradas={analisis?.paradas} foco={foco} viajeActivo={viajeActivo} alElegirViaje={(n) => setViajeActivo((a) => (a === n ? null : n))}
           alto="100%" ficha={false} leyenda={false} espacioFicha />
       </div>
       <div className="control-search">
@@ -155,7 +156,7 @@ export default function CentroControl() {
       {seleccionado && <aside className={`control-panel control-unit${viendoRecorrido ? ' con-ruta' : ''}`} aria-label="Detalle de la unidad">
         <FichaUnidad unidad={unidad} alCerrar={() => setSeleccionado(null)} alVerRecorrido={() => setViendoRecorrido(v => !v)} viendoRecorrido={viendoRecorrido} />
         {!viendoRecorrido && colaPuntos.length > 1 && <p className="control-detail-note ruta-cola-nota" role="status">{colaInfo?.ampliada ? 'Línea punteada: su último trayecto (ahora está detenida).' : `Línea punteada: los últimos ${COLA_MIN} min de camino.`} Pulsa «Ver recorrido» para el día completo.</p>}
-        {viendoRecorrido && <PanelRecorrido analisis={analisis} horas={horas} alCambiarHoras={setHoras} cargando={dia.estado === 'cargando'} truncado={dia.datos?.truncado} alEnfocar={(p) => setFoco({ ...p, clave: Date.now() })} />}
+        {viendoRecorrido && <PanelRecorrido analisis={analisis} horas={horas} alCambiarHoras={setHoras} cargando={dia.estado === 'cargando'} truncado={dia.datos?.truncado} alEnfocar={(p) => setFoco({ ...p, clave: Date.now() })} viajeActivo={viajeActivo} alElegirViaje={setViajeActivo} />}
         {viendoRecorrido && dia.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={dia.recargar}>Reintentar</button></p>}
         {detalle.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={detalle.recargar}>Reintentar</button></p>}
       </aside>}

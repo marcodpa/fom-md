@@ -22,9 +22,11 @@ function textoPunto(p, viaje) {
  * Pinta viajes y paradas en un grupo de capas nuevo y lo devuelve junto a los límites.
  * Cada viaje es una línea visible y otra invisible, más ancha, que recibe el cursor.
  */
-export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bfa' }) {
+export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bfa', alElegirViaje }) {
   const grupo = L.layerGroup().addTo(mapa)
   const limites = []
+  const lineas = new Map()
+  const marcas = new Map()
   // El inicio o el fin que caen en una parada se cuentan en la propia parada: un solo marcador.
   const enParada = (lugar) => paradas.some((x) => distanciaM(lugar, x) <= 150)
   let popupAbierto = false
@@ -34,7 +36,8 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
   for (const viaje of viajes) {
     const trazo = viaje.puntos.map((p) => [p.lat, p.lng])
     limites.push(...trazo)
-    L.polyline(trazo, { color, weight: 5, opacity: 0.95, lineJoin: 'round' }).addTo(grupo)
+    lineas.set(viaje.numero, L.polyline(trazo, { color, weight: 5, opacity: 0.95, lineJoin: 'round' }).addTo(grupo))
+    marcas.set(viaje.numero, [])
     const zona = L.polyline(trazo, { color, weight: 24, opacity: 0.001, lineJoin: 'round' }).addTo(grupo)
     zona.on('mousemove', (e) => {
       const p = puntoEnRuta(viaje.puntos, e.latlng)
@@ -48,6 +51,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
       const p = puntoEnRuta(viaje.puntos, e.latlng)
       if (!p) return
       popupAbierto = true
+      alElegirViaje?.(viaje.numero)
       sonda.remove()
       L.popup({ className: 'ruta-popup', closeButton: true, offset: [0, -4], autoPan: false })
         .setLatLng([p.lat, p.lng])
@@ -60,16 +64,17 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
     })
 
     if (!enParada(viaje.inicio)) {
-      L.marker([viaje.inicio.lat, viaje.inicio.lng], {
+      const marcaA = L.marker([viaje.inicio.lat, viaje.inicio.lng], {
         icon: icono(L, pin('inicio', 'A', `Inicio ${f.hora(viaje.inicio.hora)}`), 150),
         zIndexOffset: 400,
       })
         .bindPopup(`<strong>Inicio del viaje ${viaje.numero}</strong><span>${esc(f.fechaHora(viaje.inicio.hora))}</span>`, { className: 'ruta-popup', autoPan: false })
         .addTo(grupo)
+      marcas.get(viaje.numero).push(marcaA)
     }
 
     if (!viaje.fin.enCurso && !enParada(viaje.fin)) {
-      L.marker([viaje.fin.lat, viaje.fin.lng], {
+      const marcaB = L.marker([viaje.fin.lat, viaje.fin.lng], {
         icon: icono(L, pin('fin', 'B', `Fin ${f.hora(viaje.fin.hora)}`), 150),
         zIndexOffset: 400,
       })
@@ -79,6 +84,7 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
           { className: 'ruta-popup', autoPan: false },
         )
         .addTo(grupo)
+      marcas.get(viaje.numero).push(marcaB)
     }
   }
 
@@ -96,7 +102,17 @@ export function pintarRuta(L, mapa, { viajes = [], paradas = [], color = '#349bf
       )
       .addTo(grupo)
   }
-  return { grupo, limites }
+  /** Resalta un viaje (`numero`) y aclara los demás; sin número, todos vuelven a su estilo normal. */
+  const resaltar = (numero) => {
+    const hay = numero != null
+    for (const [n, linea] of lineas) {
+      const es = n === numero
+      linea.setStyle({ opacity: hay && !es ? 0.2 : 0.95, weight: es ? 8 : 5 })
+      if (es) linea.bringToFront()
+      marcas.get(n)?.forEach((m) => m.setOpacity(hay && !es ? 0.3 : 1))
+    }
+  }
+  return { grupo, limites, resaltar }
 }
 
 /** La cola reciente: una línea punteada y tenue, con un punto donde empieza. */
