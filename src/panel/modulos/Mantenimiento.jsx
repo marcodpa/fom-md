@@ -47,19 +47,19 @@ const EN_CURSO = ['en_revision', 'aprobada', 'asignada', 'en_ejecucion', 'pausad
 const PASOS_ODT = {
   abierta: [
     { a: 'en_revision', t: 'Pasar a revisión' },
-    { a: 'cerrada', t: 'Cerrar' },
+    { a: 'cerrada', t: 'Resolver sin taller' },
     { a: 'cancelada', t: 'Cancelar orden', sutil: true },
   ],
   en_revision: [
     { a: 'aprobada', t: 'Aprobar' },
     { a: 'abierta', t: 'Devolver a abierta', sutil: true },
-    { a: 'cerrada', t: 'Cerrar' },
+    { a: 'cerrada', t: 'Resolver sin taller' },
     { a: 'cancelada', t: 'Cancelar orden', sutil: true },
   ],
   aprobada: [
     { a: 'asignar', t: 'Asignar responsable' },
     { a: 'en_revision', t: 'Volver a revisión', sutil: true },
-    { a: 'cerrada', t: 'Cerrar' },
+    { a: 'cerrada', t: 'Resolver sin taller' },
     { a: 'cancelada', t: 'Cancelar orden', sutil: true },
   ],
   asignada: [
@@ -87,9 +87,9 @@ const PASOS_ODT = {
 }
 const EVENTO_ODT = { inicio: 'inició', pausa: 'pausó', reanudacion: 'reanudó', entrega: 'entregó a calidad' }
 const AYUDA_ODT = {
-  abierta: 'Alguien reportó la falla. Pásala a revisión para evaluarla, o ciérrala si ya se atendió.',
-  en_revision: 'Se está evaluando. Apruébala para que pase a taller.',
-  aprobada: 'Aprobada. Asigna quién la ejecuta: lo verá en su app.',
+  abierta: 'Alguien reportó la falla. Pásala a revisión para evaluarla, o resuélvela directo si no necesita taller.',
+  en_revision: 'Se está evaluando. Apruébala para llevarla a taller, o resuélvela sin taller si ya se atendió.',
+  aprobada: 'Aprobada. Asigna quién la ejecuta en taller (lo verá en su app), o resuélvela sin taller.',
   asignada: 'Tiene responsable. El trabajo empieza cuando el responsable lo inicia desde su app.',
   en_ejecucion: 'En taller. Cuando termine, se entrega a calidad.',
   pausada: 'El trabajo está detenido. Reanúdalo cuando siga.',
@@ -314,6 +314,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
     [odt.id, odt.estado],
   )
   const responsable = ejecucion.datos?.responsable ?? null
+  const omiteTaller = odt.estado === 'cerrada' && ejecucion.estado === 'ok' && !ejecucion.datos?.responsable && !(ejecucion.datos?.eventos?.length)
   // La sesión trae correo y nombre, no identificador: se resuelve contra la
   // lista de gente. Iniciar, pausar, reanudar y entregar los hace SOLO el
   // responsable (el servidor responde «no existe» a cualquier otro), igual
@@ -352,6 +353,8 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
 
   const pasos = (PASOS_ODT[odt.estado] ?? []).filter((p) => !p.ejecucion || soyResponsable)
   const pasosDelResponsable = (PASOS_ODT[odt.estado] ?? []).filter((p) => p.ejecucion)
+  // Antes de llegar al taller, la orden puede resolverse directo (una revisión rápida, un ajuste en sitio…).
+  const sinTaller = ['abierta', 'en_revision', 'aprobada'].includes(odt.estado) ? (PASOS_ODT[odt.estado] ?? []).find((p) => p.a === 'cerrada') : null
 
   // Solo piden datos (y por eso abren formulario) asignar, cerrar y cancelar. Iniciar, pausar, reanudar,
   // entregar, aprobar o devolver no tienen nada que preguntar: se hacen con un clic.
@@ -468,7 +471,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
       </div>
 
       <div className="mnt-unit"><VehicleVisual modelo={vehiculo?.modelo ?? ''} compacta/><div><b>{odt.vehiculoNombre}</b><span>{[vehiculo?.marca, vehiculo?.modelo].filter(Boolean).join(' ') || 'Unidad de la flota'}</span></div></div>
-      <ol className="mnt-progress">{[['Reportada',['abierta']],['Revisión',['en_revision','aprobada']],['Taller',['asignada','en_ejecucion','pausada']],['Calidad',['en_calidad']],['Cerrada',['cerrada']]].map(([t, estados]) => <li key={t} aria-current={estados.includes(odt.estado) ? 'step' : undefined}><i/>{t}</li>)}</ol>
+      <ol className="mnt-progress">{[['Reportada',['abierta']],['Revisión',['en_revision','aprobada']],['Taller',['asignada','en_ejecucion','pausada']],['Calidad',['en_calidad']],['Cerrada',['cerrada']]].map(([t, estados]) => <li key={t} aria-current={estados.includes(odt.estado) ? 'step' : undefined} className={['Taller', 'Calidad'].includes(t) ? (omiteTaller ? 'omitido' : 'opcional') : undefined} title={['Taller', 'Calidad'].includes(t) ? (omiteTaller ? 'Esta orden se resolvió sin pasar por taller' : 'Solo si la orden necesita taller') : undefined}><i/>{t}{['Taller', 'Calidad'].includes(t) && <small>{omiteTaller ? 'no hizo falta' : 'si aplica'}</small>}</li>)}</ol>
       {odt.estado === 'pausada' && <Tag color="ambar">Trabajo pausado</Tag>}
       <Datos items={items} />
 
@@ -537,7 +540,9 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
       ) : (
         <div ref={siguienteRef} className="mnt-next-actions" role="group" aria-label="Acciones sobre la orden">
           {pasos.filter(p => !p.sutil).slice(0,1).map(p => <button key={p.a} type="button" className="pnl-btn primario" onClick={() => elegir(p)} disabled={guardando}>{p.t} →</button>)}
-          <details><summary>Más acciones</summary>{pasos.filter(p => p !== pasos.find(p => !p.sutil)).map(p => <button key={p.a} type="button" className="pnl-btn sutil" onClick={() => elegir(p)} disabled={guardando}>{p.t}</button>)}</details>
+          {sinTaller && <button type="button" className="pnl-btn" onClick={() => elegir(sinTaller)} disabled={guardando}>{sinTaller.t}</button>}
+          {sinTaller && <p className="mnt-muted" style={{ fontSize: 12, margin: 0 }}>¿No necesita taller? Ciérrala ahora contando qué se hizo.</p>}
+          <details><summary>Más acciones</summary>{pasos.filter(p => p !== pasos.find(p => !p.sutil) && p !== sinTaller).map(p => <button key={p.a} type="button" className="pnl-btn sutil" onClick={() => elegir(p)} disabled={guardando}>{p.t}</button>)}</details>
         </div>
       )}
 
