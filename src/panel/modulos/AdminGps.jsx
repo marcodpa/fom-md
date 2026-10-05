@@ -89,7 +89,7 @@ export default function AdminGps() {
   const acciones = {
     verificar: (g) => ejecutar(g, () => repo.admin.gps.verificar(g.id, actor)),
     probarPanico: (g) => ejecutar(g, () => repo.admin.gps.probarPanico(g.id, actor)),
-    instalar: (g, vehiculoId) => vehiculoId && ejecutar(g, () => repo.admin.gps.asociar(g.id, vehiculoId), 'Equipo instalado en la unidad.'),
+    instalar: (g, vehiculoId) => vehiculoId && ejecutar(g, () => repo.admin.gps.asociar(g.id, vehiculoId, actor), 'Equipo instalado en la unidad.'),
     desmontar: (g) => ejecutar(g, () => repo.admin.gps.desmontar(g.instalacionId), 'Equipo desmontado: vuelve al inventario.'),
   }
 

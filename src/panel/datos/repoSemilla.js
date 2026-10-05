@@ -846,17 +846,19 @@ export const repo = {
         return responder({ ok: true, mensaje: 'GPS verificado: el equipo respondió con posición válida.' }, 900)
       },
 
-      async asociar(id, empresaId, actor) {
+      /** Instala el equipo en una unidad (el mismo paso que `POST gps-devices/:id/installation`). */
+      async asociar(id, vehiculoId, actor) {
         const g = todosGps().find((x) => x.id === id)
         if (!g) return fallo('Ese GPS no está en el inventario.')
         if (g.vehiculoId) return fallo('Ese GPS ya está instalado en una unidad.')
-        const e = empresaId ? todasEmpresas().find((x) => x.id === empresaId) : null
-        if (empresaId && !e) return fallo('Ese empresa no existe.')
-        guardarParche('gps', id, { empresaId: empresaId || null })
+        if (!g.verificado) return fallo('El GPS debe estar verificado antes de instalarse.')
+        const v = todosVehiculos().find((x) => x.id === vehiculoId)
+        if (!v) return fallo('Esa unidad no existe.')
+        guardarParche('gps', id, { vehiculoId: v.id, vehiculoNombre: `${v.alias} · ${v.placa}`, empresaId: v.empresaId ?? EMPRESA.id })
         auditar('asociar_gps', {
-          actor, empresaId: empresaId || null,
+          actor, empresaId: v.empresaId ?? EMPRESA.id,
           objetivo: `${g.modelo} · ${g.imei}`,
-          detalle: e ? `Asociado a ${e.nombre}` : 'Devuelto al inventario general',
+          detalle: `Instalado en ${v.alias} · ${v.placa}`,
         })
         return responder(true, 260)
       },

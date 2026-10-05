@@ -89,7 +89,9 @@ function Resultados({ vista, abrirPrograma, cambiarVista, inspeccionId }) {
   const lista = resultado ? base.filter(i => i.resultado === resultado) : base
   useEffect(() => { if (inspeccionId && registros.estado === 'ok') setDetalle(base.find(i => i.id === inspeccionId) ?? null) }, [inspeccionId, registros.datos, registros.estado])
   const abrir = i => setDetalle(i)
-  const tabla = filas => <TablaResultados lista={filas} abrir={abrir}/>
+  // Programada = la que el supervisor fijó y el conductor completó (la cita guarda su inspección); el resto es la diaria.
+  const programadas = new Set((agenda.datos ?? []).map(c => c.inspeccionId).filter(Boolean))
+  const tabla = filas => <TablaResultados lista={filas} abrir={abrir} programadas={programadas}/>
   return <>
     {vista === 'resumen' && <>
       {hoy.estado === 'error' ? <ErrorCarga error={hoy.error} onReintentar={hoy.recargar}/> : hoy.estado !== 'ok' || vehiculos.estado !== 'ok' ? <Cargando filas={1}/> : <div className="insp-summary">
@@ -120,8 +122,8 @@ function Resultados({ vista, abrirPrograma, cambiarVista, inspeccionId }) {
   </>
 }
 
-function TablaResultados({ lista, abrir }) {
-  return <div className="pnl-tabla-wrap"><table className="pnl-tabla insp-table"><thead><tr>{['Fecha y hora','Unidad','Conductor','Resultado','Observaciones','Fallas críticas','Ubicación','Detalle'].map(t=><th key={t}>{t}</th>)}</tr></thead><tbody>{lista.map(i=><tr key={i.id}><td>{f.fechaHora(i.creadaEn || i.fecha)}</td><td><b>{i.vehiculo?.alias || i.vehiculoNombre}</b><small>{i.vehiculo?.placa || etiqueta('vehiculo_tipo',i.tipoVehiculo)}</small></td><td>{i.conductorNombre}</td><td><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag></td><td>{f.numero(i.observaciones)}</td><td>{f.numero(i.fallasCriticas)}</td><td>{i.ubicacion || 'Sin ubicación'}</td><td><button className="pnl-table-action" type="button" aria-label={'Ver resultado de '+i.vehiculoNombre} onClick={()=>abrir(i)}>Ver resultado →</button></td></tr>)}</tbody></table></div>
+function TablaResultados({ lista, abrir, programadas = new Set() }) {
+  return <div className="pnl-tabla-wrap"><table className="pnl-tabla insp-table"><thead><tr>{['Fecha y hora','Tipo','Unidad','Conductor','Resultado','Observaciones','Fallas críticas','Ubicación','Detalle'].map(t=><th key={t}>{t}</th>)}</tr></thead><tbody>{lista.map(i=><tr key={i.id}><td>{f.fechaHora(i.creadaEn || i.fecha)}</td><td><Tag color={programadas.has(i.id) ? 'azul' : 'gris'}>{programadas.has(i.id) ? 'Programada' : 'Diaria'}</Tag></td><td><b>{i.vehiculo?.alias || i.vehiculoNombre}</b><small>{i.vehiculo?.placa || etiqueta('vehiculo_tipo',i.tipoVehiculo)}</small></td><td>{i.conductorNombre}</td><td><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag></td><td>{f.numero(i.observaciones)}</td><td>{f.numero(i.fallasCriticas)}</td><td>{i.ubicacion || 'Sin ubicación'}</td><td><button className="pnl-table-action" type="button" aria-label={'Ver resultado de '+i.vehiculoNombre} onClick={()=>abrir(i)}>Ver resultado →</button></td></tr>)}</tbody></table></div>
 }
 function DetalleInspeccion({ inspeccion, alCerrar, alHallazgos }) {
   const detalle = useDatos(() => CONECTADO ? repo.inspecciones.obtener(inspeccion.id) : Promise.resolve(checklistDe(inspeccion)), [inspeccion.id])

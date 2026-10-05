@@ -28,6 +28,15 @@ function paso(t) {
   return null
 }
 
+/**
+ * El servidor responde 403 con una frase genérica. Aquí se dice qué pasa de verdad: el permiso para mover
+ * personas y vehículos entre empresas lo da el servidor, no esta pantalla, y se arregla allá.
+ */
+const explicar = (mensaje) =>
+  /permiso/i.test(String(mensaje ?? ''))
+    ? 'Tu cuenta todavía no puede ver ni abrir transferencias entre empresas. No es un error de la pantalla: el servidor aún no te reconoce como administrador de la plataforma. Pide que registren tu usuario como administrador de plataforma y vuelve a entrar.'
+    : mensaje
+
 export default function Transferencias() {
   const sesion = useSesion()
   const actor = sesion?.perfil
@@ -55,7 +64,7 @@ export default function Transferencias() {
       lista.recargar()
       return true
     } catch (e) {
-      setAviso(e?.message || 'No se pudo completar la acción.')
+      setAviso(explicar(e?.message) || 'No se pudo completar la acción.')
       return false
     } finally {
       setOcupado(false)
@@ -86,7 +95,7 @@ export default function Transferencias() {
             />
           </div>
           {lista.estado === 'cargando' && <Cargando filas={4} />}
-          {lista.estado === 'error' && <ErrorCarga onReintentar={lista.recargar} error={lista.error} />}
+          {lista.estado === 'error' && <ErrorCarga onReintentar={lista.recargar} error={{ message: explicar(lista.error?.message) }} />}
           {lista.estado === 'ok' && (lista.datos.length === 0 ? (
             <div className="pnl-card-cuerpo">
               <Vacio icono="comparar" titulo="Sin transferencias" texto="No hay movimientos entre empresas con este filtro." />
