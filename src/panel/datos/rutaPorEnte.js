@@ -2,9 +2,10 @@
 //
 // El servidor ya no lee una cabecera para cambiar de empresa (Issue 567): cada lectura o
 // escritura de una empresa ajena viaja con la empresa EN LA RUTA, `/tenants/{id}/...`, y el
-// servidor vuelve a autorizarla. Lo que no tiene ruta así todavía no se puede pedir para otra
-// empresa; mandarlo tal cual devolvería los datos de la empresa propia del administrador como
-// si fueran los de la elegida, así que se rechaza antes de salir.
+// servidor vuelve a autorizarla. Desde la Issue 594 casi toda la consola tiene su versión por
+// empresa (lista abajo, copiada de las rutas publicadas en fom-core). Lo que NO la tiene se
+// rechaza antes de salir: mandarlo tal cual devolvería los datos de la empresa propia del
+// administrador como si fueran los de la elegida.
 
 const CONSOLA = '/api/v1/console'
 
@@ -17,18 +18,60 @@ const GLOBALES = [
   /^\/audit(\?|$)/,
   /^\/identity-transfers/,
   /^\/vehicle-transfers/,
-  /^\/gps-devices/,
+  /^\/gps-devices(\/|\?|$)/,
   /^\/gps-installations\//,
 ]
 
-/** Las que ya tienen versión con la empresa en la ruta, y cómo se escriben. */
-const EXPLICITAS = [
-  { metodo: 'GET', de: /^\/vehicles(\?.*)?$/, a: (id, m) => `/tenants/${id}/vehicles${m[1] ?? ''}` },
-  { metodo: 'GET', de: /^\/directory(\?.*)?$/, a: (id, m) => `/tenants/${id}/directory${m[1] ?? ''}` },
-  { metodo: 'GET', de: /^\/vehicles\/([0-9a-f-]{36})\/daily-metrics(\?.*)?$/i, a: (id, m) => `/tenants/${id}/vehicles/${m[1]}/daily-metrics${m[2] ?? ''}` },
-  { metodo: 'POST', de: /^\/users$/, a: (id) => `/tenants/${id}/users` },
-  { metodo: 'PATCH', de: /^\/users\/([0-9a-f-]{36})$/i, a: (id, m) => `/tenants/${id}/users/${m[1]}` },
-]
+const Q = '(?:\\?.*)?'
+const ID = '[^/?]+'
+
+/** `:x` → un segmento cualquiera; el resto, literal. */
+function patron(ruta) {
+  const cuerpo = ruta
+    .split('/')
+    .map((s) => (s.startsWith(':') ? ID : s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    .join('/')
+  return new RegExp(`^${cuerpo}${Q}$`)
+}
+
+/** Rutas con versión `/tenants/{id}/…` en fom-core, por método (relativas a /api/v1/console). */
+const ESPEJOS = {
+  GET: [
+    '/vehicles', '/vehicles/:v', '/vehicles/:v/daily-metrics', '/vehicles/:v/position/latest', '/vehicles/:v/positions',
+    '/vehicles/:v/telemetry-capabilities', '/vehicles/:v/odometer', '/vehicles/:v/archive-preflight',
+    '/directory', '/notifications', '/summary', '/areas', '/drivers',
+    '/fleet-expenses', '/fleet-expenses/months', '/driver-metrics', '/operational-report',
+    '/work-orders', '/work-orders/:w', '/work-orders/:w/execution',
+    '/inspections', '/inspections/:i', '/inspection-schedules', '/inspection-findings',
+    '/inspections/:i/findings/:a/follow-up', '/inspection-templates', '/inspection-templates/:t',
+    '/documents', '/alert-rules', '/maintenance/plans', '/maintenance/plans/:p', '/maintenance/actions', '/maintenance/actions/:a',
+    '/alert-events', '/alert-events/:e', '/emergencies', '/emergencies/:e', '/driver-sessions', '/driver-sessions/:s',
+    '/:coleccion/:padre/objects',
+  ],
+  POST: [
+    '/users', '/users/:u/rehire', '/users/:u/credential-reset', '/fleet-expenses',
+    '/vehicles', '/vehicles/:v/drivers', '/vehicles/:v/archive', '/areas',
+    '/work-orders', '/work-orders/:w/execution-events',
+    '/inspection-schedules', '/inspection-schedules/:s/cancel', '/inspections/:i/findings/:a/follow-up', '/inspection-templates',
+    '/documents', '/alert-rules',
+    '/alert-events/:e/acknowledge', '/alert-events/:e/resolve', '/emergencies/:e/acknowledge', '/emergencies/:e/resolve',
+    '/gps-devices', '/gps-devices/:d/installation',
+    '/:coleccion/:padre/uploads', '/uploads/:u/complete', '/:coleccion/:padre/objects/:o/downloads',
+  ],
+  PATCH: [
+    '/users/:u', '/users/:u/profile', '/vehicles/:v', '/driver-assignments/:a/revoke', '/driver-assignments/:a/pin', '/areas/:a',
+    '/work-orders/:w/status', '/inspection-templates/:t/status', '/documents/:d', '/alert-rules/:r',
+    '/maintenance/plans/:p', '/maintenance/actions/:a/status',
+    '/gps-devices/:d', '/gps-installations/:a/remove',
+  ],
+  PUT: [
+    '/work-orders/:w/assignee', '/maintenance/plans/:p', '/maintenance/plans/:p/vehicles/:v', '/maintenance/actions/:a',
+    '/gps-devices/:d/capabilities',
+  ],
+  DELETE: ['/maintenance/plans/:p/vehicles/:v'],
+}
+
+const REGLAS = Object.fromEntries(Object.entries(ESPEJOS).map(([m, lista]) => [m, lista.map(patron)]))
 
 /**
  * `null` si la ruta no tiene versión por empresa; la misma ruta si es global; o la ruta con
@@ -37,12 +80,10 @@ const EXPLICITAS = [
 export function aRutaPorEnte(ruta, metodo, enteId) {
   if (!enteId || !ruta.startsWith(`${CONSOLA}/`)) return ruta
   const resto = ruta.slice(CONSOLA.length)
+  // Primero las que tienen versión por empresa (incluidas las altas de equipos GPS); después, lo global.
+  const reglas = REGLAS[metodo.toUpperCase()] ?? []
+  if (reglas.some((r) => r.test(resto))) return `${CONSOLA}/tenants/${enteId}${resto}`
   if (GLOBALES.some((r) => r.test(resto))) return ruta
-  for (const regla of EXPLICITAS) {
-    if (regla.metodo !== metodo.toUpperCase()) continue
-    const m = regla.de.exec(resto)
-    if (m) return `${CONSOLA}${regla.a(enteId, m)}`
-  }
   return null
 }
 

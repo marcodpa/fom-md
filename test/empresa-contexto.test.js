@@ -25,9 +25,13 @@ test('la empresa elegida viaja en la ruta, no en una cabecera, y la autenticaci�
     for (const r of requests) assert.equal(r.options.headers['x-fom-console-tenant'], undefined)
 
     // Una escritura sin ruta por empresa no sale: caería en la empresa propia del administrador.
+    // (Marcar un aviso como leído es de cada persona y no tiene versión por empresa.)
     const antes = requests.length
-    await assert.rejects(mod.api.actualizarPerfil('persona', { phone: '123' }), (e) => e.estado === 501)
+    await assert.rejects(mod.api.marcarAvisoLeido('aviso'), (e) => e.estado === 501)
     assert.equal(requests.length, antes)
+    // En cambio, editar el perfil de una persona de esa empresa sí va por su ruta.
+    await mod.api.actualizarPerfil('persona', { phone: '123' })
+    assert.match(requests.at(-1).url, /\/api\/v1\/console\/tenants\/empresa-a\/users\/persona\/profile$/)
 
     mod.fijarEmpresaGestion('empresa-b')
     await mod.api.vehiculos()
