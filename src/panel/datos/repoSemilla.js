@@ -633,7 +633,7 @@ export const repo = {
   // rutas para cualquier otro rol.
   // ============================================================
   admin: {
-    // ---------------- Empresas (entes) ----------------
+    // ---------------- Empresas (empresas) ----------------
     empresas: {
       async listar({ q = '', tipo = '' } = {}) {
         const perfiles = todosPerfiles()
@@ -657,7 +657,7 @@ export const repo = {
           const t = q.toLowerCase()
           lista = lista.filter((e) => [e.nombre, e.rif, e.contacto, e.email].join(' ').toLowerCase().includes(t))
         }
-        // El ente de respaldo siempre al final, como en la app.
+        // El empresa de respaldo siempre al final, como en la app.
         return responder(lista.sort((a, b) => (a.respaldo ? 1 : 0) - (b.respaldo ? 1 : 0) || a.nombre.localeCompare(b.nombre)))
       },
 
@@ -676,10 +676,10 @@ export const repo = {
       },
 
       async crear({ nombre, tipo = 'estandar', rif = '', contacto = '', telefono = '', email = '', predefinidas = [] }, actor) {
-        if (!nombre?.trim()) return fallo('El nombre del ente es obligatorio.')
+        if (!nombre?.trim()) return fallo('El nombre del empresa es obligatorio.')
         const slug = nombre.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
           .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-        if (todasEmpresas().some((e) => e.slug === slug)) return fallo('Ya existe un ente con ese nombre.')
+        if (todasEmpresas().some((e) => e.slug === slug)) return fallo('Ya existe un empresa con ese nombre.')
         const fila = {
           id: slug, slug, nombre: nombre.trim(), tipo, rif, contacto, telefono, email,
           servicioActivo: true,
@@ -693,18 +693,18 @@ export const repo = {
 
       async actualizar(id, patch, actor) {
         const e = todasEmpresas().find((x) => x.id === id)
-        if (!e) return fallo('Ese ente no existe.')
-        if (e.respaldo) return fallo('El ente de respaldo no se edita: es del sistema.')
+        if (!e) return fallo('Ese empresa no existe.')
+        if (e.respaldo) return fallo('El empresa de respaldo no se edita: es del sistema.')
         guardarParche('empresas', id, patch)
-        auditar('editar_empresa', { actor, empresaId: id, objetivo: e.nombre, detalle: 'Datos del ente actualizados' })
+        auditar('editar_empresa', { actor, empresaId: id, objetivo: e.nombre, detalle: 'Datos del empresa actualizados' })
         return responder(true, 220)
       },
 
-      /** Suspende o reactiva el servicio FOM del ente. */
+      /** Suspende o reactiva el servicio FOM del empresa. */
       async setServicio(id, activo, actor) {
         const e = todasEmpresas().find((x) => x.id === id)
-        if (!e) return fallo('Ese ente no existe.')
-        if (e.respaldo) return fallo('El ente de respaldo no tiene servicio que suspender.')
+        if (!e) return fallo('Ese empresa no existe.')
+        if (e.respaldo) return fallo('El empresa de respaldo no tiene servicio que suspender.')
         guardarParche('empresas', id, { servicioActivo: !!activo })
         auditar('servicio_empresa', {
           actor, empresaId: id, objetivo: e.nombre,
@@ -716,7 +716,7 @@ export const repo = {
       /** Qué compañías (predefinidas) puede ver una contratista. */
       async asignarPredefinidas(id, listaIds, actor) {
         const e = todasEmpresas().find((x) => x.id === id)
-        if (!e) return fallo('Ese ente no existe.')
+        if (!e) return fallo('Ese empresa no existe.')
         if (e.tipo !== 'estandar') return fallo('Solo una contratista trabaja para compañías.')
         guardarParche('empresas', id, { predefinidas: listaIds })
         auditar('editar_empresa', { actor, empresaId: id, objetivo: e.nombre, detalle: `Compañías asignadas: ${listaIds.length}` })
@@ -725,12 +725,12 @@ export const repo = {
 
       async eliminar(id, actor) {
         const e = todasEmpresas().find((x) => x.id === id)
-        if (!e) return fallo('Ese ente no existe.')
-        if (e.respaldo) return fallo('El ente de respaldo no se puede eliminar.')
+        if (!e) return fallo('Ese empresa no existe.')
+        if (e.respaldo) return fallo('El empresa de respaldo no se puede eliminar.')
         if (todosPerfiles().some((p) => p.empresaId === id))
-          return fallo('El ente aún tiene personal: muévelo o envíalo a Desempleados C.A. primero.')
+          return fallo('El empresa aún tiene personal: muévelo o envíalo a Desempleados C.A. primero.')
         guardarParche('empresas', id, { eliminada: true })
-        auditar('eliminar_empresa', { actor, empresaId: id, objetivo: e.nombre, detalle: 'Ente eliminado' })
+        auditar('eliminar_empresa', { actor, empresaId: id, objetivo: e.nombre, detalle: 'Empresa eliminado' })
         return responder(true, 260)
       },
     },
@@ -753,11 +753,11 @@ export const repo = {
 
       async registrar({ empresaId, monto, moneda = 'USD', periodo, nota = '' }, actor) {
         const e = todasEmpresas().find((x) => x.id === empresaId)
-        if (!e) return fallo('Selecciona el ente del pago.')
+        if (!e) return fallo('Selecciona el empresa del pago.')
         if (!(Number(monto) > 0)) return fallo('El monto debe ser mayor que cero.')
         if (!/^\d{4}-\d{2}$/.test(periodo || '')) return fallo('El período va como AAAA-MM, por ejemplo 2026-08.')
         if (todosPagos().some((p) => p.empresaId === empresaId && p.periodo === periodo))
-          return fallo('Ese período ya tiene una cuota registrada para este ente.')
+          return fallo('Ese período ya tiene una cuota registrada para este empresa.')
         const fila = {
           id: `pag-n${Date.now().toString(36)}`,
           empresaId, monto: Number(monto), moneda, periodo,
@@ -851,7 +851,7 @@ export const repo = {
         if (!g) return fallo('Ese GPS no está en el inventario.')
         if (g.vehiculoId) return fallo('Ese GPS ya está instalado en una unidad.')
         const e = empresaId ? todasEmpresas().find((x) => x.id === empresaId) : null
-        if (empresaId && !e) return fallo('Ese ente no existe.')
+        if (empresaId && !e) return fallo('Ese empresa no existe.')
         guardarParche('gps', id, { empresaId: empresaId || null })
         auditar('asociar_gps', {
           actor, empresaId: empresaId || null,
@@ -898,7 +898,7 @@ export const repo = {
 
       /**
        * Alta de usuario, como la Edge Function: rol asignable, compatible con
-       * el tipo de ente, y clave por defecto que se entrega una sola vez.
+       * el tipo de empresa, y clave por defecto que se entrega una sola vez.
        */
       async crear({ nombre, email, rol, empresaId, conduce = false }, actor) {
         if (!nombre?.trim()) return fallo('El nombre es obligatorio.')
@@ -907,7 +907,7 @@ export const repo = {
           return fallo('Ya existe un usuario con ese correo.')
         if (!ROLES_ASIGNABLES.includes(rol)) return fallo('Ese rol no se puede asignar desde el panel.')
         const e = todasEmpresas().find((x) => x.id === empresaId)
-        if (!e) return fallo('Selecciona el ente del usuario.')
+        if (!e) return fallo('Selecciona el empresa del usuario.')
         const errorRol = validarRolEmpresa(rol, e.tipo)
         if (errorRol) return fallo(errorRol)
         const fila = {
@@ -942,13 +942,13 @@ export const repo = {
         return responder(true, 240)
       },
 
-      /** Mueve a otro ente, validando rol contra el tipo de destino. */
+      /** Mueve a otro empresa, validando rol contra el tipo de destino. */
       async mover(id, empresaId, actor) {
         const p = todosPerfiles().find((x) => x.id === id)
         if (!p) return fallo('Ese usuario no existe.')
         if (!puedeGestionarA(actor, p)) return fallo('No puedes gestionar a ese usuario: su rango no es menor que el tuyo.')
         const e = todasEmpresas().find((x) => x.id === empresaId)
-        if (!e) return fallo('Ese ente no existe.')
+        if (!e) return fallo('Ese empresa no existe.')
         const errorRol = validarRolEmpresa(p.rol, e.tipo)
         if (errorRol) return fallo(errorRol)
         guardarParche('perfiles', id, { empresaId, areaId: null })
@@ -973,7 +973,7 @@ export const repo = {
         return responder(true, 280)
       },
 
-      /** Borrado real: solo desde el ente de respaldo, y es definitivo. */
+      /** Borrado real: solo desde el empresa de respaldo, y es definitivo. */
       async eliminarDefinitivo(id, actor) {
         const p = todosPerfiles().find((x) => x.id === id)
         if (!p) return fallo('Ese usuario no existe.')

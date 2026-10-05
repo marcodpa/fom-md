@@ -11,7 +11,7 @@ import { Icono } from '../Iconos'
 // TRANSFERENCIAS ENTRE ENTES (doble control)
 // ------------------------------------------------------------
 // Mover una persona o un vehículo de una empresa a otra no es editar un
-// campo: el ente de origen la libera y el de destino la acepta, y hasta
+// campo: el empresa de origen la libera y el de destino la acepta, y hasta
 // que no pasan las dos cosas no se completa. Cualquiera de los dos puede
 // rechazarla y quien la abrió puede cancelarla. Cada decisión viaja con la
 // versión que se vio, para que dos personas no se pisen.
@@ -66,7 +66,7 @@ export default function Transferencias() {
 
   return (
     <>
-      <Cabecera titulo="Transferencias" bajada="Personas y vehículos que cambian de ente, con liberación en origen y aceptación en destino.">
+      <Cabecera titulo="Transferencias" bajada="Personas y vehículos que cambian de empresa, con liberación en origen y aceptación en destino.">
         <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
           <Icono nombre="mas" tam={16} />
           {pestana === 'identidad' ? 'Transferir persona' : 'Transferir vehículo'}
@@ -89,7 +89,7 @@ export default function Transferencias() {
           {lista.estado === 'error' && <ErrorCarga onReintentar={lista.recargar} error={lista.error} />}
           {lista.estado === 'ok' && (lista.datos.length === 0 ? (
             <div className="pnl-card-cuerpo">
-              <Vacio icono="comparar" titulo="Sin transferencias" texto="No hay movimientos entre entes con este filtro." />
+              <Vacio icono="comparar" titulo="Sin transferencias" texto="No hay movimientos entre empresas con este filtro." />
             </div>
           ) : (
             <div className="pnl-filas">
@@ -182,7 +182,7 @@ function ModalNueva({ tipo, abierto, empresas, admin, alCerrar, guardar }) {
   async function confirmar() {
     if (!d.origenId) return setError('Elige primero la empresa de origen.')
     if (cargando || errorCarga || !opcionesOrigen.some(o => o.id === d.sujeto)) return setError(tipo === 'identidad' ? 'Elige la persona.' : 'Elige el vehículo.')
-    if (!d.origenId || !d.destinoId || d.origenId === d.destinoId) return setError('Origen y destino tienen que ser entes distintos.')
+    if (!d.origenId || !d.destinoId || d.origenId === d.destinoId) return setError('Origen y destino tienen que ser empresas distintos.')
     if (tipo === 'vehiculo' && !d.codigoDestino.trim()) return setError('Di el código que tendrá el vehículo en el destino.')
     if (d.motivo.trim().length < 3) return setError('Escribe el motivo.')
     setGuardando(true)

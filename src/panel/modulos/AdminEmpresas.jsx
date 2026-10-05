@@ -13,7 +13,7 @@ import { Icono } from '../Iconos'
 
 // ============================================================
 // EMPRESAS (solo Administrador FOM)
-// La capa multiempresa: cada ente del sistema con su gente, su flota,
+// La capa multiempresa: cada empresa del sistema con su gente, su flota,
 // su deuda y el estado del servicio.
 // ============================================================
 
@@ -78,7 +78,7 @@ export default function AdminEmpresas() {
     <>
       <Cabecera
         titulo="Empresas"
-        bajada="Todos los entes del sistema: contratistas, compañías y cuentas personales."
+        bajada="Todos los empresas del sistema: contratistas, compañías y cuentas personales."
       >
         <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
           <Icono nombre="mas" tam={16} />
@@ -124,7 +124,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
   return (
     <>
       <div className="pnl-grid k4">
-        <Kpi titulo="Entes en el sistema" valor={operativas.length} icono="empresa" nota="Sin contar el de respaldo" />
+        <Kpi titulo="Empresas en el sistema" valor={operativas.length} icono="empresa" nota="Sin contar el de respaldo" />
         <Kpi titulo="Con servicio activo" valor={activas} icono="check" tono="ok" nota={`${operativas.length - activas} suspendidos`} />
         <Kpi titulo="Deuda acumulada" valor={f.moneda(deudaTotal)} icono="costos" tono={deudaTotal > 0 ? 'malo' : 'ok'} nota="Cuotas pendientes y vencidas" />
         <Kpi titulo="Usuarios totales" valor={usuariosTotal} icono="gente" nota="En todas las empresas" />
@@ -133,7 +133,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
       {aviso && <p className="pnl-campo-error" role="alert">{aviso}</p>}
 
       <div className="pnl-admin-dividido"><Tarjeta
-        titulo="Todos los entes"
+        titulo="Todos los empresas"
         accion={<Buscador valor={q} alCambiar={setQ} placeholder="Buscar por nombre, RIF o contacto…" />}
         sinCuerpo
       >
@@ -157,7 +157,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
             <table className="pnl-tabla">
               <thead>
                 <tr>
-                  <th>Ente</th>
+                  <th>Empresa</th>
                   <th>Tipo</th>
                   <th>Contacto</th>
                   <th className="num">Usuarios</th>
@@ -215,7 +215,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
           </div>
         )}
       </Tarjeta>
-      <aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle del ente">
+      <aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle del empresa">
         {seleccion ? <>
           <span className="pnl-metrica-icono"><Icono nombre="empresa" tam={28} /></span>
           <h3>{seleccion.nombre}</h3>
@@ -224,7 +224,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
           </button>
           <Tag color={seleccion.servicioActivo ? 'verde' : 'ambar'}>{seleccion.servicioActivo ? 'Servicio activo' : 'Servicio suspendido'}</Tag>
           <Datos items={[
-            {etiqueta:'Tipo de ente',valor:seleccion.tipoEtiqueta || etiqueta('company_tipo', seleccion.tipo)},
+            {etiqueta:'Tipo de empresa',valor:seleccion.tipoEtiqueta || etiqueta('company_tipo', seleccion.tipo)},
             {etiqueta:'Usuarios',valor:seleccion.usuarios},
             {etiqueta:'Vehículos',valor:seleccion.vehiculos},
             {etiqueta:'Saldo',valor:f.moneda(seleccion.deuda)},
@@ -237,7 +237,7 @@ function Contenido({ lista, q, setQ, tipo, setTipo, aviso, alternarServicio, eli
             <button type="button" className="pnl-btn" onClick={() => alternarServicio(seleccion)}>{seleccion.servicioActivo ? 'Suspender servicio' : 'Reactivar servicio'}</button>
             <button type="button" className="pnl-btn sutil" onClick={() => eliminar(seleccion)}>Retirar de operación</button>
           </div>}
-        </> : <Vacio icono="empresa" titulo="Selecciona un ente" texto="Consulta su información y servicio." />}
+        </> : <Vacio icono="empresa" titulo="Selecciona un empresa" texto="Consulta su información y servicio." />}
       </Tarjeta></aside></div>
     </>
   )
@@ -282,7 +282,7 @@ function ModalNueva({ abierto, alCerrar, alGuardar, actor }) {
 
   return (
     <Modal titulo="Nueva empresa" abierto={abierto} alCerrar={cerrar} ancho={560}>
-      <Campo etiqueta="Nombre del ente" error={error}>
+      <Campo etiqueta="Nombre del empresa" error={error}>
         <input type="text" className="pnl-input" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Transporte El Menito, C.A." />
       </Campo>
       <Campo etiqueta="Tipo" ayuda="Contratista opera flota; Compañía solo supervisa; Personal es una cuenta individual.">

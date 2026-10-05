@@ -11,9 +11,9 @@ import { Icono } from '../Iconos'
 // ============================================================
 // TODA LA PLATAFORMA (solo Administrador FOM)
 // ------------------------------------------------------------
-// Las personas de TODOS los entes en una sola búsqueda: nombre, correo,
+// Las personas de TODOS los empresas en una sola búsqueda: nombre, correo,
 // empresa o código. Una fila por membresía, así que quien pertenece a dos
-// entes sale dos veces, y eso es correcto: son dos accesos distintos.
+// empresas sale dos veces, y eso es correcto: son dos accesos distintos.
 // El administrador gestiona aquí cada membresía con su empresa explícita.
 // ============================================================
 
@@ -43,9 +43,9 @@ export default function Plataforma() {
       </Cabecera>
       <div className="pnl-cuerpo">
         <div className="pnl-grid k3">
-          <Kpi titulo="Membresías" valor={total == null ? '—' : f.numero(total)} icono="gente" nota="Una por persona y ente" />
-          <Kpi titulo="Entes" valor="Ver" icono="empresa" nota="Crear, suspender y colgar contratistas" a="/panel/admin/empresas" />
-          <Kpi titulo="Transferencias" valor="Ver" icono="comparar" nota="Mover gente y unidades entre entes" a="/panel/admin/transferencias" />
+          <Kpi titulo="Membresías" valor={total == null ? '—' : f.numero(total)} icono="gente" nota="Una por persona y empresa" />
+          <Kpi titulo="Empresas" valor="Ver" icono="empresa" nota="Crear, suspender y colgar contratistas" a="/panel/admin/empresas" />
+          <Kpi titulo="Transferencias" valor="Ver" icono="comparar" nota="Mover gente y unidades entre empresas" a="/panel/admin/transferencias" />
         </div>
 
         <label className="pnl-campo">Empresa
@@ -65,11 +65,11 @@ export default function Plataforma() {
           {personas.estado === 'error' && <ErrorCarga onReintentar={personas.recargar} error={personas.error} />}
           {personas.estado === 'ok' && (personas.datos.length === 0 ? (
             <div className="pnl-card-cuerpo">
-              <Vacio icono="buscar" titulo="Nadie coincide" texto="Prueba con parte del nombre, el correo o el código del ente." />
+              <Vacio icono="buscar" titulo="Nadie coincide" texto="Prueba con parte del nombre, el correo o el código del empresa." />
             </div>
           ) : (
             <>
-              <div className="pnl-tabla-wrap"><table className="pnl-tabla"><thead><tr><th>Persona</th><th>Ente</th><th>Rol</th><th>Estado</th><th>Código</th><th aria-label="Acciones" /></tr></thead><tbody>
+              <div className="pnl-tabla-wrap"><table className="pnl-tabla"><thead><tr><th>Persona</th><th>Empresa</th><th>Rol</th><th>Estado</th><th>Código</th><th aria-label="Acciones" /></tr></thead><tbody>
                 {personas.datos.map(p => <tr key={p.id}>
                   <td><div className="pnl-persona"><i className="pnl-avatar">{f.iniciales(p.nombre)}</i><div className="pnl-doble"><b>{p.nombre}</b><span>{p.email}</span></div></div></td>
                   <td>{rolCanonico(p.rol) === 'admin_fom' ? 'Acceso global · FOM' : p.empresaNombre}</td>

@@ -11,7 +11,7 @@ import { Icono } from '../Iconos'
 
 // ============================================================
 // PAGOS DEL SERVICIO (solo Administrador FOM)
-// La facturación de FOM a cada ente: lo vencido arriba, y el registro
+// La facturación de FOM a cada empresa: lo vencido arriba, y el registro
 // de cada cuota con su estado.
 // ============================================================
 
@@ -50,7 +50,7 @@ export default function AdminPagos() {
   return (
     <>
       <Cabecera
-        titulo="Pagos del servicio"
+        titulo="Facturación"
         bajada="Registro administrativo de cuotas y pagos informados. Esta web no procesa cobros ni mueve dinero."
       >
         <button type="button" className="pnl-btn primario" onClick={() => setRegistrando(true)}>
@@ -228,7 +228,7 @@ function ModalRegistrar({ abierto, empresas, alCerrar, alGuardar, actor }) {
     <Modal titulo="Registrar cuota" abierto={abierto} alCerrar={cerrar} ancho={480}>
       <Campo etiqueta="Empresa" error={error}>
         <select className="pnl-input" value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
-          <option value="">Selecciona el ente…</option>
+          <option value="">Selecciona el empresa…</option>
           {empresas.map((e) => (
             <option key={e.id} value={e.id}>{e.nombre}</option>
           ))}

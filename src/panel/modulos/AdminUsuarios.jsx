@@ -74,7 +74,7 @@ function exportarCSV(lista) {
 
 function cargar(q, empresaId, rol) {
   if (DIRECTORIO_REAL) {
-    // El servidor resuelve la empresa desde la sesión, sin un ente elegible.
+    // El servidor resuelve la empresa desde la sesión, sin un empresa elegible.
     return Promise.all([
       repo.admin.usuarios.listar({ q, rol }),
       repo.admin.empresas.listar().catch(() => []),
@@ -319,7 +319,7 @@ function Contenido({
                           {/* La empresa debajo del nombre, como pidio Marco: en la
                               vista de un contratista, o en la del admin FOM, es lo
                               que distingue a dos personas con el mismo nombre. Si
-                              el nombre del ente no se resolvio, no se inventa. */}
+                              el nombre del empresa no se resolvio, no se inventa. */}
                           <span>
                             {p.empresaNombre ? `${p.empresaNombre} · ` : ''}
                             {p.email}
@@ -602,13 +602,13 @@ export function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, dire
           </Campo>
           {(!directorioReal || global) && <Campo etiqueta="Empresa">
             <select className="pnl-input" value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
-              <option value="">Selecciona el ente…</option>
+              <option value="">Selecciona el empresa…</option>
               {destinos.map((e) => (
                 <option key={e.id} value={e.id}>{e.nombre} · {e.tipoEtiqueta}</option>
               ))}
             </select>
           </Campo>}
-          <Campo etiqueta="Rol" ayuda="El repositorio valida rol contra tipo de ente, igual que la app.">
+          <Campo etiqueta="Rol" ayuda="El repositorio valida rol contra tipo de empresa, igual que la app.">
             <select className="pnl-input" value={rol} onChange={(e) => setRol(e.target.value)}>
               {(directorioReal ? rolesReales : ROLES_ASIGNABLES.map((r) => ({ v: r, t: etiquetaRol(r, destino?.tipo) }))).map((r) => (
                 <option key={r.v} value={r.v}>{r.t}</option>
@@ -687,7 +687,7 @@ function ModalMover({ usuario, empresas, alCerrar, alGuardar, actor }) {
 
   return (
     <Modal titulo={`Mover a ${usuario.nombre}`} abierto alCerrar={cerrar} ancho={460}>
-      <Campo etiqueta="Ente destino" error={error} ayuda="El rol debe ser compatible con el tipo de ente.">
+      <Campo etiqueta="Empresa destino" error={error} ayuda="El rol debe ser compatible con el tipo de empresa.">
         <select className="pnl-input" value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
           <option value="">Selecciona…</option>
           {destinos.map((e) => (

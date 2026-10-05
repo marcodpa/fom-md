@@ -289,7 +289,7 @@ export const repoApi = {
                 ? 'Operador'
                 : 'Usuario',
           empresaId: null,
-          empresaNombre: 'Ente actual',
+          empresaNombre: 'Empresa actual',
           conduce: u.role === 'conductor',
           claveTemporal: null,
           perfilCompleto: null,

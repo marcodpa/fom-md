@@ -120,19 +120,19 @@ export default function AdminGps() {
 }
 
 /**
- * IMEI que están mandando mensajes al receptor sin pertenecer a ningún ente.
+ * IMEI que están mandando mensajes al receptor sin pertenecer a ningún empresa.
  * Es la bandeja del administrador: un equipo recién encendido aparece aquí
  * antes de registrarlo. Lectura reservada al administrador FOM.
  */
 function SinEmparejar() {
   const bandeja = useDatos(() => repo.admin.gps.sinEmparejar(), [], 60000)
   return (
-    <Tarjeta titulo="Equipos que reportan sin ente" sinCuerpo>
+    <Tarjeta titulo="Equipos que reportan sin empresa" sinCuerpo>
       {bandeja.estado === 'cargando' && <Cargando filas={2} />}
       {bandeja.estado === 'error' && <ErrorCarga onReintentar={bandeja.recargar} error={bandeja.error} />}
       {bandeja.estado === 'ok' && (bandeja.datos.length === 0 ? (
         <div className="pnl-card-cuerpo">
-          <Vacio icono="pin" titulo="Nada sin emparejar" texto="Todo IMEI que llega al receptor ya está registrado en algún ente." />
+          <Vacio icono="pin" titulo="Nada sin emparejar" texto="Todo IMEI que llega al receptor ya está registrado en algún empresa." />
         </div>
       ) : (
         <div className="pnl-filas">

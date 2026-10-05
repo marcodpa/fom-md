@@ -586,7 +586,7 @@ function ModalNuevaUnidad({ abierto, areas, alCerrar, alGuardar, actor }) {
 }
 
 // ---------------- Nueva área ----------------
-// Igual que en la app: nombre y tipo (ubicación, sector o contrato). El ente
+// Igual que en la app: nombre y tipo (ubicación, sector o contrato). El empresa
 // es el de la sesión; el servidor la crea bajo `tenants/:id/areas`.
 const TIPOS_DE_AREA = [['ubicacion', 'Ubicación'], ['sector', 'Sector'], ['contrato', 'Contrato']]
 function ModalArea({ abierto, tenantId, alCerrar, alGuardar }) {
@@ -596,7 +596,7 @@ function ModalArea({ abierto, tenantId, alCerrar, alGuardar }) {
   const [guardando, setGuardando] = useState(false)
   async function confirmar() {
     if (nombre.trim().length < 2) return setError('Ponle nombre al área.')
-    if (!tenantId) return setError('No se sabe el ente de la sesión: vuelve a entrar.')
+    if (!tenantId) return setError('No se sabe el empresa de la sesión: vuelve a entrar.')
     setGuardando(true)
     setError('')
     try {

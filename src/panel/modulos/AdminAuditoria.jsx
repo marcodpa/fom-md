@@ -18,7 +18,7 @@ const TIPOS = {
   crear_empresa: { t: 'Empresa creada', i: 'empresa', c: 'verde' },
   editar_empresa: { t: 'Empresa editada', i: 'editar', c: 'azul' },
   eliminar_empresa: { t: 'Empresa eliminada', i: 'empresa', c: 'rojo' },
-  servicio_empresa: { t: 'Servicio del ente', i: 'escudo', c: 'ambar' },
+  servicio_empresa: { t: 'Servicio del empresa', i: 'escudo', c: 'ambar' },
   crear_usuario: { t: 'Usuario creado', i: 'gente', c: 'verde' },
   editar_usuario: { t: 'Usuario editado', i: 'editar', c: 'azul' },
   mover_usuario: { t: 'Usuario movido', i: 'gente', c: 'azul' },
@@ -42,7 +42,7 @@ const ACCION = {
 }
 const ENTIDAD = {
   work_order: 'Orden de trabajo', vehicle_driver_assignment: 'Asignación de conductor', user_credential: 'Clave',
-  user_profile: 'Perfil', notification: 'Aviso', vehicle: 'Vehículo', tenant: 'Ente', user: 'Persona',
+  user_profile: 'Perfil', notification: 'Aviso', vehicle: 'Vehículo', tenant: 'Empresa', user: 'Persona',
   membership: 'Membresía', document: 'Documento', gps_device: 'Equipo GPS', alert_rule: 'Regla',
 }
 const vista = (tipo) => {

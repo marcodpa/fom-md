@@ -69,7 +69,7 @@ const MENU_ADMIN = {
     { a: '/panel/admin/empresas', icono: 'empresa', texto: 'Empresas' },
     { a: '/panel/admin/plataforma', icono: 'buscar', texto: 'Toda la plataforma' },
     { a: '/panel/admin/transferencias', icono: 'comparar', texto: 'Transferencias' },
-    { a: '/panel/admin/pagos', icono: 'costos', texto: 'Pagos' },
+    { a: '/panel/admin/pagos', icono: 'costos', texto: 'Facturación' },
     { a: '/panel/admin/gps', icono: 'pin', texto: 'GPS' },
     { a: '/panel/admin/auditoria', icono: 'auditoria', texto: 'Auditoría' },
   ],
