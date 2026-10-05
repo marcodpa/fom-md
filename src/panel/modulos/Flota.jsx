@@ -126,6 +126,8 @@ export default function Flota() {
   const esAdmin = esAdminFom(sesion?.perfil)
   const esGestorDeFlota = esGestor(sesion?.perfil)
   const [creandoArea, setCreandoArea] = useState(false)
+  const [asignando, setAsignando] = useState(null) // { area } cuando se abre «Agregar vehículos a un área»
+  const [moviendo, setMoviendo] = useState(null) // la unidad cuya área se cambia desde su fila
   const [q, setQ] = useState('')
   const [filtro, setFiltro] = useState('todas')
   const [areaId, setAreaId] = useState('')
@@ -217,6 +219,12 @@ export default function Flota() {
             Nueva área
           </button>
         )}
+        {esGestorDeFlota && (
+          <button type="button" className="pnl-btn" onClick={() => setAsignando({ area: areaId })}>
+            <Icono nombre="camion" tam={16} />
+            Agregar vehículos a un área
+          </button>
+        )}
         {esAdmin && (
           <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
             <Icono nombre="mas" tam={16} />
@@ -225,6 +233,24 @@ export default function Flota() {
         )}
       </Cabecera>
 
+      {esGestorDeFlota && (
+        <ModalAsignarArea
+          abierto={Boolean(asignando)}
+          areas={areas.datos ?? []}
+          vehiculos={lista}
+          areaInicial={asignando?.area ?? ''}
+          alCerrar={() => setAsignando(null)}
+          alGuardar={vehiculos.recargar}
+        />
+      )}
+      {esGestorDeFlota && (
+        <ModalMoverUnidad
+          unidad={moviendo}
+          areas={areas.datos ?? []}
+          alCerrar={() => setMoviendo(null)}
+          alGuardar={vehiculos.recargar}
+        />
+      )}
       {esAdmin && (
         <ModalNuevaUnidad
           abierto={creando}
@@ -288,7 +314,17 @@ export default function Flota() {
 
             <Tarjeta
               titulo={`${ordenadas.length} ${ordenadas.length === 1 ? 'unidad' : 'unidades'}`}
-              accion={<span className="pnl-link">Toca una fila para ver el expediente</span>}
+              accion={
+                <span className="pnl-chips" style={{ alignItems: 'center' }}>
+                  {esGestorDeFlota && areaId && (
+                    <button type="button" className="pnl-btn primario" onClick={() => setAsignando({ area: areaId })}>
+                      <Icono nombre="mas" tam={16} />
+                      Agregar vehículos a «{(areas.datos ?? []).find((a) => a.id === areaId)?.nombre ?? 'esta área'}»
+                    </button>
+                  )}
+                  <span className="pnl-link">Toca una fila para ver el expediente</span>
+                </span>
+              }
               sinCuerpo
             >
               {!lista.length && (
@@ -372,7 +408,23 @@ export default function Flota() {
                             </div></div>
                           </td>
                           <td className="placa">{v.placa}</td>
-                          <td>{v.areaNombre}</td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span>{v.areaNombre}</span>
+                              {esGestorDeFlota && (
+                                <button
+                                  type="button"
+                                  className="pnl-btn sutil"
+                                  style={{ minHeight: 30, padding: '2px 10px', fontSize: 12 }}
+                                  aria-label={`Cambiar el área de ${v.alias}`}
+                                  onClick={(e) => { e.stopPropagation(); setMoviendo(v) }}
+                                  onKeyDown={(e) => e.stopPropagation()}
+                                >
+                                  Cambiar
+                                </button>
+                              )}
+                            </div>
+                          </td>
                           <td>{nombreConductor(v)}</td>
                           <td>
                             <div className="pnl-doble">
@@ -570,6 +622,161 @@ function ModalArea({ abierto, tenantId, alCerrar, alGuardar }) {
       </Campo>
       <div className="pnl-chips">
         <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>{guardando ? 'Guardando…' : 'Crear área'}</button>
+        <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
+      </div>
+    </Modal>
+  )
+}
+
+
+// ---------------- Agregar vehículos a un área ----------------
+// Elige el área, marca las unidades y listo. Cada cambio es el mismo que se hace desde el expediente
+// de la unidad (`asignarArea`); aquí se hacen varios de una vez y se avisa de los que no se pudieron.
+function ModalAsignarArea({ abierto, areas, vehiculos, areaInicial, alCerrar, alGuardar }) {
+  const [destino, setDestino] = useState('')
+  const [q, setQ] = useState('')
+  const [marcados, setMarcados] = useState(() => new Set())
+  const [progreso, setProgreso] = useState(null)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!abierto) return
+    setDestino(areaInicial || areas[0]?.id || '')
+    setQ('')
+    setMarcados(new Set())
+    setProgreso(null)
+    setError('')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abierto, areaInicial])
+
+  const candidatos = useMemo(() => {
+    const t = q.trim().toLowerCase()
+    return vehiculos
+      .filter((v) => (v.areaId ?? '') !== destino)
+      .filter((v) => !t || [v.alias, v.placa, v.numero, v.areaNombre, v.marca, v.modelo].join(' ').toLowerCase().includes(t))
+  }, [vehiculos, destino, q])
+  const nombreDestino = destino ? (areas.find((a) => a.id === destino)?.nombre ?? 'el área') : 'Sin área'
+  const todosMarcados = candidatos.length > 0 && candidatos.every((v) => marcados.has(v.id))
+  const trabajando = progreso !== null
+
+  function alternar(id) {
+    setMarcados((m) => {
+      const n = new Set(m)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
+  }
+  function alternarTodos() {
+    setMarcados((m) => {
+      const n = new Set(m)
+      if (todosMarcados) candidatos.forEach((v) => n.delete(v.id))
+      else candidatos.forEach((v) => n.add(v.id))
+      return n
+    })
+  }
+
+  async function confirmar() {
+    const ids = [...marcados]
+    if (ids.length === 0) return setError('Marca al menos una unidad.')
+    setError('')
+    const fallidos = []
+    for (let i = 0; i < ids.length; i++) {
+      setProgreso({ hechos: i, total: ids.length })
+      try {
+        await repo.vehiculos.asignarArea(ids[i], destino || null)
+      } catch (e) {
+        fallidos.push({ id: ids[i], motivo: e?.message || 'no se pudo' })
+      }
+    }
+    await alGuardar()
+    setProgreso(null)
+    if (fallidos.length) {
+      setMarcados(new Set(fallidos.map((x) => x.id)))
+      const nombre = (id) => vehiculos.find((x) => x.id === id)?.alias ?? 'Unidad'
+      setError(`${ids.length - fallidos.length} de ${ids.length} se pasaron. No se pudo con: ${fallidos.map((x) => `${nombre(x.id)} (${x.motivo})`).join(' · ')}`)
+      return
+    }
+    alCerrar()
+  }
+
+  return (
+    <Modal titulo="Agregar vehículos a un área" abierto={abierto} alCerrar={trabajando ? () => {} : alCerrar} ancho={620}>
+      <Campo etiqueta="¿A qué área?">
+        <select className="pnl-input" value={destino} disabled={trabajando} onChange={(e) => { setDestino(e.target.value); setMarcados(new Set()) }}>
+          <option value="">Sin área</option>
+          {areas.map((a) => <option key={a.id} value={a.id}>{a.nombre}</option>)}
+        </select>
+      </Campo>
+      <Campo etiqueta="Unidades que todavía no están ahí" ayuda="Marca las que quieres pasar. Su área actual aparece a la derecha.">
+        <input className="pnl-input" value={q} disabled={trabajando} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por alias, placa o área…" />
+      </Campo>
+      {candidatos.length === 0 ? (
+        <Vacio icono="camion" titulo="No hay unidades para agregar" texto={`Todas las unidades ya están en «${nombreDestino}»${q.trim() ? ' o no coinciden con la búsqueda' : ''}.`} />
+      ) : (
+        <>
+          <label style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '6px 4px', fontSize: 14 }}>
+            <input type="checkbox" checked={todosMarcados} disabled={trabajando} onChange={alternarTodos} />
+            Marcar todas las que se ven ({candidatos.length})
+          </label>
+          <div className="pnl-filas" style={{ maxHeight: 320, overflow: 'auto' }}>
+            {candidatos.map((v) => (
+              <label key={v.id} className="pnl-fila" style={{ cursor: 'pointer' }}>
+                <input type="checkbox" checked={marcados.has(v.id)} disabled={trabajando} onChange={() => alternar(v.id)} />
+                <div className="pnl-fila-txt">
+                  <b>{v.alias}</b>
+                  <span>{v.placa} · {v.marca} {v.modelo}</span>
+                </div>
+                <em>{v.areaNombre}</em>
+              </label>
+            ))}
+          </div>
+        </>
+      )}
+      {error && <p role="alert" style={{ color: '#f87171', fontSize: 14, margin: '12px 0 0' }}>{error}</p>}
+      {trabajando && <p role="status" style={{ fontSize: 14, margin: '12px 0 0' }}>Pasando {progreso.hechos + 1} de {progreso.total}…</p>}
+      <div className="pnl-chips" style={{ marginTop: 16 }}>
+        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={trabajando || marcados.size === 0}>
+          {marcados.size === 0 ? 'Agregar' : `Agregar ${marcados.size} ${marcados.size === 1 ? 'unidad' : 'unidades'} a «${nombreDestino}»`}
+        </button>
+        <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={trabajando}>Cancelar</button>
+      </div>
+    </Modal>
+  )
+}
+
+// ---------------- Cambiar el área de una unidad (desde su fila) ----------------
+function ModalMoverUnidad({ unidad, areas, alCerrar, alGuardar }) {
+  const [destino, setDestino] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    setDestino(unidad?.areaId ?? '')
+    setError('')
+  }, [unidad])
+  async function confirmar() {
+    setGuardando(true)
+    setError('')
+    try {
+      await repo.vehiculos.asignarArea(unidad.id, destino || null)
+      await alGuardar()
+      alCerrar()
+    } catch (e) {
+      setError(e?.message || 'No se pudo cambiar el área.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+  return (
+    <Modal titulo={unidad ? `Área de ${unidad.alias}` : ''} abierto={Boolean(unidad)} alCerrar={alCerrar} ancho={460}>
+      <Campo etiqueta="Área" error={error} ayuda="Ubicación, sector o contrato al que responde la unidad.">
+        <select className="pnl-input" value={destino} onChange={(e) => setDestino(e.target.value)}>
+          <option value="">Sin área</option>
+          {areas.map((a) => <option key={a.id} value={a.id}>{a.nombre}</option>)}
+        </select>
+      </Campo>
+      <div className="pnl-chips">
+        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando || destino === (unidad?.areaId ?? '')}>{guardando ? 'Guardando…' : 'Guardar'}</button>
         <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
       </div>
     </Modal>
