@@ -313,6 +313,8 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
     () => ((enTaller || odt.estado === 'cerrada') && repo.odts.ejecucion ? repo.odts.ejecucion(odt.id) : Promise.resolve(null)),
     [odt.id, odt.estado],
   )
+  // Cada cambio de estado de la orden, guardado en la base con su autor, su fecha y su nota.
+  const historial = useDatos(() => (repo.odts.historial ? repo.odts.historial(odt.id) : Promise.resolve(null)), [odt.id, odt.estado])
   const responsable = ejecucion.datos?.responsable ?? null
   const omiteTaller = odt.estado === 'cerrada' && ejecucion.estado === 'ok' && !ejecucion.datos?.responsable && !(ejecucion.datos?.eventos?.length)
   // La sesión trae correo y nombre, no identificador: se resuelve contra la
@@ -492,13 +494,20 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
       {(() => {
         // La historia completa de la orden, en el orden en que pasó: quién la reportó, a quién se asignó,
         // qué hizo el taller y, si ya se cerró, qué se hizo y cuánto costó.
+        const cambios = historial.datos ?? []
         const hitos = [
-          { t: 'Reportada', d: `${odt.creadorNombre || 'Alguien'} · ${odt.descripcion}`, en: odt.creadaEn },
+          ...(cambios.length
+            ? cambios.map((c) => ({
+                t: c.de ? `${c.actor || 'Alguien'}: de «${etiqueta('odt_estado', c.de)}» a «${etiqueta('odt_estado', c.a)}»` : `${c.actor || odt.creadorNombre || 'Alguien'} reportó la falla`,
+                d: c.de ? (c.a === 'cerrada' ? [odt.notaSolucion, c.nota, odt.costo != null ? `Costo ${f.moneda(odt.costo)}` : 'Sin costo registrado'].filter(Boolean).join(' · ') : c.nota) : [odt.descripcion, c.nota].filter(Boolean).join(' · '),
+                en: c.en,
+              }))
+            : [
+                { t: 'Reportada', d: `${odt.creadorNombre || 'Alguien'} · ${odt.descripcion}`, en: odt.creadaEn },
+                ...(odt.estado === 'cerrada' && odt.resueltaEn ? [{ t: 'Cerrada', d: [odt.notaSolucion, odt.costo != null ? `Costo ${f.moneda(odt.costo)}` : 'Sin costo registrado'].filter(Boolean).join(' · '), en: odt.resueltaEn }] : []),
+              ]),
           ...(responsable ? [{ t: 'Responsable asignado', d: responsable.nombre, en: responsable.desde }] : []),
           ...(ejecucion.datos?.eventos ?? []).map((e) => ({ t: `${e.actor} ${EVENTO_ODT[e.tipo] ?? e.tipo}`, d: e.nota, en: e.en })),
-          ...(odt.estado === 'cerrada' && odt.resueltaEn
-            ? [{ t: 'Cerrada', d: [odt.notaSolucion, odt.costo != null ? `Costo ${f.moneda(odt.costo)}` : 'Sin costo registrado'].filter(Boolean).join(' · '), en: odt.resueltaEn }]
-            : []),
         ]
           .filter((h) => h.en)
           .sort((a, b) => new Date(a.en) - new Date(b.en))

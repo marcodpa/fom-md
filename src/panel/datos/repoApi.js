@@ -1062,6 +1062,21 @@ export const repoApi = {
      * responsable puede iniciar, pausar, reanudar o entregar (así lo exige
      * el servidor, igual que la app); el gestor lo ve.
      */
+    /**
+     * El historial COMPLETO de la orden, tal como lo guarda la base: cada cambio de estado con quién lo hizo,
+     * cuándo y la nota. El servidor lo devuelve junto con la orden (`events`), del primero al último.
+     */
+    async historial(id) {
+      const r = await api.odt(id)
+      return (r?.events ?? []).map((e) => ({
+        n: e.sequence,
+        de: e.fromStatus ?? null,
+        a: e.toStatus,
+        nota: e.note ?? '',
+        en: e.occurredAt,
+        actor: e.actorName ?? null,
+      }))
+    },
     async ejecucion(id) {
       const r = await api.ejecucionOdt(id)
       const vigente = (r?.assignments ?? []).find((a) => !a.endedAt) ?? null

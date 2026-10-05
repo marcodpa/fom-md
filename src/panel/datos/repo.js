@@ -227,6 +227,7 @@ const repo = HAY_API
         cambiarEstado: repoApi.odts.cambiarEstado,
         asignarResponsable: repoApi.odts.asignarResponsable,
         ejecucion: repoApi.odts.ejecucion,
+        historial: repoApi.odts.historial,
         ejecutar: repoApi.odts.ejecutar,
       },
       inspecciones: conRespaldoParcial(
