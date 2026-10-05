@@ -20,7 +20,11 @@
 .control-filters>*{pointer-events:auto}
 .control-filters .pnl-chips{flex-wrap:nowrap;gap:6px;margin:0;flex-shrink:0}
 .control-filters .pnl-chip{white-space:nowrap;background:#0b1927;color:#c6d4e3;border-color:#263b4d}
-.control-filters select{max-width:220px;width:auto;background:#0b1927}
+/* El selector de área se ve como los chips de al lado: misma altura, forma de píldora, mismo borde y tipografía. */
+.fom-dark .control-filters select.pnl-input{min-height:40px;appearance:none;-webkit-appearance:none;max-width:220px;width:auto;height:40px;padding:0 34px 0 var(--e-lg,16px);border-radius:999px;border:1px solid #263b4d;background:#0b1927 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c6d4e3' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 13px center;color:#c6d4e3;font-family:var(--e-fuente,inherit);font-size:var(--e-t-sm,13px);font-weight:500;line-height:1;cursor:pointer;transition:color .15s,border-color .15s}
+.fom-dark .control-filters select.pnl-input:hover{color:#f3f7fc;border-color:#3a5570}
+.fom-dark .control-filters select.pnl-input:focus-visible{outline:2px solid #68baff;outline-offset:2px}
+.fom-dark .control-filters select.pnl-input option{background:#0b1927;color:#f3f7fc}
 .control-panel{position:absolute;left:20px;top:160px;width:352px;max-height:calc(100% - 214px);overflow:auto;overscroll-behavior:contain;border:1px solid #263b4d;background:#0b1927f5;border-radius:14px;z-index:3;padding:18px;scrollbar-width:thin;scrollbar-color:#39566e #0b1927}
 .control-unit{display:flex;flex-direction:column;overflow:hidden;height:calc(100% - 214px)}
 .control-unit .fleet-card{min-height:0;flex:1}
@@ -59,7 +63,7 @@
  .control-search .pnl-btn svg{width:20px}
  .control-filters{top:146px;left:12px;right:12px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
  .fom-dark .control-filters .pnl-chip{font-size:12px;min-height:40px;padding:8px 10px}
- .control-filters select{min-width:140px;font-size:12px;min-height:40px}
+ .fom-dark .control-filters select.pnl-input{min-width:140px;font-size:12px;height:40px;min-height:40px}
  .control-panel{left:12px;right:12px;top:auto;bottom:62px;width:auto;max-height:44dvh;padding:16px}
  .control-feedback{top:200px;bottom:auto;max-height:40dvh}
  .control-live{display:none}
