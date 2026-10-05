@@ -14,6 +14,7 @@ import { BarrasH } from '../comp/Grafico'
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
+import { resumenKm } from '../datos/odometro'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
 
 // ============================================================
@@ -68,6 +69,29 @@ function Nivel({ icono, titulo, pct, tono }) {
       <em>{pct ?? 0}%</em>
     </div>
   )
+}
+
+/**
+ * Kilometraje de la unidad. Si el equipo manda odómetro, ese total manda. Si no, se calcula del GPS de los
+ * últimos 7 días (sin saltos ni deriva) y se dice que es un cálculo, no una lectura.
+ */
+function KpiKilometraje({ v }) {
+  const pos = useDatos(() => repo.recorridoDetallado(v.id, { horas: 168, limite: 1000 }), [v.id])
+  const hoy = f.hoyISO()
+  const r = pos.estado === 'ok' ? resumenKm({ lectura: v.km, puntos: pos.datos.puntos, hoy }) : null
+  const aprox = (n) => `${f.numero(Math.round(n))} km`
+  let valor = f.km(v.km)
+  let nota = `Alta: ${f.fecha(v.creadoEn)}`
+  if (r) {
+    const parcial = pos.datos.truncado ? ' (al menos)' : ''
+    if (r.lectura == null) {
+      valor = r.recorridoKm > 0 ? `≈ ${aprox(r.recorridoKm)}` : 'Sin dato'
+      nota = r.recorridoKm > 0 ? `Calculado del GPS, últimos 7 días${parcial}. El equipo no manda odómetro.` : 'El equipo no manda odómetro y no hay recorrido reciente.'
+    } else {
+      nota = `Hoy ${aprox(r.hoyKm)} · 7 días ${aprox(r.recorridoKm)}${parcial}`
+    }
+  }
+  return <Kpi titulo="Kilometraje" valor={valor} icono="camion" nota={nota} />
 }
 
 export default function ExpedienteVehiculo() {
@@ -235,7 +259,7 @@ export default function ExpedienteVehiculo() {
         {estado === 'ok' && v && (
           <>
             <div className="pnl-grid k4">
-              <Kpi titulo="Kilometraje" valor={f.km(v.km)} icono="camion" nota={`Alta: ${f.fecha(v.creadoEn)}`} />
+              <KpiKilometraje v={v} />
               <Kpi
                 titulo="Índice seguro"
                 valor={v.indiceSeguro}
