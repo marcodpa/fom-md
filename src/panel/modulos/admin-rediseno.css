@@ -1,0 +1,15 @@
+/* GPS y Auditoría con el estilo de Mantenimiento: lista a la izquierda, detalle y acciones a la derecha. */
+.adm-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;align-items:start}
+.adm-panel{position:sticky;top:16px;border:1px solid var(--mnt-line);background:var(--e-sup);border-radius:12px;padding:22px;display:grid;gap:16px;min-width:0}
+.adm-detalle{display:grid;gap:16px;min-width:0}
+.adm-cab{display:flex;align-items:center;gap:14px}.adm-cab h3{margin:0 0 4px}.adm-cab code{font-size:12px;color:var(--e-texto-2);overflow-wrap:anywhere}
+.adm-tags{display:flex;gap:8px;flex-wrap:wrap}
+.adm-item{cursor:pointer;transition:background .15s}.adm-item:hover{background:var(--e-sup-baja)}.adm-item.sel{background:var(--e-info-sup);box-shadow:inset 3px 0 0 var(--e-info)}
+.adm-sigue{padding:14px 16px;background:var(--e-sup-baja);border-radius:10px;display:grid;gap:6px}.adm-sigue b{font-size:13px}.adm-sigue p{font-size:13px;margin:0}
+.adm-acciones{display:grid;gap:10px}.adm-acciones .pnl-btn{justify-content:center;text-decoration:none}
+.adm-instalar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.adm-dia{padding:10px 22px;font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--e-texto-2);background:var(--e-sup-baja);border-bottom:1px solid var(--mnt-line)}
+.adm-hora{font-variant-numeric:tabular-nums;color:var(--e-texto-2);font-size:13px;flex:none}
+.adm-cadena{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:1100px){.adm-layout{grid-template-columns:1fr}.adm-panel{position:static}}
+.mnt-filters .pnl-buscar{max-width:560px}.mnt-filters select.pnl-input{min-width:220px;width:auto}

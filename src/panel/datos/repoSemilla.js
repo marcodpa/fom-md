@@ -861,6 +861,14 @@ export const repo = {
         return responder(true, 260)
       },
 
+      /** Edita los datos del equipo (fabricante, serie, activo o inactivo). */
+      async set(id, { estado, fabricante, serie }) {
+        const g = todosGps().find((x) => x.id === id)
+        if (!g) return fallo('Ese GPS no está en el inventario.')
+        guardarParche('gps', id, { estado, fabricante, serie })
+        return responder(true, 220)
+      },
+
       /** Prueba del botón de pánico (solo equipos verificados con soporte PIN). */
       async probarPanico(id, actor) {
         const g = todosGps().find((x) => x.id === id)

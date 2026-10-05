@@ -801,6 +801,9 @@ export const repoApi = {
           vehiculoId: d.vehicleId ?? null,
           vehiculoNombre: d.vehicleId ? [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') : null,
           ubicacion: d.storageLocation ?? null,
+          serie: d.serialNumber ?? null,
+          pinSupport: Boolean(d.panicSupported ?? d.pinSupport),
+          instalacionId: d.installationId ?? d.activeInstallationId ?? d.installation?.id ?? null,
         }))
         .filter((g) => !t || [g.imei, g.modelo, g.linea, g.vehiculoNombre].some((v) => String(v ?? '').toLowerCase().includes(t)))
     },
