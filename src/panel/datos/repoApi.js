@@ -15,6 +15,7 @@ import { api, empresaGestionActualId } from './api'
 import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
+import { quitarSaltos } from './recorrido'
 
 /**
  * Une el vehículo con su estado en vivo en la forma que consumen los módulos.
@@ -258,7 +259,7 @@ function sinDeriva(acum, p, i, todos) {
 
 /** Filas de posiciones del servidor (más nuevas primero) → puntos válidos, del más antiguo al más nuevo. */
 function puntosDe(filas) {
-  return filas
+  return quitarSaltos(filas
     .filter((p) => p.positionValid && p.latitude != null && p.longitude != null)
     .map((p) => ({
       lat: p.latitude,
@@ -268,7 +269,7 @@ function puntosDe(filas) {
       ignition: p.telemetry?.ignition ?? null,
       hora: p.eventTime || p.receivedAt,
     }))
-    .reverse()
+    .reverse())
 }
 
 export const repoApi = {
@@ -1308,7 +1309,7 @@ export const repoApi = {
       const items = []
       let offset = 0
       while (true) {
-        const r = await api.eventosDeAlerta({ limit: 200, offset })
+        const r = await api.eventosDeAlerta({ limit: 100, offset })
         const page = r.items ?? []
         items.push(...page)
         offset += page.length

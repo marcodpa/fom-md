@@ -19,6 +19,31 @@ export const COLA_MIN = 5
 const RADIO_TIERRA_M = 6371000
 const rad = (g) => (g * Math.PI) / 180
 
+/**
+ * Quita los «saltos» del GPS: puntos que aparecen lejos de donde estaba la unidad, más rápido de lo que ella
+ * misma dice que va (un carro parado que «viaja» 500 m en un minuto), y que vuelven enseguida. Se dibujan como
+ * rectas largas que cruzan el mapa. Si los puntos lejanos se repiten (4 seguidos) se acepta que la unidad sí
+ * se movió, por ejemplo tras un túnel o un rato sin señal.
+ */
+export function quitarSaltos(puntos, { minM = 150, kmhMin = 25, kmhTope = 160, seguidos = 4 } = {}) {
+  const salida = []
+  let rechazados = 0
+  for (const p of puntos ?? []) {
+    const a = salida[salida.length - 1]
+    if (!a) { salida.push(p); continue }
+    const dt = Math.abs(Date.parse(p.hora) - Date.parse(a.hora)) / 3600000
+    const m = distanciaM(a, p)
+    const dicha = Math.max(a.velocidadKmh ?? 0, p.velocidadKmh ?? 0)
+    const conocida = a.velocidadKmh != null && p.velocidadKmh != null
+    const tope = conocida ? Math.max(dicha * 2, kmhMin) : kmhTope
+    const salto = m > minM && (dt <= 0 || m / 1000 / dt > tope)
+    if (salto && rechazados < seguidos - 1) { rechazados++; continue }
+    rechazados = 0
+    salida.push(p)
+  }
+  return salida
+}
+
 /** Distancia en metros entre dos puntos (fórmula de haversine). */
 export function distanciaM(a, b) {
   const dLat = rad(b.lat - a.lat)

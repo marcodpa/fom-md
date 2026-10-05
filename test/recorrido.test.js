@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { analizar, colaReciente, compactarQuietud, detectarParadas, distanciaM, puntoEnRuta, ultimosMinutos } from '../src/panel/datos/recorrido.js'
+import { analizar, colaReciente, compactarQuietud, detectarParadas, distanciaM, puntoEnRuta, quitarSaltos, ultimosMinutos } from '../src/panel/datos/recorrido.js'
 
 // Un punto cada minuto a partir de las 08:00; ~111 m por cada 0,001° de latitud.
 const T0 = Date.parse('2026-10-02T08:00:00Z')
@@ -155,4 +155,23 @@ test('deriva: lo que se mueve de verdad no se colapsa', () => {
   const rodando = []
   for (let m = 0; m <= 10; m++) rodando.push({ ...pt(m, 10 + m * 0.002), velocidadKmh: 45 })
   assert.equal(compactarQuietud(rodando).length, 11)
+})
+
+test('quitarSaltos: un carro parado que «salta» lejos y vuelve no dibuja rectas', () => {
+  const p = [pt(0, 10.0), pt(1, 10.0002), pt(2, 10.006), pt(3, 10.0001), pt(4, 10.0002), pt(5, 10.007), pt(6, 10.0)]
+  const r = quitarSaltos(p)
+  assert.equal(r.length, 5)
+  assert.ok(r.every((x) => x.lat < 10.001))
+})
+
+test('quitarSaltos: un carro que sí avanza rápido conserva todos sus puntos', () => {
+  const p = []
+  for (let m = 0; m <= 8; m++) p.push({ ...pt(m, 10.0 + m * 0.004), velocidadKmh: 60 }) // ~440 m/min = 26 km/h
+  assert.equal(quitarSaltos(p).length, p.length)
+})
+
+test('quitarSaltos: si el cambio de sitio se repite se acepta que se movió', () => {
+  const p = [pt(0, 10.0), pt(1, 10.0), pt(2, 10.05), pt(3, 10.0501), pt(4, 10.0502), pt(5, 10.0503), pt(6, 10.0504)]
+  const r = quitarSaltos(p)
+  assert.ok(r.some((x) => x.lat > 10.04))
 })
