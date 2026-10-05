@@ -44,3 +44,9 @@ docs/qa-dashboard/asignacion-confirmacion.png
 docs/qa-dashboard/plantilla-verificada.png
 docs/qa-dashboard/roles-plataforma.png
 docs/qa-dashboard/ejecucion.json
+
+# Local maintenance review captures may contain real fleet/personnel data.
+.impeccable/review/mantenimiento/
+output/mantenimiento-supervisor/visual.mp4
+output/mantenimiento-supervisor/render.log
+output/mantenimiento-supervisor/web-build.log

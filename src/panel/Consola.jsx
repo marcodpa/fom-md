@@ -25,8 +25,6 @@ import MiUnidad from './modulos/MiUnidad'
 import MiPerfil from './modulos/MiPerfil'
 import Seguridad from './modulos/Seguridad'
 import Jornadas from './modulos/Jornadas'
-import Planes from './modulos/Planes'
-import ProgramaInspecciones from './modulos/ProgramaInspecciones'
 import Transferencias from './modulos/Transferencias'
 import Plataforma from './modulos/Plataforma'
 
@@ -47,9 +45,7 @@ const MENU = [
       { a: '/panel/flota', icono: 'camion', texto: 'Vehículos' },
       { a: '/panel/jornadas', icono: 'reloj', texto: 'Jornadas' },
       { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento', fin: true },
-      { a: '/panel/mantenimiento/planes', icono: 'sync', texto: 'Planes de mantenimiento' },
       { a: '/panel/inspecciones', icono: 'check', texto: 'Inspecciones', fin: true },
-      { a: '/panel/inspecciones/programa', icono: 'inspeccion', texto: 'Programa de inspecciones' },
       { a: '/panel/documentos', icono: 'documento', texto: 'Documentos' },
     ],
   },
@@ -332,9 +328,9 @@ export default function Consola() {
           <Route path="seguridad" element={<Seguridad />} />
           <Route path="jornadas" element={<Jornadas />} />
           <Route path="mantenimiento" element={<Mantenimiento />} />
-          <Route path="mantenimiento/planes" element={<Planes />} />
+          <Route path="mantenimiento/planes" element={<Navigate to="/panel/mantenimiento?vista=planes" replace />} />
           <Route path="inspecciones" element={<Inspecciones />} />
-          <Route path="inspecciones/programa" element={<ProgramaInspecciones />} />
+          <Route path="inspecciones/programa" element={<Navigate to="/panel/inspecciones?vista=agenda" replace />} />
           <Route path="documentos" element={<Documentos />} />
           <Route path="personal" element={<AdminUsuarios />} />
           <Route path="personal/:id" element={<ExpedienteConductor />} />

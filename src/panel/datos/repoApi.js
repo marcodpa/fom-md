@@ -1537,6 +1537,7 @@ Object.assign(repoApi, {
         placa: a.plate ?? null,
         planId: a.planId ?? null,
         plan: a.planName ?? null,
+        ciclo: a.cycleOrdinal ?? null,
         odtId: a.workOrderId ?? null,
         tipo: a.kind,
         titulo: a.title,

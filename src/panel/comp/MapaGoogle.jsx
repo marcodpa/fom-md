@@ -249,12 +249,24 @@ export default function MapaGoogle({
     return () => { limpiar(); info.close() }
   }, [viajes, paradas, estado, tokens])
 
+  const colaEncuadrada = useRef(null)
+  useEffect(() => { colaEncuadrada.current = null }, [seleccionado])
+
   // Cola: los últimos minutos de camino de la unidad elegida
   useEffect(() => {
     if (estado !== 'listo' || !window.google?.maps) return undefined
     const g = window.google.maps
     if (!cola || cola.length < 2) return undefined
     const util = cola.filter(validPosition).map((p) => ({ lat: p.lat, lng: p.lng }))
+    if (util.length < 2) return undefined
+    if (seleccionado && colaEncuadrada.current !== seleccionado) {
+      const limites = new g.LatLngBounds()
+      util.forEach(p => limites.extend(p))
+      const ancho = contenedor.current.clientWidth
+      mapa.current.fitBounds(limites, { top: 150, right: 80, bottom: (ficha || espacioFicha) && ancho <= 600 ? Math.min(contenedor.current.clientHeight * .45, 350) : 80, left: (ficha || espacioFicha) && ancho > 600 ? 410 : 40 })
+      if (mapa.current.getZoom() > 16) mapa.current.setZoom(16)
+      colaEncuadrada.current = seleccionado
+    }
     const trazo = new g.Polyline({
       map: mapa.current, path: util, strokeOpacity: 0,
       icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, strokeColor: tokens.primario, scale: 3 }, offset: '0', repeat: '12px' }],

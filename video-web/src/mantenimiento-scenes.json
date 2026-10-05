@@ -1,0 +1,77 @@
+[
+  [
+    "01-inicio",
+    "Todo el mantenimiento, en un lugar",
+    "Órdenes, próximos servicios y planes. Empieza por lo que necesita tu atención."
+  ],
+  [
+    "02-listado",
+    "Encuentra la orden que buscas",
+    "Filtra por tipo y etapa, o busca por unidad. Abre la orden para revisar su siguiente paso."
+  ],
+  [
+    "03-nueva-unidad",
+    "Primero, elige la unidad",
+    "Busca por placa o nombre. Selecciona el vehículo antes de continuar."
+  ],
+  [
+    "04-nueva-falla",
+    "Describe qué está pasando",
+    "Cuenta la falla, elige su tipo e indica la ubicación. La orden queda abierta para revisión."
+  ],
+  [
+    "05-detalle",
+    "Revisa y decide qué sigue",
+    "Consulta el reporte y su estado exacto. Cada cambio requiere una nota y confirmación."
+  ],
+  [
+    "06-asignar",
+    "Asigna a quien hará el trabajo",
+    "Después de aprobar, elige un responsable permitido. Recibirá el trabajo en su app."
+  ],
+  [
+    "07-taller",
+    "Sigue el trabajo en taller",
+    "Solo el responsable inicia, pausa, reanuda y entrega. El supervisor consulta la actividad y revisa el resultado."
+  ],
+  [
+    "08-cerrar",
+    "Cierra con una solución clara",
+    "Describe qué se hizo, agrega el costo en USD si lo tienes y confirma con la nota de cierre."
+  ],
+  [
+    "09-confirmacion",
+    "Confirma los cambios importantes",
+    "Revisa el destino antes de guardar. Una orden cancelada no admite más cambios."
+  ],
+  [
+    "10-proximos",
+    "Anticípate al próximo servicio",
+    "Consulta acciones por estado y vencimiento. Puedes abrir una orden preventiva vinculada a una acción abierta."
+  ],
+  [
+    "11-planes",
+    "Tus planes viven aquí mismo",
+    "Revisa servicio, intervalo, importancia y unidades cubiertas. Todo queda dentro de Mantenimiento."
+  ],
+  [
+    "12-nuevo-plan",
+    "Define el servicio y su intervalo",
+    "Indica código, servicio, estrategia, kilómetros o días y criticidad. Revisa el resumen antes de guardar."
+  ],
+  [
+    "13-cubrir",
+    "Asigna el plan a una unidad",
+    "Elige el vehículo e introduce el último servicio y el próximo vencimiento. Confirma para guardar."
+  ],
+  [
+    "14-nueva-accion",
+    "Programa un trabajo concreto",
+    "Elige unidad y vencimiento. Una acción preventiva requiere plan y número de ciclo."
+  ],
+  [
+    "15-accion-confirmar",
+    "Completa el seguimiento del servicio",
+    "Confirma el estado y su nota. Completar la acción no cierra automáticamente la orden vinculada."
+  ]
+]

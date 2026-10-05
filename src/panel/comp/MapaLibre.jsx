@@ -147,6 +147,7 @@ export default function MapaLibre({
   viajeActivoRef.current = viajeActivo
   alElegirViajeRef.current = alElegirViaje
   const colaCapa = useRef(null)
+  const colaEncuadrada = useRef(null)
   const encuadrado = useRef(false)
   const [fallaTeselas, setFallaTeselas] = useState(false)
 
@@ -306,6 +307,7 @@ export default function MapaLibre({
   // Al ELEGIR una unidad se centra en ella (una sola vez, sin tocar el zoom). Los refrescos de la flota
   // no mueven nada: la vista solo la mueve quien la usa.
   useEffect(() => {
+    colaEncuadrada.current = null
     if (!mapa.current || !seleccionado) return
     const v = vehiculosRef.current.find((x) => x.id === seleccionado)
     if (!validPosition(v)) return
@@ -322,9 +324,9 @@ export default function MapaLibre({
     rutaCapa.current?.remove()
     rutaCapa.current = null
     if (!viajes?.length && !paradas?.length) return undefined
-    const { grupo, resaltar } = pintarRuta(L, mapa.current, { viajes: viajes ?? [], paradas: paradas ?? [], color: leerTokens().primario, alElegirViaje: (n) => alElegirViajeRef.current?.(n) })
-    rutaCapa.current = grupo
-    resaltarRef.current = resaltar
+    const { grupo, resaltar } = pintarRuta(L, mapa.current, { viajes: viajes ?? [], paradas: paradas ?? [], color: leerTokens().primario, alElegirViaje: (n) => alElegirViajeRef.current?.(n) })
+    rutaCapa.current = grupo
+    resaltarRef.current = resaltar
     resaltar(viajeActivoRef.current)
     return () => {
       grupo.remove()
@@ -343,8 +345,19 @@ export default function MapaLibre({
     colaCapa.current = null
     if (!cola || cola.length < 2) return undefined
     const util = cola.filter(validPosition)
+    if (util.length < 2) return undefined
     const grupo = pintarCola(L, mapa.current, util, leerTokens().primario)
     colaCapa.current = grupo
+    if (seleccionado && colaEncuadrada.current !== seleccionado) {
+      const size = mapa.current.getSize()
+      mapa.current.fitBounds(L.latLngBounds(util.map(p => [p.lat, p.lng])), {
+        paddingTopLeft: [(ficha || espacioFicha) && size.x > 600 ? 410 : 40, 150],
+        paddingBottomRight: [80, (ficha || espacioFicha) && size.x <= 600 ? Math.min(size.y * .45, 350) : 80],
+        maxZoom: 16,
+        animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      })
+      colaEncuadrada.current = seleccionado
+    }
     return () => {
       grupo.remove()
     }

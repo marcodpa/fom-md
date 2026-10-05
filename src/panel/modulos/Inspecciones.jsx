@@ -1,20 +1,13 @@
-import { Fragment, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import repo, { CONECTADO } from '../datos/repo'
 import { useDatos } from '../useDatos'
-import {
-  Buscador, Cabecera, Cargando, Chips, Datos, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
-} from '../comp/ui'
-import { BarrasH } from '../comp/Grafico'
+import { Buscador, Cargando, Chips, Datos, ErrorCarga, Modal, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
-
-// ============================================================
-// INSPECCIONES PREOPERACIONALES
-// En la app el supervisor solo ve el resultado final: nunca puede abrir la
-// revisión y saber QUÉ falló. Aquí sí, con el checklist completo por unidad.
-// ============================================================
+import ProgramaInspecciones, { ProgramarInspeccion } from './ProgramaInspecciones'
+import './inspecciones.css'
 
 /** Hash FNV-1a: misma inspección, mismo checklist, siempre. */
 function hash(texto) {
@@ -63,319 +56,77 @@ function porCategoria(items) {
   return grupos
 }
 
-function cargar(fecha, q) {
-  return Promise.all([
-    repo.inspecciones.listar({ fecha, q }),
-    repo.inspecciones.listar({ fecha: f.hoyISO() }),
-    repo.inspecciones.pendientesHoy(),
-    repo.vehiculos.listar({}),
-  ]).then(([lista, hoy, pendientes, vehiculos]) => ({ lista, hoy, pendientes, vehiculos }))
+
+const VISTAS = ['resumen', 'historial', 'agenda', 'hallazgos', 'plantillas']
+export default function Inspecciones() {
+  const [params, setParams] = useSearchParams()
+  const vista = VISTAS.includes(params.get('vista')) ? params.get('vista') : 'resumen'
+  const [programando, setProgramando] = useState(null)
+  const [aviso, setAviso] = useState('')
+  const [version, setVersion] = useState(0)
+  const cambiar = v => { const p = new URLSearchParams(); if (v !== 'resumen') p.set('vista', v); setParams(p) }
+  return <section className="insp-root">
+    <div className="insp-heading"><div><p className="insp-breadcrumb">Inicio › Inspecciones</p><h1>Inspecciones</h1><p>Qué unidades faltan por revisar y qué requiere atención.</p></div>{vista !== 'plantillas' && <button type="button" className="pnl-btn primario" onClick={() => setProgramando({})}><Icono nombre="mas" tam={18}/>Programar inspección</button>}</div>
+    <nav className="insp-nav" aria-label="Secciones de inspecciones">{VISTAS.map((v,i) => <button type="button" key={v} aria-current={vista === v ? 'page' : undefined} onClick={() => cambiar(v)}>{['Resumen','Historial','Agenda','Hallazgos','Plantillas'][i]}</button>)}</nav>
+    {aviso && <p className="insp-success" role="status">{aviso}</p>}
+    {vista === 'resumen' || vista === 'historial' ? <Resultados key={vista} vista={vista} abrirPrograma={v => setProgramando({ vehiculoId: v.id })} cambiarVista={cambiar} inspeccionId={params.get('inspeccion')}/> : <ProgramaInspecciones key={vista + version} vista={vista} abrirPrograma={() => setProgramando({})}/>}
+    {programando && <ProgramarInspeccion unidadInicial={programando.vehiculoId} alCerrar={() => setProgramando(null)} alGuardar={() => { setProgramando(null); setAviso('Inspección programada.'); setVersion(v => v+1) }}/>}
+  </section>
 }
 
-export default function Inspecciones() {
-  const [fecha, setFecha] = useState(f.hoyISO())
+function Resultados({ vista, abrirPrograma, cambiarVista, inspeccionId }) {
+  const [fecha, setFecha] = useState(inspeccionId ? '' : f.hoyISO())
   const [resultado, setResultado] = useState('')
   const [q, setQ] = useState('')
   const [detalle, setDetalle] = useState(null)
-
-  const { datos, estado, error, recargar } = useDatos(() => cargar(fecha, q), [fecha, q])
-
-  return (
-    <>
-      <Cabecera
-        titulo="Inspecciones"
-        bajada="Revisión preoperacional de cada unidad, con el detalle de lo que reportó el conductor."
-      >
-        <Link to="/panel/inspecciones/programa" className="pnl-btn sutil">
-          <Icono nombre="inspeccion" tam={16} />
-          Programa y hallazgos
-        </Link>
-        <button type="button" className="pnl-btn" onClick={() => setFecha(f.hoyISO())}>
-          <Icono nombre="reloj" tam={16} />
-          Ver hoy
-        </button>
-      </Cabecera>
-
-      <div className="pnl-cuerpo">
-        {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
-        {estado === 'ok' && (
-          <Contenido
-            datos={datos}
-            fecha={fecha}
-            setFecha={setFecha}
-            resultado={resultado}
-            setResultado={setResultado}
-            q={q}
-            setQ={setQ}
-            abrirDetalle={setDetalle}
-          />
-        )}
-      </div>
-
-      <DetalleInspeccion inspeccion={detalle} alCerrar={() => setDetalle(null)} />
-    </>
-  )
+  const registros = useDatos(() => repo.inspecciones.listar({ fecha: vista === 'resumen' ? f.hoyISO() : fecha, q }), [vista,fecha,q])
+  const hoy = useDatos(() => repo.inspecciones.listar({ fecha: f.hoyISO() }), [])
+  const pendientes = useDatos(() => repo.inspecciones.pendientesHoy(), [])
+  const vehiculos = useDatos(() => repo.vehiculos.listar({}), [])
+  const base = registros.datos ?? []
+  const lista = resultado ? base.filter(i => i.resultado === resultado) : base
+  useEffect(() => { if (inspeccionId && registros.estado === 'ok') setDetalle(base.find(i => i.id === inspeccionId) ?? null) }, [inspeccionId, registros.datos, registros.estado])
+  const abrir = i => setDetalle(i)
+  const tabla = filas => <TablaResultados lista={filas} abrir={abrir}/>
+  return <>
+    {vista === 'resumen' && <>
+      {hoy.estado === 'error' ? <ErrorCarga error={hoy.error} onReintentar={hoy.recargar}/> : hoy.estado !== 'ok' || vehiculos.estado !== 'ok' ? <Cargando filas={1}/> : <div className="insp-summary">
+        {[['Revisadas hoy', new Set(hoy.datos.map(i => i.vehiculoId)).size + ' de ' + vehiculos.datos.length,'check'],['Aprobadas',hoy.datos.filter(i => i.resultado === 'aprobada').length,'escudo'],['Con observaciones',hoy.datos.filter(i => i.resultado === 'aprobada_con_observaciones').length,'editar'],['Bloqueadas',hoy.datos.filter(i => i.resultado === 'bloqueada').length,'alerta']].map(([t,n,icono]) => <div key={t}><Icono nombre={icono}/><span>{t}<b>{n}</b></span></div>)}
+      </div>}
+      {vehiculos.estado === 'error' && <ErrorCarga error={vehiculos.error} onReintentar={vehiculos.recargar}/>}
+      <div className="insp-overview"><Tarjeta titulo="Requiere tu atención" sinCuerpo accion={<button className="pnl-link" type="button" onClick={() => cambiarVista('historial')}>Ver historial →</button>}>
+        {registros.estado === 'cargando' && <Cargando filas={2}/>}
+        {registros.estado === 'error' && <ErrorCarga error={registros.error} onReintentar={registros.recargar}/>}
+        {registros.estado === 'ok' && base.filter(i => i.resultado !== 'aprobada').map(i => <article className="insp-task" key={i.id}><Icono nombre={i.resultado === 'bloqueada' ? 'alerta' : 'inspeccion'} tam={24}/><div><h3>{i.vehiculoNombre}</h3><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag><p>{f.numero(i.fallasCriticas)} fallas críticas · {f.numero(i.observaciones)} observaciones</p></div><span className="insp-task-person">{i.conductorNombre}</span><button className="pnl-btn primario" type="button" onClick={() => abrir(i)}>Ver resultado →</button></article>)}
+        {pendientes.estado === 'cargando' && <Cargando filas={2}/>}
+        {pendientes.estado === 'error' && <ErrorCarga error={pendientes.error} onReintentar={pendientes.recargar}/>}
+        {pendientes.estado === 'ok' && pendientes.datos.map(v => <article className="insp-task" key={v.id}><Icono nombre="camion" tam={24}/><div><h3>{v.alias} · {v.placa}</h3><Tag color="ambar">Sin inspección de hoy</Tag><p>{v.areaNombre || 'Sin área'}</p></div><span className="insp-task-person">{v.conductorNombre || 'Sin conductor'}</span><button className="pnl-btn" type="button" onClick={() => abrirPrograma(v)}>Programar →</button></article>)}
+        {registros.estado === 'ok' && pendientes.estado === 'ok' && !pendientes.datos.length && !base.some(i => i.resultado !== 'aprobada') && <Vacio icono="check" titulo="Sin pendientes de revisión" texto="No hay unidades sin inspección ni resultados con novedades hoy."/>}
+      </Tarjeta><aside className="insp-guide"><h2>Cómo funciona</h2><p>Las inspecciones se realizan desde la app móvil.</p>{[['Programar','Elige unidad, plantilla, responsable y fecha.'],['Revisar desde la app','El conductor registra el estado de los puntos.'],['Atender hallazgos','Consulta los resultados y da seguimiento.']].map(([t,p],i) => <div key={t}><b>{i+1}</b><span><strong>{t}</strong><p>{p}</p></span></div>)}</aside></div>
+      <Tarjeta titulo="Últimos resultados de hoy" sinCuerpo accion={<button className="pnl-link" type="button" onClick={() => cambiarVista('historial')}>Ver todos →</button>}>{registros.estado === 'ok' && (base.length ? tabla(base.slice(0,5)) : <Vacio icono="inspeccion" titulo="Sin resultados hoy" texto="Los resultados aparecerán cuando se registren desde la app."/>)}</Tarjeta>
+    </>}
+    {vista === 'historial' && <Tarjeta titulo="Historial de inspecciones" sinCuerpo>
+      <div className="insp-filters"><input type="date" className="pnl-input" aria-label="Fecha de las inspecciones" value={fecha} onChange={e => setFecha(e.target.value)}/><button className="pnl-btn sutil" type="button" aria-pressed={fecha === ''} onClick={() => setFecha('')}>Todas las fechas</button><button className="pnl-btn sutil" type="button" onClick={() => setFecha(f.hoyISO())}>Ver hoy</button><Buscador valor={q} alCambiar={setQ} placeholder="Buscar unidad o conductor…"/></div>
+      <div className="insp-filter-chips"><Chips opciones={[{v:'',t:'Todas',n:base.length},{v:'aprobada',t:'Aprobadas',n:base.filter(i=>i.resultado==='aprobada').length},{v:'aprobada_con_observaciones',t:'Con observaciones',n:base.filter(i=>i.resultado==='aprobada_con_observaciones').length},{v:'bloqueada',t:'Bloqueadas',n:base.filter(i=>i.resultado==='bloqueada').length}]} valor={resultado} alCambiar={setResultado}/></div>
+      {registros.estado === 'cargando' && <Cargando filas={5}/>}
+      {registros.estado === 'error' && <ErrorCarga error={registros.error} onReintentar={registros.recargar}/>}
+      {registros.estado === 'ok' && (lista.length ? tabla(lista) : <Vacio icono="buscar" titulo="No hay resultados con estos filtros" texto="Prueba otra fecha, resultado o búsqueda."/>)}
+      {inspeccionId && registros.estado === 'ok' && !base.some(i=>i.id === inspeccionId) && <p className="insp-feedback" role="status">Esta inspección no está disponible en el listado autorizado.</p>}
+    </Tarjeta>}
+    {detalle && <DetalleInspeccion key={detalle.id} inspeccion={detalle} alCerrar={() => setDetalle(null)} alHallazgos={() => {setDetalle(null);cambiarVista('hallazgos')}}/>}
+  </>
 }
 
-function Contenido({ datos, fecha, setFecha, resultado, setResultado, q, setQ, abrirDetalle }) {
-  const { lista: base, hoy, pendientes, vehiculos } = datos
-
-  const lista = useMemo(
-    () => (resultado ? base.filter((i) => i.resultado === resultado) : base),
-    [base, resultado]
-  )
-
-  const cuenta = (r) => base.filter((i) => i.resultado === r).length
-  const hechasHoy = new Set(hoy.map((i) => i.vehiculoId)).size
-  const aprobadasHoy = hoy.filter((i) => i.resultado === 'aprobada').length
-  const conObservacionHoy = hoy.filter((i) => i.resultado === 'aprobada_con_observaciones').length
-  const bloqueadasHoy = hoy.filter((i) => i.resultado === 'bloqueada').length
-
-  // Fallas por categoría dentro del período que se está mirando.
-  const fallasPorCategoria = useMemo(() => {
-    const conteo = new Map()
-    lista.forEach((insp) => {
-      if (!insp.fallasCriticas) return
-      checklistDe(insp).forEach((it) => {
-        if (it.estadoItem === 'falla') conteo.set(it.categoria, (conteo.get(it.categoria) ?? 0) + 1)
-      })
-    })
-    return [...conteo.entries()]
-      .map(([cat, valor]) => ({ etiqueta: cat, valor }))
-      .sort((a, b) => b.valor - a.valor)
-  }, [lista])
-
-  return (
-    <>
-      <div className="pnl-grid k4">
-        <Kpi
-          titulo="Inspecciones de hoy"
-          valor={`${hechasHoy} de ${vehiculos.length}`}
-          icono="check"
-          tono={pendientes.length > 0 ? 'aviso' : 'ok'}
-          nota={
-            pendientes.length > 0
-              ? `${pendientes.length} ${pendientes.length === 1 ? 'unidad sin revisar' : 'unidades sin revisar'}`
-              : 'Toda la flota revisada'
-          }
-        />
-        <Kpi
-          titulo="Aprobadas hoy"
-          valor={f.numero(aprobadasHoy)}
-          icono="escudo"
-          tono="ok"
-          nota="Salieron sin novedad"
-        />
-        <Kpi
-          titulo="Con observaciones hoy"
-          valor={f.numero(conObservacionHoy)}
-          icono="editar"
-          tono={conObservacionHoy > 0 ? 'aviso' : 'ok'}
-          nota={conObservacionHoy > 0 ? 'Revisa el detalle de cada una' : 'Ninguna con novedades'}
-        />
-        <Kpi
-          titulo="Unidades bloqueadas hoy"
-          valor={f.numero(bloqueadasHoy)}
-          icono="alerta"
-          tono={bloqueadasHoy > 0 ? 'malo' : 'ok'}
-          nota={bloqueadasHoy > 0 ? 'No deben salir a ruta' : 'Ninguna bloqueada'}
-        />
-      </div>
-
-      <div className="pnl-grid dos-tercios">
-        <Tarjeta
-          titulo="Unidades sin inspección de hoy"
-          accion={<Link to="/panel/flota" className="pnl-link">Ver la flota</Link>}
-        >
-          {pendientes.length === 0 ? (
-            <Vacio
-              icono="check"
-              titulo="Todas las unidades inspeccionadas"
-              texto={`Las ${vehiculos.length} unidades pasaron su revisión preoperacional de hoy.`}
-            />
-          ) : (
-            <div className="pnl-filas">
-              {pendientes.map((v) => (
-                <Link key={v.id} to={`/panel/flota/${v.id}`} className="pnl-fila aviso">
-                  <div className="pnl-fila-txt">
-                    <b>{v.alias} · {v.placa}</b>
-                    <span>{v.areaNombre} · {v.conductorNombre}</span>
-                  </div>
-                  <em>Sin revisar</em>
-                </Link>
-              ))}
-            </div>
-          )}
-        </Tarjeta>
-
-        <Tarjeta titulo="Ítems que más fallan">
-          {fallasPorCategoria.length === 0 ? (
-            <Vacio
-              icono="escudo"
-              titulo={CONECTADO ? 'Detalle en cada inspección' : 'Sin fallas críticas'}
-              texto={CONECTADO ? 'Abre una inspección para consultar las respuestas reales y sus observaciones.' : 'Ninguna inspección del período mostrado reportó fallas críticas.'}
-            />
-          ) : (
-            <BarrasH datos={fallasPorCategoria} formato={(n) => f.numero(n)} />
-          )}
-        </Tarjeta>
-      </div>
-
-      <Tarjeta
-        titulo="Historial de inspecciones"
-        accion={<Buscador valor={q} alCambiar={setQ} placeholder="Buscar unidad o conductor…" />}
-        sinCuerpo
-      >
-        <div className="pnl-card-cuerpo">
-          <div className="pnl-chips">
-            <Chips
-              opciones={[
-                { v: '', t: 'Todas', n: base.length },
-                { v: 'aprobada', t: 'Aprobadas', n: cuenta('aprobada') },
-                { v: 'aprobada_con_observaciones', t: 'Con observaciones', n: cuenta('aprobada_con_observaciones') },
-                { v: 'bloqueada', t: 'Bloqueadas', n: cuenta('bloqueada') },
-              ]}
-              valor={resultado}
-              alCambiar={setResultado}
-            />
-            <input
-              type="date"
-              className="pnl-input"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-              aria-label="Fecha de las inspecciones"
-            />
-            <button
-              type="button"
-              className={`pnl-chip${fecha === '' ? ' activo' : ''}`}
-              onClick={() => setFecha('')}
-              aria-pressed={fecha === ''}
-            >
-              Todas las fechas
-            </button>
-          </div>
-        </div>
-
-        {lista.length === 0 ? (
-          <div className="pnl-card-cuerpo">
-            <Vacio
-              icono="buscar"
-              titulo="No hay inspecciones que mostrar"
-              texto="Prueba con otra fecha, otro resultado o limpia el buscador."
-            />
-          </div>
-        ) : (
-          <div className="pnl-tabla-wrap">
-            <table className="pnl-tabla">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Unidad</th>
-                  <th>Conductor</th>
-                  <th>Resultado</th>
-                  <th className="num">Observaciones</th>
-                  <th className="num">Fallas críticas</th>
-                  <th>Ubicación</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lista.map((i) => (
-                  <tr
-                    key={i.id}
-                    className="pnl-tabla-fila-link"
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`Ver detalle de la inspección de ${i.vehiculoNombre}`}
-                    onClick={() => abrirDetalle(i)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        abrirDetalle(i)
-                      }
-                    }}
-                  >
-                    <td>{f.fecha(i.fecha)}</td>
-                    <td>
-                      <div className="pnl-doble">
-                        <b>{i.vehiculo?.alias ?? i.vehiculoNombre}</b>
-                        <span>{i.vehiculo?.placa ?? etiqueta('vehiculo_tipo', i.tipoVehiculo)}</span>
-                      </div>
-                    </td>
-                    <td>{i.conductorNombre}</td>
-                    <td>
-                      <Tag color={color('inspeccion_resultado', i.resultado)}>
-                        {etiqueta('inspeccion_resultado', i.resultado)}
-                      </Tag>
-                    </td>
-                    <td className="num">{f.numero(i.observaciones)}</td>
-                    <td className="num">
-                      {i.fallasCriticas > 0 ? <Tag color="rojo">{i.fallasCriticas}</Tag> : '0'}
-                    </td>
-                    <td>{i.ubicacion || 'Sin ubicación'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Tarjeta>
-    </>
-  )
+function TablaResultados({ lista, abrir }) {
+  return <div className="pnl-tabla-wrap"><table className="pnl-tabla insp-table"><thead><tr>{['Fecha y hora','Unidad','Conductor','Resultado','Observaciones','Fallas críticas','Ubicación','Detalle'].map(t=><th key={t}>{t}</th>)}</tr></thead><tbody>{lista.map(i=><tr key={i.id}><td>{f.fechaHora(i.creadaEn || i.fecha)}</td><td><b>{i.vehiculo?.alias || i.vehiculoNombre}</b><small>{i.vehiculo?.placa || etiqueta('vehiculo_tipo',i.tipoVehiculo)}</small></td><td>{i.conductorNombre}</td><td><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag></td><td>{f.numero(i.observaciones)}</td><td>{f.numero(i.fallasCriticas)}</td><td>{i.ubicacion || 'Sin ubicación'}</td><td><button className="pnl-table-action" type="button" aria-label={'Ver resultado de '+i.vehiculoNombre} onClick={()=>abrir(i)}>Ver resultado →</button></td></tr>)}</tbody></table></div>
 }
-
-function DetalleInspeccion({ inspeccion, alCerrar }) {
-  const detalleReal = useDatos(() => inspeccion && CONECTADO ? repo.inspecciones.obtener(inspeccion.id) : Promise.resolve([]), [inspeccion?.id])
-  const grupos = useMemo(() => porCategoria(CONECTADO ? detalleReal.datos ?? [] : inspeccion ? checklistDe(inspeccion) : []), [inspeccion, detalleReal.datos])
-  if (!inspeccion) return null
-
-  return (
-    <Modal titulo="Detalle de la inspección" abierto alCerrar={alCerrar} ancho={620}>
-      <Datos
-        items={[
-          { etiqueta: 'Unidad', valor: inspeccion.vehiculoNombre },
-          { etiqueta: 'Conductor', valor: inspeccion.conductorNombre },
-          { etiqueta: 'Fecha y hora', valor: f.fechaHora(inspeccion.creadaEn) },
-          { etiqueta: 'Ubicación', valor: inspeccion.ubicacion || 'Sin ubicación' },
-          { etiqueta: 'Tipo de unidad', valor: etiqueta('vehiculo_tipo', inspeccion.tipoVehiculo) },
-          {
-            etiqueta: 'Resultado',
-            valor: (
-              <Tag color={color('inspeccion_resultado', inspeccion.resultado)}>
-                {etiqueta('inspeccion_resultado', inspeccion.resultado)}
-              </Tag>
-            ),
-          },
-        ]}
-      />
-
-      <div className="pnl-checklist">
-        {CONECTADO && detalleReal.estado === 'cargando' && <Cargando filas={3} />}
-        {CONECTADO && detalleReal.estado === 'error' && <ErrorCarga error={detalleReal.error} onReintentar={detalleReal.recargar} />}
-        {grupos.map((g) => (
-          <Fragment key={g.categoria}>
-            <div className="pnl-check-cat">{g.categoria}</div>
-            {g.items.map((it) => (
-              <div className="pnl-check-item" key={it.id}>
-                <div className="pnl-fila-txt">
-                  <b>{it.nombre}</b>
-                  {it.critico && <span>Crítico</span>}
-                  {it.nota && <span>{it.nota}</span>}
-                </div>
-                <Tag color={color('inspeccion_item_estado', it.estadoItem)}>
-                  {etiqueta('inspeccion_item_estado', it.estadoItem)}
-                </Tag>
-              </div>
-            ))}
-          </Fragment>
-        ))}
-      </div>
-
-      <div className="pnl-fila-txt">
-        <span>
-          {CONECTADO ? 'Respuestas registradas por el conductor. Si no hay respuestas disponibles, no se completa el checklist con datos supuestos.' : 'Checklist ilustrativo del modo de demostración.'}
-        </span>
-      </div>
-    </Modal>
-  )
+function DetalleInspeccion({ inspeccion, alCerrar, alHallazgos }) {
+  const detalle = useDatos(() => CONECTADO ? repo.inspecciones.obtener(inspeccion.id) : Promise.resolve(checklistDe(inspeccion)), [inspeccion.id])
+  const grupos = useMemo(() => porCategoria(detalle.datos ?? []), [detalle.datos])
+  return <Modal titulo="Resultado de inspección" abierto alCerrar={alCerrar} ancho={1040}><div className="insp-dialog-grid"><aside className="insp-context"><Icono nombre="camion" tam={70}/><h3>{inspeccion.vehiculoNombre}</h3><Tag color={color('inspeccion_resultado',inspeccion.resultado)}>{etiqueta('inspeccion_resultado',inspeccion.resultado)}</Tag><Datos items={[{etiqueta:'Conductor',valor:inspeccion.conductorNombre},{etiqueta:'Fecha y hora',valor:f.fechaHora(inspeccion.creadaEn||inspeccion.fecha)},{etiqueta:'Ubicación',valor:inspeccion.ubicacion||'Sin ubicación'},{etiqueta:'Tipo de unidad',valor:etiqueta('vehiculo_tipo',inspeccion.tipoVehiculo)}]}/></aside><div><div className="insp-result-summary"><Icono nombre={inspeccion.fallasCriticas ? 'alerta' : 'check'}/><strong>{f.numero(inspeccion.fallasCriticas)} fallas críticas · {f.numero(inspeccion.observaciones)} observaciones</strong></div>
+    {detalle.estado === 'cargando' && <Cargando filas={4}/>}
+    {detalle.estado === 'error' && <ErrorCarga error={detalle.error} onReintentar={detalle.recargar}/>}
+    {detalle.estado === 'ok' && !grupos.length && <Vacio icono="documento" titulo="Sin respuestas disponibles" texto="No se completa el checklist con datos supuestos."/>}
+    {grupos.map(g=><Fragment key={g.categoria}><h3 className="insp-category">{g.categoria || 'General'}</h3>{g.items.map(it=><div className="insp-check" key={it.id}><Icono nombre={it.estadoItem==='falla'?'alerta':it.estadoItem==='observacion'?'editar':'check'}/><div><b>{it.nombre}</b>{it.critico && <small>Punto crítico</small>}{it.nota && <p>{it.nota}</p>}</div><Tag color={color('inspeccion_item_estado',it.estadoItem)}>{etiqueta('inspeccion_item_estado',it.estadoItem)}</Tag></div>)}</Fragment>)}
+    <p className="insp-info">Respuestas registradas desde la app. El supervisor no modifica el resultado.</p></div></div><div className="insp-actions"><button className="pnl-btn sutil" type="button" onClick={alCerrar}>Cerrar</button><button className="pnl-btn primario" type="button" onClick={alHallazgos}>Ver hallazgos →</button></div></Modal>
 }

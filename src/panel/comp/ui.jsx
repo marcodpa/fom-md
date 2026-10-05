@@ -210,7 +210,7 @@ export function Modal({ titulo, abierto, alCerrar, children, ancho = 520 }) {
     if (!abierto) return undefined
     const previo = document.activeElement
     const overflow = document.body.style.overflow
-    const enfocables = () => Array.from(dialogo.current?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]') ?? []).filter(e => e.getClientRects().length)
+    const enfocables = () => Array.from(dialogo.current?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], summary, [tabindex="0"]') ?? []).filter(e => e.getClientRects().length)
     const marco = requestAnimationFrame(() => (enfocables()[0] ?? dialogo.current)?.focus())
     const onKey = (e) => {
       if (e.key === 'Escape') cerrarRef.current()
@@ -218,6 +218,7 @@ export function Modal({ titulo, abierto, alCerrar, children, ancho = 520 }) {
       const elementos = enfocables()
       if (!elementos.length) { e.preventDefault(); return }
       const primero = elementos[0], ultimo = elementos.at(-1)
+      if (!dialogo.current?.contains(document.activeElement)) { e.preventDefault(); (e.shiftKey ? ultimo : primero).focus(); return }
       if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus() }
       else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus() }
     }

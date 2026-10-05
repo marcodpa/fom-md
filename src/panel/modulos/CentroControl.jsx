@@ -67,11 +67,12 @@ export default function CentroControl() {
   // Sin pedir el recorrido: los últimos minutos de camino de la unidad elegida, para saber de
   // dónde viene. Se renueva con el mismo ritmo que la flota.
   const cola = useDatos(
-    () => (seleccionado ? repo.colaReciente(seleccionado) : Promise.resolve([])),
+    async () => ({ vehiculoId: seleccionado, puntos: seleccionado ? await repo.colaReciente(seleccionado) : [] }),
     [seleccionado],
     15000
   )
-  const colaInfo = useEstable(useMemo(() => colaReciente(cola.datos ?? []), [cola.datos]), (c) => `${firmaPuntos(c.puntos)}|${c.ampliada}`)
+  const colaActual = cola.datos?.vehiculoId === seleccionado
+  const colaInfo = useEstable(useMemo(() => colaReciente(colaActual ? cola.datos.puntos : []), [colaActual, cola.datos]), (c) => `${firmaPuntos(c.puntos)}|${c.ampliada}`)
   const colaPuntos = colaInfo?.puntos ?? []
   // Al pedir el recorrido: el rango completo, con viajes, paradas y la hora de cada punto.
   const dia = useDatos(
@@ -156,6 +157,9 @@ export default function CentroControl() {
       {seleccionado && <aside className={`control-panel control-unit${viendoRecorrido ? ' con-ruta' : ''}`} aria-label="Detalle de la unidad">
         <FichaUnidad unidad={unidad} alCerrar={() => setSeleccionado(null)} alVerRecorrido={() => setViendoRecorrido(v => !v)} viendoRecorrido={viendoRecorrido} />
         {!viendoRecorrido && colaPuntos.length > 1 && <p className="control-detail-note ruta-cola-nota" role="status">{colaInfo?.ampliada ? 'Línea punteada: su último trayecto (ahora está detenida).' : `Línea punteada: los últimos ${COLA_MIN} min de camino.`} Pulsa «Ver recorrido» para el día completo.</p>}
+        {!viendoRecorrido && cola.estado === 'error' && <p className="control-detail-note" role="status">No se pudieron cargar los últimos 5 minutos. <button type="button" onClick={cola.recargar}>Reintentar</button></p>}
+        {!viendoRecorrido && cola.estado !== 'error' && (!colaActual || cola.estado === 'cargando') && <p className="control-detail-note" role="status">Cargando los últimos 5 minutos…</p>}
+        {!viendoRecorrido && colaActual && cola.estado === 'ok' && colaPuntos.length < 2 && <p className="control-detail-note" role="status">{cola.datos.puntos.length > 1 ? 'Sin movimiento registrado en el tramo reciente.' : 'No hay suficientes posiciones para dibujar el recorrido reciente.'} Puedes consultar el día completo en «Ver recorrido».</p>}
         {viendoRecorrido && <PanelRecorrido analisis={analisis} horas={horas} alCambiarHoras={setHoras} cargando={dia.estado === 'cargando'} truncado={dia.datos?.truncado} alEnfocar={(p) => setFoco({ ...p, clave: Date.now() })} viajeActivo={viajeActivo} alElegirViaje={setViajeActivo} />}
         {viendoRecorrido && dia.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={dia.recargar}>Reintentar</button></p>}
         {detalle.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={detalle.recargar}>Reintentar</button></p>}
