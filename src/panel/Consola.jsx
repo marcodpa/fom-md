@@ -50,11 +50,11 @@ const MENU = [
     ],
   },
   {
-    grupo: 'Gente',
+    grupo: 'Usuarios',
     // Una sola entrada. «Personal» y «Usuarios» eran dos pantallas para la
     // misma gente —una preguntaba «puede manejar hoy» y la otra «tiene
     // acceso»— y la primera ademas estaba vacia. Ahora es una.
-    items: [{ a: '/panel/personal', icono: 'gente', texto: 'Gente' }],
+    items: [{ a: '/panel/personal', icono: 'gente', texto: 'Usuarios' }],
   },
   {
     grupo: 'Análisis',
@@ -86,7 +86,7 @@ const MENU_POR_AREA = {
     {
       grupo: 'Contratistas',
       items: [
-        { a: '/panel/personal', icono: 'gente', texto: 'Gente' },
+        { a: '/panel/personal', icono: 'gente', texto: 'Usuarios' },
         { a: '/panel/reportes', icono: 'reporte', texto: 'Reportes' },
       ],
     },

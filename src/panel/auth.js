@@ -289,7 +289,7 @@ export async function iniciarSesion({ usuario, clave, recordar = true }) {
         error:
           'Usuario o clave incorrectos. Ojo: tras varios intentos fallidos la ' +
           'cuenta se bloquea un rato; si la acabas de crear, reinicia su clave ' +
-          'desde Gente y usa la temporal nueva.',
+          'desde Usuarios y usa la temporal nueva.',
       }
     }
     return { ok: false, error: error.message || 'Usuario o clave incorrectos.' }

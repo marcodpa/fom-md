@@ -162,7 +162,7 @@ export default function AdminUsuarios() {
   return (
     <>
       <Cabecera
-        titulo="Gente"
+        titulo="Usuarios"
         bajada={`Personal de ${actor?.empresa || 'tu empresa'}. Consulta sus roles, unidades y documentos.`}
       >
         <button
