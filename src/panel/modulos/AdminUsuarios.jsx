@@ -12,7 +12,7 @@ import { ROLES_ASIGNABLES, etiquetaRol } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 
 // Gente pertenece a la empresa de la sesión. El directorio global vive
-// en «Toda la plataforma» y no se mezcla con esta vista.
+// en «Usuarios generales» y no se mezcla con esta vista.
 
 /** El tipo de documento en palabras: los códigos son para agrupar, no para leer. */
 function etiquetaDocumento(tipo) {
@@ -445,7 +445,7 @@ export function ModalCambiarRol({ persona, alCerrar, alGuardar }) {
     setGuardando(true)
     setError('')
     try {
-      if (!persona.empresaId || !persona.userId) throw new Error('Selecciona una persona y su empresa desde Toda la plataforma.')
+      if (!persona.empresaId || !persona.userId) throw new Error('Selecciona una persona y su empresa desde Usuarios generales.')
       await repo.admin.usuarios.cambiar(persona.userId, {rol, empresaId: persona.empresaId, motivo:'cambio-de-rol-desde-plataforma'})
       await alGuardar()
       alCerrar()
