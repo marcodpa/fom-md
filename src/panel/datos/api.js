@@ -202,18 +202,6 @@ export const api = {
       idempotente: true,
     }),
 
-  /**
-   * El CONDUCTOR reporta una falla de SU unidad. La consola es del supervisor y le responde 403; esta es la
-   * misma ruta que usa la app del conductor (`POST /mobile/vehicles/:id/work-orders`): nace una orden
-   * correctiva abierta que el supervisor ve en su lista.
-   */
-  reportarFallaConductor: (vehicleId, { description, severity, failureType, location }) =>
-    pedir(`/api/v1/mobile/vehicles/${encodeURIComponent(vehicleId)}/work-orders`, {
-      metodo: 'POST',
-      cuerpo: { description, severity, failureType, location },
-      idempotente: true,
-    }),
-
   // --- Escrituras del directorio (#219 de fom-core) ------------------------
 
   /** Cambiar perfil o estado de una persona en el ente. */

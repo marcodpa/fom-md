@@ -132,7 +132,6 @@ export default function MantenimientoConductor() {
         {creando && v && (
           <NuevaOdt
             vehiculos={[v]}
-            comoConductor
             creadorId={perfil?.id ?? null}
             recargar={ordenes.recargar}
             alCerrar={() => setCreando(false)}
