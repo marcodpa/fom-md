@@ -132,6 +132,7 @@ export default function MantenimientoConductor() {
         {creando && v && (
           <NuevaOdt
             vehiculos={[v]}
+            sinPermiso="Todavía no puedes reportar fallas desde la web: el servidor solo deja crear órdenes al supervisor. Avísale a tu supervisor, o repórtala desde la app del conductor."
             creadorId={perfil?.id ?? null}
             recargar={ordenes.recargar}
             alCerrar={() => setCreando(false)}

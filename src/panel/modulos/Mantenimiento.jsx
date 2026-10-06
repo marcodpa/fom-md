@@ -566,7 +566,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
 
 // ---------------- Nueva ODT ----------------
 
-export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear }) {
+export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, sinPermiso = '' }) {
   // Con una sola unidad (el conductor) no hay nada que elegir: se salta al paso de la falla.
   const [vehiculoId, setVehiculoId] = useState(vehiculos.length === 1 ? vehiculos[0].id : '')
   const [paso, setPaso] = useState(vehiculos.length === 1 ? 2 : 1)
@@ -621,7 +621,7 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear }) 
         // Se muestra el motivo REAL. Un «inténtalo otra vez» generico invita a
         // repetir algo que no puede funcionar, y esconde justo el dato que
         // permite arreglarlo.
-        setFallo(error?.message || 'No pudimos crear la orden.')
+        setFallo(sinPermiso && /permiso/i.test(error?.message ?? '') ? sinPermiso : (error?.message || 'No pudimos crear la orden.'))
         setGuardando(false)
       })
   }
