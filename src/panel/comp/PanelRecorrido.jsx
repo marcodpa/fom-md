@@ -13,7 +13,7 @@ export default function PanelRecorrido({ analisis, horas, alCambiarHoras, cargan
     if (!analisis) return []
     const viajes = analisis.viajes.map((v) => ({ clave: `v${v.numero}`, tipo: 'viaje', desde: v.inicio.hora, v }))
     const paradas = analisis.paradas.map((p, i) => ({ clave: `p${i}`, tipo: 'parada', desde: p.desde, p }))
-    return [...viajes, ...paradas].sort((a, b) => Date.parse(a.desde) - Date.parse(b.desde))
+    return [...viajes, ...paradas].sort((a, b) => Date.parse(b.desde) - Date.parse(a.desde))
   }, [analisis])
   const r = analisis ? resumen(analisis) : null
 
