@@ -8,6 +8,7 @@ import FichaUnidad from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
+import './resumen-glass.css'
 
 // ============================================================
 // RESUMEN — el inicio del supervisor
@@ -114,7 +115,7 @@ export default function Resumen() {
   const [seleccionado, setSeleccionado] = useState(null)
 
   return (
-    <>
+    <div className="rs-glass">
       <Cabecera titulo="Resumen" bajada="Toda tu operación, en un solo lugar.">
         {estado === 'ok' && (
           <span className="rs-vivo">
@@ -131,7 +132,7 @@ export default function Resumen() {
           <Tablero {...datos} seleccionado={seleccionado} alSeleccionar={setSeleccionado} />
         )}
       </div>
-    </>
+    </div>
   )
 }
 
