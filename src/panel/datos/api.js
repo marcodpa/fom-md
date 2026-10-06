@@ -202,6 +202,17 @@ export const api = {
       idempotente: true,
     }),
 
+  /**
+   * El CONDUCTOR reporta una falla de SU unidad. Ruta de consola propia del conductor (decidida en el #631):
+   * valida la asignación vigente y crea una orden correctiva abierta que el supervisor ve en su lista.
+   */
+  reportarFallaConductor: (vehicleId, { description, severity, failureType, location }) =>
+    pedir(`${CONSOLA}/vehicles/${encodeURIComponent(vehicleId)}/work-orders`, {
+      metodo: 'POST',
+      cuerpo: { description, severity, failureType, location },
+      idempotente: true,
+    }),
+
   // --- Escrituras del directorio (#219 de fom-core) ------------------------
 
   /** Cambiar perfil o estado de una persona en el ente. */

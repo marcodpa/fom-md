@@ -566,7 +566,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
 
 // ---------------- Nueva ODT ----------------
 
-export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, sinPermiso = '' }) {
+export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, sinPermiso = '', comoConductor = false }) {
   // Con una sola unidad (el conductor) no hay nada que elegir: se salta al paso de la falla.
   const [vehiculoId, setVehiculoId] = useState(vehiculos.length === 1 ? vehiculos[0].id : '')
   const [paso, setPaso] = useState(vehiculos.length === 1 ? 2 : 1)
@@ -611,6 +611,7 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
         tipoFalla,
         ubicacion: ubicacion.trim() || UBICACION_POR_DEFECTO,
         creadorId,
+        comoConductor,
       })
       .then(() => {
         alCrear(elegido?.placa || elegido?.alias || "la unidad")
