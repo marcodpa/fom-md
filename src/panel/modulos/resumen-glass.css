@@ -4,8 +4,8 @@
 .rs-glass {
   --g-borde: rgba(255, 255, 255, .16);
   --g-borde-luz: rgba(255, 255, 255, .34);
-  --g-vidrio: rgba(16, 30, 58, .38);
-  --g-vidrio-alto: rgba(26, 46, 84, .5);
+  --g-vidrio: #0e1a33;
+  --g-vidrio-alto: #13203d;
   --g-curva: cubic-bezier(.32, .72, 0, 1);
 
   --e-texto: #f2f6ff;
@@ -51,9 +51,7 @@
 
 /* Cabecera: cristal pegado arriba */
 .rs-glass .pnl-cab {
-  background: rgba(14, 26, 52, .42);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
-  backdrop-filter: blur(22px) saturate(140%);
+  background: rgba(8, 16, 36, .92);
   border-bottom: 1px solid var(--g-borde);
 }
 .rs-glass .pnl-cab h1 { font-size: 28px; letter-spacing: -.8px; font-weight: 600; }
@@ -65,29 +63,20 @@
   color: var(--e-texto-2);
 }
 
-/* Todas las superficies: vidrio con borde de luz arriba y sombra teñida de azul */
+/* Tarjetas: sólidas y sobrias; el cristal es solo el fondo */
 .rs-glass .pnl-card,
 .rs-glass .pnl-kpi,
 .rs-glass .pnl-flota-metrica {
-  background: linear-gradient(160deg, rgba(255, 255, 255, .13) 0%, rgba(255, 255, 255, .04) 38%, var(--g-vidrio) 100%);
-  border: 1px solid var(--g-borde);
-  border-top-color: var(--g-borde-luz);
-  border-radius: 24px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .22),
-    inset 0 0 0 1px rgba(255, 255, 255, .03),
-    0 18px 50px -18px rgba(4, 12, 34, .7);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  backdrop-filter: blur(20px) saturate(150%);
-  transition: transform .5s var(--g-curva), border-color .4s var(--g-curva), background .4s var(--g-curva), box-shadow .5s var(--g-curva);
+  background: var(--g-vidrio);
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 16px;
+  box-shadow: 0 14px 40px -20px rgba(2, 8, 24, .75);
+  transition: transform .4s var(--g-curva), border-color .3s var(--g-curva);
 }
 .rs-glass a.pnl-kpi:hover,
 .rs-glass a.pnl-flota-metrica:hover {
   transform: translateY(-3px);
-  border-color: var(--g-borde-luz);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .3),
-    0 26px 60px -20px rgba(4, 12, 34, .8);
+  border-color: rgba(255, 255, 255, .22);
 }
 .rs-glass a.pnl-kpi:active,
 .rs-glass a.pnl-flota-metrica:active { transform: scale(.985); }
@@ -137,7 +126,7 @@
 
 /* El mapa vive dentro del cristal: se recorta con la misma curva de la tarjeta */
 .rs-glass .pnl-resumen-mapa .pnl-card { overflow: hidden; }
-.rs-glass .pnl-resumen-mapa .pnl-mapa { border-radius: 0 0 24px 24px; }
+.rs-glass .pnl-resumen-mapa .pnl-mapa { border-radius: 0 0 16px 16px; }
 
 /* Línea de tiempo del día */
 .rs-glass .rs-evento { border-top: 1px solid var(--g-borde); transition: background .35s var(--g-curva); border-radius: 12px; }
@@ -167,15 +156,11 @@
   .rs-glass { background-attachment: scroll; }
   .rs-glass .pnl-resumen-metricas { grid-template-columns: 1fr; }
   .rs-glass .pnl-kpi b { font-size: 34px; }
-  .rs-glass .pnl-card, .rs-glass .pnl-kpi, .rs-glass .pnl-flota-metrica { border-radius: 20px; }
+  .rs-glass .pnl-card, .rs-glass .pnl-kpi, .rs-glass .pnl-flota-metrica { border-radius: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rs-glass .pnl-resumen > * { animation: none; }
   .rs-glass .pnl-card, .rs-glass .pnl-kpi, .rs-glass .pnl-flota-metrica { transition: none; }
-}
-/* Sin soporte de desenfoque: más opaco, para que se lea igual */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .rs-glass { --g-vidrio: rgba(18, 32, 62, .86); --g-vidrio-alto: rgba(24, 42, 78, .9); }
 }
 
 .rs-glass .pnl-cuerpo { padding-top: 28px; padding-bottom: 40px; }
