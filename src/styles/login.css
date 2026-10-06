@@ -61,8 +61,10 @@
 /* --- Emblema (84 px): el disco es oscuro, la flecha es la luz --- */
 .lg-emblema {
   position: relative;
-  width: 84px;
-  height: 84px;
+  display: flex;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
   animation: lg-emblema-flota 4.6s var(--fom-ease-enfasis) infinite alternate;
 }
 @keyframes lg-entra-emblema {
