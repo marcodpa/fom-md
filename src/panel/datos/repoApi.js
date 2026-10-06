@@ -273,6 +273,17 @@ function puntosDe(filas) {
 }
 
 export const repoApi = {
+  /**
+   * Score de manejo del conductor en sesión. El servidor aún no lo entrega (pendiente en #631/Issue de manejo):
+   * devuelve null y la tarjeta lo dice, en vez de inventar un número. Cuando exista, debe devolver
+   * { indice, eventosPor100, km, dias, frenadas, aceleraciones, excesos }.
+   */
+  manejo: {
+    async miScore() {
+      return null
+    },
+  },
+
   admin: {
     usuarios: {
       async listar({ q = '', rol = '' } = {}) {

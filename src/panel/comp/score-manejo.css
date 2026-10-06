@@ -1,0 +1,30 @@
+/* Score de manejo del conductor */
+.sm { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 24px; align-items: center; }
+.sm-indice {
+  --sm-color: var(--e-exito);
+  display: flex; align-items: baseline; justify-content: center; gap: 2px;
+  width: 132px; height: 132px; border-radius: 50%;
+  border: 6px solid var(--sm-color);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--sm-color) 14%, transparent);
+  align-content: center; padding-top: 34px;
+}
+.sm-indice.amarillo { --sm-color: var(--e-aviso); }
+.sm-indice.rojo { --sm-color: var(--e-peligro); }
+.sm-indice strong { font-size: 44px; line-height: 1; letter-spacing: -1.5px; font-variant-numeric: tabular-nums; }
+.sm-indice small { font-size: 14px; color: var(--e-texto-2); }
+.sm-estado { font-size: 20px; font-weight: 600; letter-spacing: -.3px; margin: 0; color: var(--e-exito); }
+.sm-estado.amarillo { color: var(--e-aviso); }
+.sm-estado.rojo { color: var(--e-peligro); }
+.sm-ayuda { margin: 4px 0 16px; font-size: 13px; color: var(--e-texto-2); }
+.sm-eventos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.sm-eventos li { padding: 12px 14px; border: 1px solid var(--e-borde); border-radius: 12px; display: grid; gap: 2px; }
+.sm-eventos li b { font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -.8px; }
+.sm-eventos li.con b { color: var(--e-aviso); }
+.sm-eventos li span { font-size: 12px; color: var(--e-texto-2); }
+.sm-vacio { display: flex; gap: 16px; align-items: flex-start; color: var(--e-texto-2); }
+.sm-vacio b { color: var(--e-texto); display: block; margin-bottom: 4px; }
+.sm-vacio p { margin: 0; font-size: 13px; line-height: 1.5; }
+@media (max-width: 700px) {
+  .sm { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .sm-eventos { grid-template-columns: 1fr; width: 100%; text-align: left; }
+}

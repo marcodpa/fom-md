@@ -2,12 +2,15 @@ import { useMemo } from 'react'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
+import { miAsignacion } from '../datos/asignacion-conductor'
+export { miAsignacion } from '../datos/asignacion-conductor'
 import { Cabecera, Cargando, Datos, ErrorCarga, Tag, Tarjeta, Vacio } from '../comp/ui'
 import MapaLibre from '../comp/MapaLibre'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
+import ScoreManejo from '../comp/ScoreManejo'
 
 // ============================================================
 // MI UNIDAD — el inicio del conductor
@@ -34,21 +37,6 @@ import FichaUnidad from '../comp/FichaUnidad'
  * Mientras el servidor no mande el identificador en la sesión, se empareja
  * por nombre; cuando lo mande, `perfil.userId` manda y el nombre sobra.
  */
-export function miAsignacion(perfil, asignaciones) {
-  if (!perfil) return null
-  if (perfil.userId) {
-    return asignaciones.find((a) => a.id === perfil.userId) ?? null
-  }
-  const nombre = String(perfil.nombre ?? '').trim().toLowerCase()
-  if (!nombre) return null
-  const mias = asignaciones.filter(
-    (a) => String(a.nombre ?? '').trim().toLowerCase() === nombre,
-  )
-  // Dos personas con el mismo nombre en la misma empresa: mejor no adivinar
-  // cuál es la unidad del que entró que enseñarle la de otro.
-  return mias.length === 1 ? mias[0] : null
-}
-
 /** Distancia en km entre dos puntos (haversine). Suficiente para sumar un recorrido. */
 function distanciaKm(a, b) {
   const R = 6371
@@ -193,6 +181,7 @@ export default function MiUnidad() {
             </div>
           </section>
 
+          <ScoreManejo />
           <div className="mu-vehicle"><Tarjeta titulo="Tu vehículo"><FichaUnidad unidad={unidad} conEnlace={false} /></Tarjeta></div>
           {/* --- Posición y cifras de la unidad -------------------------- */}
           <section className="mu-mapa" aria-label="Posición de la unidad">

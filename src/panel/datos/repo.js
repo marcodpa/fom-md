@@ -215,6 +215,7 @@ const repo = HAY_API
       // Operación y cumplimiento, desde las tablas de #170 y #171. Las
       // escrituras de la semilla se conservan donde existen: la superficie
       // real es de solo lectura todavía.
+      manejo: repoApi.manejo,
       odts: {
         ...sinRespaldo(repoSemilla.odts),
         listar: repoApi.odts.listar,

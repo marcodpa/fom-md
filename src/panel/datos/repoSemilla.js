@@ -624,6 +624,11 @@ export const repo = {
 
   /** Serie de posiciones del día para dibujar el recorrido. */
   recorrido: (vehiculoId) => responder(recorridoDe(vehiculoId), 80),
+  /** El score de manejo lo calcula el servidor: sin él no se inventa ningún número, tampoco en demo. */
+  manejo: {
+    miScore: () => responder(null, 60),
+  },
+
   /** Asignaciones vigentes: quién maneja qué unidad (misma forma que la base real). */
   conductores: () => responder(
     todosVehiculos()
