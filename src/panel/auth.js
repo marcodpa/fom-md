@@ -50,6 +50,22 @@ const CUENTAS = [
     },
   },
   {
+    usuario: 'conductor@fom.com.ve',
+    clave: 'ConductorFOM2026',
+    perfil: {
+      id: 'usr-002',
+      nombre: 'Carlos Méndez',
+      correo: 'conductor@fom.com.ve',
+      rol: 'conductor',
+      rolNombre: 'Conductor',
+      empresaTipo: 'estandar',
+      empresa: 'Transporte Lago Sur, C.A.',
+      empresaId: 'transporte-lago-sur',
+      sede: 'Costa Oriental del Lago',
+      iniciales: 'CM',
+    },
+  },
+  {
     usuario: 'admin@fom.com.ve',
     clave: 'AdminFOM2026',
     perfil: {

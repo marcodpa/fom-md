@@ -34,7 +34,7 @@ import FichaUnidad from '../comp/FichaUnidad'
  * Mientras el servidor no mande el identificador en la sesión, se empareja
  * por nombre; cuando lo mande, `perfil.userId` manda y el nombre sobra.
  */
-function miAsignacion(perfil, asignaciones) {
+export function miAsignacion(perfil, asignaciones) {
   if (!perfil) return null
   if (perfil.userId) {
     return asignaciones.find((a) => a.id === perfil.userId) ?? null

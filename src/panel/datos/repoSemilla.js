@@ -624,6 +624,16 @@ export const repo = {
 
   /** Serie de posiciones del día para dibujar el recorrido. */
   recorrido: (vehiculoId) => responder(recorridoDe(vehiculoId), 80),
+  /** Asignaciones vigentes: quién maneja qué unidad (misma forma que la base real). */
+  conductores: () => responder(
+    todosVehiculos()
+      .filter((v) => v.conductorPrincipalId)
+      .map((v) => {
+        const p = todosPerfiles().find((x) => x.id === v.conductorPrincipalId)
+        return { id: v.conductorPrincipalId, nombre: p?.nombre ?? '', rol: 'conductor', vehiculoId: v.id, vehiculo: v.placa, desde: v.creadoEn ?? null }
+      }),
+    80,
+  ),
   recorridoDetallado: (vehiculoId, { horas = 24 } = {}) => responder(recorridoDetalladoDe(vehiculoId, horas), 120),
   colaReciente: (vehiculoId) => responder(recorridoDetalladoDe(vehiculoId, 24).puntos.slice(-60), 60),
 

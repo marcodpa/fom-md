@@ -316,7 +316,6 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
   // Cada cambio de estado de la orden, guardado en la base con su autor, su fecha y su nota.
   const historial = useDatos(() => (repo.odts.historial ? repo.odts.historial(odt.id) : Promise.resolve(null)), [odt.id, odt.estado])
   const responsable = ejecucion.datos?.responsable ?? null
-  const omiteTaller = odt.estado === 'cerrada' && ejecucion.estado === 'ok' && !ejecucion.datos?.responsable && !(ejecucion.datos?.eventos?.length)
   // La sesión trae correo y nombre, no identificador: se resuelve contra la
   // lista de gente. Iniciar, pausar, reanudar y entregar los hace SOLO el
   // responsable (el servidor responde «no existe» a cualquier otro), igual
@@ -350,7 +349,9 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
   if (odt.estado === 'cerrada' && odt.resueltaEn) {
     const minutos = (new Date(odt.resueltaEn) - new Date(odt.creadaEn)) / 60000
     items.push({ etiqueta: 'Resuelta', valor: f.fechaHora(odt.resueltaEn) })
-    items.push({ etiqueta: 'Tiempo de resolución', valor: f.duracion(minutos) })
+    const dias = Math.floor(minutos / 1440)
+    const resto = Math.round(minutos % 1440)
+    items.push({ etiqueta: 'Tiempo de resolución', valor: Number.isFinite(minutos) && minutos >= 0 ? (dias ? `${dias} ${dias === 1 ? 'día' : 'días'}${resto ? ` y ${f.duracion(resto)}` : ''}` : f.duracion(minutos)) : 'Sin fecha válida' })
   }
 
   const pasos = (PASOS_ODT[odt.estado] ?? []).filter((p) => !p.ejecucion || soyResponsable)
@@ -467,28 +468,21 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
         <em>{f.desde(odt.creadaEn)}</em>
       </div>
 
-      <div className="pnl-fila-txt">
-        <b>{odt.descripcion}</b>
-        <span>Orden {odt.id}</span>
-      </div>
+      <header className="mnt-detail-title">
+        <span>Problema reportado</span>
+        <h2>{odt.descripcion}</h2>
+        <p>Referencia de la orden: <code>{odt.id.slice(0, 8)}</code></p>
+      </header>
 
       <div className="mnt-unit"><VehicleVisual modelo={vehiculo?.modelo ?? ''} compacta/><div><b>{odt.vehiculoNombre}</b><span>{[vehiculo?.marca, vehiculo?.modelo].filter(Boolean).join(' ') || 'Unidad de la flota'}</span></div></div>
-      <ol className="mnt-progress">{[['Reportada',['abierta']],['Revisión',['en_revision','aprobada']],['Taller',['asignada','en_ejecucion','pausada']],['Calidad',['en_calidad']],['Cerrada',['cerrada']]].map(([t, estados]) => <li key={t} aria-current={estados.includes(odt.estado) ? 'step' : undefined} className={['Taller', 'Calidad'].includes(t) ? (omiteTaller ? 'omitido' : 'opcional') : undefined} title={['Taller', 'Calidad'].includes(t) ? (omiteTaller ? 'Esta orden se resolvió sin pasar por taller' : 'Solo si la orden necesita taller') : undefined}><i/>{t}{['Taller', 'Calidad'].includes(t) && <small>{omiteTaller ? 'no hizo falta' : 'si aplica'}</small>}</li>)}</ol>
-      {odt.estado === 'pausada' && <Tag color="ambar">Trabajo pausado</Tag>}
-      <Datos items={items} />
-
-      {odt.estado === 'cerrada' && (
-        <div className={`pnl-fila${odt.costo != null ? '' : ' aviso'}`}>
-          <div className="pnl-fila-txt">
-            <b>{odt.notaSolucion || 'Se cerró sin nota de solución.'}</b>
-            <span>
-              {odt.costo != null
-                ? `Costo cargado: ${f.moneda(odt.costo)}`
-                : 'No se cargó ningún costo a esta orden.'}
-            </span>
-          </div>
-        </div>
-      )}
+      <section className={`mnt-resolution${odt.estado === 'cerrada' && !odt.notaSolucion ? ' incompleta' : ''}`} aria-label="Situación del trabajo">
+        <div className="mnt-resolution-heading"><Icono nombre={odt.estado === 'cerrada' ? (odt.notaSolucion ? 'check' : 'alerta') : 'llave'} tam={24}/><h3>{odt.estado === 'cerrada' ? 'Resultado del trabajo' : 'Estado del trabajo'}</h3></div>
+        {odt.estado === 'cerrada' ? <>
+          <p>{odt.notaSolucion || 'La orden está cerrada, pero no se registró qué se hizo para solucionar la falla.'}</p>
+          <dl className="mnt-resolution-facts"><div><dt>Cierre</dt><dd>{odt.resueltaEn ? f.fechaHora(odt.resueltaEn) : 'Sin fecha registrada'}</dd></div><div><dt>Costo registrado</dt><dd>{odt.costo != null ? f.moneda(odt.costo) : 'Sin registrar'}</dd></div><div><dt>Tiempo hasta el cierre</dt><dd>{items.find(i => i.etiqueta === 'Tiempo de resolución')?.valor || 'Sin fechas suficientes'}</dd></div></dl>
+        </> : <><p>{AYUDA_ODT[odt.estado] || 'Revisa el reporte y elige la siguiente acción disponible.'}</p><p className="mnt-detail-responsable"><b>Responsable:</b> {responsable?.nombre || 'Aún sin asignar'}</p></>}
+      </section>
+      <details className="mnt-record"><summary>Datos del reporte <span>Unidad, responsable, fechas y ubicación</span></summary><Datos items={items}/><p className="mnt-order-reference">Identificador completo: <code>{odt.id}</code></p></details>
 
       {ejecucion.estado === 'error' && <ErrorCarga texto={ejecucion.error?.message} onReintentar={ejecucion.recargar}/>}
       {(() => {
@@ -513,7 +507,10 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
           .sort((a, b) => new Date(a.en) - new Date(b.en))
         return (
           <section className="mnt-history">
-            <h3>Qué pasó con esta orden</h3>
+            <h3>Historial de la orden</h3>
+            <p className="mnt-history-intro">Quién hizo cada cambio y cuándo ocurrió.</p>
+            {historial.estado === 'cargando' && <p role="status">Consultando los cambios registrados…</p>}
+            {historial.estado === 'error' && <ErrorCarga texto="No se pudo cargar el historial completo. Estas son las fechas disponibles de la orden." onReintentar={historial.recargar}/>}
             {hitos.map((h, i) => (
               <div key={i}>
                 <i />
@@ -530,7 +527,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
       </section><aside className="mnt-next">
       {aviso && <div className="mnt-success" role="status">{aviso}</div>}
       <div className="pnl-fila-txt">
-        <b>Qué sigue</b>
+        <b>{odt.estado === 'cerrada' ? '¿La falla volvió?' : 'Siguiente paso'}</b>
         <span>{AYUDA_ODT[odt.estado] ?? 'Mueve la orden según vaya avanzando el trabajo.'}</span>
       </div>
 
@@ -569,9 +566,10 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
 
 // ---------------- Nueva ODT ----------------
 
-function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear }) {
-  const [vehiculoId, setVehiculoId] = useState('')
-  const [paso, setPaso] = useState(1)
+export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear }) {
+  // Con una sola unidad (el conductor) no hay nada que elegir: se salta al paso de la falla.
+  const [vehiculoId, setVehiculoId] = useState(vehiculos.length === 1 ? vehiculos[0].id : '')
+  const [paso, setPaso] = useState(vehiculos.length === 1 ? 2 : 1)
   const [busqueda, setBusqueda] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [tipoFalla, setTipoFalla] = useState('motor')
@@ -629,7 +627,7 @@ function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear }) {
   }
 
   return <div className="mnt-wizard">
-    <div className="mnt-wizard-steps"><span className={paso === 1 ? 'activo' : ''}>1 · Elige la unidad</span><span className={paso === 2 ? 'activo' : ''}>2 · Describe la falla</span></div>
+    <div className="mnt-wizard-steps">{vehiculos.length > 1 && <span className={paso === 1 ? 'activo' : ''}>1 · Elige la unidad</span>}<span className={paso === 2 ? 'activo' : ''}>{vehiculos.length > 1 ? '2 · ' : ''}Describe la falla</span></div>
     {paso === 1 ? <>
       <h3>¿Qué unidad necesita atención?</h3><p>Selecciona el vehículo para continuar.</p>
       <Buscador valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por placa o nombre…"/>

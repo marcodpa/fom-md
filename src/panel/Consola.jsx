@@ -1,16 +1,20 @@
+import LogoFom from '../components/LogoFom'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
+import { useApariencia } from './useApariencia'
 import { Icono } from './Iconos'
 import repo, { alCambiarDatos, CONECTADO } from './datos/repo'
+import '../styles/apariencia.css'
 
 import Resumen from './modulos/Resumen'
 import CentroControl from './modulos/CentroControl'
 import Flota from './modulos/Flota'
 import ExpedienteVehiculo from './modulos/ExpedienteVehiculo'
 import Mantenimiento from './modulos/Mantenimiento'
+import MantenimientoConductor from './modulos/MantenimientoConductor'
 import Inspecciones from './modulos/Inspecciones'
 import ExpedienteConductor from './modulos/ExpedienteConductor'
 import Alertas from './modulos/Alertas'
@@ -96,6 +100,7 @@ const MENU_POR_AREA = {
       grupo: 'Mi trabajo',
       items: [
         { a: '/panel', icono: 'camion', texto: 'Mi unidad', fin: true },
+        { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento' },
         { a: '/panel/alertas', icono: 'alerta', texto: 'Alertas' },
       ],
     },
@@ -117,7 +122,7 @@ const RUTAS_POR_AREA = {
   admin: null, // todas
   operativo: ['', 'mapa', 'alertas', 'seguridad', 'flota', 'jornadas', 'mantenimiento', 'inspecciones', 'documentos', 'personal', 'reportes'],
   gerencial: ['personal', 'reportes'],
-  conductor: ['', 'alertas'],
+  conductor: ['', 'alertas', 'mantenimiento'],
   personal: ['mapa', 'alertas', 'documentos', 'personal'],
 }
 
@@ -136,20 +141,7 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
     <aside id="panel-navigation" className={`pnl-side${abierto ? ' abierto' : ''}`} onKeyDown={e => { if (e.key === 'Escape') cerrar() }}>
       <div className="pnl-side-top">
         <NavLink to="/panel" end className="pnl-marca" onClick={cerrar}>
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <path
-              d="M12 2.4c-3.9 0-7 3.1-7 7 0 4.9 7 12.6 7 12.6s7-7.7 7-12.6c0-3.9-3.1-7-7-7Z"
-              fill="url(#pnl-mark)"
-            />
-            <circle cx="12" cy="9.3" r="2.4" fill="#0a1120" />
-            <defs>
-              <linearGradient id="pnl-mark" x1="5" y1="2" x2="19" y2="22" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#5cb0ff" />
-                <stop offset="1" stopColor="#208aef" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <span>FOM</span>
+          <LogoFom />
           <em>{esAdminFom(perfil) ? 'Administración' : 'Operación conectada'}</em>
         </NavLink>
         <button type="button" className="pnl-side-cerrar" aria-label="Cerrar navegación" onClick={cerrar}><Icono nombre="cerrar" tam={20} /></button>
@@ -210,6 +202,7 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
 
 export default function Consola() {
   const sesion = useSesion()
+  const { diseno } = useApariencia(sesion?.perfil)
   const { pathname } = useLocation()
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [sinLeer, setSinLeer] = useState(0)
@@ -230,7 +223,7 @@ export default function Consola() {
 
   // Contador del globo de alertas: se recalcula al navegar y cuando algo cambia.
   useEffect(() => {
-    if (!sesion?.perfil || esAdminFom(sesion.perfil)) return
+    if (!sesion?.perfil || esAdminFom(sesion.perfil) && !sesion.perfil.empresaGestion) { setSinLeer(0); return }
     let vivo = true
     const leer = () =>
       repo.alertas.listar({ soloSinLeer: true }).then((l) => vivo && setSinLeer(l.length)).catch(() => {})
@@ -240,7 +233,7 @@ export default function Consola() {
       vivo = false
       baja()
     }
-  }, [pathname, sesion?.perfil?.id])
+  }, [pathname, sesion?.perfil?.id, sesion?.perfil?.empresaGestion?.id])
 
   useEffect(() => {
     document.title = 'Consola FOM'
@@ -277,7 +270,7 @@ export default function Consola() {
   }
 
   return (
-    <div className="pnl fom-dark" data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'}>
+    <div className="pnl fom-dark" data-diseno={diseno} data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'}>
       <Lateral
         perfil={perfil}
         abierto={menuAbierto}
@@ -295,14 +288,13 @@ export default function Consola() {
 
       <main className="pnl-main" id="contenido">
         <div className="pnl-topbar">
-          <span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{esAdminFom(perfil) && pathname.includes('/admin/') ? 'Administración global FOM' : perfil.empresa}</span>
+          <div className="pnl-topbar-contexto"><span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{esAdminFom(perfil) && pathname.includes('/admin/') ? 'Administración global FOM' : perfil.empresa || 'FOM · Administración'}</span><span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span></div>
           <div className="pnl-topbar-derecha">
-            <span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span>
-            {!esAdminFom(perfil) && <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={`Alertas: ${sinLeer} sin leer`}>
+            {esAdminFom(perfil) && !perfil.empresaGestion ? <button type="button" className="pnl-notificaciones" disabled title="Entra a una empresa para consultar sus alertas" aria-label="Alertas: entra a una empresa para consultarlas"><Icono nombre="campana" tam={21} /></button> : <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={`Alertas: ${sinLeer} sin leer`}>
               <Icono nombre="campana" tam={21} />
               {sinLeer > 0 && <span>{sinLeer}</span>}
             </Link>}
-            <Link to="/panel/mi-perfil" className="pnl-topbar-perfil" aria-label="Mi perfil"><i className="pnl-avatar">{perfil.iniciales}</i><b>{perfil.nombre}</b></Link>
+            <Link to="/panel/mi-perfil" className="pnl-topbar-perfil" aria-label="Mi perfil"><span className="pnl-topbar-identidad"><b>{perfil.nombre}</b><small>{perfil.rolNombre}</small></span><i className="pnl-avatar">{perfil.iniciales}</i></Link>
           </div>
         </div>
         <button
@@ -327,7 +319,7 @@ export default function Consola() {
           <Route path="flota/:id" element={<ExpedienteVehiculo />} />
           <Route path="seguridad" element={<Seguridad />} />
           <Route path="jornadas" element={<Jornadas />} />
-          <Route path="mantenimiento" element={<Mantenimiento />} />
+          <Route path="mantenimiento" element={area === 'conductor' ? <MantenimientoConductor /> : <Mantenimiento />} />
           <Route path="mantenimiento/planes" element={<Navigate to="/panel/mantenimiento?vista=planes" replace />} />
           <Route path="inspecciones" element={<Inspecciones />} />
           <Route path="inspecciones/programa" element={<Navigate to="/panel/inspecciones?vista=agenda" replace />} />
