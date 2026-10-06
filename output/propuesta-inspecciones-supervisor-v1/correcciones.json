@@ -1,0 +1,17 @@
+{
+  "edits": [
+    [
+      "04-agenda",
+      "Keep entire design unchanged. In the Próximas citas list, change the amber badge 'Con observaciones' for Unidad03 to a blue badge 'Programada'. Appointment states only Programada, Completada, Cancelada. Preserve all layout."
+    ],
+    [
+      "06-programar-detalles",
+      "Keep entire design unchanged. Replace the stepper at top of the modal with exactly TWO steps: a completed check-circle '1. Unidad', then active blue circle '2. Detalles'. Remove third step '3. Confirmación' completely. Keep fields, summary and Programar inspección button unchanged."
+    ],
+    [
+      "09-resolver-hallazgo",
+      "Keep entire design unchanged. In the left context inside modal replace blue link 'Ver inspección (ODT)' with exactly 'Ver inspección'. Change any background amber state text 'Abierto' to 'Pendiente'. Preserve every other layout and control."
+    ]
+  ],
+  "first": "Edit the supplied FOM Inspecciones design image. Preserve every layout, font, logo, color and control. Change the red result badge in the bottom table from 'Rechazada' to exactly 'Bloqueada'. Change every 2025 date to '2 oct 2026' for today and '1 oct 2026' previous row. Preserve all other content. This is one horizontal desktop UI design image."
+}

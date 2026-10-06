@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Icono } from '../../panel/Iconos'
+import LogoFom from '../LogoFom'
 const GROUPS = [
   { name: 'Plataforma', id: 'plataforma', links: [['/plataforma', 'Plataforma web'], ['/app', 'App'], ['/funciones', 'Funciones'], ['/seguridad', 'Seguridad'], ['/areas', 'Áreas']] },
   { name: 'Información', id: 'informacion', links: [['/quienes-somos', 'Quiénes somos'], ['/que-ofrecemos', 'Qué ofrecemos'], ['/beneficios', 'Beneficios'], ['/preguntas-frecuentes', 'Preguntas']] },
 ]
-export function Brand() { return <span className="m-brand"><Icono nombre="pin" tam={30} /><b>FOM</b></span> }
+export function Brand() { return <span className="m-brand"><LogoFom /></span> }
 export default function MarketingHeader() {
   const [open, setOpen] = useState(false)
   const [group, setGroup] = useState(null)

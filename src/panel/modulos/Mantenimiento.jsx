@@ -21,6 +21,7 @@ import {
 } from '../comp/ui'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
+import { presentarHistorial } from '../datos/historial-odt'
 import { Icono } from '../Iconos'
 
 // ============================================================
@@ -85,7 +86,6 @@ const PASOS_ODT = {
   cerrada: [{ a: 'en_revision', t: 'Reabrir' }],
   cancelada: [],
 }
-const EVENTO_ODT = { inicio: 'inició', pausa: 'pausó', reanudacion: 'reanudó', entrega: 'entregó a calidad' }
 const AYUDA_ODT = {
   abierta: 'Alguien reportó la falla. Pásala a revisión para evaluarla, o resuélvela directo si no necesita taller.',
   en_revision: 'Se está evaluando. Apruébala para llevarla a taller, o resuélvela sin taller si ya se atendió.',
@@ -116,23 +116,25 @@ function cargarMantenimiento() {
 
 export default function Mantenimiento() {
   const [params, setParams] = useSearchParams()
-  const vista = ['acciones', 'planes'].includes(params.get('vista')) ? params.get('vista') : 'ordenes'
+  const vista = ['acciones', 'planes', 'todas'].includes(params.get('vista')) ? params.get('vista') : 'ordenes'
   function cambiar(v) { setParams(v === 'ordenes' ? {} : { vista: v }) }
   return <div className="mnt-root">
     <div className="mnt-heading"><div><span className="mnt-breadcrumb">Inicio › Mantenimiento</span><h1>Mantenimiento</h1><p>Qué necesita atención y qué sigue en taller.</p></div></div>
     <nav className="mnt-nav" aria-label="Secciones de mantenimiento">
-      {[['ordenes', 'llave', 'Órdenes'], ['acciones', 'reloj', 'Próximos servicios'], ['planes', 'sync', 'Planes']].map(([v, icono, t]) => <button key={v} type="button" aria-current={vista === v ? 'page' : undefined} className={vista === v ? 'activo' : ''} onClick={() => cambiar(v)}><Icono nombre={icono} tam={18}/>{t}</button>)}
+      {[['ordenes', 'llave', 'Órdenes'], ['todas', 'documento', 'Todas las órdenes'], ['acciones', 'reloj', 'Próximos servicios'], ['planes', 'sync', 'Planes']].map(([v, icono, t]) => <button key={v} type="button" aria-current={vista === v ? 'page' : undefined} className={vista === v ? 'activo' : ''} onClick={() => cambiar(v)}><Icono nombre={icono} tam={18}/>{t}</button>)}
     </nav>
-    {vista === 'ordenes' ? <Ordenes /> : <Planes key={vista} vista={vista} integrado />}
+    {['ordenes', 'todas'].includes(vista) ? <Ordenes key={vista} listaCompleta={vista === 'todas'} /> : <Planes key={vista} vista={vista} integrado />}
   </div>
 }
 
-function Ordenes() {
+function Ordenes({ listaCompleta = false }) {
   const sesion = useSesion()
   const { datos, estado, error, recargar } = useDatos(cargarMantenimiento, [])
   const [q, setQ] = useState('')
   const [tipo, setTipo] = useState('')
-  const [vista, setVista] = useState('atencion')
+  const [vista, setVista] = useState(listaCompleta ? 'lista' : 'atencion')
+  const [unidadFiltro, setUnidadFiltro] = useState('')
+  const [estadoFiltro, setEstadoFiltro] = useState('')
   const [grupo, setGrupo] = useState('')
   const [params] = useSearchParams()
   const [detalleId, setDetalleId] = useState(() => params.get('orden'))
@@ -142,21 +144,28 @@ function Ordenes() {
   const vehiculos = datos?.vehiculos ?? []
   const visibles = useMemo(() => odts.filter(o => {
     if (tipo && o.tipo !== tipo) return false
+    if (unidadFiltro && o.vehiculoId !== unidadFiltro) return false
+    if (estadoFiltro && o.estado !== estadoFiltro) return false
     if (grupo && !GRUPOS.find(g => g.clave === grupo)?.estados.includes(o.estado)) return false
-    return [o.descripcion, o.vehiculoNombre, o.creadorNombre, etiqueta('tipo_falla', o.tipoFalla)].join(' ').toLowerCase().includes(q.trim().toLowerCase())
-  }), [odts, q, tipo, grupo])
+    return [o.id, o.descripcion, o.vehiculoNombre, o.creadorNombre, etiqueta('tipo_falla', o.tipoFalla)].join(' ').toLowerCase().includes(q.trim().toLowerCase())
+  }), [odts, q, tipo, grupo, unidadFiltro, estadoFiltro])
   const detalle = detalleId ? odts.find(o => o.id === detalleId) : null
   const filtrosEtapa = <div className="mnt-states" aria-label="Filtrar por etapa"><button type="button" aria-pressed={!grupo} onClick={() => setGrupo('')}>Todas <b>{odts.length}</b></button>{GRUPOS.map(g => <button type="button" key={g.clave} aria-pressed={grupo === g.clave} onClick={() => setGrupo(grupo === g.clave ? '' : g.clave)}><i className={g.color}/>{g.titulo}<b>{odts.filter(o => g.estados.includes(o.estado)).length}</b></button>)}</div>
   return <div className="mnt-content">
-    <div className="mnt-toolbar"><div><h2>Órdenes de trabajo</h2><p>De la falla reportada a la unidad lista para volver.</p></div><button className="pnl-btn primario" type="button" onClick={() => setCreando(true)}><Icono nombre="mas" tam={18}/>Crear orden</button></div>
+    <div className="mnt-toolbar"><div><h2>{listaCompleta ? 'Todas las órdenes de mantenimiento' : 'Órdenes de trabajo'}</h2><p>{listaCompleta ? 'Consulta abiertas, en proceso, cerradas y canceladas de esta empresa.' : 'De la falla reportada a la unidad lista para volver.'}</p></div><button className="pnl-btn primario" type="button" onClick={() => setCreando(true)}><Icono nombre="mas" tam={18}/>Crear orden</button></div>
     {aviso && <div className="mnt-success" role="status"><Icono nombre="check" tam={20}/>{aviso}</div>}
     {estado === 'cargando' && <Cargando filas={6}/>}
     {estado === 'error' && <ErrorCarga onReintentar={recargar} texto={error?.message}/>}
     {estado === 'ok' && <>
       <Indicadores odts={odts}/>
-      {vista === 'lista' &&       <div className="mnt-filters"><Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/><div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Resumen</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div></div>
+      {vista === 'lista' &&       <div className="mnt-filters"><Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/>{!listaCompleta && <div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Resumen</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div>}</div>
 }
-      {vista === 'lista' && filtrosEtapa}
+      {vista === 'lista' && (listaCompleta ? <div className="mnt-all-filters">
+        <Campo etiqueta="Vehículo"><select aria-label="Vehículo" className="pnl-input" value={unidadFiltro} onChange={e => setUnidadFiltro(e.target.value)}><option value="">Todos los vehículos</option>{[...new Map(odts.map(o => [o.vehiculoId, o.vehiculoNombre])).entries()].filter(([id]) => id).map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></Campo>
+        <Campo etiqueta="Estado"><select aria-label="Estado" className="pnl-input" value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)}><option value="">Todos los estados</option>{Object.keys(AYUDA_ODT).map(e => <option key={e} value={e}>{etiqueta('odt_estado', e)}</option>)}</select></Campo>
+        <p role="status">{visibles.length} de {odts.length} órdenes</p>
+        {(q || tipo || unidadFiltro || estadoFiltro) && <button type="button" className="pnl-btn sutil" onClick={() => { setQ(''); setTipo(''); setUnidadFiltro(''); setEstadoFiltro('') }}>Limpiar filtros</button>}
+      </div> : filtrosEtapa)}
       {vista === 'lista' ? <Tarjeta titulo="Todas las órdenes" sinCuerpo><Lista odts={visibles} alAbrir={setDetalleId}/></Tarjeta> : <div className="mnt-overview"><div><Tarjeta titulo="Necesita tu atención" accion={<div className="mnt-attention-tools"><div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Prioridades</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div><Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>} sinCuerpo><Atencion odts={visibles.filter(o => !['cerrada', 'cancelada'].includes(o.estado))} vehiculos={vehiculos} alAbrir={setDetalleId} alCrear={() => setCreando(true)}/><details className="mnt-type-filter"><summary>Filtrar por tipo de orden</summary><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/></details>      {filtrosEtapa}
 </Tarjeta></div><aside className="mnt-guide"><h3>Cómo avanza una orden</h3><p className="mnt-guide-intro">Del reporte al cierre, en cuatro pasos.</p>{[['Reportar', 'Elige la unidad y describe la falla.'], ['Revisar y asignar', 'Evalúa el reporte y asigna a quien hará el trabajo.'], ['Trabajo en taller', 'El responsable inicia, pausa y entrega desde su app.'], ['Revisar y cerrar', 'Confirma la solución y registra el costo si lo tienes.']].map(([t,d],i) => <div className="mnt-guide-step" key={t}><b>{i+1}</b><div><strong>{t}</strong><p>{d}</p></div></div>)}<Link to="/panel/mantenimiento?vista=planes" className="pnl-link">Prepara tus servicios con un plan →</Link></aside></div>}
       {vista === 'atencion' && <Tarjeta titulo="Órdenes cerradas · toca una para ver qué pasó" sinCuerpo><Cierres odts={visibles.filter(o => o.estado === 'cerrada').sort((a,b) => new Date(b.resueltaEn || b.creadaEn) - new Date(a.resueltaEn || a.creadaEn))} alAbrir={setDetalleId}/></Tarjeta>}
@@ -243,7 +252,7 @@ function Lista({ odts, alAbrir }) {
             >
               <td>
                 <div className="pnl-doble">
-                  <b>{o.descripcion}</b>
+                  <button type="button" className="mnt-table-link" onClick={e => { e.stopPropagation(); alAbrir(o.id) }}>{o.descripcion}</button>
                   <span>{o.ubicacion || 'Sin ubicación'}</span>
                 </div>
               </td>
@@ -486,41 +495,33 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
 
       {ejecucion.estado === 'error' && <ErrorCarga texto={ejecucion.error?.message} onReintentar={ejecucion.recargar}/>}
       {(() => {
-        // La historia completa de la orden, en el orden en que pasó: quién la reportó, a quién se asignó,
-        // qué hizo el taller y, si ya se cerró, qué se hizo y cuánto costó.
-        const cambios = historial.datos ?? []
-        const hitos = [
-          ...(cambios.length
-            ? cambios.map((c) => ({
-                t: c.de ? `${c.actor || 'Alguien'}: de «${etiqueta('odt_estado', c.de)}» a «${etiqueta('odt_estado', c.a)}»` : `${c.actor || odt.creadorNombre || 'Alguien'} reportó la falla`,
-                d: c.de ? (c.a === 'cerrada' ? [odt.notaSolucion, c.nota, odt.costo != null ? `Costo ${f.moneda(odt.costo)}` : 'Sin costo registrado'].filter(Boolean).join(' · ') : c.nota) : [odt.descripcion, c.nota].filter(Boolean).join(' · '),
-                en: c.en,
-              }))
-            : [
-                { t: 'Reportada', d: `${odt.creadorNombre || 'Alguien'} · ${odt.descripcion}`, en: odt.creadaEn },
-                ...(odt.estado === 'cerrada' && odt.resueltaEn ? [{ t: 'Cerrada', d: [odt.notaSolucion, odt.costo != null ? `Costo ${f.moneda(odt.costo)}` : 'Sin costo registrado'].filter(Boolean).join(' · '), en: odt.resueltaEn }] : []),
-              ]),
-          ...(responsable ? [{ t: 'Responsable asignado', d: responsable.nombre, en: responsable.desde }] : []),
-          ...(ejecucion.datos?.eventos ?? []).map((e) => ({ t: `${e.actor} ${EVENTO_ODT[e.tipo] ?? e.tipo}`, d: e.nota, en: e.en })),
-        ]
-          .filter((h) => h.en)
-          .sort((a, b) => new Date(a.en) - new Date(b.en))
+        const hitos = presentarHistorial(odt, historial.datos ?? [], ejecucion.datos)
+        const grupos = []
+        for (const hito of hitos) {
+          const fecha = hito.fechaValida ? f.fecha(hito.en) : 'Sin fecha registrada'
+          if (grupos.at(-1)?.fecha !== fecha) grupos.push({ fecha, hitos: [] })
+          grupos.at(-1).hitos.push(hito)
+        }
         return (
           <section className="mnt-history">
             <h3>Historial de la orden</h3>
-            <p className="mnt-history-intro">Quién hizo cada cambio y cuándo ocurrió.</p>
+            <p className="mnt-history-intro">Del reporte al cierre, en el orden en que ocurrió.</p>
             {historial.estado === 'cargando' && <p role="status">Consultando los cambios registrados…</p>}
             {historial.estado === 'error' && <ErrorCarga texto="No se pudo cargar el historial completo. Estas son las fechas disponibles de la orden." onReintentar={historial.recargar}/>}
-            {hitos.map((h, i) => (
-              <div key={i}>
-                <i />
-                <div>
-                  <b>{h.t}</b>
-                  {h.d && <p>{h.d}</p>}
-                  <small>{f.fechaHora(h.en)}</small>
-                </div>
-              </div>
-            ))}
+            {grupos.map(grupo => <div className="mnt-history-day" key={grupo.fecha}>
+              <h4>{grupo.fecha}</h4>
+              <ol className="mnt-history-events">
+                {grupo.hitos.map((h, i) => <li className="mnt-history-event" key={i}>
+                  <time dateTime={h.fechaValida ? new Date(h.en).toISOString() : undefined}>{h.fechaValida ? f.hora(h.en) : 'Sin hora'}</time>
+                  <div className="mnt-history-event-body">
+                    <strong>{h.titulo}</strong>
+                    <span className="mnt-history-actor">{h.actor ? `Por ${h.actor}` : 'Autor no registrado'}</span>
+                    {h.responsable && <p className="mnt-history-responsable"><b>A cargo de:</b> {h.responsable}</p>}
+                    {h.notas.length > 0 && <div className="mnt-history-note"><span>Nota registrada</span>{h.notas.map((n, j) => <p key={j}>{n}</p>)}</div>}
+                  </div>
+                </li>)}
+              </ol>
+            </div>)}
           </section>
         )
       })()}

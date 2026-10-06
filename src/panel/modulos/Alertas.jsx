@@ -1,347 +1,97 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import repo from '../datos/repo'
+import repo, { CONECTADO } from '../datos/repo'
+import { useSesion } from '../useSesion'
 import { useDatos } from '../useDatos'
-import { Cabecera, Cargando, Chips, ErrorCarga, Kpi, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
-import { BarrasH } from '../comp/Grafico'
+import { Cabecera, Cargando, Chips, ErrorCarga, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
-
-// La app separa dos cosas que el supervisor nunca ve juntas: las
-// notificaciones (ODT nuevas y reglas que se cumplieron) y los eventos de
-// manejo que alimentan el índice seguro. Aquí conviven en la misma bandeja.
+import { agruparAvisos, esDeHoy, estaLeida } from './alertas-presentacion'
+import './perfil-alertas.css'
 
 const DIAS_EVENTOS = 28
-
-const PESTANAS = [
-  { v: 'notificaciones', t: 'Notificaciones' },
-  { v: 'eventos', t: 'Eventos de manejo' },
-]
-
-const TIPOS_EVENTO = [
-  { v: 'exceso_velocidad', t: 'Exceso de velocidad' },
-  { v: 'frenada_brusca', t: 'Frenada brusca' },
-  { v: 'aceleracion_brusca', t: 'Aceleración fuerte' },
-  { v: 'curva_agresiva', t: 'Curva agresiva' },
-]
+const PESTANAS = [{ v: 'notificaciones', t: 'Notificaciones' }, { v: 'eventos', t: 'Eventos de manejo' }]
+const TIPOS_EVENTO = [{ v: 'exceso_velocidad', t: 'Exceso de velocidad' }, { v: 'frenada_brusca', t: 'Frenada brusca' }, { v: 'aceleracion_brusca', t: 'Aceleración fuerte' }, { v: 'curva_agresiva', t: 'Curva agresiva' }, { v: 'condicion', t: 'Condición de telemetría' }]
 
 export default function Alertas() {
+  const sesion = useSesion()
+  const empresaAjena = CONECTADO && Boolean(sesion?.perfil?.empresaGestion)
   const [pestana, setPestana] = useState('notificaciones')
   const [filtro, setFiltro] = useState('todas')
   const [tipoEvento, setTipoEvento] = useState('')
-
+  const [pendiente, setPendiente] = useState('')
+  const [errorAccion, setErrorAccion] = useState('')
+  const [aviso, setAviso] = useState('')
   const notif = useDatos(() => repo.alertas.listar({}), [])
   const manejo = useDatos(() => repo.alertas.eventos({ dias: DIAS_EVENTOS }), [])
-
   const lista = useMemo(() => notif.datos ?? [], [notif.datos])
   const eventos = useMemo(() => manejo.datos ?? [], [manejo.datos])
-
-  // El estado de la pantalla lo decide SOLO la bandeja. Los eventos de
-  // manejo no tienen servidor todavia, asi que su carga siempre falla; si
-  // ese fallo tumbara la pantalla entera, la bandeja —que si funciona— no se
-  // veria nunca. Cada mitad responde por si misma.
-  const sinEventos = manejo.estado === 'error'
-  const estado =
-    notif.estado === 'error'
-      ? 'error'
-      : notif.estado === 'ok' && manejo.estado !== 'cargando'
-        ? 'ok'
-        : 'cargando'
-
-  const recargar = () => {
-    notif.recargar()
-    manejo.recargar()
-  }
-
-  const sinLeer = lista.filter((n) => !n.leida).length
-  const hoy = f.hoyISO()
-  const deHoy = lista.filter((n) => f.hoyISO(new Date(n.creadaEn)) === hoy).length
-  const excesos = eventos.filter((e) => e.clave === 'exceso_velocidad').length
-
+  const sinLeer = lista.filter(n => !estaLeida(n)).length
+  const deHoy = lista.filter(n => esDeHoy(n.creadaEn)).length
   const filtrosNotif = [
     { v: 'todas', t: 'Todas', n: lista.length },
     { v: 'sin_leer', t: 'Sin leer', n: sinLeer },
-    { v: 'odt_nueva', t: 'ODT nuevas', n: lista.filter((n) => n.tipo === 'odt_nueva').length },
-    {
-      v: 'alerta_cumplida',
-      t: 'Reglas cumplidas',
-      n: lista.filter((n) => n.tipo === 'alerta_cumplida').length,
-    },
+    { v: 'odt_nueva', t: 'ODT nuevas', n: lista.filter(n => n.tipo === 'odt_nueva').length },
+    { v: 'alerta_cumplida', t: 'Reglas cumplidas', n: lista.filter(n => n.tipo === 'alerta_cumplida').length },
   ]
+  const notificaciones = lista.filter(n => filtro === 'todas' || (filtro === 'sin_leer' ? !estaLeida(n) : n.tipo === filtro))
+  const grupos = agruparAvisos(notificaciones)
+  const filtrosEvento = [{ v: '', t: 'Todos', n: eventos.length }].concat(TIPOS_EVENTO.filter(t => t.v !== 'condicion' || eventos.some(e => e.clave === t.v)).map(t => ({ ...t, n: eventos.filter(e => e.clave === t.v).length })))
+  const eventosFiltrados = tipoEvento ? eventos.filter(e => e.clave === tipoEvento) : eventos
+  const puedeActuar = notif.estado === 'ok' && !pendiente && !empresaAjena
 
-  const notificaciones = useMemo(() => {
-    if (filtro === 'sin_leer') return lista.filter((n) => !n.leida)
-    if (filtro === 'odt_nueva' || filtro === 'alerta_cumplida') {
-      return lista.filter((n) => n.tipo === filtro)
-    }
-    return lista
-  }, [lista, filtro])
-
-  const conteoPorTipo = useMemo(
-    () =>
-      TIPOS_EVENTO.map((t) => ({
-        etiqueta: t.t,
-        valor: eventos.filter((e) => e.clave === t.v).length,
-      })),
-    [eventos]
-  )
-
-  const filtrosEvento = [{ v: '', t: 'Todos', n: eventos.length }].concat(
-    TIPOS_EVENTO.map((t) => ({
-      v: t.v,
-      t: t.t,
-      n: eventos.filter((e) => e.clave === t.v).length,
-    }))
-  )
-
-  const eventosFiltrados = useMemo(
-    () => (tipoEvento ? eventos.filter((e) => e.clave === tipoEvento) : eventos),
-    [eventos, tipoEvento]
-  )
-
-  const descartar = async (alerta) => {
-    await repo.alertas.descartar(alerta.id).catch(() => {})
-    notif.recargar()
+  async function ejecutar(clave, operacion, mensaje) {
+    if (pendiente) return
+    setPendiente(clave)
+    setErrorAccion('')
+    setAviso('')
+    try {
+      await operacion()
+      await notif.recargar()
+      setAviso(mensaje)
+    } catch (e) { setErrorAccion(e.message || 'No se pudo completar la acción. Inténtalo de nuevo.') }
+    finally { setPendiente('') }
   }
-  const descartarLeidos = async () => {
-    await repo.alertas.descartarLeidos().catch(() => {})
-    notif.recargar()
-  }
+  const marcar = n => estaLeida(n) ? undefined : ejecutar(`leer-${n.id}`, () => repo.alertas.marcarLeida(n.id), 'La notificación se marcó como leída.')
+  const descartar = n => ejecutar(`descartar-${n.id}`, () => repo.alertas.descartar(n.id), 'La notificación se descartó de tu bandeja.')
 
-  const marcar = (alerta) => {
-    if (!alerta.leida) repo.alertas.marcarLeida(alerta.id)
-  }
-
-  const bajada =
-    estado === 'ok'
-      ? sinLeer > 0
-        ? `${f.numero(sinLeer)} ${sinLeer === 1 ? 'notificación sin leer' : 'notificaciones sin leer'}`
-        : 'Todo al día, no queda nada sin leer.'
-      : 'Lo que pasó en la flota, en orden de llegada.'
-
-  return (
-    <>
-      <Cabecera titulo="Alertas" bajada={bajada}>
-        <button
-          type="button"
-          className="pnl-btn"
-          onClick={() => repo.alertas.marcarTodasLeidas()}
-          disabled={estado !== 'ok' || sinLeer === 0}
-        >
-          <Icono nombre="check" tam={16} />
-          Marcar todas como leídas
-        </button>
-        <button type="button" className="pnl-btn sutil" onClick={descartarLeidos}>
-          <Icono nombre="cerrar" tam={16} />
-          Descartar leídos
-        </button>
-      </Cabecera>
-
-      <div className="pnl-cuerpo">
-        {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={notif.error} />}
-        {estado === 'ok' && (
-          <>
-            <div className="pnl-grid k4">
-              <Kpi
-                titulo="Sin leer"
-                valor={f.numero(sinLeer)}
-                icono="campana"
-                tono={sinLeer > 0 ? 'aviso' : ''}
-                nota={sinLeer > 0 ? 'Esperan tu revisión' : 'Bandeja al día'}
-              />
-              <Kpi titulo="Alertas de hoy" valor={f.numero(deHoy)} icono="alerta" />
-              {/* Sin servidor de eventos, un «0» aqui seria mentira: cero
-                  excesos y «no se sabe» no son lo mismo, y sobre ese numero
-                  se juzga a un conductor. Se muestra un guion y el motivo. */}
-              <Kpi
-                titulo="Eventos de manejo"
-                valor={sinEventos ? '—' : f.numero(eventos.length)}
-                icono="velocidad"
-                nota={sinEventos ? 'Sin servidor todavía' : `Últimos ${DIAS_EVENTOS} días`}
-              />
-              <Kpi
-                titulo="Excesos de velocidad"
-                valor={sinEventos ? '—' : f.numero(excesos)}
-                icono="escudo"
-                tono={!sinEventos && excesos > 0 ? 'aviso' : ''}
-                nota={sinEventos ? 'Sin servidor todavía' : `Últimos ${DIAS_EVENTOS} días`}
-              />
-            </div>
-
-            <Pestanas opciones={PESTANAS} valor={pestana} alCambiar={setPestana} />
-
-            {pestana === 'notificaciones' ? (
-              <>
-                <Chips opciones={filtrosNotif} valor={filtro} alCambiar={setFiltro} />
-                <Tarjeta titulo="Bandeja">
-                  {notificaciones.length === 0 ? (
-                    <Vacio
-                      icono="campana"
-                      titulo="Sin notificaciones"
-                      texto="Cuando llegue una ODT nueva o se cumpla una regla, la verás aquí."
-                    />
-                  ) : (
-                    <div className="pnl-filas">
-                      {notificaciones.map((n) => (
-                        <FilaNotificacion key={n.id} alerta={n} alAbrir={marcar} alDescartar={descartar} />
-                      ))}
-                    </div>
-                  )}
-                </Tarjeta>
-              </>
-            ) : (
-              <>
-                <Chips opciones={filtrosEvento} valor={tipoEvento} alCambiar={setTipoEvento} />
-                {sinEventos ? (
-                  <Tarjeta titulo="Eventos de manejo">
-                    {/* Decir «buena señal» cuando lo que pasa es que no hay
-                        servidor seria felicitar a la flota por un dato que
-                        no existe. Se dice el motivo real. */}
-                    <Vacio
-                      icono="velocidad"
-                      titulo="Los eventos de manejo viven en «Eventos y SOS»"
-                      texto="Ahí están los excesos de velocidad y las condiciones que disparan las reglas, con reconocer y resolver. Esta pestaña queda para los avisos personales."
-                      accion={<Link to="/panel/seguridad" className="pnl-btn primario">Ir a Eventos y SOS</Link>}
-                    />
-                  </Tarjeta>
-                ) : eventos.length === 0 ? (
-                  <Tarjeta titulo="Eventos de manejo">
-                    <Vacio
-                      icono="velocidad"
-                      titulo="Sin eventos de manejo"
-                      texto={`No se detectaron eventos en los últimos ${DIAS_EVENTOS} días. Buena señal.`}
-                    />
-                  </Tarjeta>
-                ) : (
-                  <div className="pnl-grid">
-                    <Tarjeta titulo="Eventos por tipo">
-                      <BarrasH datos={conteoPorTipo} formato={f.numero} />
-                    </Tarjeta>
-                    <Tarjeta titulo="Detalle de eventos">
-                      {eventosFiltrados.length === 0 ? (
-                        <Vacio
-                          icono="filtro"
-                          titulo="Ningún evento de ese tipo"
-                          texto="Prueba con otro tipo de evento o mira todos."
-                          accion={
-                            <button
-                              type="button"
-                              className="pnl-btn"
-                              onClick={() => setTipoEvento('')}
-                            >
-                              Ver todos
-                            </button>
-                          }
-                        />
-                      ) : (
-                        <TablaEventos eventos={eventosFiltrados} />
-                      )}
-                    </Tarjeta>
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        )}
-      </div>
-    </>
-  )
-}
-
-/** Fila de la bandeja. Si la notificación trae ODT, lleva a Mantenimiento. */
-function FilaNotificacion({ alerta, alAbrir, alDescartar }) {
-  const contenido = (
-    <>
-      <i className={`pnl-punto ${alerta.leida ? 'off' : 'alerta'}`} />
-      <div className="pnl-fila-txt">
-        <b>{alerta.titulo}</b>
-        <span>{alerta.detalle}</span>
-      </div>
-      <em>{f.desde(alerta.creadaEn)}</em>
-      <button
-        type="button"
-        className="pnl-btn sutil"
-        aria-label="Descartar este aviso"
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); alDescartar?.(alerta) }}
-      >
-        Descartar
-      </button>
-    </>
-  )
-
-  const clase = `pnl-fila${alerta.leida ? '' : ' aviso'}`
-
-  if (alerta.odtId) {
-    return (
-      <Link to="/panel/mantenimiento" className={clase} onClick={() => alAbrir(alerta)}>
-        {contenido}
-      </Link>
-    )
-  }
-
-  return (
-    <div
-      className={clase}
-      role="button"
-      tabIndex={0}
-      onClick={() => alAbrir(alerta)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          alAbrir(alerta)
-        }
-      }}
-    >
-      {contenido}
+  return <div className="fa-superficie pa-superficie">
+    <Cabecera titulo="Alertas" bajada="Revisa lo nuevo y sigue con tu operación.">
+      {pestana === 'notificaciones' && <>
+      <button className="pnl-btn primario" disabled={!puedeActuar || !sinLeer} onClick={() => ejecutar('leer-todas', () => repo.alertas.marcarTodasLeidas(), 'Las notificaciones se marcaron como leídas.')}><Icono nombre="check" tam={17} />{pendiente === 'leer-todas' ? 'Marcando…' : 'Marcar todas como leídas'}</button>
+      <button className="pnl-btn" disabled={!puedeActuar || lista.length === sinLeer} onClick={() => ejecutar('descartar-leidos', () => repo.alertas.descartarLeidos(), 'Se descartaron las notificaciones leídas.')}><Icono nombre="cerrar" tam={17} />{pendiente === 'descartar-leidos' ? 'Descartando…' : 'Descartar leídos'}</button>
+      </>}
+    </Cabecera>
+    <div className="pnl-cuerpo">
+      {empresaAjena && <p className="pa-nota fa-limitacion" role="status"><Icono nombre="alerta" tam={18} />Puedes consultar las alertas de esta empresa. Marcar y descartar desde el acceso global requiere la actualización del servidor pendiente en el issue #631. Sus supervisores pueden hacerlo desde su propia cuenta.</p>}
+      {errorAccion && <p className="pa-error" role="alert">{errorAccion}</p>}
+      {aviso && <p className="pa-confirmacion" role="status"><Icono nombre="check" tam={17} />{aviso}</p>}
+      {pestana === 'notificaciones' && <section className="fa-metricas" aria-label="Estado de las notificaciones"><div><Icono nombre="campana" tam={30} /><span>Sin leer<strong>{notif.datos === null ? '—' : f.numero(sinLeer)}</strong></span></div><div><Icono nombre="reloj" tam={30} /><span>Avisos de hoy<strong>{notif.datos === null ? '—' : f.numero(deHoy)}</strong></span></div></section>}
+      <Pestanas opciones={PESTANAS} valor={pestana} alCambiar={setPestana} />
+      {pestana === 'notificaciones' ? <>
+        {notif.estado === 'cargando' && <Cargando filas={5} />}
+        {notif.estado === 'error' && <ErrorCarga error={notif.error} texto="No se pudieron consultar tus notificaciones." onReintentar={notif.recargar} />}
+        {notif.datos !== null && <>
+          <Chips opciones={filtrosNotif} valor={filtro} alCambiar={setFiltro} />
+          {grupos.length ? <section className="fa-bandeja" aria-label="Bandeja de notificaciones" aria-busy={Boolean(pendiente)}>{grupos.map(g => <div key={g.titulo}><h2>{g.titulo}</h2>{g.items.map(n => <article key={n.id} className={`fa-aviso${estaLeida(n) ? ' leida' : ''}`}><span className="fa-lectura" aria-label={estaLeida(n) ? 'Leída' : 'Sin leer'} /><Icono nombre={n.tipo === 'odt_nueva' ? 'documento' : n.tipo === 'alerta_cumplida' ? 'check' : 'campana'} tam={28} /><div className="fa-aviso-texto"><h3>{n.titulo}</h3>{n.detalle && <p>{n.detalle}</p>}</div><time dateTime={n.creadaEn || undefined} title={n.creadaEn ? f.fechaHora(n.creadaEn) : undefined}>{n.creadaEn ? f.desde(n.creadaEn) : 'Sin fecha'}</time><div className="fa-aviso-acciones">{n.odtId ? <><Link to="/panel/mantenimiento" className="pnl-btn primario">Ver mantenimiento</Link>{!estaLeida(n) && <button className="pnl-btn sutil" disabled={!puedeActuar} onClick={() => marcar(n)}>Marcar leída</button>}</> : estaLeida(n) ? <span className="fa-leida"><Icono nombre="check" tam={15} />Leída</span> : <button className="pnl-btn" disabled={!puedeActuar} onClick={() => marcar(n)}>{pendiente === `leer-${n.id}` ? 'Marcando…' : 'Marcar leída'}</button>}<button className="pnl-btn sutil" aria-label={`Descartar: ${n.titulo}`} disabled={!puedeActuar} onClick={() => descartar(n)}>{pendiente === `descartar-${n.id}` ? 'Descartando…' : 'Descartar'}</button></div></article>)}</div>)}</section> : <Tarjeta><Vacio icono={filtro === 'todas' ? 'check' : 'filtro'} titulo={lista.length === 0 || filtro === 'sin_leer' && sinLeer === 0 ? 'Tu bandeja está al día' : 'Sin notificaciones en este filtro'} texto={lista.length === 0 ? 'Cuando llegue una nueva orden de trabajo o se cumpla una regla, la verás aquí. Los eventos de manejo se consultan por separado.' : filtro === 'sin_leer' && sinLeer === 0 ? 'Ya revisaste las notificaciones de tu bandeja.' : 'Prueba otro filtro para ver los avisos disponibles.'} accion={filtro !== 'todas' && <button className="pnl-btn" onClick={() => setFiltro('todas')}>Ver todas</button>} /></Tarjeta>}
+        </>}
+        <p className="pa-nota fa-alcance">Los avisos se muestran según tu rol y la empresa autorizada. Leer o descartar un aviso no cierra una orden de trabajo.</p>
+      </> : <>
+        <div className="fa-eventos-cab"><p>Eventos registrados en los últimos {DIAS_EVENTOS} días.</p><Link to="/panel/seguridad" className="pnl-link">Ver Eventos y SOS<Icono nombre="flecha" tam={17} /></Link></div>
+        {manejo.estado === 'cargando' && <Cargando filas={5} />}
+        {manejo.estado === 'error' && <ErrorCarga error={manejo.error} texto="No se pudieron consultar los eventos de manejo." onReintentar={manejo.recargar} />}
+        {manejo.datos !== null && <><Chips opciones={filtrosEvento} valor={tipoEvento} alCambiar={setTipoEvento} />
+          {eventosFiltrados.length > 0 && <div className="fa-severidades" aria-label="Severidad de los eventos consultados">{['alta', 'media', 'baja'].map(s => <span key={s}><Tag color={color('alerta_severidad', s)}>{etiqueta('alerta_severidad', s)}</Tag><strong>{eventosFiltrados.filter(e => e.severidad === s).length}</strong></span>)}</div>}
+          <Tarjeta titulo="Detalle de eventos" accion={<span className="pa-nota">{f.numero(eventosFiltrados.length)} registros</span>}>
+          {eventosFiltrados.length ? <TablaEventos eventos={eventosFiltrados} /> : <Vacio icono="velocidad" titulo={tipoEvento ? 'Sin eventos de este tipo' : 'Sin eventos registrados'} texto={tipoEvento ? 'Consulta otros tipos o vuelve a mostrar todos.' : `No hay eventos registrados en los últimos ${DIAS_EVENTOS} días.`} accion={tipoEvento && <button className="pnl-btn" onClick={() => setTipoEvento('')}>Ver todos</button>} />}
+        </Tarjeta></>}
+      </>}
     </div>
-  )
+  </div>
 }
 
 function TablaEventos({ eventos }) {
-  return (
-    <div className="pnl-tabla-wrap">
-      <table className="pnl-tabla">
-        <thead>
-          <tr>
-            <th>Evento</th>
-            <th>Severidad</th>
-            <th>Unidad</th>
-            <th>Conductor</th>
-            <th className="num">Valor</th>
-            <th>Ubicación</th>
-            <th>Cuándo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {eventos.map((e) => (
-            <tr key={e.id}>
-              <td>{e.nombre}</td>
-              <td>
-                <Tag color={color('alerta_severidad', e.severidad)}>
-                  {etiqueta('alerta_severidad', e.severidad)}
-                </Tag>
-              </td>
-              <td>
-                {e.vehiculo ? (
-                  <Link to={`/panel/flota/${e.vehiculo.id}`} className="pnl-link">
-                    {e.vehiculo.alias}
-                  </Link>
-                ) : (
-                  'Sin unidad'
-                )}
-              </td>
-              <td>{e.conductorNombre}</td>
-              <td className="num">
-                {e.clave === 'exceso_velocidad' ? f.velocidad(e.valor) : f.numero(e.valor)}
-              </td>
-              <td>{e.ubicacion}</td>
-              <td>{f.desde(e.creadaEn)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
+  return <div className="pnl-tabla-wrap"><table className="pnl-tabla fa-eventos-tabla"><thead><tr><th>Evento</th><th>Severidad</th><th>Unidad</th><th>Conductor</th><th className="num">Valor</th><th>Ubicación</th><th>Cuándo</th></tr></thead><tbody>{eventos.map(e => <tr key={e.id}><td>{e.nombre || 'Sin dato'}</td><td><Tag color={color('alerta_severidad', e.severidad)}>{etiqueta('alerta_severidad', e.severidad) || 'Sin dato'}</Tag></td><td>{e.vehiculo ? <Link to={`/panel/flota/${e.vehiculo.id}`} className="pnl-link">{e.vehiculo.alias || 'Ver unidad'}</Link> : 'Sin unidad'}</td><td>{e.conductorNombre || 'Sin dato'}</td><td className="num">{e.valor == null ? 'Sin dato' : e.clave === 'exceso_velocidad' ? f.velocidad(e.valor) : f.numero(e.valor)}</td><td>{e.ubicacion || 'Sin dato'}</td><td>{e.creadaEn ? f.fechaHora(e.creadaEn) : 'Sin fecha'}</td></tr>)}</tbody></table></div>
 }
+

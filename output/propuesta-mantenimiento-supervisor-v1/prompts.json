@@ -1,0 +1,144 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-10-02",
+  "base": "Use case: ui-mockup. Generate ONE polished high-fidelity desktop WEB APP screen, landscape 16:9, 1920x1080-like composition, straight-on interface screenshot, no physical monitor, no photographic people, no montage. FOM fleet maintenance redesigned for a busy Spanish-speaking SUPERVISOR. Operate mode: extraordinarily clear, practical, graphic, calm, professional, fully readable Spanish. Coherent shared system for ALL screens: very dark ink #090f15 background, navy graphite #131e29 surfaces, quiet #263748 hairline borders, blue #349bfa primary controls, off-white #eef4fc text, muted blue-gray #a3b4c8, restrained amber for pending and green for completed, red only warnings. Use clean humanist sans, large readable UI, generous 24-32px spacing, 10-14px corners, precise 1.5px line icons. Sidebar 210px, FOM blue pin wordmark, empresa 'Empresa de demostración', menu Resumen / Centro de control / Alertas / Vehículos / Mantenimiento [selected] / Inspecciones / Gente, footer Supervisor. Top bar company and supervisor avatar; NO Operator role, no billing. Within maintenance a single unified secondary nav 'Órdenes | Próximos servicios | Planes', currently relevant tab selected, clear breadcrumbs. Dominant one primary next action; secondary actions unobtrusive. Do not invent backend capabilities: NO drag-and-drop, AI diagnostics, automatic scheduling, payments, attachments or messaging. Visual vehicle thumbnail is illustrative, NOT a real app screen; never invent actual mobile capture. All sample operational names/values fictional and footer small 'Propuesta de diseño · Datos de demostración'. Use unit 'Unidad 08 · DEMO08', a white pickup, reported problem 'Revisar frenos delanteros', fictional responsible 'Responsable de ejemplo'. Operational stages preserve separately Abierta, En revisión, Aprobada, Asignada, En ejecución, Pausada, En calidad, Cerrada, Cancelada; display grouped stages for overview only and exact label on detail.",
+  "screens": [
+    {
+      "id": "01-inicio",
+      "title": "Vista principal",
+      "prompt": "Main page 'Mantenimiento', subtitle 'Qué necesita atención y qué sigue en taller.' Primary '+ Crear orden'. Unified tabs with Órdenes active. Compact horizontal summary, NOT four huge KPI cards: 'Por revisar 1', 'En taller 0', 'Cerradas este mes 0', 'Costo registrado $65', all demonstration. Main composition: left 65% 'Necesita tu atención' ONE clear work-order row with small white pickup thumb, 'Revisar frenos delanteros', DEMO08, amber Abierta, 'Motor / frenos' use exact type 'Frenos', 'Hace 7 días', a visible blue 'Revisar orden' button. Below thin grouped state ribbon 'Abiertas 1 / En revisión 0 / En taller 0 / Cerradas 3' not giant empty kanban columns. Right 30% contextual 'Cómo avanza una orden' elegant vertical 4-step diagram Reportar, Revisar y asignar, Trabajo en taller, Revisar y cerrar, concise text. Bottom 'Últimos cierres' two restrained rows no marketing photos. Tab switch 'Prioridades | Lista' and search. Focus is the one next needed action, no fake urgency or uncomputed SLA."
+    },
+    {
+      "id": "02-listado",
+      "title": "Lista de órdenes",
+      "prompt": "Full-page maintenance Órdenes tab, 'Todas las órdenes', '+ Crear orden', compact filters search 'Buscar por unidad o descripción', Estado Todos, Tipo Todas, button 'Limpiar filtros'. Legible spacious TABLE exactly columns Orden / Unidad / Tipo / Estado / Responsable / Creada / Costo. 5 demonstration rows, white pickup tiny thumbnail plate DEMO08, titles Revisar frenos delanteros / Cambio de aceite / Revisar luces / Servicio de filtros / Revisar neumáticos. Exact states Abierta, Aprobada, En ejecución, En calidad, Cerrada. Assignment absent 'Sin asignar', costs missing 'Sin registrar'. Last column small 'Ver orden →'. Show minimal grouped counts above table. Do not use whole wall of metric cards. Bottom explanatory 'Selecciona una orden para revisar su siguiente paso.'"
+    },
+    {
+      "id": "03-nueva-unidad",
+      "title": "Crear orden · elegir unidad",
+      "prompt": "Maintenance page subtly dimmed behind a centered LARGE dialog 900px wide, sharp UI. Header 'Crear orden' subtitle '1 de 2 · Elige la unidad', clear X. Horizontal two-step indicator '1 Unidad — 2 Falla'. Search field 'Buscar por placa o nombre'. Three large clickable horizontal vehicle rows with small pickup illustrations, radio selector, DEMO08 / DEMO12 / DEMO21, Unidad 08 / Unidad 12 / Unidad 21, 'Conductor de ejemplo' or 'Sin conductor asignado'. First row selected blue outline. Right selected-unit preview with WHITE PICKUP fully visible, DEMO08 prominent and driver label. NO fake live metrics, maps or GPS fields needed. Bottom 'Cancelar' ghost and blue 'Continuar →'. Must explicitly choose a unit; no silently preselected hidden default."
+    },
+    {
+      "id": "04-nueva-falla",
+      "title": "Crear orden · describir falla",
+      "prompt": "Same large dialog step '2 de 2 · Describe la falla', step indicator Unidad completed and Falla active. Selected unit compact strip with tiny pickup 'Unidad 08 · DEMO08' link Cambiar unidad. Label '¿Qué le pasa al vehículo?' large textarea containing 'Los frenos delanteros hacen ruido al detener el vehículo.' helper 'Describe la falla con al menos 10 caracteres.' Then 'Tipo de falla' six icon selectors Motor / Frenos selected / Neumáticos / Eléctrico / Carrocería / Otro. 'Ubicación' simple input 'Patio de operaciones'. Below quiet summary 'Se creará una orden correctiva en estado Abierta.' NO priority selection (not existing creation field), no attachments. Footer ← Volver and blue 'Crear orden'. Show field grouping with hierarchy not long stacked dense form."
+    },
+    {
+      "id": "05-detalle",
+      "title": "Detalle y revisión de una orden",
+      "prompt": "Full-page work-order DETAIL workspace replacing cramped modal. Breadcrumb Mantenimiento / Órdenes / DEMO-001. Big 'Revisar frenos delanteros' with amber 'Abierta', Correctiva, 'Prioridad media' demo detail (read-only). Left main section 'Qué se reportó' full problem description, 'Unidad 08 · DEMO08' white pickup thumbnail, report actor 'Persona de ejemplo', date 'Datos de demostración', location Patio de operaciones. Stage timeline clearly Abierta > Revisión > Aprobada > Asignada > Taller > Calidad > Cerrada; currently Abierta, note grouped visual does not remove Pausada. Right 340px fixed context area 'Siguiente paso' 'Revisar la falla' helper 'Pasa la orden a revisión para evaluarla.' one blue 'Pasar a revisión', secondary 'Cerrar orden' text and overflow 'Más acciones' (cancel lives there). Below 'Nota para el historial' textarea relevant selected action and 'Confirmar revisión' button, no automatic transition. Main bottom tabs Información / Historial, real timeline samples marked demo. Readable no many equal buttons."
+    },
+    {
+      "id": "06-asignar",
+      "title": "Asignar responsable",
+      "prompt": "Same detail subtly dimmed background in Aprobada. Centered 820px wide dialog 'Asignar responsable' showing compact order summary DEMO-001 / DEMO08 / Revisar frenos delanteros. Left searchable people list 'Buscar por nombre', 3 fictional rows Persona de ejemplo A/B/C with initials, neutral label 'Miembro activo de la empresa', first selected radio blue. Right slim text 'Quién hará el trabajo' selected 'Persona de ejemplo A', clear note 'La orden quedará asignada. Solo el responsable puede iniciarla, pausarla y entregarla desde su app.' Required textarea 'Nota para el historial' filled 'Asignación para revisión de frenos'. Footer Cancelar and blue 'Asignar responsable'. No staff availability invented, no workload metrics, no forced technician role."
+    },
+    {
+      "id": "07-taller",
+      "title": "Seguimiento del taller",
+      "prompt": "Full-page detail current exact blue badge 'En ejecución'. Main title Revisar frenos delanteros, unit DEMO08. Clear progression ribbon Reportada ✓ / Revisada ✓ / Asignada ✓ / En ejecución current / En calidad / Cerrada. Main left chronological execution log 'Trabajo en taller': assigned to 'Responsable de ejemplo', 'Trabajo iniciado', existing note example 'Revisión del sistema de frenos'. Small read-only responsible person strip. Right 'El responsable está trabajando' prominent line icon wrench and compact note 'Iniciar, pausar, reanudar y entregar lo hace el responsable desde su app.' Supervisor NOT responsible: do NOT display functioning start/pause/deliver buttons. Right primary neutral navigation 'Ver datos de la orden', overflow Más acciones for allowed cancellation only in En ejecución. Thin secondary explainer 'Cuando pase a En calidad podrás revisar y cerrar.' No live percent completion, estimated completion times, or false promises."
+    },
+    {
+      "id": "08-cerrar",
+      "title": "Cerrar una orden",
+      "prompt": "Full-page detail En calidad behind centered 900px dialog 'Revisar y cerrar orden'. Two-column dialog: left 60% editable '¿Qué se hizo?' multiline filled 'Se revisaron los frenos delanteros y se corrigió el ajuste.', mandatory solution; 'Costo registrado (USD)' 65.00 helper 'Opcional. Si no lo conoces, déjalo vacío.' separate mandatory 'Nota del cierre' filled 'Trabajo revisado y terminado.' Right 35% quiet summary white pickup DEMO08 / order DEMO-001 / current En calidad / after Cerrada, clear green outlined next-state pill, no decorative confetti. Warning helper 'El cierre y sus notas quedarán en el historial.' Footer Volver and blue 'Confirmar cierre'. Do not conflate maintenance costs with payments or claiming vehicle ready-to-drive technically."
+    },
+    {
+      "id": "09-confirmacion",
+      "title": "Confirmar cambio de estado",
+      "prompt": "Centered 680px sober dialog over clear order-detail background. 'Cancelar orden' red small alert icon, title clear. Unit DEMO08 and Revisar frenos delanteros summary. Two status tokens 'En revisión → Cancelada'. Text 'La orden cancelada no admite más cambios.' Required textarea 'Motivo de cancelación' filled 'El reporte estaba duplicado.' Footer 'Volver' and restrained red 'Confirmar cancelación'. No generic Are you sure, no hidden consequence. Small summary note 'El motivo quedará en el historial'. NOT destructive delete and no trash icon. Same modal grammar is used for review/approve/reopen with blue CTA; depict only cancellation here no montage."
+    },
+    {
+      "id": "10-proximos",
+      "title": "Próximos servicios",
+      "prompt": "Unified maintenance 'Próximos servicios' tab selected. Title 'Próximos servicios', subtitle 'Trabajos por atender según fecha o kilometraje.' '+ Nueva acción' secondary blue. Filters Pendientes / En curso / Completadas / Descartadas / Todas. Spacious list with columns Servicio / Vehículo / Vencimiento / Relevancia / Estado / Acción. Three demos: Cambio de aceite DEMO08 vence a 85.000 km relevancia Alta estado Pendiente blue Abrir orden; Revisión de frenos DEMO12 fecha 15 oct 2026 Media Pendiente Abrir orden; Filtros DEMO21 92.000km Baja En curso 'Ver acción'. Show true due threshold not invented days remaining or progress gauge without odometer. One row expanded shows associated plan and estimated cost $65 USD optional. Context right slim legend 'Una acción es un trabajo concreto para una unidad. Abrir orden crea la ODT preventiva vinculada.' Small status options start/complete/discard appear in contextual menu not all buttons in every row."
+    },
+    {
+      "id": "11-planes",
+      "title": "Planes de mantenimiento",
+      "prompt": "Maintenance Planes selected title 'Planes de mantenimiento', subtitle 'Define el servicio y cada cuánto debe hacerse.' '+ Crear plan' primary. Visual readable service plan rows (not repeating 3-card grids), left line icon oil/filter, service 'Cambio de aceite y filtro', code aceite-5000 muted, one big interval 'Cada 5.000 km', strategy 'Desde el último servicio', active green label, '1 unidad cubierta', right 'Asignar a una unidad →'. Second 'Revisión de frenos' 'Cada 180 días' Combinada with 5.000km too ensure only combined both; third 'Servicio de filtros' 'Cada 10.000 km' Fija por km. No fake automatic billing or toggle functionality where current code no toggle. Bottom small empty coverage example 'Sin unidades cubiertas' teaches Assign unit. Sidebar same allscreens. Quiet inline explanation Plan > Unidad cubierta > Acción > Orden, not huge empty containers."
+    },
+    {
+      "id": "12-nuevo-plan",
+      "title": "Crear un plan",
+      "prompt": "Large centered 920px dialog 'Crear plan de mantenimiento'. Content carefully grouped three numbered blocks '1 Servicio' inputs Servicio 'Cambio de aceite y filtro', Código 'aceite-5000' editable helper '2 a 80 caracteres; espacios y acentos se normalizan.', Descripción optional. '2 Frecuencia' labeled strategy native style dropdown 'Flotante · desde el último servicio', fields Cada cuántos km 5000 and Cada cuántos días blank optional. Required at least one of km or days. '3 Criticidad' compact labeled radio strip Baja / Media selected / Alta / Crítica. Right quiet live text PREVIEW of provided settings 'Cambio de aceite y filtro / Cada 5.000 km / Desde el último servicio / Criticidad media', no fake generated vehicle coverage. Footer Cancelar and 'Guardar plan'. No wizard gate changing API, no hidden required code, no assumed automatic assignment."
+    },
+    {
+      "id": "13-cubrir",
+      "title": "Asignar plan a una unidad",
+      "prompt": "Large dialog 'Asignar plan a una unidad' subtitle Cambio de aceite y filtro · Cada 5.000 km. Searchable native styled selection 'Unidad' chosen Unidad08 DEMO08, white pickup thumbnail in side preview. Input group 'Desde dónde contamos' with 'Último servicio (km)' 80000; 'Próximo vencimiento (km)' 85000; 'Próximo vencimiento (fecha)' optional blank. Clear helper 'Revisa el próximo vencimiento antes de guardar.' Do not imply unsourced automatic calculation, show these as entered values. Right graphical odometer horizontal line labeled 80.000 Último servicio -> 85.000 Próximo servicio only, NOT current actual mileage marker. Footer Cancelar and blue 'Asignar plan'. Exactly one vehicle selection, do not invent batch assignment backend. Small 'No crea una orden en este paso.' accurate coverage only."
+    },
+    {
+      "id": "14-nueva-accion",
+      "title": "Crear acción de mantenimiento",
+      "prompt": "Large full-height dialog 980px 'Nueva acción de mantenimiento'. Grouping within two columns but readable. First left 'Unidad' selected DEMO08 with tiny pickup; 'Tipo' Preventiva selected vs Predictiva. 'Plan obligatorio' chosen Cambio de aceite y filtro; 'Número de ciclo'1 helper primer servicio del plan. Main title 'Cambio de aceite y filtro' and Detalle optional. Second right 'Vencimiento' fields Vence a los km85000 / Vence el optional blank; 'Relevancia' Media; 'Costo estimado opcional'65 and 'Moneda'USD vsVES. Crucial preview summary 'Unidad08 · DEMO08 / Preventiva / Ciclo1 / Pendiente / Vence a los85.000km'. Footer Cancelar / 'Crear acción'. Note 'Después podrás abrir la orden vinculada.' NO pretending created workorder automatically; no attachments or invented schedule picker."
+    },
+    {
+      "id": "15-accion-confirmar",
+      "title": "Completar una acción",
+      "prompt": "Centered 700px dialog 'Completar acción' over Próximos servicios tab background. White pickup tiny thumb 'Unidad08 · DEMO08', service Cambio de aceite y filtro. State En curso -> Completada green. Required textarea 'Qué se hizo' fill 'Se completó el cambio de aceite y filtro.' helper 'La nota queda en el historial.' Footer Volver and blue 'Confirmar'. Quiet explanatory note 'Esto actualiza la acción de mantenimiento. La orden vinculada se gestiona por separado.' Avoid suggesting automatic closing of workorder. Same UI family for Iniciar and Descartar, image only one state, not collage. Show no attachment, invoice or financial transaction."
+    }
+  ],
+  "finalImages": [
+    {
+      "id": "01-inicio",
+      "file": "01-inicio.png"
+    },
+    {
+      "id": "02-listado",
+      "file": "02-listado.png"
+    },
+    {
+      "id": "03-nueva-unidad",
+      "file": "03-nueva-unidad.png"
+    },
+    {
+      "id": "04-nueva-falla",
+      "file": "04-nueva-falla.png"
+    },
+    {
+      "id": "05-detalle",
+      "file": "05-detalle.png"
+    },
+    {
+      "id": "06-asignar",
+      "file": "06-asignar.png"
+    },
+    {
+      "id": "07-taller",
+      "file": "07-taller.png"
+    },
+    {
+      "id": "08-cerrar",
+      "file": "08-cerrar.png"
+    },
+    {
+      "id": "09-confirmacion",
+      "file": "09-confirmacion.png"
+    },
+    {
+      "id": "10-proximos",
+      "file": "10-proximos.png"
+    },
+    {
+      "id": "11-planes",
+      "file": "11-planes.png"
+    },
+    {
+      "id": "12-nuevo-plan",
+      "file": "12-nuevo-plan.png"
+    },
+    {
+      "id": "13-cubrir",
+      "file": "13-cubrir.png"
+    },
+    {
+      "id": "14-nueva-accion",
+      "file": "14-nueva-accion.png"
+    },
+    {
+      "id": "15-accion-confirmar",
+      "file": "15-accion-confirmar.png"
+    }
+  ]
+}

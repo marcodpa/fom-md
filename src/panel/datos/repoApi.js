@@ -1,3 +1,4 @@
+import { listarTodasOdts } from './listar-odts'
 // ============================================================
 // REPOSITORIO REAL — traduce la API de fom-core a las formas del panel
 // ------------------------------------------------------------
@@ -1127,7 +1128,7 @@ export const repoApi = {
     },
     async listar({ estado = '', q = '' } = {}) {
       try {
-        const r = await api.odts({ estado })
+        const r = { items: await listarTodasOdts(api, { estado }) }
         let lista = (r?.items ?? []).map((o) => ({
           id: o.id,
           estado: o.status,
@@ -1140,6 +1141,7 @@ export const repoApi = {
           tipoFalla: o.failureType,
           ubicacion: o.location,
           notaResolucion: o.resolutionNote,
+          notaSolucion: o.resolutionNote,
           costo: o.resolutionCost,
           resueltaEn: o.resolvedAt,
           creadaEn: o.createdAt,
@@ -1214,6 +1216,7 @@ export const repoApi = {
         falla: o.failureType,
         ubicacion: o.location,
         notaResolucion: o.resolutionNote,
+          notaSolucion: o.resolutionNote,
         costo: o.resolutionCost,
         resueltaEn: o.resolvedAt,
         creadaEn: o.createdAt,

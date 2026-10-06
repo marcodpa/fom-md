@@ -26,6 +26,7 @@ import AdminGps from './modulos/AdminGps'
 import AdminUsuarios from './modulos/AdminUsuarios'
 import AdminAuditoria from './modulos/AdminAuditoria'
 import MiUnidad from './modulos/MiUnidad'
+import MapaConductor from './modulos/MapaConductor'
 import MiPerfil from './modulos/MiPerfil'
 import Seguridad from './modulos/Seguridad'
 import Jornadas from './modulos/Jornadas'
@@ -100,6 +101,7 @@ const MENU_POR_AREA = {
       grupo: 'Mi trabajo',
       items: [
         { a: '/panel', icono: 'camion', texto: 'Mi unidad', fin: true },
+        { a: '/panel/mapa', icono: 'mapa', texto: 'Mapa' },
         { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento' },
         { a: '/panel/alertas', icono: 'alerta', texto: 'Alertas' },
       ],
@@ -122,7 +124,7 @@ const RUTAS_POR_AREA = {
   admin: null, // todas
   operativo: ['', 'mapa', 'alertas', 'seguridad', 'flota', 'jornadas', 'mantenimiento', 'inspecciones', 'documentos', 'personal', 'reportes'],
   gerencial: ['personal', 'reportes'],
-  conductor: ['', 'alertas', 'mantenimiento'],
+  conductor: ['', 'mapa', 'alertas', 'mantenimiento'],
   personal: ['mapa', 'alertas', 'documentos', 'personal'],
 }
 
@@ -313,7 +315,7 @@ export default function Consola() {
           {/* El inicio depende del area: el conductor abre en SU unidad, no en
               el resumen de toda la flota. */}
           <Route index element={area === 'conductor' ? <MiUnidad /> : <Resumen />} />
-          <Route path="mapa" element={<CentroControl />} />
+          <Route path="mapa" element={area === 'conductor' ? <MapaConductor /> : <CentroControl />} />
           <Route path="alertas" element={<Alertas />} />
           <Route path="flota" element={<Flota />} />
           <Route path="flota/:id" element={<ExpedienteVehiculo />} />

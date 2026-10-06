@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Icono } from '../panel/Iconos'
+import LogoFom from './LogoFom'
 
 const LINKS = [['/', 'Inicio'], ['/plataforma', 'Plataforma'], ['/funciones', 'Funciones'], ['/seguridad', 'Seguridad'], ['/areas', 'Áreas'], ['/contacto', 'Contacto']]
 
 export function SiteBrand() {
-  return <span className="site-brand"><Icono nombre="pin" tam={30} /><b>FOM</b></span>
+  return <span className="site-brand"><LogoFom /></span>
 }
 
 export default function SiteHeader() {

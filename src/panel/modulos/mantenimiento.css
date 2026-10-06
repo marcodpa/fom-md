@@ -26,3 +26,44 @@
 
 .mnt-attention-tools{max-width:100%;flex-wrap:wrap}.mnt-attention-tools .pnl-buscar{max-width:100%;min-width:0}.mnt-type-filter+.mnt-states{flex-wrap:wrap}
 .mnt-progress li small{display:block;font-size:10px;opacity:.7;margin-top:-4px}.mnt-progress li.opcional{opacity:.8}.mnt-progress li.omitido{opacity:.4}.mnt-progress li.omitido>i{background:repeating-linear-gradient(90deg,var(--mnt-line) 0 4px,transparent 4px 8px)}
+.mnt-detail-title { margin:0; }
+.mnt-detail-title>span { color:var(--e-texto-2); font-size:12px; }
+.mnt-detail-title h2 { margin:6px 0; font-size:26px; line-height:1.25; overflow-wrap:anywhere; }
+.mnt-detail-title p { color:var(--e-texto-2); font-size:12px; }
+.mnt-detail-title code { font:inherit; }
+.mnt-resolution { margin:0; padding:20px; background:var(--e-sup-baja); border:1px solid var(--e-borde); border-radius:24px; }
+.mnt-resolution-heading { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
+.mnt-resolution-heading h3 { font-size:18px; margin:0; }
+.mnt-resolution>p { font-size:15px; line-height:1.6; color:var(--e-texto); }
+.mnt-resolution.incompleta .mnt-resolution-heading svg { color:var(--e-aviso, #ffc247); }
+.mnt-resolution-facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin:18px 0 0; padding-top:18px; border-top:1px solid var(--e-borde); }
+.mnt-resolution-facts dt { color:var(--e-texto-2); font-size:12px; margin-bottom:6px; }
+.mnt-resolution-facts dd { margin:0; font-size:15px; font-weight:600; overflow-wrap:anywhere; }
+.mnt-detail-responsable { margin-top:12px!important; font-size:13px!important; }
+.mnt-record { margin:0; border:1px solid var(--e-borde); border-radius:20px; padding:0 18px; }
+.mnt-detail .mnt-next { align-self:start; }
+.mnt-record summary { padding:16px 0; cursor:pointer; font-size:15px; font-weight:600; }
+.mnt-record summary span { display:block; margin:6px 0 0 17px; font-size:12px; font-weight:400; color:var(--e-texto-2); }
+.mnt-record>.pnl-datos { margin:0 0 16px; }
+.mnt-order-reference { padding-bottom:16px; font-size:12px; color:var(--e-texto-2); overflow-wrap:anywhere; }
+.mnt-order-reference code { font:inherit; }
+.mnt-history-intro { color:var(--e-texto-2); font-size:12px; margin:6px 0 18px!important; }
+@media(max-width:600px) { .mnt-detail-title h2 { font-size:22px; } .mnt-resolution { padding:16px; } .mnt-resolution-facts { grid-template-columns:1fr; gap:14px; } }
+.mnt-history .mnt-history-day { display:block; padding:0; margin-top:24px; }
+.mnt-history-day h4 { margin:0 0 14px; font-size:14px; color:var(--e-texto); }
+.mnt-history-events { list-style:none; padding:0; margin:0; }
+.mnt-history-event { display:grid; grid-template-columns:90px minmax(0,1fr); gap:16px; padding-bottom:24px; }
+.mnt-history-event time { padding-top:2px; color:var(--e-texto-2); font-size:12px; font-variant-numeric:tabular-nums; }
+.mnt-history-event-body { min-width:0; position:relative; padding-left:20px; }
+.mnt-history-event-body:before { content:''; position:absolute; left:0; top:6px; width:7px; height:7px; border-radius:50%; background:var(--e-info); }
+.mnt-history-event:not(:last-child) .mnt-history-event-body:after { content:''; position:absolute; left:3px; top:18px; bottom:-15px; width:1px; background:var(--e-borde); }
+.mnt-history-event-body>strong { display:block; font-size:15px; line-height:1.4; overflow-wrap:anywhere; }
+.mnt-history-actor { display:block; margin-top:5px; color:var(--e-texto-2); font-size:13px; overflow-wrap:anywhere; }
+.mnt-history .mnt-history-responsable { font-size:13px; margin-top:8px; }
+.mnt-history-note { margin-top:12px; padding:10px 12px; border-radius:12px; background:var(--e-sup-baja); }
+.mnt-history-note>span { color:var(--e-texto-2); font-size:11px; }
+.mnt-history .mnt-history-note p { margin:4px 0 0; color:var(--e-texto); font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+@media(max-width:600px) { .mnt-history-event { grid-template-columns:1fr; gap:6px; } .mnt-history-event time { padding-left:20px; } }
+.mnt-all-filters { display:flex; align-items:end; gap:16px; flex-wrap:wrap; }
+.mnt-all-filters .pnl-campo { flex:1; min-width:180px; margin:0; }
+.mnt-all-filters>p { font-size:13px; color:var(--e-texto-2); margin:0 0 12px; }

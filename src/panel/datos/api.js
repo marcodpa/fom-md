@@ -379,8 +379,8 @@ export const api = {
   // --- Operación y cumplimiento (tablas de #170 y #171) --------------------
 
   /** Órdenes de trabajo, de la más recientemente movida a la más vieja. */
-  odts: ({ estado = '', vehiculoId = '', limite = 100 } = {}) => {
-    const p = new URLSearchParams({ limit: limite })
+  odts: ({ estado = '', vehiculoId = '', limite = 100, desplazamiento = 0 } = {}) => {
+    const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
     if (estado) p.set('status', estado)
     if (vehiculoId) p.set('vehicleId', vehiculoId)
     return pedir(`${CONSOLA}/work-orders?${p}`)

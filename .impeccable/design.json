@@ -1,19 +1,55 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-23T18:32:08.328Z",
-  "title": "Design System: FOM marketing v6",
+  "generatedAt": "2026-10-06T18:04:08.145087+00:00",
+  "title": "Design System: FOM — marketing y panel autenticado",
   "extensions": {
     "inicioV7": {
       "scope": "Inicio solamente: .home-v7 y .home-v7-shell; conserva panel, autenticación y marketing v6.",
-      "sources": ["src/pages/HomeV7.jsx", "src/styles/home-v7.css"],
+      "sources": [
+        "src/pages/HomeV7.jsx",
+        "src/styles/home-v7.css"
+      ],
       "approvedReferences": "output/laminas-secciones-v7/01-inicio/01.png a 11.png",
       "northStar": "La oficina y la carretera, conectadas",
       "localTokens": {
-        "colors": { "background": "#06121c", "ink": "#f6f8fb", "muted": "#b4cbe3", "accent": "#32a8ff", "button": "#008bff", "buttonHover": "#0679d8", "focus": "#65bbff" },
-        "typography": { "family": "'Spline Sans',sans-serif", "headingWeight": 600, "headingLineHeight": 1.08, "headingTracking": "-.025em", "desktopDisplay": "3.42vw", "desktopBody": "1.65vw", "mobileDisplay": "clamp(28px,6.7vw,48px)", "mobileHeadline": "34px", "mobileBody": "17px", "mobileBodyLineHeight": 1.5 },
-        "rounded": { "button": "12px", "question": "12px", "field": "10px", "form": "20px", "mobileForm": "16px" },
-        "layout": { "desktopSceneAspectRatio": "1672/941", "stackMax": "760px", "mobileTextGutter": "6%" },
-        "motion": { "buttonTransition": "background .2s,transform .2s", "buttonHover": "translateY(-2px)", "reducedMotion": "Transitions disabled; no v6 GSAP hero sequence." }
+        "colors": {
+          "background": "#06121c",
+          "ink": "#f6f8fb",
+          "muted": "#b4cbe3",
+          "accent": "#32a8ff",
+          "button": "#008bff",
+          "buttonHover": "#0679d8",
+          "focus": "#65bbff"
+        },
+        "typography": {
+          "family": "'Spline Sans',sans-serif",
+          "headingWeight": 600,
+          "headingLineHeight": 1.08,
+          "headingTracking": "-.025em",
+          "desktopDisplay": "3.42vw",
+          "desktopBody": "1.65vw",
+          "mobileDisplay": "clamp(28px,6.7vw,48px)",
+          "mobileHeadline": "34px",
+          "mobileBody": "17px",
+          "mobileBodyLineHeight": 1.5
+        },
+        "rounded": {
+          "button": "12px",
+          "question": "12px",
+          "field": "10px",
+          "form": "20px",
+          "mobileForm": "16px"
+        },
+        "layout": {
+          "desktopSceneAspectRatio": "1672/941",
+          "stackMax": "760px",
+          "mobileTextGutter": "6%"
+        },
+        "motion": {
+          "buttonTransition": "background .2s,transform .2s",
+          "buttonHover": "translateY(-2px)",
+          "reducedMotion": "Transitions disabled; no v6 GSAP hero sequence."
+        }
       },
       "rules": [
         "Dark cinematic photography follows the eleven approved individual section references.",
@@ -39,6 +75,11 @@
         "name": "marketing-hero-monitor",
         "value": "0 25px 45px -20px #030b19",
         "purpose": "Consola del hero de inicio"
+      },
+      {
+        "name": "panel-glass-ambient",
+        "value": "0 6px 18px rgb(0 0 0 / .16)",
+        "purpose": "Paneles y herramientas Glass; no se aplica al lienzo cartográfico."
       }
     ],
     "motion": [
@@ -88,8 +129,234 @@
       {
         "name": "marketing-gsap-small-max",
         "value": "700px"
+      },
+      {
+        "name": "panel-appearance-compact-max",
+        "value": "1100px"
+      },
+      {
+        "name": "panel-appearance-drawer-max",
+        "value": "900px"
+      },
+      {
+        "name": "panel-appearance-mobile-max",
+        "value": "600px"
       }
-    ]
+    ],
+    "panelApariencia": {
+      "scope": "Todos los apartados autenticados /panel, escritorio y móvil; los materiales no alteran marketing ni acceso.",
+      "approvedAt": "2026-10-06",
+      "authority": ".impeccable/surfaces/apariencia.md",
+      "review": ".impeccable/review/apariencia/review-v3.md",
+      "disposition": "ship",
+      "sources": [
+        "src/styles/apariencia.css",
+        "src/styles/panel.css",
+        "src/styles/redesign.css",
+        "src/styles/brand.css",
+        "src/panel/apariencia-store.js",
+        "src/panel/useApariencia.js",
+        "src/panel/comp/Apariencia.jsx",
+        "src/panel/Consola.jsx",
+        "src/panel/modulos/MapaConductor.jsx",
+        "src/panel/modulos/Mantenimiento.jsx",
+        "src/panel/modulos/mantenimiento.css",
+        "public/brand/fom-logo.svg",
+        "public/brand/fom-symbol.svg"
+      ],
+      "frontmatterNamespace": "panel-",
+      "materials": {
+        "azul": {
+          "label": "Azul FOM",
+          "backgroundToken": "panel-blue-background",
+          "surfaceToken": "panel-blue-surface",
+          "secondaryToken": "panel-blue-text-secondary",
+          "tertiaryToken": "panel-blue-text-tertiary",
+          "shadow": "none",
+          "backdropFilter": "none"
+        },
+        "glass": {
+          "label": "Glass gris",
+          "backgroundToken": "panel-glass-background",
+          "surfaceToken": "panel-glass-surface",
+          "secondaryToken": "panel-glass-text-secondary",
+          "tertiaryToken": "panel-glass-text-tertiary",
+          "groundMaxToken": "panel-glass-ground-max",
+          "backgroundCss": "radial-gradient(ellipse at 85% 0%, #62676e 0%, transparent 58%), linear-gradient(150deg, #60656c, #52565e 70%, #60656c)",
+          "shadowRef": "panel-glass-ambient",
+          "backdropFilter": "blur(16px) saturate(110%)",
+          "reducedTransparency": {
+            "mediaQuery": "(prefers-reduced-transparency: reduce)",
+            "surfaceToken": "panel-glass-solid",
+            "surfaceLowToken": "panel-glass-solid-low",
+            "surfaceHighToken": "panel-glass-solid-high",
+            "backdropFilter": "none"
+          }
+        }
+      },
+      "layout": {
+        "preserveModuleGrids": true,
+        "cardRadiusToken": "panel-card",
+        "mobileCardRadiusToken": "panel-card-mobile",
+        "sidebarRadiusToken": "panel-sidebar",
+        "outerInsetToken": "panel-outer-inset",
+        "desktopSidebarWidth": "232px",
+        "compactSidebarWidth": "218px",
+        "drawerWidth": "min(280px, calc(100vw - 28px))",
+        "header": "Context capsule fills remaining width, circular notifications, profile capsule at right; avatar only at compact widths."
+      },
+      "focus": {
+        "outline": "2px solid #75b9fa",
+        "outlineOffset": "3px"
+      },
+      "persistence": {
+        "storage": "localStorage",
+        "keyPrefix": "fom.apariencia.v1:",
+        "accountIdentityOrder": [
+          "userId",
+          "id",
+          "correo"
+        ],
+        "companyIdentity": false,
+        "fallback": "azul",
+        "sameBrowserTabs": "storage event invalidates in-memory account preferences",
+        "storageFailure": "Applies in memory and explains persistence limit.",
+        "backendPersistence": false,
+        "crossDeviceSync": false
+      },
+      "map": {
+        "scope": "/panel/mapa",
+        "canvas": "100dvh, edge to edge, no rounded corners or backdrop filtering on map/image layers",
+        "floatingTools": "Current shared material; control-room search/list/filter controls preserved.",
+        "driverRoute": "/panel/mapa",
+        "driverSource": "Resolve own assignment with miAsignacion; fetch only repo.vehiculos.obtener(vehiculoId), never the fleet list for display.",
+        "refreshIntervalMs": 15000,
+        "fallbacks": [
+          "cargando",
+          "error con reintento",
+          "sin asignación",
+          "sin posición GPS válida"
+        ],
+        "mobileDetail": "Bottom overlay, accessible close affordance and internal scrolling."
+      },
+      "orderDetail": {
+        "hierarchy": [
+          "problema reportado",
+          "unidad",
+          "resultado o estado actual",
+          "cierre, costo y duración humana"
+        ],
+        "disclosure": "Datos del reporte uses native details/summary.",
+        "history": "Recorded changes, assignment and execution; fallback only to available recorded dates.",
+        "missingSolution": "Explicitly explain that a closed order lacks its solution note.",
+        "actions": "Existing workflow actions and role guards preserved."
+      },
+      "identity": {
+        "assets": [
+          "public/brand/fom-logo.svg",
+          "public/brand/fom-symbol.svg"
+        ],
+        "form": "Three growing blue chevrons; clear FOM lettering in full mark.",
+        "sourceReference": "C:/Users/home/Downloads/ChatGPT Image 6 Oct 2026, 11_47_36.png",
+        "renderer": "src/components/LogoFom.jsx and src/styles/brand.css",
+        "liveScope": [
+          "panel",
+          "marketing",
+          "login",
+          "loading",
+          "favicon"
+        ],
+        "historicalImages": "Existing photographic and mockup branding remains in its pixels."
+      },
+      "verification": {
+        "reportedBy": "principal implementation agent",
+        "testsPassed": 79,
+        "latestBuild": "passed",
+        "documenterReranTests": false,
+        "viewports": [
+          "1440x900",
+          "390x844"
+        ],
+        "evidenceDirectory": ".impeccable/review/apariencia/",
+        "glassContrast": {
+          "secondaryOnMaxGround": "4.99:1",
+          "tertiaryOnMaxGround": "4.55:1",
+          "scope": "Only the specific reviewed foreground/background pairs."
+        },
+        "buildDurationSeconds": 12.29,
+        "connectedDriverMap": {
+          "evidence": ".impeccable/review/apariencia/conductor-mapa-real.png",
+          "observedVehicle": "AB538RM",
+          "observedMarkers": 1,
+          "scope": "Existing driver session against real API; no new real login or assignment changes."
+        }
+      },
+      "limits": [
+        "Personal appearance is browser-local, with no backend or cross-device synchronization.",
+        "Foreign-company alert mutations are disabled because server routes are missing: issue #631 point 3. This delivery does not fix that backend issue.",
+        "Own-company supervisor demo mark-all-read passed; full CRUD and production server authorization are not certified.",
+        "No commit or deployment in this documentation pass."
+      ],
+      "usageDocument": "docs/DISENO-APARIENCIA.md",
+      "narrative": {
+        "northStar": "Calma con precisión",
+        "overview": "La plataforma autenticada ofrece dos materiales personales sobre la misma composición: Azul FOM conserva la paleta existente; Glass gris combina fondo gris medio y superficies translúcidas de grafito. Ambos comparten tarjetas redondeadas, lateral separado del borde y cabecera con cápsula de contexto, notificaciones circulares y cápsula de perfil. Se conservan las rejillas de cada módulo, sus acciones y las restricciones por rol.",
+        "keyCharacteristics": [
+          "Dos materiales, una composición funcional.",
+          "Spline Sans y jerarquía operativa legible.",
+          "Gris medio con paneles de grafito y contraste corregido.",
+          "Mapas nítidos a pantalla completa con herramientas flotantes.",
+          "Información registrada, estados vacíos y límites visibles."
+        ],
+        "rules": [
+          {
+            "name": "The Alcance Rule",
+            "body": "Aplicar los tokens de Apariencia únicamente a la consola autenticada; las paletas de marketing mantienen su alcance aprobado.",
+            "section": "colors"
+          },
+          {
+            "name": "The Contraste Glass Rule",
+            "body": "Conservar los valores corregidos del fondo máximo y ambos niveles de texto; revisar también las pestañas expuestas de mantenimiento, inspecciones y reportes.",
+            "section": "colors"
+          },
+          {
+            "name": "The Mapa Nítido Rule",
+            "body": "Aplicar el cristal a las herramientas flotantes; el lienzo cartográfico y las capas de imágenes permanecen nítidos. Con `prefers-reduced-transparency: reduce`, las superficies Glass se vuelven opacas y se elimina el filtro.",
+            "section": "elevation"
+          }
+        ]
+      }
+    },
+    "colorMeta": {
+      "panel-primary": {
+        "role": "primary",
+        "displayName": "Azul Operación"
+      },
+      "panel-blue-background": {
+        "role": "neutral",
+        "displayName": "Lienzo nocturno del panel"
+      },
+      "panel-glass-background": {
+        "role": "neutral",
+        "displayName": "Suelo gris medio"
+      },
+      "panel-glass-ground-max": {
+        "role": "neutral",
+        "displayName": "Límite claro del suelo Glass"
+      },
+      "panel-glass-surface": {
+        "role": "neutral",
+        "displayName": "Grafito translúcido"
+      },
+      "panel-glass-text-secondary": {
+        "role": "neutral",
+        "displayName": "Tinta secundaria Glass legible"
+      },
+      "panel-glass-text-tertiary": {
+        "role": "neutral",
+        "displayName": "Tinta terciaria Glass legible"
+      }
+    }
   },
   "components": [
     {
@@ -99,6 +366,22 @@
       "description": "CTA del contenido público v6; no corresponde al panel.",
       "html": "<button class=\"ds-fom-primary\">Solicitar una demostración <span aria-hidden=\"true\">↗</span></button>",
       "css": ".ds-fom-primary{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:48px;padding:14px 22px;border:1px solid #349bfa;background:#198bfa;color:#fff;border-radius:6px;font-family:'Spline Sans',sans-serif;font-weight:500;font-size:15px;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s}.ds-fom-primary>span{font-size:20px}.ds-fom-primary:hover{background:#0876d9;transform:translateY(-2px)}.ds-fom-primary:focus-visible{outline:3px solid #68baff;outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-fom-primary{transition:none}}"
+    },
+    {
+      "name": "Tarjeta Azul FOM",
+      "kind": "card",
+      "refersTo": "panel-card-blue",
+      "description": "Geometría compartida con material Azul FOM en la plataforma autenticada.",
+      "html": "<article class=\"ds-panel-card ds-panel-blue\"><h3>Mi unidad</h3><p>Datos registrados de tu vehículo.</p><button type=\"button\">Ver unidad</button></article>",
+      "css": ".ds-panel-card{padding:24px;border-radius:28px;color:var(--e-texto,#f3f5f8);font-family:'Spline Sans','Segoe UI',system-ui,sans-serif;border:1px solid var(--e-borde,#262e39)}.ds-panel-card h3{margin:0 0 12px;font-size:18px}.ds-panel-card p{margin:0;font-size:14px;line-height:1.5}.ds-panel-card button{margin-top:20px;padding:12px 18px;border:0;border-radius:16px;background:var(--e-primario,#3d9bf5);color:var(--e-sobre-primario,#08121c);font:inherit;cursor:pointer;transition:filter 120ms}.ds-panel-card button:hover{filter:brightness(1.08)}.ds-panel-card button:focus-visible{outline:2px solid #75b9fa;outline-offset:3px}.ds-panel-card button:active{transform:scale(.97)}@media(prefers-reduced-motion:reduce){.ds-panel-card button{transition:none}}.ds-panel-blue{background:var(--e-sup,#141a22);box-shadow:none}.ds-panel-blue p{color:var(--e-texto-2,#abb3bf)}"
+    },
+    {
+      "name": "Tarjeta Glass gris",
+      "kind": "card",
+      "refersTo": "panel-card-glass",
+      "description": "Panel de grafito translúcido con alternativa opaca si se reduce transparencia.",
+      "html": "<article class=\"ds-panel-card ds-panel-glass\"><h3>Mi unidad</h3><p>Datos registrados de tu vehículo.</p><button type=\"button\">Ver unidad</button></article>",
+      "css": ".ds-panel-card{padding:24px;border-radius:28px;color:var(--e-texto,#f3f5f8);font-family:'Spline Sans','Segoe UI',system-ui,sans-serif;border:1px solid var(--e-borde,#262e39)}.ds-panel-card h3{margin:0 0 12px;font-size:18px}.ds-panel-card p{margin:0;font-size:14px;line-height:1.5}.ds-panel-card button{margin-top:20px;padding:12px 18px;border:0;border-radius:16px;background:var(--e-primario,#3d9bf5);color:var(--e-sobre-primario,#08121c);font:inherit;cursor:pointer;transition:filter 120ms}.ds-panel-card button:hover{filter:brightness(1.08)}.ds-panel-card button:focus-visible{outline:2px solid #75b9fa;outline-offset:3px}.ds-panel-card button:active{transform:scale(.97)}@media(prefers-reduced-motion:reduce){.ds-panel-card button{transition:none}}.ds-panel-glass{background:var(--e-sup,rgb(39 42 48 / .88));border-color:var(--e-borde,rgb(255 255 255 / .13));box-shadow:0 6px 18px rgb(0 0 0 / .16);backdrop-filter:blur(16px) saturate(110%)}.ds-panel-glass p{color:var(--e-texto-2,#edf0f5)}@media(prefers-reduced-transparency:reduce){.ds-panel-glass{background:#292c32;backdrop-filter:none}}"
     }
   ],
   "narrative": {

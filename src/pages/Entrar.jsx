@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { alCambiar, CONECTADO_A_BD, CUENTAS_DEMO, iniciarSesion, sesionActual } from '../panel/auth'
 import GloboCanvas from '../components/GloboCanvas'
+import LogoFom from '../components/LogoFom'
 
 // ============================================================
 // INICIA SESIÓN, con el diseño del login de la app llevado a web:
@@ -13,25 +14,7 @@ import GloboCanvas from '../components/GloboCanvas'
 
 /** Emblema: brújula de vidrio nocturno. El disco es oscuro, la flecha es la luz. */
 function Emblema() {
-  return (
-    <div className="lg-emblema" aria-hidden="true">
-      <i className="lg-halo" />
-      <div className="lg-disco">
-        <i className="lg-brillo" />
-        <i className="lg-dial" />
-        <i className="lg-norte" />
-        <svg className="lg-flecha" viewBox="0 0 24 24">
-          <defs>
-            <linearGradient id="lg-aguja" x1="12" y1="3" x2="12" y2="21" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#9FE5FF" />
-              <stop offset="1" stopColor="#3D9BF5" />
-            </linearGradient>
-          </defs>
-          <path d="M12 3.2 15.4 12l-3.4 8.8L8.6 12Z" fill="url(#lg-aguja)" />
-        </svg>
-      </div>
-    </div>
-  )
+  return <div className="lg-emblema"><LogoFom /></div>
 }
 
 const Ojo = ({ tachado }) => (
@@ -105,7 +88,6 @@ export default function Entrar() {
         <GloboCanvas />
         <div className="lg-arte-centro">
           <Emblema />
-          <p className="lg-marca" aria-hidden="true">FOM</p>
           <p className="lg-tagline">Fleet Operations &amp; Maintenance</p>
         </div>
         <p className="lg-arte-pie">Gestión de flotas · multiempresa · en una sola app</p>

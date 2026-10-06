@@ -1,0 +1,22 @@
+[
+  {
+    "file": "02-operacion",
+    "prompt": "Edit only these labels and state colors in this supplied FOM UI image; preserve all layout, style and other text. Bottom 'Índice de conducción promedio' subtitle must read 'Promedio de los índices actuales disponibles de la flota.' Bottom missing value supporting text must read 'No todas las unidades tienen un índice disponible.' These indices are current snapshot, NOT period performance. 'Detenida' row badge and middle fleet distribution segment must be muted blue-grey, not red: parked is normal, not failure. Keep existing green moving and grey unknown. Preserve all numbers and screen.",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-1b576fcc-0ed7-47ad-8e97-3886be56fdf5.png"
+  },
+  {
+    "file": "08-exportar",
+    "prompt": "Edit this FOM report sharing modal screenshot. Preserve the entire main Compartir reporte modal text, composition, buttons and size exactly. Replace ONLY the background behind the modal by the second reference screenshot (approved Reportes Resumen), dimmed uniformly for focus. Use the second reference's real layout and 12units/7moving/8ODT, availability missingcosts/events. Do not keep fabricated activity48inspections,15orders,6alerts, documentscount or outofservice1 from first background. Companyheader says Empresa de demostración. One fullscreen screenshot, same landscape dimensions; do not produce collage.",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-b3d3d6ee-6a61-4492-ac19-311662dd0bb6.png"
+  },
+  {
+    "file": "04-seguridad",
+    "prompt": "Precise text-only correction of this FOM Reportes Seguridad screenshot. Preserve all layout and other data. Under Identificación de conductores replace 'Unidades con conductor identificado en sus viajes.' with exact 'Unidades con conductor asignado.' No tracking actual driver per trip is supported. Bottom empty chart subtext replace 'No hay eventos validados en el período seleccionado.' with 'No hay una métrica validada para mostrar.' This is incomplete source not proof zero events. Everything else unchanged.",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-345343de-8472-426d-bb19-606a13a67c97.png"
+  },
+  {
+    "file": "09-informe",
+    "prompt": "Precise edits to this FOM print preview screenshot, all surroundingdarkapp and whitepaperlayoutpreserved. In the paper metric8 ODT replace nonsense 'odómetros totales' by 'órdenes del período'. Unitstable remove unsupported Última actividad column completely; table must have only Unidad,Conductor,Estado,Odómetro acumulado. Use rows Unidad01/DEM001, Conductor de ejemplo1,En marcha,84.230km; Unidad02/DEM002,Conductor de ejemplo2,Detenida,Sin dato; Unidad03/DEM003,Sin asignar,Sin dato,38.000km. Parked dot neutral bluegrey not red. Preserve12units7moving8ODT,2open1review5closed,$65083%, missing data warning, date and allotherfeatures. Do not invent timestamps. Landscape1672x941.",
+    "source": "C:\\Users\\home\\.codex\\generated_images\\01a0c42b-1c2f-7e31-bc99-313b4f91baaa\\exec-4ccfea58-638b-4aa9-ad57-0303d7cc1ce6.png"
+  }
+]

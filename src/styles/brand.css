@@ -1,0 +1,11 @@
+.fom-logo { display: block; width: 140px; height: auto; flex: none; object-fit: contain; }
+.fom-logo-simbolo { width: 42px; }
+.pnl-marca .fom-logo { width: 138px; }
+.m-brand .fom-logo, .site-brand .fom-logo { width: 136px; }
+.v7-footer-hero .m-brand .fom-logo { width: clamp(180px, 22vw, 360px); }
+.v7-footer-brand .m-brand .fom-logo { width: 180px; }
+.lg-marca .fom-logo { width: min(280px, 70vw); margin: auto; }
+.lg-emblema .fom-logo-simbolo { width: 145px; height: auto; }
+.lg-emblema > .fom-logo { width: min(280px, 70vw); height: auto; max-width: none; }
+.loader-brand .fom-logo { width: 170px; margin: auto; }
+@media(max-width:600px) { .m-brand .fom-logo, .site-brand .fom-logo, .brand .fom-logo { width: 112px; } }

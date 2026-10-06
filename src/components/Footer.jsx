@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import LogoFom from './LogoFom'
 
 // Pie de página completo: marca y estado, mapa del sitio en columnas,
 // canales de contacto y línea legal. Es la última oportunidad de orientar
@@ -26,21 +27,7 @@ const COLUMNAS = [
   },
 ]
 
-const Pin = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path
-      d="M12 2.4c-3.9 0-7 3.1-7 7 0 4.9 7 12.6 7 12.6s7-7.7 7-12.6c0-3.9-3.1-7-7-7Z"
-      fill="url(#pie-mark)"
-    />
-    <circle cx="12" cy="9.3" r="2.4" fill="#0a1120" />
-    <defs>
-      <linearGradient id="pie-mark" x1="5" y1="2" x2="19" y2="22" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#5cb0ff" />
-        <stop offset="1" stopColor="#208aef" />
-      </linearGradient>
-    </defs>
-  </svg>
-)
+
 
 const Ic = {
   correo: (
@@ -76,8 +63,7 @@ export default function Footer() {
         <div className="footer-cuerpo">
           <div className="footer-marca">
             <a href="#top" className="footer-logo" aria-label="FOM, volver arriba">
-              <Pin />
-              <span>FOM</span>
+              <LogoFom decorativo />
             </a>
             <p className="footer-lema">
               Control y monitoreo de flotas por GPS para la Costa Oriental del Lago de

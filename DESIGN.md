@@ -1,6 +1,6 @@
 ---
-name: "FOM marketing v6"
-description: "Tokens limitados al sitio público v6; el documento original del panel se conserva íntegro."
+name: "FOM — marketing y panel autenticado"
+description: "Tokens con alcance marketing- y panel-; conserva el documento histórico y las extensiones aprobadas."
 colors:
   marketing-background: "#071019"
   marketing-ink: "#f3f7fc"
@@ -16,7 +16,47 @@ colors:
   marketing-focus: "#68baff"
   marketing-form: "#0e1c29"
   marketing-field: "#091420"
+  panel-blue-background: "#0a0d12"
+  panel-blue-surface: "#141a22"
+  panel-blue-surface-high: "#1d2530"
+  panel-blue-surface-low: "#0f141b"
+  panel-blue-text-secondary: "#abb3bf"
+  panel-blue-text-tertiary: "#69727e"
+  panel-blue-border: "#262e39"
+  panel-blue-border-strong: "#39424f"
+  panel-glass-background: "#60656c"
+  panel-glass-ground-max: "#62676e"
+  panel-glass-ground-low: "#52565e"
+  panel-glass-surface: "rgb(39 42 48 / .88)"
+  panel-glass-surface-high: "rgb(53 56 63 / .94)"
+  panel-glass-surface-low: "rgb(32 35 41 / .78)"
+  panel-glass-text-secondary: "#edf0f5"
+  panel-glass-text-tertiary: "#e2e6ec"
+  panel-glass-border: "rgb(255 255 255 / .13)"
+  panel-glass-border-strong: "rgb(255 255 255 / .24)"
+  panel-glass-solid: "#292c32"
+  panel-glass-solid-high: "#35383f"
+  panel-glass-solid-low: "#22252b"
+  panel-glass-active: "#184573"
+  panel-glass-active-text: "#c6e5ff"
+  panel-text: "#f3f5f8"
+  panel-primary: "#3d9bf5"
+  panel-on-primary: "#08121c"
+  panel-focus: "#75b9fa"
+  panel-brand-mark: "#349bfa"
 typography:
+  panel-page-title:
+    fontFamily: "'Spline Sans', 'Segoe UI', system-ui, sans-serif"
+    fontSize: "32px"
+    fontWeight: 700
+    lineHeight: 1.18
+    letterSpacing: "-.8px"
+  panel-body:
+    fontFamily: "'Spline Sans', 'Segoe UI', system-ui, sans-serif"
+    fontSize: "14px"
+    lineHeight: 1.5
+  panel-context:
+    fontSize: "13px"
   marketing-display:
     fontFamily: "'Spline Sans', sans-serif"
     fontSize: "clamp(38px,4.3vw,64px)"
@@ -44,6 +84,14 @@ typography:
     fontWeight: 500
     lineHeight: 1.4
 rounded:
+  panel-card: "28px"
+  panel-card-mobile: "24px"
+  panel-sidebar: "32px"
+  panel-control: "16px"
+  panel-chip: "12px"
+  panel-context: "20px"
+  panel-pill: "999px"
+  panel-choice: "22px"
   marketing-field: "5px"
   marketing-button: "6px"
   marketing-monitor: "10px"
@@ -51,11 +99,41 @@ rounded:
   marketing-phone-screen: "25px"
   marketing-phone-frame: "35px"
 spacing:
+  panel-outer-inset: "14px"
+  panel-header-gap: "12px"
+  panel-choice-gap: "18px"
   marketing-button-gap: "24px"
   marketing-copy-paragraph: "20px"
   marketing-copy-button: "30px"
   marketing-form-padding: "32px"
 components:
+  panel-card-blue:
+    backgroundColor: "{colors.panel-blue-surface}"
+    textColor: "{colors.panel-text}"
+    rounded: "{rounded.panel-card}"
+  panel-card-glass:
+    backgroundColor: "{colors.panel-glass-surface}"
+    textColor: "{colors.panel-text}"
+    rounded: "{rounded.panel-card}"
+  panel-sidebar:
+    rounded: "{rounded.panel-sidebar}"
+    width: "232px"
+  panel-context-capsule:
+    rounded: "{rounded.panel-context}"
+    typography: "{typography.panel-context}"
+    padding: "12px 18px"
+  panel-profile-capsule:
+    rounded: "{rounded.panel-pill}"
+    padding: "6px 8px 6px 16px"
+  panel-notifications:
+    rounded: "50%"
+    width: "44px"
+    height: "44px"
+  panel-control-header:
+    rounded: "{rounded.panel-card}"
+  panel-appearance-choice:
+    rounded: "{rounded.panel-choice}"
+    padding: "16px"
   marketing-button-primary:
     backgroundColor: "{colors.marketing-button}"
     textColor: "{colors.marketing-button-text}"
@@ -82,7 +160,7 @@ components:
     padding: "12px"
 ---
 
-> **Alcance de los tokens:** todos los tokens del frontmatter pertenecen exclusivamente al marketing público v6. No modifican el panel ni la autenticación. El documento original se conserva íntegro a continuación. Su vocabulario histórico de sitio público queda como referencia anterior; para las once páginas publicitarias prevalece el anexo «Marketing FOM v6» al final. Las normas del panel siguen vigentes en su propio alcance.
+> **Alcance de los tokens:** los tokens `marketing-` pertenecen exclusivamente al marketing público v6; los tokens `panel-` describen el panel autenticado aprobado en el anexo «Apariencia del panel autenticado». No intercambiar ambas familias. El documento original se conserva íntegro a continuación. Su vocabulario histórico de sitio público queda como referencia anterior; para las once páginas publicitarias prevalece el anexo «Marketing FOM v6» y para Inicio su extensión v7. La nueva geometría y el material del panel prevalecen sobre sus valores históricos de radios y tipografía. La marca SVG aprobada tiene el alcance transversal indicado en el nuevo anexo.
 
 # Sistema de diseño: FOM — Control de flotas
 
@@ -500,3 +578,94 @@ Para el centro de control y los mapas interactivos de vehículos prevalece
 [docs/mapas/DESIGN.md](docs/mapas/DESIGN.md). Define la ficha, los marcadores
 con placa, estados y rumbo, los recursos compartidos y la adaptación nativa
 para Juan. Sus tokens pertenecen al panel de mapas; no cambian el marketing.
+
+---
+
+# Apariencia del panel autenticado · aprobado 2026-10-06
+
+## Overview
+
+**Creative North Star: "Calma con precisión"**
+
+La plataforma autenticada ofrece dos materiales personales sobre la misma composición: Azul FOM conserva la paleta existente; Glass gris combina fondo gris medio y superficies translúcidas de grafito. Ambos comparten tarjetas redondeadas, lateral separado del borde y cabecera con cápsula de contexto, notificaciones circulares y cápsula de perfil. Se conservan las rejillas de cada módulo, sus acciones y las restricciones por rol.
+
+El alcance visual es `/panel` en escritorio y móvil. La elección se aplica inmediatamente desde Mi perfil y se conserva por cuenta en este navegador. No representa sincronización con un servidor ni entre dispositivos. El sitio público y el inicio de sesión conservan sus materiales; la marca SVG aprobada sí se utiliza en las superficies vivas de panel, marketing, acceso, carga y favicon.
+
+**Key Characteristics:**
+- Dos materiales, una composición funcional.
+- Spline Sans y jerarquía operativa legible.
+- Gris medio con paneles de grafito y contraste corregido.
+- Mapas nítidos a pantalla completa con herramientas flotantes.
+- Información registrada, estados vacíos y límites visibles.
+
+## Colors
+
+### Primary
+
+Azul Operación corresponde a `panel-primary`; el texto sobre botones usa `panel-on-primary` y el foco usa `panel-focus`. La marca SVG usa `panel-brand-mark`, conservando su azul oficial.
+
+### Neutral
+
+Los tokens `panel-blue-*` conservan las superficies y textos del esquema oscuro existente. Los tokens `panel-glass-*` describen el material nuevo. `panel-glass-ground-max` limita el área de fondo más clara; `panel-glass-text-secondary` y `panel-glass-text-tertiary` hacen legibles las etiquetas pequeñas sobre ella. Los tokens `panel-glass-solid*` son la alternativa opaca para diálogos y preferencias de transparencia reducida. Los colores semánticos existentes siguen señalando estados con texto o forma adicional.
+
+**The Alcance Rule.** Aplicar los tokens de Apariencia únicamente a la consola autenticada; las paletas de marketing mantienen su alcance aprobado.
+
+**The Contraste Glass Rule.** Conservar los valores corregidos del fondo máximo y ambos niveles de texto; revisar también las pestañas expuestas de mantenimiento, inspecciones y reportes.
+
+## Typography
+
+Spline Sans conserva la voz actual de la consola, con alternativas Segoe UI, system-ui y sans-serif. El título de página, cuerpo y contexto usan los roles `panel-page-title`, `panel-body` y `panel-context`; cada módulo mantiene su escala propia. Los datos variables conservan cifras tabulares. En la ficha de orden el problema es el título principal; las etiquetas de cierre, costo y duración quedan subordinadas al resultado.
+
+## Layout
+
+La consola de escritorio conserva las rejillas de cada módulo. El contenedor usa `panel-outer-inset`; la columna lateral mide (232px) y baja a (218px) hasta (1100px). La cabecera normal deja margen lateral de (28px). El contexto ocupa el espacio flexible y el perfil permanece a la derecha.
+
+Hasta (1100px), la identidad del perfil se reduce al avatar. Hasta (900px), el lateral pasa a un cajón fijo con cierre, velo y margen exterior; su ancho máximo es (280px). Hasta (600px), la tarjeta usa `panel-card-mobile`, el contexto reduce su texto a (11px), el origen de datos se oculta y el perfil se compacta. Las dos opciones de Apariencia pasan a una columna.
+
+En `/panel/mapa` el lienzo ocupa (100dvh), sin margen ni esquinas, y la navegación queda en cajón. La cabecera flotante conserva búsqueda, lista y filtros donde corresponden al centro de control. El conductor ve «Mi mapa», su unidad asignada y el enlace a Mi unidad. Su ficha móvil usa una superposición inferior con desplazamiento interno.
+
+## Elevation & Depth
+
+Azul FOM conserva superficies sin sombra ni desenfoque de Apariencia. Glass gris usa sombra ambiental (0 6px 18px rgb(0 0 0 / .16)) y filtro de fondo (blur(16px) saturate(110%)) en paneles y herramientas. El fondo combina degradado radial y lineal con los tres tokens de suelo gris. Estos valores completos viven en el sidecar, fuera del esquema de frontmatter.
+
+**The Mapa Nítido Rule.** Aplicar el cristal a las herramientas flotantes; el lienzo cartográfico y las capas de imágenes permanecen nítidos. Con `prefers-reduced-transparency: reduce`, las superficies Glass se vuelven opacas y se elimina el filtro.
+
+## Shapes
+
+Tarjetas, métricas y diálogos comparten `panel-card`; el lateral usa `panel-sidebar`. Los controles y elementos de navegación usan `panel-control`, las pestañas y chips `panel-chip`, el contexto `panel-context` y el perfil una cápsula `panel-pill`. La campana es circular. El mapa a pantalla completa es la excepción de esquinas rectas. Los radios locales del detalle de orden y la ficha de vehículo se conservan en sus respectivos componentes.
+
+## Components
+
+### Apariencia personal
+
+Mi perfil contiene un `fieldset` con dos radios reales: «Azul FOM» y «Glass gris». La selección conserva indicación textual «Seleccionado», foco visible y anuncio de estado con `aria-live`. La persistencia usa `fom.apariencia.v1:` y la identidad de la cuenta, nunca la empresa; cambiar de empresa no debe redefinir la preferencia. Un valor inválido vuelve a Azul FOM. Si el almacenamiento falla, el cambio sigue disponible en memoria y se explica el límite de persistencia.
+
+### Cabecera y navegación
+
+Contexto, campana y perfil comparten geometría en ambos materiales. Las notificaciones conducen a Alertas; un administrador global sin empresa gestionada ve la campana deshabilitada y su explicación. El cajón mantiene los módulos permitidos por área, cierre por Escape y cierre al cambiar de ruta.
+
+### Marca FOM
+
+Los recursos oficiales son `public/brand/fom-logo.svg` y `public/brand/fom-symbol.svg`: tres chevrones azules crecientes, con logotipo FOM claro en la versión completa. La geometría SVG deriva de la referencia aprobada, para uso nítido. Usar el componente compartido `LogoFom` y las medidas de `brand.css`; evitar recreaciones con texto o iconos aproximados. La marca antigua que aparece dentro de fotografías y maquetas históricas se conserva en esas imágenes.
+
+### Detalle de orden
+
+La lectura sigue problema reportado, unidad y resultado o estado actual. En una orden cerrada, mostrar solución registrada, fecha de cierre, costo y duración humana. Cuando falta la nota de solución, explicarlo; no completar la historia con una solución inventada. «Datos del reporte» despliega el registro completo. El historial conserva los cambios registrados, asignación y ejecución, con estados de carga/error y fechas disponibles como alternativa. Las acciones y sus guardas de rol se conservan. En móvil los hechos del cierre pasan a una columna y el diálogo permite desplazamiento vertical.
+
+### Mapa del conductor
+
+El menú y la ruta `/panel/mapa` están disponibles para el área conductor. Se resuelve su asignación y se consulta únicamente ese vehículo mediante `repo.vehiculos.obtener`; no se solicita el listado de la flota para dibujarlo. Se actualiza cada (15s). Sin asignación, sin coordenadas GPS válidas o con error, mostrar el estado correspondiente y la opción de reintentar cuando existe. La ficha presenta datos reales de la unidad y permite cerrarse.
+
+## Do's and Don'ts
+
+- **Do** conservar ambos materiales y las rejillas funcionales de los módulos.
+- **Do** mantener la elección por cuenta y los mensajes sobre persistencia local.
+- **Do** conservar el contraste corregido, foco visible, radios nativos y estados de carga/error/vacío.
+- **Do** mantener los mapas nítidos y el historial basado en registros reales.
+- **Do** usar la marca SVG oficial en las superficies vivas.
+- **Don't** extender Glass al marketing ni al inicio de sesión.
+- **Don't** convertir la preferencia del navegador en una promesa de sincronización remota.
+- **Don't** inventar soluciones, eventos, costos ni datos GPS ausentes.
+- **Don't** representar como exitosas las mutaciones de alertas de empresas ajenas: faltan rutas del servidor, según issue #631 punto 3.
+
+Uso, QA y límites de entrega: [docs/DISENO-APARIENCIA.md](docs/DISENO-APARIENCIA.md). Revisión de acabado: [.impeccable/review/apariencia/review-v3.md](.impeccable/review/apariencia/review-v3.md), con veredicto `ship`.

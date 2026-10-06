@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
+import LogoFom from './LogoFom'
 
 // Plataforma es un grupo con sub-tabs (Funciones y Áreas) que aparecen al
 // pasar el mouse por encima.
@@ -31,23 +32,7 @@ const LINKS = [
 
 const CHILD_PATHS = LINKS.flatMap((l) => (l.children ? l.children.map((c) => c.to) : []))
 
-function BrandMark() {
-  return (
-    <svg className="brand-mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <path
-        d="M12 2.4c-3.9 0-7 3.1-7 7 0 4.9 7 12.6 7 12.6s7-7.7 7-12.6c0-3.9-3.1-7-7-7Z"
-        fill="url(#fom-mark)"
-      />
-      <circle cx="12" cy="9.3" r="2.4" fill="#0a1120" />
-      <defs>
-        <linearGradient id="fom-mark" x1="5" y1="2" x2="19" y2="22" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#5cb0ff" />
-          <stop offset="1" stopColor="#208aef" />
-        </linearGradient>
-      </defs>
-    </svg>
-  )
-}
+
 
 const Chevron = () => (
   <svg className="nav-caret" viewBox="0 0 24 24" width="12" height="12" fill="none" aria-hidden="true">
@@ -83,8 +68,7 @@ export default function Header() {
     <header className={`header${scrolled ? ' scrolled' : ''}${open ? ' open' : ''}`}>
       <div className="header-inner">
         <Link to="/" className="brand" aria-label="FOM — inicio">
-          <BrandMark />
-          <span className="brand-word">FOM</span>
+          <LogoFom decorativo />
         </Link>
 
         <nav className="nav" aria-label="Navegación principal">

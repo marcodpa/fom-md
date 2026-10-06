@@ -47,6 +47,12 @@ docs/qa-dashboard/ejecucion.json
 
 # Local maintenance review captures may contain real fleet/personnel data.
 .impeccable/review/mantenimiento/
+.impeccable/review/reportes/
+.impeccable/review/perfil-alertas/
+.impeccable/review/empresas/
+.impeccable/review/apariencia/
 output/mantenimiento-supervisor/visual.mp4
 output/mantenimiento-supervisor/render.log
 output/mantenimiento-supervisor/web-build.log
+
+.impeccable/review/historial/
