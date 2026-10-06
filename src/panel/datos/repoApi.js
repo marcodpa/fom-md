@@ -1151,7 +1151,16 @@ export const repoApi = {
    * Abrir una orden. El servidor decide el estado inicial y el histórico:
    * aquí solo viaja lo que el supervisor escribió.
    */
-    async crear({ vehiculoId, descripcion, tipoFalla, ubicacion, tipo, prioridad }) {
+    async crear({ vehiculoId, descripcion, tipoFalla, ubicacion, tipo, prioridad, comoConductor = false }) {
+      // El conductor no pasa por la consola (403): reporta por la misma ruta que su app.
+      if (comoConductor) {
+        const c = await api.reportarFallaConductor(vehiculoId, {
+          description: descripcion,
+          failureType: tipoFalla || undefined,
+          location: ubicacion || undefined,
+        })
+        return { id: c?.workOrderId ?? c?.workOrder?.id ?? null, estado: c?.workOrder?.status ?? 'abierta' }
+      }
       const r = await api.crearOdt({
         vehicleId: vehiculoId,
         description: descripcion,
