@@ -8,6 +8,7 @@ import FichaUnidad from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
+import RankingManejo from '../comp/RankingManejo'
 
 // ============================================================
 // RESUMEN — el inicio del supervisor
@@ -214,6 +215,8 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
         <Kpi titulo="Mantenimiento" valor={odtAbiertas} icono="llave" nota="Órdenes pendientes y en revisión" tono={odtAbiertas ? 'aviso' : ''} a="/panel/mantenimiento" />
         <Kpi titulo="Documentos por vencer" valor={num(r.docsPorVencer)} icono="documento" nota="Revisa los próximos vencimientos" tono={r.docsPorVencer ? 'aviso' : ''} a="/panel/documentos" />
       </div>
+
+      <RankingManejo />
 
       <Tarjeta
         titulo="Hoy, en orden"

@@ -27,8 +27,8 @@ export default function ScoreManejo({ titulo = 'Tu score de manejo' }) {
         <div className="sm-vacio">
           <Icono nombre="velocidad" tam={34} />
           <div>
-            <b>Tu score todavía no está disponible en la web</b>
-            <p>Se calcula con las frenadas bruscas, las aceleraciones bruscas y los excesos de velocidad de tus recorridos. Aparecerá aquí cuando el servidor lo entregue.</p>
+            <b>Todavía no hay score para mostrar</b>
+            <p>Se calcula con las frenadas bruscas, las aceleraciones bruscas y los excesos de velocidad de tus recorridos. Aparece cuando hay kilómetros recorridos en los últimos {DIAS} días.</p>
           </div>
         </div>
       )}
@@ -38,7 +38,7 @@ export default function ScoreManejo({ titulo = 'Tu score de manejo' }) {
 }
 
 function Detalle({ s }) {
-  const rango = f.rangoIndice(s.indice)
+  const rango = { green: 'verde', yellow: 'amarillo', red: 'rojo' }[s.rating] ?? f.rangoIndice(s.indice)
   const eventos = [
     ['Frenadas bruscas', s.frenadas, 'frenada'],
     ['Aceleraciones bruscas', s.aceleraciones, 'aceleracion'],

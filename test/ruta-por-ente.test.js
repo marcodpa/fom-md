@@ -46,9 +46,9 @@ test('subidas y descargas de archivos de una empresa', () => {
 })
 
 test('lo que no tiene ruta por empresa se rechaza en vez de leer la empresa propia', () => {
-  // Marcar leído / descartar avisos es de cada persona.
-  assert.equal(aRutaPorEnte(`${C}/notifications/${V}/read`, 'PATCH', ENTE), null)
-  assert.equal(aRutaPorEnte(`${C}/notifications/read-all`, 'POST', ENTE), null)
+  // Mi score de manejo es de cada persona: no tiene versión por empresa.
+  assert.equal(aRutaPorEnte(`${C}/me/driving-score`, 'GET', ENTE), null)
+  assert.equal(aRutaPorEnte(`${C}/me/driving-events`, 'GET', ENTE), null)
   assert.equal(aRutaPorEnte(`${C}/inexistente`, 'GET', ENTE), null)
   // Un método que no existe en ese recurso tampoco pasa.
   assert.equal(aRutaPorEnte(`${C}/summary`, 'DELETE', ENTE), null)
@@ -62,4 +62,12 @@ test('lo global del administrador no se toca', () => {
 
 test('lo que no es de la consola no se reescribe', () => {
   assert.equal(aRutaPorEnte('/health', 'GET', ENTE), '/health')
+})
+
+test('los avisos (#633) y el manejo (#634) sí tienen ruta por empresa', () => {
+  assert.equal(aRutaPorEnte(`${C}/notifications/${V}/read`, 'PATCH', ENTE), `${C}/tenants/${ENTE}/notifications/${V}/read`)
+  assert.equal(aRutaPorEnte(`${C}/notifications/read-all`, 'POST', ENTE), `${C}/tenants/${ENTE}/notifications/read-all`)
+  assert.equal(aRutaPorEnte(`${C}/notifications/${V}/dismiss`, 'PATCH', ENTE), `${C}/tenants/${ENTE}/notifications/${V}/dismiss`)
+  assert.equal(aRutaPorEnte(`${C}/driving-scores?days=7`, 'GET', ENTE), `${C}/tenants/${ENTE}/driving-scores?days=7`)
+  assert.equal(aRutaPorEnte(`${C}/drivers/${V}/driving-events?days=7`, 'GET', ENTE), `${C}/tenants/${ENTE}/drivers/${V}/driving-events?days=7`)
 })

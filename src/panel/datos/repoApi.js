@@ -259,6 +259,26 @@ function sinDeriva(acum, p, i, todos) {
 }
 
 /** Filas de posiciones del servidor (más nuevas primero) → puntos válidos, del más antiguo al más nuevo. */
+/**
+ * El score del servidor (política driving-v1) en la forma de la pantalla. `index` y la tasa llegan en null cuando
+ * no hubo kilómetros (rating «unavailable»): no se inventa nada, se devuelve null o el aviso.
+ */
+function scoreDe(s, aunSinIndice = false) {
+  if (!s) return null
+  const sinIndice = s.index == null || s.rating === 'unavailable'
+  if (sinIndice && !aunSinIndice) return null
+  return {
+    indice: s.index ?? null,
+    eventosPor100: s.eventsPer100Km ?? null,
+    km: Number(s.km ?? 0),
+    dias: s.days,
+    frenadas: s.harshBraking ?? 0,
+    aceleraciones: s.harshAcceleration ?? 0,
+    excesos: s.speeding ?? 0,
+    rating: s.rating,
+  }
+}
+
 function puntosDe(filas) {
   return quitarSaltos(filas
     .filter((p) => p.positionValid && p.latitude != null && p.longitude != null)
@@ -280,8 +300,14 @@ export const repoApi = {
    * { indice, eventosPor100, km, dias, frenadas, aceleraciones, excesos }.
    */
   manejo: {
-    async miScore() {
-      return null
+    /** Mi score (conductor). `null` si el servidor aún no tiene recorridos suficientes. */
+    async miScore({ dias = 7 } = {}) {
+      return scoreDe(await api.miScoreManejo(dias))
+    },
+    /** Ranking de los conductores de la empresa, del mejor al peor. */
+    async ranking({ dias = 7 } = {}) {
+      const r = await api.scoresManejo(dias)
+      return (Array.isArray(r) ? r : r?.items ?? []).map((x) => ({ id: x.userId, nombre: x.displayName, ...scoreDe(x, true) }))
     },
   },
 
@@ -414,6 +440,12 @@ export const repoApi = {
   },
 
   vehiculos: {
+    /** La lectura OFICIAL más reciente del odómetro (km, como número) o null si nunca hubo una. */
+    async odometro(vehiculoId) {
+      const r = await api.odometroOficial(vehiculoId, 1)
+      const lectura = (r?.items ?? [])[0]
+      return lectura ? { km: Number(lectura.odometerKm), origen: lectura.source, en: lectura.observedAt } : null
+    },
     async listar({ q = '', areaId = '' } = {}) {
       const [lista, conductores] = await Promise.all([
         flota(q),
@@ -1269,6 +1301,8 @@ export const repoApi = {
           vehiculoNombre: [i.vehicleCode, i.vehiclePlate].filter(Boolean).join(' · ') || '—',
           conductorNombre: i.driverName || '—',
           plantilla: i.templateName,
+          // «daily» (la diaria de cada conductor) o «scheduled» (la que fija el supervisor): lo clasifica el servidor.
+          clase: i.kind ?? null,
         })).filter(i => !fecha || String(i.fecha).slice(0, 10) === fecha)
           .filter(i => !q || `${i.vehiculoNombre} ${i.conductorNombre}`.toLowerCase().includes(q.toLowerCase()))
       } catch (error) {

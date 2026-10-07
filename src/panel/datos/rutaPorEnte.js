@@ -45,6 +45,7 @@ const ESPEJOS = {
     '/inspections', '/inspections/:i', '/inspection-schedules', '/inspection-findings',
     '/inspections/:i/findings/:a/follow-up', '/inspection-templates', '/inspection-templates/:t',
     '/documents', '/alert-rules', '/maintenance/plans', '/maintenance/plans/:p', '/maintenance/actions', '/maintenance/actions/:a',
+    '/driving-scores', '/drivers/:d/driving-score', '/drivers/:d/driving-events',
     '/alert-events', '/alert-events/:e', '/emergencies', '/emergencies/:e', '/driver-sessions', '/driver-sessions/:s',
     '/:coleccion/:padre/objects',
   ],
@@ -55,6 +56,7 @@ const ESPEJOS = {
     '/inspection-schedules', '/inspection-schedules/:s/cancel', '/inspections/:i/findings/:a/follow-up', '/inspection-templates',
     '/documents', '/alert-rules',
     '/alert-events/:e/acknowledge', '/alert-events/:e/resolve', '/emergencies/:e/acknowledge', '/emergencies/:e/resolve',
+    '/notifications/read-all', '/notifications/dismiss-read',
     '/gps-devices', '/gps-devices/:d/installation',
     '/:coleccion/:padre/uploads', '/uploads/:u/complete', '/:coleccion/:padre/objects/:o/downloads',
   ],
@@ -62,6 +64,7 @@ const ESPEJOS = {
     '/users/:u', '/users/:u/profile', '/vehicles/:v', '/driver-assignments/:a/revoke', '/driver-assignments/:a/pin', '/areas/:a',
     '/work-orders/:w/status', '/inspection-templates/:t/status', '/documents/:d', '/alert-rules/:r',
     '/maintenance/plans/:p', '/maintenance/actions/:a/status',
+    '/notifications/:n/read', '/notifications/:n/dismiss',
     '/gps-devices/:d', '/gps-installations/:a/remove',
   ],
   PUT: [

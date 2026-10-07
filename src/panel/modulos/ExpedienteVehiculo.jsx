@@ -77,10 +77,14 @@ function Nivel({ icono, titulo, pct, tono }) {
  */
 function KpiKilometraje({ v }) {
   const pos = useDatos(() => repo.recorridoDetallado(v.id, { horas: 168, limite: 1000 }), [v.id])
+  // La lectura OFICIAL del odómetro (la registra el servidor: GPS, manual u orden de mantenimiento) manda sobre el
+  // cálculo del recorrido.
+  const oficial = useDatos(() => (repo.vehiculos.odometro ? repo.vehiculos.odometro(v.id).catch(() => null) : Promise.resolve(null)), [v.id])
+  const lecturaKm = oficial.datos?.km ?? v.km
   const hoy = f.hoyISO()
-  const r = pos.estado === 'ok' ? resumenKm({ lectura: v.km, puntos: pos.datos.puntos, hoy }) : null
+  const r = pos.estado === 'ok' ? resumenKm({ lectura: lecturaKm, puntos: pos.datos.puntos, hoy }) : null
   const aprox = (n) => `${f.numero(Math.round(n))} km`
-  let valor = f.km(v.km)
+  let valor = f.km(lecturaKm)
   let nota = `Alta: ${f.fecha(v.creadoEn)}`
   if (r) {
     const parcial = pos.datos.truncado ? ' (al menos)' : ''

@@ -284,6 +284,16 @@ export const api = {
   actualizarArea: (areaId, cuerpo) =>
     pedir(`${CONSOLA}/areas/${areaId}`, { metodo: 'PATCH', cuerpo }),
 
+  // --- Score de manejo (#634 de fom-core, política driving-v1) --------------
+  /** Mi score (solo el conductor en sesión). `me/` no tiene versión por empresa. */
+  miScoreManejo: (days = 7) => pedir(`${CONSOLA}/me/driving-score?days=${days}`),
+  /** Score de todos los conductores de la empresa (supervisor / administrador). */
+  scoresManejo: (days = 7) => pedir(`${CONSOLA}/driving-scores?days=${days}`),
+  eventosManejoDe: (userId, days = 7, limit = 50) =>
+    pedir(`${CONSOLA}/drivers/${encodeURIComponent(userId)}/driving-events?days=${days}&limit=${limit}`),
+  /** Lecturas oficiales del odómetro de una unidad (la más reciente primero). */
+  odometroOficial: (vehicleId, limit = 1) => pedir(`${CONSOLA}/vehicles/${encodeURIComponent(vehicleId)}/odometer?limit=${limit}`),
+
   // --- Cumplimiento y avisos (#260 de fom-core) ---------------------------
 
   marcarAvisoLeido: (avisoId) =>
