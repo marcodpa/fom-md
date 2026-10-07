@@ -675,9 +675,9 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
         <button type="button" className="pnl-btn primario" onClick={crear} disabled={guardando}>
           {guardando ? 'Creando…' : 'Crear orden'}
         </button>
-        <button type="button" className="pnl-btn sutil" onClick={() => setPaso(1)} disabled={guardando}>
+        {vehiculos.length > 1 && (<button type="button" className="pnl-btn sutil" onClick={() => setPaso(1)} disabled={guardando}>
           ← Cambiar unidad
-        </button>
+        </button>)}
       </div>
     </div><aside className="mnt-new-context"><VehicleVisual modelo={elegido?.modelo ?? ''}/><h3>{elegido?.placa || elegido?.alias}</h3><p>{elegido?.marca} {elegido?.modelo}</p><p>{elegido?.conductorNombre || 'Sin conductor asignado'}</p><hr/><b>¿Qué sigue?</b><p>La orden quedará abierta para revisarla y asignar el trabajo.</p></aside></div>}
   </div>
