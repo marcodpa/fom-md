@@ -143,3 +143,7 @@
 
 .fa-limitacion { display:flex; align-items:flex-start; gap:10px; padding:14px 18px; border:1px solid var(--e-borde); border-radius:16px; background:var(--e-sup); line-height:1.5; }
 .fa-limitacion svg { flex:none; margin-top:2px; }
+.fa-empresa-selector { display:grid; gap:18px; max-width:600px; }
+.fa-empresa-selector>p { color:var(--e-texto-2); font-size:14px; line-height:1.6; margin:0; }
+.fa-empresa-selector .pnl-campo { margin:0; }
+.fa-empresa-selector>.pnl-btn { justify-self:start; }

@@ -5,6 +5,7 @@ import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
 import { useApariencia } from './useApariencia'
+import { estaLeida } from './modulos/alertas-presentacion'
 import { Icono } from './Iconos'
 import repo, { alCambiarDatos, CONECTADO } from './datos/repo'
 import '../styles/apariencia.css'
@@ -228,7 +229,7 @@ export default function Consola() {
     if (!sesion?.perfil || esAdminFom(sesion.perfil) && !sesion.perfil.empresaGestion) { setSinLeer(0); return }
     let vivo = true
     const leer = () =>
-      repo.alertas.listar({ soloSinLeer: true }).then((l) => vivo && setSinLeer(l.length)).catch(() => {})
+      repo.alertas.listar({}).then((l) => vivo && setSinLeer(l.filter(n => !estaLeida(n)).length)).catch(() => {})
     leer()
     const baja = alCambiarDatos(leer)
     return () => {
@@ -264,7 +265,7 @@ export default function Consola() {
   // `pathname` viene del router, no del `window`: asi la guarda vuelve a
   // evaluarse en cada navegacion y no solo al cargar la pagina.
   const primerTramo = pathname.replace(/^\/panel\/?/u, '').split('/')[0]
-  if (area === 'admin' && !perfil.empresaGestion && primerTramo !== 'admin' && primerTramo !== 'mi-perfil') {
+  if (area === 'admin' && !perfil.empresaGestion && !['admin', 'mi-perfil', 'alertas'].includes(primerTramo)) {
     return <Navigate to="/panel/admin/plataforma" replace />
   }
   if (primerTramo !== 'mi-perfil' && permitidas && !permitidas.includes(primerTramo)) {
@@ -292,10 +293,10 @@ export default function Consola() {
         <div className="pnl-topbar">
           <div className="pnl-topbar-contexto"><span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{esAdminFom(perfil) && pathname.includes('/admin/') ? 'Administración global FOM' : perfil.empresa || 'FOM · Administración'}</span><span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span></div>
           <div className="pnl-topbar-derecha">
-            {esAdminFom(perfil) && !perfil.empresaGestion ? <button type="button" className="pnl-notificaciones" disabled title="Entra a una empresa para consultar sus alertas" aria-label="Alertas: entra a una empresa para consultarlas"><Icono nombre="campana" tam={21} /></button> : <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={`Alertas: ${sinLeer} sin leer`}>
+            <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={esAdminFom(perfil) && !perfil.empresaGestion ? 'Alertas: elegir empresa' : `Alertas: ${sinLeer} sin leer`}>
               <Icono nombre="campana" tam={21} />
               {sinLeer > 0 && <span>{sinLeer}</span>}
-            </Link>}
+            </Link>
             <Link to="/panel/mi-perfil" className="pnl-topbar-perfil" aria-label="Mi perfil"><span className="pnl-topbar-identidad"><b>{perfil.nombre}</b><small>{perfil.rolNombre}</small></span><i className="pnl-avatar">{perfil.iniciales}</i></Link>
           </div>
         </div>

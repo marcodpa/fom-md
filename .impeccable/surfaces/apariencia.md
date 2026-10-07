@@ -14,4 +14,4 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 - Control map floating header inherits the rounded current material; preserves search, list and filters, edge-to-edge map.
 - Order detail: prioritize problem, unit, result/current state, closure cost and human duration. Full reporting fields are an expandable block, actual recorded history remains visible, actions and role checks retain existing behavior. Missing solution note is explicit, no invented completion events.
 - Review contrast correction: maximum Glass exposed ground `#62676e`, secondary text `#edf0f5`, tertiary text `#e2e6ec`; preserves gray ground/graphite panel direction with readable small labels.
-- Foreign-company alert mutations are blocked by missing server routes (issue #631 point 3); UI explains/disabled buttons rather than pretending a successful mutation or writing into another tenant.
+- 7 Oct: active administrator bell opens a company selector; tenant context is confirmed before loading alerts. Integrated #633 notification routes replace the earlier #631 frontend blocker; mutations require server success and never fall back to another tenant.

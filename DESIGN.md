@@ -642,7 +642,7 @@ Mi perfil contiene un `fieldset` con dos radios reales: «Azul FOM» y «Glass g
 
 ### Cabecera y navegación
 
-Contexto, campana y perfil comparten geometría en ambos materiales. Las notificaciones conducen a Alertas; un administrador global sin empresa gestionada ve la campana deshabilitada y su explicación. El cajón mantiene los módulos permitidos por área, cierre por Escape y cierre al cambiar de ruta.
+Contexto, campana y perfil comparten geometría en ambos materiales. Las notificaciones conducen a Alertas; un administrador global sin empresa gestionada elige allí una empresa autorizada antes de abrir la bandeja. La campana permanece activa. «Cambiar empresa» devuelve al selector. El cajón mantiene los módulos permitidos por área, cierre por Escape y cierre al cambiar de ruta.
 
 ### Marca FOM
 
@@ -666,6 +666,6 @@ El menú y la ruta `/panel/mapa` están disponibles para el área conductor. Se 
 - **Don't** extender Glass al marketing ni al inicio de sesión.
 - **Don't** convertir la preferencia del navegador en una promesa de sincronización remota.
 - **Don't** inventar soluciones, eventos, costos ni datos GPS ausentes.
-- **Don't** representar como exitosas las mutaciones de alertas de empresas ajenas: faltan rutas del servidor, según issue #631 punto 3.
+- **Don't** representar como exitosa una mutación de alertas antes de la confirmación del servidor. Las rutas por empresa del #633 conservan el tenant objetivo y la identidad real; los errores se muestran en la bandeja.
 
 Uso, QA y límites de entrega: [docs/DISENO-APARIENCIA.md](docs/DISENO-APARIENCIA.md). Revisión de acabado: [.impeccable/review/apariencia/review-v3.md](.impeccable/review/apariencia/review-v3.md), con veredicto `ship`.

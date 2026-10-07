@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import repo, { CONECTADO } from '../datos/repo'
+import repo from '../datos/repo'
 import { useSesion } from '../useSesion'
+import { entrarEmpresa, salirEmpresa } from '../auth'
+import { esAdminFom } from '../roles'
 import { useDatos } from '../useDatos'
-import { Cabecera, Cargando, Chips, ErrorCarga, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
+import { Cabecera, Campo, Cargando, Chips, ErrorCarga, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
@@ -16,7 +18,45 @@ const TIPOS_EVENTO = [{ v: 'exceso_velocidad', t: 'Exceso de velocidad' }, { v: 
 
 export default function Alertas() {
   const sesion = useSesion()
-  const empresaAjena = CONECTADO && Boolean(sesion?.perfil?.empresaGestion)
+  return esAdminFom(sesion?.perfil) && !sesion?.perfil?.empresaGestion
+    ? <ElegirEmpresaAlertas /> : <BandejaAlertas />
+}
+
+function ElegirEmpresaAlertas() {
+  const empresas = useDatos(() => repo.admin.empresas.listar({}), [])
+  const [empresaId, setEmpresaId] = useState('')
+  const [entrando, setEntrando] = useState(false)
+  const [error, setError] = useState('')
+  const lista = (empresas.datos ?? []).filter(e => !e.respaldo)
+  async function abrir(e) {
+    e.preventDefault()
+    const empresa = lista.find(e => e.id === empresaId)
+    if (!empresa || entrando) return
+    setError('')
+    setEntrando(true)
+    try { await entrarEmpresa(empresa) }
+    catch (e) { setError(e?.message || 'No se pudo abrir esta empresa. Inténtalo de nuevo.'); setEntrando(false) }
+  }
+  return <div className="fa-root">
+    <Cabecera titulo="Alertas" bajada="Elige la empresa cuyas alertas quieres consultar." />
+    {empresas.estado === 'cargando' && <Cargando filas={3} />}
+    {empresas.estado === 'error' && <ErrorCarga texto={empresas.error?.message} onReintentar={empresas.recargar} />}
+    {empresas.estado === 'ok' && <Tarjeta titulo="Consultar alertas de una empresa">
+      {lista.length ? <form className="fa-empresa-selector" onSubmit={abrir} aria-busy={entrando}>
+        <p>Tu acceso de administrador se conserva. Solo cambia la empresa que estás consultando.</p>
+        <Campo etiqueta="Empresa"><select className="pnl-input" aria-label="Empresa para consultar alertas" value={empresaId} onChange={e => { setEmpresaId(e.target.value); setError('') }} disabled={entrando} required>
+          <option value="">Selecciona una empresa</option>
+          {lista.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+        </select></Campo>
+        {error && <p role="alert" className="pnl-error-texto">{error}</p>}
+        <button type="submit" className="pnl-btn primario" disabled={!empresaId || entrando}><Icono nombre="campana" tam={18} />{entrando ? 'Abriendo alertas…' : 'Ver alertas'}</button>
+      </form> : <Vacio icono="empresa" titulo="No hay empresas disponibles" texto="Las empresas autorizadas aparecerán aquí para consultar sus alertas." />}
+    </Tarjeta>}
+  </div>
+}
+
+function BandejaAlertas() {
+  const sesion = useSesion()
   const [pestana, setPestana] = useState('notificaciones')
   const [filtro, setFiltro] = useState('todas')
   const [tipoEvento, setTipoEvento] = useState('')
@@ -39,7 +79,7 @@ export default function Alertas() {
   const grupos = agruparAvisos(notificaciones)
   const filtrosEvento = [{ v: '', t: 'Todos', n: eventos.length }].concat(TIPOS_EVENTO.filter(t => t.v !== 'condicion' || eventos.some(e => e.clave === t.v)).map(t => ({ ...t, n: eventos.filter(e => e.clave === t.v).length })))
   const eventosFiltrados = tipoEvento ? eventos.filter(e => e.clave === tipoEvento) : eventos
-  const puedeActuar = notif.estado === 'ok' && !pendiente && !empresaAjena
+  const puedeActuar = notif.estado === 'ok' && !pendiente
 
   async function ejecutar(clave, operacion, mensaje) {
     if (pendiente) return
@@ -58,13 +98,13 @@ export default function Alertas() {
 
   return <div className="fa-superficie pa-superficie">
     <Cabecera titulo="Alertas" bajada="Revisa lo nuevo y sigue con tu operación.">
+      {esAdminFom(sesion?.perfil) && sesion.perfil.empresaGestion && <button type="button" className="pnl-btn" onClick={salirEmpresa}><Icono nombre="empresa" tam={17} />Cambiar empresa</button>}
       {pestana === 'notificaciones' && <>
       <button className="pnl-btn primario" disabled={!puedeActuar || !sinLeer} onClick={() => ejecutar('leer-todas', () => repo.alertas.marcarTodasLeidas(), 'Las notificaciones se marcaron como leídas.')}><Icono nombre="check" tam={17} />{pendiente === 'leer-todas' ? 'Marcando…' : 'Marcar todas como leídas'}</button>
       <button className="pnl-btn" disabled={!puedeActuar || lista.length === sinLeer} onClick={() => ejecutar('descartar-leidos', () => repo.alertas.descartarLeidos(), 'Se descartaron las notificaciones leídas.')}><Icono nombre="cerrar" tam={17} />{pendiente === 'descartar-leidos' ? 'Descartando…' : 'Descartar leídos'}</button>
       </>}
     </Cabecera>
     <div className="pnl-cuerpo">
-      {empresaAjena && <p className="pa-nota fa-limitacion" role="status"><Icono nombre="alerta" tam={18} />Puedes consultar las alertas de esta empresa. Marcar y descartar desde el acceso global requiere la actualización del servidor pendiente en el issue #631. Sus supervisores pueden hacerlo desde su propia cuenta.</p>}
       {errorAccion && <p className="pa-error" role="alert">{errorAccion}</p>}
       {aviso && <p className="pa-confirmacion" role="status"><Icono nombre="check" tam={17} />{aviso}</p>}
       {pestana === 'notificaciones' && <section className="fa-metricas" aria-label="Estado de las notificaciones"><div><Icono nombre="campana" tam={30} /><span>Sin leer<strong>{notif.datos === null ? '—' : f.numero(sinLeer)}</strong></span></div><div><Icono nombre="reloj" tam={30} /><span>Avisos de hoy<strong>{notif.datos === null ? '—' : f.numero(deHoy)}</strong></span></div></section>}

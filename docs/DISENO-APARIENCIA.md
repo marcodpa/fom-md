@@ -48,7 +48,7 @@ Para una regresión futura, comprobar selección inmediata, recarga, separación
 
 ## Límites verificados
 
-Las mutaciones de alertas al gestionar una empresa ajena están deshabilitadas y explicadas porque faltan rutas del servidor: **issue #631, punto 3**. La acción **Marcar todas como leídas** pasó en la demostración del supervisor de su propia empresa. Esta entrega no resuelve ese problema de backend ni acredita CRUD completo o una auditoría de permisos en producción.
+Actualización del 7 oct: la campana permite elegir empresa y abrir la bandeja. El cliente ya integra las rutas por empresa del #633 y se retiró el bloqueo anterior del #631. Las acciones dependen de la confirmación del servidor; esta revisión no modificó avisos reales. Véase [CAMPANA-ALERTAS.md](CAMPANA-ALERTAS.md). El pase original de Apariencia solo probó marcar avisos en demostración y no certifica CRUD completo ni permisos de producción.
 
 Los resultados del mapa son evidencia de interfaz y consulta por asignación; no constituyen una auditoría de autorización del servidor. La entrega conserva el alcance de las pruebas reportadas. No se hizo commit ni despliegue en este pase.
 

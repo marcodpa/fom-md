@@ -293,7 +293,7 @@
       },
       "limits": [
         "Personal appearance is browser-local, with no backend or cross-device synchronization.",
-        "Foreign-company alert mutations are disabled because server routes are missing: issue #631 point 3. This delivery does not fix that backend issue.",
+        "Global administrators enter Alerts through the active bell and select a confirmed company. Notification mutations use the integrated tenant routes from #633; success requires server confirmation, errors remain visible.",
         "Own-company supervisor demo mark-all-read passed; full CRUD and production server authorization are not certified.",
         "No commit or deployment in this documentation pass."
       ],
