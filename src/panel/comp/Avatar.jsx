@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { etiquetas, listarImagenes, miniatura } from '../datos/cloudinary'
+import { etiquetas, fotosDe, invalidarFotos, miniatura } from '../datos/cloudinary'
 
 // Foto de perfil: la más reciente con la etiqueta `fom_avatar_<userId>` en Cloudinary; si no hay, las iniciales.
 // Se guarda en memoria para no pedir lo mismo en la barra de arriba, el menú y Mi perfil a la vez.
@@ -9,13 +9,14 @@ const oyentes = new Set()
 
 function cargar(userId) {
   if (!cache.has(userId)) {
-    cache.set(userId, listarImagenes(etiquetas.avatar(userId)).then((r) => r[0]?.url ?? null))
+    cache.set(userId, fotosDe(etiquetas.avatar(userId)).then((r) => r[0]?.url ?? null))
   }
   return cache.get(userId)
 }
 
 /** Después de cambiar la foto: se vuelve a pedir en todos los lugares donde aparece. */
 export function invalidarAvatar(userId) {
+  invalidarFotos(etiquetas.avatar(userId))
   cache.delete(userId)
   oyentes.forEach((f) => f(userId))
 }

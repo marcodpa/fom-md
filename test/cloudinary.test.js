@@ -70,3 +70,40 @@ test('la miniatura le pide a Cloudinary una versión liviana', () => {
   assert.equal(miniatura('https://res.cloudinary.com/demo/image/upload/v2/b.png', 96, 96), 'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,w_96,h_96,c_fill/v2/b.png')
   assert.equal(miniatura('blob:otra'), 'blob:otra')
 })
+
+test('quitar: solo una foto recién subida con su token, y una vez', async () => {
+  const { puedeQuitarImagen, quitarImagen } = await import('../src/panel/datos/cloudinary.js')
+  configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
+  const original = globalThis.fetch
+  const llamadas = []
+  globalThis.fetch = async (url, op) => {
+    llamadas.push({ url, op })
+    if (String(url).endsWith('/image/upload')) return { ok: true, json: async () => ({ secure_url: 'https://res.cloudinary.com/demo/image/upload/v1/fom/x.jpg', public_id: 'fom/x', delete_token: 'tok123' }) }
+    return { ok: true, json: async () => ({ result: 'ok' }) }
+  }
+  try {
+    assert.equal(puedeQuitarImagen('fom/x'), false)
+    await subirImagen(foto())
+    assert.equal(puedeQuitarImagen('fom/x'), true)
+    await quitarImagen('fom/x')
+    assert.equal(llamadas.at(-1).url, 'https://api.cloudinary.com/v1_1/demo/delete_by_token')
+    assert.equal(llamadas.at(-1).op.body.get('token'), 'tok123')
+    assert.equal(puedeQuitarImagen('fom/x'), false)
+    await assert.rejects(quitarImagen('fom/x'), /ya no se puede quitar/)
+  } finally { globalThis.fetch = original }
+})
+
+test('fotosDe recuerda la consulta y invalidarFotos la repite', async () => {
+  const { fotosDe, invalidarFotos } = await import('../src/panel/datos/cloudinary.js')
+  configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
+  const original = globalThis.fetch
+  let n = 0
+  globalThis.fetch = async () => { n++; return { ok: true, json: async () => ({ resources: [] }) } }
+  try {
+    await fotosDe('fom_vehiculo_z'); await fotosDe('fom_vehiculo_z')
+    assert.equal(n, 1)
+    invalidarFotos('fom_vehiculo_z')
+    await fotosDe('fom_vehiculo_z')
+    assert.equal(n, 2)
+  } finally { globalThis.fetch = original }
+})

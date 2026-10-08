@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Modal, Cargando } from './ui'
 import { Icono } from '../Iconos'
-import { cloudinaryConfigurado, listarImagenes, miniatura, problemaDelArchivo, subirImagen } from '../datos/cloudinary'
+import { cloudinaryConfigurado, fotosDe, invalidarFotos, miniatura, problemaDelArchivo, puedeQuitarImagen, quitarImagen, subirImagen } from '../datos/cloudinary'
 import './fotos-de.css'
 
 // Las fotos de algo (una unidad, un documento, una persona): se ven en una galería, se amplían al hacer clic y,
@@ -15,7 +15,7 @@ export function useFotos(etiqueta) {
     let vigente = true
     setFotos(null)
     if (!etiqueta) { setFotos([]); return undefined }
-    listarImagenes(etiqueta).then((r) => { if (vigente) setFotos(r) })
+    fotosDe(etiqueta).then((r) => { if (vigente) setFotos(r) })
     return () => { vigente = false }
   }, [etiqueta, version])
   return { fotos, recargar: useCallback(() => setVersion((v) => v + 1), []) }
@@ -50,7 +50,20 @@ export default function FotosDe({ etiqueta, carpeta, titulo = '', permiteSubir =
     }
     setErrores(nuevos)
     // La lista pública de Cloudinary tarda un instante en ver la foto nueva.
-    setTimeout(() => { recargar(); alCambiar?.() }, 1200)
+    setTimeout(() => { invalidarFotos(etiqueta); recargar(); alCambiar?.() }, 1200)
+  }
+
+  async function quitar(foto) {
+    setErrores([])
+    try {
+      await quitarImagen(foto.id)
+      setAbierta(null)
+      invalidarFotos(etiqueta)
+      recargar()
+      alCambiar?.()
+    } catch (e) {
+      setErrores([e.message])
+    }
   }
 
   return (
@@ -95,7 +108,10 @@ export default function FotosDe({ etiqueta, carpeta, titulo = '', permiteSubir =
         {abierta && (
           <div className="fd-grande">
             <img src={miniatura(abierta.url, 1600)} alt={abierta.titulo || ''} />
-            <a className="pnl-link" href={abierta.url} target="_blank" rel="noreferrer">Abrir original</a>
+            <div className="fd-acciones">
+              <a className="pnl-link" href={abierta.url} target="_blank" rel="noreferrer">Abrir original</a>
+              {permiteSubir && puedeQuitarImagen(abierta.id) && <button type="button" className="pnl-btn sutil" onClick={() => quitar(abierta)}>Quitar esta foto</button>}
+            </div>
           </div>
         )}
       </Modal>

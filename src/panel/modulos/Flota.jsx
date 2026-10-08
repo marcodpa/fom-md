@@ -1,3 +1,4 @@
+import MiniFoto from '../comp/MiniFoto'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -402,7 +403,7 @@ export default function Flota() {
                           }}
                         >
                           <td>
-                            <div className="pnl-vehicle-cell"><VehicleVisual modelo={v.modelo ?? ''} compacta /><div className="pnl-doble">
+                            <div className="pnl-vehicle-cell"><MiniFoto vehiculoId={v.id}><VehicleVisual modelo={v.modelo ?? ''} compacta /></MiniFoto><div className="pnl-doble">
                               <b>{v.alias}</b>
                               <span>{v.numero} · {v.marca} {v.modelo}</span>
                             </div></div>

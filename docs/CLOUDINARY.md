@@ -32,4 +32,6 @@ La foto principal de una unidad o de una persona es la **más reciente** con su 
 ## Límites
 
 - Solo imágenes (JPG, PNG, WebP, HEIC), hasta 10 MB cada una. Los PDF no se listan por etiqueta (la lista pública de Cloudinary es de imágenes).
-- La web no puede borrar fotos (borrar exige firma con el API secret, que no va en el navegador). Si se quiere, se hace desde el panel de Cloudinary o con una ruta del servidor.
+- **Quitar fotos:** borrar de verdad exige firmar con el API secret, que no puede ir en el navegador. Lo que sí hay sin firma es el «token de borrado» que Cloudinary devuelve al subir (vale 10 minutos): en ese lapso aparece «Quitar esta foto» para corregir un error. Para que el preset devuelva el token hay que activar **Return delete token** en el upload preset.
+- **Quitar fotos viejas:** requiere una ruta del servidor (por ejemplo `DELETE /api/v1/console/media` con `publicId`, que valide que la foto pertenece a la empresa del supervisor y firme la petición con el secret guardado en el servidor). Pendiente de pedirle a Juan.
+- **Foto por carro en las listas:** la lista de Vehículos pide la foto de cada unidad solo cuando su fila se ve en pantalla, y recuerda lo ya pedido.

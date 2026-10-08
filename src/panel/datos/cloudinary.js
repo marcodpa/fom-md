@@ -61,6 +61,8 @@ export async function subirImagen(archivo, { carpeta, etiqueta, titulo } = {}) {
   const cuerpo = new FormData()
   cuerpo.append('file', archivo)
   cuerpo.append('upload_preset', preset)
+  // Pide el «token de borrado» (si el preset lo permite): con él se puede quitar la foto en los 10 minutos siguientes.
+  cuerpo.append('return_delete_token', 'true')
   if (carpeta) cuerpo.append('folder', carpeta)
   if (etiqueta) cuerpo.append('tags', etiqueta)
   // `|` y `=` separan los pares del contexto: dentro de un título lo romperían.
@@ -82,7 +84,54 @@ export async function subirImagen(archivo, { carpeta, etiqueta, titulo } = {}) {
   }
   const json = await respuesta.json()
   if (!json.secure_url) throw new Error('Cloudinary no devolvió la dirección de la foto.')
+  if (json.delete_token && json.public_id) tokensDeBorrado.set(json.public_id, { token: json.delete_token, hasta: Date.now() + VIDA_TOKEN })
   return json.secure_url
+}
+
+// --- Quitar fotos ------------------------------------------------------------
+// Borrar de verdad exige firmar la petición con el API secret, y ese secreto NO puede estar en el navegador.
+// Lo que sí permite Cloudinary sin firma es el «token de borrado» que devuelve al subir: vale 10 minutos y solo
+// para esa foto. Sirve para corregir un error al momento. Quitar una foto vieja requiere una ruta del servidor.
+const VIDA_TOKEN = 9 * 60 * 1000
+const tokensDeBorrado = new Map() // public_id -> { token, hasta }
+
+/** ¿Esta foto se subió hace poco desde aquí, y todavía se puede quitar? */
+export function puedeQuitarImagen(publicId) {
+  const t = tokensDeBorrado.get(publicId)
+  if (!t) return false
+  if (Date.now() > t.hasta) { tokensDeBorrado.delete(publicId); return false }
+  return true
+}
+
+/** Quita una foto recién subida. Lanza un Error con el motivo si no se pudo. */
+export async function quitarImagen(publicId) {
+  if (!puedeQuitarImagen(publicId)) throw new Error('Esta foto ya no se puede quitar desde aquí. Pídele al administrador que la borre.')
+  const cuerpo = new FormData()
+  cuerpo.append('token', tokensDeBorrado.get(publicId).token)
+  let respuesta
+  try {
+    respuesta = await fetch(`https://api.cloudinary.com/v1_1/${nube}/delete_by_token`, { method: 'POST', body: cuerpo })
+  } catch {
+    throw new Error('No se pudo quitar la foto. Revisa tu conexión e inténtalo de nuevo.')
+  }
+  if (!respuesta.ok) throw new Error('Cloudinary no dejó quitar la foto.')
+  tokensDeBorrado.delete(publicId)
+  return true
+}
+
+// --- Fotos por etiqueta, con memoria ----------------------------------------
+// Una lista de vehículos pide una foto por cada uno: se guarda lo ya pedido para no repetir la misma consulta.
+const memoria = new Map() // etiqueta -> Promise<foto[]>
+
+/** Las fotos de una etiqueta; pide a Cloudinary una sola vez salvo que se invalide. */
+export function fotosDe(etiqueta) {
+  if (!memoria.has(etiqueta)) memoria.set(etiqueta, listarImagenes(etiqueta))
+  return memoria.get(etiqueta)
+}
+
+/** Después de subir o quitar: la próxima vez se vuelve a pedir. */
+export function invalidarFotos(etiqueta) {
+  memoria.delete(etiqueta)
 }
 
 /**
