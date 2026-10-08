@@ -129,9 +129,8 @@ test('la URL es directa y liviana, y el recorte de fondo se apaga solo si falla'
   assert.match(urlDe('fom/vehiculo/v1/2', 300, 200), /^https:\/\/res\.cloudinary\.com\/demo\/image\/upload\/f_auto,q_auto,w_300,h_200,c_fill,g_auto\/fom\/vehiculo\/v1\/2\?v=\d+$/)
   assert.match(urlDe('fom/vehiculo/v1/2', 300), /w_300,c_limit/)
   assert.match(urlOriginal('fom/vehiculo/v1/2'), /^https:\/\/res\.cloudinary\.com\/demo\/image\/upload\/fom\/vehiculo\/v1\/2\?v=\d+$/)
-  assert.match(urlDe('fom/vehiculo/v1/2', 900, 600, { sinFondo: true }), /image\/upload\/e_background_removal\/f_auto,q_auto,w_900,c_limit\/fom\/vehiculo\/v1\/2/)
-  assert.equal(quitarFondoDisponible(), true)
-  desactivarQuitarFondo()
+  // Apagado por defecto (consume créditos): la foto sale normal.
+  assert.equal(quitarFondoDisponible(), false)
   assert.doesNotMatch(urlDe('fom/vehiculo/v1/2', 900, 600, { sinFondo: true }), /background_removal/)
 })
 

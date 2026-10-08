@@ -29,7 +29,7 @@ La foto se ve en `https://res.cloudinary.com/<nube>/image/upload/<transformacion
 ## Cómo se reemplaza
 
 - La unidad, la persona y cada cara de un documento tienen UNA foto vigente: «Editar foto» / «Reemplazar» sube la versión siguiente y esa pasa a mostrarse.
-- En la ficha de la unidad, el carro se muestra **sin fondo** (Cloudinary AI, `e_background_removal`) sobre un escenario de FOM. Si la cuenta no tiene ese complemento o la foto no se puede procesar, se muestra la foto normal en un marco 3:2.
+- **Quitar el fondo** (Cloudinary AI, `e_background_removal`) es un complemento de pago que consume créditos, por eso viene **apagado**. Para encenderlo: `VITE_CLOUDINARY_SIN_FONDO=1` en `.env.local`. Encendido, la ficha muestra el carro sin fondo sobre un escenario de FOM; apagado, o si Cloudinary no puede procesar la foto, se muestra la foto normal en un marco 3:2.
 - Justo después de subir, Cloudinary tarda unos segundos en servir la nueva; la web reintenta sola y mientras tanto muestra la anterior o la ilustración.
 - El número `?v=` al final de la URL fuerza a los navegadores a pedir de nuevo la imagen cambiada.
 

@@ -124,7 +124,9 @@ export function huboSubidaReciente(ms = 45_000) {
 // Quitar el fondo lo hace Cloudinary AI (`e_background_removal`, un complemento de la cuenta). Si la cuenta no lo
 // tiene activo o la foto no se puede procesar (por ejemplo, menos de 64x64), Cloudinary responde con error: la web lo
 // detecta una vez, deja de pedirlo y muestra la foto normal. Nunca se queda sin foto.
-let fondoDisponible = true
+// OJO: es un complemento de PAGO (consume cupo/créditos de la cuenta). Por eso viene APAGADO y se enciende a propósito con
+// VITE_CLOUDINARY_SIN_FONDO=1. Apagado, la ficha muestra la foto normal en un marco ordenado y no gasta nada.
+let fondoDisponible = ['1', 'si', 'true'].includes(String(import.meta.env?.VITE_CLOUDINARY_SIN_FONDO ?? '').toLowerCase())
 export function quitarFondoDisponible() {
   return fondoDisponible
 }
