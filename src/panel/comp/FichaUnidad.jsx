@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import { estadoUnidad } from '../datos/estadoUnidad'
-import { etiquetas, miniatura } from '../datos/cloudinary'
-import { useFotos } from './FotosDe'
+import { etiquetas, ids } from '../datos/cloudinary'
+import FotoFija from './FotoFija'
 import CambiarFoto from './CambiarFoto'
 import { useSesion } from '../useSesion'
 import { esGestor } from '../roles'
@@ -38,9 +39,8 @@ function datosDe(v) {
 
 export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, conEnlace = true, alVerRecorrido, viendoRecorrido = false }) {
   // La foto principal de la unidad (la más reciente con su etiqueta en Cloudinary); sin ella, la ilustración.
-  const { fotos, recargar } = useFotos(v?.id ? etiquetas.vehiculo(v.id) : null, 'unica')
+  const [hayFoto, setHayFoto] = useState(false)
   const puedeEditar = esGestor(useSesion()?.perfil)
-  const fotoPrincipal = fotos?.[0] ?? null
   if (!v) return null
   const estado = estadoUnidad(v)
   const descripcion = [v.alias, [v.marca, v.modelo, v.anio].filter(Boolean).join(' ')].filter(Boolean).join(' · ')
@@ -59,10 +59,11 @@ export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, c
     <h3 className="fleet-plate">{v.placa || 'Sin placa'}</h3>
     {descripcion && <p className="fleet-description">{descripcion}</p>}
     <figure className="fleet-vehicle-image">
-      {fotoPrincipal
-        ? <><img src={miniatura(fotoPrincipal.url, 900, 600)} alt={`Foto de ${v.placa || v.alias || 'la unidad'}`} /><figcaption>Foto de la unidad</figcaption></>
-        : <><img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" /><figcaption>Imagen de referencia</figcaption></>}
-      {puedeEditar && v?.id && <CambiarFoto etiqueta={etiquetas.vehiculo(v.id)} titulo={v.placa || v.alias || ''} hayFoto={Boolean(fotoPrincipal)} alCambiar={recargar} />}
+      <FotoFija publicId={v?.id ? ids.vehiculo(v.id) : null} ancho={900} alto={600} alt={`Foto de ${v.placa || v.alias || 'la unidad'}`} alExistir={setHayFoto}>
+        <img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" />
+      </FotoFija>
+      <figcaption>{hayFoto ? 'Foto de la unidad' : 'Imagen de referencia'}</figcaption>
+      {puedeEditar && v?.id && <CambiarFoto publicId={ids.vehiculo(v.id)} etiqueta={etiquetas.vehiculo(v.id)} titulo={v.placa || v.alias || ''} hayFoto={hayFoto} />}
     </figure>
     <div className="fleet-speed"><Icono nombre="velocidad" tam={25} /><strong>{v.velocidadKmh == null ? 'Sin velocidad GPS' : f.numero(v.velocidadKmh)}{v.velocidadKmh != null && <small> km/h</small>}</strong></div>
     <dl className="fleet-facts">{filas.map(([icono, etiqueta, valor]) => <div key={etiqueta}><Icono nombre={icono} tam={19} /><div><dt>{etiqueta}</dt><dd>{valor}</dd></div></div>)}</dl>

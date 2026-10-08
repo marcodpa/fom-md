@@ -6,36 +6,21 @@ import { cargarMiPerfil, guardarMiPerfil } from '../datos/miPerfil'
 import { iniciales, fecha } from '../datos/formato'
 import './perfil-alertas.css'
 import Apariencia from '../comp/Apariencia'
-import Avatar, { invalidarAvatar } from '../comp/Avatar'
-import { cloudinaryConfigurado, etiquetas, subirImagen } from '../datos/cloudinary'
+import Avatar from '../comp/Avatar'
+import CambiarFoto from '../comp/CambiarFoto'
+import { cloudinaryConfigurado, etiquetas, ids } from '../datos/cloudinary'
 import ScoreManejo from '../comp/ScoreManejo'
 
 const ESTADOS = { vigente: ['Vigente', 'verde'], por_vencer: ['Por vencer', 'ambar'], vencido: ['Vencido', 'rojo'] }
 const CAMPOS = [['nombre', 'Nombre y apellido', 'text'], ['cedula', 'Cédula', 'text'], ['telefono', 'Teléfono', 'tel'], ['direccion', 'Dirección', 'text'], ['fechaNacimiento', 'Fecha de nacimiento', 'date']]
 
-/** Botón para cambiar la foto de perfil: se sube a Cloudinary con la etiqueta de la persona. */
+/** Botón para cambiar la foto de perfil: reemplaza la anterior (misma dirección fija en Cloudinary). */
 function FotoDePerfil({ userId }) {
-  const [subiendo, setSubiendo] = useState(false)
-  const [mensaje, setMensaje] = useState('')
   if (!userId) return null
   if (!cloudinaryConfigurado()) return <p className="fp-foto-nota">La foto de perfil se activa cuando se conecte Cloudinary a esta web.</p>
-  async function elegir(e) {
-    const archivo = e.target.files?.[0]
-    e.target.value = ''
-    if (!archivo) return
-    setSubiendo(true); setMensaje('')
-    try {
-      await subirImagen(archivo, { carpeta: `fom/${etiquetas.avatar(userId)}`, etiqueta: etiquetas.avatar(userId), titulo: 'Foto de perfil', lote: String(Date.now()) })
-      setMensaje('Foto actualizada.')
-      // La lista pública de Cloudinary tarda un instante en ver la foto nueva.
-      setTimeout(() => invalidarAvatar(userId), 1200)
-    } catch (err) { setMensaje(err.message) }
-    finally { setSubiendo(false) }
-  }
   return (
     <div className="fp-foto-nota">
-      <label className="pnl-btn sutil"><input type="file" accept="image/*" hidden disabled={subiendo} onChange={elegir} />{subiendo ? 'Subiendo…' : 'Cambiar foto'}</label>
-      {mensaje && <span role="status"> {mensaje}</span>}
+      <CambiarFoto flotante={false} publicId={ids.avatar(userId)} etiqueta={etiquetas.avatar(userId)} titulo="Foto de perfil" hayFoto textos={{ editar: 'Cambiar foto' }} />
     </div>
   )
 }

@@ -10,7 +10,7 @@ import * as f from '../datos/formato'
 import { color, diasPara, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import FotosDe from '../comp/FotosDe'
-import { etiquetas } from '../datos/cloudinary'
+import { etiquetas, ids } from '../datos/cloudinary'
 
 // ============================================================
 // DOCUMENTOS
@@ -340,7 +340,7 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
         )}
       </Tarjeta>
       <Modal titulo={fotosDe ? `Fotos: ${fotosDe.tipo}` : 'Fotos'} abierto={Boolean(fotosDe)} alCerrar={() => setFotosDe(null)} ancho={760}>
-        {fotosDe && <FotosDe etiqueta={etiquetas.documento(fotosDe.id)} titulo={fotosDe.tipo} modo="juego" vacio="Este documento todavía no tiene fotos. Sube la cara frontal y la trasera juntas." />}
+        {fotosDe && <FotosDe huecos={[{ clave: 'frente', titulo: 'Frente', publicId: ids.documento(fotosDe.id, 'frente'), etiqueta: etiquetas.documento(fotosDe.id) }, { clave: 'reverso', titulo: 'Reverso', publicId: ids.documento(fotosDe.id, 'reverso'), etiqueta: etiquetas.documento(fotosDe.id) }]} />}
       </Modal>
     </>
   )

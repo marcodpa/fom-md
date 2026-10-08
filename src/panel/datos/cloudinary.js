@@ -1,16 +1,13 @@
-// Imágenes en Cloudinary: documentos, fotos de perfil y fotos de las unidades.
+// Imágenes en Cloudinary: fotos de unidades, documentos y perfiles.
 //
-// FOM no guarda imágenes: cada foto va a Cloudinary con una ETIQUETA que lleva el id de FOM de lo que
-// retrata, y por esa etiqueta se vuelve a encontrar. Es la MISMA convención que usa la app del conductor
-// (fom-driver: `fom_documento_<id>`, `fom_credencial_<tipo>_<userId>`, `fom_odt_<id>`, `fom_inspeccion_<id>`),
-// así una foto subida desde la web se ve en la app y al revés.
+// FOM no guarda imágenes. Cada foto vive en Cloudinary con una DIRECCIÓN FIJA que lleva el id de FOM de lo que
+// retrata (`fom/vehiculo/<id>`, `fom/avatar/<userId>`, `fom/documento/<id>/<cara>`). Subir otra foto con la misma
+// dirección la REEMPLAZA (el preset debe tener «Overwrite» activo) y no se borra nada. Como la dirección se conoce de
+// antemano, no hace falta consultar listas: la cuenta puede tener bloqueada la «lista de recursos» y todo funciona.
 //
 // La subida usa un UPLOAD PRESET SIN FIRMA (unsigned): en el navegador no puede haber ningún secreto.
-// Solo se pone en `.env`:
 //   VITE_CLOUDINARY_CLOUD_NAME=<nombre de la nube>
-//   VITE_CLOUDINARY_UPLOAD_PRESET=<preset unsigned>
-// Para volver a leer las fotos por etiqueta, la cuenta debe tener activada la lista pública de recursos
-// («Resource list» en Settings → Security → Restricted media types).
+//   VITE_CLOUDINARY_UPLOAD_PRESET=<preset unsigned, con Overwrite activado>
 
 let nube = import.meta.env?.VITE_CLOUDINARY_CLOUD_NAME || ''
 let preset = import.meta.env?.VITE_CLOUDINARY_UPLOAD_PRESET || ''
@@ -26,15 +23,51 @@ export function cloudinaryConfigurado() {
   return Boolean(nube && preset)
 }
 
-/** Etiquetas de Cloudinary, iguales a las de la app del conductor (y las nuevas, acordadas con ella). */
+/** Dirección fija de cada foto. Subir otra con la misma dirección la reemplaza. */
+export const ids = {
+  vehiculo: (id) => `fom/vehiculo/${id}`,
+  avatar: (userId) => `fom/avatar/${userId}`,
+  /** Un documento tiene dos caras: «frente» y «reverso». */
+  documento: (id, cara) => `fom/documento/${id}/${cara}`,
+}
+
+/** Etiquetas (tags) que también se ponen al subir: la app del conductor las usa para encontrar sus fotos. */
 export const etiquetas = {
   documento: (id) => `fom_documento_${id}`,
-  credencial: (tipo, userId) => `fom_credencial_${tipo}_${userId}`,
-  orden: (id) => `fom_odt_${id}`,
-  inspeccion: (id) => `fom_inspeccion_${id}`,
-  /** Nuevas (la app aún no las usa): foto de perfil y fotos de la unidad. */
-  avatar: (userId) => `fom_avatar_${userId}`,
   vehiculo: (id) => `fom_vehiculo_${id}`,
+  avatar: (userId) => `fom_avatar_${userId}`,
+}
+
+// Cuando se reemplaza una foto, el navegador y la red de Cloudinary pueden seguir mostrando la anterior. Un número
+// al final de la dirección fuerza a pedirla de nuevo; cambia al abrir la web y cada vez que se sube una foto aquí.
+let version = Date.now()
+let ultimaSubida = 0
+const oyentes = new Set()
+export function alCambiarFotos(f) {
+  oyentes.add(f)
+  return () => oyentes.delete(f)
+}
+function avisarCambio() {
+  version = Date.now()
+  ultimaSubida = version
+  oyentes.forEach((f) => f(version))
+}
+
+/** ¿Se subió una foto desde esta web hace poco? Justo después, Cloudinary tarda un instante en servirla. */
+export function huboSubidaReciente(ms = 45_000) {
+  return Date.now() - ultimaSubida < ms
+}
+
+/** La URL pública de una foto por su dirección fija, ya recortada y comprimida por Cloudinary. */
+export function urlDe(publicId, ancho = 480, alto = 0) {
+  if (!nube || !publicId) return ''
+  const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`, 'c_fill'] : ['c_limit'])].join(',')
+  return `https://res.cloudinary.com/${nube}/image/upload/${t}/${publicId}?v=${version}`
+}
+
+/** La misma foto sin recortar, para abrirla completa. */
+export function urlOriginal(publicId) {
+  return nube && publicId ? `https://res.cloudinary.com/${nube}/image/upload/${publicId}?v=${version}` : ''
 }
 
 /** Lo más que se espera una subida antes de darla por perdida. */
@@ -51,24 +84,21 @@ export function problemaDelArchivo(archivo) {
 }
 
 /**
- * Sube UNA imagen y devuelve su URL pública (`secure_url`). Lanza un Error con el motivo si no se pudo: la
- * pantalla no debe decir «guardado» si la foto no llegó.
+ * Sube UNA imagen a su dirección fija (`publicId`) y la deja como la vigente. Lanza un Error con el motivo si no se
+ * pudo: la pantalla no debe decir «guardado» si la foto no llegó.
  */
-export async function subirImagen(archivo, { carpeta, etiqueta, titulo, lote } = {}) {
+export async function subirImagen(archivo, { publicId, etiqueta, titulo } = {}) {
   if (!cloudinaryConfigurado()) throw new Error('Cloudinary no está configurado en esta web.')
+  if (!publicId) throw new Error('Falta saber a qué pertenece la foto.')
   const mal = problemaDelArchivo(archivo)
   if (mal) throw new Error(mal)
   const cuerpo = new FormData()
   cuerpo.append('file', archivo)
   cuerpo.append('upload_preset', preset)
-  if (carpeta) cuerpo.append('folder', carpeta)
+  cuerpo.append('public_id', publicId)
   if (etiqueta) cuerpo.append('tags', etiqueta)
   // `|` y `=` separan los pares del contexto: dentro de un título lo romperían.
-  const contexto = []
-  if (titulo) contexto.push(`caption=${String(titulo).replace(/[|=]/g, ' ')}`)
-  // `lote` agrupa las fotos que se subieron juntas: reemplazar es subir un lote nuevo, y se ve el más reciente.
-  if (lote) contexto.push(`lote=${lote}`)
-  if (contexto.length) cuerpo.append('context', contexto.join('|'))
+  if (titulo) cuerpo.append('context', `caption=${String(titulo).replace(/[|=]/g, ' ')}`)
 
   const corte = new AbortController()
   const reloj = setTimeout(() => corte.abort(), TIEMPO_LIMITE)
@@ -86,66 +116,6 @@ export async function subirImagen(archivo, { carpeta, etiqueta, titulo, lote } =
   }
   const json = await respuesta.json()
   if (!json.secure_url) throw new Error('Cloudinary no devolvió la dirección de la foto.')
+  avisarCambio()
   return json.secure_url
-}
-
-// --- Fotos por etiqueta, con memoria ----------------------------------------
-// Una lista de vehículos pide una foto por cada uno: se guarda lo ya pedido para no repetir la misma consulta.
-const memoria = new Map() // etiqueta -> Promise<foto[]>
-
-/** Las fotos de una etiqueta; pide a Cloudinary una sola vez salvo que se invalide. */
-export function fotosDe(etiqueta) {
-  if (!memoria.has(etiqueta)) memoria.set(etiqueta, listarImagenes(etiqueta))
-  return memoria.get(etiqueta)
-}
-
-/** Después de subir o quitar: la próxima vez se vuelve a pedir. */
-export function invalidarFotos(etiqueta) {
-  memoria.delete(etiqueta)
-}
-
-/**
- * Las fotos con una etiqueta, de la más nueva a la más vieja. Si la cuenta tiene restringida la lista pública,
- * o no hay nube, devuelve vacío en vez de fallar.
- */
-export async function listarImagenes(etiqueta) {
-  if (!nube) return []
-  try {
-    const respuesta = await fetch(`https://res.cloudinary.com/${nube}/image/list/${encodeURIComponent(etiqueta)}.json`)
-    if (!respuesta.ok) return []
-    const json = await respuesta.json()
-    return [...(json.resources ?? [])]
-      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
-      .map((r) => ({
-        id: r.public_id,
-        url: `https://res.cloudinary.com/${nube}/image/upload/v${r.version}/${r.public_id}.${r.format}`,
-        titulo: r.context?.custom?.caption ?? '',
-        lote: r.context?.custom?.lote ?? '',
-        creadaEn: r.created_at,
-      }))
-  } catch {
-    return []
-  }
-}
-
-/** La misma imagen, recortada y comprimida por Cloudinary: miniaturas livianas en vez de la foto entera. */
-export function miniatura(url, ancho = 320, alto = 0) {
-  if (!url || !url.includes('/image/upload/')) return url
-  const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`, 'c_fill'] : ['c_limit'])].join(',')
-  return url.replace('/image/upload/', `/image/upload/${t}/`)
-}
-
-/**
- * Lo que se muestra de una lista de fotos, sin borrar nada:
- *  - `unica`: solo la más reciente (una unidad, una persona). Subir otra la REEMPLAZA.
- *  - `juego`: las del lote más reciente (las dos caras de un documento). Subir un lote nuevo lo reemplaza.
- *  - `todas`: todas, de la más nueva a la más vieja.
- */
-export function fotosVigentes(fotos, modo = 'todas') {
-  if (modo === 'unica') return fotos.slice(0, 1)
-  if (modo === 'juego') {
-    const lote = fotos[0]?.lote
-    return lote ? fotos.filter((f) => f.lote === lote) : fotos.slice(0, 1)
-  }
-  return fotos
 }

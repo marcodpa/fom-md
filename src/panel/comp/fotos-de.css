@@ -22,3 +22,11 @@
 .fd-editar:hover { background: rgba(10, 18, 36, .92); transform: translateY(-1px); }
 .fd-editar:disabled { opacity: .7; cursor: progress; }
 .fd-editar-error { position: absolute; left: 12px; right: 12px; bottom: 6px; padding: 6px 10px; border-radius: 8px; background: rgba(120, 20, 30, .9); color: #fff; font-size: 12px; }
+/* Huecos fijos (caras de un documento) */
+.fd-huecos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.fd-hueco { display: grid; gap: 10px; align-content: start; }
+.fd-marco { position: relative; aspect-ratio: 4 / 3; border: 1px solid var(--e-borde); border-radius: 12px; overflow: hidden; background: var(--e-sup-baja); display: grid; place-items: center; }
+.fd-marco img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fd-vacio-foto { color: var(--e-texto-3); font-size: 13px; }
+.fd-ampliar { position: absolute; right: 8px; bottom: 8px; padding: 4px 10px; border: 0; border-radius: 999px; background: rgba(10, 18, 36, .75); color: #fff; font: inherit; font-size: 12px; cursor: zoom-in; }
+.fd-error-linea { color: var(--e-peligro); font-size: 12px; }
