@@ -16,3 +16,9 @@
 .fd-acciones { display: flex; gap: 16px; align-items: center; }
 .fd-galeria.unica { grid-template-columns: minmax(0, 420px); }
 .fd-nota { flex-basis: 100%; color: var(--e-texto-3); font-size: 12px; }
+/* «Editar foto» sobre la imagen */
+.fleet-vehicle-image { position: relative; }
+.fd-editar { position: absolute; right: 12px; bottom: 34px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(10, 18, 36, .72); color: #fff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .25s var(--e-curva), transform .25s var(--e-curva); }
+.fd-editar:hover { background: rgba(10, 18, 36, .92); transform: translateY(-1px); }
+.fd-editar:disabled { opacity: .7; cursor: progress; }
+.fd-editar-error { position: absolute; left: 12px; right: 12px; bottom: 6px; padding: 6px 10px; border-radius: 8px; background: rgba(120, 20, 30, .9); color: #fff; font-size: 12px; }

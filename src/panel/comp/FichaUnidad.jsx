@@ -4,6 +4,9 @@ import { Icono } from '../Iconos'
 import { estadoUnidad } from '../datos/estadoUnidad'
 import { etiquetas, miniatura } from '../datos/cloudinary'
 import { useFotos } from './FotosDe'
+import CambiarFoto from './CambiarFoto'
+import { useSesion } from '../useSesion'
+import { esGestor } from '../roles'
 import '../../styles/fleet-map.css'
 export { estadoUnidad } from '../datos/estadoUnidad'
 
@@ -35,7 +38,8 @@ function datosDe(v) {
 
 export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, conEnlace = true, alVerRecorrido, viendoRecorrido = false }) {
   // La foto principal de la unidad (la más reciente con su etiqueta en Cloudinary); sin ella, la ilustración.
-  const { fotos } = useFotos(v?.id ? etiquetas.vehiculo(v.id) : null, 'unica')
+  const { fotos, recargar } = useFotos(v?.id ? etiquetas.vehiculo(v.id) : null, 'unica')
+  const puedeEditar = esGestor(useSesion()?.perfil)
   const fotoPrincipal = fotos?.[0] ?? null
   if (!v) return null
   const estado = estadoUnidad(v)
@@ -58,6 +62,7 @@ export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, c
       {fotoPrincipal
         ? <><img src={miniatura(fotoPrincipal.url, 900, 600)} alt={`Foto de ${v.placa || v.alias || 'la unidad'}`} /><figcaption>Foto de la unidad</figcaption></>
         : <><img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" /><figcaption>Imagen de referencia</figcaption></>}
+      {puedeEditar && v?.id && <CambiarFoto etiqueta={etiquetas.vehiculo(v.id)} titulo={v.placa || v.alias || ''} hayFoto={Boolean(fotoPrincipal)} alCambiar={recargar} />}
     </figure>
     <div className="fleet-speed"><Icono nombre="velocidad" tam={25} /><strong>{v.velocidadKmh == null ? 'Sin velocidad GPS' : f.numero(v.velocidadKmh)}{v.velocidadKmh != null && <small> km/h</small>}</strong></div>
     <dl className="fleet-facts">{filas.map(([icono, etiqueta, valor]) => <div key={etiqueta}><Icono nombre={icono} tam={19} /><div><dt>{etiqueta}</dt><dd>{valor}</dd></div></div>)}</dl>
