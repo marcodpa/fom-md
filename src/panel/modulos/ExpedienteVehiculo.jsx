@@ -13,8 +13,6 @@ import Mapa from '../comp/Mapa'
 import { BarrasH } from '../comp/Grafico'
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
-import FotosDe from '../comp/FotosDe'
-import { etiquetas } from '../datos/cloudinary'
 import * as f from '../datos/formato'
 import { resumenKm } from '../datos/odometro'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
@@ -295,9 +293,6 @@ export default function ExpedienteVehiculo() {
             {/* ---------------- Resumen ---------------- */}
             {pestana === 'resumen' && (
               <>
-                <Tarjeta titulo="Foto de la unidad">
-                  <FotosDe etiqueta={etiquetas.vehiculo(v.id)} titulo={`${v.placa || v.alias || ''}`} modo="unica" permiteSubir={esGestor(sesion?.perfil)} vacio="Esta unidad todavía no tiene foto. La que subas será la de su ficha y la de la lista de vehículos." />
-                </Tarjeta>
                 <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto="470px" ficha={false} /></Tarjeta></div>
                 <Tarjeta titulo="Ficha de la unidad">
                   <Datos
