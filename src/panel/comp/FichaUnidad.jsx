@@ -35,7 +35,7 @@ function datosDe(v) {
 
 export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, conEnlace = true, alVerRecorrido, viendoRecorrido = false }) {
   // La foto principal de la unidad (la más reciente con su etiqueta en Cloudinary); sin ella, la ilustración.
-  const { fotos } = useFotos(v?.id ? etiquetas.vehiculo(v.id) : null)
+  const { fotos } = useFotos(v?.id ? etiquetas.vehiculo(v.id) : null, 'unica')
   const fotoPrincipal = fotos?.[0] ?? null
   if (!v) return null
   const estado = estadoUnidad(v)

@@ -25,7 +25,7 @@ function FotoDePerfil({ userId }) {
     if (!archivo) return
     setSubiendo(true); setMensaje('')
     try {
-      await subirImagen(archivo, { carpeta: `fom/${etiquetas.avatar(userId)}`, etiqueta: etiquetas.avatar(userId), titulo: 'Foto de perfil' })
+      await subirImagen(archivo, { carpeta: `fom/${etiquetas.avatar(userId)}`, etiqueta: etiquetas.avatar(userId), titulo: 'Foto de perfil', lote: String(Date.now()) })
       setMensaje('Foto actualizada.')
       // La lista pública de Cloudinary tarda un instante en ver la foto nueva.
       setTimeout(() => invalidarAvatar(userId), 1200)

@@ -14,3 +14,5 @@
 .fd-avatar { position: relative; display: grid; place-items: center; overflow: hidden; border-radius: 50%; background: var(--e-primario); color: var(--e-sobre-primario, #fff); font-weight: 700; }
 .fd-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .fd-acciones { display: flex; gap: 16px; align-items: center; }
+.fd-galeria.unica { grid-template-columns: minmax(0, 420px); }
+.fd-nota { flex-basis: 100%; color: var(--e-texto-3); font-size: 12px; }

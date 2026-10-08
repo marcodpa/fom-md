@@ -54,19 +54,21 @@ export function problemaDelArchivo(archivo) {
  * Sube UNA imagen y devuelve su URL pública (`secure_url`). Lanza un Error con el motivo si no se pudo: la
  * pantalla no debe decir «guardado» si la foto no llegó.
  */
-export async function subirImagen(archivo, { carpeta, etiqueta, titulo } = {}) {
+export async function subirImagen(archivo, { carpeta, etiqueta, titulo, lote } = {}) {
   if (!cloudinaryConfigurado()) throw new Error('Cloudinary no está configurado en esta web.')
   const mal = problemaDelArchivo(archivo)
   if (mal) throw new Error(mal)
   const cuerpo = new FormData()
   cuerpo.append('file', archivo)
   cuerpo.append('upload_preset', preset)
-  // Pide el «token de borrado» (si el preset lo permite): con él se puede quitar la foto en los 10 minutos siguientes.
-  cuerpo.append('return_delete_token', 'true')
   if (carpeta) cuerpo.append('folder', carpeta)
   if (etiqueta) cuerpo.append('tags', etiqueta)
   // `|` y `=` separan los pares del contexto: dentro de un título lo romperían.
-  if (titulo) cuerpo.append('context', `caption=${String(titulo).replace(/[|=]/g, ' ')}`)
+  const contexto = []
+  if (titulo) contexto.push(`caption=${String(titulo).replace(/[|=]/g, ' ')}`)
+  // `lote` agrupa las fotos que se subieron juntas: reemplazar es subir un lote nuevo, y se ve el más reciente.
+  if (lote) contexto.push(`lote=${lote}`)
+  if (contexto.length) cuerpo.append('context', contexto.join('|'))
 
   const corte = new AbortController()
   const reloj = setTimeout(() => corte.abort(), TIEMPO_LIMITE)
@@ -84,39 +86,7 @@ export async function subirImagen(archivo, { carpeta, etiqueta, titulo } = {}) {
   }
   const json = await respuesta.json()
   if (!json.secure_url) throw new Error('Cloudinary no devolvió la dirección de la foto.')
-  if (json.delete_token && json.public_id) tokensDeBorrado.set(json.public_id, { token: json.delete_token, hasta: Date.now() + VIDA_TOKEN })
   return json.secure_url
-}
-
-// --- Quitar fotos ------------------------------------------------------------
-// Borrar de verdad exige firmar la petición con el API secret, y ese secreto NO puede estar en el navegador.
-// Lo que sí permite Cloudinary sin firma es el «token de borrado» que devuelve al subir: vale 10 minutos y solo
-// para esa foto. Sirve para corregir un error al momento. Quitar una foto vieja requiere una ruta del servidor.
-const VIDA_TOKEN = 9 * 60 * 1000
-const tokensDeBorrado = new Map() // public_id -> { token, hasta }
-
-/** ¿Esta foto se subió hace poco desde aquí, y todavía se puede quitar? */
-export function puedeQuitarImagen(publicId) {
-  const t = tokensDeBorrado.get(publicId)
-  if (!t) return false
-  if (Date.now() > t.hasta) { tokensDeBorrado.delete(publicId); return false }
-  return true
-}
-
-/** Quita una foto recién subida. Lanza un Error con el motivo si no se pudo. */
-export async function quitarImagen(publicId) {
-  if (!puedeQuitarImagen(publicId)) throw new Error('Esta foto ya no se puede quitar desde aquí. Pídele al administrador que la borre.')
-  const cuerpo = new FormData()
-  cuerpo.append('token', tokensDeBorrado.get(publicId).token)
-  let respuesta
-  try {
-    respuesta = await fetch(`https://api.cloudinary.com/v1_1/${nube}/delete_by_token`, { method: 'POST', body: cuerpo })
-  } catch {
-    throw new Error('No se pudo quitar la foto. Revisa tu conexión e inténtalo de nuevo.')
-  }
-  if (!respuesta.ok) throw new Error('Cloudinary no dejó quitar la foto.')
-  tokensDeBorrado.delete(publicId)
-  return true
 }
 
 // --- Fotos por etiqueta, con memoria ----------------------------------------
@@ -150,6 +120,7 @@ export async function listarImagenes(etiqueta) {
         id: r.public_id,
         url: `https://res.cloudinary.com/${nube}/image/upload/v${r.version}/${r.public_id}.${r.format}`,
         titulo: r.context?.custom?.caption ?? '',
+        lote: r.context?.custom?.lote ?? '',
         creadaEn: r.created_at,
       }))
   } catch {
@@ -162,4 +133,19 @@ export function miniatura(url, ancho = 320, alto = 0) {
   if (!url || !url.includes('/image/upload/')) return url
   const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`, 'c_fill'] : ['c_limit'])].join(',')
   return url.replace('/image/upload/', `/image/upload/${t}/`)
+}
+
+/**
+ * Lo que se muestra de una lista de fotos, sin borrar nada:
+ *  - `unica`: solo la más reciente (una unidad, una persona). Subir otra la REEMPLAZA.
+ *  - `juego`: las del lote más reciente (las dos caras de un documento). Subir un lote nuevo lo reemplaza.
+ *  - `todas`: todas, de la más nueva a la más vieja.
+ */
+export function fotosVigentes(fotos, modo = 'todas') {
+  if (modo === 'unica') return fotos.slice(0, 1)
+  if (modo === 'juego') {
+    const lote = fotos[0]?.lote
+    return lote ? fotos.filter((f) => f.lote === lote) : fotos.slice(0, 1)
+  }
+  return fotos
 }

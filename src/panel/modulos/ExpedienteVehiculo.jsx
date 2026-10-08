@@ -295,8 +295,8 @@ export default function ExpedienteVehiculo() {
             {/* ---------------- Resumen ---------------- */}
             {pestana === 'resumen' && (
               <>
-                <Tarjeta titulo="Fotos de la unidad">
-                  <FotosDe etiqueta={etiquetas.vehiculo(v.id)} titulo={`${v.placa || v.alias || ''}`} permiteSubir={esGestor(sesion?.perfil)} vacio="Todavía no hay fotos de esta unidad. La más reciente que subas será la foto principal en su ficha." />
+                <Tarjeta titulo="Foto de la unidad">
+                  <FotosDe etiqueta={etiquetas.vehiculo(v.id)} titulo={`${v.placa || v.alias || ''}`} modo="unica" permiteSubir={esGestor(sesion?.perfil)} vacio="Esta unidad todavía no tiene foto. La que subas será la de su ficha y la de la lista de vehículos." />
                 </Tarjeta>
                 <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto="470px" ficha={false} /></Tarjeta></div>
                 <Tarjeta titulo="Ficha de la unidad">

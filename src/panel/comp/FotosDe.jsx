@@ -1,28 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Modal, Cargando } from './ui'
 import { Icono } from '../Iconos'
-import { cloudinaryConfigurado, fotosDe, invalidarFotos, miniatura, problemaDelArchivo, puedeQuitarImagen, quitarImagen, subirImagen } from '../datos/cloudinary'
+import { cloudinaryConfigurado, fotosDe, fotosVigentes, invalidarFotos, miniatura, problemaDelArchivo, subirImagen } from '../datos/cloudinary'
 import './fotos-de.css'
 
-// Las fotos de algo (una unidad, un documento, una persona): se ven en una galería, se amplían al hacer clic y,
-// si `permiteSubir`, se agregan arrastrándolas o eligiéndolas. Todo vive en Cloudinary bajo la `etiqueta`.
+// Las fotos de algo (una unidad, un documento, una persona). No se borra nada: se REEMPLAZA.
+//   modo «unica»: una sola foto; elegir otra la reemplaza (unidad, persona).
+//   modo «juego»: un juego de fotos (las dos caras de un documento); elegir un juego nuevo reemplaza el anterior.
+// Todo vive en Cloudinary bajo la `etiqueta`; lo anterior queda guardado allá pero deja de mostrarse.
 
-/** Las fotos de una etiqueta, con `recargar()` para después de subir. */
-export function useFotos(etiqueta) {
+/** Las fotos VIGENTES de una etiqueta, con `recargar()` para después de subir. */
+export function useFotos(etiqueta, modo = 'todas') {
   const [fotos, setFotos] = useState(null)
   const [version, setVersion] = useState(0)
   useEffect(() => {
     let vigente = true
     setFotos(null)
     if (!etiqueta) { setFotos([]); return undefined }
-    fotosDe(etiqueta).then((r) => { if (vigente) setFotos(r) })
+    fotosDe(etiqueta).then((r) => { if (vigente) setFotos(fotosVigentes(r, modo)) })
     return () => { vigente = false }
-  }, [etiqueta, version])
+  }, [etiqueta, modo, version])
   return { fotos, recargar: useCallback(() => setVersion((v) => v + 1), []) }
 }
 
-export default function FotosDe({ etiqueta, carpeta, titulo = '', permiteSubir = true, vacio = 'Todavía no hay fotos.', alCambiar }) {
-  const { fotos, recargar } = useFotos(etiqueta)
+export default function FotosDe({ etiqueta, carpeta, titulo = '', modo = 'unica', permiteSubir = true, vacio = 'Todavía no hay foto.', alCambiar }) {
+  const { fotos, recargar } = useFotos(etiqueta, modo)
   const [subiendo, setSubiendo] = useState(0)
   const [errores, setErrores] = useState([])
   const [encima, setEncima] = useState(false)
@@ -30,52 +32,49 @@ export default function FotosDe({ etiqueta, carpeta, titulo = '', permiteSubir =
   const campo = useRef(null)
   const lista = fotos ?? []
   const configurado = cloudinaryConfigurado()
+  const varias = modo !== 'unica'
+  const hay = lista.length > 0
 
   async function subir(archivos) {
-    const elegidos = [...archivos]
+    // En modo «unica» solo cuenta una: la última elegida.
+    const elegidos = varias ? [...archivos] : [...archivos].slice(-1)
     if (!elegidos.length) return
     setErrores([])
     const nuevos = []
+    // Las fotos de esta tanda llevan el mismo lote: reemplazar es subir un lote nuevo.
+    const lote = String(Date.now())
+    let subidas = 0
     setSubiendo(elegidos.length)
-    // De una en una: es más fácil de seguir y de reintentar si una falla.
     for (const a of elegidos) {
       const mal = problemaDelArchivo(a)
       if (mal) { nuevos.push(mal); setSubiendo((n) => n - 1); continue }
       try {
-        await subirImagen(a, { carpeta: carpeta ?? `fom/${etiqueta}`, etiqueta, titulo })
+        await subirImagen(a, { carpeta: carpeta ?? `fom/${etiqueta}`, etiqueta, titulo, lote })
+        subidas += 1
       } catch (e) {
         nuevos.push(e.message)
       }
       setSubiendo((n) => n - 1)
     }
     setErrores(nuevos)
-    // La lista pública de Cloudinary tarda un instante en ver la foto nueva.
-    setTimeout(() => { invalidarFotos(etiqueta); recargar(); alCambiar?.() }, 1200)
-  }
-
-  async function quitar(foto) {
-    setErrores([])
-    try {
-      await quitarImagen(foto.id)
-      setAbierta(null)
-      invalidarFotos(etiqueta)
-      recargar()
-      alCambiar?.()
-    } catch (e) {
-      setErrores([e.message])
+    if (subidas > 0) {
+      // La lista pública de Cloudinary tarda un instante en ver la foto nueva.
+      setTimeout(() => { invalidarFotos(etiqueta); recargar(); alCambiar?.() }, 1200)
     }
   }
 
+  const accion = !varias ? (hay ? 'Cambiar foto' : 'Subir foto') : (hay ? 'Reemplazar fotos' : 'Subir fotos')
+
   return (
     <div className="fd">
-      {fotos === null ? <Cargando filas={2} /> : lista.length === 0 ? (
+      {fotos === null ? <Cargando filas={2} /> : !hay ? (
         <p className="fd-vacio">{vacio}</p>
       ) : (
-        <ul className="fd-galeria">
+        <ul className={`fd-galeria${varias ? '' : ' unica'}`}>
           {lista.map((f) => (
             <li key={f.id}>
               <button type="button" onClick={() => setAbierta(f)} aria-label={f.titulo ? `Ver foto: ${f.titulo}` : 'Ver foto'}>
-                <img src={miniatura(f.url, 360, 270)} alt={f.titulo || ''} loading="lazy" />
+                <img src={miniatura(f.url, 480, 360)} alt={f.titulo || ''} loading="lazy" />
               </button>
             </li>
           ))}
@@ -90,9 +89,10 @@ export default function FotosDe({ etiqueta, carpeta, titulo = '', permiteSubir =
           onDrop={(e) => { e.preventDefault(); setEncima(false); subir(e.dataTransfer.files) }}
         >
           <Icono nombre="mas" tam={20} />
-          <span>{subiendo > 0 ? `Subiendo ${subiendo} ${subiendo === 1 ? 'foto' : 'fotos'}…` : 'Arrastra fotos aquí o'}</span>
-          <button type="button" className="pnl-btn sutil" disabled={subiendo > 0} onClick={() => campo.current?.click()}>Elegir fotos</button>
-          <input ref={campo} type="file" accept="image/*" multiple hidden onChange={(e) => { subir(e.target.files); e.target.value = '' }} />
+          <span>{subiendo > 0 ? 'Subiendo…' : `Arrastra ${varias ? 'las fotos' : 'la foto'} aquí o`}</span>
+          <button type="button" className="pnl-btn sutil" disabled={subiendo > 0} onClick={() => campo.current?.click()}>{accion}</button>
+          <input ref={campo} type="file" accept="image/*" multiple={varias} hidden onChange={(e) => { subir(e.target.files); e.target.value = '' }} />
+          {hay && <small className="fd-nota">{varias ? 'Las fotos nuevas reemplazan a las actuales.' : 'La foto nueva reemplaza a la actual.'}</small>}
         </div>
       ) : (
         <p className="fd-aviso" role="status">
@@ -108,10 +108,7 @@ export default function FotosDe({ etiqueta, carpeta, titulo = '', permiteSubir =
         {abierta && (
           <div className="fd-grande">
             <img src={miniatura(abierta.url, 1600)} alt={abierta.titulo || ''} />
-            <div className="fd-acciones">
-              <a className="pnl-link" href={abierta.url} target="_blank" rel="noreferrer">Abrir original</a>
-              {permiteSubir && puedeQuitarImagen(abierta.id) && <button type="button" className="pnl-btn sutil" onClick={() => quitar(abierta)}>Quitar esta foto</button>}
-            </div>
+            <a className="pnl-link" href={abierta.url} target="_blank" rel="noreferrer">Abrir original</a>
           </div>
         )}
       </Modal>

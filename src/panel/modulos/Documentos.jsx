@@ -340,7 +340,7 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
         )}
       </Tarjeta>
       <Modal titulo={fotosDe ? `Fotos: ${fotosDe.tipo}` : 'Fotos'} abierto={Boolean(fotosDe)} alCerrar={() => setFotosDe(null)} ancho={760}>
-        {fotosDe && <FotosDe etiqueta={etiquetas.documento(fotosDe.id)} titulo={fotosDe.tipo} vacio="Este documento todavía no tiene fotos. Sube la cara frontal y la trasera." />}
+        {fotosDe && <FotosDe etiqueta={etiquetas.documento(fotosDe.id)} titulo={fotosDe.tipo} modo="juego" vacio="Este documento todavía no tiene fotos. Sube la cara frontal y la trasera juntas." />}
       </Modal>
     </>
   )

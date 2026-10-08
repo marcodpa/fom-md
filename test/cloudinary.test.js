@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cloudinaryConfigurado, configurarCloudinary, etiquetas, listarImagenes, miniatura, problemaDelArchivo, subirImagen } from '../src/panel/datos/cloudinary.js'
+import { cloudinaryConfigurado, configurarCloudinary, etiquetas, fotosVigentes, listarImagenes, miniatura, problemaDelArchivo, subirImagen } from '../src/panel/datos/cloudinary.js'
 
 const foto = (extra = {}) => ({ name: 'foto.jpg', type: 'image/jpeg', size: 200_000, ...extra })
 
@@ -71,28 +71,6 @@ test('la miniatura le pide a Cloudinary una versión liviana', () => {
   assert.equal(miniatura('blob:otra'), 'blob:otra')
 })
 
-test('quitar: solo una foto recién subida con su token, y una vez', async () => {
-  const { puedeQuitarImagen, quitarImagen } = await import('../src/panel/datos/cloudinary.js')
-  configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
-  const original = globalThis.fetch
-  const llamadas = []
-  globalThis.fetch = async (url, op) => {
-    llamadas.push({ url, op })
-    if (String(url).endsWith('/image/upload')) return { ok: true, json: async () => ({ secure_url: 'https://res.cloudinary.com/demo/image/upload/v1/fom/x.jpg', public_id: 'fom/x', delete_token: 'tok123' }) }
-    return { ok: true, json: async () => ({ result: 'ok' }) }
-  }
-  try {
-    assert.equal(puedeQuitarImagen('fom/x'), false)
-    await subirImagen(foto())
-    assert.equal(puedeQuitarImagen('fom/x'), true)
-    await quitarImagen('fom/x')
-    assert.equal(llamadas.at(-1).url, 'https://api.cloudinary.com/v1_1/demo/delete_by_token')
-    assert.equal(llamadas.at(-1).op.body.get('token'), 'tok123')
-    assert.equal(puedeQuitarImagen('fom/x'), false)
-    await assert.rejects(quitarImagen('fom/x'), /ya no se puede quitar/)
-  } finally { globalThis.fetch = original }
-})
-
 test('fotosDe recuerda la consulta y invalidarFotos la repite', async () => {
   const { fotosDe, invalidarFotos } = await import('../src/panel/datos/cloudinary.js')
   configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
@@ -105,5 +83,25 @@ test('fotosDe recuerda la consulta y invalidarFotos la repite', async () => {
     invalidarFotos('fom_vehiculo_z')
     await fotosDe('fom_vehiculo_z')
     assert.equal(n, 2)
+  } finally { globalThis.fetch = original }
+})
+
+test('reemplazar sin borrar: solo se ve la foto más reciente, o el último juego', () => {
+  const f = [{ id: 'c', lote: '20', url: 'c' }, { id: 'b', lote: '20', url: 'b' }, { id: 'a', lote: '10', url: 'a' }]
+  assert.deepEqual(fotosVigentes(f, 'unica').map((x) => x.id), ['c'])
+  assert.deepEqual(fotosVigentes(f, 'juego').map((x) => x.id), ['c', 'b'])
+  assert.deepEqual(fotosVigentes(f).map((x) => x.id), ['c', 'b', 'a'])
+  // fotos viejas sin lote: se toma la más reciente como el juego
+  assert.deepEqual(fotosVigentes([{ id: 'x', lote: '' }, { id: 'y', lote: '' }], 'juego').map((x) => x.id), ['x'])
+})
+
+test('subir con lote lo manda en el contexto junto al título', async () => {
+  configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
+  const original = globalThis.fetch
+  let cuerpo
+  globalThis.fetch = async (_u, op) => { cuerpo = op.body; return { ok: true, json: async () => ({ secure_url: 'https://x/image/upload/v1/a.jpg' }) } }
+  try {
+    await subirImagen(foto(), { titulo: 'Frente', lote: '99' })
+    assert.equal(cuerpo.get('context'), 'caption=Frente|lote=99')
   } finally { globalThis.fetch = original }
 })
