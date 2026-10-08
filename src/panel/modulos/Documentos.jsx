@@ -9,6 +9,8 @@ import { Barras } from '../comp/Grafico'
 import * as f from '../datos/formato'
 import { color, diasPara, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
+import FotosDe from '../comp/FotosDe'
+import { etiquetas } from '../datos/cloudinary'
 
 // ============================================================
 // DOCUMENTOS
@@ -146,6 +148,8 @@ export default function Documentos() {
 }
 
 function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ, abrirRenovar, archivar }) {
+  const [fotosDe, setFotosDe] = useState(null)
+  const verFotos = (d) => setFotosDe(d)
   const { todos, lista } = datos
 
   const vencidos = todos.filter((d) => d.estado === 'vencido').length
@@ -313,6 +317,10 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
                       </td>
                       <td className="num">
                         <div className="pnl-chips">
+                          <button type="button" className="pnl-btn sutil" onClick={() => verFotos(d)}>
+                            <Icono nombre="ver" tam={15} />
+                            Fotos
+                          </button>
                           <button type="button" className="pnl-btn sutil" onClick={() => abrirRenovar(d)}>
                             <Icono nombre="editar" tam={15} />
                             Renovar
@@ -331,6 +339,9 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
           </div>
         )}
       </Tarjeta>
+      <Modal titulo={fotosDe ? `Fotos: ${fotosDe.tipo}` : 'Fotos'} abierto={Boolean(fotosDe)} alCerrar={() => setFotosDe(null)} ancho={760}>
+        {fotosDe && <FotosDe etiqueta={etiquetas.documento(fotosDe.id)} titulo={fotosDe.tipo} vacio="Este documento todavía no tiene fotos. Sube la cara frontal y la trasera." />}
+      </Modal>
     </>
   )
 }

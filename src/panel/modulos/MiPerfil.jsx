@@ -6,10 +6,39 @@ import { cargarMiPerfil, guardarMiPerfil } from '../datos/miPerfil'
 import { iniciales, fecha } from '../datos/formato'
 import './perfil-alertas.css'
 import Apariencia from '../comp/Apariencia'
+import Avatar, { invalidarAvatar } from '../comp/Avatar'
+import { cloudinaryConfigurado, etiquetas, subirImagen } from '../datos/cloudinary'
 import ScoreManejo from '../comp/ScoreManejo'
 
 const ESTADOS = { vigente: ['Vigente', 'verde'], por_vencer: ['Por vencer', 'ambar'], vencido: ['Vencido', 'rojo'] }
 const CAMPOS = [['nombre', 'Nombre y apellido', 'text'], ['cedula', 'Cédula', 'text'], ['telefono', 'Teléfono', 'tel'], ['direccion', 'Dirección', 'text'], ['fechaNacimiento', 'Fecha de nacimiento', 'date']]
+
+/** Botón para cambiar la foto de perfil: se sube a Cloudinary con la etiqueta de la persona. */
+function FotoDePerfil({ userId }) {
+  const [subiendo, setSubiendo] = useState(false)
+  const [mensaje, setMensaje] = useState('')
+  if (!userId) return null
+  if (!cloudinaryConfigurado()) return <p className="fp-foto-nota">La foto de perfil se activa cuando se conecte Cloudinary a esta web.</p>
+  async function elegir(e) {
+    const archivo = e.target.files?.[0]
+    e.target.value = ''
+    if (!archivo) return
+    setSubiendo(true); setMensaje('')
+    try {
+      await subirImagen(archivo, { carpeta: `fom/${etiquetas.avatar(userId)}`, etiqueta: etiquetas.avatar(userId), titulo: 'Foto de perfil' })
+      setMensaje('Foto actualizada.')
+      // La lista pública de Cloudinary tarda un instante en ver la foto nueva.
+      setTimeout(() => invalidarAvatar(userId), 1200)
+    } catch (err) { setMensaje(err.message) }
+    finally { setSubiendo(false) }
+  }
+  return (
+    <div className="fp-foto-nota">
+      <label className="pnl-btn sutil"><input type="file" accept="image/*" hidden disabled={subiendo} onChange={elegir} />{subiendo ? 'Subiendo…' : 'Cambiar foto'}</label>
+      {mensaje && <span role="status"> {mensaje}</span>}
+    </div>
+  )
+}
 
 export default function MiPerfil() {
   const sesion = useSesion()
@@ -81,9 +110,9 @@ function Perfil() {
       {cargando ? <Cargando filas={4} /> : !perfil ? <ErrorCarga error={{ message: error }} onReintentar={() => setRevision(v => v + 1)} /> : <>
         {aviso && <p className="pa-confirmacion" role="status"><Icono nombre="check" tam={18} />{aviso}</p>}
         <section className="fp-identidad" aria-label="Identidad de la cuenta">
-          <div className="fp-avatar">{perfil.fotoUrl ? <img src={perfil.fotoUrl} alt={`Foto de ${perfil.nombre}`} /> : <span>{iniciales(perfil.nombre)}</span>}</div>
+          <div className="fp-avatar"><Avatar userId={perfil.id} iniciales={iniciales(perfil.nombre)} nombre={perfil.nombre} clase="fp-avatar-foto" tam={240} /></div>
           <div className="fp-identidad-datos"><h2>{perfil.nombre}</h2><Tag color="azul">{perfil.rol}</Tag><p>{perfil.email}</p>{perfil.empresa && <p><Icono nombre="empresa" tam={16} />{perfil.empresa}</p>}</div>
-          <p className="fp-foto-nota">La foto se cambia desde la app.</p>
+          <FotoDePerfil userId={perfil.id} />
         </section>
         <div className="fp-principal">
           <Tarjeta titulo="Datos personales"><dl className="fp-datos">{campos.map(([icono, nombre, contenido]) => <div key={nombre}><Icono nombre={icono} tam={23} /><div><dt>{nombre}</dt><dd>{contenido}</dd></div></div>)}</dl></Tarjeta>

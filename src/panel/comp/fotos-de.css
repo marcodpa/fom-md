@@ -1,0 +1,15 @@
+.fd { display: grid; gap: 16px; }
+.fd-galeria { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.fd-galeria button { display: block; width: 100%; padding: 0; border: 1px solid var(--e-borde); border-radius: 12px; overflow: hidden; background: var(--e-sup-baja); cursor: zoom-in; aspect-ratio: 4 / 3; transition: transform .25s var(--e-curva), border-color .25s var(--e-curva); }
+.fd-galeria button:hover { transform: translateY(-2px); border-color: var(--e-borde-fuerte); }
+.fd-galeria img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fd-vacio { margin: 0; color: var(--e-texto-2); font-size: 14px; }
+.fd-zona { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px; border: 1.5px dashed var(--e-borde-fuerte); border-radius: 14px; color: var(--e-texto-2); font-size: 14px; transition: background .2s var(--e-curva), border-color .2s var(--e-curva); }
+.fd-zona.encima { background: color-mix(in srgb, var(--e-primario) 12%, transparent); border-color: var(--e-primario); }
+.fd-aviso { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--e-sup-baja); color: var(--e-texto-2); font-size: 13px; line-height: 1.5; }
+.fd-errores { margin: 0; padding-left: 18px; color: var(--e-peligro); font-size: 13px; }
+.fd-grande { display: grid; gap: 12px; justify-items: center; }
+.fd-grande img { max-width: 100%; max-height: 70vh; border-radius: 12px; object-fit: contain; }
+/* Foto de perfil / principal redonda o recuadrada */
+.fd-avatar { position: relative; display: grid; place-items: center; overflow: hidden; border-radius: 50%; background: var(--e-primario); color: var(--e-sobre-primario, #fff); font-weight: 700; }
+.fd-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
