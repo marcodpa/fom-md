@@ -61,7 +61,7 @@ export function huboSubidaReciente(ms = 45_000) {
 /** La URL pública de una foto por su dirección fija, ya recortada y comprimida por Cloudinary. */
 export function urlDe(publicId, ancho = 480, alto = 0) {
   if (!nube || !publicId) return ''
-  const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`, 'c_fill'] : ['c_limit'])].join(',')
+  const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`, 'c_fill', 'g_auto'] : ['c_limit'])].join(',')
   return `https://res.cloudinary.com/${nube}/image/upload/${t}/${publicId}?v=${version}`
 }
 

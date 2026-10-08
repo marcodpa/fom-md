@@ -58,7 +58,7 @@ export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, c
     <span className={`fleet-status ${estado.color}`}><i />{estado.texto}</span>
     <h3 className="fleet-plate">{v.placa || 'Sin placa'}</h3>
     {descripcion && <p className="fleet-description">{descripcion}</p>}
-    <figure className="fleet-vehicle-image">
+    <figure className={`fleet-vehicle-image${hayFoto ? ' con-foto' : ''}`}>
       <FotoFija publicId={v?.id ? ids.vehiculo(v.id) : null} ancho={900} alto={600} alt={`Foto de ${v.placa || v.alias || 'la unidad'}`} alExistir={setHayFoto}>
         <img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" />
       </FotoFija>

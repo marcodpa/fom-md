@@ -30,3 +30,7 @@
 .fd-vacio-foto { color: var(--e-texto-3); font-size: 13px; }
 .fd-ampliar { position: absolute; right: 8px; bottom: 8px; padding: 4px 10px; border: 0; border-radius: 999px; background: rgba(10, 18, 36, .75); color: #fff; font: inherit; font-size: 12px; cursor: zoom-in; }
 .fd-error-linea { color: var(--e-peligro); font-size: 12px; }
+/* Foto real de la unidad en la ficha: marco uniforme 3:2, recortada con enfoque automático (sale igual de ordenada con cualquier foto) */
+.fleet-vehicle-image.con-foto { background: none; border-bottom: 0; margin: 12px 0 8px; }
+.fleet-vehicle-image.con-foto img { height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 16px; box-shadow: 0 10px 30px -14px rgba(0, 0, 0, .6); }
+.control-unit .fleet-vehicle-image.con-foto img { height: 66px; aspect-ratio: auto; border-radius: 8px; box-shadow: none; }

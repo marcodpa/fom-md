@@ -57,7 +57,7 @@ test('subir sin saber a qué pertenece la foto se rechaza', async () => {
 test('la URL de una foto es directa, liviana y cambia de versión al reemplazarla', async () => {
   configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
   const a = urlDe('fom/vehiculo/v1', 300, 200)
-  assert.match(a, /^https:\/\/res\.cloudinary\.com\/demo\/image\/upload\/f_auto,q_auto,w_300,h_200,c_fill\/fom\/vehiculo\/v1\?v=\d+$/)
+  assert.match(a, /^https:\/\/res\.cloudinary\.com\/demo\/image\/upload\/f_auto,q_auto,w_300,h_200,c_fill,g_auto\/fom\/vehiculo\/v1\?v=\d+$/)
   assert.match(urlDe('fom/vehiculo/v1', 300), /w_300,c_limit/)
   assert.match(urlOriginal('fom/vehiculo/v1'), /^https:\/\/res\.cloudinary\.com\/demo\/image\/upload\/fom\/vehiculo\/v1\?v=\d+$/)
 
