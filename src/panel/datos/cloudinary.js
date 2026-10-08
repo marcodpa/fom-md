@@ -1,9 +1,12 @@
 // Imágenes en Cloudinary: fotos de unidades, documentos y perfiles.
 //
-// FOM no guarda imágenes. Cada foto vive en Cloudinary con una DIRECCIÓN FIJA que lleva el id de FOM de lo que
-// retrata (`fom/vehiculo/<id>`, `fom/avatar/<userId>`, `fom/documento/<id>/<cara>`). Subir otra foto con la misma
-// dirección la REEMPLAZA (el preset debe tener «Overwrite» activo) y no se borra nada. Como la dirección se conoce de
-// antemano, no hace falta consultar listas: la cuenta puede tener bloqueada la «lista de recursos» y todo funciona.
+// FOM no guarda imágenes. Cada foto vive en Cloudinary bajo una DIRECCIÓN BASE que lleva el id de FOM de lo que
+// retrata (`fom/vehiculo/<id>`, `fom/avatar/<userId>`, `fom/documento/<id>/<cara>`).
+//
+// Cloudinary NO deja sobrescribir en una subida sin firma (devuelve la foto que ya existe), así que reemplazar se
+// hace con VERSIONES NUMERADAS: la primera foto es `<base>/1`, la siguiente `<base>/2`, y la vigente es la de número
+// más alto. Para saber cuál es, se prueba si existen (una consulta liviana por foto, con búsqueda por saltos), así no
+// hace falta la «lista de recursos» ni ningún dato en el servidor. Nada se borra: lo anterior solo deja de mostrarse.
 //
 // La subida usa un UPLOAD PRESET SIN FIRMA (unsigned): en el navegador no puede haber ningún secreto.
 //   VITE_CLOUDINARY_CLOUD_NAME=<nombre de la nube>
@@ -53,14 +56,91 @@ function avisarCambio() {
   oyentes.forEach((f) => f(version))
 }
 
+// --- Versiones numeradas -----------------------------------------------------
+const memoria = new Map() // base -> Promise<número de la foto vigente (0 si no hay)>
+
+const pista = (base) => {
+  try { return Number(globalThis.localStorage?.getItem(`fom_foto_${base}`)) || 0 } catch { return 0 }
+}
+const guardarPista = (base, n) => {
+  try { globalThis.localStorage?.setItem(`fom_foto_${base}`, String(n)) } catch { /* sin almacenamiento: no pasa nada */ }
+}
+
+/** ¿Existe esa foto en Cloudinary? Consulta liviana (solo cabeceras). */
+async function existe(publicId) {
+  try {
+    const r = await fetch(`https://res.cloudinary.com/${nube}/image/upload/${publicId}?p=${Date.now()}`, { method: 'HEAD' })
+    return r.ok
+  } catch {
+    return false
+  }
+}
+
+/** Busca el número más alto que existe: parte de lo último que se vio y avanza por saltos (1, 2, 4…) y luego afina. */
+async function buscarUltima(base) {
+  let n = pista(base)
+  if (n > 0 && !(await existe(`${base}/${n}`))) n = 0
+  if (n === 0) {
+    if (!(await existe(`${base}/1`))) return 0
+    n = 1
+  }
+  let paso = 1
+  while (await existe(`${base}/${n + paso}`)) { n += paso; paso *= 2 }
+  let bajo = n
+  let alto = n + paso
+  while (alto - bajo > 1) {
+    const medio = Math.floor((bajo + alto) / 2)
+    if (await existe(`${base}/${medio}`)) bajo = medio
+    else alto = medio
+  }
+  return bajo
+}
+
+/** El número de la foto vigente de una dirección base (0 si todavía no hay ninguna). Se recuerda por sesión. */
+export function ultimaVersion(base) {
+  if (!nube || !base) return Promise.resolve(0)
+  if (!memoria.has(base)) {
+    memoria.set(base, buscarUltima(base).then((n) => { if (n) guardarPista(base, n); return n }))
+  }
+  return memoria.get(base)
+}
+
+/** La dirección completa de la foto vigente (`<base>/<n>`), o `null` si todavía no hay foto. */
+export async function idVigente(base) {
+  const n = await ultimaVersion(base)
+  return n ? `${base}/${n}` : null
+}
+
+/** Solo para pruebas: olvida lo recordado. */
+export function olvidarFotos() {
+  memoria.clear()
+}
+
 /** ¿Se subió una foto desde esta web hace poco? Justo después, Cloudinary tarda un instante en servirla. */
 export function huboSubidaReciente(ms = 45_000) {
   return Date.now() - ultimaSubida < ms
 }
 
-/** La URL pública de una foto por su dirección fija, ya recortada y comprimida por Cloudinary. */
-export function urlDe(publicId, ancho = 480, alto = 0) {
+// Quitar el fondo lo hace Cloudinary AI (`e_background_removal`, un complemento de la cuenta). Si la cuenta no lo
+// tiene activo o la foto no se puede procesar (por ejemplo, menos de 64x64), Cloudinary responde con error: la web lo
+// detecta una vez, deja de pedirlo y muestra la foto normal. Nunca se queda sin foto.
+let fondoDisponible = true
+export function quitarFondoDisponible() {
+  return fondoDisponible
+}
+export function desactivarQuitarFondo() {
+  fondoDisponible = false
+}
+
+/**
+ * La URL pública de una foto por su dirección fija, ya recortada y comprimida por Cloudinary. Con `sinFondo`, el
+ * carro viene recortado sobre fondo transparente (sin recorte al marco: se respeta su silueta completa).
+ */
+export function urlDe(publicId, ancho = 480, alto = 0, { sinFondo = false } = {}) {
   if (!nube || !publicId) return ''
+  if (sinFondo && fondoDisponible) {
+    return `https://res.cloudinary.com/${nube}/image/upload/e_background_removal/f_auto,q_auto,w_${ancho},c_limit/${publicId}?v=${version}`
+  }
   const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`, 'c_fill', 'g_auto'] : ['c_limit'])].join(',')
   return `https://res.cloudinary.com/${nube}/image/upload/${t}/${publicId}?v=${version}`
 }
@@ -84,38 +164,48 @@ export function problemaDelArchivo(archivo) {
 }
 
 /**
- * Sube UNA imagen a su dirección fija (`publicId`) y la deja como la vigente. Lanza un Error con el motivo si no se
- * pudo: la pantalla no debe decir «guardado» si la foto no llegó.
+ * Sube UNA imagen como la versión siguiente de su dirección base (`publicId`) y la deja como la vigente. Lanza un
+ * Error con el motivo si no se pudo: la pantalla no debe decir «guardado» si la foto no llegó.
  */
-export async function subirImagen(archivo, { publicId, etiqueta, titulo } = {}) {
+export async function subirImagen(archivo, { publicId: base, etiqueta, titulo } = {}) {
   if (!cloudinaryConfigurado()) throw new Error('Cloudinary no está configurado en esta web.')
-  if (!publicId) throw new Error('Falta saber a qué pertenece la foto.')
+  if (!base) throw new Error('Falta saber a qué pertenece la foto.')
   const mal = problemaDelArchivo(archivo)
   if (mal) throw new Error(mal)
-  const cuerpo = new FormData()
-  cuerpo.append('file', archivo)
-  cuerpo.append('upload_preset', preset)
-  cuerpo.append('public_id', publicId)
-  if (etiqueta) cuerpo.append('tags', etiqueta)
-  // `|` y `=` separan los pares del contexto: dentro de un título lo romperían.
-  if (titulo) cuerpo.append('context', `caption=${String(titulo).replace(/[|=]/g, ' ')}`)
 
-  const corte = new AbortController()
-  const reloj = setTimeout(() => corte.abort(), TIEMPO_LIMITE)
-  let respuesta
-  try {
-    respuesta = await fetch(`https://api.cloudinary.com/v1_1/${nube}/image/upload`, { method: 'POST', body: cuerpo, signal: corte.signal })
-  } catch {
-    throw new Error('No se pudo subir la foto. Revisa tu conexión e inténtalo de nuevo.')
-  } finally {
-    clearTimeout(reloj)
+  let n = (await ultimaVersion(base)) + 1
+  // Si alguien subió otra foto al mismo tiempo, Cloudinary devuelve la que ya existía (`existing`): se pasa a la siguiente.
+  for (let intento = 0; intento < 4; intento += 1, n += 1) {
+    const cuerpo = new FormData()
+    cuerpo.append('file', archivo)
+    cuerpo.append('upload_preset', preset)
+    cuerpo.append('public_id', `${base}/${n}`)
+    if (etiqueta) cuerpo.append('tags', etiqueta)
+    // `|` y `=` separan los pares del contexto: dentro de un título lo romperían.
+    if (titulo) cuerpo.append('context', `caption=${String(titulo).replace(/[|=]/g, ' ')}`)
+
+    const corte = new AbortController()
+    const reloj = setTimeout(() => corte.abort(), TIEMPO_LIMITE)
+    let respuesta
+    try {
+      respuesta = await fetch(`https://api.cloudinary.com/v1_1/${nube}/image/upload`, { method: 'POST', body: cuerpo, signal: corte.signal })
+    } catch {
+      throw new Error('No se pudo subir la foto. Revisa tu conexión e inténtalo de nuevo.')
+    } finally {
+      clearTimeout(reloj)
+    }
+    if (!respuesta.ok) {
+      const detalle = await respuesta.json().then((j) => j?.error?.message).catch(() => null)
+      throw new Error(detalle ? `Cloudinary rechazó la foto: ${detalle}` : 'Cloudinary rechazó la foto.')
+    }
+    const json = await respuesta.json()
+    if (json.existing) continue
+    if (!json.secure_url) throw new Error('Cloudinary no devolvió la dirección de la foto.')
+    // La nueva es la vigente: se recuerda sin tener que volver a buscarla.
+    memoria.set(base, Promise.resolve(n))
+    guardarPista(base, n)
+    avisarCambio()
+    return json.secure_url
   }
-  if (!respuesta.ok) {
-    const detalle = await respuesta.json().then((j) => j?.error?.message).catch(() => null)
-    throw new Error(detalle ? `Cloudinary rechazó la foto: ${detalle}` : 'Cloudinary rechazó la foto.')
-  }
-  const json = await respuesta.json()
-  if (!json.secure_url) throw new Error('Cloudinary no devolvió la dirección de la foto.')
-  avisarCambio()
-  return json.secure_url
+  throw new Error('No se pudo guardar la foto: hubo cambios al mismo tiempo. Inténtalo de nuevo.')
 }

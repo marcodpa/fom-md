@@ -32,12 +32,12 @@ export default function FotosDe({ huecos, permiteSubir = true }) {
                 ancho={640}
                 alto={440}
                 alt={h.titulo}
-                alExistir={(v) => setExiste((e) => (e[h.clave] === v ? e : { ...e, [h.clave]: v }))}
+                alExistir={(v, _recortada, idCompleto) => setExiste((e) => (e[h.clave]?.hay === v && e[h.clave]?.id === idCompleto ? e : { ...e, [h.clave]: { hay: v, id: idCompleto } }))}
               >
                 <span className="fd-vacio-foto">Sin foto</span>
               </FotoFija>
-              {existe[h.clave] && (
-                <button type="button" className="fd-ampliar" onClick={() => setAbierta(h)} aria-label={`Ampliar ${h.titulo}`}>Ampliar</button>
+              {existe[h.clave]?.hay && (
+                <button type="button" className="fd-ampliar" onClick={() => setAbierta({ ...h, id: existe[h.clave].id })} aria-label={`Ampliar ${h.titulo}`}>Ampliar</button>
               )}
             </div>
             {permiteSubir && (
@@ -46,7 +46,7 @@ export default function FotosDe({ huecos, permiteSubir = true }) {
                 publicId={h.publicId}
                 etiqueta={h.etiqueta}
                 titulo={h.titulo}
-                hayFoto={Boolean(existe[h.clave])}
+                hayFoto={Boolean(existe[h.clave]?.hay)}
                 textos={{ subir: 'Subir', editar: 'Reemplazar' }}
               />
             )}
@@ -56,8 +56,8 @@ export default function FotosDe({ huecos, permiteSubir = true }) {
       <Modal titulo={abierta?.titulo || 'Foto'} abierto={Boolean(abierta)} alCerrar={() => setAbierta(null)} ancho={920}>
         {abierta && (
           <div className="fd-grande">
-            <img src={urlOriginal(abierta.publicId)} alt={abierta.titulo} />
-            <a className="pnl-link" href={urlOriginal(abierta.publicId)} target="_blank" rel="noreferrer">Abrir original</a>
+            <img src={urlOriginal(abierta.id)} alt={abierta.titulo} />
+            <a className="pnl-link" href={urlOriginal(abierta.id)} target="_blank" rel="noreferrer">Abrir original</a>
           </div>
         )}
       </Modal>

@@ -1,6 +1,6 @@
 # Imágenes en Cloudinary (web y app del conductor)
 
-FOM no guarda imágenes. Cada foto vive en Cloudinary con una **dirección fija** que lleva el id de FOM de lo que retrata. Subir otra foto con la misma dirección la **reemplaza**; no se borra nada. Como la dirección se conoce de antemano, **no hace falta consultar listas**, así que la cuenta puede tener bloqueada la «lista de recursos».
+FOM no guarda imágenes. Cada foto vive en Cloudinary bajo una **dirección base** que lleva el id de FOM de lo que retrata. Cloudinary **no deja sobrescribir** en una subida sin firma, así que reemplazar se hace con **versiones numeradas**: la primera foto es `<base>/1`, la siguiente `<base>/2`, y la vigente es la de número más alto (la web la encuentra con consultas livianas). Nada se borra. No hace falta la «lista de recursos»: la cuenta puede tenerla bloqueada.
 
 ## Qué hay que configurar (una vez)
 
@@ -28,7 +28,8 @@ La foto se ve en `https://res.cloudinary.com/<nube>/image/upload/<transformacion
 
 ## Cómo se reemplaza
 
-- La unidad, la persona y cada cara de un documento tienen UNA foto: «Editar foto» / «Reemplazar» sube otra a la misma dirección y la sustituye.
+- La unidad, la persona y cada cara de un documento tienen UNA foto vigente: «Editar foto» / «Reemplazar» sube la versión siguiente y esa pasa a mostrarse.
+- En la ficha de la unidad, el carro se muestra **sin fondo** (Cloudinary AI, `e_background_removal`) sobre un escenario de FOM. Si la cuenta no tiene ese complemento o la foto no se puede procesar, se muestra la foto normal en un marco 3:2.
 - Justo después de subir, Cloudinary tarda unos segundos en servir la nueva; la web reintenta sola y mientras tanto muestra la anterior o la ilustración.
 - El número `?v=` al final de la URL fuerza a los navegadores a pedir de nuevo la imagen cambiada.
 
