@@ -209,7 +209,9 @@ function motivo(texto, porDefecto = 'consola') {
 
 function conductoresPorVehiculo(lista) {
   const porVehiculo = new Map()
-  for (const c of lista) {
+  // Una unidad puede tener un conductor principal y uno o más secundarios: manda el principal, no el primero que llega.
+  const ordenados = [...lista].sort((a, b) => (a.role === 'principal' ? 0 : 1) - (b.role === 'principal' ? 0 : 1))
+  for (const c of ordenados) {
     if (!porVehiculo.has(c.vehicleId)) porVehiculo.set(c.vehicleId, c)
   }
   return porVehiculo
@@ -482,17 +484,35 @@ export const repoApi = {
       // La ficha del servidor no trae al conductor: vive en las asignaciones.
       // Sin esto el expediente decia «Sin conductor» aunque la asignacion se
       // hubiera guardado, y el selector volvia a vacio: parecia que no dejaba.
-      const asignacion = await api
+      const delaUnidad = await api
         .conductores()
         .then((r) => (r?.items ?? [])
           .filter((c) => c.vehicleId === id)
-          .sort((a, b) => (a.role === 'principal' ? -1 : 1) - (b.role === 'principal' ? -1 : 1))[0] ?? null)
+          .sort((a, b) => (a.role === 'principal' ? 0 : 1) - (b.role === 'principal' ? 0 : 1)))
+        .catch(() => [])
+      const asignacion = delaUnidad[0] ?? null
+      // El detalle del vehículo no trae su GPS: se une desde la lista de equipos por el id de la unidad.
+      const equipo = await api
+        .equiposGps()
+        .then((r) => (r?.devices ?? []).find((d) => d.vehicleId === id) ?? null)
         .catch(() => null)
       return {
         ...comoUnidad(ficha.vehicle),
         conductorPrincipalId: asignacion?.userId ?? null,
         asignacionId: asignacion?.assignmentId ?? null,
         conductorNombre: asignacion?.displayName ?? 'Sin asignar',
+        conductores: delaUnidad.map((c) => ({ id: c.userId, nombre: c.displayName, rol: c.role })),
+        gps: equipo
+          ? {
+              modelo: equipo.model ?? 'Equipo GPS',
+              imei: equipo.imei,
+              linea: equipo.simPhone ?? null,
+              verificado: Boolean(equipo.connected || equipo.lastConnectionAt),
+              conectado: Boolean(equipo.connected),
+              pinSupport: false,
+              instalacionId: equipo.installationId ?? null,
+            }
+          : null,
         recorrido,
         documentos,
         odts,
@@ -1590,6 +1610,10 @@ Object.assign(repoApi, {
         enabled: Boolean(activo),
       })
       return { id: r?.plan?.id ?? planId }
+    },
+    /** Apaga o vuelve a encender un plan sin tocar el resto de sus datos. */
+    async encender(plan, activo) {
+      return repoApi.planes.guardar({ id: plan.id, codigo: plan.codigo, servicio: plan.servicio, descripcion: plan.descripcion, estrategia: plan.estrategia, cadaKm: plan.cadaKm, cadaDias: plan.cadaDias, criticidad: plan.criticidad, activo })
     },
     async cubrirUnidad(planId, vehiculoId, { ultimoServicioKm, proximoKm, proximaFecha } = {}) {
       await api.cubrirUnidadEnPlan(planId, vehiculoId, {

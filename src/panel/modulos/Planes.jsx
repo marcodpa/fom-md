@@ -100,6 +100,7 @@ export default function Planes({ vista = 'acciones' }) {
                       <div className="mnt-plan-interval"><b>{p.cadaKm ? f.numero(p.cadaKm) : p.cadaDias}</b><span>{p.cadaKm ? 'km' : 'días'}{p.cadaKm && p.cadaDias ? ` / ${p.cadaDias} días` : ''}</span></div>
                       <Tag color={crC}>{crT}</Tag>
                       <Tag color={p.activo ? 'verde' : 'gris'} plano>{p.activo ? 'Activo' : 'Apagado'}</Tag>
+                      <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => actuar(() => repo.planes.encender(p, !p.activo), p.activo ? 'Plan apagado: ya no genera servicios.' : 'Plan encendido.')}>{p.activo ? 'Apagar' : 'Encender'}</button>
                       <button type="button" className="pnl-btn sutil" onClick={() => setCubriendo(p)}>Asignar unidad →</button>
                     </div>
                   )

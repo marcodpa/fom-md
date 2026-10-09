@@ -68,7 +68,14 @@ export function useDatos(cargar, deps = [], refrescarCada = 0) {
     }
   }, [refrescarCada, ejecutar])
 
-  return { datos, estado, error, recargar: () => ejecutar(true) }
+  // Tras una escritura, el servidor tarda un instante en reflejar el cambio: se vuelve a leer una segunda vez para que la
+  // lista no se quede con lo anterior hasta recargar la página.
+  const recargar = () => {
+    const primera = ejecutar(true)
+    setTimeout(() => { if (vivo.current) ejecutar(true) }, 2200)
+    return primera
+  }
+  return { datos, estado, error, recargar }
 }
 
 export default useDatos

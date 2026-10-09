@@ -312,7 +312,8 @@ export default function ExpedienteVehiculo() {
                       { etiqueta: 'GPS', valor: v.gps?.modelo ?? 'Sin GPS' },
                       { etiqueta: 'IMEI', valor: v.gps?.imei ?? 'Sin registrar' },
                       { etiqueta: 'Seguridad', valor: v.gps?.pinSupport ? 'GPS con PIN' : 'GPS sin PIN' },
-                      { etiqueta: 'Alta en el sistema', valor: f.fecha(v.creadoEn) },
+                      ...(v.creadoEn ? [{ etiqueta: 'Alta en el sistema', valor: f.fecha(v.creadoEn) }] : []),
+                      ...((v.conductores?.length ?? 0) > 1 ? [{ etiqueta: 'Otros conductores', valor: v.conductores.slice(1).map((c) => `${c.nombre} (${c.rol})`).join(', ') }] : []),
                     ]}
                   />
                 </Tarjeta>
@@ -368,25 +369,27 @@ export default function ExpedienteVehiculo() {
             {/* ---------------- Telemetría ---------------- */}
             {pestana === 'telemetria' && (
               <>
-                <Tarjeta titulo="Niveles">
-                  <div className="pnl-filas">
-                    <Nivel
-                      icono="llave"
-                      titulo="Aceite"
-                      pct={v.aceitePct}
-                      tono={tonoNivel(v.aceitePct, 25, 40)}
-                    />
-                  </div>
-                </Tarjeta>
+                {v.aceitePct != null && (
+                  <Tarjeta titulo="Niveles">
+                    <div className="pnl-filas">
+                      <Nivel
+                        icono="llave"
+                        titulo="Aceite"
+                        pct={v.aceitePct}
+                        tono={tonoNivel(v.aceitePct, 25, 40)}
+                      />
+                    </div>
+                  </Tarjeta>
+                )}
 
                 <Tarjeta titulo="Estado en vivo">
                   <Datos
                     items={[
-                      { etiqueta: 'Temperatura del motor', valor: `${v.tempMotorC} °C` },
+                      { etiqueta: 'Temperatura del motor', valor: v.tempMotorC == null ? 'Sin dato' : `${v.tempMotorC} °C` },
                       { etiqueta: 'Velocidad actual', valor: f.velocidad(v.velocidadKmh) },
                       { etiqueta: 'Estado', valor: etiqueta('marcha_estado', v.estadoMarcha) },
                       { etiqueta: 'Kilometraje', valor: f.km(v.km) },
-                      { etiqueta: 'Ubicación', valor: v.ubicacionTexto },
+                      { etiqueta: 'Ubicación', valor: v.ubicacionTexto || (Number.isFinite(v.lat) && Number.isFinite(v.lng) ? `${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}` : 'Sin posición') },
                       { etiqueta: 'Último reporte', valor: f.desde(v.ultimoReporte) },
                     ]}
                   />

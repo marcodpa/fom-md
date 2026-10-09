@@ -75,7 +75,7 @@ function Perfil() {
   if (perfil?.cedula && !documentos.some(d => /c[eé]dula|identidad/i.test(d.tipo))) documentos.unshift({ tipo: 'Cédula de identidad', numero: perfil.cedula, declarado: true })
   if (perfil?.conduce && perfil.licenciaNumero && !documentos.some(d => /licencia/i.test(d.tipo))) documentos.push({ tipo: 'Licencia de conducir', numero: perfil.licenciaNumero, venceEn: perfil.licenciaVence, declarado: true })
   if (perfil?.conduce && perfil.cartaMedicaVence && !documentos.some(d => /m[eé]dic/i.test(d.tipo))) documentos.push({ tipo: 'Carta médica', venceEn: perfil.cartaMedicaVence, declarado: true })
-  const valor = (v, disponible = true) => v || (disponible ? 'Sin registrar' : 'No disponible en la web')
+  const valor = (v, disponible = true) => v || (disponible ? 'Sin registrar' : 'Se completa desde la app')
   const campos = perfil ? [
     ['gente', 'Nombre y apellido', perfil.nombre],
     ['documento', 'Cédula', valor(perfil.cedula, perfil.editable || perfil.completoDisponible)],

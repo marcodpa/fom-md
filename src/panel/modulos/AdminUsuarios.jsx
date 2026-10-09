@@ -608,7 +608,7 @@ export function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, dire
               ))}
             </select>
           </Campo>}
-          <Campo etiqueta="Rol" ayuda="El repositorio valida rol contra tipo de empresa, igual que la app.">
+          <Campo etiqueta="Rol" ayuda="Los roles disponibles dependen del tipo de empresa.">
             <select className="pnl-input" value={rol} onChange={(e) => setRol(e.target.value)}>
               {(directorioReal ? rolesReales : ROLES_ASIGNABLES.map((r) => ({ v: r, t: etiquetaRol(r, destino?.tipo) }))).map((r) => (
                 <option key={r.v} value={r.v}>{r.t}</option>

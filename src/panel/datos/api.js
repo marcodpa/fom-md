@@ -18,8 +18,21 @@ const BASE = (import.meta.env?.VITE_FOM_API || '').replace(/\/+$/, '')
 export const HAY_API = Boolean(BASE)
 
 /** Mensaje en español para cada fallo, listo para mostrar en pantalla. */
+// Mensajes del servidor que llegan en inglés, dichos en español.
+const MENSAJES = [
+  [/Progress only applies while in progress/i, 'El avance solo se registra mientras el servicio está en curso.'],
+  [/requires the FOM administrator/i, 'Esta acción es solo del administrador FOM.'],
+  [/expected status|status has changed|stale/i, 'Alguien más cambió esto mientras lo mirabas. Recarga y vuelve a intentarlo.'],
+  [/not found/i, 'Ese elemento ya no existe.'],
+  [/already exists|duplicate/i, 'Ya existe uno igual.'],
+]
+function enEspanol(texto) {
+  if (typeof texto !== 'string') return texto
+  return MENSAJES.find(([patron]) => patron.test(texto))?.[1] ?? texto
+}
+
 function traducir(estado, cuerpo) {
-  const detalle = typeof cuerpo === 'string' ? cuerpo : cuerpo?.message || cuerpo?.error
+  const detalle = enEspanol(typeof cuerpo === 'string' ? cuerpo : cuerpo?.message || cuerpo?.error)
   if (estado === 0) {
     return 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.'
   }

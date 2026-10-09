@@ -149,6 +149,7 @@ export default function Documentos() {
 
 function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ, abrirRenovar, archivar }) {
   const [fotosDe, setFotosDe] = useState(null)
+  const [porArchivar, setPorArchivar] = useState(null)
   const verFotos = (d) => setFotosDe(d)
   const { todos, lista } = datos
 
@@ -325,7 +326,7 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
                             <Icono nombre="editar" tam={15} />
                             Renovar
                           </button>
-                          <button type="button" className="pnl-btn sutil" onClick={() => archivar(d)}>
+                          <button type="button" className="pnl-btn sutil" onClick={() => setPorArchivar(d)}>
                             <Icono nombre="cerrar" tam={15} />
                             Archivar
                           </button>
@@ -339,6 +340,17 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
           </div>
         )}
       </Tarjeta>
+      <Modal titulo="¿Archivar este documento?" abierto={Boolean(porArchivar)} alCerrar={() => setPorArchivar(null)} ancho={460}>
+        {porArchivar && (
+          <>
+            <p>{porArchivar.tipo} · {porArchivar.titular}. Sale de la vigilancia de vencimientos y queda en el historial.</p>
+            <div className="pnl-chips">
+              <button type="button" className="pnl-btn primario" onClick={() => { const d = porArchivar; setPorArchivar(null); archivar(d) }}>Archivar</button>
+              <button type="button" className="pnl-btn sutil" onClick={() => setPorArchivar(null)}>Cancelar</button>
+            </div>
+          </>
+        )}
+      </Modal>
       <Modal titulo={fotosDe ? `Fotos: ${fotosDe.tipo}` : 'Fotos'} abierto={Boolean(fotosDe)} alCerrar={() => setFotosDe(null)} ancho={760}>
         {fotosDe && <FotosDe huecos={[{ clave: 'frente', titulo: 'Frente', publicId: ids.documento(fotosDe.id, 'frente'), etiqueta: etiquetas.documento(fotosDe.id) }, { clave: 'reverso', titulo: 'Reverso', publicId: ids.documento(fotosDe.id, 'reverso'), etiqueta: etiquetas.documento(fotosDe.id) }]} />}
       </Modal>
