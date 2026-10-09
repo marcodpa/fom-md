@@ -116,12 +116,12 @@ function cargarMantenimiento() {
 
 export default function Mantenimiento() {
   const [params, setParams] = useSearchParams()
-  const vista = ['acciones', 'planes', 'todas'].includes(params.get('vista')) ? params.get('vista') : 'ordenes'
+  const vista = ['planes', 'todas'].includes(params.get('vista')) ? params.get('vista') : 'ordenes'
   function cambiar(v) { setParams(v === 'ordenes' ? {} : { vista: v }) }
   return <div className="mnt-root">
     <div className="mnt-heading"><div><span className="mnt-breadcrumb">Inicio › Mantenimiento</span><h1>Mantenimiento</h1><p>Qué necesita atención y qué sigue en taller.</p></div></div>
     <nav className="mnt-nav" aria-label="Secciones de mantenimiento">
-      {[['ordenes', 'llave', 'Órdenes'], ['todas', 'documento', 'Todas las órdenes'], ['acciones', 'reloj', 'Próximos servicios'], ['planes', 'sync', 'Planes']].map(([v, icono, t]) => <button key={v} type="button" aria-current={vista === v ? 'page' : undefined} className={vista === v ? 'activo' : ''} onClick={() => cambiar(v)}><Icono nombre={icono} tam={18}/>{t}</button>)}
+      {[['ordenes', 'llave', 'Órdenes'], ['todas', 'documento', 'Todas las órdenes'], ['planes', 'sync', 'Planes']].map(([v, icono, t]) => <button key={v} type="button" aria-current={vista === v ? 'page' : undefined} className={vista === v ? 'activo' : ''} onClick={() => cambiar(v)}><Icono nombre={icono} tam={18}/>{t}</button>)}
     </nav>
     {['ordenes', 'todas'].includes(vista) ? <Ordenes key={vista} listaCompleta={vista === 'todas'} /> : <Planes key={vista} vista={vista} integrado />}
   </div>
