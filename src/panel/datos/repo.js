@@ -195,8 +195,10 @@ const repo = HAY_API
         ...sinRespaldo(repoSemilla.vehiculos),
         listar: repoApi.vehiculos.listar,
         obtener: repoApi.vehiculos.obtener,
+        usuariosAsignados: repoApi.vehiculos.usuariosAsignados,
         odometro: repoApi.vehiculos.odometro,
         kmPorDia: repoApi.vehiculos.kmPorDia,
+        registrarOdometro: repoApi.vehiculos.registrarOdometro,
         // Alta, edición, área y conductor: reales desde el #219.
         ...repoApi.vehiculosEscritura,
       },

@@ -13,8 +13,9 @@ import Mapa from '../comp/Mapa'
 import { BarrasH } from '../comp/Grafico'
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
+import FichaDatosUnidad from './FichaDatosUnidad'
+import UsuariosUnidad from './UsuariosUnidad'
 import * as f from '../datos/formato'
-import { resumenKm } from '../datos/odometro'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
 
 // ============================================================
@@ -27,6 +28,8 @@ import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
 
 const PESTANAS = [
   { v: 'resumen', t: 'Resumen' },
+  { v: 'ficha', t: 'Ficha de la unidad' },
+  { v: 'usuarios', t: 'Usuarios' },
   { v: 'telemetria', t: 'Telemetría' },
   { v: 'mantenimiento', t: 'Mantenimiento' },
   { v: 'inspecciones', t: 'Inspecciones' },
@@ -72,39 +75,94 @@ function Nivel({ icono, titulo, pct, tono }) {
 }
 
 /**
- * Kilometraje de la unidad. Si el equipo manda odómetro, ese total manda. Si no, se calcula del GPS de los
- * últimos 7 días (sin saltos ni deriva) y se dice que es un cálculo, no una lectura.
+ * Kilometraje de la unidad: lo de HOY en grande y el TOTAL del carro. El total es la lectura oficial del odómetro más
+ * lo recorrido desde que se registró (los km por día los calcula el servidor con todas las posiciones del GPS). Sin
+ * lectura oficial no se inventa un total: se dice y se ofrece registrar el odómetro actual.
  */
-function KpiKilometraje({ v }) {
-  const pos = useDatos(() => repo.recorridoDetallado(v.id, { horas: 168, limite: 1000 }), [v.id])
-  // La lectura OFICIAL del odómetro (la registra el servidor: GPS, manual u orden de mantenimiento) manda sobre el
-  // cálculo del recorrido.
-  const oficial = useDatos(() => (repo.vehiculos.odometro ? repo.vehiculos.odometro(v.id).catch(() => null) : Promise.resolve(null)), [v.id])
-  const lecturaKm = oficial.datos?.km ?? v.km
-  // Los kilómetros por día los calcula el servidor con todas las posiciones del día: es la cifra estable. Solo si no
-  // la entrega (por ejemplo en demostración) se calcula desde las posiciones que llegan al navegador.
-  const dia = useDatos(() => (repo.vehiculos.kmPorDia ? repo.vehiculos.kmPorDia(v.id, 7).catch(() => null) : Promise.resolve(null)), [v.id])
+function KpiKilometraje({ v, puedeRegistrar }) {
+  const [registrando, setRegistrando] = useState(false)
+  const [version, setVersion] = useState(0)
+  const datos = useDatos(async () => {
+    const oficial = repo.vehiculos.odometro ? await repo.vehiculos.odometro(v.id).catch(() => null) : null
+    // Desde el día de la lectura hasta hoy (lo que se movió después de que alguien miró el tablero).
+    const desdeLectura = oficial?.en ? Math.ceil((Date.now() - Date.parse(oficial.en)) / 86400000) + 1 : 0
+    const dias = repo.vehiculos.kmPorDia ? await repo.vehiculos.kmPorDia(v.id, Math.min(120, Math.max(7, desdeLectura))).catch(() => null) : null
+    return { oficial, dias }
+  }, [v.id, version])
   const hoy = f.hoyISO()
-  const r = pos.estado === 'ok' ? resumenKm({ lectura: lecturaKm, puntos: pos.datos.puntos, hoy }) : null
   const km1 = (n) => `${n < 10 ? n.toFixed(1).replace('.', ',') : f.numero(Math.round(n))} km`
-  const delServidor = dia.estado === 'ok' && dia.datos && dia.datos.length > 0 ? dia.datos : null
-  let valor = f.km(lecturaKm)
-  let nota = v.creadoEn ? `Alta: ${f.fecha(v.creadoEn)}` : ''
-  if (delServidor) {
-    const hoyKm = delServidor.find((d) => d.fecha === hoy)?.km ?? 0
-    const semana = delServidor.reduce((s, d) => s + d.km, 0)
-    if (lecturaKm == null) valor = `≈ ${f.numero(Math.round(semana))} km`
-    nota = `Hoy ${km1(hoyKm)} · últimos 7 días ${km1(semana)}. Calculado por el servidor con el GPS${lecturaKm == null ? '; el equipo no manda odómetro' : ''}.`
-  } else if (r) {
-    const parcial = pos.datos.truncado ? ' (al menos)' : ''
-    if (r.lectura == null) {
-      valor = r.recorridoKm > 0 ? `≈ ${f.numero(Math.round(r.recorridoKm))} km` : 'Sin dato'
-      nota = r.recorridoKm > 0 ? `Calculado del GPS, últimos 7 días${parcial}. El equipo no manda odómetro.` : 'El equipo no manda odómetro y no hay recorrido reciente.'
-    } else {
-      nota = `Hoy ${km1(r.hoyKm)} · 7 días ${km1(r.recorridoKm)}${parcial}`
+  const { oficial, dias } = datos.datos ?? {}
+  const lectura = oficial?.km ?? v.km ?? null
+
+  let valor = 'Sin dato'
+  let nota = 'Sin recorrido registrado hoy.'
+  if (dias && dias.length > 0) {
+    const hoyKm = dias.find((d) => d.fecha === hoy)?.km ?? 0
+    const semana = dias.filter((d) => d.fecha >= hoyMenos(7)).reduce((s, d) => s + d.km, 0)
+    valor = `${km1(hoyKm)} hoy`
+    let total = 'Total del carro: sin odómetro registrado'
+    if (lectura != null) {
+      // Lo recorrido desde el día de la lectura (si no hay fecha de lectura, es el odómetro tal cual lo manda el equipo).
+      const desde = oficial?.en ? String(oficial.en).slice(0, 10) : null
+      const despues = desde ? dias.filter((d) => d.fecha >= desde).reduce((s, d) => s + d.km, 0) : 0
+      total = `Total del carro: ${f.km(lectura + despues)}`
+    }
+    nota = `${total} · últimos 7 días ${km1(semana)}`
+  } else if (lectura != null) {
+    valor = f.km(lectura)
+    nota = 'Odómetro registrado.'
+  }
+
+  return (
+    <div className="km-card">
+      <Kpi titulo="Kilometraje" valor={valor} icono="camion" nota={nota} />
+      {puedeRegistrar && lectura == null && (
+        <button type="button" className="pnl-link km-registrar" onClick={() => setRegistrando(true)}>Registrar el odómetro actual →</button>
+      )}
+      {puedeRegistrar && lectura != null && (
+        <button type="button" className="pnl-link km-registrar" onClick={() => setRegistrando(true)}>Corregir el odómetro →</button>
+      )}
+      <ModalOdometro unidad={v} abierto={registrando} alCerrar={() => setRegistrando(false)} alGuardar={() => { setRegistrando(false); setVersion((n) => n + 1) }} />
+    </div>
+  )
+}
+
+/** El día de hace `n` días como AAAA-MM-DD, para sumar los últimos 7 días. */
+function hoyMenos(n) {
+  const d = new Date(Date.now() - (n - 1) * 86400000)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function ModalOdometro({ unidad, abierto, alCerrar, alGuardar }) {
+  const [km, setKm] = useState('')
+  const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  async function confirmar() {
+    const n = Number(String(km).replace(',', '.'))
+    if (!Number.isFinite(n) || n < 0) return setError('Escribe los kilómetros que marca el tablero del carro.')
+    setGuardando(true)
+    setError('')
+    try {
+      await repo.vehiculos.registrarOdometro(unidad.id, n)
+      setKm('')
+      alGuardar()
+    } catch (e) {
+      setError(/todavía no está en el servidor/i.test(e?.message ?? '') ? 'El servidor todavía no permite registrar el odómetro a mano: falta esa ruta. Está pedida en el Issue del servidor.' : (e?.message || 'No se pudo registrar el odómetro.'))
+    } finally {
+      setGuardando(false)
     }
   }
-  return <Kpi titulo="Kilometraje" valor={valor} icono="camion" nota={nota} />
+  return (
+    <Modal titulo={`Odómetro de ${unidad.alias || unidad.placa}`} abierto={abierto} alCerrar={() => { if (!guardando) alCerrar() }} ancho={460}>
+      <Campo etiqueta="Kilómetros que marca el tablero hoy" ayuda="Desde ese número, la web suma lo que el GPS vaya registrando para mostrar el total del carro." error={error}>
+        <input className="pnl-input" inputMode="decimal" value={km} onChange={(e) => setKm(e.target.value)} placeholder="52340" autoFocus />
+      </Campo>
+      <div className="pnl-chips">
+        <button type="button" className="pnl-btn primario" disabled={guardando} onClick={confirmar}>{guardando ? 'Guardando…' : 'Guardar odómetro'}</button>
+        <button type="button" className="pnl-btn sutil" disabled={guardando} onClick={alCerrar}>Cancelar</button>
+      </div>
+    </Modal>
+  )
 }
 
 export default function ExpedienteVehiculo() {
@@ -120,7 +178,9 @@ export default function ExpedienteVehiculo() {
   const [guardado, setGuardado] = useState('')
   const [conductorElegido, setConductorElegido] = useState(null)
   const [asignandoConductor, setAsignandoConductor] = useState(false)
-  useEffect(() => { setConductorElegido(null) }, [id])
+  const [guardandoArea, setGuardandoArea] = useState(false)
+  const [errorArea, setErrorArea] = useState('')
+  useEffect(() => { setConductorElegido(null); setPestana('resumen'); setErrorForma(''); setErrorArea('') }, [id])
 
   // Modal de nueva ODT
   const [modalOdt, setModalOdt] = useState(false)
@@ -160,13 +220,17 @@ export default function ExpedienteVehiculo() {
   // Sin try/catch un rechazo del servidor era una promesa sin capturar:
   // ningun mensaje, el selector volvia a su valor, y parecia que «no dejaba».
   async function cambiarArea(valor) {
-    setErrorForma('')
+    if (guardandoArea) return
+    setGuardandoArea(true)
+    setErrorArea('')
     try {
       await repo.vehiculos.asignarArea(id, valor || null)
       await recargar()
       avisarGuardado()
     } catch (e) {
-      setErrorForma(e.message)
+      setErrorArea(e.message)
+    } finally {
+      setGuardandoArea(false)
     }
   }
 
@@ -272,7 +336,7 @@ export default function ExpedienteVehiculo() {
         {estado === 'ok' && v && (
           <>
             <div className="pnl-grid k4">
-              <KpiKilometraje v={v} />
+              <KpiKilometraje v={v} puedeRegistrar={esGestor(sesion?.perfil)} />
               <Kpi
                 titulo="Índice seguro"
                 valor={v.indiceSeguro}
@@ -303,77 +367,20 @@ export default function ExpedienteVehiculo() {
             {pestana === 'resumen' && (
               <>
                 <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto="470px" ficha={false} /></Tarjeta></div>
-                <Tarjeta titulo="Ficha de la unidad">
-                  <Datos
-                    items={[
-                      { etiqueta: 'Alias', valor: v.alias },
-                      { etiqueta: 'Número interno', valor: v.numero },
-                      { etiqueta: 'Placa', valor: v.placa },
-                      { etiqueta: 'Marca', valor: v.marca },
-                      { etiqueta: 'Modelo', valor: v.modelo },
-                      { etiqueta: 'Año', valor: v.anio ?? '—' },
-                      { etiqueta: 'Tipo', valor: etiqueta('vehiculo_tipo', v.tipo) },
-                      { etiqueta: 'Área', valor: v.areaNombre },
-                      {
-                        etiqueta: 'Conductor principal',
-                        valor: v.conductorPrincipalId ? v.conductorNombre : 'Sin conductor',
-                      },
-                      { etiqueta: 'GPS', valor: v.gps?.modelo ?? 'Sin GPS' },
-                      { etiqueta: 'IMEI', valor: v.gps?.imei ?? 'Sin registrar' },
-                      { etiqueta: 'Seguridad', valor: v.gps?.pinSupport ? 'GPS con PIN' : 'GPS sin PIN' },
-                      ...(v.creadoEn ? [{ etiqueta: 'Alta en el sistema', valor: f.fecha(v.creadoEn) }] : []),
-                      ...((v.conductores?.length ?? 0) > 1 ? [{ etiqueta: 'Otros conductores', valor: v.conductores.slice(1).map((c) => `${c.nombre} (${c.rol})`).join(', ') }] : []),
-                    ]}
-                  />
-                </Tarjeta>
-
-                <Tarjeta
-                  titulo="Asignaciones"
-                  accion={guardado ? <Tag color="verde">{guardado}</Tag> : null}
-                >
-                  <div className="pnl-grid k2">
-                    <Campo etiqueta="Área" ayuda="Ubicación, sector o contrato al que responde la unidad.">
-                      <select
-                        className="pnl-select"
-                        value={v.areaId ?? ''}
-                        onChange={(e) => cambiarArea(e.target.value)}
-                      >
-                        <option value="">Sin área</option>
-                        {(areas.datos ?? []).map((a) => (
-                          <option key={a.id} value={a.id}>
-                            {a.nombre} ({etiqueta('area_tipo', a.tipo)})
-                          </option>
-                        ))}
-                      </select>
-                    </Campo>
-
-                    <Campo etiqueta="Conductor principal" ayuda="Elige al conductor y pulsa Asignar. Se sustituirá la asignación anterior de esta unidad." error={errorForma}>
-                      <select
-                        className="pnl-select"
-                        value={conductorElegido ?? v.conductorPrincipalId ?? ''}
-                        disabled={asignandoConductor}
-                        onChange={(e) => { setConductorElegido(e.target.value); setErrorForma('') }}
-                      >
-                        <option value="">Sin conductor</option>
-                        {(conductores.datos ?? []).map((p) => (
-                          <option key={p.id} value={p.id}>{p.nombre}</option>
-                        ))}
-                      </select>
-                      {conductorElegido !== null && conductorElegido !== (v.conductorPrincipalId ?? '') && (
-                        <div className="pnl-chips">
-                          <button type="button" className="pnl-btn primario" disabled={asignandoConductor} onClick={() => cambiarConductor(conductorElegido)}>
-                            {asignandoConductor ? 'Guardando…' : conductorElegido ? 'Asignar' : 'Quitar asignación'}
-                          </button>
-                          <button type="button" className="pnl-btn sutil" disabled={asignandoConductor} onClick={() => { setConductorElegido(null); setErrorForma('') }}>Cancelar</button>
-                        </div>
-                      )}
-                    </Campo>
-                  </div>
-                </Tarjeta>
-
-
               </>
             )}
+
+            {pestana === 'ficha' && <FichaDatosUnidad
+              unidad={v} areas={areas} puedeEditar={esGestor(sesion?.perfil)} cambiarArea={cambiarArea}
+              guardandoArea={guardandoArea} errorArea={errorArea} guardado={guardado}
+              verUsuarios={() => setPestana('usuarios')}
+            />}
+
+            {pestana === 'usuarios' && <UsuariosUnidad key={v.id}
+              unidad={v} conductores={conductores} puedeEditar={esGestor(sesion?.perfil)}
+              elegido={conductorElegido} elegir={valor => { setConductorElegido(valor); setErrorForma('') }}
+              asignando={asignandoConductor} asignar={cambiarConductor} error={errorForma} guardado={guardado}
+            />}
 
             {/* ---------------- Telemetría ---------------- */}
             {pestana === 'telemetria' && (

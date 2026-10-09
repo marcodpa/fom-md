@@ -307,6 +307,9 @@ export const api = {
   /** Resumen por día de una unidad (kilómetros, posiciones, velocidad máxima), calculado por el servidor. Fechas AAAA-MM-DD. */
   metricasDiarias: (vehicleId, desde, hasta) =>
     pedir(`${CONSOLA}/vehicles/${encodeURIComponent(vehicleId)}/daily-metrics?from=${desde}&to=${hasta}`),
+  /** Registra a mano la lectura del odómetro de una unidad (lo que marca el tablero hoy). */
+  registrarOdometro: (vehicleId, { odometerKm, observedAt }) =>
+    pedir(`${CONSOLA}/vehicles/${encodeURIComponent(vehicleId)}/odometer`, { metodo: 'POST', cuerpo: { odometerKm, observedAt }, idempotente: true }),
   /** Lecturas oficiales del odómetro de una unidad (la más reciente primero). */
   odometroOficial: (vehicleId, limit = 1) => pedir(`${CONSOLA}/vehicles/${encodeURIComponent(vehicleId)}/odometer?limit=${limit}`),
 
@@ -486,8 +489,8 @@ Object.assign(api, {
   resolverEmergencia: (id) => pedir(`${CONSOLA}/emergencies/${id}/resolve`, { metodo: 'POST' }),
 
   // --- Jornadas de conducción ---------------------------------------------
-  jornadas: ({ status, vehicleId, userId, limit = 100 } = {}) =>
-    pedir(`${CONSOLA}/driver-sessions${consulta({ status, vehicleId, userId, limit })}`),
+  jornadas: ({ status, vehicleId, userId, limit = 100, offset = 0 } = {}) =>
+    pedir(`${CONSOLA}/driver-sessions${consulta({ status, vehicleId, userId, limit, offset })}`),
 
   // --- Planes y acciones de mantenimiento ----------------------------------
   planesDeMantenimiento: ({ q, limit = 200 } = {}) =>

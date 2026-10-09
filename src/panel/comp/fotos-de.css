@@ -55,3 +55,4 @@
 .control-unit .fleet-vehicle-image.con-foto.sin-fondo { padding: 0; border: 0; background: none; box-shadow: none; }
 .control-unit .fleet-vehicle-image.con-foto.sin-fondo::before { display: none; }
 .control-unit .fleet-vehicle-image.con-foto.sin-fondo img { height: 66px; filter: none; }
+.km-card { display: grid; gap: 6px; align-content: start; } .km-registrar { justify-self: start; font-size: 13px; background: none; border: 0; cursor: pointer; padding: 0 6px; }

@@ -456,6 +456,11 @@ export const repoApi = {
         .map((m) => ({ fecha: m.metricDate, km: Number(m.distanceMeters ?? 0) / 1000, posiciones: Number(m.positionCount ?? 0), parcial: m.calculationStatus !== 'complete' }))
         .sort((a, b) => b.fecha.localeCompare(a.fecha))
     },
+    /** Registra la lectura actual del odómetro (la que marca el tablero del carro). */
+    async registrarOdometro(vehiculoId, km) {
+      await api.registrarOdometro(vehiculoId, { odometerKm: Number(km), observedAt: new Date().toISOString() })
+      return true
+    },
     /** La lectura OFICIAL más reciente del odómetro (km, como número) o null si nunca hubo una. */
     async odometro(vehiculoId) {
       const r = await api.odometroOficial(vehiculoId, 1)
@@ -482,6 +487,23 @@ export const repoApi = {
         .sort((a, b) => a.alias.localeCompare(b.alias))
     },
 
+    /** Recorrer el directorio paginado: la unidad puede estar después de los primeros 200 registros. */
+    async usuariosAsignados(id) {
+      const asignaciones = []
+      let desplazamiento = 0
+      while (true) {
+        const r = await api.conductores({ desplazamiento })
+        const items = r?.items ?? []
+        asignaciones.push(...items.filter(c => c.vehicleId === id).map(c => ({
+          id: c.userId, nombre: c.displayName, rol: c.role,
+          asignacionId: c.assignmentId, desde: c.validFrom ?? null,
+        })))
+        desplazamiento += items.length
+        if (!items.length || (r?.page?.total != null ? desplazamiento >= r.page.total : items.length < 200)) break
+      }
+      return asignaciones.sort((a, b) => (a.rol === 'principal' ? 0 : 1) - (b.rol === 'principal' ? 0 : 1))
+    },
+
     async obtener(id) {
       const [ficha, recorrido] = await Promise.all([
         api.vehiculo(id),
@@ -498,13 +520,9 @@ export const repoApi = {
       // La ficha del servidor no trae al conductor: vive en las asignaciones.
       // Sin esto el expediente decia «Sin conductor» aunque la asignacion se
       // hubiera guardado, y el selector volvia a vacio: parecia que no dejaba.
-      const delaUnidad = await api
-        .conductores()
-        .then((r) => (r?.items ?? [])
-          .filter((c) => c.vehicleId === id)
-          .sort((a, b) => (a.role === 'principal' ? 0 : 1) - (b.role === 'principal' ? 0 : 1)))
-        .catch(() => [])
-      const asignacion = delaUnidad[0] ?? null
+      let asignacionesError = false
+      const delaUnidad = await repoApi.vehiculos.usuariosAsignados(id).catch(() => { asignacionesError = true; return [] })
+      const asignacion = delaUnidad.find(c => c.rol === 'principal') ?? null
       // El detalle del vehículo no trae su GPS: se une desde la lista de equipos por el id de la unidad.
       const equipo = await api
         .equiposGps()
@@ -512,10 +530,11 @@ export const repoApi = {
         .catch(() => null)
       return {
         ...comoUnidad(ficha.vehicle),
-        conductorPrincipalId: asignacion?.userId ?? null,
-        asignacionId: asignacion?.assignmentId ?? null,
-        conductorNombre: asignacion?.displayName ?? 'Sin asignar',
-        conductores: delaUnidad.map((c) => ({ id: c.userId, nombre: c.displayName, rol: c.role })),
+        conductorPrincipalId: asignacion?.id ?? null,
+        asignacionId: asignacion?.asignacionId ?? null,
+        conductorNombre: asignacion?.nombre ?? 'Sin asignar',
+        conductores: delaUnidad,
+        asignacionesError,
         gps: equipo
           ? {
               modelo: equipo.model ?? 'Equipo GPS',
@@ -1577,10 +1596,11 @@ Object.assign(repoApi, {
 
   /** Jornadas de conducción: quién manejó qué unidad y cuándo. */
   jornadas: {
-    async listar({ estado = '', vehiculoId = '', usuarioId = '' } = {}) {
-      const r = await api.jornadas({ status: estado, vehicleId: vehiculoId, userId: usuarioId })
-      return (r?.items ?? []).map((j) => ({
+    async listar({ estado = '', vehiculoId = '', usuarioId = '', limite = 100, desplazamiento = 0 } = {}) {
+      const r = await api.jornadas({ status: estado, vehicleId: vehiculoId, userId: usuarioId, limit: limite, offset: desplazamiento })
+      const lista = (r?.items ?? []).map((j) => ({
         id: j.id,
+        usuarioId: j.userId ?? j.driverUserId ?? null,
         conductor: j.displayName ?? '—',
         vehiculo: j.vehicleCode,
         placa: j.vehiclePlate ?? null,
@@ -1590,6 +1610,8 @@ Object.assign(repoApi, {
         inicio: j.startedAt,
         fin: j.endedAt ?? null,
       }))
+      lista.pagina = pagina(r)
+      return lista
     },
   },
 
