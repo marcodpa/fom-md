@@ -124,6 +124,17 @@ test('subir sin saber a qué pertenece la foto se rechaza', async () => {
   await assert.rejects(subirImagen(foto(), {}), /a qué pertenece/)
 })
 
+test('contener conserva la foto completa antes de llegar al marco, sin recorte automático', () => {
+  configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
+  for (const [ancho, alto] of [[1000, 700], [640, 440], [140, 112]]) {
+    const url = urlDe('fom/vehiculo/v1/2', ancho, alto, { ajuste: 'contener' })
+    assert.match(url, new RegExp(`w_${ancho},h_${alto},c_limit/`))
+    assert.doesNotMatch(url, /c_fill|g_auto/)
+  }
+  // Los avatares mantienen su recorte cuadrado habitual.
+  assert.match(urlDe('fom/avatar/u1/2', 48, 48), /w_48,h_48,c_fill,g_auto/)
+})
+
 test('la URL es directa y liviana, y el recorte de fondo se apaga solo si falla', () => {
   configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
   assert.match(urlDe('fom/vehiculo/v1/2', 300, 200), /^https:\/\/res\.cloudinary\.com\/demo\/image\/upload\/f_auto,q_auto,w_300,h_200,c_fill,g_auto\/fom\/vehiculo\/v1\/2\?v=\d+$/)

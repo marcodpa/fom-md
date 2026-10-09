@@ -26,33 +26,25 @@
 .fd-huecos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .fd-hueco { display: grid; gap: 10px; align-content: start; }
 .fd-marco { position: relative; aspect-ratio: 4 / 3; border: 1px solid var(--e-borde); border-radius: 12px; overflow: hidden; background: var(--e-sup-baja); display: grid; place-items: center; }
-.fd-marco img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fd-marco img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .fd-vacio-foto { color: var(--e-texto-3); font-size: 13px; }
-.fd-ampliar { position: absolute; right: 8px; bottom: 8px; padding: 4px 10px; border: 0; border-radius: 999px; background: rgba(10, 18, 36, .75); color: #fff; font: inherit; font-size: 12px; cursor: zoom-in; }
+.fd-ampliar { position: absolute; right: 8px; bottom: 8px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 999px; background: rgba(10, 18, 36, .85); color: #fff; font: inherit; font-size: 12px; cursor: zoom-in; }
 .fd-error-linea { color: var(--e-peligro); font-size: 12px; }
-/* Foto real de la unidad en la ficha: marco uniforme 3:2, recortada con enfoque automático (sale igual de ordenada con cualquier foto) */
-.fleet-vehicle-image.con-foto { background: none; border-bottom: 0; margin: 12px 0 8px; }
-.fleet-vehicle-image.con-foto img { height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 16px; box-shadow: 0 10px 30px -14px rgba(0, 0, 0, .6); }
-.control-unit .fleet-vehicle-image.con-foto img { height: 66px; aspect-ratio: auto; border-radius: 8px; box-shadow: none; }
-/* Con el fondo quitado: el carro entero en un ESCENARIO de FOM (luz azul, piso con sombra y las flechas de la marca) */
-.fleet-vehicle-image.con-foto.sin-fondo {
-  position: relative; overflow: hidden; margin: 12px 0 14px; padding: 18px 10px 6px; border: 1px solid rgba(120, 170, 255, .22); border-radius: 18px;
-  background:
-    radial-gradient(ellipse 62% 70% at 50% 30%, rgba(60, 130, 255, .38), transparent 72%),
-    radial-gradient(ellipse 58% 13% at 50% 80%, rgba(0, 0, 0, .6), transparent 72%),
-    linear-gradient(180deg, #16264a 0%, #0b1530 62%, #070e22 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 14px 34px -18px rgba(0, 0, 0, .7);
+/* La foto se adapta al marco, no al revés. También para verticales, panorámicas y PNG transparentes. */
+.fleet-vehicle-image.fleet-photo { margin: 12px 0 14px; border: 0; background: none; }
+.fleet-photo-stage { position: relative; display: grid; place-items: center; width: 100%; height: 180px; padding: 8px; overflow: hidden; border: 1px solid var(--e-borde, #263b4d); border-radius: 18px; background: var(--e-sup-baja, #0f141b); color: var(--e-texto, #f3f5f8); cursor: zoom-in; }
+.fleet-photo-stage:disabled { cursor: default; opacity: 1; }
+.fleet-photo-stage:not(:disabled):hover { border-color: var(--e-borde-fuerte, #39424f); }
+.fleet-vehicle-image.fleet-photo .fleet-photo-stage img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; object-position: center; aspect-ratio: auto; border-radius: 10px; box-shadow: none; filter: none; }
+.fleet-photo-zoom { position: absolute; right: 8px; bottom: 8px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--e-sup, #141a22); color: var(--e-texto, #f3f5f8); pointer-events: none; }
+.fleet-vehicle-image .fleet-photo-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; padding: 4px 0 0; text-align: left; font-size: 12px; color: var(--e-texto-2, #b7c7d9); }
+.fleet-photo-footer .pnl-btn { min-height: 44px; padding: 6px 10px; font-size: 12px; flex: none; }
+.fleet-photo-footer .fd-error-linea { flex-basis: 100%; }
+.fleet-photo-footer { flex-wrap: wrap; }
+.pnl-resumen-unidad .fleet-photo-stage { height: 124px; }
+@media (max-width: 600px) {
+  .control-unit .fleet-photo-stage { height: 66px; padding: 4px; border-radius: 12px; }
+  .control-unit .fleet-photo-footer { display: none; }
+  .control-unit .fleet-photo-zoom { width: 24px; height: 24px; right: 4px; bottom: 4px; }
 }
-/* Las flechas de FOM, muy tenues, de fondo */
-.fleet-vehicle-image.con-foto.sin-fondo::before {
-  content: ''; position: absolute; left: 6%; top: 10%; width: 120px; height: 72px; opacity: .1; pointer-events: none;
-  background: linear-gradient(135deg, #5aa2ff, #2f6bff);
-  -webkit-mask: url(/brand/fom-symbol.svg) center / contain no-repeat;
-  mask: url(/brand/fom-symbol.svg) center / contain no-repeat;
-}
-.fleet-vehicle-image.con-foto.sin-fondo img { position: relative; z-index: 1; height: 190px; width: 100%; aspect-ratio: auto; object-fit: contain; border-radius: 0; box-shadow: none; filter: drop-shadow(0 16px 14px rgba(0, 0, 0, .55)); }
-.fleet-vehicle-image.con-foto.sin-fondo figcaption { position: relative; z-index: 1; color: rgba(190, 210, 245, .7); }
-.control-unit .fleet-vehicle-image.con-foto.sin-fondo { padding: 0; border: 0; background: none; box-shadow: none; }
-.control-unit .fleet-vehicle-image.con-foto.sin-fondo::before { display: none; }
-.control-unit .fleet-vehicle-image.con-foto.sin-fondo img { height: 66px; filter: none; }
 .km-card { display: grid; gap: 6px; align-content: start; } .km-registrar { justify-self: start; font-size: 13px; background: none; border: 0; cursor: pointer; padding: 0 6px; }

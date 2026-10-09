@@ -669,3 +669,7 @@ El menú y la ruta `/panel/mapa` están disponibles para el área conductor. Se 
 - **Don't** representar como exitosa una mutación de alertas antes de la confirmación del servidor. Las rutas por empresa del #633 conservan el tenant objetivo y la identidad real; los errores se muestran en la bandeja.
 
 Uso, QA y límites de entrega: [docs/DISENO-APARIENCIA.md](docs/DISENO-APARIENCIA.md). Revisión de acabado: [.impeccable/review/apariencia/review-v3.md](.impeccable/review/apariencia/review-v3.md), con veredicto `ship`.
+
+### Fotografías de unidades y documentos
+
+Las fotos se muestran completas, centradas y nítidas sobre la superficie baja del tema. El marco conserva su altura independientemente de la proporción del archivo: 180 px en fichas, 124 px en Resumen y 66 px en la miniatura del mapa móvil. Cloudinary limita la resolución con `c_limit` y la web usa `object-fit: contain`; los avatares conservan su recorte. Ampliar abre el original fuera del contenedor desplazable, con Escape y restauración de foco. Véase [docs/DISENO-FOTOS.md](docs/DISENO-FOTOS.md).

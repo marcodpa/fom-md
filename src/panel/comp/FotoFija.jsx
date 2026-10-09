@@ -8,7 +8,7 @@ import { alCambiarFotos, cloudinaryConfigurado, desactivarQuitarFondo, huboSubid
 const REINTENTOS = 12
 const ESPERA_MS = 2000
 
-export default function FotoFija({ publicId, ancho = 480, alto = 0, alt = '', className, style, children, alExistir, sinFondo = false }) {
+export default function FotoFija({ publicId, ancho = 480, alto = 0, alt = '', className, style, children, alExistir, sinFondo = false, ajuste = 'recortar' }) {
   const [id, setId] = useState(null) // dirección completa de la versión vigente
   const [fallo, setFallo] = useState(false)
   const [cargada, setCargada] = useState(false)
@@ -40,7 +40,7 @@ export default function FotoFija({ publicId, ancho = 480, alto = 0, alt = '', cl
     <>
       <img
         key={`${id}-${intento}-${usaSinFondo}`}
-        src={`${urlDe(id, ancho, alto, { sinFondo })}${intento ? `&r=${intento}` : ''}`}
+        src={`${urlDe(id, ancho, alto, { sinFondo, ajuste })}${intento ? `&r=${intento}` : ''}`}
         alt={alt}
         className={className}
         style={cargada ? style : { ...style, display: 'none' }}

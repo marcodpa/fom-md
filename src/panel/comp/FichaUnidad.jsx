@@ -1,11 +1,8 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import { estadoUnidad } from '../datos/estadoUnidad'
-import { etiquetas, ids } from '../datos/cloudinary'
-import FotoFija from './FotoFija'
-import CambiarFoto from './CambiarFoto'
+import FotoUnidad from './FotoUnidad'
 import { useSesion } from '../useSesion'
 import { esGestor } from '../roles'
 import '../../styles/fleet-map.css'
@@ -37,10 +34,7 @@ function datosDe(v) {
   return filas.filter(([, valor]) => valor != null && valor !== '')
 }
 
-export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, conEnlace = true, alVerRecorrido, viendoRecorrido = false }) {
-  // La foto principal de la unidad (la más reciente con su etiqueta en Cloudinary); sin ella, la ilustración.
-  const [hayFoto, setHayFoto] = useState(false)
-  const [sinFondo, setSinFondo] = useState(false)
+export default function FichaUnidad({ unidad: v, variante = 'panel', conCabecera = true, alCerrar, conEnlace = true, alVerRecorrido, viendoRecorrido = false }) {
   const puedeEditar = esGestor(useSesion()?.perfil)
   if (!v) return null
   const estado = estadoUnidad(v)
@@ -52,20 +46,14 @@ export default function FichaUnidad({ unidad: v, variante = 'panel', alCerrar, c
     ['pin', 'Ubicación', v.ubicacionTexto || (Number.isFinite(v.lat) && Number.isFinite(v.lng) ? `${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}` : 'Sin posición disponible')],
   ]
   return <article className={`fleet-card ${variante}`} aria-label={`Vehículo ${v.placa || v.alias || ''}`}>
-    <header className="fleet-card-heading"><h2>Vehículo seleccionado</h2>
+    {conCabecera && <header className="fleet-card-heading"><h2>Vehículo seleccionado</h2>
       {alCerrar && <button type="button" className="fleet-card-close" aria-label="Cerrar ficha del vehículo" onClick={alCerrar}><Icono nombre="cerrar" tam={20} /></button>}
-    </header>
+    </header>}
     <div className="fleet-card-content">
     <span className={`fleet-status ${estado.color}`}><i />{estado.texto}</span>
     <h3 className="fleet-plate">{v.placa || 'Sin placa'}</h3>
     {descripcion && <p className="fleet-description">{descripcion}</p>}
-    <figure className={`fleet-vehicle-image${hayFoto ? ' con-foto' : ''}${sinFondo ? ' sin-fondo' : ''}`}>
-      <FotoFija sinFondo publicId={v?.id ? ids.vehiculo(v.id) : null} ancho={900} alto={600} alt={`Foto de ${v.placa || v.alias || 'la unidad'}`} alExistir={(hay, recortada) => { setHayFoto(hay); setSinFondo(hay && recortada) }}>
-        <img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" />
-      </FotoFija>
-      <figcaption>{hayFoto ? 'Foto de la unidad' : 'Imagen de referencia'}</figcaption>
-      {puedeEditar && v?.id && <CambiarFoto publicId={ids.vehiculo(v.id)} etiqueta={etiquetas.vehiculo(v.id)} titulo={v.placa || v.alias || ''} hayFoto={hayFoto} />}
-    </figure>
+    <FotoUnidad key={v.id} unidad={v} puedeEditar={puedeEditar} />
     <div className="fleet-speed"><Icono nombre="velocidad" tam={25} /><strong>{v.velocidadKmh == null ? 'Sin velocidad GPS' : f.numero(v.velocidadKmh)}{v.velocidadKmh != null && <small> km/h</small>}</strong></div>
     <dl className="fleet-facts">{filas.map(([icono, etiqueta, valor]) => <div key={etiqueta}><Icono nombre={icono} tam={19} /><div><dt>{etiqueta}</dt><dd>{valor}</dd></div></div>)}</dl>
     <dl className="fleet-metrics"><div><Icono nombre="mapa" tam={22} /><div><dt>Odómetro</dt><dd>{v.km == null ? 'Sin dato' : f.km(v.km)}</dd></div></div><div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg><div><dt>GPS</dt><dd>{v.conectado === true ? 'Conectado' : v.conectado === false ? 'Sin señal' : 'Sin dato'}</dd></div></div></dl>

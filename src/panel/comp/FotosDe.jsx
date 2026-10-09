@@ -28,6 +28,7 @@ export default function FotosDe({ huecos, permiteSubir = true }) {
             <b>{h.titulo}</b>
             <div className="fd-marco">
               <FotoFija
+                ajuste="contener"
                 publicId={h.publicId}
                 ancho={640}
                 alto={440}

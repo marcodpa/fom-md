@@ -135,15 +135,17 @@ export function desactivarQuitarFondo() {
 }
 
 /**
- * La URL pública de una foto por su dirección fija, ya recortada y comprimida por Cloudinary. Con `sinFondo`, el
+ * La URL pública optimizada. `ajuste: 'contener'` limita el tamaño sin recortar la imagen ni aumentar la resolución.
+ * El valor predeterminado conserva el recorte de los avatares. Con `sinFondo`, el
  * carro viene recortado sobre fondo transparente (sin recorte al marco: se respeta su silueta completa).
  */
-export function urlDe(publicId, ancho = 480, alto = 0, { sinFondo = false } = {}) {
+export function urlDe(publicId, ancho = 480, alto = 0, { sinFondo = false, ajuste = 'recortar' } = {}) {
   if (!nube || !publicId) return ''
   if (sinFondo && fondoDisponible) {
     return `https://res.cloudinary.com/${nube}/image/upload/e_background_removal/f_auto,q_auto,w_${ancho},c_limit/${publicId}?v=${version}`
   }
-  const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`, 'c_fill', 'g_auto'] : ['c_limit'])].join(',')
+  const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`] : []),
+    ...(alto && ajuste !== 'contener' ? ['c_fill', 'g_auto'] : ['c_limit'])].join(',')
   return `https://res.cloudinary.com/${nube}/image/upload/${t}/${publicId}?v=${version}`
 }
 

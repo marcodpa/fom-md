@@ -206,7 +206,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
             {unidades.map(u => <option key={u.id} value={u.id}>{u.alias} · {u.placa}</option>)}
           </select>
         )}>
-          {seleccion ? <FichaUnidad unidad={seleccion} /> : <Vacio icono="camion" titulo="Sin unidades todavía" texto="Las unidades registradas aparecerán aquí." accion={<Link className="pnl-btn" to="/panel/flota">Ver vehículos</Link>} />}
+          {seleccion ? <FichaUnidad unidad={seleccion} conCabecera={false} /> : <Vacio icono="camion" titulo="Sin unidades todavía" texto="Las unidades registradas aparecerán aquí." accion={<Link className="pnl-btn" to="/panel/flota">Ver vehículos</Link>} />}
         </Tarjeta>
         </div>
       </div>

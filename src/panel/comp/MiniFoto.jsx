@@ -6,7 +6,7 @@ import { ids } from '../datos/cloudinary'
 export default function MiniFoto({ vehiculoId, alto = 56, ancho = 70, children }) {
   return (
     <span style={{ display: 'inline-flex', width: ancho, height: alto, flex: 'none' }}>
-      <FotoFija publicId={vehiculoId ? ids.vehiculo(vehiculoId) : null} ancho={ancho * 2} alto={alto * 2} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }}>
+      <FotoFija publicId={vehiculoId ? ids.vehiculo(vehiculoId) : null} ancho={ancho * 2} alto={alto * 2} ajuste="contener" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }}>
         {children}
       </FotoFija>
     </span>
