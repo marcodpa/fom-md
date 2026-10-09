@@ -88,6 +88,15 @@
         "5193"
       ],
       "port": 5193
+    },
+    {
+      "name": "fom-rapido",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "rapido"
+      ],
+      "port": 4173
     }
   ]
 }

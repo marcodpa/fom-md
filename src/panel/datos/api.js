@@ -112,6 +112,15 @@ async function pedirUnaVez(rutaPedida, { metodo = 'GET', cuerpo, señal, idempot
     throw error
   }
 
+  // Tope de tiempo. Sin esto, una petición que el servidor nunca contesta
+  // deja la pantalla en «cargando» para siempre, y como `pedir` reutiliza la
+  // lectura en curso, todo intento posterior de esa misma ruta hereda el
+  // cuelgue. Las lecturas esperan 25 s; las escrituras, 60 s.
+  const mutacionTope = !['GET', 'HEAD', 'OPTIONS'].includes(metodo.toUpperCase())
+  const control = new AbortController()
+  const tope = setTimeout(() => control.abort('tope'), mutacionTope ? 60_000 : 25_000)
+  if (señal) señal.addEventListener('abort', () => control.abort(), { once: true })
+
   let respuesta
   try {
     const mutacion = !['GET', 'HEAD', 'OPTIONS'].includes(metodo.toUpperCase())
@@ -125,16 +134,21 @@ async function pedirUnaVez(rutaPedida, { metodo = 'GET', cuerpo, señal, idempot
           } : {}),
       },
       body: cuerpo ? JSON.stringify(cuerpo) : undefined,
-      signal: señal,
+      signal: control.signal,
       // En desarrollo la guarda el proxy; publicada, la cookie HttpOnly viaja
       // solo al mismo origen. Nunca se habilitan credenciales cross-origin.
       credentials: 'same-origin',
     })
   } catch (error) {
+    clearTimeout(tope)
+    if (control.signal.reason === 'tope') {
+      throw new Error('El servidor tardó demasiado en responder. Revisa la conexión e inténtalo de nuevo.')
+    }
     if (error.name === 'AbortError') throw error
     throw new Error(traducir(0))
   }
 
+  clearTimeout(tope)
   const texto = await respuesta.text()
   let datos = null
   if (texto) {

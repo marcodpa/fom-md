@@ -212,6 +212,11 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: { exclude: ['maplibre-gl'] },
     // 5173 por defecto; si el entorno impone un PORT (varias sesiones a la vez),
     // se respeta para no chocar con otro servidor ya levantado.
+    // `vite preview` sirve el panel COMPILADO (tres archivos en vez de ciento
+    // dieciséis) con el mismo puente a producción: es la forma rápida de usarlo
+    // en la máquina sin esperar a que el servidor de desarrollo transforme cada
+    // módulo. `npm run rapido`.
+    preview: { port: 4173, proxy: { '/fom-api': puenteFom(env) } },
     server: {
       port: Number(process.env.PORT) || 5173,
       proxy: { '/fom-api': puenteFom(env) },
