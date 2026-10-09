@@ -87,3 +87,7 @@ Lo no auditado a fondo: la ruta `POST /vehicles/:id/work-orders` (delega al
 servicio móvil), las lecturas de emergencias y de score de manejo, y la
 existencia de triggers de base que rellenen alguno de los campos del punto 4
 (se comprobó solo en tres casos).
+
+---
+
+Issue para Juan con todo esto, en su repo: https://github.com/juancpachecog/fom-core/issues/642
