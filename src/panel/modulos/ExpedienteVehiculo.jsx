@@ -81,18 +81,27 @@ function KpiKilometraje({ v }) {
   // cálculo del recorrido.
   const oficial = useDatos(() => (repo.vehiculos.odometro ? repo.vehiculos.odometro(v.id).catch(() => null) : Promise.resolve(null)), [v.id])
   const lecturaKm = oficial.datos?.km ?? v.km
+  // Los kilómetros por día los calcula el servidor con todas las posiciones del día: es la cifra estable. Solo si no
+  // la entrega (por ejemplo en demostración) se calcula desde las posiciones que llegan al navegador.
+  const dia = useDatos(() => (repo.vehiculos.kmPorDia ? repo.vehiculos.kmPorDia(v.id, 7).catch(() => null) : Promise.resolve(null)), [v.id])
   const hoy = f.hoyISO()
   const r = pos.estado === 'ok' ? resumenKm({ lectura: lecturaKm, puntos: pos.datos.puntos, hoy }) : null
-  const aprox = (n) => `${f.numero(Math.round(n))} km`
+  const km1 = (n) => `${n < 10 ? n.toFixed(1).replace('.', ',') : f.numero(Math.round(n))} km`
+  const delServidor = dia.estado === 'ok' && dia.datos && dia.datos.length > 0 ? dia.datos : null
   let valor = f.km(lecturaKm)
-  let nota = `Alta: ${f.fecha(v.creadoEn)}`
-  if (r) {
+  let nota = v.creadoEn ? `Alta: ${f.fecha(v.creadoEn)}` : ''
+  if (delServidor) {
+    const hoyKm = delServidor.find((d) => d.fecha === hoy)?.km ?? 0
+    const semana = delServidor.reduce((s, d) => s + d.km, 0)
+    if (lecturaKm == null) valor = `≈ ${f.numero(Math.round(semana))} km`
+    nota = `Hoy ${km1(hoyKm)} · últimos 7 días ${km1(semana)}. Calculado por el servidor con el GPS${lecturaKm == null ? '; el equipo no manda odómetro' : ''}.`
+  } else if (r) {
     const parcial = pos.datos.truncado ? ' (al menos)' : ''
     if (r.lectura == null) {
-      valor = r.recorridoKm > 0 ? `≈ ${aprox(r.recorridoKm)}` : 'Sin dato'
+      valor = r.recorridoKm > 0 ? `≈ ${f.numero(Math.round(r.recorridoKm))} km` : 'Sin dato'
       nota = r.recorridoKm > 0 ? `Calculado del GPS, últimos 7 días${parcial}. El equipo no manda odómetro.` : 'El equipo no manda odómetro y no hay recorrido reciente.'
     } else {
-      nota = `Hoy ${aprox(r.hoyKm)} · 7 días ${aprox(r.recorridoKm)}${parcial}`
+      nota = `Hoy ${km1(r.hoyKm)} · 7 días ${km1(r.recorridoKm)}${parcial}`
     }
   }
   return <Kpi titulo="Kilometraje" valor={valor} icono="camion" nota={nota} />

@@ -304,6 +304,9 @@ export const api = {
   scoresManejo: (days = 7) => pedir(`${CONSOLA}/driving-scores?days=${days}`),
   eventosManejoDe: (userId, days = 7, limit = 50) =>
     pedir(`${CONSOLA}/drivers/${encodeURIComponent(userId)}/driving-events?days=${days}&limit=${limit}`),
+  /** Resumen por día de una unidad (kilómetros, posiciones, velocidad máxima), calculado por el servidor. Fechas AAAA-MM-DD. */
+  metricasDiarias: (vehicleId, desde, hasta) =>
+    pedir(`${CONSOLA}/vehicles/${encodeURIComponent(vehicleId)}/daily-metrics?from=${desde}&to=${hasta}`),
   /** Lecturas oficiales del odómetro de una unidad (la más reciente primero). */
   odometroOficial: (vehicleId, limit = 1) => pedir(`${CONSOLA}/vehicles/${encodeURIComponent(vehicleId)}/odometer?limit=${limit}`),
 

@@ -442,6 +442,20 @@ export const repoApi = {
   },
 
   vehiculos: {
+    /**
+     * Kilómetros recorridos por día, calculados por el servidor con TODAS las posiciones del día (la lectura de
+     * posiciones solo entrega 1.000 por consulta, unas 11 horas, y por eso el cálculo desde el navegador se movía).
+     * Devuelve los últimos `dias` días, del más reciente al más antiguo.
+     */
+    async kmPorDia(vehiculoId, dias = 7) {
+      const fecha = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      const hasta = new Date()
+      const desde = new Date(Date.now() - (dias - 1) * 86400000)
+      const r = await api.metricasDiarias(vehiculoId, fecha(desde), fecha(hasta))
+      return (r?.items ?? [])
+        .map((m) => ({ fecha: m.metricDate, km: Number(m.distanceMeters ?? 0) / 1000, posiciones: Number(m.positionCount ?? 0), parcial: m.calculationStatus !== 'complete' }))
+        .sort((a, b) => b.fecha.localeCompare(a.fecha))
+    },
     /** La lectura OFICIAL más reciente del odómetro (km, como número) o null si nunca hubo una. */
     async odometro(vehiculoId) {
       const r = await api.odometroOficial(vehiculoId, 1)

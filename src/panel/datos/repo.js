@@ -196,6 +196,7 @@ const repo = HAY_API
         listar: repoApi.vehiculos.listar,
         obtener: repoApi.vehiculos.obtener,
         odometro: repoApi.vehiculos.odometro,
+        kmPorDia: repoApi.vehiculos.kmPorDia,
         // Alta, edición, área y conductor: reales desde el #219.
         ...repoApi.vehiculosEscritura,
       },
