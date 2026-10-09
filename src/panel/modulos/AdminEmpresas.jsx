@@ -10,6 +10,8 @@ import {
 import * as f from '../datos/formato'
 import { COMPANY_TIPO, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
+import LogoEmpresa from '../comp/LogoEmpresa'
+import { subirLogoDeEmpresa } from '../datos/logos'
 import './empresas.css'
 
 // ============================================================
@@ -76,6 +78,8 @@ export default function AdminEmpresas() {
       setAviso(e.message)
     } finally { setOcupado(false) }
   }
+  // Cada empresa tiene su logo y se ve de una vez al entrar; FOM Operations usa el de FOM.
+  const subirLogo = (e, archivo) => accion(() => subirLogoDeEmpresa(e.id, archivo), `Logo de ${e.nombre} guardado.`)
 
   const alternarServicio = (e) => {
     const verbo = e.servicioActivo ? 'suspender' : 'reactivar'
@@ -106,7 +110,7 @@ export default function AdminEmpresas() {
         {estado === 'cargando' && datos === null && <Cargando filas={6} />}
         {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {datos !== null && (
-          <Contenido
+          <Contenido subirLogo={subirLogo}
             lista={lista}
             todas={datos}
             q={q}
@@ -133,13 +137,13 @@ export default function AdminEmpresas() {
   )
 }
 
-function Contenido({ lista, todas, q, setQ, tipo, setTipo, servicio, setServicio, ocupado, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando, seleccionId, setSeleccionId }) {
+function Contenido({ lista, todas, q, setQ, tipo, setTipo, servicio, setServicio, ocupado, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando, seleccionId, setSeleccionId, subirLogo }) {
   const seleccion = lista.find(e => e.id === seleccionId) ?? lista[0]
   const operativas = todas.filter(e => !e.respaldo)
   const activas = operativas.filter(e => e.servicioActivo).length
   const deuda = operativas.length && operativas.every(e => Number.isFinite(e.deuda)) ? operativas.reduce((a, e) => a + e.deuda, 0) : null
   const limpiar = () => { setQ(''); setTipo(''); setServicio('') }
-  const fichaProps = { ocupado, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando }
+  const fichaProps = { subirLogo, ocupado, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando }
 
   return <>
     <section className="emp-resumen" aria-label="Resumen de las empresas disponibles">
@@ -157,7 +161,7 @@ function Contenido({ lista, todas, q, setQ, tipo, setTipo, servicio, setServicio
         </div>
         {lista.length ? <ul className="emp-lista">{lista.map(e => <li key={e.id}>
           <button type="button" className={`emp-fila${seleccion?.id === e.id ? ' seleccionada' : ''}`} aria-pressed={seleccion?.id === e.id} aria-label={`Ver detalles de ${e.nombre}`} onClick={()=>setSeleccionId(e.id)}>
-            <span className="emp-simbolo"><Icono nombre={e.tipo === 'personal' ? 'gente' : 'empresa'} tam={23} /></span>
+            <span className="emp-simbolo"><LogoEmpresa empresaId={e.id} nombre={e.nombre} respaldo={<Icono nombre={e.tipo === 'personal' ? 'gente' : 'empresa'} tam={23} />} /></span>
             <span className="emp-fila-identidad"><strong>{e.nombre}</strong><span>{e.respaldo ? 'Respaldo del sistema' : e.tipoEtiqueta || etiqueta('company_tipo',e.tipo)}{e.rif ? ` · ${e.rif}` : ''}</span><span>{e.contacto || e.email || e.telefono || 'Sin contacto registrado'}</span></span>
             <span className="emp-fila-estado"><Tag color={e.respaldo ? 'gris' : e.servicioActivo ? 'verde' : 'rojo'}>{e.respaldo ? 'Respaldo' : e.servicioActivo ? 'Activo' : 'Suspendido'}</Tag><span>{Number.isFinite(e.vehiculos) ? `${e.vehiculos} vehículos` : 'Flota sin dato'}</span></span>
             <Icono nombre="flecha" tam={18} />
@@ -171,9 +175,9 @@ function Contenido({ lista, todas, q, setQ, tipo, setTipo, servicio, setServicio
   </>
 }
 
-function FichaEmpresa({empresa:e, ocupado, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando}) {
+function FichaEmpresa({empresa:e, ocupado, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando, subirLogo}) {
   return <>
-    <div className="emp-ficha-identidad"><span className="emp-simbolo grande"><Icono nombre="empresa" tam={30} /></span><div><h2>{e.nombre}</h2><p>{e.respaldo ? 'Respaldo del sistema' : e.tipoEtiqueta || etiqueta('company_tipo',e.tipo)}</p></div></div>
+    <div className="emp-ficha-identidad"><span className="emp-simbolo grande"><LogoEmpresa empresaId={e.id} nombre={e.nombre} respaldo={<Icono nombre={e.tipo === 'personal' ? 'gente' : 'empresa'} tam={30} />} /></span><div><h2>{e.nombre}</h2><p>{e.respaldo ? 'Respaldo del sistema' : e.tipoEtiqueta || etiqueta('company_tipo',e.tipo)}</p></div></div>
     <Tag color={e.respaldo ? 'gris' : e.servicioActivo ? 'verde' : 'rojo'}>{e.respaldo ? 'Cuenta de respaldo' : e.servicioActivo ? 'Servicio activo' : 'Servicio suspendido'}</Tag>
     <button type="button" className="pnl-btn primario emp-entrar" disabled={ocupado} onClick={()=>gestionar(e)}><Icono nombre="empresa" tam={18} />{entrando ? 'Comprobando acceso…' : 'Entrar a empresa'}<Icono nombre="flecha" tam={18} /></button>
     <p className="emp-ayuda">Abre su panel para gestionar vehículos, usuarios y la operación según tus permisos.</p>
@@ -181,7 +185,7 @@ function FichaEmpresa({empresa:e, ocupado, alternarServicio, eliminar, abrirPred
     <section className="emp-contacto"><h3>Información de la empresa</h3><dl>{[
       ['RIF',e.rif || 'Sin registrar'],['Contacto',e.contacto || 'Sin registrar'],['Correo',e.email || 'Sin registrar'],['Teléfono',e.telefono || 'Sin registrar'],['Saldo',Number.isFinite(e.deuda) ? f.moneda(e.deuda) : 'No disponible'],
     ].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>
-    {!e.respaldo && <section className="emp-gestion"><h3>Administración</h3>{e.tipo === 'estandar' && <button type="button" className="pnl-btn" disabled={ocupado} onClick={()=>abrirPredefinidas(e)}><Icono nombre="gente" tam={17} />Compañías asociadas</button>}<button type="button" className="pnl-btn" disabled={ocupado} onClick={()=>alternarServicio(e)}><Icono nombre={e.servicioActivo ? 'reloj' : 'check'} tam={17} />{e.servicioActivo ? 'Suspender servicio' : 'Reactivar servicio'}</button><details><summary>Otras acciones</summary><p>Retirar una empresa suspende su servicio y conserva el historial.</p><button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={()=>eliminar(e)}>Retirar de operación</button></details></section>}
+    {!e.respaldo && <section className="emp-gestion"><h3>Administración</h3><label className={`pnl-btn${ocupado ? ' deshabilitado' : ''}`}><Icono nombre="mas" tam={17} />Subir logo<input type="file" accept="image/png,image/jpeg,image/webp" hidden disabled={ocupado} onChange={(ev) => { const a = ev.target.files?.[0]; ev.target.value = ''; if (a) subirLogo(e, a) }} /></label>{e.tipo === 'estandar' && <button type="button" className="pnl-btn" disabled={ocupado} onClick={()=>abrirPredefinidas(e)}><Icono nombre="gente" tam={17} />Compañías asociadas</button>}<button type="button" className="pnl-btn" disabled={ocupado} onClick={()=>alternarServicio(e)}><Icono nombre={e.servicioActivo ? 'reloj' : 'check'} tam={17} />{e.servicioActivo ? 'Suspender servicio' : 'Reactivar servicio'}</button><details><summary>Otras acciones</summary><p>Retirar una empresa suspende su servicio y conserva el historial.</p><button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={()=>eliminar(e)}>Retirar de operación</button></details></section>}
   </>
 }
 

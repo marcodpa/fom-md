@@ -77,3 +77,10 @@
 @media(max-width:1200px) { .emp-espacio { grid-template-columns: 1fr; } .emp-ficha { display: none; } .emp-ficha-inline { display: block; padding: 24px; background: var(--e-sup-baja); border-top: 1px solid var(--e-borde); } .emp-ficha-inline > .pnl-btn.sutil { margin-top: 16px; } .emp-contacto dl > div { grid-template-columns: 120px minmax(0,1fr); } .emp-resumen > div { padding: 0 18px; gap: 10px; } }
 @media(max-width:600px) { .emp-resumen { grid-template-columns: 1fr 1fr; row-gap: 22px; } .emp-resumen > div:nth-child(2) { border: 0; } .emp-resumen svg { display: none; } .emp-resumen strong { font-size: 24px; } .emp-toolbar { padding: 20px; } .emp-toolbar .pnl-buscar { max-width: none; min-width: 0; flex-basis: 100%; } .emp-filtros { padding: 0 20px 20px; } .emp-filtros .pnl-chips { gap: 6px; } .emp-root .pnl-chip { padding: 9px 12px; } .emp-estado-filtro { width: 100%; } .emp-estado-filtro .pnl-input { flex: 1; min-width: 0; } .emp-fila { padding: 20px; grid-template-columns: 36px minmax(0,1fr) 18px; gap: 12px; } .emp-fila > svg { grid-column: 3; grid-row: 1; } .emp-fila-estado { grid-column: 2; justify-items: start; display: flex; align-items: center; flex-wrap: wrap; } .emp-simbolo { width: 36px; height: 36px; } .emp-ficha-inline { padding: 20px; } .emp-pie { padding: 16px 20px; } .emp-contacto dl > div { grid-template-columns: 76px minmax(0,1fr); } .emp-form-grid { grid-template-columns: 1fr; } .emp-form-acciones { flex-wrap: wrap; } }
 @media(prefers-reduced-motion:reduce) { .emp-fila { transition: none; } }
+
+/* Logo de la empresa dentro del símbolo: llena la caja; el de FOM va centrado. */
+.emp-simbolo { overflow: hidden; }
+.emp-simbolo .logo-empresa { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
+.emp-simbolo .logo-fom { width: 62%; height: auto; }
+.emp-gestion label.pnl-btn { cursor: pointer; }
+.emp-gestion label.pnl-btn.deshabilitado { opacity: 0.5; pointer-events: none; }
