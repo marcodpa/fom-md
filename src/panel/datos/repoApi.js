@@ -1644,7 +1644,8 @@ Object.assign(repoApi, {
         detail: detalle || undefined,
         relevance: relevancia,
         dueOdometerKm: venceKm === undefined || venceKm === null || venceKm === '' ? undefined : Number(venceKm),
-        dueAt: venceEn ? new Date(venceEn).toISOString() : undefined,
+        // Mediodía UTC: a medianoche UTC, en Venezuela (UTC-4) la fecha se veía un día antes.
+        dueAt: venceEn ? new Date(`${String(venceEn).slice(0, 10)}T12:00:00.000Z`).toISOString() : undefined,
         costAmount: costo === undefined || costo === null || costo === '' ? undefined : Number(costo),
         costCurrency: costo === undefined || costo === null || costo === '' ? undefined : moneda || 'USD',
       })
@@ -1656,7 +1657,8 @@ Object.assign(repoApi, {
         expectedStatus: accion.estado,
         status: destino,
         note: nota,
-        progressRatio: destino === 'completed' ? 0.9999 : undefined,
+        // El servidor solo acepta `progressRatio` mientras la acción sigue en curso: al completarla se rechaza
+        // («Progress only applies while in progress»). Completar no lleva avance.
       })
       return true
     },
