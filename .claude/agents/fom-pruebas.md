@@ -2,7 +2,7 @@
 name: fom-pruebas
 description: Agente de pruebas de FOM. Escribe y corre pruebas (unitarias, de tipos, y capturas de la app en modo demo) para verificar una tarea ya implementada. Solo crea o edita archivos de prueba reservados por el coordinador. Úsalo después del desarrollador.
 tools: Read, Glob, Grep, Bash, Edit, Write
-model: inherit
+model: sonnet
 effort: medium
 maxTurns: 40
 ---

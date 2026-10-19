@@ -29,6 +29,7 @@ import AdminAuditoria from './modulos/AdminAuditoria'
 import MiUnidad from './modulos/MiUnidad'
 import MapaConductor from './modulos/MapaConductor'
 import MiPerfil from './modulos/MiPerfil'
+import Configuracion from './modulos/Configuracion'
 import Seguridad from './modulos/Seguridad'
 import Jornadas from './modulos/Jornadas'
 import Transferencias from './modulos/Transferencias'
@@ -192,6 +193,7 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
           </div>
         </NavLink>
         <NavLink to="/panel/mi-perfil" className={({ isActive }) => `pnl-salir mp-enlace${isActive ? ' activo' : ''}`} onClick={cerrar}><Icono nombre="gente" />Mi perfil</NavLink>
+        <NavLink to="/panel/configuracion" className={({ isActive }) => `pnl-salir mp-enlace${isActive ? ' activo' : ''}`} onClick={cerrar}><Icono nombre="ajustes" />Configuración</NavLink>
         <Link to="/" className="pnl-salir">
           <Icono nombre="volver" />
           Ir al sitio
@@ -267,10 +269,10 @@ export default function Consola() {
   // `pathname` viene del router, no del `window`: asi la guarda vuelve a
   // evaluarse en cada navegacion y no solo al cargar la pagina.
   const primerTramo = pathname.replace(/^\/panel\/?/u, '').split('/')[0]
-  if (area === 'admin' && !perfil.empresaGestion && !['admin', 'mi-perfil', 'alertas'].includes(primerTramo)) {
+  if (area === 'admin' && !perfil.empresaGestion && !['admin', 'mi-perfil', 'configuracion', 'alertas'].includes(primerTramo)) {
     return <Navigate to="/panel/admin/plataforma" replace />
   }
-  if (primerTramo !== 'mi-perfil' && permitidas && !permitidas.includes(primerTramo)) {
+  if (!['mi-perfil', 'configuracion'].includes(primerTramo) && permitidas && !permitidas.includes(primerTramo)) {
     return <Navigate to={inicioDe(area)} replace />
   }
 
@@ -315,6 +317,7 @@ export default function Consola() {
 
         <Routes key={perfil.empresaGestion?.id || 'global'}>
           <Route path="mi-perfil" element={<MiPerfil />} />
+          <Route path="configuracion" element={<Configuracion />} />
           {/* El inicio depende del area: el conductor abre en SU unidad, no en
               el resumen de toda la flota. */}
           <Route index element={area === 'conductor' ? <MiUnidad /> : <Resumen />} />

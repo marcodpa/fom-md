@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -16,26 +16,28 @@ import FichaUnidad from '../comp/FichaUnidad'
 import { SelectorArchivos } from '../comp/Archivos'
 import { subirVarios } from '../datos/archivos'
 import { ArchivosDeDocumento, ModalNuevoDocumento } from './Documentos'
+import FotoUnidad from '../comp/FotoUnidad'
 import FichaDatosUnidad from './FichaDatosUnidad'
 import UsuariosUnidad from './UsuariosUnidad'
 import * as f from '../datos/formato'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
+import './expediente-unidad.css'
 
 // ============================================================
 // EXPEDIENTE DEL VEHÍCULO
 // ------------------------------------------------------------
 // Todo lo que se sabe de una unidad en un solo lugar: ficha, telemetría,
-// mantenimiento, inspecciones, papeles y gasto. Las asignaciones (área y
+// mantenimiento, inspecciones, documentos y gasto. Las asignaciones (área y
 // conductor) se editan aquí mismo, sin salir de la pantalla.
 // ============================================================
 
 const PESTANAS = [
   { v: 'resumen', t: 'Resumen' },
   { v: 'ficha', t: 'Ficha de la unidad' },
-  { v: 'usuarios', t: 'Usuarios' },
   { v: 'telemetria', t: 'Telemetría' },
-  { v: 'mantenimiento', t: 'Mantenimiento' },
+  { v: 'usuarios', t: 'Usuarios' },
   { v: 'inspecciones', t: 'Inspecciones' },
+  { v: 'mantenimiento', t: 'Mantenimiento' },
   { v: 'documentos', t: 'Documentos' },
   { v: 'costos', t: 'Costos' },
 ]
@@ -136,6 +138,108 @@ function hoyMenos(n) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+// ---------------- Tarjetas compactas del Resumen ----------------
+// Usan lo que la ficha ya trae (documentos y costos de la unidad): no piden
+// nada nuevo al servidor. El detalle completo sigue en su pestaña.
+
+const PRIORIDAD_DOC = { vencido: 0, por_vencer: 1, vigente: 2 }
+const TONO_DOC = { vencido: 'malo', por_vencer: 'aviso', vigente: '' }
+const MAX_DOCS_RESUMEN = 4
+// Los rubros que no caben se suman en «Otros» para que la barra no se corte.
+const MAX_RUBROS_RESUMEN = 3
+const TONOS_RUBRO = ['primario', 'aviso', 'tenue', 'otros']
+
+function VerTodo({ alPulsar, children }) {
+  return <button type="button" className="pnl-link eu-ver" onClick={alPulsar}>{children} →</button>
+}
+
+/** Primero lo vencido y lo que está por vencer: es lo que hay que atender. */
+function ResumenDocumentos({ documentos, verTodo }) {
+  const lista = [...(documentos ?? [])]
+    .sort((a, b) => (PRIORIDAD_DOC[a.estado] ?? 3) - (PRIORIDAD_DOC[b.estado] ?? 3) || String(a.venceEn).localeCompare(String(b.venceEn)))
+  const visibles = lista.slice(0, MAX_DOCS_RESUMEN)
+  const resto = lista.length - visibles.length
+  return (
+    <Tarjeta titulo="Documentos de la unidad" accion={<VerTodo alPulsar={verTodo}>Ver documentos</VerTodo>}>
+      {!visibles.length ? (
+        <p className="eu-nota eu-nota-sola">Sin documentos cargados. Regístralos desde Documentos para no perder los vencimientos.</p>
+      ) : (
+        <div className="eu-docs">
+          {visibles.map((d) => (
+            <div key={d.id} className="eu-doc">
+              <span className={`eu-doc-icono ${TONO_DOC[d.estado] ?? ''}`}><Icono nombre="documento" tam={18} /></span>
+              <div className="eu-doc-txt">
+                <b>{d.tipo}</b>
+                <span>{d.venceEn ? `Vence el ${f.fecha(d.venceEn)} · ${f.vencimiento(d.venceEn)}` : 'Sin fecha de vencimiento'}</span>
+              </div>
+              <Tag color={color('documento_estado', d.estado)}>{etiqueta('documento_estado', d.estado)}</Tag>
+            </div>
+          ))}
+          {resto > 0 && <p className="eu-nota">Y {resto} {resto === 1 ? 'documento más' : 'documentos más'} en Documentos.</p>}
+        </div>
+      )}
+    </Tarjeta>
+  )
+}
+
+/** "octubre 2026": el mes en curso, para decir de qué período es el total. */
+function mesActual() {
+  const d = new Date()
+  return `${d.toLocaleDateString('es', { month: 'long' })} ${d.getFullYear()}`
+}
+
+/** Total del mes en curso y sus rubros principales, con los costos que la ficha ya trae. */
+function ResumenCostos({ costos, verTodo }) {
+  const { total, rubros } = useMemo(() => {
+    const mes = f.hoyISO().slice(0, 7)
+    const suma = {}
+    let total = 0
+    ;(costos ?? []).forEach((c) => {
+      if (String(c.fecha ?? c.creadaEn ?? '').slice(0, 7) !== mes) return
+      // Un monto vacío o no numérico no debe volver NaN todo el total.
+      const monto = Number(c.monto) || 0
+      suma[c.categoria] = (suma[c.categoria] || 0) + monto
+      total += monto
+    })
+    const orden = Object.entries(suma)
+      .map(([clave, valor]) => ({ etiqueta: CATEGORIA_COSTO[clave] ?? clave, valor }))
+      .sort((a, b) => b.valor - a.valor)
+    const rubros = orden.slice(0, MAX_RUBROS_RESUMEN)
+    const otros = orden.slice(MAX_RUBROS_RESUMEN).reduce((s, r) => s + r.valor, 0)
+    if (otros > 0) rubros.push({ etiqueta: 'Otros', valor: otros })
+    return { total, rubros }
+  }, [costos])
+  return (
+    <Tarjeta titulo="Costos del mes" accion={<VerTodo alPulsar={verTodo}>Ver costos</VerTodo>}>
+      {!rubros.length ? (
+        // Con el servidor real la ficha aún no trae costos: no se afirma «sin gastos».
+        <p className="eu-nota eu-nota-sola">No hay costos cargados para este mes.</p>
+      ) : (
+        <div className="eu-costos">
+          <div className="eu-costo-total">
+            <b>{f.moneda(total)}</b>
+            <span>en total · {mesActual()}</span>
+          </div>
+          <div className="eu-costo-barra" aria-hidden="true">
+            {rubros.map((r, i) => (
+              <span key={r.etiqueta} className={TONOS_RUBRO[i]} style={{ flexGrow: r.valor }} />
+            ))}
+          </div>
+          <div>
+            {rubros.map((r, i) => (
+              <div key={r.etiqueta} className="eu-costo-fila">
+                <i className={TONOS_RUBRO[i]} />
+                {r.etiqueta}
+                <b>{f.moneda(r.valor)}</b>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Tarjeta>
+  )
+}
+
 function ModalOdometro({ unidad, abierto, alCerrar, alGuardar }) {
   const [km, setKm] = useState('')
   const [error, setError] = useState('')
@@ -170,20 +274,27 @@ function ModalOdometro({ unidad, abierto, alCerrar, alGuardar }) {
 
 export default function ExpedienteVehiculo() {
   const { id } = useParams()
+  const [parametros, setParametros] = useSearchParams()
+  const pestana = PESTANAS.some(p => p.v === parametros.get('vista')) ? parametros.get('vista') : 'resumen'
+  const setPestana = valor => setParametros(previos => {
+    const siguientes = new URLSearchParams(previos)
+    if (valor === 'resumen') siguientes.delete('vista')
+    else siguientes.set('vista', valor)
+    return siguientes
+  }, { replace: true })
   const sesion = useSesion()
 
   const { datos: v, estado, error, recargar } = useDatos(() => repo.vehiculos.obtener(id), [id])
   const areas = useDatos(() => repo.areas(), [])
   const conductores = useDatos(() => repo.personal.listar({ soloConductores: true }), [])
 
-  const [pestana, setPestana] = useState('resumen')
   const [pinSeleccionado, setPinSeleccionado] = useState(null)
   const [guardado, setGuardado] = useState('')
   const [conductorElegido, setConductorElegido] = useState(null)
   const [asignandoConductor, setAsignandoConductor] = useState(false)
   const [guardandoArea, setGuardandoArea] = useState(false)
   const [errorArea, setErrorArea] = useState('')
-  useEffect(() => { setConductorElegido(null); setPestana('resumen'); setErrorForma(''); setErrorArea('') }, [id])
+  useEffect(() => { setConductorElegido(null); setErrorForma(''); setErrorArea('') }, [id])
 
   // Modal de nueva ODT
   const [modalOdt, setModalOdt] = useState(false)
@@ -308,6 +419,8 @@ export default function ExpedienteVehiculo() {
   return (
     <>
       <Cabecera
+        className="eu-cabecera"
+        imagen={v && <FotoUnidad key={v.id} unidad={v} variante="cabecera" />}
         titulo={v ? v.alias : 'Expediente de la unidad'}
         bajada={
           // Solo lo que existe. Un año nulo salia como la palabra «null» en
@@ -323,7 +436,7 @@ export default function ExpedienteVehiculo() {
               {etiqueta('marcha_estado', v.estadoMarcha)}
             </Tag>
             {esGestor(sesion?.perfil) && (
-              <button type="button" className="pnl-btn sutil" onClick={() => setArchivando(true)}>
+              <button type="button" className="pnl-btn" onClick={() => setArchivando(true)}>
                 <Icono nombre="cerrar" tam={16} />
                 Archivar unidad
               </button>
@@ -334,7 +447,7 @@ export default function ExpedienteVehiculo() {
       </Cabecera>
 
       <div className="pnl-cuerpo">
-        <Volver a="/panel/flota">Flota</Volver>
+        <Volver a="/panel/flota">Vehículos</Volver>
 
         {cargando && <Cargando filas={6} />}
         {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
@@ -382,6 +495,10 @@ export default function ExpedienteVehiculo() {
             {pestana === 'resumen' && (
               <>
                 <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto="470px" ficha={false} /></Tarjeta></div>
+                <div className="eu-resumen-grid">
+                  <ResumenDocumentos documentos={v.documentos} verTodo={() => setPestana('documentos')} />
+                  <ResumenCostos costos={v.costos} verTodo={() => setPestana('costos')} />
+                </div>
               </>
             )}
 
@@ -486,7 +603,7 @@ export default function ExpedienteVehiculo() {
                           </span>
                         </div>
                         <Tag color="gris">{etiqueta('odt_tipo', o.tipo)}</Tag>
-                        <Tag color={color('odt_estado', o.estado)}>{etiqueta('odt_estado', o.estado)}</Tag>
+                        <Tag color={color('odt_estado_visible', o.estado)}>{etiqueta('odt_estado_visible', o.estado)}</Tag>
                       </div>
                     ))}
                   </div>

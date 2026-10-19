@@ -1,0 +1,25 @@
+/* Documentos: filas sin raya lateral; el estado lo dicen la caja de icono y la etiqueta. */
+.doc-filtros { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.doc-sep { width:1px; height:24px; background:var(--e-borde); margin:0 6px; flex:none; }
+.doc-filas { display:grid; }
+.doc-fila { display:flex; align-items:center; gap:16px; padding:16px 0; border-top:1px solid var(--e-borde); }
+.doc-fila:last-child { padding-bottom:0; }
+.doc-fila>.pnl-btn { flex:none; white-space:nowrap; }
+.doc-fila .pnl-fila-txt b { font-size:15px; }
+.doc-fila .pnl-fila-txt span { font-size:13px; }
+/* Caja de icono (esquina 10) con el tono del estado. */
+.doc-ibox { display:grid; place-items:center; width:40px; height:40px; border-radius:10px; flex:none; background:var(--e-info-sup); color:var(--e-info); }
+.doc-ibox.ok { background:var(--e-exito-sup); color:var(--e-exito); }
+.doc-ibox.aviso { background:var(--e-aviso-sup); color:var(--e-aviso); }
+.doc-ibox.malo { background:var(--e-peligro-sup); color:var(--e-peligro); }
+@media(max-width:600px) {
+  .doc-sep { display:none; }
+  .doc-fila { flex-wrap:wrap; gap:12px; }
+  .doc-fila .pnl-fila-txt { flex-basis:calc(100% - 52px); }
+  .doc-fila>.pnl-tag { margin-left:52px; }
+  .doc-fila>.pnl-btn { margin-left:auto; }
+}
+/* Aviso de éxito (archivado): verde, no el rojo de error. El token da #3DD68C en tema oscuro. */
+.doc-aviso-ok { display:block; margin-top:var(--e-xs); font-size:var(--e-t-xs); color:var(--e-exito, #3DD68C); }
+/* «N en total»: solo informa, no se pulsa; por eso no lleva estilo de enlace. */
+.doc-total { color:var(--e-info); font-size:var(--e-t-sm); font-weight:500; }

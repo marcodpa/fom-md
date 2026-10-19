@@ -1,9 +1,25 @@
 import { etiqueta } from './catalogos.js'
 
+// La ODT se muestra con 3 estados, igual que la app: Abierta / En revisión /
+// Resuelta. Es SOLO presentación: el servidor sigue con sus nueve estados y
+// lo que se le envía no cambia. Cancelada cuenta como resuelta porque ya no
+// espera nada (la app hace lo mismo).
+export const ESTADOS_VISIBLES = [
+  { clave: 'abierta', etiqueta: 'Abierta', plural: 'Abiertas', color: 'ambar', estados: ['abierta'] },
+  { clave: 'revision', etiqueta: 'En revisión', plural: 'En revisión', color: 'azul', estados: ['en_revision', 'aprobada', 'asignada', 'en_ejecucion', 'pausada', 'en_calidad'] },
+  { clave: 'resuelta', etiqueta: 'Resuelta', plural: 'Resueltas', color: 'verde', estados: ['cerrada', 'cancelada'] },
+]
+
+/** El estado visible (de los 3) de un estado del servidor. Uno desconocido se enseña tal cual, en gris. */
+export function estadoVisible(estado) {
+  return ESTADOS_VISIBLES.find(g => g.estados.includes(estado))
+    ?? { clave: estado, etiqueta: etiqueta('odt_estado', estado), plural: etiqueta('odt_estado', estado), color: 'gris', estados: [estado] }
+}
+
 const TITULOS = {
   abierta: 'Falla reportada', en_revision: 'Enviada a revisión', aprobada: 'Trabajo aprobado',
   asignada: 'Responsable asignado', en_ejecucion: 'Trabajo iniciado', pausada: 'Trabajo pausado',
-  en_calidad: 'Trabajo entregado para revisión de calidad', cerrada: 'Orden cerrada', cancelada: 'Orden cancelada',
+  en_calidad: 'Trabajo entregado para revisión de calidad', cerrada: 'Orden resuelta', cancelada: 'Orden cancelada',
 }
 const ESTADO_EVENTO = { inicio: 'en_ejecucion', pausa: 'pausada', reanudacion: 'en_ejecucion', entrega: 'en_calidad' }
 const TITULO_EVENTO = { inicio: 'Trabajo iniciado', pausa: 'Trabajo pausado', reanudacion: 'Trabajo reanudado', entrega: TITULOS.en_calidad }
@@ -19,13 +35,13 @@ export function presentarHistorial(odt, cambios = [], ejecucion = null) {
     titulo: !c.de ? 'Falla reportada' : c.a === 'en_revision' && c.de === 'cerrada' ? 'Orden reabierta'
       : c.a === 'en_ejecucion' && c.de === 'pausada' ? 'Trabajo reanudado'
       : c.a === 'en_ejecucion' && c.de === 'en_calidad' ? 'Trabajo devuelto al taller'
-      : TITULOS[c.a] || `Estado registrado: ${etiqueta('odt_estado', c.a)}`,
+      : TITULOS[c.a] || `Estado registrado: ${estadoVisible(c.a).etiqueta}`,
     actor: nombre(c.actor) || (!c.de ? nombre(odt.creadorNombre) : null),
     en: c.en, de: c.de, a: c.a, notas: c.nota ? [c.nota] : [], registros: [c],
   }))
   if (!hitos.length) {
     hitos.push({ titulo: 'Falla reportada', actor: nombre(odt.creadorNombre), en: odt.creadaEn, notas: [], registros: [] })
-    if (odt.estado === 'cerrada' && odt.resueltaEn) hitos.push({ titulo: 'Orden cerrada', actor: null, en: odt.resueltaEn, notas: odt.notaSolucion ? [odt.notaSolucion] : [], registros: [] })
+    if (odt.estado === 'cerrada' && odt.resueltaEn) hitos.push({ titulo: TITULOS.cerrada, actor: null, en: odt.resueltaEn, notas: odt.notaSolucion ? [odt.notaSolucion] : [], registros: [] })
   }
   for (const e of ejecucion?.eventos ?? []) {
     const a = e.a ?? ESTADO_EVENTO[e.tipo]
@@ -43,7 +59,7 @@ export function presentarHistorial(odt, cambios = [], ejecucion = null) {
     else hitos.push({ titulo: 'Responsable asignado', actor: null, responsable: responsable.nombre, en: responsable.desde, notas: [], registros: [] })
   }
   return hitos.sort((a, b) => (instante(a.en) || 0) - (instante(b.en) || 0)).map(h => ({
-    ...h, estado: h.a ? etiqueta('odt_estado', h.a) : null,
+    ...h, estado: h.a ? estadoVisible(h.a).etiqueta : null,
     fechaValida: Number.isFinite(instante(h.en)),
   }))
 }

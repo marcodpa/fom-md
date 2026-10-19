@@ -214,7 +214,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
             </div>
           </div>
         </Link>
-        <Kpi titulo="ODT abiertas" valor={odtAbiertas} icono="llave" nota="Órdenes de trabajo" a="/panel/mantenimiento" />
+        <Kpi titulo="ODT por resolver" valor={odtAbiertas} icono="llave" nota={`${num(r.odtAbiertas ?? 0)} abiertas · ${num(r.odtEnRevision ?? 0)} en revisión`} a="/panel/mantenimiento" />
         <Kpi titulo="Alertas nuevas" valor={num(r.alertasSinLeer)} icono="campana" nota="Pendientes de leer" a="/panel/alertas" />
       </div>
       <div className="pnl-resumen-central">

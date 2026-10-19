@@ -1,8 +1,8 @@
 // Regla de contraseña del panel web. Mismo contenido que `validarClave` de la app del conductor
 // (fom-driver-juan/src/lib/validate.ts): hay que mantener las dos iguales.
-// El servidor (fom-core) aplica su propio mínimo; si es mayor que este, rechazará la clave aunque
-// la pantalla la acepte.
-export const MIN_CLAVE = 5
+// El mínimo es el de fom-core (16 a 256 caracteres): si fuera menor, la pantalla aceptaría claves
+// que el servidor luego rechaza.
+export const MIN_CLAVE = 16
 export const MAX_CLAVE = 128
 const COMUNES = ['password', 'contrasena', 'contraseña', 'qwerty', 'admin', 'clave', 'flotas', '12345', 'abcde', 'fom2026', 'samfor']
 

@@ -56,8 +56,35 @@ function porCategoria(items) {
   return grupos
 }
 
+/** La lista del servidor no trae conteos (llegan en null): entonces no se pinta «0», se dice que no hay dato. */
+const conConteo = (insp) => insp.fallasCriticas != null || insp.observaciones != null
 
-const VISTAS = ['resumen', 'historial', 'agenda', 'hallazgos', 'plantillas']
+/**
+ * Conteos sacados de las respuestas reales del detalle. Misma regla que la base:
+ * falla en punto crítico = falla crítica; cualquier otra respuesta no conforme = observación.
+ */
+function contarRespuestas(items) {
+  const fallasCriticas = items.filter((it) => it.critico && it.estadoItem === 'falla').length
+  const observaciones = items.filter((it) => it.estadoItem !== 'conforme').length - fallasCriticas
+  return { fallasCriticas, observaciones }
+}
+
+/** Cuándo se hizo, corto: «hoy 7:42 a. m.», «ayer 5:10 p. m.» o la fecha. Sin dato, no se dice nada. */
+function cuandoSeHizo(insp) {
+  const iso = insp.creadaEn || insp.fecha
+  if (!iso) return ''
+  const soloFecha = /^\d{4}-\d{2}-\d{2}$/.test(iso)
+  const dia = soloFecha ? iso : f.hoyISO(new Date(iso))
+  const ayer = new Date(); ayer.setDate(ayer.getDate() - 1)
+  const nombreDia = dia === f.hoyISO() ? 'hoy' : dia === f.hoyISO(ayer) ? 'ayer' : f.fechaCorta(iso)
+  return soloFecha ? nombreDia : `${nombreDia} ${f.hora(iso)}`
+}
+
+const momento = i => new Date(i.creadaEn || i.fecha || 0).getTime() || 0
+
+// Agenda y Plantillas van al final: se planean con ratón y solo existen en la web.
+const VISTAS = ['resumen', 'historial', 'hallazgos', 'agenda', 'plantillas']
+const NOMBRE_VISTA = { resumen: 'Resumen', historial: 'Historial', hallazgos: 'Hallazgos', agenda: 'Agenda', plantillas: 'Plantillas' }
 export default function Inspecciones() {
   const [params, setParams] = useSearchParams()
   const vista = VISTAS.includes(params.get('vista')) ? params.get('vista') : 'resumen'
@@ -67,7 +94,7 @@ export default function Inspecciones() {
   const cambiar = v => { const p = new URLSearchParams(); if (v !== 'resumen') p.set('vista', v); setParams(p) }
   return <section className="insp-root">
     <div className="insp-heading"><div><p className="insp-breadcrumb">Inicio › Inspecciones</p><h1>Inspecciones</h1><p>Qué unidades faltan por revisar y qué requiere atención.</p></div>{vista !== 'plantillas' && <button type="button" className="pnl-btn primario" onClick={() => setProgramando({})}><Icono nombre="mas" tam={18}/>Programar inspección</button>}</div>
-    <nav className="insp-nav" aria-label="Secciones de inspecciones">{VISTAS.map((v,i) => <button type="button" key={v} aria-current={vista === v ? 'page' : undefined} onClick={() => cambiar(v)}>{['Resumen','Historial','Agenda','Hallazgos','Plantillas'][i]}</button>)}</nav>
+    <nav className="insp-nav" aria-label="Secciones de inspecciones">{VISTAS.map(v => <button type="button" key={v} aria-current={vista === v ? 'page' : undefined} onClick={() => cambiar(v)}>{NOMBRE_VISTA[v]}</button>)}</nav>
     {aviso && <p className="insp-success" role="status">{aviso}</p>}
     {vista === 'resumen' || vista === 'historial' ? <Resultados key={vista} vista={vista} abrirPrograma={v => setProgramando({ vehiculoId: v.id })} cambiarVista={cambiar} inspeccionId={params.get('inspeccion')}/> : <ProgramaInspecciones key={vista + version} vista={vista} abrirPrograma={() => setProgramando({})}/>}
     {programando && <ProgramarInspeccion unidadInicial={programando.vehiculoId} alCerrar={() => setProgramando(null)} alGuardar={() => { setProgramando(null); setAviso('Inspección programada.'); setVersion(v => v+1) }}/>}
@@ -79,6 +106,7 @@ function Resultados({ vista, abrirPrograma, cambiarVista, inspeccionId }) {
   const [resultado, setResultado] = useState('')
   const [q, setQ] = useState('')
   const [detalle, setDetalle] = useState(null)
+  const [faltanTodas, setFaltanTodas] = useState(false)
   const registros = useDatos(() => repo.inspecciones.listar({ fecha: vista === 'resumen' ? f.hoyISO() : fecha, q }), [vista,fecha,q])
   const hoy = useDatos(() => repo.inspecciones.listar({ fecha: f.hoyISO() }), [])
   const pendientes = useDatos(() => repo.inspecciones.pendientesHoy(), [])
@@ -92,21 +120,33 @@ function Resultados({ vista, abrirPrograma, cambiarVista, inspeccionId }) {
   // Programada = la que el supervisor fijó y el conductor completó (la cita guarda su inspección); el resto es la diaria.
   const programadas = new Set((agenda.datos ?? []).map(c => c.inspeccionId).filter(Boolean))
   const tabla = filas => <TablaResultados lista={filas} abrir={abrir} programadas={programadas}/>
+  // Requiere tu atención: bloqueadas y con observaciones, de la más reciente a la más antigua.
+  const atencion = base.filter(i => i.resultado !== 'aprobada').sort((a, b) => momento(b) - momento(a))
+  const faltan = pendientes.datos ?? []
   return <>
     {vista === 'resumen' && <>
       {hoy.estado === 'error' ? <ErrorCarga error={hoy.error} onReintentar={hoy.recargar}/> : hoy.estado !== 'ok' || vehiculos.estado !== 'ok' ? <Cargando filas={1}/> : <div className="insp-summary">
-        {[['Diarias hechas hoy', new Set(hoy.datos.map(i => i.vehiculoId)).size + ' de ' + vehiculos.datos.length,'check'],['Aprobadas',hoy.datos.filter(i => i.resultado === 'aprobada').length,'escudo'],['Con observaciones',hoy.datos.filter(i => i.resultado === 'aprobada_con_observaciones').length,'editar'],['Bloqueadas',hoy.datos.filter(i => i.resultado === 'bloqueada').length,'alerta']].map(([t,n,icono]) => <div key={t}><Icono nombre={icono}/><span>{t}<b>{n}</b></span></div>)}
+        {[['Diarias hechas hoy', new Set(hoy.datos.map(i => i.vehiculoId)).size,'check','info',vehiculos.datos.length],['Aprobadas',hoy.datos.filter(i => i.resultado === 'aprobada').length,'escudo','ok'],['Con observaciones',hoy.datos.filter(i => i.resultado === 'aprobada_con_observaciones').length,'editar','aviso'],['Bloqueadas',hoy.datos.filter(i => i.resultado === 'bloqueada').length,'alerta','malo']].map(([t,n,icono,tono,de]) => <div key={t}><span className={`insp-ibox ${tono}`}><Icono nombre={icono}/></span><span>{t}<b>{n}{de != null && <small> de {de}</small>}</b></span></div>)}
       </div>}
       {vehiculos.estado === 'error' && <ErrorCarga error={vehiculos.error} onReintentar={vehiculos.recargar}/>}
       <div className="insp-overview"><Tarjeta titulo="Requiere tu atención" sinCuerpo accion={<button className="pnl-link" type="button" onClick={() => cambiarVista('historial')}>Ver historial →</button>}>
         {registros.estado === 'cargando' && <Cargando filas={2}/>}
         {registros.estado === 'error' && <ErrorCarga error={registros.error} onReintentar={registros.recargar}/>}
-        {registros.estado === 'ok' && base.filter(i => i.resultado !== 'aprobada').map(i => <article className="insp-task" key={i.id}><Icono nombre={i.resultado === 'bloqueada' ? 'alerta' : 'inspeccion'} tam={24}/><div><h3>{i.vehiculoNombre}</h3><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag><p>{f.numero(i.fallasCriticas)} fallas críticas · {f.numero(i.observaciones)} observaciones</p></div><span className="insp-task-person">{i.conductorNombre}</span><button className="pnl-btn primario" type="button" onClick={() => abrir(i)}>Ver resultado →</button></article>)}
-        {pendientes.estado === 'cargando' && <Cargando filas={2}/>}
-        {pendientes.estado === 'error' && <ErrorCarga error={pendientes.error} onReintentar={pendientes.recargar}/>}
-        {pendientes.estado === 'ok' && pendientes.datos.map(v => <article className="insp-task" key={v.id}><Icono nombre="camion" tam={24}/><div><h3>{v.alias} · {v.placa}</h3><Tag color="ambar">Falta la inspección diaria</Tag><p>{v.areaNombre || 'Sin área'} · la llena el conductor desde su app</p></div><span className="insp-task-person">{v.conductorNombre || 'Sin conductor'}</span></article>)}
-        {registros.estado === 'ok' && pendientes.estado === 'ok' && !pendientes.datos.length && !base.some(i => i.resultado !== 'aprobada') && <Vacio icono="check" titulo="Sin pendientes de revisión" texto="No hay unidades sin inspección ni resultados con novedades hoy."/>}
-      </Tarjeta><aside className="insp-guide"><h2>Dos clases de inspección</h2>{[['Diaria', 'Cada conductor llena una cada día, desde la app, antes de salir. Aquí ves quién ya la hizo y quién falta.'],['Programada', 'Tú eliges unidad, plantilla, responsable y fecha. El conductor la ve en su app y sabe que le toca.'],['Hallazgos', 'Lo que sale mal en cualquiera de las dos se convierte en un hallazgo con seguimiento.']].map(([t,p],i) => <div key={t}><b>{i+1}</b><span><strong>{t}</strong><p>{p}</p></span></div>)}</aside></div>
+        <p className="insp-card-hint">Bloqueadas y con observaciones, de la más reciente a la más antigua.</p>
+        {registros.estado === 'ok' && atencion.map(i => { const cuando = cuandoSeHizo(i); return <article className="insp-task" key={i.id}><span className={`insp-ibox ${i.resultado === 'bloqueada' ? 'malo' : 'aviso'}`}><Icono nombre={i.resultado === 'bloqueada' ? 'alerta' : 'inspeccion'}/></span><div><h3>{i.vehiculoNombre}</h3><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag><p>{conConteo(i) ? `${f.numero(i.fallasCriticas)} fallas críticas · ${f.numero(i.observaciones)} observaciones` : `${i.plantilla ? i.plantilla + ' · ' : ''}abre el resultado para ver fallas y observaciones`}{cuando && ` · ${cuando}`}</p></div><span className="insp-task-person">{i.conductorNombre}</span><button className="pnl-btn primario" type="button" onClick={() => abrir(i)}>Ver resultado →</button></article> })}
+        {registros.estado === 'ok' && !atencion.length && <Vacio icono="check" titulo="Nada requiere tu atención" texto="Hoy no hay inspecciones bloqueadas ni con observaciones."/>}
+      </Tarjeta><div className="insp-side-col">
+      <Tarjeta titulo="Faltan hoy" sinCuerpo accion={pendientes.estado === 'ok' && faltan.length > 4 ? <button className="pnl-link" type="button" aria-expanded={faltanTodas} onClick={() => setFaltanTodas(v => !v)}>{faltanTodas ? 'Ver menos' : `Ver las ${f.numero(faltan.length)} →`}</button> : null}>
+        <div className="insp-faltan">
+          {pendientes.estado === 'cargando' && <Cargando filas={1}/>}
+          {pendientes.estado === 'error' && <ErrorCarga error={pendientes.error} onReintentar={pendientes.recargar}/>}
+          {pendientes.estado === 'ok' && (faltan.length ? <>
+            <p className="insp-faltan-cifra"><b>{f.numero(faltan.length)}</b> {faltan.length === 1 ? 'unidad sin la diaria' : 'unidades sin la diaria'}</p>
+            <ul className="insp-faltan-lista" aria-label="Unidades sin la inspección diaria">{(faltanTodas ? faltan : faltan.slice(0, 4)).map(v => <li key={v.id} title={[v.alias, v.placa, v.conductorNombre || 'Sin conductor'].filter(Boolean).join(' · ')}>{v.placa || v.alias}</li>)}</ul>
+          </> : <p className="insp-faltan-ok"><Icono nombre="check" tam={18}/>Todas las unidades tienen la diaria de hoy.</p>)}
+        </div>
+      </Tarjeta>
+      <aside className="insp-guide"><h2>Dos clases de inspección</h2>{[['Diaria', 'Cada conductor llena una cada día, desde la app, antes de salir. Aquí ves quién ya la hizo y quién falta.'],['Programada', 'Tú eliges unidad, plantilla, responsable y fecha. El conductor la ve en su app y sabe que le toca.'],['Hallazgos', 'Lo que sale mal en cualquiera de las dos se convierte en un hallazgo con seguimiento.']].map(([t,p],i) => <div key={t}><b>{i+1}</b><span><strong>{t}</strong><p>{p}</p></span></div>)}</aside></div></div>
       <Tarjeta titulo="Programadas · lo que el conductor ya sabe que viene" sinCuerpo accion={<button className="pnl-link" type="button" onClick={() => cambiarVista('agenda')}>Ver agenda →</button>}>{agenda.estado === 'cargando' && <Cargando filas={2}/>}{agenda.estado === 'error' && <ErrorCarga error={agenda.error} onReintentar={agenda.recargar}/>}{agenda.estado === 'ok' && (() => {const proximas = (agenda.datos ?? []).filter(c => !c.inspeccionId && !['completed','completada','cancelled','cancelada','canceled'].includes(String(c.estado).toLowerCase())).sort((a, b) => new Date(a.fecha) - new Date(b.fecha)).slice(0, 4);return proximas.length ? proximas.map(c => <article className="insp-task" key={c.id}><Icono nombre="inspeccion" tam={24}/><div><h3>{c.vehiculo}{c.placa ? ' · ' + c.placa : ''}</h3><Tag color="azul">{f.fechaCorta(c.fecha)}</Tag><p>{c.plantilla}</p></div><span className="insp-task-person">{c.asignadoA || 'Sin responsable'}</span></article>) : <Vacio icono="inspeccion" titulo="No hay inspecciones programadas" texto="Programa una para que el conductor la vea en su app."/>})()}</Tarjeta>
       <Tarjeta titulo="Últimos resultados de hoy" sinCuerpo accion={<button className="pnl-link" type="button" onClick={() => cambiarVista('historial')}>Ver todos →</button>}>{registros.estado === 'ok' && (base.length ? tabla(base.slice(0,5)) : <Vacio icono="inspeccion" titulo="Sin resultados hoy" texto="Los resultados aparecerán cuando se registren desde la app."/>)}</Tarjeta>
     </>}
@@ -128,7 +168,9 @@ function TablaResultados({ lista, abrir, programadas = new Set() }) {
 function DetalleInspeccion({ inspeccion, alCerrar, alHallazgos }) {
   const detalle = useDatos(() => CONECTADO ? repo.inspecciones.obtener(inspeccion.id) : Promise.resolve(checklistDe(inspeccion)), [inspeccion.id])
   const grupos = useMemo(() => porCategoria(detalle.datos ?? []), [detalle.datos])
-  return <Modal titulo="Resultado de inspección" abierto alCerrar={alCerrar} ancho={1040}><div className="insp-dialog-grid"><aside className="insp-context"><Icono nombre="camion" tam={70}/><h3>{inspeccion.vehiculoNombre}</h3><Tag color={color('inspeccion_resultado',inspeccion.resultado)}>{etiqueta('inspeccion_resultado',inspeccion.resultado)}</Tag><Datos items={[{etiqueta:'Conductor',valor:inspeccion.conductorNombre},{etiqueta:'Fecha y hora',valor:f.fechaHora(inspeccion.creadaEn||inspeccion.fecha)},{etiqueta:'Ubicación',valor:inspeccion.ubicacion||'Sin ubicación'},{etiqueta:'Tipo de unidad',valor:etiqueta('vehiculo_tipo',inspeccion.tipoVehiculo)}]}/></aside><div><div className="insp-result-summary"><Icono nombre={inspeccion.fallasCriticas ? 'alerta' : 'check'}/><strong>{f.numero(inspeccion.fallasCriticas)} fallas críticas · {f.numero(inspeccion.observaciones)} observaciones</strong></div>
+  // Si la lista no trajo conteos, se cuentan de las respuestas; sin respuestas, no hay dato.
+  const cuenta = conConteo(inspeccion) ? inspeccion : detalle.estado === 'ok' && detalle.datos?.length ? contarRespuestas(detalle.datos) : null
+  return <Modal titulo="Resultado de inspección" abierto alCerrar={alCerrar} ancho={1040}><div className="insp-dialog-grid"><aside className="insp-context"><Icono nombre="camion" tam={70}/><h3>{inspeccion.vehiculoNombre}</h3><Tag color={color('inspeccion_resultado',inspeccion.resultado)}>{etiqueta('inspeccion_resultado',inspeccion.resultado)}</Tag><Datos items={[{etiqueta:'Conductor',valor:inspeccion.conductorNombre},{etiqueta:'Fecha y hora',valor:f.fechaHora(inspeccion.creadaEn||inspeccion.fecha)},{etiqueta:'Ubicación',valor:inspeccion.ubicacion||'Sin ubicación'},{etiqueta:'Tipo de unidad',valor:etiqueta('vehiculo_tipo',inspeccion.tipoVehiculo) || '—'}]}/></aside><div><div className="insp-result-summary"><Icono nombre={cuenta ? (cuenta.fallasCriticas ? 'alerta' : 'check') : inspeccion.resultado === 'bloqueada' ? 'alerta' : 'inspeccion'}/><strong>{cuenta ? `${f.numero(cuenta.fallasCriticas)} fallas críticas · ${f.numero(cuenta.observaciones)} observaciones` : detalle.estado === 'cargando' ? 'Contando fallas y observaciones…' : 'Fallas y observaciones: sin dato'}</strong></div>
     {detalle.estado === 'cargando' && <Cargando filas={4}/>}
     {detalle.estado === 'error' && <ErrorCarga error={detalle.error} onReintentar={detalle.recargar}/>}
     {detalle.estado === 'ok' && !grupos.length && <Vacio icono="documento" titulo="Sin respuestas disponibles" texto="No se completa el checklist con datos supuestos."/>}

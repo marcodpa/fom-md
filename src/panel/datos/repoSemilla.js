@@ -109,8 +109,10 @@ function todosDocumentos() {
   return [...DOCUMENTOS, ...agregados('documentos')].map((d) => aplicar('documentos', d))
 }
 function todasNotificaciones() {
+  // Las descartadas salen de la bandeja (y del conteo sin leer), como en la API.
   return [...NOTIFICACIONES, ...agregados('notificaciones')]
     .map((n) => aplicar('notificaciones', n))
+    .filter((n) => !n.descartada)
     .sort((a, b) => new Date(b.creadaEn) - new Date(a.creadaEn))
 }
 function todasInspecciones() {
@@ -235,6 +237,11 @@ export const repo = {
 
   // ---------------- Vehículos ----------------
   vehiculos: {
+    async usuariosAsignados(id) {
+      const v = todosVehiculos().find(x => x.id === id)
+      const p = todosPerfiles().find(x => x.id === v?.conductorPrincipalId)
+      return responder(p ? [{ id: p.id, nombre: p.nombre, rol: 'principal', desde: null }] : [])
+    },
     async listar({ q = '', areaId = '', estado = '' } = {}) {
       const perfiles = todosPerfiles()
       const docs = todosDocumentos()
@@ -395,6 +402,14 @@ export const repo = {
 
     async actualizar(id, patch) {
       guardarParche('perfiles', id, patch)
+      return responder(true, 200)
+    },
+    async actualizarPerfil(id, { cedula, telefono, direccion, nacimiento }) {
+      const persona = todosPerfiles().find(p => p.id === id)
+      if (!persona) throw new Error('No conseguimos a esta persona.')
+      const cambios = Object.fromEntries(Object.entries({ cedula, telefono, direccion, fechaNacimiento: nacimiento }).filter(([, valor]) => valor !== undefined))
+      const actual = { ...persona, ...cambios }
+      guardarParche('perfiles', id, { ...cambios, perfilCompleto: Boolean(actual.cedula && actual.telefono && actual.direccion && actual.fechaNacimiento) })
       return responder(true, 200)
     },
   },
@@ -577,6 +592,16 @@ export const repo = {
         if (!n.leida) guardarParche('notificaciones', n.id, { leida: true })
       })
       return responder(true, 150)
+    },
+    /** Descartar saca el aviso de la bandeja; misma respuesta que repoApi. */
+    async descartar(id) {
+      guardarParche('notificaciones', id, { descartada: true })
+      return responder(true, 100)
+    },
+    async descartarLeidos() {
+      const leidas = todasNotificaciones().filter((n) => n.leida)
+      leidas.forEach((n) => guardarParche('notificaciones', n.id, { descartada: true }))
+      return responder({ descartados: leidas.length }, 150)
     },
     /** Eventos de manejo detectados (base del índice seguro). */
     async eventos({ dias = 28 } = {}) {
@@ -867,7 +892,7 @@ export const repo = {
         const g = todosGps().find((x) => x.id === id)
         if (!g) return fallo('Ese GPS no está en el inventario.')
         if (g.vehiculoId) return fallo('Ese GPS ya está instalado en una unidad.')
-        if (!g.verificado) return fallo('El GPS debe estar verificado antes de instalarse.')
+        // Como el servidor: solo exige que esté en inventario, no que haya reportado.
         const v = todosVehiculos().find((x) => x.id === vehiculoId)
         if (!v) return fallo('Esa unidad no existe.')
         guardarParche('gps', id, { vehiculoId: v.id, vehiculoNombre: `${v.alias} · ${v.placa}`, empresaId: v.empresaId ?? EMPRESA.id })

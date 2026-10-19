@@ -4,10 +4,10 @@ import { DISENOS } from '../apariencia-store'
 import { Icono } from '../Iconos'
 import { Tarjeta } from './ui'
 
-export default function Apariencia() {
+export default function Apariencia({ titulo = 'Apariencia de la web' }) {
   const sesion = useSesion()
   const { diseno, cambiar, aviso } = useApariencia(sesion?.perfil)
-  return <Tarjeta titulo="Apariencia de la web">
+  return <Tarjeta titulo={titulo}>
     <p className="apariencia-ayuda">Escoge cómo quieres ver FOM. El cambio se aplica a todos los apartados de tu plataforma.</p>
     <fieldset className="apariencia-opciones">
       <legend className="apariencia-legend">Diseño de la plataforma</legend>

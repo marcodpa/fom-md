@@ -133,6 +133,18 @@ export const COLOR = {
   documento_estado: { vigente: 'verde', por_vencer: 'ambar', vencido: 'rojo' },
 }
 
+// ODT con 3 estados visibles (Abierta / En revisión / Resuelta), como la app.
+// SOLO presentación: `odt_estado` sigue con los 9 del servidor porque Reportes
+// los cuenta uno a uno. Mismos grupos que ESTADOS_VISIBLES de historial-odt.js
+// (no se importa de allí: ese archivo ya importa este y quedaría en círculo).
+const ODT_GRUPOS = [
+  ['Abierta', 'ambar', ['abierta']],
+  ['En revisión', 'azul', ['en_revision', 'aprobada', 'asignada', 'en_ejecucion', 'pausada', 'en_calidad']],
+  ['Resuelta', 'verde', ['cerrada', 'cancelada']],
+]
+ETIQUETA.odt_estado_visible = Object.fromEntries(ODT_GRUPOS.flatMap(([et, , estados]) => estados.map(e => [e, et])))
+COLOR.odt_estado_visible = Object.fromEntries(ODT_GRUPOS.flatMap(([, col, estados]) => estados.map(e => [e, col])))
+
 /** Traduce un valor de enum a su etiqueta visible. */
 export function etiqueta(enumName, valor) {
   return ETIQUETA[enumName]?.[valor] ?? valor ?? ''

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FOM · Usuarios y perfil · Propuesta desde la web real</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0a0d12;color:#f3f5f8;font:14px/1.5 "Segoe UI",sans-serif}
+header{padding:20px 24px;border-bottom:1px solid #262e39;display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+h1{font-size:20px;margin:0 0 4px}p{margin:0;color:#abb3bf}a{color:#75b9fa}
+nav{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit;color:#abb3bf;background:#141a22;border:1px solid #262e39;border-radius:12px;padding:9px 14px;cursor:pointer}
+button:hover,button[aria-pressed="true"]{color:#75b9fa;background:#183752;border-color:#39424f}
+button:focus-visible,a:focus-visible{outline:2px solid #75b9fa;outline-offset:3px}
+.toolbar{padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.toolbar span{color:#abb3bf}.toolbar strong{color:#f3f5f8}
+main{padding:0 24px 20px}.stage{position:relative;margin:0 auto;max-width:1672px;line-height:0;background:#141a22;border:1px solid #262e39;border-radius:18px;overflow:hidden}
+.stage img{display:block;width:100%;height:auto;aspect-ratio:1672/941}
+.hot{position:absolute;background:transparent;border:1px solid transparent;border-radius:12px;padding:0;line-height:1;cursor:pointer}
+.hot:hover,.hot:focus-visible{background:#3d9bf51a;border-color:#75b9fa;outline:none}
+footer{padding:0 24px 24px;color:#abb3bf;display:flex;gap:20px;justify-content:space-between;flex-wrap:wrap}
+.reference{max-width:950px;line-height:1.5}.reference img{aspect-ratio:auto}.reference p{padding:16px}
+@media(max-width:700px){header,.toolbar{padding:14px}main{padding:0 8px 14px}footer{padding:0 14px 20px}.hot{border-radius:4px}h1{font-size:18px}}
+</style>
+</head>
+<body>
+<header><div><h1>Usuarios y perfil · FOM</h1><p>Propuesta basada en la web actual. Datos de demostración.</p></div><nav aria-label="Vistas de usuarios"><button data-go="0">Supervisor</button><button data-go="1">Administrador FOM</button><button data-go="7">Referencia real</button></nav></header>
+<div class="toolbar"><span id="status" aria-live="polite"></span><nav aria-label="Pestañas del perfil"><button data-go="2">Datos</button><button data-go="3">Conducción</button><button data-go="4">Inspecciones</button><button data-go="5">Documentos</button><button data-go="6">Editar datos</button></nav></div>
+<main><div class="stage" id="stage"><img id="screen" alt=""><div id="hotspots"></div></div></main>
+<footer><span id="help">Haz clic en Carlos Mendoza o en Ver perfil para abrir su ficha.</span><span><a id="original" href="01-usuarios-supervisor.png" target="_blank" rel="noopener">Abrir imagen</a> · <a href="DISENO.md">Criterios y fuentes</a> · <a href="prompts.json">Prompts</a></span></footer>
+<script>
+const screens=[
+{file:"01-usuarios-supervisor.png",title:"Usuarios · Supervisor"},
+{file:"02-usuarios-admin.png",title:"Usuarios generales · Administrador FOM"},
+{file:"03-perfil-datos.png",title:"Perfil · Datos"},
+{file:"04-perfil-conduccion.png",title:"Perfil · Conducción"},
+{file:"05-perfil-inspecciones.png",title:"Perfil · Inspecciones"},
+{file:"06-perfil-documentos.png",title:"Perfil · Documentos"},
+{file:"07-editar-datos.png",title:"Perfil · Editar datos"},
+{file:"referencia-web-real.jpg",title:"Referencia · Captura de Usuarios en la web real"}
+];
+let current=0,directory=0;
+const image=document.getElementById("screen"),stage=document.getElementById("stage"),spots=document.getElementById("hotspots");
+function hot(label,target,x,y,w,h){const b=document.createElement("button");b.className="hot";b.setAttribute("aria-label",label);b.title=label;b.style.left=(x/1672*100)+"%";b.style.top=(y/941*100)+"%";b.style.width=(w/1672*100)+"%";b.style.height=(h/941*100)+"%";b.onclick=()=>show(target);spots.append(b)}
+function show(index,updateHash=true){
+current=index;if(index<2)directory=index;
+image.src=screens[index].file;image.alt=screens[index].title+" — propuesta visual de FOM";
+stage.classList.toggle("reference",index===7);
+document.getElementById("status").textContent=screens[index].title;
+document.getElementById("original").href=screens[index].file;
+document.querySelectorAll("[data-go]").forEach(b=>b.setAttribute("aria-pressed",String(Number(b.dataset.go)===index)));
+spots.replaceChildren();
+if(index===0){hot("Abrir perfil de Carlos Mendoza",2,347,591,1262,59)}
+if(index===1){hot("Abrir perfil completo de Carlos Mendoza",2,1235,618,388,48);hot("Abrir perfil de Carlos Mendoza",2,320,583,795,59)}
+if(index>=2&&index<=5){
+hot("Volver a usuarios",directory,304,91,175,32);
+hot("Datos",2,304,521,107,44);hot("Conducción",3,421,521,128,44);hot("Inspecciones",4,559,521,140,44);hot("Documentos",5,709,521,140,44);
+hot("Editar datos",6,1479,134,161,46);
+hot("Usuarios",directory,28,665,236,39);
+}
+if(index===6){hot("Cerrar vista de edición",2,1100,190,38,34);hot("Cancelar edición",2,647,725,231,45)}
+document.getElementById("help").textContent=index<2?"Haz clic en Carlos Mendoza o en Ver perfil para abrir su ficha.":index===7?"Captura en vivo recortada antes de los registros personales.":index===6?"Vista del formulario existente. La galería no guarda datos.":"Haz clic en las pestañas del perfil o en Usuarios para volver. Índice de la unidad asignada.";
+if(updateHash)history.replaceState(null,"","#vista="+index);
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(Number(b.dataset.go)));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&current===6)show(2)});
+function fromHash(){const m=location.hash.match(/^#vista=([0-7])$/);show(m?Number(m[1]):0,false)}
+window.addEventListener("hashchange",fromHash);fromHash();
+</script>
+</body></html>

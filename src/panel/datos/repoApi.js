@@ -17,6 +17,9 @@ import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
 import { quitarSaltos } from './recorrido'
+import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
+import { cuerpoCredencial, credencialesVigentes } from './credencialesPersona'
+import { cambiosGps } from './metadatosGps'
 
 /**
  * Une el vehículo con su estado en vivo en la forma que consumen los módulos.
@@ -38,6 +41,7 @@ function comoUnidad(v) {
     anio: v.modelYear ?? null,
     placa: v.plate || '—',
     numero: v.fleetNumber || v.code || '—',
+    numeroFlota: v.fleetNumber ?? null,
     alias,
     tipo: v.vehicleType || 'otro',
     estado: v.status,
@@ -490,16 +494,21 @@ export const repoApi = {
     /** Recorrer el directorio paginado: la unidad puede estar después de los primeros 200 registros. */
     async usuariosAsignados(id) {
       const asignaciones = []
+      const vistos = new Set()
       let desplazamiento = 0
       while (true) {
         const r = await api.conductores({ desplazamiento })
         const items = r?.items ?? []
-        asignaciones.push(...items.filter(c => c.vehicleId === id).map(c => ({
+        if (!items.length) break
+        const nuevos = items.filter(c => !vistos.has(c.assignmentId))
+        if (!nuevos.length) throw new Error('El servidor repitió una página de asignaciones. Vuelve a intentarlo.')
+        nuevos.forEach(c => vistos.add(c.assignmentId))
+        asignaciones.push(...nuevos.filter(c => c.vehicleId === id).map(c => ({
           id: c.userId, nombre: c.displayName, rol: c.role,
           asignacionId: c.assignmentId, desde: c.validFrom ?? null,
         })))
         desplazamiento += items.length
-        if (!items.length || (r?.page?.total != null ? desplazamiento >= r.page.total : items.length < 200)) break
+        if (r?.page?.total != null ? desplazamiento >= r.page.total : items.length < 200) break
       }
       return asignaciones.sort((a, b) => (a.rol === 'principal' ? 0 : 1) - (b.rol === 'principal' ? 0 : 1))
     },
@@ -652,6 +661,12 @@ export const repoApi = {
    * persona apunta a su membresia, asi que aqui no existe alguien sin cuenta.
    */
   gente: {
+    async guardarCredencial(userId, borrador, idempotencia) {
+      const cuerpo = cuerpoCredencial(borrador)
+      const r = await api.actualizarCredencialPersona(userId, cuerpo, idempotencia)
+      if (!r?.credential?.id || r.credential.kind !== cuerpo.kind) throw new Error('El servidor no confirmó la credencial guardada. Recarga el perfil para comprobarla antes de repetir.')
+      return r.credential
+    },
     /**
      * Una persona por su identificador. El directorio no tiene ruta de
      * detalle: se busca en la lista. Antes «obtener» caía en la semilla y
@@ -659,31 +674,50 @@ export const repoApi = {
      * persona» para todo el mundo.
      */
     async obtener(id) {
-      const [lista, insp, odts] = await Promise.all([
-        repoApi.gente.listar({}),
-        repoApi.inspecciones.listar({}).catch(() => []),
-        repoApi.odts.listar({}).catch(() => []),
-      ])
+      const lista = await repoApi.gente.listar({})
       const p = lista.find((x) => x.userId === id || x.id === id)
       if (!p) return null
-      const nombre = String(p.nombre ?? '').trim().toLowerCase()
+      const [insp, odts, docs, manejo] = await Promise.allSettled([
+        repoApi.inspecciones.listar({}),
+        repoApi.odts.listar({}),
+        repoApi.documentos.listar({ ambito: 'persona' }),
+        p.conduce ? repoApi.manejo.ranking({ dias: 28 }) : Promise.resolve([]),
+      ])
+      const inspecciones = coleccionDePersona(insp, p.userId, ['conductorId'])
+      const ordenes = coleccionDePersona(odts, p.userId, ['creadorId'])
+      const documentos = coleccionDePersona(docs, p.userId, ['personaId', 'titularId'])
+      const score = manejo.status === 'fulfilled' ? manejo.value.find(s => s.id === p.userId) : null
+      const credenciales = credencialesVigentes(p.credenciales)
+      const licencia = credenciales.find(c => c.kind === 'driver_license')
+      const medica = credenciales.find(c => c.kind === 'medical_certificate')
+      const documentoLicencia = documentos.registros.find(d => d.tipo === 'licencia_conducir')
+      const documentoMedico = documentos.registros.find(d => d.tipo === 'certificado_medico')
       return {
         ...p,
-        // El expediente espera la unidad como objeto y las colecciones como
-        // listas. Lo que el servidor no sirve por persona queda vacío, no
-        // inventado: eventos de manejo y licencia todavía no viajan aquí.
+        administrable: lista.alcance?.administrable !== false,
         unidad: p.unidad ? { id: p.unidad, alias: p.unidadAlias ?? p.unidadNombre ?? p.unidad, placa: p.unidadPlaca ?? '' } : null,
         eventos: [],
-        inspecciones: insp.filter((i) => String(i.conductorNombre ?? '').trim().toLowerCase() === nombre),
-        odts: odts.filter((o) => String(o.creadorNombre ?? '').trim().toLowerCase() === nombre),
-        documentos: [],
+        eventosDisponibles: false,
+        eventosError: p.conduce ? 'El servidor todavía no entrega el detalle de eventos de manejo para este perfil.' : '',
+        manejo: score,
+        manejoError: manejo.status === 'rejected' ? manejo.reason.message : '',
+        indiceFuente: 'conductor',
+        inspecciones: inspecciones.registros,
+        inspeccionesError: inspecciones.error,
+        inspeccionesDisponibles: inspecciones.disponible,
+        odts: ordenes.registros,
+        odtsDisponibles: ordenes.disponible,
+        odtsError: ordenes.error,
+        documentos: documentos.registros,
+        documentosError: documentos.error,
         direccion: p.direccion ?? null,
         fechaNacimiento: p.fechaNacimiento ?? null,
-        licenciaNumero: null,
-        licenciaCategoria: null,
-        licenciaVence: null,
-        cartaMedicaVence: null,
-        indiceSeguro: null,
+        credenciales,
+        licenciaNumero: licencia?.number ?? documentoLicencia?.numero ?? null,
+        licenciaCategoria: licencia?.category ?? null,
+        licenciaVence: licencia?.expiresAt ?? documentoLicencia?.venceEn ?? null,
+        cartaMedicaVence: medica?.expiresAt ?? documentoMedico?.venceEn ?? null,
+        indiceSeguro: indiceDePersona(score),
         creadoEn: p.activadoEn ?? null,
       }
     },
@@ -711,12 +745,15 @@ export const repoApi = {
         // Sin nombre resuelto se deja vacio, no un texto inventado: el panel
         // muestra la fila igual y el hueco dice la verdad.
         empresaNombre: empresa?.name ?? null,
+        credenciales: p.credentials ?? [],
 
         // Datos personales. Vienen NULOS cuando se lee un contratista: la
         // politica de fila de la base exige compartir ente, y una compania no
         // lo comparte con la gente ajena. Se ve quien es, no su cedula.
         cedula: p.nationalId ?? null,
         telefono: p.phone ?? null,
+        direccion: p.address ?? null,
+        fechaNacimiento: p.birthDate ?? null,
         perfilCompleto: Boolean(p.profileComplete),
 
         unidad: p.vehicleId ?? null,
@@ -889,8 +926,17 @@ export const repoApi = {
           fabricante: d.manufacturer ?? null,
           protocolo: d.protocolFamily,
           linea: d.simPhone ?? null,
+          simPhone: d.simPhone ?? null,
+          iccid: d.iccid ?? null,
+          carrier: d.carrier ?? null,
+          apn: d.apn ?? null,
+          simStatus: d.simStatus ?? null,
+          simPlan: d.simPlan ?? null,
+          firmwareVersion: d.firmwareVersion ?? null,
+          transport: d.transport ?? null,
           estado: d.status,
-          // «Verificado» = el receptor ya lo oyó alguna vez.
+          // «Verificado» = el receptor ya lo oyó alguna vez. Es informativo: el servidor deja instalar
+          // cualquier equipo en inventario, haya reportado o no.
           verificado: Boolean(d.connected || d.lastConnectionAt),
           conectado: Boolean(d.connected),
           ultimaConexion: d.lastConnectionAt ?? null,
@@ -905,32 +951,36 @@ export const repoApi = {
         }))
         .filter((g) => !t || [g.imei, g.modelo, g.linea, g.vehiculoNombre].some((v) => String(v ?? '').toLowerCase().includes(t)))
     },
-    async registrar({ imei, modelo, protocolo, fabricante, serie }) {
+    async registrar({ imei, modelo, protocolo, fabricante, serie, linea, ...metadata }) {
       const r = await api.registrarEquipoGps({
         imei,
         model: modelo,
         protocolFamily: protocolo || 'coban-gps103',
         manufacturer: fabricante || undefined,
         serialNumber: serie || undefined,
+        ...cambiosGps({ ...metadata, simPhone: linea || metadata.simPhone }),
       })
       return { id: r?.gpsDevice?.id ?? null }
     },
-    async asociar(equipoId, vehiculoId, notas) {
+    async asociar(equipoId, vehiculoId, notas, { tecnico, ubicacion } = {}) {
       await api.instalarEquipoGps(equipoId, {
         vehicleId: vehiculoId,
         notes: notas || undefined,
+        technician: tecnico?.trim() || undefined,
+        installationLocation: ubicacion?.trim() || undefined,
       })
       return true
     },
-    async desmontar(instalacionId, notas) {
-      await api.desmontarEquipoGps(instalacionId, { notes: notas || undefined })
+    async desmontar(instalacionId, notas, ubicacion) {
+      await api.desmontarEquipoGps(instalacionId, { notes: notas || undefined, storageLocation: ubicacion?.trim() || undefined })
       return true
     },
-    async set(equipoId, { estado, fabricante, serie }) {
+    async set(equipoId, { estado, fabricante, serie, metadatos = {} }) {
       await api.actualizarEquipoGps(equipoId, {
         status: estado,
         manufacturer: fabricante,
         serialNumber: serie,
+        ...metadatos,
       })
       return true
     },
@@ -1052,11 +1102,12 @@ export const repoApi = {
      * en vez de fingir que el GPS quedo asociado, porque un vehiculo que se
      * cree «con GPS» y no lo tenga es peor que uno que se sepa sin el.
      */
-    async crear({ alias, placa, marca, modelo, anio, tipo, areaId, gpsId }) {
+    async crear({ alias, placa, marca, modelo, anio, tipo, areaId, gpsId, numero }) {
       const r = await api.crearVehiculo({
         code: (alias || placa || '').trim().toLowerCase().replace(/\s+/gu, '-'),
         plate: placa || undefined,
         alias: alias || undefined,
+        fleetNumber: numero?.trim() || undefined,
         make: marca || undefined,
         model: modelo || undefined,
         modelYear: anio ? Number(anio) : undefined,
@@ -1073,6 +1124,7 @@ export const repoApi = {
       await api.actualizarVehiculo(id, {
         plate: parche.placa,
         alias: parche.alias,
+        fleetNumber: parche.numero === undefined ? undefined : parche.numero?.trim() || null,
         make: parche.marca,
         model: parche.modelo,
         modelYear: parche.anio ? Number(parche.anio) : undefined,
@@ -1217,6 +1269,7 @@ export const repoApi = {
         let lista = (r?.items ?? []).map((o) => ({
           id: o.id,
           estado: o.status,
+          planId: o.maintenancePlanId ?? null,
           prioridad: o.severity ?? null,
           responsableId: o.assigneeUserId ?? null,
           responsable: o.assigneeDisplayName ?? o.assigneeName ?? null,
@@ -1233,6 +1286,7 @@ export const repoApi = {
           vehiculoId: o.vehicleId,
           vehiculoNombre: [o.vehicleCode, o.vehiclePlate].filter(Boolean).join(' · ') || '—',
           creadorNombre: o.createdByName || 'Sistema',
+          creadorId: o.createdByUserId ?? null,
         }))
         if (q) {
           const t = q.toLowerCase()
@@ -1299,6 +1353,7 @@ export const repoApi = {
         tipo: o.kind,
         descripcion: o.description,
         falla: o.failureType,
+        planId: o.maintenancePlanId ?? null,
         ubicacion: o.location,
         notaResolucion: o.resolutionNote,
           notaSolucion: o.resolutionNote,
@@ -1353,9 +1408,15 @@ export const repoApi = {
           vehiculoId: i.vehicleId,
           vehiculoNombre: [i.vehicleCode, i.vehiclePlate].filter(Boolean).join(' · ') || '—',
           conductorNombre: i.driverName || '—',
+          conductorId: i.driverUserId ?? null,
           plantilla: i.templateName,
           // «daily» (la diaria de cada conductor) o «scheduled» (la que fija el supervisor): lo clasifica el servidor.
           clase: i.kind ?? null,
+          // GET /inspections no trae conteos ni tipo de unidad (solo resultado, unidad, conductor y plantilla).
+          // Se dejan en null, no en 0: «sin dato» no es «sin fallas». El detalle los cuenta de sus respuestas.
+          fallasCriticas: null,
+          observaciones: null,
+          tipoVehiculo: null,
         })).filter(i => !fecha || String(i.fecha).slice(0, 10) === fecha)
           .filter(i => !q || `${i.vehiculoNombre} ${i.conductorNombre}`.toLowerCase().includes(q.toLowerCase()))
       } catch (error) {
@@ -1924,6 +1985,7 @@ function comoTransferencia(t) {
     codigoDestino: t.destinationCode ?? null,
     estado: t.status,
     motivo: t.reason,
+    motivoCierre: t.closedReason ?? null,
     version: t.version,
     liberadaEn: t.originReleasedAt ?? null,
     aceptadaEn: t.destinationAcceptedAt ?? null,

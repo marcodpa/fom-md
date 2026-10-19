@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { REGLAS_CLAVE, validarClave } from '../../lib/clave'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import repo, { DIRECTORIO_REAL } from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -10,6 +10,8 @@ import {
 import * as f from '../datos/formato'
 import { ROLES_ASIGNABLES, etiquetaRol } from '../datos/catalogos'
 import { Icono } from '../Iconos'
+import AccionesUsuario from '../comp/AccionesUsuario'
+import './usuarios-perfil.css'
 
 // Gente pertenece a la empresa de la sesión. El directorio global vive
 // en «Usuarios generales» y no se mezcla con esta vista.
@@ -42,7 +44,7 @@ function exportarCSV(lista) {
   const cabecera = [
     'Nombre', 'Cédula', 'Correo', 'Teléfono', 'Rol', 'Estado', 'Unidad',
     'Rol en la unidad', 'Perfil completo', 'Documento próximo',
-    'Vence', 'Días', 'Papeles por vencer',
+    'Vence', 'Días', 'Documentos por vencer',
   ]
   const filas = lista.map((p) => [
     p.nombre,
@@ -182,7 +184,7 @@ export default function AdminUsuarios() {
         )}
       </Cabecera>
 
-      <div className="pnl-cuerpo">
+      <div className="pnl-cuerpo usr-directorio">
         {estado === 'cargando' && <Cargando filas={6} />}
         {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
@@ -315,7 +317,7 @@ function Contenido({
                       <div className="pnl-persona">
                         <i className="pnl-avatar">{f.iniciales(p.nombre)}</i>
                         <div className="pnl-doble">
-                          <b>{p.nombre}</b>
+                          <Link className="usr-nombre" to={`/panel/personal/${encodeURIComponent(p.userId ?? p.id)}`}>{p.nombre}</Link>
                           {/* La empresa debajo del nombre, como pidio Marco: en la
                               vista de un contratista, o en la del admin FOM, es lo
                               que distingue a dos personas con el mismo nombre. Si
@@ -355,6 +357,7 @@ function Contenido({
                         {p.estado === 'suspended' && <Tag color="ambar">Suspendido</Tag>}
                         {p.estado === 'revoked' && <Tag color="rojo">Sin acceso</Tag>}
                         {!p.perfilCompleto && <Tag color="gris" plano>Perfil incompleto</Tag>}
+                        {p.perfilCompleto && <Tag color="verde" plano>Perfil completo</Tag>}
                         {/* Los días los cuenta la base con su propia fecha:
                             juzgar un vencimiento con el reloj del navegador
                             cambia la respuesta según quién abra la pantalla. */}
@@ -368,16 +371,21 @@ function Contenido({
                           ) : null
                         )}
                         {p.papelesPendientes > 1 && (
-                          <Tag color="gris" plano>{p.papelesPendientes} papeles por vencer</Tag>
+                          <Tag color="gris" plano>{p.papelesPendientes} documentos por vencer</Tag>
                         )}
                       </div>
                     </td>
                     <td className="num">
+                      <div className="usr-acciones-fila">
+                        <Link className="usr-ver-perfil" to={`/panel/personal/${encodeURIComponent(p.userId ?? p.id)}`} aria-label={`Ver perfil de ${p.nombre}`}>
+                          Ver perfil <Icono nombre="volver" tam={16} />
+                        </Link>
                       {/* En modo conectado solo se ofrecen las acciones que el
                           servidor sabe hacer, y solo sobre quien el rango del
                           actor puede administrar. Ofrecer un boton que va a
                           devolver 403 es peor que no ofrecerlo. */}
                       {directorioReal && (lista.alcance?.administrable ?? true) && puedeAdministrar(actor, p) && (
+                        <AccionesUsuario nombre={p.nombre}>
                         <div className="pnl-chips">
                           <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
                             Clave
@@ -397,8 +405,10 @@ function Contenido({
                             </button>
                           )}
                         </div>
+                        </AccionesUsuario>
                       )}
                       {!directorioReal && p.rol !== 'admin' && (
+                        <AccionesUsuario nombre={p.nombre}>
                         <div className="pnl-chips">
                           <button type="button" className="pnl-btn sutil" onClick={() => abrirMover(p)}>
                             Mover
@@ -416,7 +426,9 @@ function Contenido({
                             </button>
                           )}
                         </div>
+                        </AccionesUsuario>
                       )}
+                      </div>
                     </td>
                   </tr>
                 ))}

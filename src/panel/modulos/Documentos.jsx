@@ -13,6 +13,7 @@ import FotosDe from '../comp/FotosDe'
 import { GaleriaArchivos, SelectorArchivos } from '../comp/Archivos'
 import { etiquetas, ids } from '../datos/cloudinary'
 import { subirVarios } from '../datos/archivos'
+import './documentos.css'
 
 // ============================================================
 // DOCUMENTOS
@@ -31,7 +32,13 @@ function rutaTitular(d) {
   return d.ambito === 'vehiculo' ? `/panel/flota/${d.titularId}` : `/panel/personal/${d.titularId}`
 }
 
-const nombreAmbito = (ambito) => (ambito === 'vehiculo' ? 'Vehículo' : 'Personal')
+const nombreAmbito = (ambito) => (ambito === 'vehiculo' ? 'Vehículo' : 'Persona')
+
+/** «vencido hace 3 días» → «Vencido hace 3 días», para la etiqueta de estado. */
+const conMayuscula = (t) => t.charAt(0).toUpperCase() + t.slice(1)
+
+/** Tono de la caja de icono según el estado de vigilancia. */
+const TONO_ESTADO = { vencido: 'malo', por_vencer: 'aviso', vigente: 'ok' }
 
 /** Descarga la tabla filtrada como CSV, sin librerías. */
 function exportarCsv(lista) {
@@ -73,11 +80,13 @@ function vencimientosPorMes(lista) {
   return meses.map((m) => ({ etiqueta: m.etiqueta, valor: m.valor }))
 }
 
-function cargar(ambito, estadoDoc, q) {
-  return Promise.all([
-    repo.documentos.listar({}),
-    repo.documentos.listar({ ambito, estado: estadoDoc, q }),
-  ]).then(([todos, lista]) => ({ todos, lista }))
+/** Filtros en el cliente sobre la lista ya cargada: cambiar de chip no vuelve a pedir nada al servidor. */
+function filtrar(todos, { ambito, estadoDoc, q = '' }) {
+  const t = q.trim().toLowerCase()
+  return todos
+    .filter((d) => !ambito || d.ambito === ambito)
+    .filter((d) => !estadoDoc || d.estado === estadoDoc)
+    .filter((d) => !t || [d.tipo, d.titular, d.numero].join(' ').toLowerCase().includes(t))
 }
 
 export default function Documentos() {
@@ -86,9 +95,11 @@ export default function Documentos() {
   const [q, setQ] = useState('')
   const [renovando, setRenovando] = useState(null)
   const [creando, setCreando] = useState(false)
-  const [aviso, setAviso] = useState('')
+  // { texto, ok }: el mismo aviso sirve para éxito (verde) y para error (rojo).
+  const [aviso, setAviso] = useState(null)
 
-  const { datos, estado, error, recargar } = useDatos(() => cargar(ambito, estadoDoc, q), [ambito, estadoDoc, q])
+  const { datos, estado, error, recargar } = useDatos(() => repo.documentos.listar({}), [])
+  const lista = useMemo(() => filtrar(datos ?? [], { ambito, estadoDoc, q }), [datos, ambito, estadoDoc, q])
 
   return (
     <>
@@ -99,8 +110,8 @@ export default function Documentos() {
         <button
           type="button"
           className="pnl-btn"
-          onClick={() => exportarCsv(datos?.lista ?? [])}
-          disabled={estado !== 'ok' || (datos?.lista.length ?? 0) === 0}
+          onClick={() => exportarCsv(lista)}
+          disabled={estado !== 'ok' || lista.length === 0}
         >
           <Icono nombre="descargar" tam={16} />
           Exportar CSV
@@ -112,12 +123,15 @@ export default function Documentos() {
       </Cabecera>
 
       <div className="pnl-cuerpo">
-        {aviso && <p className="pnl-campo-error" role="status">{aviso}</p>}
+        {aviso && (aviso.ok
+          ? <p className="doc-aviso-ok" role="status">{aviso.texto}</p>
+          : <p className="pnl-campo-error" role="alert">{aviso.texto}</p>)}
         {estado === 'cargando' && <Cargando filas={6} />}
         {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
         {estado === 'ok' && (
           <Contenido
-            datos={datos}
+            todos={datos}
+            lista={lista}
             ambito={ambito}
             setAmbito={setAmbito}
             estadoDoc={estadoDoc}
@@ -126,13 +140,13 @@ export default function Documentos() {
             setQ={setQ}
             abrirRenovar={setRenovando}
             archivar={async (d) => {
-              setAviso('')
+              setAviso(null)
               try {
                 await repo.documentos.archivar(d.id)
-                setAviso(`${d.tipo} archivado: sale de la vigilancia y queda en el historial.`)
+                setAviso({ ok: true, texto: `${d.tipo} archivado: sale de la vigilancia y queda en el historial.` })
                 await recargar()
               } catch (e) {
-                setAviso(e?.message || 'No se pudo archivar.')
+                setAviso({ ok: false, texto: e?.message || 'No se pudo archivar.' })
               }
             }}
           />
@@ -149,25 +163,29 @@ export default function Documentos() {
   )
 }
 
-function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ, abrirRenovar, archivar }) {
+function Contenido({ todos, lista, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ, abrirRenovar, archivar }) {
   const [fotosDe, setFotosDe] = useState(null)
   const [porArchivar, setPorArchivar] = useState(null)
   const verFotos = (d) => setFotosDe(d)
-  const { todos, lista } = datos
+  // Los chips de arriba filtran también «Atención inmediata»; el buscador es solo de la tabla.
+  const filtrados = useMemo(() => filtrar(todos, { ambito, estadoDoc }), [todos, ambito, estadoDoc])
 
   const vencidos = todos.filter((d) => d.estado === 'vencido').length
   const porVencer = todos.filter((d) => d.estado === 'por_vencer').length
   const vigentes = todos.filter((d) => d.estado === 'vigente').length
 
-  const urgentes = useMemo(
-    () => todos.filter((d) => d.estado === 'vencido' || diasPara(d.venceEn) <= 7).slice(0, 10),
-    [todos]
+  const todosUrgentes = useMemo(
+    () => filtrados.filter((d) => d.estado === 'vencido' || diasPara(d.venceEn) <= 7),
+    [filtrados]
   )
-  const totalUrgentes = todos.filter((d) => d.estado === 'vencido' || diasPara(d.venceEn) <= 7).length
+  const urgentes = todosUrgentes.slice(0, 10)
+  const totalUrgentes = todosUrgentes.length
+  const hayFiltro = Boolean(ambito || estadoDoc)
   const porMes = useMemo(() => vencimientosPorMes(todos), [todos])
 
-  const cuentaAmbito = (a) => (a ? todos.filter((d) => d.ambito === a).length : todos.length)
-  const cuentaEstado = (e) => (e ? todos.filter((d) => d.estado === e).length : todos.length)
+  // Cada grupo cuenta respetando el otro filtro, para que el número diga lo que se va a ver.
+  const cuentaAmbito = (a) => filtrar(todos, { ambito: a, estadoDoc }).length
+  const cuentaEstado = (e) => filtrar(todos, { ambito, estadoDoc: e }).length
 
   return (
     <>
@@ -201,12 +219,37 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
         />
       </div>
 
+      <div className="doc-filtros" role="group" aria-label="Filtros de documentos">
+        <Chips
+          etiqueta="Estado"
+          opciones={[
+            { v: '', t: 'Todos', n: cuentaEstado('') },
+            { v: 'vencido', t: 'Vencidos', n: cuentaEstado('vencido') },
+            { v: 'por_vencer', t: 'Por vencer', n: cuentaEstado('por_vencer') },
+            { v: 'vigente', t: 'Vigentes', n: cuentaEstado('vigente') },
+          ]}
+          valor={estadoDoc}
+          alCambiar={setEstadoDoc}
+        />
+        <span className="doc-sep" aria-hidden="true" />
+        {/* Vehículos / Personas: se activa uno o ninguno; tocar el activo lo quita. */}
+        <Chips
+          etiqueta="Ámbito"
+          opciones={[
+            { v: 'vehiculo', t: 'Vehículos', n: cuentaAmbito('vehiculo') },
+            { v: 'persona', t: 'Personas', n: cuentaAmbito('persona') },
+          ]}
+          valor={ambito}
+          alCambiar={(v) => setAmbito((actual) => (actual === v ? '' : v))}
+        />
+      </div>
+
       <div className="pnl-grid dos-tercios">
         <Tarjeta
           titulo="Atención inmediata"
           accion={
             totalUrgentes > urgentes.length ? (
-              <span className="pnl-link">{totalUrgentes} en total</span>
+              <span className="doc-total">{totalUrgentes} en total</span>
             ) : null
           }
         >
@@ -214,26 +257,29 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
             <Vacio
               icono="check"
               titulo="Nada urgente"
-              texto="Ningún documento vence en los próximos 7 días."
+              texto={hayFiltro ? 'Con estos filtros no hay documentos vencidos ni por vencer en 7 días.' : 'Ningún documento vence en los próximos 7 días.'}
             />
           ) : (
-            <div className="pnl-filas">
+            <div className="doc-filas">
               {urgentes.map((d) => {
                 const ruta = rutaTitular(d)
-                const clase = `pnl-fila ${d.estado === 'vencido' ? 'critica' : 'aviso'}`
-                const contenido = (
-                  <>
+                return (
+                  <div key={d.id} className="doc-fila">
+                    <span className={`doc-ibox ${TONO_ESTADO[d.estado] ?? ''}`}>
+                      <Icono nombre="documento" tam={18} />
+                    </span>
                     <div className="pnl-fila-txt">
                       <b>{d.tipo}</b>
-                      <span>{d.titular} · {nombreAmbito(d.ambito)}</span>
+                      <span>
+                        {ruta ? <Link to={ruta} className="pnl-link">{d.titular}</Link> : d.titular}
+                        {' · '}{nombreAmbito(d.ambito)}
+                      </span>
                     </div>
-                    <Tag color={color('documento_estado', d.estado)}>{f.vencimiento(d.venceEn)}</Tag>
-                  </>
-                )
-                return ruta ? (
-                  <Link key={d.id} to={ruta} className={clase}>{contenido}</Link>
-                ) : (
-                  <div key={d.id} className={clase}>{contenido}</div>
+                    <Tag color={color('documento_estado', d.estado)}>{conMayuscula(f.vencimiento(d.venceEn))}</Tag>
+                    <button type="button" className="pnl-btn" onClick={() => abrirRenovar(d)}>
+                      Renovar
+                    </button>
+                  </div>
                 )
               })}
             </div>
@@ -250,28 +296,6 @@ function Contenido({ datos, ambito, setAmbito, estadoDoc, setEstadoDoc, q, setQ,
         accion={<Buscador valor={q} alCambiar={setQ} placeholder="Buscar por tipo o titular…" />}
         sinCuerpo
       >
-        <div className="pnl-card-cuerpo">
-          <Chips
-            opciones={[
-              { v: '', t: 'Todos', n: cuentaAmbito('') },
-              { v: 'vehiculo', t: 'De vehículos', n: cuentaAmbito('vehiculo') },
-              { v: 'persona', t: 'De personal', n: cuentaAmbito('persona') },
-            ]}
-            valor={ambito}
-            alCambiar={setAmbito}
-          />
-          <Chips
-            opciones={[
-              { v: '', t: 'Todos', n: cuentaEstado('') },
-              { v: 'vencido', t: 'Vencidos', n: cuentaEstado('vencido') },
-              { v: 'por_vencer', t: 'Por vencer', n: cuentaEstado('por_vencer') },
-              { v: 'vigente', t: 'Vigentes', n: cuentaEstado('vigente') },
-            ]}
-            valor={estadoDoc}
-            alCambiar={setEstadoDoc}
-          />
-        </div>
-
         {lista.length === 0 ? (
           <div className="pnl-card-cuerpo">
             <Vacio

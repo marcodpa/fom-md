@@ -7,35 +7,53 @@ import { Icono } from '../Iconos'
 // ============================================================
 
 /** Cabecera pegajosa de cada módulo: título, bajada y acciones a la derecha. */
-export function Cabecera({ titulo, bajada, children }) {
+export function Cabecera({ titulo, bajada, children, imagen, className = '' }) {
+  const texto = <div className="pnl-cab-txt">
+    <h1>{titulo}</h1>
+    {bajada && <p>{bajada}</p>}
+  </div>
   return (
-    <header className="pnl-cab">
-      <div className="pnl-cab-txt">
-        <h1>{titulo}</h1>
-        {bajada && <p>{bajada}</p>}
-      </div>
+    <header className={`pnl-cab${className ? ` ${className}` : ''}`}>
+      {imagen ? <div className="pnl-cab-identidad">{imagen}{texto}</div> : texto}
       {children && <div className="pnl-cab-acciones">{children}</div>}
     </header>
   )
 }
 
-/** Esqueleto de carga con la forma real del contenido. */
+// Anchos de las dos barras de cada fila, para que el esqueleto no parezca una
+// pared: se repiten de tres en tres (los mismos de la maqueta W6).
+const ANCHOS_SKEL = [['72%', '46%'], ['64%', '38%'], ['78%', '50%']]
+
+/** Esqueleto de carga con la forma real del contenido: caja y dos barras. */
 export function Cargando({ filas = 5 }) {
   return (
     <div className="pnl-skeleton" aria-live="polite" aria-busy="true">
       <span className="visually-hidden">Cargando…</span>
-      {Array.from({ length: filas }).map((_, i) => (
-        <div className="pnl-skel-fila" key={i} style={{ animationDelay: `${i * 70}ms` }} />
-      ))}
+      {Array.from({ length: filas }).map((_, i) => {
+        const [largo, corto] = ANCHOS_SKEL[i % ANCHOS_SKEL.length]
+        return (
+          <div className="pnl-skel-fila" key={i} style={{ animationDelay: `${i * 70}ms` }}>
+            <i />
+            <span>
+              <i style={{ width: largo }} />
+              <i style={{ width: corto }} />
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-/** Estado vacío amable, con acción opcional (empty-state.tsx de la app). */
-export function Vacio({ icono = 'buscar', titulo, texto, accion }) {
+/**
+ * Estado vacío amable, con acción opcional (empty-state.tsx de la app):
+ * círculo azul suave con el icono. `compacto` es la versión para dentro de
+ * una tarjeta (círculo más chico).
+ */
+export function Vacio({ icono = 'buscar', titulo, texto, accion, compacto = false }) {
   return (
-    <div className="pnl-vacio">
-      <Icono nombre={icono} tam={40} />
+    <div className={`pnl-vacio${compacto ? ' compacto' : ''}`}>
+      <Icono nombre={icono} tam={compacto ? 22 : 28} />
       <b>{titulo}</b>
       <span>{texto}</span>
       {accion}
@@ -44,35 +62,37 @@ export function Vacio({ icono = 'buscar', titulo, texto, accion }) {
 }
 
 /**
- * Error con reintento. Mismos textos y forma que error-state.tsx de la app;
- * allá varias pantallas se quedaban en spinner infinito, aquí siempre hay
- * salida.
- */
-/**
- * Fallo al cargar, DICIENDO POR QUÉ.
+ * Fallo al cargar, DICIENDO POR QUÉ. Mismos textos y forma que
+ * error-state.tsx de la app (bloque centrado: círculo rojo suave, título,
+ * frase y «Reintentar» en píldora). `compacto` lo achica para dentro de una
+ * tarjeta.
  *
  * Antes decía siempre «revisa tu conexión», que es un diagnóstico inventado:
  * la causa más común no es la red sino un permiso, una sesión caída o una
- * función que todavía no está publicada. Mandar a revisar el cable a quien
- * tiene un problema de permisos es peor que no decir nada.
+ * función que todavía no está publicada.
  *
- * `error` es el que devuelve `useDatos`. Si no llega, se mantiene el texto
- * genérico de siempre.
+ * `error` es el que devuelve `useDatos`; si no llega, queda el texto genérico.
+ * «Reintentar» solo aparece si llega `onReintentar`: un botón que no hace
+ * nada es peor que no tenerlo.
  */
 export function ErrorCarga({
   onReintentar,
   error = null,
   texto = 'Revisa tu conexión e inténtalo de nuevo.',
+  compacto = false,
 }) {
   const motivo = error?.message || texto
   return (
-    <div className="pnl-vacio error" role="alert">
-      <Icono nombre="alerta" tam={40} />
+    <div className={`pnl-vacio error${compacto ? ' compacto' : ''}`} role="alert">
+      <Icono nombre="alerta" tam={compacto ? 22 : 28} />
       <b>No pudimos cargar esto</b>
       <span>{motivo}</span>
-      <button type="button" className="pnl-btn" onClick={onReintentar}>
-        Reintentar
-      </button>
+      {onReintentar && (
+        <button type="button" className="pnl-btn pnl-reintentar" onClick={onReintentar}>
+          <Icono nombre="sync" tam={compacto ? 16 : 18} />
+          Reintentar
+        </button>
+      )}
     </div>
   )
 }
@@ -172,10 +192,13 @@ export function Buscador({ valor, alCambiar, placeholder = 'Buscar…' }) {
   )
 }
 
-/** Grupo de filtros tipo chip. opciones = [{v, t, n}] (valor, texto, contador) */
-export function Chips({ opciones, valor, alCambiar }) {
+/**
+ * Grupo de filtros tipo chip. opciones = [{v, t, n}] (valor, texto, contador).
+ * `etiqueta` (opcional) le da nombre al grupo para el lector de pantalla.
+ */
+export function Chips({ opciones, valor, alCambiar, etiqueta }) {
   return (
-    <div className="pnl-chips" role="group">
+    <div className="pnl-chips" role="group" aria-label={etiqueta}>
       {opciones.map((o) => (
         <button
           key={o.v}

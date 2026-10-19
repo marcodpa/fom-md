@@ -1,0 +1,7 @@
+4041a560f9d9c8899bd7742922d8792e9a2a0a4372596e4618eaba873ddfa4b4  /usr/local/sbin/fom-prod
+13ef0a57a436159c49e7f05c99a1ad560ca0d06b571368b297651c9af331b9b4  /opt/fom/deploy/fom-core/bin/deploy.sh
+56608810f231834f235e56457a57c2a2590463879822aad1cdd893e3038a3874  /opt/fom/deploy/fom-core/bin/migrate.sh
+04043d53281620f6fcd8291e7297815ca17147e4d989c918e194c6baa168cf06  /opt/fom/deploy/fom-core/bin/lib/common.sh
+db8bf662c81acd9b4433b695517c58305a2c2bde0c78e35998837050f7de4958  /opt/fom/deploy/fom-core/bin/health-check.sh
+ed5a9124e78ba863a37aa5debe05131acca7e90d32bd67b5a5631adbad0f9ede  /opt/fom/docker/core/docker-compose.yml
+71af0b8f8963dca0ab9847f59410e1791d614d52634df6abdc6d11d8ed7a1588  /opt/fom/docker/core/docker-compose.deploy.yml

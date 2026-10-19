@@ -206,7 +206,7 @@ export default function Flota() {
 
   return (
     <>
-      <Cabecera titulo="Vehículos" bajada="Toda la flota en una sola tabla: estado, papeles y responsable de cada unidad.">
+      <Cabecera titulo="Vehículos" bajada="Toda la flota en una sola tabla: estado, documentos y responsable de cada unidad.">
         <Buscador valor={q} alCambiar={setQ} placeholder="Buscar unidad, placa, conductor o área…" />
         <button
           type="button"
@@ -298,7 +298,7 @@ export default function Flota() {
                 valor={atencion}
                 icono="alerta"
                 tono={atencion ? 'aviso' : 'ok'}
-                nota="Papeles en riesgo o sin responsable"
+                nota="Documentos en riesgo o sin responsable"
               />
               <Kpi
                 titulo="Sin conductor"
@@ -477,6 +477,7 @@ export default function Flota() {
  */
 function ModalNuevaUnidad({ abierto, areas, alCerrar, alGuardar, actor }) {
   const [alias, setAlias] = useState('')
+  const [numero, setNumero] = useState('')
   const [placa, setPlaca] = useState('')
   const [marca, setMarca] = useState('')
   const [modelo, setModelo] = useState('')
@@ -495,6 +496,7 @@ function ModalNuevaUnidad({ abierto, areas, alCerrar, alGuardar, actor }) {
 
   const cerrar = () => {
     setAlias(''); setPlaca(''); setMarca(''); setModelo(''); setAnio('')
+    setNumero('')
     setTipo('camioneta'); setGpsId(''); setAreaSel(''); setError('')
     alCerrar()
   }
@@ -504,7 +506,7 @@ function ModalNuevaUnidad({ abierto, areas, alCerrar, alGuardar, actor }) {
     setError('')
     try {
       await repo.vehiculos.crear(
-        { alias, placa, marca, modelo, anio, tipo, gpsId, areaId: areaSel || null },
+        { alias, placa, marca, modelo, anio, tipo, gpsId, areaId: areaSel || null, numero },
         actor
       )
       await alGuardar()
@@ -536,6 +538,7 @@ function ModalNuevaUnidad({ abierto, areas, alCerrar, alGuardar, actor }) {
           <Campo etiqueta="Alias (opcional)" ayuda="Si lo dejas vacío se numera como Unidad NN.">
             <input type="text" className="pnl-input" value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="Unidad 27" />
           </Campo>
+          <Campo etiqueta="Número interno de flota (opcional)"><input className="pnl-input" value={numero} maxLength={30} onChange={e => setNumero(e.target.value)} /></Campo>
           <Campo etiqueta="Marca">
             <input type="text" className="pnl-input" value={marca} onChange={(e) => setMarca(e.target.value)} placeholder="Toyota" />
           </Campo>

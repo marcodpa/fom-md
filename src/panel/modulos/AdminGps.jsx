@@ -7,6 +7,8 @@ import {
   Buscador, Campo, Cargando, Datos, ErrorCarga, Modal, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import { Icono } from '../Iconos'
+import CamposGps from '../comp/CamposGps'
+import { cambiosGps } from '../datos/metadatosGps'
 import * as f from '../datos/formato'
 import './mantenimiento.css'
 import './admin-rediseno.css'
@@ -44,7 +46,8 @@ const estadoDe = (g) => {
 
 const SIGUIENTE = (g) => {
   if (g.estado === 'inactive') return 'El equipo está inactivo. Actívalo desde «Editar» para volver a usarlo.'
-  if (!g.verificado) return 'Primero hay que comprobar que responde. La verificación por ping se hace en campo, con el aparato delante.'
+  if (!g.verificado && g.vehiculoId) return `Está instalado en ${g.vehiculoNombre} pero aún no ha reportado. Comprueba que empiece a enviar señal.`
+  if (!g.verificado) return 'Aún no ha reportado. Lo ideal es verificarlo por ping en campo, con el aparato delante; si ya está montado puedes instalarlo igual y comprobar después que envíe señal.'
   if (g.vehiculoId) return `Está instalado en ${g.vehiculoNombre}. Si cambia de unidad, desmóntalo primero.`
   return 'Ya responde. Instálalo en la unidad que va a rastrear.'
 }
@@ -89,8 +92,8 @@ export default function AdminGps() {
   const acciones = {
     verificar: (g) => ejecutar(g, () => repo.admin.gps.verificar(g.id, actor)),
     probarPanico: (g) => ejecutar(g, () => repo.admin.gps.probarPanico(g.id, actor)),
-    instalar: (g, vehiculoId) => vehiculoId && ejecutar(g, () => repo.admin.gps.asociar(g.id, vehiculoId, actor), 'Equipo instalado en la unidad.'),
-    desmontar: (g) => ejecutar(g, () => repo.admin.gps.desmontar(g.instalacionId), 'Equipo desmontado: vuelve al inventario.'),
+    instalar: (g, vehiculoId, metadatos) => vehiculoId && ejecutar(g, () => repo.admin.gps.asociar(g.id, vehiculoId, undefined, metadatos), g.verificado ? 'Equipo instalado en la unidad.' : 'Equipo instalado en la unidad. Aún no ha reportado: comprueba que empiece a enviar señal.'),
+    desmontar: (g, ubicacion) => ejecutar(g, () => repo.admin.gps.desmontar(g.instalacionId, undefined, ubicacion), 'Equipo desmontado: vuelve al inventario.'),
   }
 
   const lista = datos?.lista ?? []
@@ -239,6 +242,9 @@ function Detalle({ g, vehiculos, fila, acciones, alEditar }) {
   const instalado = !!g.vehiculoId
   const activo = g.estado !== 'inactive'
   const [vehiculoId, setVehiculoId] = useState('')
+  const [tecnico, setTecnico] = useState('')
+  const [ubicacionInstalacion, setUbicacionInstalacion] = useState('')
+  const [ubicacionInventario, setUbicacionInventario] = useState('')
   // Lo que ha pasado con el equipo, de la bitácora.
   const historial = useDatos(
     () => repo.admin.auditoria.listar({ q: g.imei }).then((l) => [...l].slice(0, 6)).catch(() => []),
@@ -266,6 +272,11 @@ function Detalle({ g, vehiculos, fila, acciones, alEditar }) {
         { etiqueta: 'Fabricante', valor: g.fabricante || '—' },
         { etiqueta: 'Protocolo', valor: g.protocolo || '—' },
         { etiqueta: 'Última conexión', valor: g.ultimaConexion ? f.desde(g.ultimaConexion) : 'Nunca' },
+        { etiqueta: 'Operador SIM', valor: g.carrier || 'Sin registrar' },
+        { etiqueta: 'ICCID', valor: g.iccid || 'Sin registrar' },
+        { etiqueta: 'Firmware', valor: g.firmwareVersion || 'Sin registrar' },
+        { etiqueta: 'Transporte', valor: g.transport?.toUpperCase() || 'Sin registrar' },
+        { etiqueta: 'Ubicación en inventario', valor: g.ubicacion || 'Sin registrar' },
       ]} />
 
       <div className="adm-sigue">
@@ -282,20 +293,29 @@ function Detalle({ g, vehiculos, fila, acciones, alEditar }) {
             <Icono nombre="sync" tam={16} />{fila.ocupado ? 'Verificando…' : fila.error ? 'Reintentar verificación' : 'Verificar por ping'}
           </button>
         )}
-        {activo && g.verificado && !instalado && (
+        {/* El servidor deja instalar cualquier equipo en inventario: no exige que haya reportado. Un equipo
+            nuevo se monta antes de oírse por primera vez, así que se permite, avisando de comprobarlo. */}
+        {activo && !g.verificado && !instalado && (
+          <div className="adm-sigue" role="note">
+            <b>Aún no ha reportado</b>
+            <p>Este equipo aún no ha reportado; tras instalarlo comprueba que empiece a enviar señal.</p>
+          </div>
+        )}
+        {activo && !instalado && (
           <div className="adm-instalar">
             <select className="pnl-input" value={vehiculoId} disabled={fila.ocupado} onChange={(ev) => setVehiculoId(ev.target.value)} aria-label="Unidad donde instalar">
               <option value="">Elige la unidad…</option>
               {vehiculos.map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
             </select>
-            <button type="button" className="pnl-btn primario" disabled={!vehiculoId || fila.ocupado} onClick={() => acciones.instalar(g, vehiculoId)}>Instalar →</button>
+            <details><summary className="pnl-link">Datos de instalación (opcional)</summary><Campo etiqueta="Técnico"><input className="pnl-input" maxLength={120} value={tecnico} disabled={fila.ocupado} onChange={e => setTecnico(e.target.value)} /></Campo><Campo etiqueta="Ubicación de instalación"><input className="pnl-input" maxLength={255} value={ubicacionInstalacion} disabled={fila.ocupado} onChange={e => setUbicacionInstalacion(e.target.value)} /></Campo></details>
+            <button type="button" className="pnl-btn primario" disabled={!vehiculoId || fila.ocupado} onClick={() => acciones.instalar(g, vehiculoId, { tecnico, ubicacion: ubicacionInstalacion })}>Instalar →</button>
           </div>
         )}
         {instalado && (
           <Link className="pnl-btn" to={`/panel/flota/${g.vehiculoId}`}><Icono nombre="camion" tam={16} />Ver la unidad →</Link>
         )}
         {instalado && g.instalacionId && (
-          <button type="button" className="pnl-btn" disabled={fila.ocupado} onClick={() => acciones.desmontar(g)}>Desmontar de la unidad</button>
+          <div><Campo etiqueta="Ubicación al volver al inventario (opcional)"><input className="pnl-input" value={ubicacionInventario} maxLength={255} disabled={fila.ocupado} onChange={e => setUbicacionInventario(e.target.value)} /></Campo><button type="button" className="pnl-btn" disabled={fila.ocupado} onClick={() => acciones.desmontar(g, ubicacionInventario)}>Desmontar de la unidad</button></div>
         )}
         {activo && g.verificado && g.pinSupport && !g.panicoProbado && (
           <button type="button" className="pnl-btn sutil" disabled={fila.ocupado} onClick={() => acciones.probarPanico(g)}>
@@ -326,6 +346,7 @@ function Detalle({ g, vehiculos, fila, acciones, alEditar }) {
 }
 
 function ModalRegistrar({ abierto, inicial, alCerrar, alGuardar, actor }) {
+  const [metadata, setMetadata] = useState({})
   const [modelo, setModelo] = useState('')
   const [imei, setImei] = useState('')
   const [linea, setLinea] = useState('')
@@ -338,6 +359,7 @@ function ModalRegistrar({ abierto, inicial, alCerrar, alGuardar, actor }) {
   if (!abierto && visto) setVisto(false)
 
   const cerrar = () => {
+    setMetadata({})
     setModelo(''); setImei(''); setLinea(''); setError('')
     alCerrar()
   }
@@ -346,7 +368,7 @@ function ModalRegistrar({ abierto, inicial, alCerrar, alGuardar, actor }) {
     setGuardando(true)
     setError('')
     try {
-      await repo.admin.gps.registrar({ modelo, imei, linea }, actor)
+      await repo.admin.gps.registrar({ modelo, imei, linea, ...metadata }, actor)
       await alGuardar()
       cerrar()
     } catch (e) {
@@ -367,6 +389,7 @@ function ModalRegistrar({ abierto, inicial, alCerrar, alGuardar, actor }) {
       <Campo etiqueta="Línea (opcional)">
         <input type="tel" className="pnl-input" value={linea} onChange={(e) => setLinea(e.target.value)} placeholder="+58 …" />
       </Campo>
+      <CamposGps datos={metadata} alCambiar={setMetadata} ocupado={guardando} sinLinea />
       <div className="pnl-chips">
         <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>
           <Icono nombre="check" tam={16} />{guardando ? 'Registrando…' : 'Registrar'}
@@ -378,6 +401,7 @@ function ModalRegistrar({ abierto, inicial, alCerrar, alGuardar, actor }) {
 }
 
 function ModalEditar({ equipo, alCerrar, alGuardar }) {
+  const [metadata, setMetadata] = useState({})
   const [fabricante, setFabricante] = useState('')
   const [serie, setSerie] = useState('')
   const [activo, setActivo] = useState(true)
@@ -386,6 +410,7 @@ function ModalEditar({ equipo, alCerrar, alGuardar }) {
   const [idCargado, setIdCargado] = useState(null)
 
   if (equipo && idCargado !== equipo.id) {
+    setMetadata({ ...equipo, simPhone: equipo.linea || '' })
     setIdCargado(equipo.id)
     setFabricante(equipo.fabricante ?? '')
     setSerie(equipo.serie ?? '')
@@ -402,6 +427,7 @@ function ModalEditar({ equipo, alCerrar, alGuardar }) {
         estado: activo ? 'active' : 'inactive',
         fabricante: fabricante.trim() || undefined,
         serie: serie.trim() || undefined,
+        metadatos: cambiosGps(metadata, { ...equipo, simPhone: equipo.linea || '' }),
       })
       await alGuardar()
       alCerrar()
@@ -420,6 +446,7 @@ function ModalEditar({ equipo, alCerrar, alGuardar }) {
       <Campo etiqueta="Número de serie">
         <input type="text" className="pnl-input" value={serie} onChange={(e) => setSerie(e.target.value)} />
       </Campo>
+      <CamposGps datos={metadata} alCambiar={setMetadata} ocupado={guardando} />
       <Campo etiqueta="Estado" ayuda="Un equipo inactivo no se puede instalar en ninguna unidad.">
         <select className="pnl-input" value={activo ? 'active' : 'inactive'} onChange={(e) => setActivo(e.target.value === 'active')}>
           <option value="active">Activo</option>

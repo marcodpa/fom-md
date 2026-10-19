@@ -4,7 +4,8 @@ import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import { Cargando, ErrorCarga, Modal, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
-import { color, etiqueta } from '../datos/catalogos'
+import { etiqueta } from '../datos/catalogos'
+import { estadoVisible, presentarHistorial } from '../datos/historial-odt'
 import { Icono } from '../Iconos'
 import { miAsignacion } from './MiUnidad'
 import { NuevaOdt } from './Mantenimiento'
@@ -19,7 +20,12 @@ import { GaleriaArchivos } from '../comp/Archivos'
 // ============================================================
 
 const CADA_MINUTO = 60_000
-const CERRADAS = ['cerrada', 'cancelada']
+
+/** La etiqueta de estado con los 3 estados visibles (Abierta / En revisión / Resuelta), igual que el supervisor. */
+function EstadoOdt({ estado }) {
+  const g = estadoVisible(estado)
+  return <Tag color={g.color}>{g.etiqueta}</Tag>
+}
 
 const AYUDA = {
   abierta: 'Tu reporte llegó al supervisor. Falta que lo revise.',
@@ -57,8 +63,11 @@ export default function MantenimientoConductor() {
     () => [...(ordenes.datos ?? [])].sort((a, b) => Date.parse(b.creadaEn) - Date.parse(a.creadaEn)),
     [ordenes.datos],
   )
-  const enCurso = lista.filter((o) => !CERRADAS.includes(o.estado))
-  const cerradas = lista.filter((o) => CERRADAS.includes(o.estado))
+  const enCurso = lista.filter((o) => estadoVisible(o.estado).clave !== 'resuelta')
+  const cerradas = lista.filter((o) => estadoVisible(o.estado).clave === 'resuelta')
+  const abiertas = enCurso.filter((o) => estadoVisible(o.estado).clave === 'abierta')
+  // Se cuenta por su grupo, no restando: un estado desconocido no debe sumar a «En revisión».
+  const enRevision = enCurso.filter((o) => estadoVisible(o.estado).clave === 'revision')
   const v = unidad.datos
   const detalle = abierta ? lista.find((o) => o.id === abierta) : null
 
@@ -68,7 +77,7 @@ export default function MantenimientoConductor() {
         <div>
           <span className="mnt-breadcrumb">Inicio › Mantenimiento</span>
           <h1>Mantenimiento de mi unidad</h1>
-          <p>Reporta una falla y sigue lo que pasa con tu unidad.</p>
+          <p>Qué necesita atención y qué sigue.</p>
         </div>
       </div>
 
@@ -90,7 +99,7 @@ export default function MantenimientoConductor() {
               <div className="mnt-unit">
                 <div>
                   <b>{v.alias} · {v.placa}</b>
-                  <span>{[v.marca, v.modelo].filter(Boolean).join(' ')}</span>
+                  <span>{[[v.marca, v.modelo].filter(Boolean).join(' '), v.km == null ? null : f.km(v.km)].filter(Boolean).join(' · ')}</span>
                 </div>
               </div>
               <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
@@ -101,16 +110,16 @@ export default function MantenimientoConductor() {
 
             <div className="mnt-summary">
               {[
-                ['En curso', enCurso.length, 'Órdenes abiertas de tu unidad', 'llave'],
-                ['Cerradas', cerradas.length, 'Ya resueltas', 'check'],
-                ['Última falla', lista[0] ? f.desde(lista[0].creadaEn) : '—', lista[0] ? etiqueta('tipo_falla', lista[0].tipoFalla) : 'Sin órdenes todavía', 'alerta'],
-                ['Kilometraje', v.km == null ? 'Sin dato' : f.km(v.km), 'Lectura de tu unidad', 'mapa'],
-              ].map(([t, val, d, i]) => (
-                <div key={t}><Icono nombre={i} tam={28} /><span>{t}</span><b>{val}</b><small>{d}</small></div>
+                ['Abiertas', abiertas.length, 'Reportadas, falta revisarlas', 'ambar'],
+                ['En revisión', enRevision.length, 'En evaluación o en taller', 'azul'],
+                ['Resueltas', cerradas.length, 'Quedan en el historial', 'verde'],
+                ['Última falla', lista[0] ? f.desde(lista[0].creadaEn) : '—', lista[0] ? etiqueta('tipo_falla', lista[0].tipoFalla) : 'Sin órdenes todavía', 'gris'],
+              ].map(([t, val, d, c]) => (
+                <div key={t}><span><i className={c} />{t}</span><b>{val}</b><small>{d}</small></div>
               ))}
             </div>
 
-            <Tarjeta titulo="En curso" sinCuerpo>
+            <Tarjeta titulo="Por resolver" sinCuerpo>
               {enCurso.length === 0 ? (
                 <div className="pnl-card-cuerpo"><Vacio icono="check" titulo="Sin órdenes abiertas" texto="Si algo falla en tu unidad, repórtalo con «Reportar una falla»." /></div>
               ) : (
@@ -120,7 +129,7 @@ export default function MantenimientoConductor() {
 
             <Tarjeta titulo="Historial de mantenimiento de mi unidad" sinCuerpo>
               {cerradas.length === 0 ? (
-                <div className="pnl-card-cuerpo"><Vacio icono="reloj" titulo="Todavía no hay órdenes cerradas" texto="Aquí quedará lo que se arregló en tu unidad, con su fecha." /></div>
+                <div className="pnl-card-cuerpo"><Vacio icono="reloj" titulo="Todavía no hay órdenes resueltas" texto="Aquí quedará lo que se arregló en tu unidad, con su fecha." /></div>
               ) : (
                 <Filas ordenes={cerradas} alAbrir={setAbierta} />
               )}
@@ -159,7 +168,7 @@ function Filas({ ordenes, alAbrir }) {
             <span>{etiqueta('tipo_falla', o.tipoFalla)}</span>
             <h3>{o.descripcion}</h3>
             <div>
-              <Tag color={color('odt_estado', o.estado)}>{etiqueta('odt_estado', o.estado)}</Tag>
+              <EstadoOdt estado={o.estado} />
               <small>{f.fechaCorta(o.creadaEn)} · {f.desde(o.creadaEn)}</small>
             </div>
           </div>
@@ -173,22 +182,18 @@ function Filas({ ordenes, alAbrir }) {
 /** Solo lectura: cada cambio de estado de la orden, con quién, cuándo y la nota. */
 function Historia({ odt }) {
   const historial = useDatos(() => repo.odts.historial(odt.id), [odt.id, odt.estado])
-  const cambios = historial.datos ?? []
-  const hitos = cambios.length
-    ? cambios.map((c) => ({
-        t: c.de
-          ? `${c.actor || 'Alguien'}: de «${etiqueta('odt_estado', c.de)}» a «${etiqueta('odt_estado', c.a)}»`
-          : `${c.actor || odt.creadorNombre || 'Alguien'} reportó la falla`,
-        d: c.de ? c.nota : [odt.descripcion, c.nota].filter(Boolean).join(' · '),
-        en: c.en,
-      }))
-    : [{ t: 'Reportada', d: `${odt.creadorNombre || 'Alguien'} · ${odt.descripcion}`, en: odt.creadaEn }]
+  // Los pasos se cuentan con palabras («Responsable asignado», «Trabajo iniciado»…), no con los nueve estados del servidor.
+  const hitos = presentarHistorial(odt, historial.datos ?? []).map((h, i) => ({
+    t: h.actor ? `${h.titulo} · ${h.actor}` : h.titulo,
+    d: [i === 0 && !h.de ? odt.descripcion : null, ...h.notas].filter(Boolean).join(' · '),
+    en: h.en,
+  }))
 
   return (
     <div className="mnt-detail" style={{ gridTemplateColumns: '1fr' }}>
       <section className="mnt-detail-main">
         <div className="pnl-kanban-cab">
-          <Tag color={color('odt_estado', odt.estado)}>{etiqueta('odt_estado', odt.estado)}</Tag>
+          <EstadoOdt estado={odt.estado} />
           <em>{f.desde(odt.creadaEn)}</em>
         </div>
         <div className="pnl-fila-txt"><b>{odt.descripcion}</b><span>{AYUDA[odt.estado] ?? ''}</span></div>

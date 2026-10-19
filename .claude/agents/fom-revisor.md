@@ -2,7 +2,7 @@
 name: fom-revisor
 description: Revisor de código de FOM, de SOLO LECTURA. Revisa los archivos que cambió una tarea y devuelve hallazgos ordenados por gravedad (errores, seguridad, rendimiento, estilo del proyecto). No modifica nada ni ejecuta comandos.
 tools: Read, Glob, Grep
-model: inherit
+model: opus
 effort: high
 maxTurns: 30
 ---

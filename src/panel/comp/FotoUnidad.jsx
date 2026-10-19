@@ -7,8 +7,8 @@ import CambiarFoto from './CambiarFoto'
 import { Modal } from './ui'
 import './fotos-de.css'
 
-/** Marco estable: la proporción de la foto nunca determina el tamaño de la ficha. */
-export default function FotoUnidad({ unidad, puedeEditar = false }) {
+/** Vista cuadrada uniforme; al ampliar se conserva la fotografía original. */
+export default function FotoUnidad({ unidad, puedeEditar = false, variante = 'ficha' }) {
   const marco = useRef(null)
   const [foto, setFoto] = useState({ hay: false, sinFondo: false, id: null })
   const [abierta, setAbierta] = useState(null)
@@ -24,18 +24,20 @@ export default function FotoUnidad({ unidad, puedeEditar = false }) {
     setAbierta(foto.id)
   }
   return <>
-    <figure ref={marco} className={`fleet-vehicle-image fleet-photo${foto.hay ? ' con-foto' : ''}${foto.hay && foto.sinFondo ? ' sin-fondo' : ''}`}>
+    <figure ref={marco} className={`fleet-vehicle-image fleet-photo${variante === 'cabecera' ? ' eu-foto-cabecera' : ''}${foto.hay ? ' con-foto' : ''}${foto.hay && foto.sinFondo ? ' sin-fondo' : ''}`}>
       <button type="button" className="fleet-photo-stage" disabled={!foto.hay} onClick={ampliar} aria-label={`Ampliar foto de ${nombre}`}>
-        <FotoFija sinFondo publicId={unidad.id ? ids.vehiculo(unidad.id) : null}
-          ancho={1000} alto={700} ajuste="contener" alt={`Foto de ${nombre}`} alExistir={alExistir}>
-          <img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" />
+        <FotoFija publicId={unidad.id ? ids.vehiculo(unidad.id) : null}
+          ancho={variante === 'cabecera' ? 400 : 640} alto={variante === 'cabecera' ? 400 : 640} ajuste="recortar" alt={`Foto de ${nombre}`} alExistir={alExistir}>
+          {variante === 'cabecera'
+            ? <span className="eu-foto-sin-imagen"><Icono nombre="camion" tam={24} /><span>Sin foto</span></span>
+            : <img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" />}
         </FotoFija>
         {foto.hay && <span className="fleet-photo-zoom" aria-hidden="true"><Icono nombre="buscar" tam={16} /></span>}
       </button>
-      <figcaption className="fleet-photo-footer">
+      {variante !== 'cabecera' && <figcaption className="fleet-photo-footer">
         <span>{foto.hay ? 'Foto de la unidad' : 'Imagen de referencia'}</span>
         {puedeEditar && unidad.id && <CambiarFoto flotante={false} publicId={ids.vehiculo(unidad.id)} etiqueta={etiquetas.vehiculo(unidad.id)} titulo={nombre} hayFoto={foto.hay} />}
-      </figcaption>
+      </figcaption>}
     </figure>
     {abierta && createPortal(
       <Modal titulo={`Foto de ${nombre}`} abierto alCerrar={() => setAbierta(null)} ancho={960}>

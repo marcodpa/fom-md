@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { entrarEmpresa } from '../auth'
 import repo, { DIRECTORIO_REAL } from '../datos/repo'
 import { useSesion } from '../useSesion'
 import { ModalCrear, ModalCambiarRol } from './AdminUsuarios'
@@ -10,6 +11,7 @@ import { etiquetaRolSesion, rolCanonico } from '../roles'
 import { Icono } from '../Iconos'
 import './mantenimiento.css'
 import './admin-rediseno.css'
+import './usuarios-perfil.css'
 
 // ============================================================
 // USUARIOS GENERALES (solo Administrador FOM)
@@ -36,6 +38,9 @@ const GRUPOS = [
 ]
 
 export default function Plataforma() {
+  const navegar = useNavigate()
+  const [abriendoPerfil, setAbriendoPerfil] = useState(false)
+  const [errorPerfil, setErrorPerfil] = useState('')
   const sesion = useSesion()
   const [creando, setCreando] = useState(false)
   const [editandoRol, setEditandoRol] = useState(null)
@@ -57,6 +62,18 @@ export default function Plataforma() {
   const seleccion = visibles.find((p) => p.id === seleccionId) ?? visibles[0] ?? null
   const soyAdmin = rolCanonico(sesion?.perfil?.rol) === 'admin_fom'
   const puedeCambiarRol = (p) => soyAdmin && rolCanonico(p.rol) !== 'admin_fom' && p.email !== sesion?.perfil?.correo && p.estado !== 'revoked'
+  async function abrirPerfil(persona) {
+    if (abriendoPerfil || !persona?.empresaId || !persona?.userId) return
+    setAbriendoPerfil(true)
+    setErrorPerfil('')
+    try {
+      const destino = (empresas.datos ?? []).find(e => e.id === persona.empresaId)
+      if (!destino) throw new Error('No se pudo resolver la empresa de este acceso. Recarga la lista de empresas.')
+      await entrarEmpresa(destino)
+      navegar(`/panel/personal/${encodeURIComponent(persona.userId)}?origen=plataforma`)
+    } catch (e) { setErrorPerfil(e.message || 'No se pudo abrir el perfil.') }
+    finally { setAbriendoPerfil(false) }
+  }
 
   const resumen = [
     ['Membresías', total == null ? '—' : f.numero(total), 'Una por persona y empresa', 'gente'],
@@ -66,7 +83,7 @@ export default function Plataforma() {
   ]
 
   return (
-    <div className="mnt-root">
+    <div className="mnt-root usr-plataforma">
       <div className="mnt-heading">
         <div>
           <span className="mnt-breadcrumb">Inicio › Administración › Usuarios generales</span>
@@ -114,27 +131,25 @@ export default function Plataforma() {
                   <Vacio icono="buscar" titulo="Nadie coincide" texto="Prueba con parte del nombre, el correo o el código de la empresa." />
                 </div>
               ) : (
-                <div className="mnt-orders">
+                <div className="pnl-tabla-wrap">
+                  <table className="pnl-tabla usr-tabla-global">
+                  <thead><tr><th>Persona</th><th>Empresa</th><th>Rol</th><th>Estado</th></tr></thead>
+                  <tbody>
                   {visibles.map((p) => {
                     const rol = rolCanonico(p.rol)
                     return (
-                      <article key={p.id} className={`mnt-order adm-item${seleccion?.id === p.id ? ' sel' : ''}`} onClick={() => setSeleccionId(p.id)}>
-                        <div className="mnt-thumb"><i className="pnl-avatar">{f.iniciales(p.nombre)}</i></div>
-                        <div className="mnt-order-copy">
-                          <span>{rol === 'admin_fom' ? 'Acceso global · FOM' : p.empresaNombre}</span>
-                          <h3>{p.nombre}</h3>
-                          <div>
-                            <Tag color={COLOR_ROL[rol] ?? 'gris'}>{etiquetaRolSesion(rol)}</Tag>
-                            <Tag color={COLOR_ESTADO[p.estado] ?? 'gris'} plano>{ESTADO[p.estado] ?? p.estado}</Tag>
-                            <small>{p.email}</small>
-                          </div>
-                        </div>
-                        {puedeCambiarRol(p) && (
-                          <button type="button" className="pnl-btn" onClick={(ev) => { ev.stopPropagation(); setEditandoRol(p) }}>Cambiar rol</button>
-                        )}
-                      </article>
+                      <tr key={p.id} className={seleccion?.id === p.id ? 'seleccionada' : ''} onClick={() => { setSeleccionId(p.id); setErrorPerfil('') }}>
+                        <td><div className="pnl-persona"><i className="pnl-avatar">{f.iniciales(p.nombre)}</i><div className="pnl-doble">
+                          <button type="button" className="usr-nombre usr-seleccionar" aria-pressed={seleccion?.id === p.id} onClick={() => { setSeleccionId(p.id); setErrorPerfil('') }}>{p.nombre}</button>
+                          <span>{p.email}</span>
+                        </div></div></td>
+                        <td>{rol === 'admin_fom' ? 'Acceso global · FOM' : p.empresaNombre}</td>
+                        <td><Tag color={COLOR_ROL[rol] ?? 'gris'}>{etiquetaRolSesion(rol)}</Tag></td>
+                        <td><Tag color={COLOR_ESTADO[p.estado] ?? 'gris'} plano>{ESTADO[p.estado] ?? p.estado}</Tag></td>
+                      </tr>
                     )
                   })}
+                  </tbody></table>
                 </div>
               )}
               {paginas > 1 && (
@@ -151,7 +166,7 @@ export default function Plataforma() {
                 <div className="adm-detalle">
                   <div className="adm-cab">
                     <div className="mnt-thumb"><i className="pnl-avatar">{f.iniciales(seleccion.nombre)}</i></div>
-                    <div><h3>{seleccion.nombre}</h3><code>{seleccion.email}</code></div>
+                    <div><h3>{seleccion.nombre}</h3><p className="usr-email">{seleccion.email}</p></div>
                   </div>
                   <div className="adm-tags">
                     <Tag color={COLOR_ROL[rolCanonico(seleccion.rol)] ?? 'gris'}>{etiquetaRolSesion(rolCanonico(seleccion.rol))}</Tag>
@@ -162,6 +177,12 @@ export default function Plataforma() {
                     { etiqueta: 'Código de la empresa', valor: rolCanonico(seleccion.rol) === 'admin_fom' ? '—' : (seleccion.empresaCodigo || '—') },
                   ]} />
                   <div className="adm-acciones" role="group" aria-label="Acciones sobre la persona">
+                    {seleccion.empresaId && seleccion.userId && (
+                      <button type="button" className="pnl-btn primario usr-abrir" disabled={abriendoPerfil} onClick={() => abrirPerfil(seleccion)}>
+                        {abriendoPerfil ? 'Abriendo perfil…' : 'Abrir perfil completo'} <Icono nombre="volver" tam={16} />
+                      </button>
+                    )}
+                    {errorPerfil && <p className="pnl-campo-error" role="alert">{errorPerfil}</p>}
                     {puedeCambiarRol(seleccion) && (
                       <button type="button" className="pnl-btn primario" onClick={() => setEditandoRol(seleccion)}>Cambiar rol →</button>
                     )}

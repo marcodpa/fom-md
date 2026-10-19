@@ -8,6 +8,20 @@ agentes, definidos en `.claude/agents/`:
 | `fom-desarrollador` | Implementa una tarea | Solo los archivos que se le reservan | Read, Edit, Write, Glob, Grep, Bash |
 | `fom-pruebas` | Escribe y corre pruebas, saca capturas | Solo archivos de prueba reservados | Read, Glob, Grep, Bash, Edit, Write |
 | `fom-revisor` | Revisa el código cambiado | Nada (solo lectura) | Read, Glob, Grep |
+| `fom-disenador` | Diseño, motion (Remotion o JS), imagen y video con Higgsfield | Sus archivos reservados y su carpeta de entrega | Todas (incluye Skill, Higgsfield y Canva) |
+
+## Modelos
+
+| Agente | Modelo | Por qué |
+|---|---|---|
+| Coordinador | Opus | Divide, decide y junta el trabajo de todos |
+| Desarrollador | Opus | El código de FOM es grande; los errores salen caros |
+| Revisor | Opus | Tiene que ver lo que los demás no ven |
+| Diseñador | Opus | El gusto y el criterio visual pesan |
+| Pruebas | Sonnet | Corre comandos y mira capturas: no necesita el más caro |
+
+Para una tarea mecánica (renombrar, capturas masivas) el coordinador puede
+lanzar cualquier agente con Haiku o Sonnet sin cambiar su configuración.
 
 ## Flujo de una tarea
 

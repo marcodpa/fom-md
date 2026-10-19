@@ -149,6 +149,7 @@ const repo = HAY_API
         listar: repoApi.gente.listar,
         obtener: repoApi.gente.obtener,
         actualizarPerfil: repoApi.gente.actualizarPerfil,
+        guardarCredencial: repoApi.gente.guardarCredencial,
       },
       costos: conRespaldoParcial(repoSemilla.costos, {}, {
         resumen: FALTA_COSTOS,
@@ -280,6 +281,7 @@ const repo = HAY_API
     }
   : {
       ...repoSemilla,
+      personal: { ...repoSemilla.personal, guardarCredencial: faltaEnElServidor(SOLO_CON_BASE_REAL) },
       seguridad: soloConBaseReal(repoApi.seguridad),
       jornadas: soloConBaseReal(repoApi.jornadas),
       planes: soloConBaseReal(repoApi.planes),

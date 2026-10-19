@@ -172,10 +172,10 @@ export default function Planes({ vista = 'acciones' }) {
         )}
       </div>
 
-      <ModalPlan key={String(nuevoPlan)} fallo={fallo} abierto={nuevoPlan} alCerrar={() => { if (!ocupado) { setNuevoPlan(false); setFallo('') } }} guardar={(datos) => actuar(() => repo.planes.guardar(datos), 'Plan guardado.')} />
-      <ModalCubrir key={cubriendo?.id ?? "sin-plan"} fallo={fallo} plan={cubriendo} vehiculos={vehiculos.datos ?? []} alCerrar={() => { if (!ocupado) { setCubriendo(null); setFallo('') } }} guardar={(vehiculoId, datos) => actuar(() => repo.planes.cubrirUnidad(cubriendo.id, vehiculoId, datos), 'Unidad cubierta por el plan.')} />
-      <ModalAccion key={String(nuevaAccion)} fallo={fallo} abierto={nuevaAccion} vehiculos={vehiculos.datos ?? []} planes={planes.datos ?? []} alCerrar={() => { if (!ocupado) { setNuevaAccion(false); setFallo('') } }} guardar={(datos) => actuar(() => repo.planes.crearAccion(datos), 'Acción creada.')} />
-      <ModalMover key={`${moviendo?.accion.id}-${moviendo?.destino}`} fallo={fallo} paso={moviendo} alCerrar={() => { if (!ocupado) { setMoviendo(null); setFallo('') } }} confirmar={(nota) => actuar(() => repo.planes.moverAccion(moviendo.accion, moviendo.destino, nota), 'Acción actualizada.')} />
+      <ModalPlan key={`plan-${nuevoPlan}`} fallo={fallo} abierto={nuevoPlan} alCerrar={() => { if (!ocupado) { setNuevoPlan(false); setFallo('') } }} guardar={(datos) => actuar(() => repo.planes.guardar(datos), 'Plan guardado.')} />
+      <ModalCubrir key={`cubrir-${cubriendo?.id ?? "sin-plan"}`} fallo={fallo} plan={cubriendo} vehiculos={vehiculos.datos ?? []} alCerrar={() => { if (!ocupado) { setCubriendo(null); setFallo('') } }} guardar={(vehiculoId, datos) => actuar(() => repo.planes.cubrirUnidad(cubriendo.id, vehiculoId, datos), 'Unidad cubierta por el plan.')} />
+      <ModalAccion key={`accion-${nuevaAccion}`} fallo={fallo} abierto={nuevaAccion} vehiculos={vehiculos.datos ?? []} planes={planes.datos ?? []} alCerrar={() => { if (!ocupado) { setNuevaAccion(false); setFallo('') } }} guardar={(datos) => actuar(() => repo.planes.crearAccion(datos), 'Acción creada.')} />
+      <ModalMover key={`mover-${moviendo?.accion.id}-${moviendo?.destino}`} fallo={fallo} paso={moviendo} alCerrar={() => { if (!ocupado) { setMoviendo(null); setFallo('') } }} confirmar={(nota) => actuar(() => repo.planes.moverAccion(moviendo.accion, moviendo.destino, nota), 'Acción actualizada.')} />
     </>
   )
 }

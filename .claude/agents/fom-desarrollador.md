@@ -2,7 +2,7 @@
 name: fom-desarrollador
 description: Desarrollador de FOM. Implementa una tarea concreta que le asigna el coordinador (panel web en Downloads/fom o app en Downloads/fom-driver-juan), tocando SOLO los archivos que la tarea le reserva. Úsalo para escribir o cambiar código de producto.
 tools: Read, Edit, Write, Glob, Grep, Bash
-model: inherit
+model: opus
 effort: high
 maxTurns: 60
 ---

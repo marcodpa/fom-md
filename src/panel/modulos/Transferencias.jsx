@@ -29,14 +29,14 @@ function paso(t) {
 }
 
 /**
- * El servidor responde 403 («Transfer not authorized») cuando la base niega la operación. Con el
- * administrador FOM pasa en producción porque ahí todavía corre una regla vieja: solo deja mover
- * personas o vehículos de una empresa donde el administrador tenga membresía propia. El arreglo
- * (fom-core #632, Issue #631) ya está en el código de Juan pero no se ha publicado.
+ * El servidor responde 403 («Transfer not authorized») cuando la base niega la operación a quien la
+ * pide. La regla vieja del administrador FOM (fom-core #632) ya está publicada desde el 14 oct 2026,
+ * así que un 403 hoy es un permiso que falta de verdad. Las políticas de la base dejan pasar al
+ * administrador FOM y al administrador o supervisor activo de la empresa de origen o de destino.
  */
 const explicar = (mensaje) =>
   /permiso/i.test(String(mensaje ?? ''))
-    ? 'El servidor de producción no dejó hacer este paso. No es tu cuenta ni la pantalla: producción todavía tiene una regla vieja que solo deja mover personas y vehículos de una empresa donde el administrador FOM sea miembro. El arreglo ya está hecho en el servidor (fom-core #632) y falta que Juan lo publique.'
+    ? 'El servidor negó el permiso para esta operación. Solo la puede hacer el administrador FOM o un administrador o supervisor activo de la empresa de origen o de la de destino. Revisa el rol y la empresa de tu cuenta.'
     : mensaje
 
 export default function Transferencias() {
@@ -149,6 +149,7 @@ export default function Transferencias() {
               <li className={seleccion.aceptadaEn ? 'hecho' : ''}><i>3</i><div><b>Aceptación en destino</b><span>{seleccion.aceptadaEn ? f.fechaHora(seleccion.aceptadaEn) : 'Pendiente'}</span></div></li>
             </ol>
             <div className="pnl-audit-detalle"><b>Motivo</b><p>{seleccion.motivo}</p>{seleccion.rolDestino && <p>Rol en destino: {seleccion.rolDestino}</p>}</div>
+            {seleccion.motivoCierre && <div className="pnl-audit-detalle"><b>Motivo del rechazo o cancelación</b><p>{seleccion.motivoCierre}</p></div>}
           </> : <Vacio icono="comparar" titulo="Sin transferencias" texto="Cuando exista una solicitud podrás consultar sus pasos aquí." />}
         </Tarjeta></aside></div>
       </div>

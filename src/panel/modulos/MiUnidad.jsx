@@ -7,7 +7,7 @@ export { miAsignacion } from '../datos/asignacion-conductor'
 import { Cabecera, Cargando, Datos, ErrorCarga, Tag, Tarjeta, Vacio } from '../comp/ui'
 import Mapa from '../comp/Mapa'
 import * as f from '../datos/formato'
-import { etiqueta } from '../datos/catalogos'
+import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
 import ScoreManejo from '../comp/ScoreManejo'
@@ -279,7 +279,7 @@ export default function MiUnidad() {
                       <b>{o.descripcion}</b>
                       <span>{o.falla ? etiqueta('tipo_falla', o.falla) : 'Sin tipo'} · {f.desde(o.creadaEn)}</span>
                     </span>
-                    <Tag color={o.estado === 'en_revision' ? 'ambar' : 'azul'} plano>{etiqueta('odt_estado', o.estado)}</Tag>
+                    <Tag color={color('odt_estado_visible', o.estado)} plano>{etiqueta('odt_estado_visible', o.estado)}</Tag>
                   </li>
                 ))}
               </ul>

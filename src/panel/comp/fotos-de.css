@@ -30,20 +30,36 @@
 .fd-vacio-foto { color: var(--e-texto-3); font-size: 13px; }
 .fd-ampliar { position: absolute; right: 8px; bottom: 8px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 999px; background: rgba(10, 18, 36, .85); color: #fff; font: inherit; font-size: 12px; cursor: zoom-in; }
 .fd-error-linea { color: var(--e-peligro); font-size: 12px; }
-/* La foto se adapta al marco, no al revés. También para verticales, panorámicas y PNG transparentes. */
-.fleet-vehicle-image.fleet-photo { margin: 12px 0 14px; border: 0; background: none; }
-.fleet-photo-stage { position: relative; display: grid; place-items: center; width: 100%; height: 180px; padding: 8px; overflow: hidden; border: 1px solid var(--e-borde, #263b4d); border-radius: 18px; background: var(--e-sup-baja, #0f141b); color: var(--e-texto, #f3f5f8); cursor: zoom-in; }
+/* Recorte cuadrado uniforme, independientemente de la proporción del archivo. */
+.fleet-vehicle-image.fleet-photo { width: min(100%, 260px); margin: 12px auto 14px; border: 0; background: none; }
+.fleet-photo-stage { position: relative; display: grid; place-items: center; width: 100%; height: auto; aspect-ratio: 1; padding: 0; overflow: hidden; border: 1px solid var(--e-borde, #263b4d); border-radius: 18px; background: var(--e-sup-baja, #0f141b); color: var(--e-texto, #f3f5f8); cursor: zoom-in; }
 .fleet-photo-stage:disabled { cursor: default; opacity: 1; }
 .fleet-photo-stage:not(:disabled):hover { border-color: var(--e-borde-fuerte, #39424f); }
-.fleet-vehicle-image.fleet-photo .fleet-photo-stage img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; object-position: center; aspect-ratio: auto; border-radius: 10px; box-shadow: none; filter: none; }
+.fleet-vehicle-image.fleet-photo .fleet-photo-stage img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; max-height: none; object-fit: cover; object-position: center; aspect-ratio: 1; border-radius: 0; box-shadow: none; filter: none; }
+.fleet-vehicle-image.fleet-photo:not(.con-foto) .fleet-photo-stage img { object-fit: contain; }
 .fleet-photo-zoom { position: absolute; right: 8px; bottom: 8px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--e-sup, #141a22); color: var(--e-texto, #f3f5f8); pointer-events: none; }
 .fleet-vehicle-image .fleet-photo-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; padding: 4px 0 0; text-align: left; font-size: 12px; color: var(--e-texto-2, #b7c7d9); }
 .fleet-photo-footer .pnl-btn { min-height: 44px; padding: 6px 10px; font-size: 12px; flex: none; }
 .fleet-photo-footer .fd-error-linea { flex-basis: 100%; }
 .fleet-photo-footer { flex-wrap: wrap; }
-.pnl-resumen-unidad .fleet-photo-stage { height: 124px; }
+.pnl-resumen-unidad .fleet-vehicle-image.fleet-photo { width: min(100%, 240px); }
+.fom-dark .eu-cabecera { align-items: center; }
+.eu-cabecera .pnl-cab-identidad { display: flex; align-items: center; gap: 22px; flex: 1; min-width: 0; }
+.eu-cabecera .pnl-cab-txt { min-width: 0; }
+.eu-cabecera .pnl-cab-txt h1, .eu-cabecera .pnl-cab-txt p { overflow-wrap: anywhere; }
+.fleet-vehicle-image.fleet-photo.eu-foto-cabecera { width: 144px; flex: 0 0 144px; margin: 0; }
+.eu-foto-cabecera .fleet-photo-stage { height: auto; padding: 0; border-radius: 14px; }
+.eu-foto-cabecera .fleet-photo-stage:focus-visible { outline: 2px solid var(--e-foco, var(--e-primario)); outline-offset: 4px; }
+.eu-foto-cabecera .fleet-photo-zoom { width: 26px; height: 26px; right: 6px; bottom: 6px; }
+.eu-foto-sin-imagen { display: grid; justify-items: center; gap: 8px; color: var(--e-texto-2); font-size: 12px; }
+@media (max-width: 760px) {
+  .eu-cabecera .pnl-cab-identidad { flex-basis: 100%; gap: 16px; }
+  .fleet-vehicle-image.fleet-photo.eu-foto-cabecera { width: 100px; flex-basis: 100px; }
+  .eu-foto-cabecera .fleet-photo-stage { height: auto; border-radius: 12px; }
+  .eu-cabecera .pnl-cab-acciones { width: 100%; }
+}
 @media (max-width: 600px) {
-  .control-unit .fleet-photo-stage { height: 66px; padding: 4px; border-radius: 12px; }
+  .control-unit .fleet-photo-stage { height: auto; padding: 0; border-radius: 12px; }
   .control-unit .fleet-photo-footer { display: none; }
   .control-unit .fleet-photo-zoom { width: 24px; height: 24px; right: 4px; bottom: 4px; }
 }

@@ -2,6 +2,7 @@ import { api, HAY_API } from './api'
 import { perfilActual, actualizarNombreSesion } from '../auth'
 import { esGestor } from '../roles'
 import semilla from './repoSemilla'
+import repoApi from './repoApi'
 
 import { personaPropia, cambiosDePerfil } from './perfilValidation'
 
@@ -24,12 +25,10 @@ export async function cargarMiPerfil() {
   const respuesta = await api.directorio({ q: sesion.correo })
   const propia = personaPropia(respuesta?.items ?? [], sesion.correo)
   if (!propia) return { ...base, aviso: 'La sesión está activa, pero el directorio no devolvió tu ficha personal. Puedes consultar tus datos completos desde la app.' }
-  let documentos = [], documentosError = ''
-  try {
-    const listado = await api.documentos({})
-    documentos = (listado?.items ?? []).filter(d => d.scope === 'persona' && d.holderUserId === propia.userId && d.status !== 'archived').map(d => ({ id: d.id, tipo: d.documentType, numero: d.documentNumber, venceEn: d.expiresOn, archivos: d.fileCount, estado: d.daysToExpiry == null ? null : d.daysToExpiry < 0 ? 'vencido' : d.daysToExpiry <= 30 ? 'por_vencer' : 'vigente' }))
-  } catch { documentosError = 'No se pudieron consultar tus documentos. Vuelve a cargar el perfil.' }
-  return { ...base, id: propia.userId, nombre: propia.displayName, cedula: propia.nationalId ?? propia.identification?.value, telefono: propia.phone, direccion: propia.address, fechaNacimiento: propia.birthDate, editable: true, documentos, documentosError, perfilCompleto: propia.profileComplete, conduce: base.conduce || Boolean(propia.vehicleId), aviso: 'La foto, el índice de manejo, los datos de licencia y el cambio de contraseña se administran por ahora desde Mi perfil de la app.' }
+  // Misma ficha que ve el supervisor, resuelta siempre por la identidad propia.
+  const detalle = await repoApi.gente.obtener(propia.userId)
+  if (!detalle || detalle.userId !== propia.userId) throw new Error('No se pudo verificar tu perfil. Vuelve a cargarlo.')
+  return { ...detalle, ...base, id: propia.userId, nombre: propia.displayName, cedula: propia.nationalId ?? propia.identification?.value, telefono: propia.phone, direccion: propia.address, fechaNacimiento: propia.birthDate, editable: true, documentos: detalle.documentos, documentosError: detalle.documentosError, perfilCompleto: propia.profileComplete, conduce: base.conduce || Boolean(propia.vehicleId), rolCodigo: propia.role, aviso: 'La contraseña se cambia desde Mi perfil de la app. Las secciones muestran la información disponible para tu cuenta.' }
 }
 
 export async function guardarMiPerfil(borrador, anterior) {

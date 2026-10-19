@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+# ============================================================
+# fom-prod — operación delegada y auditada de FOM-PROD (Issue #190)
+# ------------------------------------------------------------
+# El espejo de `fom-test` para producción: subcomandos fijos, sin argumentos,
+# recibos por operación, y un candado que TEST no necesita: NINGÚN cambio de
+# base ocurre sin un respaldo verificado y atestado de como máximo 30 horas.
+#
+# Arquitectura deliberada: este script NO reimplementa despliegue ni
+# migración. Envuelve las herramientas de producción ya existentes y
+# revisadas (`/opt/fom/deploy/fom-core/bin/*`) y los activos del #189
+# (instalador de Nginx, wrapper de credencial), verificándolos por SHA-256
+# contra el checkout aprobado antes de ejecutarlos. Menos código nuevo,
+# menos superficie que revisar, y una sola fuente de verdad por pieza.
+#
+# Es consciente del host: `backup` solo corre en fom-db-01; el resto solo en
+# fom-app-01. La atestación del respaldo cruza de un host al otro por el
+# operador (pega el recibo), no por una nueva vía de confianza entre máquinas.
+#
+# EXCLUIDO PERMANENTEMENTE de este helper: seed, backfill, SQL directo,
+# migraciones down, borrado de datos, impresión de secretos.
+# ============================================================
+
+set -Eeuo pipefail
+umask 077
+
+readonly APP_HOST="fom-app-01"
+readonly DB_HOST="fom-db-01"
+readonly REPO="/opt/fom/apps/fom-core"
+readonly REPO_OWNER="fom-codex"
+readonly BIN="/opt/fom/deploy/fom-core/bin"
+readonly BACKUP_DIR="/var/backups/fom"
+readonly STATE_DIR="/opt/fom/state/prod"
+readonly LOCK_FILE="/run/lock/fom-prod.lock"
+readonly LOCK_WAIT_SECONDS="5"
+readonly BACKUP_MAX_AGE_SECONDS="108000"
+readonly NGINX_INSTALLER="$REPO/ops/deploy/issue-185-nginx-console-install.sh"
+readonly CREDENTIAL_WRAPPER="$REPO/ops/deploy/issue-185-console-password-prod.sh"
+readonly PUBLIC_HOST="15.204.105.201"
+
+fail() { printf 'fom-prod: %s\n' "$*" >&2; exit 1; }
+receipt() { printf '%s\n' "$*"; }
+
+require_root() { test "$(id -u)" -eq 0 || fail "root via sudo is required"; }
+
+require_host() {
+  test "$(hostname -s)" = "$1" ||
+    fail "the '$command_name' command only runs on $1"
+}
+
+acquire_lock() {
+  install -d -m 0755 /run/lock
+  test ! -L "$LOCK_FILE" || fail "lock file must not be a symlink"
+  touch "$LOCK_FILE"; chmod 0600 "$LOCK_FILE"
+  exec {lock_fd}<>"$LOCK_FILE"
+  flock --exclusive --timeout "$LOCK_WAIT_SECONDS" "$lock_fd" ||
+    fail "another FOM-PROD operation is busy"
+}
+
+# Esta copia conserva el helper instalado, salvo el objetivo fijado para esta publicación.
+# deploy.sh sigue comprobando que origin/main coincide exactamente antes de ejecutar.
+resolve_target() {
+  TARGET_COMMIT="bf08e2e1d3847334d1ed53a49e4c9de9761b75c3"
+  printf '%s' "$TARGET_COMMIT" | grep -qE '^[0-9a-f]{40}$' ||
+    fail "cannot resolve origin/main"
+  TARGET_IMAGE="fom-core-api:git-$(printf '%s' "$TARGET_COMMIT" | cut -c1-12)"
+}
+
+# Verifica que un activo del checkout coincide byte a byte con el commit
+# objetivo antes de ejecutarlo como root. Un checkout manipulado no corre.
+verify_asset() {
+  local path="$1"
+  local expected actual
+  expected="$(runuser -u "$REPO_OWNER" -- \
+    git -C "$REPO" show "$TARGET_COMMIT:ops/deploy/$(basename "$path")" |
+    sha256sum | cut -d' ' -f1)"
+  actual="$(sha256sum "$path" | cut -d' ' -f1)"
+  test "$expected" = "$actual" ||
+    fail "$(basename "$path") does not match the target commit; refusing to run it"
+}
+
+# ── Atestación de respaldo: el candado que TEST no necesita ─────────────────
+# `backup` (en fom-db-01) verifica el dump real e imprime un recibo con el mtime
+# del archivo y su SHA. La transmisión sigue siendo manual: no existe una vía
+# de confianza entre hosts y el recibo no es una firma criptográfica. Antes de
+# cualquier mutación se valida su forma y una edad inclusiva de 0..30 horas.
+require_backup_attestation() {
+  local created_at_epoch now_epoch age_seconds
+  test -t 0 || fail "backup attestation requires an interactive terminal"
+  printf 'Paste the FOM_PROD_BACKUP_OK receipt from %s: ' "$DB_HOST" >&2
+  IFS= read -r attestation
+  [[ "$attestation" =~ ^FOM_PROD_BACKUP_OK[[:space:]]created_at_epoch=([1-9][0-9]{9})[[:space:]]path=$BACKUP_DIR/fom_core-prod[.][A-Za-z0-9]{6}[.]dump[[:space:]]sha256=[0-9a-f]{64}$ ]] ||
+    fail "attestation must be an exact FOM_PROD_BACKUP_OK receipt"
+  created_at_epoch="${BASH_REMATCH[1]}"
+  now_epoch="$(date --utc +%s)"
+  test "$created_at_epoch" -le "$now_epoch" ||
+    fail "backup attestation timestamp is in the future"
+  age_seconds=$((now_epoch - created_at_epoch))
+  test "$age_seconds" -le "$BACKUP_MAX_AGE_SECONDS" ||
+    fail "backup attestation is older than 30 hours"
+  install -d -m 0700 "$STATE_DIR"
+  printf '%s command=%s target=%s\n' "$attestation" "$command_name" "$TARGET_COMMIT" \
+    >>"$STATE_DIR/backup-attestations.log"
+}
+
+test "$#" -eq 1 || fail "exactly one fixed command is required"
+command_name="$1"
+
+case "$command_name" in
+  status|backup|plan|deploy|rollback-image|nginx-install|nginx-remove|console-password|smoke|version) ;;
+  *) fail "unsupported FOM-PROD command" ;;
+esac
+
+require_root
+
+case "$command_name" in
+  backup|plan|deploy|rollback-image|nginx-install|nginx-remove|console-password)
+    acquire_lock
+    ;;
+esac
+
+case "$command_name" in
+  status)
+    require_host "$APP_HOST"
+    docker compose --project-directory /opt/fom/docker/core \
+      --file /opt/fom/docker/core/docker-compose.yml \
+      --file /opt/fom/docker/core/docker-compose.deploy.yml ps
+    ;;
+
+  backup)
+    require_host "$DB_HOST"
+    install -d -o postgres -g postgres -m 0700 "$BACKUP_DIR"
+    dump="$(sudo -u postgres mktemp "$BACKUP_DIR/fom_core-prod.XXXXXX.dump")"
+    sudo -u postgres pg_dump --format=custom --file="$dump" fom_core
+    sudo -u postgres chmod 0600 "$dump"
+    # Verificación COMPLETA: --list recorre el archivo entero; truncado o
+    # corrupto falla aquí, no en plena emergencia.
+    listing="$(mktemp /run/fom-prod-list.XXXXXX)"
+    sudo -u postgres pg_restore --list "$dump" >"$listing"
+    entries="$(wc -l <"$listing")"; rm -f "$listing"
+    test "$entries" -gt 10 || fail "dump listing is implausibly small"
+    sha="$(sha256sum "$dump" | cut -d' ' -f1)"
+    created_at_epoch="$(stat --format='%Y' -- "$dump")"
+    printf '%s' "$created_at_epoch" | grep -qE '^[1-9][0-9]{9}$' ||
+      fail "dump mtime is outside the supported epoch range"
+    receipt "FOM_PROD_BACKUP_OK created_at_epoch=$created_at_epoch path=$dump sha256=$sha"
+    ;;
+
+  plan)
+    require_host "$APP_HOST"
+    resolve_target
+    receipt "FOM_PROD_TARGET commit=$TARGET_COMMIT image=$TARGET_IMAGE"
+    "$BIN/deploy.sh" --dry-run --target-commit "$TARGET_COMMIT"
+    ;;
+
+  deploy)
+    # LA única vía de cambio de base: deploy.sh --with-migrations, el camino
+    # soportado que construye la imagen antes de migrar. Exige atestación de
+    # respaldo de como máximo 30 horas ANTES de tocar nada.
+    require_host "$APP_HOST"
+    resolve_target
+    require_backup_attestation
+    "$BIN/deploy.sh" --dry-run --target-commit "$TARGET_COMMIT"
+    FOM_MIGRATION_AUTHORIZATION="MIGRATE-$TARGET_COMMIT" \
+      "$BIN/deploy.sh" --deploy --with-migrations --target-commit "$TARGET_COMMIT"
+    "$BIN/health-check.sh"
+    receipt "FOM_PROD_DEPLOY_OK commit=$TARGET_COMMIT"
+    ;;
+
+  rollback-image)
+    require_host "$APP_HOST"
+    test -t 0 || fail "rollback requires an interactive terminal"
+    printf 'PREVIOUS_IMAGE from the deploy receipt: ' >&2
+    IFS= read -r previous_image
+    printf '%s' "$previous_image" | grep -qE '^fom-core-api:git-[0-9a-f]{12}$' ||
+      fail "that is not a fom-core-api:git-<sha12> image"
+    "$BIN/rollback.sh" --dry-run --target-image "$previous_image"
+    "$BIN/rollback.sh" --execute --target-image "$previous_image" \
+      --authorization-token "ROLLBACK-$previous_image"
+    "$BIN/health-check.sh"
+    receipt "FOM_PROD_ROLLBACK_OK image=$previous_image"
+    ;;
+
+  nginx-install)
+    require_host "$APP_HOST"
+    resolve_target
+    verify_asset "$NGINX_INSTALLER"
+    bash "$NGINX_INSTALLER" --install
+    code="$(curl -sk -o /dev/null -w '%{http_code}' \
+      "https://$PUBLIC_HOST/api/v1/console/auth/session")"
+    test "$code" = "401" || fail "console probe returned $code, expected 401"
+    receipt "FOM_PROD_NGINX_OK probe=401"
+    ;;
+
+  nginx-remove)
+    require_host "$APP_HOST"
+    resolve_target
+    verify_asset "$NGINX_INSTALLER"
+    bash "$NGINX_INSTALLER" --remove
+    receipt "FOM_PROD_NGINX_REMOVED"
+    ;;
+
+  console-password)
+    require_host "$APP_HOST"
+    resolve_target
+    verify_asset "$CREDENTIAL_WRAPPER"
+    # El wrapper lee la contraseña dos veces sin eco y verifica con el UID
+    # real del contenedor; aquí solo se le da paso una vez verificado.
+    bash "$CREDENTIAL_WRAPPER"
+    ;;
+
+  smoke)
+    require_host "$APP_HOST"
+    "$BIN/health-check.sh"
+    for route in auth/session vehicles work-orders summary; do
+      code="$(curl -sk -o /dev/null -w '%{http_code}' \
+        "https://$PUBLIC_HOST/api/v1/console/$route")"
+      receipt "console/$route=$code"
+      test "$code" = "401" || fail "unauthenticated probe must be 401"
+    done
+    receipt "FOM_PROD_SMOKE_OK"
+    ;;
+
+  version)
+    require_host "$APP_HOST"
+    curl -s http://127.0.0.1:3000/version
+    printf '\n'
+    ;;
+esac

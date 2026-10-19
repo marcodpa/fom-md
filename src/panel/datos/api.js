@@ -74,7 +74,7 @@ function traducir(estado, cuerpo) {
  * petición se repite con la misma clave, el servidor devuelve el recibo de la
  * primera en vez de crear dos veces.
  */
-function claveIdempotente() {
+export function claveIdempotente() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID()
   // Respaldo para entornos sin `crypto.randomUUID`: mismo formato v4, con los
   // bits de versión y variante fijados.
@@ -100,7 +100,7 @@ export function pedir(ruta, opciones = {}) {
   return peticion
 }
 
-async function pedirUnaVez(rutaPedida, { metodo = 'GET', cuerpo, señal, idempotente = false, empresaContexto = empresaGestionId } = {}) {
+async function pedirUnaVez(rutaPedida, { metodo = 'GET', cuerpo, señal, idempotente = false, idempotencia, empresaContexto = empresaGestionId } = {}) {
   if (!HAY_API) throw new Error('La API real no está configurada en este entorno.')
 
   // Dentro de una empresa ajena la empresa viaja en la ruta (Issue 567); lo que aún no tiene
@@ -130,7 +130,7 @@ async function pedirUnaVez(rutaPedida, { metodo = 'GET', cuerpo, señal, idempot
             ...(mutacion ? {
             'content-type': 'application/json',
             'x-fom-csrf': 'fom-browser-v1',
-            ...(idempotente ? { 'idempotency-key': claveIdempotente() } : {}),
+            ...(idempotente ? { 'idempotency-key': idempotencia || claveIdempotente() } : {}),
           } : {}),
       },
       body: cuerpo ? JSON.stringify(cuerpo) : undefined,
@@ -263,6 +263,10 @@ export const api = {
   /** Editar el vehiculo, incluida su area. */
   actualizarVehiculo: (vehicleId, cuerpo) =>
     pedir(`${CONSOLA}/vehicles/${vehicleId}`, { metodo: 'PATCH', cuerpo }),
+
+  /** Licencia o aptitud médica: reemplazo versionado, espejo por empresa y recibo idempotente (#643). */
+  actualizarCredencialPersona: (userId, cuerpo, idempotencia) =>
+    pedir(`${CONSOLA}/users/${encodeURIComponent(userId)}/credentials`, { metodo: 'PATCH', cuerpo, idempotente: true, idempotencia }),
 
   /** Asignar conductor a una unidad. */
   asignarConductor: (vehicleId, { userId, role, pin }) =>

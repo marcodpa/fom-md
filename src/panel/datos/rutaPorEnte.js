@@ -61,6 +61,7 @@ const ESPEJOS = {
     '/:coleccion/:padre/uploads', '/uploads/:u/complete', '/:coleccion/:padre/objects/:o/downloads',
   ],
   PATCH: [
+    '/users/:u/credentials',
     '/users/:u', '/users/:u/profile', '/vehicles/:v', '/driver-assignments/:a/revoke', '/driver-assignments/:a/pin', '/areas/:a',
     '/work-orders/:w/status', '/inspection-templates/:t/status', '/documents/:d', '/alert-rules/:r',
     '/maintenance/plans/:p', '/maintenance/actions/:a/status',

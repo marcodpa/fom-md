@@ -66,6 +66,29 @@ async function repositorioConectado() {
   return modulo.repo
 }
 
+test('licencia usa PATCH y conserva la misma clave en el reintento explícito', async () => {
+  const repo = await repositorioConectado()
+  const original = globalThis.fetch
+  const llamadas = []
+  const clave = '00000000-0000-4000-8000-000000000001'
+  try {
+    globalThis.fetch = async (url, opts) => {
+      llamadas.push({ url, metodo: opts.method, clave: opts.headers['idempotency-key'], body: JSON.parse(opts.body) })
+      return new Response(JSON.stringify({ credential: { id: 'credencial', kind: 'driver_license' } }), { status: 200 })
+    }
+    const borrador = { tipo: 'driver_license', numero: 'V-123', categoria: '5', venceEn: '2027-01-01', motivo: 'renovacion' }
+    for (let i = 0; i < 2; i++) assert.equal((await repo.personal.guardarCredencial('persona', borrador, clave)).id, 'credencial')
+    assert.equal(llamadas.length, 2)
+    for (const llamada of llamadas) {
+      assert.ok(llamada.url.endsWith('/api/v1/console/users/persona/credentials'))
+      assert.equal(llamada.metodo, 'PATCH')
+      assert.equal(llamada.clave, clave)
+      assert.equal(llamada.body.number, 'v-123')
+      assert.equal(llamada.body.expiresAt, '2027-01-01')
+    }
+  } finally { globalThis.fetch = original }
+})
+
 test('contratos verificados: vínculos, identificadores, ciclos, fechas y errores visibles', async () => {
   const repo = await repositorioConectado()
   const original = globalThis.fetch

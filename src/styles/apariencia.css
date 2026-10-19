@@ -1,9 +1,10 @@
 /* Two personal materials, one layout. Scoped to the authenticated console. */
 @media screen {
   .pnl.fom-dark[data-diseno] {
-    --e-r-lg: 28px;
-    --e-r-xl: 32px;
-    --apariencia-radio: 28px;
+    /* Esquinas de marca: tarjeta y barra 24, hoja/modal/menú lateral 28. */
+    --e-r-lg: 24px;
+    --e-r-xl: 28px;
+    --apariencia-radio: 24px;
     --apariencia-sombra: none;
     --apariencia-blur: none;
     box-sizing: border-box;
@@ -21,6 +22,10 @@
     --e-texto-2: #edf0f5;
     --e-texto-3: #e2e6ec;
     --e-info-sup: #21374a;
+    /* El activo del vidrio es un azul más claro: el #173553 se pierde sobre el gris. */
+    --e-activo-sup: #184573;
+    --e-activo-texto: #c6e5ff;
+    --e-activo-borde: #184573;
     --apariencia-sombra: 0 6px 18px rgb(0 0 0 / .16);
     --apariencia-blur: blur(16px) saturate(110%);
     background: radial-gradient(ellipse at 85% 0%, #62676e 0%, transparent 58%), linear-gradient(150deg, #60656c, #52565e 70%, #60656c);
@@ -29,13 +34,13 @@
     top: 14px;
     height: calc(100dvh - 28px);
     border: 0;
-    border-radius: 32px;
+    border-radius: 28px;
     overflow: hidden;
     box-shadow: var(--apariencia-sombra);
     backdrop-filter: var(--apariencia-blur);
   }
   .pnl.fom-dark[data-diseno] .pnl-side-pie { background: transparent; }
-  .pnl.fom-dark[data-diseno] .pnl-nav-item { border-radius: 16px; }
+  .pnl.fom-dark[data-diseno] .pnl-nav-item { border-radius: 10px; }
   .pnl.fom-dark[data-diseno] .pnl-topbar {
     border: 0;
     min-height: 52px;
@@ -52,7 +57,7 @@
     justify-content: space-between;
     gap: 20px;
     padding: 12px 18px;
-    border-radius: 20px;
+    border-radius: 24px;
     background: var(--e-sup);
     box-shadow: var(--apariencia-sombra);
     backdrop-filter: var(--apariencia-blur);
@@ -91,9 +96,11 @@
   }
   .pnl.fom-dark[data-diseno] :is(.pnl-card, .emp-directorio) { overflow: hidden; }
   .pnl.fom-dark[data-diseno] :is(.pnl-modal, .pnl-kanban-col) { border-radius: 28px; }
-  .pnl.fom-dark[data-diseno] :is(.pnl-input, .pnl-select, .pnl-btn, .pnl-buscar input, .pnl-tabs, .pnl-datos > div, .pnl-ficha-datos > div, .pnl-kanban-card) { border-radius: 16px; }
-  .pnl.fom-dark[data-diseno] :is(.pnl-tab, .pnl-chip) { border-radius: 12px; }
-  .pnl.fom-dark[data-diseno] .pnl-tabla-wrap { border-radius: 0 0 28px 28px; }
+  .pnl.fom-dark[data-diseno] :is(.pnl-input, .pnl-select, .pnl-buscar input, .pnl-tabs, .pnl-datos > div, .pnl-ficha-datos > div, .pnl-kanban-card) { border-radius: 16px; }
+  /* Los botones quedan en píldora (redesign.css) y pestañas y chips con esquina 10, como en la app.
+     .pnl-btn sale de la lista de 16 a propósito: así los módulos aún pueden afinar el suyo. */
+  .pnl.fom-dark[data-diseno] :is(.pnl-tab, .pnl-chip) { border-radius: 10px; }
+  .pnl.fom-dark[data-diseno] .pnl-tabla-wrap { border-radius: 0 0 var(--apariencia-radio) var(--apariencia-radio); }
   .pnl.fom-dark[data-diseno] .pnl-mapa { border-radius: 22px; }
   .pnl.fom-dark[data-diseno] :is(.control-search, .control-panel, .fleet-card.flotante) { border-radius: 24px; }
   .pnl.fom-dark[data-diseno] .control-search {
@@ -107,7 +114,7 @@
   .pnl.fom-dark[data-diseno] .control-search .pnl-btn { border-radius: 999px; }
   .pnl.fom-dark[data-diseno][data-screen="/mapa"] .pnl-menu-btn { top: 24px; left: 16px; border-radius: 16px; backdrop-filter: var(--apariencia-blur); }
   .pnl.fom-dark[data-diseno="glass"] :is(.pnl-modal, .pnl-ficha.flotante) { background: #292c32; }
-  .pnl.fom-dark[data-diseno="glass"] :is(.pnl-nav-item.activo, .pnl-tab.activo, .pnl-chip.activo) { background: #184573; color: #c6e5ff; }
+  .pnl.fom-dark[data-diseno="glass"] :is(.pnl-nav-item.activo, .pnl-tab.activo, .pnl-chip.activo) { background: var(--e-activo-sup); color: var(--e-activo-texto); }
   .pnl.fom-dark[data-diseno="glass"] :is(.mnt-nav, .insp-nav, .rp-nav) button { color: var(--e-texto-2); }
   .pnl.fom-dark[data-diseno="glass"] :is(.mnt-nav, .insp-nav, .rp-nav) :is(button[aria-selected="true"], button[aria-current]) { color: #e4f2ff; }
   .pnl.fom-dark[data-diseno="glass"] :is(.pnl-tabla tbody tr:hover, .pnl-tabla tbody tr.seleccionada) { background: #36404d; }
@@ -152,7 +159,7 @@
   .pnl.fom-dark[data-diseno="glass"] .fleet-vehicle-image { background: transparent; }
   .pnl.fom-dark[data-diseno="glass"] .fleet-card-content { scrollbar-color: #777d86 #292c32; }
   .pnl.fom-dark[data-diseno="glass"] .control-filters .pnl-chip { background: #292c32e8; border-color: var(--e-borde); color: var(--e-texto-2); }
-  .pnl.fom-dark[data-diseno="glass"] .control-filters .pnl-chip.activo { background: #184573; color: #c6e5ff; }
+  .pnl.fom-dark[data-diseno="glass"] .control-filters .pnl-chip.activo { background: var(--e-activo-sup); color: var(--e-activo-texto); }
   .pnl.fom-dark[data-diseno="glass"] .control-filters select.pnl-input { background-color: #292c32; border-color: var(--e-borde); color: var(--e-texto); }
   .pnl.fom-dark[data-diseno="glass"] .control-filters select.pnl-input option { background: #292c32; color: var(--e-texto); }
   .pnl.fom-dark[data-diseno="glass"] .leaflet-bar a { background: #292c32; border-color: #555b64; }
@@ -168,7 +175,7 @@
   .pnl.fom-dark[data-diseno] .mapa-capas-boton { border-radius: 999px; }
   .pnl.fom-dark[data-diseno="glass"] :is(.mapa-herr-cab span, .mapa-herr-nota, .mapa-herr-eta span, .mapa-capas-grupo > span, .mapa-capas-switch small, .mapa-herr-alcance) { color: var(--e-texto-2); }
   .pnl.fom-dark[data-diseno="glass"] :is(.mapa-herr-botones button, .mapa-capas-chips button, .mapa-capas-reset, .mapa-herr-eta) { background: var(--e-sup-baja); border-color: var(--e-borde); color: var(--e-texto); }
-  .pnl.fom-dark[data-diseno="glass"] :is(.mapa-herr-botones button.on, .mapa-capas-chips button.on) { background: #184573; border-color: #184573; color: #c6e5ff; }
+  .pnl.fom-dark[data-diseno="glass"] :is(.mapa-herr-botones button.on, .mapa-capas-chips button.on) { background: var(--e-activo-sup); border-color: var(--e-activo-borde); color: var(--e-activo-texto); }
   .pnl.fom-dark[data-diseno="glass"] .mapa-capas-boton:hover, .pnl.fom-dark[data-diseno="glass"] .mapa-capas.abierto .mapa-capas-boton { background: var(--e-sup-baja); }
   .pnl.fom-dark[data-diseno="glass"] .mapa-capas-switch i { background: var(--e-borde-fuerte, #555b64); }
   .pnl.fom-dark[data-diseno="glass"] .mapa-capas-switch input:checked + i { background: var(--e-primario); }

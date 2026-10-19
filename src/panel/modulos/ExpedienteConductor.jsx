@@ -1,36 +1,35 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
+import { useSesion } from '../useSesion'
+import { esAdminFom, esGestor, etiquetaRolSesion } from '../roles'
+import { salirEmpresa } from '../auth'
 import {
-  Cabecera, Campo, Cargando, Datos, ErrorCarga, Kpi, Modal, Pestanas, Tag, Tarjeta, Vacio, Volver,
+  Cabecera, Cargando, ErrorCarga, Tarjeta, Vacio,
 } from '../comp/ui'
-import { Anillo, BarrasH } from '../comp/Grafico'
 import * as f from '../datos/formato'
-import { color, estadoDocumento, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
-import VehicleVisual from '../../components/VehicleVisual'
+import './usuarios-perfil.css'
 
-const PESTANAS = [
-  { v: 'datos', t: 'Datos' },
-  { v: 'conduccion', t: 'Conducción' },
-  { v: 'inspecciones', t: 'Inspecciones' },
-  { v: 'documentos', t: 'Documentos' },
-]
-
-/** Tono de KPI a partir del semáforo del índice de manejo seguro. */
-const TONO_KPI = { verde: 'ok', amarillo: 'aviso', rojo: 'malo' }
+import { PESTANAS, PestanasPerfil, MetricasPerfil, Identidad, FichaDatos, UnidadAsignada, Conduccion, Inspecciones, Documentos, ModalPerfil } from '../comp/PerfilUsuario'
 
 export default function ExpedienteConductor() {
   const { id } = useParams()
-  const [pestana, setPestana] = useState('datos')
+  const [parametros, setParametros] = useSearchParams()
+  const pestana = PESTANAS.some(t => t.v === parametros.get('vista')) ? parametros.get('vista') : 'datos'
+  const setPestana = vista => setParametros(actual => { const siguiente = new URLSearchParams(actual); siguiente.set('vista', vista); return siguiente }, { replace: true })
+  const sesion = useSesion()
   // Marca de tiempo del último guardado: sirve de disparador del aviso.
   const [guardado, setGuardado] = useState(0)
 
   const ficha = useDatos(() => repo.personal.obtener(id), [id])
   const flota = useDatos(() => repo.vehiculos.listar({}), [])
   const p = ficha.datos
-
+  const puedeEditar = esGestor(sesion?.perfil) && p?.administrable !== false
+  const vieneDePlataforma = parametros.get('origen') === 'plataforma' && esAdminFom(sesion?.perfil)
+  const regreso = vieneDePlataforma ? '/panel/admin/plataforma' : '/panel/personal'
+  const inspecciones = p?.inspecciones ?? []
   // El "Guardado" se va solo a los 2 segundos, sin dejar basura en pantalla.
   useEffect(() => {
     if (!guardado) return undefined
@@ -57,6 +56,11 @@ export default function ExpedienteConductor() {
   // Eventos de manejo agrupados por tipo, de mayor a menor.
   const porTipo = useMemo(() => {
     const cuenta = new Map()
+    if (p?.manejo) return [
+      { etiqueta: 'Frenadas bruscas', valor: p.manejo.frenadas },
+      { etiqueta: 'Aceleraciones bruscas', valor: p.manejo.aceleraciones },
+      { etiqueta: 'Excesos de velocidad', valor: p.manejo.excesos },
+    ].filter(e => Number.isFinite(e.valor))
     ;(p?.eventos ?? []).forEach((e) => cuenta.set(e.nombre, (cuenta.get(e.nombre) ?? 0) + 1))
     return [...cuenta.entries()]
       .map(([etq, valor]) => ({ etiqueta: etq, valor }))
@@ -69,18 +73,26 @@ export default function ExpedienteConductor() {
   )
 
   const bajada = p
-    ? [etiqueta('rol', p.rol), p.unidad ? [p.unidad.alias, p.unidad.placa].filter(Boolean).join(' · ') : 'Sin unidad'].join(' · ')
+    ? [etiquetaRolSesion(p.rol), p.unidad ? [p.unidad.alias, p.unidad.placa].filter(Boolean).join(' · ') : 'Sin unidad'].join(' · ')
     : 'Expediente de la persona'
 
   return (
-    <>
-      <Cabecera titulo={p?.nombre ?? 'Expediente'} bajada={bajada} />
+    <div className="usr-perfil">
+      <div className="usr-regreso">
+        <Link to={regreso} className="pnl-volver" onClick={() => { if (vieneDePlataforma) salirEmpresa() }}>
+          <Icono nombre="volver" tam={16} />{vieneDePlataforma ? 'Usuarios generales' : 'Usuarios'}
+        </Link>
+      </div>
+      <Cabecera titulo={p?.nombre ?? 'Perfil de usuario'} bajada={bajada}>
+        {p && puedeEditar && <button type="button" className="pnl-btn primario" onClick={() => setEditandoPerfil(true)}>
+          <Icono nombre="editar" tam={16} />{p.perfilCompleto ? 'Editar datos' : 'Completar perfil'}
+        </button>}
+      </Cabecera>
 
       <div className="pnl-cuerpo">
-        <Volver a="/panel/personal">Personal</Volver>
 
         {ficha.estado === 'cargando' && <Cargando filas={6} />}
-        {ficha.estado === 'error' && <ErrorCarga onReintentar={ficha.recargar} />}
+        {ficha.estado === 'error' && <ErrorCarga error={ficha.error} onReintentar={ficha.recargar} />}
 
         {ficha.estado === 'ok' && !p && (
           <Tarjeta>
@@ -89,9 +101,9 @@ export default function ExpedienteConductor() {
               titulo="No conseguimos a esta persona"
               texto="Puede que la hayan dado de baja o que el enlace esté vencido."
               accion={
-                <Link to="/panel/personal" className="pnl-btn primario">
+                <Link to={regreso} className="pnl-btn primario" onClick={() => { if (vieneDePlataforma) salirEmpresa() }}>
                   <Icono nombre="gente" tam={16} />
-                  Ver el personal
+                  Ver usuarios
                 </Link>
               }
             />
@@ -101,53 +113,17 @@ export default function ExpedienteConductor() {
         {ficha.estado === 'ok' && p && (
           <>
             <Identidad persona={p} />
-            <div className="pnl-chips">
-              <button type="button" className="pnl-btn sutil" onClick={() => setEditandoPerfil(true)}>
-                <Icono nombre="editar" tam={16} />
-                {p.perfilCompleto ? 'Editar datos' : 'Completar perfil'}
-              </button>
-            </div>
+            <MetricasPerfil persona={p} />
 
-            <div className="pnl-grid k4">
-              <Kpi
-                titulo="Índice de manejo seguro"
-                valor={p.indiceSeguro === null || p.indiceSeguro === undefined ? 'Sin unidad' : f.numero(p.indiceSeguro)}
-                icono="escudo"
-                tono={p.indiceSeguro === null || p.indiceSeguro === undefined ? '' : TONO_KPI[f.rangoIndice(p.indiceSeguro)]}
-                nota={
-                  p.indiceSeguro === null || p.indiceSeguro === undefined
-                    ? 'se calcula con la unidad asignada'
-                    : 'sobre 100 puntos'
-                }
-              />
-              <Kpi
-                titulo="Eventos de manejo"
-                valor={f.numero(p.eventos.length)}
-                icono="alerta"
-                tono={p.eventos.length > 8 ? 'aviso' : ''}
-                nota="en los últimos 28 días"
-              />
-              <Kpi
-                titulo="Inspecciones hechas"
-                valor={f.numero(p.inspecciones.length)}
-                icono="check"
-                nota="preoperacionales firmadas"
-              />
-              <Kpi
-                titulo="ODT reportadas"
-                valor={f.numero(p.odts.length)}
-                icono="llave"
-                nota="órdenes que abrió esta persona"
-              />
-            </div>
-
-            <Pestanas opciones={PESTANAS} valor={pestana} alCambiar={setPestana} />
-
+            <PestanasPerfil valor={pestana} alCambiar={setPestana} />
+            <section className="usr-panel-pestana" id={`usr-panel-${pestana}`} role="tabpanel" aria-labelledby={`usr-tab-${pestana}`}>
             {pestana === 'datos' && (
               <div className="pnl-grid dos-tercios">
                 <FichaDatos persona={p} />
                 <UnidadAsignada
                   persona={p}
+                  unidadActual={(flota.datos ?? []).find(v => v.id === p.unidad?.id) ?? p.unidad}
+                  puedeEditar={puedeEditar}
                   unidades={unidades}
                   cargandoFlota={flota.estado !== 'ok'}
                   guardado={guardado > 0}
@@ -158,398 +134,15 @@ export default function ExpedienteConductor() {
             )}
 
             {pestana === 'conduccion' && <Conduccion persona={p} porTipo={porTipo} />}
-            {pestana === 'inspecciones' && <Inspecciones inspecciones={p.inspecciones} />}
-            {pestana === 'documentos' && <Documentos documentos={p.documentos} />}
+            {pestana === 'inspecciones' && <Inspecciones inspecciones={inspecciones} error={p.inspeccionesError} />}
+            {pestana === 'documentos' && <Documentos persona={p} alActualizar={ficha.recargar} documentos={p.documentos ?? []} error={p.documentosError} />}
+            </section>
           </>
         )}
       </div>
-      {p && editandoPerfil && (
+      {p && puedeEditar && editandoPerfil && (
         <ModalPerfil persona={p} alCerrar={() => setEditandoPerfil(false)} alHecho={() => { setEditandoPerfil(false); ficha.recargar() }} />
       )}
-    </>
-  )
-}
-
-function Identidad({ persona: p }) {
-  return (
-    <Tarjeta>
-      <div className="pnl-persona">
-        <i className="pnl-avatar-l">{f.iniciales(p.nombre)}</i>
-        <div className="pnl-fila-txt">
-          <b>{p.nombre}</b>
-          <span>{p.email}</span>
-          <span>
-            <Icono nombre="llamar" tam={14} />
-            {` ${p.telefono || 'Sin teléfono'}`}
-          </span>
-        </div>
-        <Tag color={p.rol === 'conductor' ? 'azul' : 'gris'}>{etiqueta('rol', p.rol)}</Tag>
-      </div>
-    </Tarjeta>
-  )
-}
-
-/** Fecha con su cuenta regresiva y el color del semáforo de documentos. */
-function Vence({ iso }) {
-  if (!iso) return <>Sin registro</>
-  const estado = estadoDocumento(iso)
-  return (
-    <>
-      {`${f.fecha(iso)} `}
-      <Tag color={color('documento_estado', estado)} plano>{f.vencimiento(iso)}</Tag>
-    </>
-  )
-}
-
-function FichaDatos({ persona: p }) {
-  const licencia = p.licenciaNumero
-    ? `${p.licenciaNumero} · Grado ${p.licenciaCategoria}`
-    : 'Sin licencia cargada'
-
-  return (
-    <Tarjeta
-      titulo="Datos de la persona"
-      accion={
-        p.perfilCompleto ? (
-          <Tag color="verde">Perfil completo</Tag>
-        ) : (
-          <Tag color="ambar">Perfil sin completar</Tag>
-        )
-      }
-    >
-      {!p.perfilCompleto && (
-        <div className="pnl-fila aviso">
-          <i className="pnl-punto off" />
-          <div className="pnl-fila-txt">
-            <b>Perfil sin completar</b>
-            <span>
-              Al entrar por primera vez a la app debe llenar su cédula, licencia y carta médica.
-            </span>
-          </div>
-        </div>
-      )}
-
-      <Datos
-        items={[
-          { etiqueta: 'Nombre', valor: p.nombre },
-          { etiqueta: 'Cédula', valor: p.cedula || 'Sin registro' },
-          { etiqueta: 'Correo', valor: p.email },
-          { etiqueta: 'Teléfono', valor: p.telefono || 'Sin registro' },
-          { etiqueta: 'Dirección', valor: p.direccion || 'Sin registro' },
-          { etiqueta: 'Fecha de nacimiento', valor: p.fechaNacimiento ? f.fecha(p.fechaNacimiento) : 'Sin registro' },
-          { etiqueta: 'Rol', valor: etiqueta('rol', p.rol) },
-          { etiqueta: 'Licencia', valor: licencia },
-          { etiqueta: 'Vence la licencia', valor: <Vence iso={p.licenciaVence} /> },
-          { etiqueta: 'Certificado médico', valor: <Vence iso={p.cartaMedicaVence} /> },
-          { etiqueta: 'Perfil completo', valor: p.perfilCompleto ? 'Sí' : 'No' },
-          { etiqueta: 'Alta en el sistema', valor: f.fecha(p.creadoEn) },
-        ]}
-      />
-    </Tarjeta>
-  )
-}
-
-function UnidadAsignada({ persona: p, unidades, cargandoFlota, guardado, alAsignar, alQuitar }) {
-  const [elegida, setElegida] = useState('')
-  const [ocupado, setOcupado] = useState(false)
-  const [error, setError] = useState('')
-  useEffect(() => { setElegida(''); setError('') }, [p.id])
-  const guardar = async (quitar = false) => {
-    if (ocupado || (!quitar && !elegida)) return
-    setOcupado(true)
-    setError('')
-    try {
-      if (quitar) await alQuitar()
-      else await alAsignar(elegida)
-      setElegida('')
-    } catch (e) { setError(e.message || 'No se pudo guardar la asignación.') }
-    finally { setOcupado(false) }
-  }
-  return (
-    <Tarjeta
-      titulo="Unidad asignada"
-      accion={guardado ? <Tag color="verde">Guardado</Tag> : null}
-    >
-      {p.unidad && <VehicleVisual modelo={p.unidad.modelo ?? ''} />}
-      <div className="pnl-filas">
-        {p.unidad ? (
-          <div className="pnl-fila">
-            <i className="pnl-punto on" />
-            <div className="pnl-fila-txt">
-              <b>{p.unidad.alias}</b>
-              <span>{p.unidad.placa || 'Sin placa'}</span>
-            </div>
-            <Link to={`/panel/flota/${p.unidad.id}`} className="pnl-link">
-              Ver la unidad
-            </Link>
-          </div>
-        ) : (
-          <div className="pnl-fila">
-            <i className="pnl-punto off" />
-            <div className="pnl-fila-txt">
-              <b>Sin unidad asignada</b>
-              <span>Esta persona no maneja ninguna unidad de la flota.</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <Campo
-        etiqueta={p.unidad ? 'Cambiar de unidad' : 'Asignar una unidad'}
-        ayuda="Elige una unidad y pulsa Asignar para guardar el cambio."
-        error={error}
-      >
-        <select
-          className="pnl-select"
-          value={elegida}
-          disabled={ocupado || cargandoFlota || unidades.length === 0}
-          onChange={(e) => { setElegida(e.target.value); setError('') }}
-        >
-          <option value="">
-            {cargandoFlota ? 'Cargando la flota…' : 'Elegir una unidad…'}
-          </option>
-          {unidades.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.conductorPrincipalId
-                ? `${v.alias} · ${v.placa} (la maneja ${v.conductorNombre})`
-                : `${v.alias} · ${v.placa} (libre)`}
-            </option>
-          ))}
-        </select>
-        {elegida && elegida !== p.unidad?.id && (
-          <div className="pnl-chips">
-            <button type="button" className="pnl-btn primario" disabled={ocupado} onClick={() => guardar()}>{ocupado ? 'Asignando…' : 'Asignar'}</button>
-            <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => { setElegida(''); setError('') }}>Cancelar</button>
-          </div>
-        )}
-      </Campo>
-
-      {p.unidad && (
-        <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => guardar(true)}>
-          <Icono nombre="cerrar" tam={16} />
-          Quitar asignación
-        </button>
-      )}
-    </Tarjeta>
-  )
-}
-
-function Conduccion({ persona: p, porTipo }) {
-  const eventos = p.eventos
-  const semaforo = p.indiceSeguro === null || p.indiceSeguro === undefined
-    ? null
-    : f.rangoIndice(p.indiceSeguro)
-
-  if (eventos.length === 0) {
-    return (
-      <Tarjeta titulo="Conducción">
-        <Vacio
-          icono="escudo"
-          titulo="Sin eventos registrados"
-          texto="Este conductor no tiene eventos de manejo en los últimos 28 días."
-        />
-      </Tarjeta>
-    )
-  }
-
-  return (
-    <div className="pnl-grid">
-      <div className="pnl-grid dos-tercios">
-        <Tarjeta titulo="Eventos por tipo">
-          <BarrasH datos={porTipo} formato={(n) => f.numero(n)} />
-        </Tarjeta>
-
-        <Tarjeta titulo="Índice de manejo seguro">
-          {semaforo ? (
-            <Anillo
-              valor={p.indiceSeguro / 100}
-              texto={f.numero(p.indiceSeguro)}
-              sub="índice"
-              tono={f.CLASE_SEMAFORO[semaforo]}
-            />
-          ) : (
-            <Vacio
-              icono="escudo"
-              titulo="Todavía no hay índice"
-              texto="El índice se calcula sobre la unidad que maneja. Asígnale una en la pestaña de Datos."
-            />
-          )}
-        </Tarjeta>
-      </div>
-
-      <Tarjeta titulo="Eventos de manejo" sinCuerpo>
-        <div className="pnl-tabla-wrap">
-          <table className="pnl-tabla">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>Severidad</th>
-                <th className="num">Valor</th>
-                <th>Ubicación</th>
-                <th>Cuándo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventos.map((e) => (
-                <tr key={e.id}>
-                  <td>{e.nombre}</td>
-                  <td>
-                    <Tag color={color('alerta_severidad', e.severidad)}>
-                      {etiqueta('alerta_severidad', e.severidad)}
-                    </Tag>
-                  </td>
-                  <td className="num">
-                    {e.clave === 'exceso_velocidad' ? f.velocidad(e.valor) : f.numero(e.valor)}
-                  </td>
-                  <td>{e.ubicacion}</td>
-                  <td>{f.desde(e.creadaEn)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Tarjeta>
     </div>
-  )
-}
-
-function Inspecciones({ inspecciones }) {
-  if (inspecciones.length === 0) {
-    return (
-      <Tarjeta titulo="Inspecciones">
-        <Vacio
-          icono="check"
-          titulo="Sin inspecciones"
-          texto="Esta persona todavía no ha firmado ninguna inspección preoperacional."
-        />
-      </Tarjeta>
-    )
-  }
-
-  return (
-    <Tarjeta titulo="Inspecciones preoperacionales" sinCuerpo>
-      <div className="pnl-tabla-wrap">
-        <table className="pnl-tabla">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Resultado</th>
-              <th className="num">Observaciones</th>
-              <th className="num">Fallas críticas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inspecciones.map((i) => (
-              <tr key={i.id}>
-                <td>{f.fecha(i.fecha)}</td>
-                <td>
-                  <Tag color={color('inspeccion_resultado', i.resultado)}>
-                    {etiqueta('inspeccion_resultado', i.resultado)}
-                  </Tag>
-                </td>
-                <td className="num">{f.numero(i.observaciones)}</td>
-                <td className="num">
-                  {i.fallasCriticas > 0 ? (
-                    <Tag color="rojo">{f.numero(i.fallasCriticas)}</Tag>
-                  ) : (
-                    f.numero(0)
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Tarjeta>
-  )
-}
-
-function Documentos({ documentos }) {
-  if (documentos.length === 0) {
-    return (
-      <Tarjeta titulo="Documentos">
-        <Vacio
-          icono="documento"
-          titulo="Sin documentos cargados"
-          texto="Cuando suba su licencia, su cédula o su certificado médico, van a aparecer aquí."
-        />
-      </Tarjeta>
-    )
-  }
-
-  return (
-    <Tarjeta titulo="Documentos de la persona" sinCuerpo>
-      <div className="pnl-tabla-wrap">
-        <table className="pnl-tabla">
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Vence</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {documentos.map((d) => (
-              <tr key={d.id}>
-                <td>{d.tipo}</td>
-                <td>{`${f.fecha(d.venceEn)} (${f.vencimiento(d.venceEn)})`}</td>
-                <td>
-                  <Tag color={color('documento_estado', d.estado)}>
-                    {etiqueta('documento_estado', d.estado)}
-                  </Tag>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Tarjeta>
-  )
-}
-
-// ---------------- Completar el perfil ----------------
-// Los cuatro datos que la app pide para dar el perfil por completo: cédula,
-// teléfono, dirección y fecha de nacimiento. El servidor exige formatos
-// (`v-12345678`, `+58414…`); el repositorio los normaliza antes de enviar.
-function ModalPerfil({ persona: p, alCerrar, alHecho }) {
-  const [d, setD] = useState({ cedula: p.cedula ?? '', telefono: p.telefono ?? '', direccion: p.direccion ?? '', nacimiento: p.fechaNacimiento ?? '' })
-  const [error, setError] = useState('')
-  const [guardando, setGuardando] = useState(false)
-  const set = (k) => (e) => setD((x) => ({ ...x, [k]: e.target.value }))
-  async function confirmar() {
-    setGuardando(true)
-    setError('')
-    try {
-      await repo.personal.actualizarPerfil(p.userId ?? p.id, d)
-      alHecho()
-    } catch (e) {
-      setError(e?.message || 'No se pudo guardar el perfil.')
-    } finally {
-      setGuardando(false)
-    }
-  }
-  return (
-    <Modal titulo={`Datos de ${p.nombre}`} abierto alCerrar={alCerrar} ancho={520}>
-      <div className="pnl-grid k2">
-        <Campo etiqueta="Cédula" ayuda="V12345678 o E-1234567">
-          <input className="pnl-input" value={d.cedula} onChange={set('cedula')} placeholder="V12345678" />
-        </Campo>
-        <Campo etiqueta="Teléfono" ayuda="0414-1234567 o +584141234567">
-          <input className="pnl-input" value={d.telefono} onChange={set('telefono')} placeholder="0414-1234567" />
-        </Campo>
-      </div>
-      <Campo etiqueta="Dirección">
-        <input className="pnl-input" value={d.direccion} onChange={set('direccion')} />
-      </Campo>
-      <Campo etiqueta="Fecha de nacimiento" error={error}>
-        <input type="date" className="pnl-input" value={d.nacimiento} onChange={set('nacimiento')} />
-      </Campo>
-      <div className="pnl-chips">
-        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>
-          {guardando ? 'Guardando…' : 'Guardar'}
-        </button>
-        <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
-      </div>
-    </Modal>
   )
 }
