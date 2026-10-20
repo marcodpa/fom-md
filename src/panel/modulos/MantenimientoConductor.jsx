@@ -11,12 +11,14 @@ import { miAsignacion } from './MiUnidad'
 import { NuevaOdt } from './Mantenimiento'
 import './mantenimiento.css'
 import { GaleriaArchivos } from '../comp/Archivos'
+import OdtAsignadas from '../comp/OdtAsignadas'
 
 // ============================================================
 // MANTENIMIENTO DEL CONDUCTOR
 // Solo lo de SU unidad: puede reportar una falla (crea una orden que el
 // supervisor ve y atiende) y seguir sus órdenes con todo lo que ha pasado
-// en cada una. No cambia estados ni asigna: eso es del supervisor.
+// en cada una. No cambia estados ni asigna: eso es del supervisor. Si es
+// responsable de alguna orden, la trabaja desde «Asignadas a ti», como en la app.
 // ============================================================
 
 const CADA_MINUTO = 60_000
@@ -48,20 +50,18 @@ export default function MantenimientoConductor() {
     () => (asignacion ? repo.vehiculos.obtener(asignacion.vehiculoId) : Promise.resolve(null)),
     [asignacion?.vehiculoId],
   )
-  // Solo las órdenes de SU unidad. Se filtra aquí además de lo que ya limite el servidor.
-  const ordenes = useDatos(
-    () => (asignacion ? repo.odts.listar({}).then((l) => l.filter((o) => o.vehiculoId === asignacion.vehiculoId)) : Promise.resolve([])),
-    [asignacion?.vehiculoId],
-    CADA_MINUTO,
-  )
+  // Todas las que el servidor le deja ver: de ahí salen las de SU unidad y las «Asignadas a ti».
+  const ordenes = useDatos(() => repo.odts.listar({}), [], CADA_MINUTO)
   const [creando, setCreando] = useState(false)
   const [abierta, setAbierta] = useState(null)
   const [aviso, setAviso] = useState('')
 
   const cargando = asignaciones.estado === 'cargando' || unidad.estado === 'cargando' || ordenes.estado === 'cargando'
+  // Solo las órdenes de SU unidad. Se filtra aquí además de lo que ya limite el servidor.
   const lista = useMemo(
-    () => [...(ordenes.datos ?? [])].sort((a, b) => Date.parse(b.creadaEn) - Date.parse(a.creadaEn)),
-    [ordenes.datos],
+    () => (asignacion ? (ordenes.datos ?? []).filter((o) => o.vehiculoId === asignacion.vehiculoId) : [])
+      .sort((a, b) => Date.parse(b.creadaEn) - Date.parse(a.creadaEn)),
+    [ordenes.datos, asignacion],
   )
   const enCurso = lista.filter((o) => estadoVisible(o.estado).clave !== 'resuelta')
   const cerradas = lista.filter((o) => estadoVisible(o.estado).clave === 'resuelta')
@@ -69,7 +69,8 @@ export default function MantenimientoConductor() {
   // Se cuenta por su grupo, no restando: un estado desconocido no debe sumar a «En revisión».
   const enRevision = enCurso.filter((o) => estadoVisible(o.estado).clave === 'revision')
   const v = unidad.datos
-  const detalle = abierta ? lista.find((o) => o.id === abierta) : null
+  // Una orden asignada puede ser de otra unidad: se busca en todo lo listado.
+  const detalle = abierta ? (ordenes.datos ?? []).find((o) => o.id === abierta) ?? null : null
 
   return (
     <div className="mnt-root">
@@ -85,6 +86,11 @@ export default function MantenimientoConductor() {
         {cargando && <Cargando filas={5} />}
         {!cargando && (asignaciones.estado === 'error' || ordenes.estado === 'error') && (
           <ErrorCarga error={asignaciones.error || ordenes.error} onReintentar={() => { asignaciones.recargar(); ordenes.recargar() }} />
+        )}
+
+        {/* Lo que le toca hacer en taller, arriba de todo y aunque no tenga unidad. */}
+        {!cargando && ordenes.estado === 'ok' && (
+          <OdtAsignadas odts={ordenes.datos} perfil={perfil} alCambiar={ordenes.recargar} alAbrir={setAbierta} />
         )}
 
         {!cargando && !asignacion && asignaciones.estado === 'ok' && (

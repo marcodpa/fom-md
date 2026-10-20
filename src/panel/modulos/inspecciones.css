@@ -45,7 +45,7 @@
 .insp-guide,.insp-side,.insp-context { border:1px solid var(--e-borde); border-radius:24px; background:var(--e-sup); padding:24px; min-width:0; }
 .insp-guide>p { margin:8px 0 24px; }
 .insp-guide>div { display:flex; gap:16px; padding-bottom:24px; }
-.insp-guide>div>b,.insp-stepper b { display:grid; place-items:center; width:32px; height:32px; border-radius:50%; background:var(--e-info-sup); color:var(--e-info); flex:none; }
+.insp-guide>div>b { display:grid; place-items:center; width:32px; height:32px; border-radius:50%; background:var(--e-info-sup); color:var(--e-info); flex:none; }
 .insp-guide strong { font-size:14px; }
 .insp-guide>div p { font-size:12px; margin-top:5px; }
 .insp-filters { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:20px 22px; }
@@ -72,7 +72,6 @@
 .insp-list-row>.pnl-link { font-size:12px; }
 .insp-template-row>span { font-size:13px; }
 .insp-inline-actions { display:flex; gap:10px; }
-.insp-date-group { padding:14px 22px; background:var(--e-sup-baja); font-size:14px!important; }
 .insp-dialog-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(230px,1fr); gap:24px; align-items:start; }
 .insp-dialog-grid:has(>.insp-context:first-child) { grid-template-columns:minmax(230px,1fr) minmax(0,1.7fr); }
 .insp-context { background:var(--e-sup-baja); }
@@ -87,16 +86,6 @@
 .insp-check p { margin-top:8px; font-size:13px; }
 .insp-info { margin-top:18px!important; font-size:13px!important; }
 .insp-actions { display:flex; justify-content:flex-end; gap:12px; border-top:1px solid var(--e-borde); padding-top:20px; margin-top:24px; }
-.insp-stepper { display:flex; align-items:center; justify-content:center; gap:24px; border-bottom:1px solid var(--e-borde); padding-bottom:24px; margin-bottom:24px; }
-.insp-stepper span { display:flex; gap:12px; align-items:center; color:var(--e-texto-2); font-size:14px; }
-.insp-stepper span[aria-current] { color:var(--e-info); }
-.insp-stepper span[aria-current] b { background:var(--e-info); color:var(--e-sobre-primario); }
-.insp-stepper i { height:1px; background:var(--e-borde); width:120px; }
-.insp-unit-picker { display:grid; gap:10px; max-height:360px; overflow:auto; margin-top:18px; }
-.insp-unit-option { display:flex; align-items:center; gap:18px; padding:16px; background:var(--e-sup-baja); border:1px solid var(--e-borde); border-radius:9px; color:var(--e-texto); font:inherit; cursor:pointer; text-align:left; }
-.insp-unit-option[aria-pressed=true] { border-color:var(--e-info); background:var(--e-info-sup); }
-.insp-unit-option span { flex:1; }
-.insp-unit-option small { display:block; color:var(--e-texto-2); margin-top:5px; }
 .insp-form-three { display:grid; grid-template-columns:1fr 1.5fr 90px; gap:14px; margin-bottom:20px; }
 .insp-points { display:grid; gap:12px; margin:18px 0; max-height:360px; overflow:auto; }
 .insp-point-edit { display:flex; gap:10px; align-items:center; padding:10px; border:1px solid var(--e-borde); border-radius:8px; }
@@ -113,4 +102,132 @@
 .insp-success { margin-bottom:20px!important; padding:14px 18px; border-radius:8px; color:var(--e-exito)!important; background:var(--e-exito-sup); }
 @media(max-width:1200px) { .insp-task-person { display:none; } .insp-split { grid-template-columns:minmax(0,1fr) 290px; } .insp-overview { grid-template-columns:minmax(0,1fr) 270px; } }
 @media(max-width:900px) { .insp-root { padding:24px 18px; } .insp-overview,.insp-split { grid-template-columns:1fr; } .insp-summary>div { padding:0 14px; gap:10px; } .insp-summary b { font-size:23px; } .insp-dialog-grid,.insp-dialog-grid:has(>.insp-context:first-child) { grid-template-columns:1fr; } .insp-dialog-grid>.insp-context { order:0; } .insp-check .pnl-tag { white-space:normal; } }
-@media(max-width:600px) { .insp-root { padding:20px 14px 36px; } .insp-root h1 { font-size:28px; } .insp-heading,.insp-toolbar { align-items:stretch; flex-direction:column; gap:18px; } .insp-heading>.pnl-btn,.insp-toolbar>.pnl-btn { justify-content:center; } .insp-nav { gap:24px; margin-top:20px; } .insp-summary { grid-template-columns:1fr 1fr; gap:24px 0; } .insp-summary>div:nth-child(2) { border:0; } .insp-summary .insp-ibox { display:none; } .insp-task { flex-wrap:wrap; gap:12px; padding:18px; } .insp-task>.pnl-btn { margin-left:52px; } .insp-task>div { flex-basis:calc(100% - 52px); } .insp-template-row,.insp-list-row { flex-wrap:wrap; } .insp-template-row>div:first-of-type,.insp-list-row>div { flex-basis:calc(100% - 45px); } .insp-inline-actions { width:100%; justify-content:flex-end; } .insp-filters { padding:16px; } .insp-filters .pnl-buscar { min-width:0; flex-basis:100%; } .insp-filters>.pnl-input { width:100%; } .insp-form-three { grid-template-columns:1fr; } .insp-point-edit { flex-wrap:wrap; } .insp-point-edit>.pnl-input { flex-basis:calc(100% - 30px); } .insp-stepper { gap:10px; } .insp-stepper i { width:30px; } .insp-actions { flex-wrap:wrap; } .insp-root .pnl-modal-cuerpo { padding:18px; } .insp-transition { gap:10px; flex-wrap:wrap; } }
+@media(max-width:600px) { .insp-root { padding:20px 14px 36px; } .insp-root h1 { font-size:28px; } .insp-heading,.insp-toolbar { align-items:stretch; flex-direction:column; gap:18px; } .insp-heading>.pnl-btn,.insp-toolbar>.pnl-btn { justify-content:center; } .insp-nav { gap:24px; margin-top:20px; } .insp-summary { grid-template-columns:1fr 1fr; gap:24px 0; } .insp-summary>div:nth-child(2) { border:0; } .insp-summary .insp-ibox { display:none; } .insp-task { flex-wrap:wrap; gap:12px; padding:18px; } .insp-task>.pnl-btn { margin-left:52px; } .insp-task>div { flex-basis:calc(100% - 52px); } .insp-template-row,.insp-list-row { flex-wrap:wrap; } .insp-template-row>div:first-of-type,.insp-list-row>div { flex-basis:calc(100% - 45px); } .insp-inline-actions { width:100%; justify-content:flex-end; } .insp-filters { padding:16px; } .insp-filters .pnl-buscar { min-width:0; flex-basis:100%; } .insp-filters>.pnl-input { width:100%; } .insp-form-three { grid-template-columns:1fr; } .insp-point-edit { flex-wrap:wrap; } .insp-point-edit>.pnl-input { flex-basis:calc(100% - 30px); } .insp-actions { flex-wrap:wrap; } .insp-root .pnl-modal-cuerpo { padding:18px; } .insp-transition { gap:10px; flex-wrap:wrap; } }
+
+/* ---------- Historial: modo (Por persona · Todas) y mes compartido ---------- */
+.insp-hist-cab { display:flex; align-items:center; justify-content:space-between; gap:12px 16px; flex-wrap:wrap; margin-bottom:20px; }
+.insp-root .insp-todas-aviso { margin:0 22px 16px; }
+.insp-filters+.insp-filter-chips { margin-top:-6px; }
+
+/* ---------- Por persona: lista con cumplimiento y ficha con calendario ---------- */
+.insp-pp { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:24px; align-items:start; }
+.insp-pp-buscar { padding:0 22px 16px; }
+.insp-pp-buscar .pnl-buscar { width:100%; }
+.insp-pp-lista { list-style:none; margin:0; padding:0; }
+.insp-pp-fila { width:100%; display:flex; align-items:center; gap:16px; padding:16px 22px; border:0; border-top:1px solid var(--e-borde); background:none; color:var(--e-texto); font:inherit; text-align:left; cursor:pointer; }
+.insp-pp-fila:hover { background:var(--e-sup-alta); }
+.insp-pp-fila[aria-pressed=true] { background:#173553; box-shadow:inset 3px 0 0 var(--e-primario-base); }
+.insp-pp-fila>svg { transform:rotate(180deg); color:var(--e-texto-2); flex:none; }
+.insp-root .insp-pp-av { width:44px; height:44px; background:#194a74; border:1px solid #31608b; color:#eef7ff; font-size:13px; font-weight:700; overflow:hidden; }
+.insp-root .insp-pp-av.grande { width:56px; height:56px; font-size:16px; }
+.insp-pp-quien { flex:1; min-width:0; display:grid; gap:4px; }
+.insp-pp-quien b { font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.insp-pp-quien small { font-size:12px; color:var(--e-texto-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.insp-pp-dato { width:210px; flex:none; display:grid; gap:8px; justify-items:end; }
+.insp-pp-cifra { font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.insp-pp-cifra.ok { color:var(--e-exito); }
+.insp-pp-cifra.aviso { color:var(--e-aviso); }
+.insp-pp-cifra.malo { color:var(--e-peligro); }
+.insp-pp-cifra.gris { color:var(--e-texto-2); font-weight:500; }
+.insp-pp-barra { width:100%; }
+.insp-pp-barra.ok .pnl-barra i { background:var(--e-exito); }
+.insp-pp-barra.gris .pnl-barra i { background:transparent; }
+.insp-pp-mes { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; white-space:nowrap; }
+.insp-pp-mes>span { min-width:120px; text-align:center; }
+.insp-pp-lado { position:sticky; top:16px; min-width:0; border:1px solid var(--e-borde); border-radius:24px; background:var(--e-sup); padding:22px; }
+.insp-pp-lado>.pnl-vacio { padding:32px 8px; }
+
+.insp-ficha { display:grid; gap:20px; min-width:0; }
+.insp-ficha-cab { display:flex; align-items:center; gap:14px; }
+.insp-ficha-cab>div { flex:1; min-width:0; }
+.insp-root .insp-ficha-cab h2 { font-size:20px; line-height:26px; }
+.insp-root .insp-ficha-cab p { font-size:13px; margin-top:2px; }
+.insp-root .insp-ficha-unidad { font-size:13px; margin-top:-8px; }
+.insp-ficha-cumple { display:grid; gap:6px; padding:16px; border-radius:16px; background:var(--e-sup-baja); border:1px solid var(--e-borde); }
+.insp-ficha-cumple .k { font-size:10px; font-weight:600; letter-spacing:1.4px; text-transform:uppercase; color:#8c97a7; }
+.insp-ficha-cumple>b { font-size:32px; line-height:38px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.5px; }
+.insp-ficha-cumple>b.ok { color:var(--e-exito); }
+.insp-ficha-cumple>b.aviso { color:var(--e-aviso); }
+.insp-ficha-cumple>b.malo { color:var(--e-peligro); }
+.insp-ficha-cumple>b.gris { color:var(--e-texto-2); }
+.insp-ficha-cumple .insp-pp-barra { margin-top:4px; }
+.insp-ficha-totales { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:0; }
+.insp-ficha-totales>div { padding:10px 8px; border-radius:10px; background:var(--e-sup-baja); border:1px solid var(--e-borde); text-align:center; min-width:0; }
+.insp-ficha-totales dt { font-size:11px; color:var(--e-texto-2); line-height:14px; min-height:28px; display:grid; place-items:center; }
+.insp-ficha-totales dd { margin:4px 0 0; font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.insp-ficha-totales .ok dd { color:var(--e-exito); }
+.insp-ficha-totales .aviso dd { color:var(--e-aviso); }
+.insp-ficha-totales .malo dd { color:var(--e-peligro); }
+.insp-root .insp-ficha-regla { display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:10px; background:var(--e-info-sup); color:var(--e-texto-2); font-size:13px; line-height:1.5; }
+.insp-ficha-regla>svg { color:var(--e-info); margin-top:2px; }
+.insp-root .insp-ficha-desde { display:flex; gap:10px; align-items:center; margin-top:-8px; font-size:13px; color:var(--e-texto-2); }
+.insp-ficha-desde>svg { color:var(--e-texto-3); }
+/* Lista de sus inspecciones del mes, debajo del calendario. */
+.insp-ficha-insp { display:grid; gap:10px; }
+.insp-root .insp-ficha-insp h3 { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600; }
+.insp-ficha-insp h3 small { font-size:12px; font-weight:600; color:var(--e-texto-2); padding:2px 8px; border-radius:10px; background:var(--e-sup-baja); border:1px solid var(--e-borde); }
+.insp-ficha-insp ul { list-style:none; margin:0; padding:0; border:1px solid var(--e-borde); border-radius:16px; overflow:hidden; }
+.insp-ficha-insp li+li { border-top:1px solid var(--e-borde); }
+.insp-ficha-insp button { width:100%; display:flex; align-items:center; gap:12px; padding:12px 14px; border:0; background:none; color:var(--e-texto); font:inherit; text-align:left; cursor:pointer; }
+.insp-ficha-insp button:hover { background:var(--e-sup-alta); }
+.insp-ficha-insp-dato { flex:1; min-width:0; display:grid; gap:2px; }
+.insp-ficha-insp-dato b { font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; }
+.insp-ficha-insp-dato small { font-size:12px; color:var(--e-texto-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.insp-ficha-insp button>svg { transform:rotate(180deg); color:var(--e-texto-2); flex:none; }
+.insp-root .insp-ficha-nada { font-size:13px; }
+.insp-root .insp-ficha-aviso { padding:12px 14px; border-radius:10px; background:var(--e-aviso-sup); color:var(--e-aviso); font-size:13px; }
+
+/* Calendario: 7 columnas de lunes a domingo; cada día con número e icono (no solo color). */
+.insp-cal { display:grid; gap:12px; }
+.insp-cal-cab { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.insp-root .insp-cal-cab h3 { font-size:17px; font-weight:600; }
+.insp-cal-flecha { width:36px; height:36px; flex:none; display:grid; place-items:center; border-radius:999px; border:1px solid var(--e-borde-fuerte); background:var(--e-sup-alta); color:var(--e-texto); cursor:pointer; }
+.insp-cal-flecha:disabled { opacity:.35; cursor:default; }
+.insp-cal-flecha.adelante svg { transform:rotate(180deg); }
+.insp-cal-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+.insp-cal-sem { font-size:11px; font-weight:600; color:#8c97a7; text-align:center; padding-bottom:2px; }
+.insp-cal-dia { position:relative; aspect-ratio:1; min-height:40px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border-radius:10px; border:1px solid var(--e-borde); background:var(--e-sup-baja); color:var(--e-texto-2); font:inherit; padding:0; }
+.insp-cal-dia b { font-size:12px; font-weight:600; line-height:14px; font-variant-numeric:tabular-nums; }
+button.insp-cal-dia { cursor:pointer; }
+button.insp-cal-dia:hover { filter:brightness(1.2); }
+.insp-cal-dia.hecha { background:var(--e-exito-sup); color:var(--e-exito); border-color:#1f4a33; }
+.insp-cal-dia.observaciones { background:var(--e-aviso-sup); color:var(--e-aviso); border-color:#4a3f17; }
+.insp-cal-dia.bloqueada,.insp-cal-dia.no_hecha { background:var(--e-peligro-sup); color:var(--e-peligro); border-color:#4d2226; }
+.insp-cal-dia.no_hecha { border-style:dashed; }
+.insp-cal-dia.libre,.insp-cal-dia.futuro { color:var(--e-texto-3); }
+.insp-cal-dia.futuro { opacity:.55; }
+.insp-cal-dia.hoy { box-shadow:0 0 0 2px var(--e-primario-base); }
+.insp-cal-raya { display:block; width:10px; height:2px; border-radius:2px; background:currentColor; opacity:.7; }
+.insp-cal-leyenda { list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px 14px; }
+.insp-cal-leyenda .insp-cal-dia { position:static; aspect-ratio:auto; min-height:0; flex-direction:row; gap:6px; border:0; background:none; font-size:12px; }
+.insp-cal-leyenda .insp-cal-dia span { color:var(--e-texto-2); }
+.insp-cal-leyenda .insp-cal-dia>svg { width:18px; height:18px; padding:2px; border-radius:6px; }
+.insp-cal-leyenda .hecha>svg { background:var(--e-exito-sup); }
+.insp-cal-leyenda .observaciones>svg { background:var(--e-aviso-sup); }
+.insp-cal-leyenda :is(.bloqueada,.no_hecha)>svg { background:var(--e-peligro-sup); }
+
+@media(max-width:1200px) { .insp-pp { grid-template-columns:minmax(0,1fr) 360px; } .insp-pp-dato { width:170px; } }
+@media(max-width:900px) { .insp-pp { grid-template-columns:1fr; } .insp-pp-lado { position:static; } }
+/* Teléfono: la ficha va en la hoja; la fila se parte en dos líneas como en la app. */
+@media(max-width:767px) {
+  .insp-pp-buscar { padding:0 16px 12px; }
+  .insp-pp-fila { padding:14px 16px; gap:12px; flex-wrap:wrap; }
+  .insp-pp-quien { flex-basis:calc(100% - 90px); }
+  .insp-pp-dato { width:auto; flex-basis:100%; order:3; justify-items:stretch; padding-left:56px; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:12px; }
+  .insp-ficha { gap:16px; }
+  .insp-cal-grid { gap:4px; }
+  .insp-hist-cab { margin-bottom:16px; }
+  .insp-imprimir { display:none; }
+  .insp-hist-cab .insp-pp-mes { flex-basis:100%; justify-content:space-between; }
+  .insp-hist-cab .insp-pp-mes>span { min-width:0; flex:1; }
+  .insp-ficha-totales { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+/* «Generar PDF» en Historial › Todas: solo la tabla del mes, sin navegación ni controles. */
+@media print {
+  .insp-nav, .insp-hist-cab, .insp-filters, .insp-filter-chips, .insp-imprimir, .insp-heading p { display:none !important; }
+  .insp-root { padding:0; max-width:none; }
+  .insp-root .pnl-tabla-wrap { overflow:visible; }
+  .insp-table th:last-child, .insp-table td:last-child { display:none; }
+  .insp-root h1, .insp-root .pnl-card-cab h2 { color:#111418; }
+}

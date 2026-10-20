@@ -1,7 +1,7 @@
 From 2581cf83b19ae476227262327ab72489b2526c13 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 14 Oct 2026 11:40:13 -0400
-Subject: [PATCH 01/16] Mapas con Mapbox, el mismo proveedor que el panel web
+Subject: [PATCH 01/17] Mapas con Mapbox, el mismo proveedor que el panel web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -3095,7 +3095,7 @@ index 0000000..269766b
 From de62044848b392b8caa43332444bea9c335718c8 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 09:05:25 -0400
-Subject: [PATCH 02/16] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
+Subject: [PATCH 02/17] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
  =?UTF-8?q?=20panel=20web:=20encabezado=20redondo=20en=20todas=20las=20pes?=
  =?UTF-8?q?ta=C3=B1as?=
 MIME-Version: 1.0
@@ -5530,7 +5530,7 @@ index 2ab97e8..1921048 100644
 From c000b636fd810bcce2f3a312f10fed67ade6af1c Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:14:53 -0400
-Subject: [PATCH 03/16] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
+Subject: [PATCH 03/17] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
  =?UTF-8?q?(tambi=C3=A9n=20en=20Expo=20Go),=20recorrido=20y=20entrada=20nu?=
  =?UTF-8?q?eva=20con=20el=20logo=20FOM?=
 MIME-Version: 1.0
@@ -26153,7 +26153,7 @@ index 5119764..7db24d0 100644
 From 50a59f9d818534889d46e3a94168948db6d9afa9 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:32:24 -0400
-Subject: [PATCH 04/16] Pantalla de carga FOM (motion) al arrancar y dentro de
+Subject: [PATCH 04/17] Pantalla de carga FOM (motion) al arrancar y dentro de
  la app, igual que la web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -27297,7 +27297,7 @@ index 9c82d64..8328c9a 100644
 From 1056c6b78ec4ebc10b57f795e36b0e6a5699274d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:04:43 -0400
-Subject: [PATCH 05/16] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
+Subject: [PATCH 05/17] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
  =?UTF-8?q?tas,=20mapa=20completo=20de=20la=20flota=20y=20arreglo=20del=20?=
  =?UTF-8?q?mapa=20en=20el=20tel=C3=A9fono?=
 MIME-Version: 1.0
@@ -29762,7 +29762,7 @@ index 0d9b55d..39566b2 100644
 From 3e5342f146d3967ea90b01f55ab4c251a554cc74 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:48:17 -0400
-Subject: [PATCH 06/16] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
+Subject: [PATCH 06/17] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
  =?UTF-8?q?,=20recorrido=20en=20el=20mapa=20completo,=20=C3=ADcono=20de=20?=
  =?UTF-8?q?veh=C3=ADculo=20de=20la=20web=20y=20espera=20nueva?=
 MIME-Version: 1.0
@@ -31408,7 +31408,7 @@ index 4fb8a10..ef7b519 100644
 From 6ec07ef815bd8196b71c53b9772e567d5931bf30 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 14:14:13 -0400
-Subject: [PATCH 07/16] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
+Subject: [PATCH 07/17] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
  =?UTF-8?q?=20el=20error=20=C2=ABStyle=20is=20not=20done=20loading=C2=BB?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32480,7 +32480,7 @@ index f6b5a22..e116c51 100644
 From 5f38ad38cd96d2426b421be91809e3017cbe4954 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 16:18:12 -0400
-Subject: [PATCH 08/16] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
+Subject: [PATCH 08/17] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
  =?UTF-8?q?=20200=20(el=20servidor=20de=20la=20app=20no=20acepta=20m=C3=A1?=
  =?UTF-8?q?s=20por=20pedido)?=
 MIME-Version: 1.0
@@ -32569,7 +32569,7 @@ index 8836fdd..2804942 100644
 From d8db74159e7bf9e52efb1c6faa6ee0abf78ee2ff Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:29:50 -0400
-Subject: [PATCH 09/16] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
+Subject: [PATCH 09/17] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
  =?UTF-8?q?=20tel=C3=A9fono=20sin=20Expo=20Go?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32732,7 +32732,7 @@ index 0086b83..f9ddcca 100644
 From 95b304af6cf2094fdef87a3885ce76ac6a994e5e Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:54:24 -0400
-Subject: [PATCH 10/16] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
+Subject: [PATCH 10/17] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
  =?UTF-8?q?nativo=20completo,=20animaciones=20y=20proyecto=20de=20Expo=20p?=
  =?UTF-8?q?ara=20la=20APK?=
 MIME-Version: 1.0
@@ -36626,7 +36626,7 @@ index 7e0fe42..23cabaa 100644
 From 2e0a3b7e59cee9887a7171b60f89f64efcde644f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:55:54 -0400
-Subject: [PATCH 11/16] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
+Subject: [PATCH 11/17] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
  =?UTF-8?q?o=20la=20compilaci=C3=B3n=20en=20Expo=20falla=20por=20mapbox-gl?=
  =?UTF-8?q?=203=20vs=20@rnmapbox/maps?=
 MIME-Version: 1.0
@@ -36656,7 +36656,7 @@ index 0000000..7c5134a
 From 8f73cfc0c36be11e3414c10a41964cce6e5b8cd2 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:20:22 -0400
-Subject: [PATCH 12/16] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
+Subject: [PATCH 12/17] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
  =?UTF-8?q?=20pedidos=20al=20servidor;=20teclado=20en=20la=20entrada=20(T-?=
  =?UTF-8?q?06=20a=20T-09,=20T-15)?=
 MIME-Version: 1.0
@@ -42315,7 +42315,7 @@ index 47f45a4..bd41d06 100644
 From f6b767485f055b63843290b9d57751bba10f5f60 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:42:17 -0400
-Subject: [PATCH 13/16] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
+Subject: [PATCH 13/17] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
  =?UTF-8?q?6,=20T-17):=20tarjetas=20del=20mapa=20en=20iOS,=20memorias=20po?=
  =?UTF-8?q?r=20generaci=C3=B3n,=20flota=20sin=20red?=
 MIME-Version: 1.0
@@ -42752,7 +42752,7 @@ index b1893fe..11e8247 100644
 From a72f6240bc42f357d00cc22fc14132a23dadc999 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 10:22:30 -0400
-Subject: [PATCH 14/16] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
+Subject: [PATCH 14/17] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
  =?UTF-8?q?=20app=20(T-19=20a=20T-23):=20SOS,=20sesi=C3=B3n,=20red,=20pant?=
  =?UTF-8?q?allas,=20mapas=20y=20limpieza?=
 MIME-Version: 1.0
@@ -48916,7 +48916,7 @@ index 479ba30..63d5a63 100644
 From d5515163a0aaed218e618724c348a98585f81a5b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Mon, 19 Oct 2026 15:15:53 -0400
-Subject: [PATCH 15/16] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
+Subject: [PATCH 15/17] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
  =?UTF-8?q?=20app=20(T-33=20a=20T-41)=20y=20trabajo=20pendiente=20de=20otr?=
  =?UTF-8?q?a=20sesi=C3=B3n?=
 MIME-Version: 1.0
@@ -57967,7 +57967,7 @@ index 0000000..287208e
 From 792b0cbbe44bdd70d321c2fa9e504dd306d27d9f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 09:56:46 -0400
-Subject: [PATCH 16/16] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
+Subject: [PATCH 16/17] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
  =?UTF-8?q?inspecciones=20programadas=20y=20carga=20en=20c=C3=ADrculo=20(T?=
  =?UTF-8?q?-47=20a=20T-53)?=
 MIME-Version: 1.0
@@ -66586,6 +66586,3459 @@ index 9c4c0ac..548f103 100644
    }
  
    // Las fotos viajan aparte, por la cola: si no llegan, quedan pendientes a la
+-- 
+2.55.0.windows.3
+
+
+From 2fb6ae2ec8e7be32857eceac6d91afcee458c710 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 20 Oct 2026 11:15:45 -0400
+Subject: [PATCH 17/17] Inspecciones simples, calendario por persona, ODT
+ asignadas, fotos y teclado (T-60 a T-65)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Inspecciones: Historial con «Por persona» (calendario del mes, cuenta todos
+  los días desde que la persona recibió la unidad) y «Todas»; sin inspecciones
+  programadas; «Cómo funciona» explica la diaria y los hallazgos.
+- «Asignadas a ti» en Mantenimiento: Iniciar trabajo, Pausar, Reanudar y Entregar,
+  con el tiempo trabajado; responsable en el detalle de la ODT.
+- Fotos: se reducen a 1600 px JPEG antes de subir; Pendientes muestra el motivo
+  real y se reintenta solo sin duplicar.
+- Enter cierra el teclado en campos de varias líneas; aviso claro sin formato.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/index.tsx                    |   5 -
+ src/app/(driver)/inspeccion.tsx               | 148 +----
+ src/app/(driver)/mantenimiento.tsx            |  16 +-
+ src/app/inspecciones.tsx                      | 204 +++++--
+ src/app/orden.tsx                             |  53 +-
+ src/app/panel/mantenimiento.tsx               |   8 +
+ src/app/reportar.tsx                          |   1 +
+ src/components/calendario-inspecciones.tsx    | 285 ++++++++++
+ src/components/evidence-field.tsx             |   3 +
+ .../inspeccion-programada-aviso.tsx           |  66 ---
+ .../inspeccion-programada-lista.tsx           | 121 ----
+ src/components/inspecciones-por-persona.tsx   | 531 ++++++++++++++++++
+ src/components/inspecciones-resultado.tsx     |  24 -
+ src/components/odt-asignada-acciones.tsx      | 245 ++++++++
+ src/components/odt-asignada-seccion.tsx       | 127 +++++
+ src/components/perfil-hojas.tsx               |  30 +-
+ src/components/text-field.tsx                 |   5 +
+ src/lib/cloudinary.ts                         | 117 +++-
+ src/services/fomConduccion.ts                 |  30 +-
+ src/services/fomOrdenes.ts                    | 223 +++++++-
+ src/services/inspeccionService.ts             | 208 ++-----
+ src/services/workOrderService.ts              |  15 +-
+ src/sync/outbox.ts                            | 111 +++-
+ 23 files changed, 1959 insertions(+), 617 deletions(-)
+ create mode 100644 src/components/calendario-inspecciones.tsx
+ delete mode 100644 src/components/inspeccion-programada-aviso.tsx
+ delete mode 100644 src/components/inspeccion-programada-lista.tsx
+ create mode 100644 src/components/inspecciones-por-persona.tsx
+ create mode 100644 src/components/odt-asignada-acciones.tsx
+ create mode 100644 src/components/odt-asignada-seccion.tsx
+
+diff --git a/src/app/(driver)/index.tsx b/src/app/(driver)/index.tsx
+index 4bd00db..ecce87a 100644
+--- a/src/app/(driver)/index.tsx
++++ b/src/app/(driver)/index.tsx
+@@ -11,7 +11,6 @@ import { BottomSheet } from '@/components/bottom-sheet';
+ import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
+ import { EncabezadoFom } from '@/components/encabezado-fom';
+-import { InspeccionProgramadaAviso } from '@/components/inspeccion-programada-aviso';
+ import { MapaVehiculo } from '@/components/map-vehiculo';
+ import { PantallaTransicion } from '@/components/pantalla-transicion';
+ import { PressableScale } from '@/components/pressable-scale';
+@@ -439,10 +438,6 @@ export default function InicioScreen() {
+           />
+         ))}
+ 
+-        {/* Una inspección PROGRAMADA para hoy: se recuerda aquí y se hace en la
+-            pestaña Inspección. Sin ninguna para hoy, no ocupa nada. */}
+-        <InspeccionProgramadaAviso />
+-
+         {/* DETENIDO: se dice arriba del todo, con el sitio y la última lectura.
+             NO inventamos "detenido hace X": el GPS reporta cuándo leyó, no desde
+             cuándo está parado. */}
+diff --git a/src/app/(driver)/inspeccion.tsx b/src/app/(driver)/inspeccion.tsx
+index 6b7d0c8..b69181b 100644
+--- a/src/app/(driver)/inspeccion.tsx
++++ b/src/app/(driver)/inspeccion.tsx
+@@ -8,7 +8,6 @@ import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
+ import { EncabezadoFom, TituloPantalla } from '@/components/encabezado-fom';
+ import { Escalonado } from '@/components/escalonado';
+-import { InspeccionProgramadaLista } from '@/components/inspeccion-programada-lista';
+ import { InspectionItem } from '@/components/inspection-item';
+ import { OTStatusBadge } from '@/components/ot-status-badge';
+ import { PressableScale } from '@/components/pressable-scale';
+@@ -17,7 +16,6 @@ import { EmptyState } from '@/components/empty-state';
+ import { Skeleton } from '@/components/skeleton';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+-import { useAsyncData } from '@/hooks/use-async-data';
+ import { identidadDeUnidad } from '@/lib/vehiculos';
+ import { useDriving } from '@/session';
+ import {
+@@ -26,7 +24,6 @@ import {
+   getTelemetria,
+   solicitarOtraUnidad,
+ } from '@/services';
+-import { getMisProgramadas, type InspeccionProgramada } from '@/services/inspeccionService';
+ import { useTheme } from '@/theme';
+ import type {
+   InspeccionItem as InspeccionItemType,
+@@ -43,10 +40,6 @@ import type {
+  * pregunta "¿crear ODT?" en fallas no críticas). Si la falla es de un ítem
+  * CRÍTICO, la app bloquea la salida y genera la ODT automáticamente (regla
+  * nuestra que se conserva). Guarda con o sin señal (offline-first).
+- *
+- * Arriba, las inspecciones PROGRAMADAS para el conductor (las pone el
+- * supervisor desde la web). Tocar la de hoy cambia el checklist por el formato
+- * de esa cita y el envío la cumple; sin citas, la pantalla es la de siempre.
+  */
+ export default function InspeccionScreen() {
+   const { colors, spacing } = useTheme();
+@@ -64,43 +57,18 @@ export default function InspeccionScreen() {
+   const [submitting, setSubmitting] = useState(false);
+   const [resultado, setResultado] = useState<ResultadoInspeccion | null>(null);
+   const [errorCarga, setErrorCarga] = useState<string | null>(null);
+-  /** La cita que se está respondiendo; sin ella, es la diaria. */
+-  const [programada, setProgramada] = useState<InspeccionProgramada | null>(null);
+-
+-  // Las citas propias. Si fallan o FOM aún no las publica, la lista no sale.
+-  const { data: programadas, recargar: recargarProgramadas } = useAsyncData(
+-    () => getMisProgramadas().catch(() => []),
+-    [user?.id],
+-    { onFocus: true },
+-  );
+ 
+   useEffect(() => {
+     // Sin vehículo asignado no se carga nada (se muestra el aviso). La unidad es
+     // la de la sesión (principal, o secundario por PIN — §4.3: el secundario
+-    // también puede hacer la inspección de ESA unidad). Una cita trae su propia
+-    // unidad y su formato.
+-    if (!user) return;
+-    const cita = programada;
++    // también puede hacer la inspección de ESA unidad).
++    if (!user || !driving || !vehiculoSesion) return;
+     const v = vehiculoSesion;
+-    if (!cita && (!driving || !v)) return;
+     let active = true;
+     (async () => {
++      setVehicle(v);
+       setErrorCarga(null);
+       try {
+-        if (cita) {
+-          // La ubicación es un extra: sin ella la cita se envía igual.
+-          const tipo = v?.id === cita.vehicleId ? v.tipo : undefined;
+-          const [t, p] = await Promise.all([
+-            getTelemetria(cita.vehicleId).catch(() => null),
+-            getPlantillaInspeccion({ id: cita.vehicleId, tipo }, cita.formatoId),
+-          ]);
+-          if (!active) return;
+-          setTelemetry(t);
+-          setPlantilla(p);
+-          return;
+-        }
+-        if (!v) return;
+-        setVehicle(v);
+         const [t, p] = await Promise.all([getTelemetria(v.id), getPlantillaInspeccion(v)]);
+         if (!active) return;
+         setTelemetry(t);
+@@ -112,7 +80,7 @@ export default function InspeccionScreen() {
+     return () => {
+       active = false;
+     };
+-  }, [user, driving, vehiculoSesion, programada]);
++  }, [user, driving, vehiculoSesion]);
+ 
+   // Lista plana de ítems (para contar y validar).
+   const items = useMemo<InspeccionItemType[]>(
+@@ -131,35 +99,8 @@ export default function InspeccionScreen() {
+     setRespuestas((prev) => ({ ...prev, [respuesta.itemId]: respuesta }));
+   }
+ 
+-  /**
+-   * Cambia entre la diaria y una cita. Son formatos distintos: lo respondido no
+-   * sirve en el otro, así que se pregunta antes de tirarlo.
+-   */
+-  function cambiarA(cita: InspeccionProgramada | null) {
+-    const hacer = () => {
+-      setProgramada(cita);
+-      setRespuestas({});
+-      setError(null);
+-      setErrorCarga(null);
+-      setPlantilla(null);
+-      setTelemetry(null);
+-    };
+-    if (respondidos === 0) return hacer();
+-    Alert.alert(
+-      cita ? 'Hacer la inspección programada' : 'Volver a la diaria',
+-      'Lo que llevas respondido se borra: es otro formato.',
+-      [
+-        { text: 'Seguir aquí', style: 'cancel' },
+-        { text: 'Cambiar', style: 'destructive', onPress: hacer },
+-      ],
+-    );
+-  }
+-
+   async function onSubmit() {
+-    // La unidad: la de la cita o la de la sesión. La diaria necesita además su
+-    // telemetría (de ahí sale la ubicación); la cita va sin ella si no la hay.
+-    const unidadId = programada?.vehicleId ?? vehicle?.id;
+-    if (!unidadId || !plantilla || !user || (!programada && !telemetry)) return;
++    if (!vehicle || !telemetry || !plantilla || !user) return;
+     setError(null);
+ 
+     // Todos los ítems deben estar respondidos.
+@@ -196,15 +137,12 @@ export default function InspeccionScreen() {
+     setSubmitting(true);
+     try {
+       const res = await enviarInspeccion({
+-        vehicleId: unidadId,
++        vehicleId: vehicle.id,
+         plantilla,
+-        ubicacionTexto: telemetry?.ubicacionTexto ?? '',
++        ubicacionTexto: telemetry.ubicacionTexto,
+         respuestas: Object.values(respuestas),
+-        ...(programada ? { programacionId: programada.id } : {}),
+       });
+       setResultado(res);
+-      // La cita pasa a «Hecha» en la lista.
+-      if (programada) recargarProgramadas();
+     } catch (e) {
+       setError(e instanceof Error ? e.message : 'No se pudo enviar la inspección.');
+     } finally {
+@@ -212,14 +150,7 @@ export default function InspeccionScreen() {
+     }
+   }
+ 
+-  const cargando = !plantilla || (!programada && (!vehicle || !telemetry));
+-  const listaProgramadas = (
+-    <InspeccionProgramadaLista
+-      programadas={programadas ?? []}
+-      activaId={programada?.id}
+-      onElegir={(p) => cambiarA(p)}
+-    />
+-  );
++  const cargando = !vehicle || !telemetry || !plantilla;
+ 
+   // El título va con el contenido (se desplaza con él); la barra de arriba, fija.
+   const titulo = <TituloPantalla titulo="Inspección" bajada="Revisa tu unidad antes de salir." />;
+@@ -231,19 +162,18 @@ export default function InspeccionScreen() {
+       <SafeAreaView style={styles.safeArea} edges={[]}>
+         <EncabezadoFom seccion="Inspección" />
+ 
+-        {!driving && !programada ? (
++        {!driving ? (
+           <ScrollView contentContainerStyle={caja} showsVerticalScrollIndicator={false}>
+             {titulo}
+             <EmptyState
+               title="Aún no tienes un vehículo asignado"
+               description="La inspección es de tu unidad. Cuando tu administrador te asigne tu vehículo, cargamos su checklist para que la hagas antes de salir."
+             />
+-            {listaProgramadas}
+           </ScrollView>
+         ) : resultado ? (
+           <ResultadoView
+             resultado={resultado}
+-            vehicleId={programada?.vehicleId ?? vehicle?.id ?? ''}
++            vehicleId={vehicle?.id ?? ''}
+             onInicio={() => router.navigate('/')}
+             titulo={titulo}
+           />
+@@ -251,15 +181,6 @@ export default function InspeccionScreen() {
+           <ScrollView contentContainerStyle={caja} showsVerticalScrollIndicator={false}>
+             {titulo}
+             <EmptyState title="No pudimos cargar la inspección" description={errorCarga} />
+-            {/* Si lo que falló es una cita, se puede volver a la diaria. */}
+-            {programada ? (
+-              <Button
+-                label={driving ? 'Volver a la diaria' : 'Volver'}
+-                variant="secondary"
+-                onPress={() => cambiarA(null)}
+-              />
+-            ) : null}
+-            {listaProgramadas}
+           </ScrollView>
+         ) : plantilla && total === 0 ? (
+           <ScrollView contentContainerStyle={caja} showsVerticalScrollIndicator={false}>
+@@ -268,7 +189,6 @@ export default function InspeccionScreen() {
+               title="Sin formato de inspección"
+               description={`${vehicle ? `Unidad ${vehicle.placa ?? vehicle.id}: t` : 'T'}u empresa todavía no publicó un formato de inspección para este tipo de unidad. Avísale a tu supervisor: se publica desde la web, en Inspecciones › Plantillas.`}
+             />
+-            {listaProgramadas}
+           </ScrollView>
+         ) : cargando ? (
+           <View style={caja}>
+@@ -302,45 +222,16 @@ export default function InspeccionScreen() {
+                 </ThemedText>
+               </Escalonado>
+ 
+-              {listaProgramadas}
+-
+-              {/* Vehículo (solo lectura). En una cita, su unidad y su formato. */}
++              {/* Vehículo (solo lectura) */}
+               <Escalonado indice={2}>
+-              {programada ? (
+-                <Card style={{ gap: spacing.xs }}>
+-                  <View style={styles.progressRow}>
+-                    <ThemedText variant="caption" color="textMuted">
+-                      Inspección programada
+-                    </ThemedText>
+-                    {driving ? (
+-                      <PressableScale
+-                        onPress={() => cambiarA(null)}
+-                        hitSlop={8}
+-                        accessibilityRole="button"
+-                        accessibilityLabel="Volver a la inspección diaria">
+-                        <ThemedText variant="caption" color="primary" style={styles.enlace}>
+-                          Volver a la diaria
+-                        </ThemedText>
+-                      </PressableScale>
+-                    ) : null}
+-                  </View>
+-                  <ThemedText variant="subtitle">
+-                    {[programada.unidad, programada.placa].filter(Boolean).join(' · ')}
+-                  </ThemedText>
+-                  <ThemedText variant="caption" color="textSecondary">
+-                    {`${programada.formato} · Hoy`}
+-                  </ThemedText>
+-                </Card>
+-              ) : vehicle ? (
+-                <Card style={{ gap: spacing.xs }}>
+-                  <ThemedText variant="caption" color="textMuted">
+-                    Vehículo
+-                  </ThemedText>
+-                  <ThemedText variant="subtitle">
+-                    {`${vehicle.marca} ${vehicle.modelo} · ${identidadDeUnidad(vehicle)}`}
+-                  </ThemedText>
+-                </Card>
+-              ) : null}
++              <Card style={{ gap: spacing.xs }}>
++                <ThemedText variant="caption" color="textMuted">
++                  Vehículo
++                </ThemedText>
++                <ThemedText variant="subtitle">
++                  {`${vehicle.marca} ${vehicle.modelo} · ${identidadDeUnidad(vehicle)}`}
++                </ThemedText>
++              </Card>
+               </Escalonado>
+ 
+               {/* Progreso */}
+@@ -537,7 +428,6 @@ const styles = StyleSheet.create({
+   divider: {
+     height: StyleSheet.hairlineWidth,
+   },
+-  enlace: { fontWeight: '600' },
+   resultCenter: {
+     alignItems: 'center',
+     gap: 16,
+diff --git a/src/app/(driver)/mantenimiento.tsx b/src/app/(driver)/mantenimiento.tsx
+index c7417b2..2a84e2e 100644
+--- a/src/app/(driver)/mantenimiento.tsx
++++ b/src/app/(driver)/mantenimiento.tsx
+@@ -1,6 +1,6 @@
+ import { LinearGradient } from 'expo-linear-gradient';
+ import { Redirect, useFocusEffect, useRouter } from 'expo-router';
+-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
++import { useCallback, useEffect, useMemo, useState } from 'react';
+ import { Animated, Easing, StyleSheet, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+@@ -15,6 +15,7 @@ import { Escalonado } from '@/components/escalonado';
+ import { EncabezadoFom, TituloPantalla } from '@/components/encabezado-fom';
+ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
+ import { KpiFila } from '@/components/kpi-fila';
++import { SeccionOdtAsignadas } from '@/components/odt-asignada-seccion';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { PulseDot } from '@/components/pulse-dot';
+ import { SearchBar } from '@/components/search-bar';
+@@ -184,7 +185,8 @@ function BarraIntervalo({ progreso, tone }: { progreso: number; tone: keyof Colo
+   const { colors, radii } = useTheme();
+   const reduced = useReducedMotion();
+   const destino = Math.max(0.02, Math.min(1, progreso / ESCALA_PROGRESO));
+-  const t = useRef(new Animated.Value(reduced ? destino : 0)).current;
++  // En el estado, no en una ref: leer `.current` al pintar lo prohíbe el React Compiler.
++  const [t] = useState(() => new Animated.Value(reduced ? destino : 0));
+ 
+   useEffect(() => {
+     if (reduced) {
+@@ -478,6 +480,12 @@ export default function MantenimientoScreen() {
+   // El título va dentro del scroll y se desplaza con él.
+   const titulo = <TituloPantalla titulo="Mantenimiento" bajada="Lo que reportaste y cómo va." />;
+ 
++  // Las ODT que el supervisor le asignó, para trabajarlas. Hoy FOM solo se
++  // las enseña a supervisores y operadores (a un conductor le dice 403): con
++  // 403, o sin ninguna, la tarjeta no aparece.
++  const abrirOrden = (id: string) =>
++    router.navigate({ pathname: '/orden', params: { id, companyId: user.companyId ?? '' } });
++
+   return (
+     <ThemedView style={styles.root} ambient>
+       <SafeAreaView style={styles.safeArea} edges={[]}>
+@@ -487,6 +495,8 @@ export default function MantenimientoScreen() {
+         {!vehicle ? (
+           <View style={[styles.content, { paddingHorizontal: spacing.lg }]}>
+             {titulo}
++            {/* Sin unidad también se trabaja una ODT asignada. */}
++            <SeccionOdtAsignadas style={{ marginTop: spacing.lg }} onAbrir={abrirOrden} />
+             <EmptyState
+               title="Aún no conduces una unidad"
+               description="Empareja tu unidad o inicia una sesión de conducción para ver su mantenimiento."
+@@ -499,6 +509,8 @@ export default function MantenimientoScreen() {
+             <ScrollVisible contentContainerStyle={[styles.content, { paddingHorizontal: spacing.lg, gap: spacing.lg }]}>
+               <Escalonado indice={0}>{titulo}</Escalonado>
+ 
++              <SeccionOdtAsignadas onAbrir={abrirOrden} />
++
+               <View style={{ gap: spacing.sm }}>
+                 {/* Cuánto hay de cada cosa. Solo con las órdenes leídas: si no se
+                     pudieron leer, unos ceros dirían algo que no se sabe. */}
+diff --git a/src/app/inspecciones.tsx b/src/app/inspecciones.tsx
+index 8c1829a..b90559e 100644
+--- a/src/app/inspecciones.tsx
++++ b/src/app/inspecciones.tsx
+@@ -10,9 +10,10 @@ import { Card } from '@/components/card';
+ import { Checkbox } from '@/components/checkbox';
+ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
+ import { ErrorState } from '@/components/error-state';
++import { SelectorMes } from '@/components/calendario-inspecciones';
++import { finDeMes, InspeccionesPorPersona, moverMes } from '@/components/inspecciones-por-persona';
+ import {
+   contarFallas,
+-  EtiquetaClase,
+   InspeccionesResultado,
+   textoFallas,
+   VISTA_INSPECCION,
+@@ -59,7 +60,7 @@ const FILTROS: { id: Filtro; label: string }[] = [
+   { id: 'bloqueada', label: 'Bloqueadas' },
+ ];
+ 
+-/** Las vistas del supervisor, las mismas que la web (Agenda y Plantillas se quedan allá). */
++/** Las vistas del supervisor, las mismas que la web (Plantillas se queda allá). */
+ type Vista = 'resumen' | 'historial' | 'hallazgos';
+ const VISTAS: { id: Vista; label: string }[] = [
+   { id: 'resumen', label: 'Resumen' },
+@@ -67,6 +68,13 @@ const VISTAS: { id: Vista; label: string }[] = [
+   { id: 'hallazgos', label: 'Hallazgos' },
+ ];
+ 
++/** Los dos modos del Historial: el cumplimiento de cada conductor, o la lista entera. */
++type ModoHistorial = 'persona' | 'todas';
++const MODOS: { id: ModoHistorial; label: string }[] = [
++  { id: 'persona', label: 'Por persona' },
++  { id: 'todas', label: 'Todas' },
++];
++
+ /** Cuántas se imprimen de una sin avisar: más que esto es un rato de espera. */
+ const AVISO_LOTE = 15;
+ 
+@@ -127,13 +135,10 @@ function Fila({
+         <ThemedText variant="button" numberOfLines={1}>
+           {[i.unidad, i.placa].filter(Boolean).join(' · ')}
+         </ThemedText>
+-        {/* Quién y a qué hora, y si fue la diaria o una programada. */}
+-        <View style={[styles.fila, { gap: spacing.xs + 2 }]}>
+-          <ThemedText variant="caption" color="textMuted" numberOfLines={1} style={styles.encoger}>
+-            {[i.conductor, i.enviadaEn ? formatHora(i.enviadaEn) : null].filter(Boolean).join(' · ')}
+-          </ThemedText>
+-          <EtiquetaClase clase={i.clase} />
+-        </View>
++        {/* Quién y a qué hora. */}
++        <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
++          {[i.conductor, i.enviadaEn ? formatHora(i.enviadaEn) : null].filter(Boolean).join(' · ')}
++        </ThemedText>
+         {/* QUÉ falló, que es lo único que no se puede deducir de la pastilla. */}
+         {fallos && fallos.length > 0 ? (
+           <ThemedText variant="caption" color={i.resultado === 'bloqueada' ? 'danger' : 'warning'} numberOfLines={2}>
+@@ -213,12 +218,9 @@ function FilaAtencion({
+         </ThemedText>
+         <Pastilla tono={v.tono} label={v.largo} conPunto />
+       </View>
+-      <View style={[styles.fila, { gap: spacing.sm, marginTop: spacing.xs }]}>
+-        <ThemedText variant="caption" color="textSecondary" numberOfLines={1} style={styles.flex1}>
+-          {[i.placa, i.conductor].filter(Boolean).join(' · ')}
+-        </ThemedText>
+-        <EtiquetaClase clase={i.clase} />
+-      </View>
++      <ThemedText variant="caption" color="textSecondary" numberOfLines={1} style={{ marginTop: spacing.xs }}>
++        {[i.placa, i.conductor].filter(Boolean).join(' · ')}
++      </ThemedText>
+       <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
+         {cuenta ? `${textoFallas(cuenta)} · ${cuando}` : `Abre el resultado para ver fallas y observaciones · ${cuando}`}
+       </ThemedText>
+@@ -263,10 +265,11 @@ function Cifra({ icon, label, valor, de }: { icon: TabIconName; label: string; v
+  * INSPECCIONES DE LA EMPRESA — lo que el supervisor recibe de sus conductores.
+  *
+  * Tres vistas, como la web: el RESUMEN de hoy (las 4 cifras, lo que pide
+- * atención y lo que falta), el HISTORIAL —que es también la cola de
++ * atención y lo que falta), el HISTORIAL del mes —por persona, con el
++ * calendario de cada conductor, o todas en lista, que es también la cola de
+  * impresión: la hoja se firma a mano y se archiva— y los HALLAZGOS, las que
+- * salieron con algo mal. Programar una inspección y sus plantillas viven en la
+- * web: se planean con calma, no en la vía.
++ * salieron con algo mal. Las plantillas viven en la web: se arman con calma,
++ * no en la vía.
+  *
+  * La inspección paso a paso del conductor es otra pantalla y no cambia.
+  */
+@@ -289,6 +292,9 @@ export default function InspeccionesScreen() {
+   const [q, setQ] = useState('');
+   const [filtro, setFiltro] = useState<Filtro>('todas');
+   const [vista, setVista] = useState<Vista>('resumen');
++  const [modo, setModo] = useState<ModoHistorial>('persona');
++  /** El mes del Historial (AAAA-MM): uno solo para «Por persona» y «Todas». */
++  const [mes, setMes] = useState(() => dia(new Date()).slice(0, 7));
+   const [verFaltan, setVerFaltan] = useState(false);
+   const [abierta, setAbierta] = useState<InspeccionResumen | null>(null);
+   const sel = useSeleccion();
+@@ -308,16 +314,37 @@ export default function InspeccionesScreen() {
+     [cid],
+   );
+ 
++  const hoy = dia(new Date());
++  const mesHoy = hoy.slice(0, 7);
++
++  /*
++   * Las del MES del Historial, de toda la empresa: UNA lectura que reparte
++   * «Por persona» y que «Todas» enseña en lista. Solo se pide con el Historial
++   * abierto; la clave lleva el mes, así volver a uno ya visto pinta al instante.
++   */
++  const enHistorial = vista === 'historial';
++  const hasta = mes === mesHoy ? hoy : finDeMes(mes);
++  const delMes = useAsyncData(
++    () => (enHistorial ? getInspeccionesFom({ desde: `${mes}-01`, hasta }) : Promise.resolve(null)),
++    [cid, mes, hasta, enHistorial],
++    enHistorial ? { clave: `inspecciones-mes:${cid}:${mes}` } : {},
++  );
++
+   const inspecciones = useMemo(() => data ?? [], [data]);
++  /** «Todas» del mes; si se entró desde una unidad, solo las suyas. */
++  const delMesVistas = useMemo(
++    () => (delMes.data ?? []).filter((i) => !vehicleId || i.vehicleId === vehicleId),
++    [delMes.data, vehicleId],
++  );
+   const nq = normalizar(q);
+   const visibles = useMemo(
+     () =>
+-      inspecciones.filter(
++      delMesVistas.filter(
+         (i) =>
+           (filtro === 'todas' || i.resultado === filtro) &&
+           (!nq || normalizar(`${i.unidad} ${i.placa ?? ''} ${i.conductor}`).includes(nq)),
+       ),
+-    [inspecciones, filtro, nq],
++    [delMesVistas, filtro, nq],
+   );
+   /** Los hallazgos: las que salieron con fallas u observaciones, de todo el historial leído. */
+   const hallazgos = useMemo(
+@@ -328,7 +355,6 @@ export default function InspeccionesScreen() {
+     [inspecciones, nq],
+   );
+ 
+-  const hoy = dia(new Date());
+   /** Las de HOY, todas: de aquí salen las cifras y lo que pide atención. */
+   const deHoy = useMemo(() => inspecciones.filter((i) => i.fecha === hoy), [inspecciones, hoy]);
+   /** Lo que pide atención hoy, lo más grave arriba. */
+@@ -352,9 +378,9 @@ export default function InspeccionesScreen() {
+    * de otra empresa daba «12 de 10». Sin flota se cuentan todas y no se dice «de N».
+    */
+   /*
+-   * Solo cuentan las DIARIAS: una programada cumple su cita, no la diaria de
+-   * la unidad (FOM las guarda aparte). Sin clase —servidor viejo— todas eran
+-   * diarias.
++   * Solo cuentan las DIARIAS: una programada que quedó de antes no es la
++   * diaria de la unidad (FOM las guarda aparte). Sin clase —servidor viejo—
++   * todas eran diarias.
+    */
+   const diariasHoy = useMemo(() => deHoy.filter((i) => i.clase !== 'programada'), [deHoy]);
+   const hechasHoy = useMemo(() => {
+@@ -446,8 +472,19 @@ export default function InspeccionesScreen() {
+     }
+   }
+ 
+-  /** Lo que se imprimiría desde la cabecera: el día en el resumen, lo que se ve en las listas. */
+-  const lote = vista === 'resumen' ? deHoy : vista === 'historial' ? visibles : hallazgos;
++  /**
++   * Lo que se imprimiría desde la cabecera: el día en el resumen, lo que se ve
++   * en las listas. «Por persona» imprime desde la lista de cada conductor.
++   */
++  const lote =
++    vista === 'resumen' ? deHoy : vista === 'hallazgos' ? hallazgos : modo === 'todas' ? visibles : [];
++
++  /** Cambia de vista o de modo: lo seleccionado era de la lista de antes. */
++  function irA(v: Vista, m?: ModoHistorial) {
++    setVista(v);
++    if (m) setModo(m);
++    sel.cancelar();
++  }
+ 
+   /** Una lista por días —del más reciente al más viejo: es como se archivan—, con su fila de siempre. */
+   function listaPorDia(lista: InspeccionResumen[], vacio: string) {
+@@ -544,10 +581,7 @@ export default function InspeccionesScreen() {
+                     label={v.label}
+                     activo={vista === v.id}
+                     cuenta={v.id === 'hallazgos' ? inspecciones.filter(esGrave).length : undefined}
+-                    onPress={() => {
+-                      setVista(v.id);
+-                      sel.cancelar();
+-                    }}
++                    onPress={() => irA(v.id)}
+                   />
+                 </OpcionRiel>
+               ))}
+@@ -698,11 +732,10 @@ export default function InspeccionesScreen() {
+ 
+                 <Card style={{ gap: spacing.md }}>
+                   <ThemedText variant="subtitle" style={styles.tituloTarjeta}>
+-                    Dos clases de inspección
++                    Cómo funciona
+                   </ThemedText>
+                   {[
+                     ['Diaria', 'El conductor la llena en la app antes de salir.'],
+-                    ['Programada', 'Se programa desde la web: unidad, plantilla, responsable y fecha.'],
+                     ['Hallazgos', 'Lo que sale mal queda con seguimiento.'],
+                   ].map(([t, p], n) => (
+                     <View key={t} style={[styles.paso, { gap: spacing.md }]}>
+@@ -723,26 +756,94 @@ export default function InspeccionesScreen() {
+               </>
+             ) : vista === 'historial' ? (
+               <>
+-                <SearchBar value={q} onChangeText={setQ} placeholder="Buscar por unidad o conductor…" />
+-                <RielOpciones seleccion={filtro} contentContainerStyle={[styles.filtros, { gap: spacing.sm }]}>
+-                  {FILTROS.map((f) => (
+-                    <OpcionRiel key={f.id} id={f.id}>
+-                      <PastillaFiltro
+-                        label={f.label}
+-                        activo={filtro === f.id}
+-                        cuenta={
+-                          f.id === 'todas'
+-                            ? inspecciones.length
+-                            : inspecciones.filter((i) => i.resultado === f.id).length
+-                        }
+-                        onPress={() => setFiltro(f.id)}
+-                      />
+-                    </OpcionRiel>
++                {/* Los dos modos del Historial; el mes de abajo vale para los dos. */}
++                <View style={[styles.fila, { gap: spacing.sm }]}>
++                  {MODOS.map((m) => (
++                    <PastillaFiltro
++                      key={m.id}
++                      label={m.label}
++                      activo={modo === m.id}
++                      onPress={() => irA('historial', m.id)}
++                    />
+                   ))}
+-                </RielOpciones>
+-                {listaPorDia(
+-                  visibles,
+-                  inspecciones.length === 0 ? 'Todavía no hay inspecciones enviadas.' : 'Ninguna coincide.',
++                </View>
++                <Card style={{ padding: spacing.sm }}>
++                  <SelectorMes
++                    mes={mes}
++                    onAnterior={() => setMes((m) => moverMes(m, -1))}
++                    onSiguiente={() => setMes((m) => (m < mesHoy ? moverMes(m, 1) : m))}
++                    haySiguiente={mes < mesHoy}
++                  />
++                </Card>
++
++                {modo === 'persona' ? (
++                  // Quién hace la diaria y quién no; al tocar a alguien, su calendario y sus inspecciones.
++                  <InspeccionesPorPersona
++                    cid={cid}
++                    hoy={hoy}
++                    mes={mes}
++                    delMes={delMes.data}
++                    estadoDelMes={delMes.estado}
++                    recargarDelMes={delMes.recargar}
++                    flota={flota ? unidades : null}
++                    estadoFlota={estadoFlota}
++                    recargarFlota={recargarFlota}
++                    onAbrir={setAbierta}
++                    listaDelMes={(lista) => (
++                      <>
++                        {lista.length > 0 ? (
++                          <View style={styles.acciones}>
++                            <PillButton
++                              label={ocupado ? 'Armando…' : `Imprimir las ${lista.length}`}
++                              icon="reporte"
++                              tone="primary"
++                              onPress={() =>
++                                void imprimir(
++                                  lista.map((i) => i.id),
++                                  lista.length > AVISO_LOTE ? `Son ${lista.length} hojas: puede tardar un poco.` : undefined,
++                                )
++                              }
++                            />
++                          </View>
++                        ) : null}
++                        {listaPorDia(lista, 'No envió inspecciones este mes.')}
++                      </>
++                    )}
++                  />
++                ) : delMes.estado === 'error' ? (
++                  <Card>
++                    <ErrorState description="No pudimos cargar las inspecciones del mes." onRetry={delMes.recargar} />
++                  </Card>
++                ) : !delMes.data ? (
++                  <View style={{ gap: spacing.md }}>
++                    {[0, 1, 2].map((n) => (
++                      <Skeleton key={n} height={62} radius={radii.lg} />
++                    ))}
++                  </View>
++                ) : (
++                  <>
++                    <SearchBar value={q} onChangeText={setQ} placeholder="Buscar por unidad o conductor…" />
++                    <RielOpciones seleccion={filtro} contentContainerStyle={[styles.filtros, { gap: spacing.sm }]}>
++                      {FILTROS.map((f) => (
++                        <OpcionRiel key={f.id} id={f.id}>
++                          <PastillaFiltro
++                            label={f.label}
++                            activo={filtro === f.id}
++                            cuenta={
++                              f.id === 'todas'
++                                ? delMesVistas.length
++                                : delMesVistas.filter((i) => i.resultado === f.id).length
++                            }
++                            onPress={() => setFiltro(f.id)}
++                          />
++                        </OpcionRiel>
++                      ))}
++                    </RielOpciones>
++                    {listaPorDia(
++                      visibles,
++                      delMesVistas.length === 0 ? 'No hay inspecciones enviadas en este mes.' : 'Ninguna coincide.',
++                    )}
++                  </>
+                 )}
+               </>
+             ) : (
+@@ -809,7 +910,6 @@ const styles = StyleSheet.create({
+   grupo: { paddingVertical: 0, paddingHorizontal: 14 },
+   fila: { flexDirection: 'row', alignItems: 'center' },
+   flex1: { flex: 1, minWidth: 0 },
+-  encoger: { flexShrink: 1, minWidth: 0 },
+   cifras: { flexDirection: 'row', flexWrap: 'wrap' },
+   cifra: { width: '46%', flexGrow: 1 },
+   numero: { fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.5 },
+diff --git a/src/app/orden.tsx b/src/app/orden.tsx
+index ac49406..aa541b8 100644
+--- a/src/app/orden.tsx
++++ b/src/app/orden.tsx
+@@ -12,6 +12,7 @@ import { Chip } from '@/components/chip';
+ import { EmptyState } from '@/components/empty-state';
+ import { ErrorState } from '@/components/error-state';
+ import { EvidenceField } from '@/components/evidence-field';
++import { AccionesOdtAsignada, MOMENTO_TALLER, RelojOdt } from '@/components/odt-asignada-acciones';
+ import { ODT_ESTADO_LABEL, otStatusColor } from '@/components/ot-status-badge';
+ import { FilaDato } from '@/components/perfil-piezas';
+ import { PhotoViewer } from '@/components/photo-viewer';
+@@ -40,6 +41,7 @@ import {
+   getOrdenDeTrabajo,
+   getVehiculo,
+ } from '@/services';
++import { esEstadoTaller, getEjecucionOdt } from '@/services/fomOrdenes';
+ import { useReducedMotion, useTheme, useThemeController, type ColorTokens } from '@/theme';
+ import {
+   ODT_ESTADOS,
+@@ -199,8 +201,10 @@ const MONTO = /^\d{1,10}([.,]\d{1,2})?$/;
+  * reabrirla. Cada cambio lo registra la base en la auditoría, con su nota, y de
+  * ahí sale el historial.
+  *
+- * Las ODT no se asignan a nadie: las resuelve siempre un tercero, así que aquí
+- * no hay "Asignada a".
++ * Si la ODT tiene responsable (el supervisor se la asignó a alguien para
++ * trabajarla en taller), se dice quién, desde cuándo y el tiempo trabajado; y
++ * si el responsable es quien mira, sus botones: iniciar, pausar, reanudar y
++ * entregar. FOM solo enseña eso a un gestor o al propio responsable.
+  *
+  * El conductor también entra (sus avisos enlazan aquí) pero en solo lectura:
+  * ve el estatus y el cierre, sin campos ni botón.
+@@ -281,6 +285,12 @@ export default function OrdenScreen() {
+     [vehicleIdOrden, cidOrden],
+   );
+ 
++  // El responsable y el reloj de taller. `null` si no la tiene nadie o FOM no
++  // se lo enseña a esta sesión: entonces no se pinta nada de esto.
++  const taller = useAsyncData(() => (id ? getEjecucionOdt(id).catch(() => null) : Promise.resolve(null)), [id], {
++    onFocus: true,
++  });
++
+   const [cambios, setCambios] = useState<Cambios>({});
+   const [guardando, setGuardando] = useState(false);
+   // Lo recién guardado se ve AL MOMENTO, sin esperar a la relectura; cuando
+@@ -380,6 +390,10 @@ export default function OrdenScreen() {
+     : !autorPersona
+       ? 'Generada por el sistema'
+       : `Reportada por ${orden.driverName}${orden.autorVia === 'secundario' ? ' · Secundario (PIN)' : orden.autorVia === 'principal' ? ' · Principal' : ''}`;
++  const ejecucion = taller.data ?? null;
++  const responsable = ejecucion?.responsable ?? null;
++  const soyResponsable = !!responsable && responsable.userId === user.id;
++
+   // El expediente de quien la reportó solo lo abre un administrador.
+   const verAutor = !!orden && !soloLectura && autorPersona && !!orden.driverId && orden.driverId !== 'sistema';
+ 
+@@ -456,6 +470,41 @@ export default function OrdenScreen() {
+               ) : null}
+             </Seccion>
+ 
++            {/* EL RESPONSABLE de taller, con su reloj; si soy yo, mis botones. */}
++            {ejecucion && responsable ? (
++              <Seccion titulo="Responsable">
++                <Card style={{ gap: spacing.md }}>
++                  <View>
++                    <FilaDato
++                      icon="perfil"
++                      label="Responsable"
++                      valor={soyResponsable ? `${responsable.nombre} (tú)` : responsable.nombre}
++                    />
++                    <FilaDato icon="calendario" label="Asignada" valor={formatFechaLarga(responsable.desde)} ultima />
++                  </View>
++                  {esEstadoTaller(ejecucion.estadoFom) ? (
++                    <>
++                      <ThemedText variant="caption" color="textSecondary">
++                        {MOMENTO_TALLER[ejecucion.estadoFom]}
++                      </ThemedText>
++                      <RelojOdt ejecucion={ejecucion} />
++                    </>
++                  ) : null}
++                  {soyResponsable ? (
++                    <AccionesOdtAsignada
++                      id={orden.id}
++                      estadoFom={ejecucion.estadoFom}
++                      onHecho={() => {
++                        // El paso cambia el estado de la orden y su historial: se relee todo.
++                        taller.recargar();
++                        recargar();
++                      }}
++                    />
++                  ) : null}
++                </Card>
++              </Seccion>
++            ) : null}
++
+             {/* EL CIERRE (§3.3), justo debajo del estatus: se llena al elegir
+                 Resuelta y se guarda con él; ya resuelta, se lee. */}
+             {estadoSel === 'cerrada' ? (
+diff --git a/src/app/panel/mantenimiento.tsx b/src/app/panel/mantenimiento.tsx
+index 885771b..904fe1b 100644
+--- a/src/app/panel/mantenimiento.tsx
++++ b/src/app/panel/mantenimiento.tsx
+@@ -13,6 +13,7 @@ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
+ import { ErrorState } from '@/components/error-state';
+ import { Escalonado } from '@/components/escalonado';
+ import { Insignia } from '@/components/insignia';
++import { SeccionOdtAsignadas } from '@/components/odt-asignada-seccion';
+ import {
+   CifrasMantenimiento,
+   ComoAvanzaOdt,
+@@ -386,6 +387,13 @@ export default function AdminMantenimientoScreen() {
+               <Escalonado indice={1}>{botonNueva}</Escalonado>
+               <Escalonado indice={2}>{pestanas}</Escalonado>
+ 
++              {/* Lo que el supervisor le asignó a quien mira, arriba: es lo
++                  suyo por hacer. Sin ODT asignadas (o sin acceso) no aparece.
++                  FOM las da del ente de la sesión: mirando otra empresa, no. */}
++              {verTodas || cid !== enteActivoFom() ? null : (
++                <SeccionOdtAsignadas onAbrir={(id) => abrir({ pathname: '/orden', id })} />
++              )}
++
+               {data ? (
+                 <Escalonado indice={3}>
+                   <CifrasMantenimiento
+diff --git a/src/app/reportar.tsx b/src/app/reportar.tsx
+index 22ea1bd..59d24c4 100644
+--- a/src/app/reportar.tsx
++++ b/src/app/reportar.tsx
+@@ -193,6 +193,7 @@ export default function ReportarScreen() {
+               ref={scrollRef}
+               contentContainerStyle={[styles.content, { padding: spacing.lg, gap: spacing.xl }]}
+               keyboardShouldPersistTaps="handled"
++              keyboardDismissMode="on-drag"
+               showsVerticalScrollIndicator={false}>
+               {/* Lo que el sistema ya sabe: se muestra, no se pide. La unidad
+                   se reconoce por su silueta antes que por el texto. */}
+diff --git a/src/components/calendario-inspecciones.tsx b/src/components/calendario-inspecciones.tsx
+new file mode 100644
+index 0000000..3385d7f
+--- /dev/null
++++ b/src/components/calendario-inspecciones.tsx
+@@ -0,0 +1,285 @@
++import { StyleSheet, View } from 'react-native';
++
++import { PressableScale } from '@/components/pressable-scale';
++import { TabIcon, type TabIconName } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import type { InspeccionResumen } from '@/services';
++import { useTheme, type ColorTokens } from '@/theme';
++
++/**
++ * CALENDARIO DE LA DIARIA: el mes de una persona, día por día.
++ *
++ * Es el mismo calendario que la web (mismos nombres, colores y leyenda). Aquí
++ * solo se pinta: qué día cuenta y cómo quedó lo decide `inspecciones-por-persona`.
++ */
++
++/**
++ * Cómo quedó un día. `no_cuenta` es el gris: futuro, sin unidad o sin
++ * jornada; `hoy` es el gris de hoy mientras la diaria todavía está a tiempo.
++ */
++export type EstadoDia = 'hecha' | 'observaciones' | 'bloqueada' | 'no_hecha' | 'hoy' | 'no_cuenta';
++
++/** Un día del calendario, ya juzgado. */
++export interface DiaCalendario {
++  /** AAAA-MM-DD. */
++  fecha: string;
++  estado: EstadoDia;
++  /** La diaria de ese día (la más grave si hubo dos). */
++  diaria?: InspeccionResumen;
++}
++
++/** Nombre, color e icono de cada estado: la leyenda y la celda salen de aquí. */
++export const VISTA_DIA: Record<
++  EstadoDia,
++  { label: string; tono: keyof ColorTokens; fondo: keyof ColorTokens; icono?: TabIconName }
++> = {
++  hecha: { label: 'Hecha', tono: 'success', fondo: 'successSurface', icono: 'check' },
++  observaciones: { label: 'Con observaciones', tono: 'warning', fondo: 'warningSurface', icono: 'editar' },
++  bloqueada: { label: 'Bloqueada', tono: 'danger', fondo: 'dangerSurface', icono: 'aviso' },
++  no_hecha: { label: 'No hecha', tono: 'danger', fondo: 'surfaceSunken', icono: 'cerrar' },
++  hoy: { label: 'Hoy, aún a tiempo', tono: 'textMuted', fondo: 'surfaceSunken' },
++  no_cuenta: { label: 'No cuenta', tono: 'textMuted', fondo: 'surfaceSunken' },
++};
++
++/** Lo que dice la leyenda, en este orden. `hoy` se explica con el anillo, no aparte. */
++const LEYENDA: EstadoDia[] = ['hecha', 'observaciones', 'bloqueada', 'no_hecha', 'no_cuenta'];
++
++const MESES = [
++  'enero',
++  'febrero',
++  'marzo',
++  'abril',
++  'mayo',
++  'junio',
++  'julio',
++  'agosto',
++  'septiembre',
++  'octubre',
++  'noviembre',
++  'diciembre',
++];
++const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
++/** La semana empieza el lunes, como se trabaja aquí. */
++const CABECERA = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
++
++/** «Octubre 2026», de un mes AAAA-MM. */
++export function nombreMes(mes: string): string {
++  const [a, m] = mes.split('-').map(Number);
++  const n = MESES[m - 1] ?? '';
++  return `${n.charAt(0).toUpperCase()}${n.slice(1)} ${a}`;
++}
++
++/** «lunes 5 de octubre», para el lector de pantalla. */
++function nombreDia(fecha: string): string {
++  const [a, m, d] = fecha.split('-').map(Number);
++  return `${DIAS_SEMANA[new Date(a, m - 1, d).getDay()]} ${d} de ${MESES[m - 1]}`;
++}
++
++/** ‹ Octubre 2026 › — el mes que se mira. No deja pasar del mes en curso. */
++export function SelectorMes({
++  mes,
++  onAnterior,
++  onSiguiente,
++  haySiguiente,
++}: {
++  mes: string;
++  onAnterior: () => void;
++  onSiguiente: () => void;
++  haySiguiente: boolean;
++}) {
++  const { colors, spacing, borderWidths } = useTheme();
++  const flecha = (activo: boolean) => [
++    styles.flecha,
++    { borderColor: colors.border, borderWidth: borderWidths.hairline, opacity: activo ? 1 : 0.35 },
++  ];
++  return (
++    <View style={[styles.fila, { gap: spacing.sm }]}>
++      <PressableScale
++        onPress={onAnterior}
++        accessibilityRole="button"
++        accessibilityLabel="Mes anterior"
++        style={flecha(true)}>
++        <View style={styles.girado}>
++          <TabIcon name="chevron" color={colors.text} size={18} />
++        </View>
++      </PressableScale>
++      <ThemedText variant="button" style={[styles.flex1, styles.centro]} accessibilityRole="header">
++        {nombreMes(mes)}
++      </ThemedText>
++      <PressableScale
++        onPress={haySiguiente ? onSiguiente : undefined}
++        disabled={!haySiguiente}
++        accessibilityRole="button"
++        accessibilityLabel="Mes siguiente"
++        accessibilityState={{ disabled: !haySiguiente }}
++        style={flecha(haySiguiente)}>
++        <TabIcon name="chevron" color={colors.text} size={18} />
++      </PressableScale>
++    </View>
++  );
++}
++
++/** Una celda: el número y el icono del estado. Con diaria, se toca para ver el resultado. */
++function Celda({
++  d,
++  esHoy,
++  onAbrir,
++}: {
++  d: DiaCalendario;
++  esHoy: boolean;
++  onAbrir: (i: InspeccionResumen) => void;
++}) {
++  const { colors, radii, borderWidths } = useTheme();
++  const v = VISTA_DIA[d.estado];
++  const dia = Number(d.fecha.slice(8, 10));
++  const abrible = d.diaria;
++  const gris = d.estado === 'no_cuenta' || d.estado === 'hoy';
++  const texto = [
++    nombreDia(d.fecha),
++    v.label,
++    abrible ? 'toca para ver el resultado' : null,
++  ]
++    .filter(Boolean)
++    .join(', ');
++  const estilo = [
++    styles.celda,
++    {
++      backgroundColor: gris ? 'transparent' : colors[v.fondo],
++      borderRadius: radii.sm,
++      // «No hecha» lleva borde rojo: sin relleno, no se confunde con la bloqueada.
++      borderWidth: esHoy ? 2 : d.estado === 'no_hecha' ? borderWidths.hairline * 2 : 0,
++      borderColor: esHoy ? colors.primary : colors.danger,
++    },
++  ];
++  // Lo que se ve va por dentro; lo que se toca es la columna entera (≥ 44 de ancho).
++  const contenido = (
++    <View style={estilo}>
++      <ThemedText
++        variant="caption"
++        tabular
++        color={gris ? 'textMuted' : 'text'}
++        style={[styles.numero, esHoy && styles.fuerte]}>
++        {`${dia}`}
++      </ThemedText>
++      {v.icono ? <TabIcon name={v.icono} color={colors[v.tono]} size={14} /> : <View style={styles.sinIcono} />}
++    </View>
++  );
++  if (!abrible) {
++    return (
++      <View style={styles.toque} accessible accessibilityLabel={texto}>
++        {contenido}
++      </View>
++    );
++  }
++  return (
++    <PressableScale
++      onPress={() => onAbrir(abrible)}
++      accessibilityRole="button"
++      accessibilityLabel={texto}
++      style={styles.toque}>
++      {contenido}
++    </PressableScale>
++  );
++}
++
++/**
++ * El mes en rejilla de 7 columnas, de lunes a domingo, con su leyenda debajo.
++ *
++ * Cada celda mide al menos 44 de alto y lleva icono además del color: el
++ * estado se lee aunque no se distingan el verde y el rojo.
++ */
++export function CalendarioInspecciones({
++  mes,
++  dias,
++  hoy,
++  onAbrir,
++}: {
++  /** AAAA-MM. */
++  mes: string;
++  /** Todos los días del mes, en orden. */
++  dias: DiaCalendario[];
++  /** AAAA-MM-DD. */
++  hoy: string;
++  onAbrir: (i: InspeccionResumen) => void;
++}) {
++  const { colors, spacing, radii } = useTheme();
++  const [a, m] = mes.split('-').map(Number);
++  // Huecos antes del día 1 para que caiga en su columna (lunes = 0).
++  const huecos = (new Date(a, m - 1, 1).getDay() + 6) % 7;
++  const casillas: (DiaCalendario | null)[] = [...Array<null>(huecos).fill(null), ...dias];
++  while (casillas.length % 7 !== 0) casillas.push(null);
++  const semanas: (DiaCalendario | null)[][] = [];
++  for (let n = 0; n < casillas.length; n += 7) semanas.push(casillas.slice(n, n + 7));
++
++  return (
++    <View style={{ gap: spacing.md }}>
++      <View style={{ gap: spacing.xs }}>
++        <View style={styles.semana}>
++          {CABECERA.map((c, n) => (
++            <ThemedText key={n} variant="caption" color="textMuted" style={[styles.columna, styles.centro]}>
++              {c}
++            </ThemedText>
++          ))}
++        </View>
++        {semanas.map((s, n) => (
++          <View key={n} style={styles.semana}>
++            {s.map((d, k) => (
++              <View key={k} style={styles.columna}>
++                {d ? <Celda d={d} esHoy={d.fecha === hoy} onAbrir={onAbrir} /> : null}
++              </View>
++            ))}
++          </View>
++        ))}
++      </View>
++
++      {/* La leyenda: los mismos nombres y colores que la web. */}
++      <View style={[styles.leyenda, { rowGap: spacing.sm, columnGap: spacing.md }]}>
++        {LEYENDA.map((e) => {
++          const v = VISTA_DIA[e];
++          return (
++            <View key={e} style={[styles.fila, { gap: spacing.xs + 2 }]}>
++              <View
++                style={[
++                  styles.muestra,
++                  {
++                    backgroundColor: e === 'no_cuenta' ? colors.surfaceSunken : colors[v.fondo],
++                    borderRadius: radii.sm / 2,
++                    borderWidth: e === 'no_hecha' ? 1 : 0,
++                    borderColor: colors.danger,
++                  },
++                ]}>
++                {v.icono ? <TabIcon name={v.icono} color={colors[v.tono]} size={11} /> : null}
++              </View>
++              <ThemedText variant="caption" color="textSecondary">
++                {v.label}
++              </ThemedText>
++            </View>
++          );
++        })}
++        <View style={[styles.fila, { gap: spacing.xs + 2 }]}>
++          <View style={[styles.muestra, { borderWidth: 2, borderColor: colors.primary, borderRadius: radii.sm / 2 }]} />
++          <ThemedText variant="caption" color="textSecondary">
++            Hoy
++          </ThemedText>
++        </View>
++      </View>
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  flex1: { flex: 1, minWidth: 0 },
++  centro: { textAlign: 'center', alignItems: 'center', justifyContent: 'center' },
++  girado: { transform: [{ rotate: '180deg' }] },
++  flecha: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
++  semana: { flexDirection: 'row' },
++  columna: { flex: 1, minWidth: 0 },
++  toque: { minHeight: 48, padding: 2 },
++  celda: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', gap: 1 },
++  numero: { fontSize: 13, lineHeight: 16 },
++  fuerte: { fontWeight: '700' },
++  sinIcono: { height: 14 },
++  leyenda: { flexDirection: 'row', flexWrap: 'wrap' },
++  muestra: { width: 18, height: 18, alignItems: 'center', justifyContent: 'center' },
++});
+diff --git a/src/components/evidence-field.tsx b/src/components/evidence-field.tsx
+index bf91e1b..e16132c 100644
+--- a/src/components/evidence-field.tsx
++++ b/src/components/evidence-field.tsx
+@@ -73,6 +73,9 @@ export function EvidenceField({
+       mediaTypes: ['images'],
+       quality: 0.6,
+       allowsMultipleSelection: true,
++      // En iOS, JPEG en vez de HEIC: es lo que la subida y la web saben leer.
++      // (Igual se convierte y reduce antes de subir, en `lib/cloudinary`.)
++      preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
+     });
+     if (!res.canceled) agregar(res.assets.map((a) => a.uri));
+   }
+diff --git a/src/components/inspeccion-programada-aviso.tsx b/src/components/inspeccion-programada-aviso.tsx
+deleted file mode 100644
+index ab6722d..0000000
+--- a/src/components/inspeccion-programada-aviso.tsx
++++ /dev/null
+@@ -1,66 +0,0 @@
+-import { useRouter } from 'expo-router';
+-import { StyleSheet, View } from 'react-native';
+-
+-import { PressableScale } from '@/components/pressable-scale';
+-import { TabIcon } from '@/components/tab-icon';
+-import { ThemedText } from '@/components/themed-text';
+-import { useAsyncData } from '@/hooks/use-async-data';
+-import { getMisProgramadas } from '@/services/inspeccionService';
+-import { useTheme } from '@/theme';
+-
+-/**
+- * AVISO EN EL INICIO: «tienes una inspección programada para hoy».
+- *
+- * Solo aparece si hay alguna que se pueda hacer HOY; las próximas, las
+- * vencidas y las hechas se ven en la pestaña Inspección. Si FOM no responde o
+- * aún no publica las citas, no pinta nada: es un recordatorio, no un bloqueo.
+- */
+-export function InspeccionProgramadaAviso() {
+-  const { colors, spacing, radii } = useTheme();
+-  const router = useRouter();
+-  const { data } = useAsyncData(() => getMisProgramadas().catch(() => []), [], { onFocus: true });
+-  const deHoy = (data ?? []).filter((p) => p.estado === 'pendiente' && p.deHoy);
+-  if (deHoy.length === 0) return null;
+-  const primera = deHoy[0];
+-
+-  return (
+-    <PressableScale
+-      onPress={() => router.navigate('/inspeccion')}
+-      accessibilityRole="button"
+-      accessibilityLabel="Ver las inspecciones programadas para hoy"
+-      style={[
+-        styles.aviso,
+-        {
+-          backgroundColor: colors.surfaceSunken,
+-          borderColor: colors.border,
+-          borderRadius: radii.lg,
+-          padding: spacing.md,
+-          gap: spacing.md,
+-        },
+-      ]}>
+-      <View style={[styles.icono, { backgroundColor: colors.infoSurface, borderRadius: radii.sm }]}>
+-        <TabIcon name="inspeccion" color={colors.info} size={21} />
+-      </View>
+-      <View style={styles.flex1}>
+-        <ThemedText variant="button" numberOfLines={1}>
+-          {deHoy.length === 1
+-            ? '1 inspección programada para hoy'
+-            : `${deHoy.length} inspecciones programadas para hoy`}
+-        </ThemedText>
+-        <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
+-          {[primera.unidad, primera.formato].join(' · ')}
+-        </ThemedText>
+-      </View>
+-      <ThemedText variant="caption" color="primary" style={styles.enlace}>
+-        Hacer →
+-      </ThemedText>
+-    </PressableScale>
+-  );
+-}
+-
+-const styles = StyleSheet.create({
+-  aviso: { flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth },
+-  icono: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
+-  flex1: { flex: 1, minWidth: 0 },
+-  enlace: { fontWeight: '600' },
+-});
+diff --git a/src/components/inspeccion-programada-lista.tsx b/src/components/inspeccion-programada-lista.tsx
+deleted file mode 100644
+index 18a1332..0000000
+--- a/src/components/inspeccion-programada-lista.tsx
++++ /dev/null
+@@ -1,121 +0,0 @@
+-import { StyleSheet, View } from 'react-native';
+-
+-import { Card } from '@/components/card';
+-import { Pastilla } from '@/components/pastilla';
+-import { PressableScale } from '@/components/pressable-scale';
+-import { ThemedText } from '@/components/themed-text';
+-import type { EstadoProgramada, InspeccionProgramada } from '@/services/inspeccionService';
+-import { useTheme, type ColorTokens } from '@/theme';
+-import { formatFecha } from '@/utils/date';
+-
+-/** Cómo se ve cada estado de una cita: el mismo semáforo que el resto de la app. */
+-const VISTA: Record<EstadoProgramada, { label: string; tono: keyof ColorTokens }> = {
+-  pendiente: { label: 'Pendiente', tono: 'warning' },
+-  vencida: { label: 'Vencida', tono: 'danger' },
+-  hecha: { label: 'Hecha', tono: 'success' },
+-};
+-
+-/** La línea de abajo de cada cita: qué puede hacer con ella. */
+-function queHacer(p: InspeccionProgramada, activa: boolean): { texto: string; tono: keyof ColorTokens } {
+-  if (p.estado === 'hecha') return { texto: 'Enviada. Ya cuenta para tu supervisor.', tono: 'textMuted' };
+-  if (p.estado === 'vencida') {
+-    return { texto: 'No se hizo a tiempo. Pídele a tu supervisor que la reprograme.', tono: 'textMuted' };
+-  }
+-  if (!p.deHoy) return { texto: `Se hace el ${formatFecha(p.fecha)}.`, tono: 'textMuted' };
+-  return activa
+-    ? { texto: 'La estás haciendo abajo.', tono: 'onActive' }
+-    : { texto: 'Tócala para hacerla ahora →', tono: 'primary' };
+-}
+-
+-/**
+- * «INSPECCIONES PROGRAMADAS PARA TI»: las citas que el supervisor puso desde la
+- * web —unidad, formato y día— y cómo van.
+- *
+- * Solo se puede tocar la de HOY: FOM recibe una programada únicamente el día de
+- * su cita. Las demás se ven para que el conductor sepa qué viene y qué se le
+- * pasó. Sin citas no pinta nada: la diaria sigue siendo lo primero.
+- */
+-export function InspeccionProgramadaLista({
+-  programadas,
+-  activaId,
+-  onElegir,
+-}: {
+-  programadas: InspeccionProgramada[];
+-  /** La que se está respondiendo ahora, si alguna. */
+-  activaId?: string;
+-  onElegir: (p: InspeccionProgramada) => void;
+-}) {
+-  const { colors, spacing, radii, borderWidths } = useTheme();
+-  if (programadas.length === 0) return null;
+-  const paraHoy = programadas.filter((p) => p.estado === 'pendiente' && p.deHoy).length;
+-
+-  return (
+-    <Card style={{ gap: spacing.xs }}>
+-      <View style={[styles.fila, { gap: spacing.sm }]}>
+-        <ThemedText variant="subtitle" style={[styles.flex1, styles.titulo]}>
+-          Inspecciones programadas para ti
+-        </ThemedText>
+-        {paraHoy > 0 ? <Pastilla tono="warning" label={`${paraHoy} hoy`} conPunto /> : null}
+-      </View>
+-
+-      {programadas.map((p, n) => {
+-        const v = VISTA[p.estado];
+-        const activa = p.id === activaId;
+-        const tocable = p.estado === 'pendiente' && p.deHoy && !activa;
+-        const pista = queHacer(p, activa);
+-        const contenido = (
+-          <>
+-            <View style={[styles.fila, { gap: spacing.sm }]}>
+-              <ThemedText variant="button" style={styles.flex1} numberOfLines={1}>
+-                {[p.unidad, p.placa].filter(Boolean).join(' · ')}
+-              </ThemedText>
+-              <Pastilla tono={v.tono} label={v.label} conPunto={p.estado !== 'hecha'} />
+-            </View>
+-            <ThemedText variant="caption" color="textSecondary" numberOfLines={1}>
+-              {[p.formato, p.deHoy ? 'Hoy' : formatFecha(p.fecha)].join(' · ')}
+-            </ThemedText>
+-            <ThemedText variant="caption" color={pista.tono} style={tocable ? styles.enlace : undefined}>
+-              {pista.texto}
+-            </ThemedText>
+-          </>
+-        );
+-        const estilo = [
+-          {
+-            gap: 2,
+-            paddingVertical: spacing.sm + 2,
+-            paddingHorizontal: activa ? spacing.sm + 2 : 0,
+-            borderTopWidth: n === 0 || activa ? 0 : borderWidths.hairline,
+-            borderTopColor: colors.border,
+-          },
+-          activa && {
+-            backgroundColor: colors.activeSurface,
+-            borderColor: colors.activeBorder,
+-            borderWidth: borderWidths.hairline,
+-            borderRadius: radii.sm,
+-          },
+-        ];
+-        return tocable ? (
+-          <PressableScale
+-            key={p.id}
+-            onPress={() => onElegir(p)}
+-            accessibilityRole="button"
+-            accessibilityLabel={`Hacer la inspección programada de ${p.unidad}: ${p.formato}`}
+-            style={estilo}>
+-            {contenido}
+-          </PressableScale>
+-        ) : (
+-          <View key={p.id} style={estilo}>
+-            {contenido}
+-          </View>
+-        );
+-      })}
+-    </Card>
+-  );
+-}
+-
+-const styles = StyleSheet.create({
+-  fila: { flexDirection: 'row', alignItems: 'center' },
+-  flex1: { flex: 1, minWidth: 0 },
+-  titulo: { fontSize: 17, lineHeight: 22 },
+-  enlace: { fontWeight: '600' },
+-});
+diff --git a/src/components/inspecciones-por-persona.tsx b/src/components/inspecciones-por-persona.tsx
+new file mode 100644
+index 0000000..39b191e
+--- /dev/null
++++ b/src/components/inspecciones-por-persona.tsx
+@@ -0,0 +1,531 @@
++import { useMemo, useState, type ReactNode } from 'react';
++import { StyleSheet, View } from 'react-native';
++
++import { Avatar } from '@/components/avatar';
++import {
++  CalendarioInspecciones,
++  VISTA_DIA,
++  type DiaCalendario,
++  type EstadoDia,
++} from '@/components/calendario-inspecciones';
++import { Card } from '@/components/card';
++import { ErrorState } from '@/components/error-state';
++import { PressableScale } from '@/components/pressable-scale';
++import { ProgressBar } from '@/components/progress-bar';
++import { SearchBar, normalizar } from '@/components/search-bar';
++import { Skeleton } from '@/components/skeleton';
++import { TabIcon } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import type { AsyncEstado } from '@/hooks/use-async-data';
++import { useAsyncData } from '@/hooks/use-async-data';
++import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
++import { getUsuariosDeEmpresa, type InspeccionResumen } from '@/services';
++// Directo del servicio: las asignaciones no están en el barril.
++import { getAsignacionesFom } from '@/services/fomConduccion';
++import { useTheme, type ColorTokens } from '@/theme';
++import type { DriverProfile, InspeccionEstado, UnidadFlota } from '@/types';
++import { formatFecha } from '@/utils/date';
++
++/**
++ * POR PERSONA: quién hace la diaria y quién no, mes a mes.
++ *
++ * Es el modo «Por persona» del Historial. La lista va del peor cumplimiento al
++ * mejor —lo que hay que mirar, arriba— y al tocar a alguien se abre su
++ * calendario y, debajo, sus inspecciones del mes. Todo sale de UNA lectura de
++ * las inspecciones del mes de la empresa —la misma que usa «Todas»—, repartida
++ * aquí por persona: pedirlas por persona o por día serían cientos de viajes.
++ *
++ * La regla es la misma de la web (ver `juzgarMes`).
++ */
++
++/** Desde aquí el cumplimiento va en verde; desde `REGULAR`, en ámbar; debajo, en rojo. */
++const BUENO = 90;
++const REGULAR = 70;
++
++/** El tono de un porcentaje de cumplimiento. */
++export function tonoCumplimiento(pct: number | null): keyof ColorTokens {
++  if (pct === null) return 'textMuted';
++  return pct >= BUENO ? 'success' : pct >= REGULAR ? 'warning' : 'danger';
++}
++
++/** Lo más grave primero: si hubo dos diarias el mismo día, se enseña la peor. */
++const PESO: Record<InspeccionEstado, number> = {
++  bloqueada: 0,
++  aprobada_con_observaciones: 1,
++  aprobada: 2,
++  pendiente: 3,
++};
++
++/** De dónde sale qué día debía hacerla. */
++export type ReglaDias = 'jornada' | 'semana';
++
++/** Cómo se explica la regla en pantalla (igual que en la web). */
++export const TEXTO_REGLA: Record<ReglaDias, string> = {
++  jornada: 'Se cuentan los días con jornada.',
++  semana: 'Se cuentan todos los días desde que tiene unidad asignada, hasta hoy.',
++};
++
++/** Un mes juzgado: sus días y las cuentas. */
++export interface MesJuzgado {
++  dias: DiaCalendario[];
++  /** Días que debía hacerla (los que hizo cuentan siempre). */
++  debidos: number;
++  /** Días que la hizo, salga como salga. */
++  hechos: number;
++  /** 0-100, o `null` si no había ningún día que contar. */
++  pct: number | null;
++  cuenta: Record<EstadoDia, number>;
++  regla: ReglaDias;
++}
++
++/** AAAA-MM-DD de un año, mes (1-12) y día. */
++function aFecha(a: number, m: number, d: number): string {
++  return `${a}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
++}
++
++/** El último día de un mes AAAA-MM, como AAAA-MM-DD. */
++export function finDeMes(mes: string): string {
++  const [a, m] = mes.split('-').map(Number);
++  return aFecha(a, m, new Date(a, m, 0).getDate());
++}
++
++/** El mes de al lado (AAAA-MM), `paso` meses adelante o atrás. */
++export function moverMes(mes: string, paso: number): string {
++  const [a, m] = mes.split('-').map(Number);
++  const d = new Date(a, m - 1 + paso, 1);
++  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
++}
++
++/**
++ * LA REGLA de «día que debía hacerla», igual que la web:
++ *
++ * - Si hay dato de jornada (o km) por día de la persona, cuentan SOLO esos días.
++ * - Si no, cuentan todos los días (de lunes a domingo), hasta hoy, si tiene unidad.
++ * - En los dos casos, nunca antes del día en que recibió la unidad (`desde`):
++ *   antes no le tocaba hacerla. Sin ese dato se cuenta desde el día 1.
++ *
++ * Un día en que la hizo cuenta siempre, aunque fuera domingo: si no, se
++ * pasaría del 100 %. Hoy, mientras no la haya hecho, no cuenta todavía: aún
++ * está a tiempo. Una programada que quedó de antes no cuenta como diaria (sin
++ * clase —servidor viejo— todas eran diarias).
++ */
++export function juzgarMes({
++  mes,
++  hoy,
++  inspecciones,
++  conUnidad,
++  desde,
++  diasConJornada,
++}: {
++  /** AAAA-MM. */
++  mes: string;
++  /** AAAA-MM-DD. */
++  hoy: string;
++  /** Las de esta persona en el mes. */
++  inspecciones: InspeccionResumen[];
++  conUnidad: boolean;
++  /** AAAA-MM-DD en que recibió su unidad vigente, si FOM lo dice. */
++  desde?: string;
++  /** Los días con jornada o km de la persona, si se tienen. Sin dato, `undefined`. */
++  diasConJornada?: ReadonlySet<string>;
++}): MesJuzgado {
++  const [a, m] = mes.split('-').map(Number);
++  const total = new Date(a, m, 0).getDate();
++  const regla: ReglaDias = diasConJornada ? 'jornada' : 'semana';
++  const cuenta: Record<EstadoDia, number> = {
++    hecha: 0,
++    observaciones: 0,
++    bloqueada: 0,
++    no_hecha: 0,
++    hoy: 0,
++    no_cuenta: 0,
++  };
++  const porDia = new Map<string, InspeccionResumen[]>();
++  for (const i of inspecciones) porDia.set(i.fecha, [...(porDia.get(i.fecha) ?? []), i]);
++
++  const dias: DiaCalendario[] = [];
++  for (let d = 1; d <= total; d++) {
++    const fecha = aFecha(a, m, d);
++    const deEseDia = porDia.get(fecha) ?? [];
++    const diaria = deEseDia
++      .filter((i) => i.clase !== 'programada')
++      .sort((x, y) => PESO[x.resultado] - PESO[y.resultado])[0];
++
++    let estado: EstadoDia;
++    if (diaria) {
++      estado =
++        diaria.resultado === 'bloqueada'
++          ? 'bloqueada'
++          : diaria.resultado === 'aprobada_con_observaciones'
++            ? 'observaciones'
++            : 'hecha';
++    } else if (fecha > hoy) {
++      estado = 'no_cuenta';
++    } else {
++      // Todos los días cuentan, domingos incluidos (lo pidió Marco), pero solo
++      // desde que tiene la unidad.
++      const debia =
++        (!desde || fecha >= desde) && (diasConJornada ? diasConJornada.has(fecha) : conUnidad);
++      estado = !debia ? 'no_cuenta' : fecha === hoy ? 'hoy' : 'no_hecha';
++    }
++    cuenta[estado] += 1;
++    dias.push({ fecha, estado, ...(diaria ? { diaria } : {}) });
++  }
++  const hechos = cuenta.hecha + cuenta.observaciones + cuenta.bloqueada;
++  const debidos = hechos + cuenta.no_hecha;
++  return {
++    dias,
++    debidos,
++    hechos,
++    pct: debidos > 0 ? Math.round((hechos * 100) / debidos) : null,
++    cuenta,
++    regla,
++  };
++}
++
++/** «18 de 20 días · 90 %», o lo que toque si no había días que contar. */
++export function textoCumplimiento(j: Pick<MesJuzgado, 'hechos' | 'debidos' | 'pct'>): string {
++  if (j.pct === null) return 'Sin días que contar';
++  return `${j.hechos} de ${j.debidos} ${j.debidos === 1 ? 'día' : 'días'} · ${j.pct} %`;
++}
++
++/** Una persona de la lista, con su unidad y su mes. */
++interface Persona {
++  clave: string;
++  nombre: string;
++  fotoUrl?: string;
++  /** «Unidad 01 · Z69FC7W», o nada si no tiene. */
++  unidad?: string;
++  /** AAAA-MM-DD en que recibió su unidad vigente, si FOM lo dice. */
++  desde?: string;
++  mes: MesJuzgado;
++  /** Las suyas del mes: la lista bajo el calendario. */
++  inspecciones: InspeccionResumen[];
++}
++
++/** ¿Es alguien que conduce? Sin rol (perfil viejo) se cuenta como conductor. */
++const conduce = (u: DriverProfile) => !u.role || u.role === 'conductor' || u.role === 'driver';
++
++/** Fila de la lista: avatar, nombre, unidad y su cumplimiento con barra. */
++function FilaPersona({ p, primera, onAbrir }: { p: Persona; primera: boolean; onAbrir: () => void }) {
++  const { colors, spacing, borderWidths } = useTheme();
++  const tono = tonoCumplimiento(p.mes.pct);
++  return (
++    <PressableScale
++      onPress={onAbrir}
++      accessibilityRole="button"
++      accessibilityLabel={`${p.nombre}, ${textoCumplimiento(p.mes)}. Ver su calendario`}
++      style={[
++        styles.fila,
++        {
++          gap: spacing.md,
++          paddingVertical: spacing.md,
++          borderTopWidth: primera ? 0 : borderWidths.hairline,
++          borderTopColor: colors.border,
++        },
++      ]}>
++      <Avatar uri={p.fotoUrl || undefined} nombre={p.nombre} size={40} tono="neutral" />
++      <View style={[styles.flex1, { gap: 2 }]}>
++        <ThemedText variant="button" numberOfLines={1}>
++          {p.nombre}
++        </ThemedText>
++        <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
++          {p.unidad ?? 'Sin unidad asignada'}
++        </ThemedText>
++        <View style={[styles.fila, { gap: spacing.sm, marginTop: spacing.xs }]}>
++          <View style={styles.flex1}>
++            <ProgressBar value={p.mes.pct ?? 0} color={colors[tono]} height={6} />
++          </View>
++          <ThemedText variant="caption" color={tono} tabular style={styles.fuerte}>
++            {textoCumplimiento(p.mes)}
++          </ThemedText>
++        </View>
++      </View>
++      <TabIcon name="chevron" color={colors.textMuted} size={18} />
++    </PressableScale>
++  );
++}
++
++/** Una cifra de los totales: el icono y color del estado, su nombre y el número. */
++function Total({ estado, valor }: { estado: EstadoDia; valor: number }) {
++  const { colors, spacing } = useTheme();
++  const v = VISTA_DIA[estado];
++  return (
++    <View style={[styles.total, styles.fila, { gap: spacing.xs + 2 }]}>
++      {v.icono ? <TabIcon name={v.icono} color={colors[v.tono]} size={15} /> : null}
++      <ThemedText variant="caption" color="textSecondary" numberOfLines={1} style={styles.flex1}>
++        {v.label}
++      </ThemedText>
++      <ThemedText variant="button" tabular>
++        {`${valor}`}
++      </ThemedText>
++    </View>
++  );
++}
++
++/**
++ * El modo «Por persona» del Historial de Inspecciones.
++ *
++ * El mes y sus inspecciones los pone la pantalla: el selector de mes es el
++ * mismo para «Por persona» y «Todas». Recibe también la flota que ya leyó —de
++ * ahí sale la unidad de cada uno— y pide aparte, con memoria, el personal.
++ */
++export function InspeccionesPorPersona({
++  cid,
++  hoy,
++  mes,
++  delMes,
++  estadoDelMes,
++  recargarDelMes,
++  flota,
++  estadoFlota,
++  recargarFlota,
++  onAbrir,
++  listaDelMes,
++}: {
++  cid: string;
++  /** AAAA-MM-DD. */
++  hoy: string;
++  /** AAAA-MM: el que marca el selector de la pantalla. */
++  mes: string;
++  /** Las inspecciones del mes de toda la empresa, o `null` mientras llegan. */
++  delMes: InspeccionResumen[] | null;
++  estadoDelMes: AsyncEstado;
++  recargarDelMes: () => void;
++  flota: UnidadFlota[] | null;
++  estadoFlota: AsyncEstado;
++  recargarFlota: () => void;
++  onAbrir: (i: InspeccionResumen) => void;
++  /** La lista de las inspecciones de una persona, con la fila e impresión de la pantalla. */
++  listaDelMes: (lista: InspeccionResumen[]) => ReactNode;
++}) {
++  const { colors, spacing, radii } = useTheme();
++  const [q, setQ] = useState('');
++  const [elegida, setElegida] = useState<string | null>(null);
++
++  const personal = useAsyncData(() => getUsuariosDeEmpresa(cid), [cid], {
++    clave: `inspecciones-personal:${cid}`,
++  });
++  /*
++   * Desde cuándo tiene cada uno su unidad: los días de antes no cuentan. Es un
++   * extra: si no llega, se cuenta desde el día 1 como antes, sin tumbar la vista.
++   */
++  const asignaciones = useAsyncData(() => getAsignacionesFom().catch(() => []), [cid], {
++    clave: `inspecciones-asignaciones:${cid}`,
++  });
++
++  const personas = useMemo<Persona[]>(() => {
++    const roster = personal.data ?? [];
++    const inspecciones = delMes ?? [];
++    // La primera de sus asignaciones vigentes: desde ahí ya tenía unidad.
++    const desdeDe = new Map<string, string>();
++    for (const a of asignaciones.data ?? []) {
++      const previa = desdeDe.get(a.userId);
++      if (a.desde && (!previa || a.desde < previa)) desdeDe.set(a.userId, a.desde);
++    }
++    // La unidad de cada uno: la que la flota le pone como conductor.
++    const unidadDe = new Map<string, string>();
++    for (const u of flota ?? []) {
++      if (u.conductorId && !unidadDe.has(u.conductorId)) {
++        unidadDe.set(u.conductorId, [etiquetaCortaDeUnidad(u.vehicle), u.vehicle.placa].filter(Boolean).join(' · '));
++      }
++    }
++    const porId = new Map(roster.map((u) => [u.id, u]));
++    const porNombre = new Map(roster.map((u) => [normalizar(u.nombre), u]));
++    // Cada inspección a su persona: por id si FOM lo manda; si no, por el nombre.
++    const suyas = new Map<string, InspeccionResumen[]>();
++    const nombreSuelto = new Map<string, string>();
++    for (const i of inspecciones) {
++      const dueño = (i.conductorId ? porId.get(i.conductorId) : undefined) ?? porNombre.get(normalizar(i.conductor));
++      let clave = dueño?.id;
++      if (!clave) {
++        // Alguien que no está en el personal (o ya salió): igual se enseña.
++        if (i.conductor === 'Sin conductor') continue;
++        clave = i.conductorId ?? `nombre:${normalizar(i.conductor)}`;
++        nombreSuelto.set(clave, i.conductor);
++      }
++      suyas.set(clave, [...(suyas.get(clave) ?? []), i]);
++    }
++    /** Una persona con su unidad, desde cuándo la tiene y su mes juzgado. */
++    const armar = (clave: string, nombre: string, fotoUrl?: string): Persona => {
++      const desde = desdeDe.get(clave);
++      const deEl = suyas.get(clave) ?? [];
++      return {
++        clave,
++        nombre,
++        ...(fotoUrl ? { fotoUrl } : {}),
++        ...(unidadDe.has(clave) ? { unidad: unidadDe.get(clave) } : {}),
++        ...(desde ? { desde } : {}),
++        mes: juzgarMes({ mes, hoy, inspecciones: deEl, conUnidad: unidadDe.has(clave), desde }),
++        inspecciones: deEl,
++      };
++    };
++    const lista: Persona[] = [];
++    for (const u of roster) {
++      if (!conduce(u) && !unidadDe.has(u.id) && !suyas.has(u.id)) continue;
++      lista.push(armar(u.id, u.nombre, u.fotoUrl || undefined));
++    }
++    for (const [clave, nombre] of nombreSuelto) lista.push(armar(clave, nombre));
++    // Del peor al mejor; quien no tenía días que contar, al final.
++    return lista.sort(
++      (x, y) =>
++        (x.mes.pct ?? 101) - (y.mes.pct ?? 101) ||
++        y.mes.cuenta.no_hecha - x.mes.cuenta.no_hecha ||
++        x.nombre.localeCompare(y.nombre),
++    );
++  }, [personal.data, asignaciones.data, delMes, flota, mes, hoy]);
++
++  const nq = normalizar(q);
++  const visibles = useMemo(
++    () => personas.filter((p) => !nq || normalizar(`${p.nombre} ${p.unidad ?? ''}`).includes(nq)),
++    [personas, nq],
++  );
++  const persona = elegida ? personas.find((p) => p.clave === elegida) : undefined;
++
++  if (personal.estado === 'error' || estadoDelMes === 'error' || estadoFlota === 'error') {
++    return (
++      <Card>
++        <ErrorState
++          description="Sin el personal, la flota y las inspecciones del mes no podemos armar el cumplimiento."
++          onRetry={() => {
++            if (personal.estado === 'error') personal.recargar();
++            if (estadoDelMes === 'error') recargarDelMes();
++            if (estadoFlota === 'error') recargarFlota();
++          }}
++        />
++      </Card>
++    );
++  }
++  const cargando = !personal.data || !delMes || !flota;
++
++  // ── El calendario de una persona y, debajo, sus inspecciones del mes ──
++  if (persona) {
++    const j = persona.mes;
++    const tono = tonoCumplimiento(j.pct);
++    return (
++      <>
++        <PressableScale
++          onPress={() => setElegida(null)}
++          hitSlop={8}
++          accessibilityRole="button"
++          accessibilityLabel="Volver a todas las personas"
++          style={[styles.fila, styles.volver, { gap: spacing.xs }]}>
++          <View style={styles.girado}>
++            <TabIcon name="chevron" color={colors.primary} size={16} />
++          </View>
++          <ThemedText variant="caption" color="primary" style={styles.fuerte}>
++            Todas las personas
++          </ThemedText>
++        </PressableScale>
++
++        <Card style={[styles.fila, { gap: spacing.md, padding: spacing.md + 2 }]}>
++          <Avatar uri={persona.fotoUrl || undefined} nombre={persona.nombre} size={48} tono="neutral" />
++          <View style={styles.flex1}>
++            <ThemedText variant="subtitle" style={styles.tituloTarjeta} numberOfLines={2}>
++              {persona.nombre}
++            </ThemedText>
++            <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
++              {persona.unidad ?? 'Sin unidad asignada'}
++            </ThemedText>
++          </View>
++        </Card>
++
++        {/* Padding corto: así cada celda pasa de 44 de ancho hasta en un teléfono de 360. */}
++        <Card style={{ padding: spacing.sm }}>
++          {cargando ? (
++            <Skeleton height={300} radius={radii.md} />
++          ) : (
++            <CalendarioInspecciones mes={mes} dias={j.dias} hoy={hoy} onAbrir={onAbrir} />
++          )}
++        </Card>
++
++        {cargando ? null : (
++          <Card style={{ gap: spacing.md }}>
++            <View style={{ gap: spacing.sm }}>
++              <ThemedText variant="subtitle" style={styles.tituloTarjeta}>
++                Cumplimiento del mes
++              </ThemedText>
++              <ThemedText tabular style={[styles.cifra, { color: colors[tono] }]}>
++                {textoCumplimiento(j)}
++              </ThemedText>
++              <ProgressBar value={j.pct ?? 0} color={colors[tono]} />
++            </View>
++            <View style={[styles.totales, { rowGap: spacing.sm, columnGap: spacing.md }]}>
++              <Total estado="hecha" valor={j.cuenta.hecha} />
++              <Total estado="observaciones" valor={j.cuenta.observaciones} />
++              <Total estado="bloqueada" valor={j.cuenta.bloqueada} />
++              <Total estado="no_hecha" valor={j.cuenta.no_hecha} />
++            </View>
++            <ThemedText variant="caption" color="textSecondary">
++              {persona.unidad
++                ? TEXTO_REGLA[j.regla]
++                : 'Sin unidad asignada: solo cuentan los días en que la hizo.'}
++            </ThemedText>
++            {/* Si la recibió dentro de este mes o después, se dice por qué esos días van en gris. */}
++            {persona.desde && persona.desde > `${mes}-01` ? (
++              <ThemedText variant="caption" color="textSecondary">
++                {`Tiene su unidad desde el ${formatFecha(persona.desde)}: los días de antes no cuentan.`}
++              </ThemedText>
++            ) : null}
++            {j.cuenta.hoy > 0 ? (
++              <ThemedText variant="caption" color="textMuted">
++                Hoy todavía no la hace: no cuenta hasta mañana.
++              </ThemedText>
++            ) : null}
++          </Card>
++        )}
++
++        {cargando ? null : (
++          <View style={{ gap: spacing.sm }}>
++            <ThemedText variant="subtitle" style={styles.tituloTarjeta}>
++              Sus inspecciones del mes
++            </ThemedText>
++            {listaDelMes(persona.inspecciones)}
++          </View>
++        )}
++      </>
++    );
++  }
++
++  // ── La lista de personas ──
++  return (
++    <>
++      <ThemedText variant="caption" color="textSecondary">
++        {TEXTO_REGLA.semana}
++      </ThemedText>
++      <SearchBar value={q} onChangeText={setQ} placeholder="Buscar por nombre o unidad…" />
++      {cargando ? (
++        <View style={{ gap: spacing.md }}>
++          {[0, 1, 2].map((n) => (
++            <Skeleton key={n} height={72} radius={radii.lg} />
++          ))}
++        </View>
++      ) : visibles.length === 0 ? (
++        <Card>
++          <ThemedText variant="caption" color="textMuted">
++            {personas.length === 0 ? 'Todavía no hay conductores en esta empresa.' : 'Nadie coincide.'}
++          </ThemedText>
++        </Card>
++      ) : (
++        <Card style={styles.grupo}>
++          {visibles.map((p, n) => (
++            <FilaPersona key={p.clave} p={p} primera={n === 0} onAbrir={() => setElegida(p.clave)} />
++          ))}
++        </Card>
++      )}
++    </>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  flex1: { flex: 1, minWidth: 0 },
++  fuerte: { fontWeight: '700' },
++  girado: { transform: [{ rotate: '180deg' }] },
++  volver: { alignSelf: 'flex-start', minHeight: 44 },
++  tituloTarjeta: { fontSize: 17, lineHeight: 22 },
++  cifra: { fontSize: 24, lineHeight: 30, fontWeight: '700', letterSpacing: -0.5 },
++  grupo: { paddingVertical: 0, paddingHorizontal: 14 },
++  totales: { flexDirection: 'row', flexWrap: 'wrap' },
++  total: { width: '46%', flexGrow: 1 },
++});
+diff --git a/src/components/inspecciones-resultado.tsx b/src/components/inspecciones-resultado.tsx
+index cedf6a4..95eda26 100644
+--- a/src/components/inspecciones-resultado.tsx
++++ b/src/components/inspecciones-resultado.tsx
+@@ -13,7 +13,6 @@ import {
+   type InspeccionResumen,
+   type RespuestaInspeccion,
+ } from '@/services';
+-import type { ClaseInspeccion } from '@/services/inspeccionService';
+ import { useTheme, type ColorTokens } from '@/theme';
+ import type { InspeccionEstado } from '@/types';
+ import { formatFecha, formatHora } from '@/utils/date';
+@@ -29,22 +28,6 @@ export const VISTA_INSPECCION: Record<InspeccionEstado, { label: string; largo:
+   bloqueada: { label: 'Bloqueada', largo: 'Bloqueada', tono: 'danger' },
+ };
+ 
+-/**
+- * La etiqueta «Diaria» / «Programada» de una inspección, según la guarda FOM.
+- *
+- * La programada va en azul porque es la que alguien pidió desde la web; la
+- * diaria, neutra, porque es la de todos los días. Sin dato —servidor de antes
+- * de la clase— no se pinta nada en vez de adivinar.
+- */
+-export function EtiquetaClase({ clase }: { clase?: ClaseInspeccion }) {
+-  if (!clase) return null;
+-  return clase === 'programada' ? (
+-    <Pastilla tono="onActive" label="Programada" />
+-  ) : (
+-    <Pastilla tono="textSecondary" label="Diaria" />
+-  );
+-}
+-
+ /** Lo que se marcó mal en una inspección, contado como en la web. */
+ export interface CuentaFallas {
+   criticas: number;
+@@ -141,13 +124,6 @@ export function InspeccionesResultado({
+             </ThemedText>
+             <Pastilla tono={v.tono} label={v.largo} conPunto />
+           </View>
+-          {/* Diaria o programada, en su propia línea: junto al resultado largo
+-              no cabía la unidad. Sale del detalle si ya llegó. */}
+-          {(detalle?.clase ?? inspeccion.clase) ? (
+-            <View style={styles.cabeza}>
+-              <EtiquetaClase clase={detalle?.clase ?? inspeccion.clase} />
+-            </View>
+-          ) : null}
+ 
+           <View style={{ gap: spacing.xs }}>
+             {datos.map(([k, valor]) => (
+diff --git a/src/components/odt-asignada-acciones.tsx b/src/components/odt-asignada-acciones.tsx
+new file mode 100644
+index 0000000..53b35e3
+--- /dev/null
++++ b/src/components/odt-asignada-acciones.tsx
+@@ -0,0 +1,245 @@
++import { useEffect, useRef, useState } from 'react';
++import { StyleSheet, View } from 'react-native';
++
++import { Button } from '@/components/button';
++import { HojaModal } from '@/components/hoja-modal';
++import { PulseDot } from '@/components/pulse-dot';
++import { TabIcon } from '@/components/tab-icon';
++import { TextField } from '@/components/text-field';
++import { ThemedText } from '@/components/themed-text';
++import { uuidV4 } from '@/lib/fom-api';
++import {
++  DESDE_EVENTO,
++  esEstadoTaller,
++  eventoPideNota,
++  registrarEventoOdt,
++  type EjecucionOdt,
++  type EventoTaller,
++} from '@/services/fomOrdenes';
++import { useTheme } from '@/theme';
++import { MIN_NOTA_ODT } from '@/utils/odt';
++
++/**
++ * EL TRABAJO DE TALLER de una ODT asignada: su reloj y los botones de su
++ * responsable. Lo usan «Asignadas a ti» (Mantenimiento) y el detalle de la ODT.
++ *
++ * Los textos son los mismos de la web: «Iniciar trabajo», «Pausar»,
++ * «Reanudar», «Entregar» y «Tiempo trabajado».
++ */
++
++/** En qué momento va el trabajo, dicho en corto bajo su estado. */
++export const MOMENTO_TALLER: Record<string, string> = {
++  asignada: 'Sin iniciar',
++  en_ejecucion: 'Trabajo en curso',
++  pausada: 'Trabajo pausado',
++  en_calidad: 'Entregada: la revisa el supervisor',
++};
++
++/** Qué botón toca en cada momento, y cuál es el principal. */
++const PASOS: Record<string, { evento: EventoTaller; label: string; principal: boolean }[]> = {
++  asignada: [{ evento: 'inicio', label: 'Iniciar trabajo', principal: true }],
++  en_ejecucion: [
++    { evento: 'pausa', label: 'Pausar', principal: false },
++    { evento: 'entrega', label: 'Entregar', principal: true },
++  ],
++  pausada: [{ evento: 'reanudacion', label: 'Reanudar', principal: true }],
++};
++
++/** Lo que pide la hoja de la nota, por evento. */
++const HOJA: Partial<Record<EventoTaller, { titulo: string; placeholder: string; ayuda: string }>> = {
++  pausa: {
++    titulo: 'Pausar',
++    placeholder: 'Por qué se detiene el trabajo…',
++    ayuda: 'El reloj se detiene hasta que lo reanudes.',
++  },
++  entrega: {
++    titulo: 'Entregar',
++    placeholder: 'Qué se hizo…',
++    // FOM solo recibe la nota al entregar: el costo y la factura van al cerrarla.
++    ayuda: 'La ODT pasa a revisión del supervisor, que la cierra con el costo y la factura.',
++  },
++};
++
++/** «1:05:23»: horas sin tope, minutos y segundos con dos cifras. */
++export function formatoReloj(segundos: number): string {
++  const s = Math.max(0, Math.floor(segundos));
++  const h = Math.floor(s / 3600);
++  const m = Math.floor((s % 3600) / 60);
++  const r = s % 60;
++  return `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
++}
++
++/**
++ * Los segundos trabajados AHORA. En taller el reloj sigue corriendo desde la
++ * lectura de FOM con el reloj del teléfono; pausada o entregada, se queda en
++ * lo que dijo FOM.
++ */
++function useSegundosTrabajados(ej: Pick<EjecucionOdt, 'segundosTrabajados' | 'leidoEn' | 'estadoFom'>): number {
++  const corriendo = ej.estadoFom === 'en_ejecucion';
++  const [ahora, setAhora] = useState(() => ej.leidoEn);
++  useEffect(() => {
++    if (!corriendo) return;
++    const t = setInterval(() => setAhora(Date.now()), 1000);
++    return () => clearInterval(t);
++  }, [corriendo]);
++  return corriendo ? ej.segundosTrabajados + Math.max(0, ahora - ej.leidoEn) / 1000 : ej.segundosTrabajados;
++}
++
++/** «Tiempo trabajado 1:05:23», con un punto que late mientras corre. */
++export function RelojOdt({ ejecucion }: { ejecucion: Pick<EjecucionOdt, 'segundosTrabajados' | 'leidoEn' | 'estadoFom'> }) {
++  const { colors, spacing } = useTheme();
++  const segundos = useSegundosTrabajados(ejecucion);
++  const corriendo = ejecucion.estadoFom === 'en_ejecucion';
++  return (
++    <View
++      style={[styles.fila, { gap: spacing.sm }]}
++      accessible
++      accessibilityLabel={`Tiempo trabajado ${formatoReloj(segundos)}${corriendo ? ', corriendo' : ''}`}>
++      {corriendo ? <PulseDot color={colors.success} size={7} /> : <TabIcon name="pausa" color={colors.textMuted} size={13} />}
++      <ThemedText variant="caption" color="textSecondary" style={styles.flex1}>
++        Tiempo trabajado
++      </ThemedText>
++      <ThemedText variant="button" tabular color={corriendo ? 'text' : 'textSecondary'}>
++        {formatoReloj(segundos)}
++      </ThemedText>
++    </View>
++  );
++}
++
++/**
++ * Los botones del responsable según el momento de su ODT. Iniciar y reanudar
++ * se hacen con un toque; pausar y entregar abren una hoja con su nota, que FOM
++ * exige. Tras cada paso, `onHecho` para que quien la pinta la relea.
++ *
++ * Un reintento del MISMO paso (misma nota) reusa su clave: si el primero sí
++ * llegó, FOM no registra otro.
++ */
++export function AccionesOdtAsignada({
++  id,
++  estadoFom,
++  onHecho,
++}: {
++  id: string;
++  estadoFom: string;
++  onHecho: () => void;
++}) {
++  const { spacing } = useTheme();
++  const [enviando, setEnviando] = useState<EventoTaller | null>(null);
++  const [error, setError] = useState<string | null>(null);
++  const [hoja, setHoja] = useState<EventoTaller | null>(null);
++  const [nota, setNota] = useState('');
++  const [errorNota, setErrorNota] = useState<string | undefined>();
++  const intento = useRef<{ firma: string; clave: string } | null>(null);
++
++  // Entregada (o fuera de taller) no le queda nada al responsable: su momento
++  // ya lo dice quien la pinta.
++  const pasos = esEstadoTaller(estadoFom) ? (PASOS[estadoFom] ?? []) : [];
++  if (pasos.length === 0) return null;
++
++  async function enviar(evento: EventoTaller, conNota?: string) {
++    if (enviando) return;
++    const desde = DESDE_EVENTO[evento];
++    const firma = `${id}|${evento}|${desde}|${conNota?.trim() ?? ''}`;
++    if (intento.current?.firma !== firma) intento.current = { firma, clave: uuidV4() };
++    setEnviando(evento);
++    setError(null);
++    try {
++      await registrarEventoOdt(id, { accion: evento, desde, nota: conNota, clave: intento.current.clave });
++      intento.current = null;
++      setHoja(null);
++      setNota('');
++      onHecho();
++    } catch (e) {
++      setError(e instanceof Error ? e.message : 'No pudimos registrar el paso. Intenta de nuevo.');
++    } finally {
++      setEnviando(null);
++    }
++  }
++
++  function tocar(evento: EventoTaller) {
++    setError(null);
++    if (eventoPideNota(evento)) {
++      setErrorNota(undefined);
++      setHoja(evento);
++    } else {
++      void enviar(evento);
++    }
++  }
++
++  function confirmarHoja() {
++    if (!hoja) return;
++    if (nota.trim().length < MIN_NOTA_ODT) {
++      setErrorNota(hoja === 'entrega' ? 'Cuenta qué se hizo.' : 'Escribe por qué se detiene.');
++      return;
++    }
++    void enviar(hoja, nota);
++  }
++
++  const textoHoja = hoja ? HOJA[hoja] : undefined;
++
++  return (
++    <View style={{ gap: spacing.sm }}>
++      <View style={[styles.fila, { gap: spacing.sm }]}>
++        {pasos.map((p) => (
++          <Button
++            key={p.evento}
++            label={p.label}
++            variant={p.principal ? 'primary' : 'secondary'}
++            icon={p.evento === 'pausa' ? 'pausa' : p.evento === 'entrega' ? 'check' : undefined}
++            onPress={() => tocar(p.evento)}
++            loading={enviando === p.evento && !hoja}
++            disabled={enviando !== null}
++            style={styles.flex1}
++          />
++        ))}
++      </View>
++      {error && !hoja ? (
++        <ThemedText variant="caption" color="danger">
++          {error}
++        </ThemedText>
++      ) : null}
++
++      <HojaModal
++        visible={hoja !== null}
++        onClose={() => (enviando ? undefined : setHoja(null))}
++        titulo={textoHoja?.titulo ?? ''}
++        icon={hoja === 'pausa' ? 'pausa' : 'check'}
++        tone="primary">
++        <TextField
++          label="Nota"
++          value={nota}
++          onChangeText={(t) => {
++            setNota(t);
++            if (errorNota) setErrorNota(undefined);
++          }}
++          placeholder={textoHoja?.placeholder}
++          multiline
++          maxLength={1000}
++          editable={!enviando}
++          style={styles.nota}
++          error={errorNota}
++        />
++        <ThemedText variant="caption" color="textSecondary">
++          {textoHoja?.ayuda ?? ''}
++        </ThemedText>
++        {error ? (
++          <ThemedText variant="caption" color="danger">
++            {error}
++          </ThemedText>
++        ) : null}
++        <Button
++          label={textoHoja?.titulo ?? ''}
++          icon={hoja === 'pausa' ? 'pausa' : 'check'}
++          onPress={confirmarHoja}
++          loading={enviando !== null}
++        />
++      </HojaModal>
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  flex1: { flex: 1, minWidth: 0 },
++  nota: { minHeight: 72 },
++});
+diff --git a/src/components/odt-asignada-seccion.tsx b/src/components/odt-asignada-seccion.tsx
+new file mode 100644
+index 0000000..f3f8c66
+--- /dev/null
++++ b/src/components/odt-asignada-seccion.tsx
+@@ -0,0 +1,127 @@
++import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
++
++import { Card } from '@/components/card';
++import { Chip } from '@/components/chip';
++import { AccionesOdtAsignada, MOMENTO_TALLER, RelojOdt } from '@/components/odt-asignada-acciones';
++import { otStatusColor, ODT_ESTADO_LABEL } from '@/components/ot-status-badge';
++import { PressableScale } from '@/components/pressable-scale';
++import { TabIcon } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import { useAsyncData } from '@/hooks/use-async-data';
++import { getEjecucionOdt, getOdtAsignadas, type EjecucionOdt, type OdtAsignada } from '@/services/fomOrdenes';
++import { useTheme } from '@/theme';
++
++/**
++ * «ASIGNADAS A TI»: las ODT que el supervisor le asignó a quien tiene la
++ * sesión, cada una con su unidad, su título, su estado, el tiempo trabajado y
++ * el botón que le toca (iniciar, pausar, reanudar, entregar).
++ *
++ * Se pide sola y se relee al volver a la pantalla y tras cada paso. Si FOM no
++ * se las enseña (403/404) o no tiene ninguna en taller, la tarjeta no aparece.
++ */
++export function SeccionOdtAsignadas({
++  onAbrir,
++  style,
++}: {
++  onAbrir: (id: string) => void;
++  style?: StyleProp<ViewStyle>;
++}) {
++  const { spacing } = useTheme();
++  const { data, recargar } = useAsyncData(
++    async () => {
++      const lista = await getOdtAsignadas();
++      if (!lista || lista.length === 0) return null;
++      // El reloj vive en el detalle de cada una. Si uno falla, esa ODT sale
++      // igual, sin reloj: sus botones siguen sirviendo.
++      const ejecuciones = await Promise.all(lista.map((o) => getEjecucionOdt(o.id).catch(() => null)));
++      return lista.map((o, i) => ({ orden: o, ejecucion: ejecuciones[i] }));
++    },
++    [],
++    { onFocus: true },
++  );
++
++  if (!data) return null;
++
++  return (
++    <Card style={[{ gap: spacing.md, paddingBottom: spacing.xs }, style]}>
++      <View style={{ gap: 2 }}>
++        <ThemedText style={styles.titulo}>Asignadas a ti</ThemedText>
++        <ThemedText variant="caption" color="textSecondary">
++          El supervisor te asignó estas ODT. Inicia, pausa y entrega desde aquí.
++        </ThemedText>
++      </View>
++      <View>
++        {data.map(({ orden, ejecucion }, i) => (
++          <FilaAsignada
++            key={orden.id}
++            orden={orden}
++            ejecucion={ejecucion}
++            primera={i === 0}
++            onAbrir={() => onAbrir(orden.id)}
++            onHecho={recargar}
++          />
++        ))}
++      </View>
++    </Card>
++  );
++}
++
++/** Una ODT asignada: unidad, título (abre el detalle), estado, reloj y botones. */
++function FilaAsignada({
++  orden,
++  ejecucion,
++  primera,
++  onAbrir,
++  onHecho,
++}: {
++  orden: OdtAsignada;
++  ejecucion: EjecucionOdt | null;
++  primera: boolean;
++  onAbrir: () => void;
++  onHecho: () => void;
++}) {
++  const { colors, spacing, borderWidths } = useTheme();
++  // Manda el estado más reciente: el del detalle, si llegó.
++  const estadoFom = ejecucion?.estadoFom ?? orden.estadoFom;
++  return (
++    <View
++      style={{
++        gap: spacing.sm,
++        paddingVertical: spacing.md,
++        borderTopWidth: primera ? 0 : borderWidths.hairline,
++        borderTopColor: colors.border,
++      }}>
++      <PressableScale
++        onPress={onAbrir}
++        accessibilityRole="button"
++        accessibilityLabel={`Ver la ODT: ${orden.descripcion}, ${orden.vehicleLabel}`}>
++        <View style={[styles.fila, { gap: spacing.sm }]}>
++          <View style={[styles.flex1, { gap: 2 }]}>
++            <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
++              {orden.vehicleLabel || 'Unidad'}
++            </ThemedText>
++            <ThemedText style={styles.ordenTitulo} numberOfLines={2}>
++              {orden.descripcion}
++            </ThemedText>
++          </View>
++          <TabIcon name="chevron" color={colors.textMuted} size={16} />
++        </View>
++      </PressableScale>
++      <View style={[styles.fila, { gap: spacing.sm }]}>
++        <Chip tone={otStatusColor(orden.estado)} label={ODT_ESTADO_LABEL[orden.estado]} dot />
++        <ThemedText variant="caption" color="textSecondary" style={styles.flex1} numberOfLines={1}>
++          {MOMENTO_TALLER[estadoFom] ?? ''}
++        </ThemedText>
++      </View>
++      {ejecucion ? <RelojOdt ejecucion={ejecucion} /> : null}
++      <AccionesOdtAsignada id={orden.id} estadoFom={estadoFom} onHecho={onHecho} />
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  flex1: { flex: 1, minWidth: 0 },
++  titulo: { fontSize: 17, lineHeight: 22, fontWeight: '600' },
++  ordenTitulo: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
++});
+diff --git a/src/components/perfil-hojas.tsx b/src/components/perfil-hojas.tsx
+index e413951..6efb1e4 100644
+--- a/src/components/perfil-hojas.tsx
++++ b/src/components/perfil-hojas.tsx
+@@ -9,7 +9,7 @@ import { TabIcon, type TabIconName } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+ import { useSync } from '@/sync';
+ import { useTheme, type ColorTokens } from '@/theme';
+-import { formatFecha } from '@/utils/date';
++import { formatFecha, formatHora } from '@/utils/date';
+ 
+ export type HojaPerfil = 'sync' | 'cerrar' | null;
+ 
+@@ -73,7 +73,14 @@ export function HojasPerfil({
+   onSignOut,
+ }: Props) {
+   const { colors, spacing } = useTheme();
+-  const { sincronizando, pendientes, sincronizarAhora } = useSync();
++  const { sincronizando, pendientes, ultimoEnvio, sincronizarAhora } = useSync();
++  // Qué pasó al tocar «Enviar ahora» (o en el reintento solo), dicho en llano.
++  const resumenEnvio = ultimoEnvio
++    ? ultimoEnvio.fallidas === 0
++      ? `Último intento (${formatHora(ultimoEnvio.en)}): se envió todo.`
++      : `Último intento (${formatHora(ultimoEnvio.en)}): no se pudo enviar ${ultimoEnvio.fallidas}` +
++        (ultimoEnvio.enviadas > 0 ? `; se enviaron ${ultimoEnvio.enviadas}.` : '.')
++    : null;
+ 
+   return (
+     <>
+@@ -94,8 +101,13 @@ export function HojasPerfil({
+         icon="sync"
+         tone="accent">
+         {pendientes.length === 0 ? (
+-          <Card style={{ padding: spacing.lg }}>
++          <Card style={{ padding: spacing.lg, gap: 2 }}>
+             <ThemedText variant="subtitle">Nada pendiente</ThemedText>
++            {resumenEnvio ? (
++              <ThemedText variant="caption" color="textMuted">
++                {resumenEnvio}
++              </ThemedText>
++            ) : null}
+           </Card>
+         ) : (
+           <>
+@@ -114,9 +126,21 @@ export function HojasPerfil({
+                 </ThemedText>
+                 <ThemedText variant="caption" color="textMuted">
+                   {formatFecha(p.creadaEn)}
++                  {p.intentos > 0 ? ` · ${p.intentos} ${p.intentos === 1 ? 'intento' : 'intentos'}` : ''}
+                 </ThemedText>
++                {/* El porqué real (lo que dijo Cloudinary o el teléfono): que no sea un misterio. */}
++                {p.motivo ? (
++                  <ThemedText variant="caption" color="danger">
++                    {`No se envió: ${p.motivo}`}
++                  </ThemedText>
++                ) : null}
+               </Card>
+             ))}
++            {resumenEnvio && !sincronizando ? (
++              <ThemedText variant="caption" color="textSecondary">
++                {resumenEnvio}
++              </ThemedText>
++            ) : null}
+             <BotonHoja
+               label={sincronizando ? 'Enviando…' : 'Enviar ahora'}
+               icon="sync"
+diff --git a/src/components/text-field.tsx b/src/components/text-field.tsx
+index d5e4522..e70d8ef 100644
+--- a/src/components/text-field.tsx
++++ b/src/components/text-field.tsx
+@@ -102,6 +102,11 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
+           placeholderTextColor={colors.textMuted}
+           selectionColor={colors.primary}
+           multiline={multiline}
++          // En un campo de varias líneas, Enter cierra el teclado (como esperan
++          // todos): nadie escribe párrafos en una falla y no había otra forma
++          // obvia de bajarlo. Quien necesite saltos de línea lo pide por props.
++          returnKeyType={multiline ? 'done' : undefined}
++          submitBehavior={multiline ? 'blurAndSubmit' : undefined}
+           accessibilityLabel={label}
+           // En contraseña, se oculta salvo que el usuario pulse el ojito.
+           secureTextEntry={esPassword && !revelado}
+diff --git a/src/lib/cloudinary.ts b/src/lib/cloudinary.ts
+index 5fb46db..e5abf95 100644
+--- a/src/lib/cloudinary.ts
++++ b/src/lib/cloudinary.ts
+@@ -24,6 +24,9 @@
+  * del teléfono y no hay nada que leer de la nube.
+  */
+ 
++import { File } from 'expo-file-system';
++import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
++
+ const NUBE = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME ?? '';
+ const PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET ?? '';
+ 
+@@ -278,8 +281,92 @@ export async function fotosEn(destino: DestinoFoto): Promise<FotoCloudinary[]> {
+ 
+ // ─────────────────────────────── SUBIR ───────────────────────────────
+ 
+-/** Lo más que se espera una subida antes de darla por perdida. */
+-const TIEMPO_LIMITE = 45_000;
++/**
++ * Lo más que se espera una subida antes de darla por perdida. Con LTE floja y
++ * la foto ya reducida (unos cientos de KB) sobra; 45 s se quedaba corto con
++ * fotos de 12 MP.
++ */
++const TIEMPO_LIMITE = 60_000;
++
++/** Lado mayor y calidad JPEG con que viaja una foto: de sobra para ver una falla. */
++const LADO_MAX = 1600;
++const CALIDAD_JPEG = 0.7;
++
++/**
++ * Una subida que no salió, con el MOTIVO real (lo que dijo Cloudinary o la
++ * excepción del teléfono). Así «Pendientes por enviar» puede decir por qué en
++ * vez de dejarlo en misterio.
++ */
++export class ErrorSubida extends Error {
++  readonly motivo: string;
++  constructor(motivo: string) {
++    super(`No se pudo subir la foto: ${motivo}`);
++    this.name = 'ErrorSubida';
++    this.motivo = motivo;
++  }
++}
++
++/**
++ * Deja la foto lista para viajar: un JPEG local de máx. 1600 px.
++ *
++ * Lo que da el teléfono no siempre se puede mandar tal cual: en iOS la galería
++ * puede dar HEIC o una dirección `ph://` que la subida no sabe leer, y una foto
++ * de cámara de 12 MP pesa megas que con LTE no llegan a tiempo. El manipulador
++ * lee todas esas y escribe un archivo `file://` normal.
++ */
++async function prepararFoto(uri: string): Promise<string> {
++  try {
++    const original = await ImageManipulator.manipulate(uri).renderAsync();
++    const lado = Math.max(original.width, original.height);
++    // Un JPEG local que ya cabe (un documento ya recortado) no se recomprime:
++    // cada pasada le quita nitidez a la letra.
++    if (lado <= LADO_MAX && /^file:\/\/.+\.jpe?g$/i.test(uri)) return uri;
++    const lista =
++      lado > LADO_MAX
++        ? await ImageManipulator.manipulate(uri)
++            .resize(original.width >= original.height ? { width: LADO_MAX } : { height: LADO_MAX })
++            .renderAsync()
++        : original;
++    return (await lista.saveAsync({ format: SaveFormat.JPEG, compress: CALIDAD_JPEG })).uri;
++  } catch (e) {
++    // Si el archivo ya no está (el sistema limpió la caché), no hay nada que subir.
++    if (uri.startsWith('file://')) {
++      let hay = true;
++      try {
++        hay = new File(uri).exists;
++      } catch {
++        // Si ni eso se puede saber, se intenta con la original.
++      }
++      if (!hay) throw new ErrorSubida('la foto ya no está en el teléfono; vuelve a tomarla');
++    }
++    // Si no se pudo preparar, se intenta con la original: puede que sí suba.
++    console.warn('[cloudinary] no se pudo preparar la foto, va la original:', e instanceof Error ? e.message : e);
++    return uri;
++  }
++}
++
++/** El mensaje de error que trae Cloudinary en el cuerpo (`{error:{message}}`), si lo trae. */
++async function mensajeCloudinary(res: Response): Promise<string> {
++  try {
++    const texto = await res.text();
++    try {
++      const json = JSON.parse(texto) as { error?: { message?: string } };
++      if (json.error?.message) return json.error.message;
++    } catch {
++      // No era JSON: va el texto, recortado.
++    }
++    return texto.slice(0, 160) || res.statusText || 'sin detalle';
++  } catch {
++    return res.statusText || 'sin detalle';
++  }
++}
++
++/** El motivo legible de una excepción de `fetch` (sin red, tiempo agotado…). */
++function motivoDeExcepcion(e: unknown, corte: AbortController): string {
++  if (corte.signal.aborted) return `la subida tardó más de ${TIEMPO_LIMITE / 1000} s (señal lenta)`;
++  const texto = e instanceof Error ? e.message : String(e);
++  return /network request failed/i.test(texto) ? 'sin conexión con Cloudinary (Network request failed)' : texto;
++}
+ 
+ export type OpcionesSubida = {
+   /**
+@@ -295,11 +382,11 @@ export type OpcionesSubida = {
+   titulo?: string;
+ };
+ 
+-/** Qué hacer cuando la subida no salió: avisar, o seguir en local. */
+-function fallo(uri: string, opts: OpcionesSubida): string {
+-  if (opts.exigirRemoto) {
+-    throw new Error('No se pudo subir la foto. Revisa tu conexión e inténtalo de nuevo.');
+-  }
++/** Qué hacer cuando la subida no salió: avisar con el motivo, o seguir en local. */
++function fallo(uri: string, opts: OpcionesSubida, motivo: string): string {
++  // Queda en el registro de Metro/Expo Go: es lo primero que se mira.
++  console.warn('[cloudinary] subida fallida:', motivo);
++  if (opts.exigirRemoto) throw new ErrorSubida(motivo);
+   return uri;
+ }
+ 
+@@ -327,9 +414,13 @@ async function subirAhora(uri: string, destino: DestinoFoto, opts: OpcionesSubid
+   // Un documento puede llegar en PDF (una póliza). Va por la misma ruta `image`
+   // que usa la web —Cloudinary guarda el PDF tal cual— y con su extensión.
+   const esPdf = /\.pdf($|\?)/i.test(uri);
++  // Las fotos viajan como JPEG local y reducido; un PDF, tal cual.
++  const archivo = esPdf ? uri : await prepararFoto(uri);
+ 
+   // Se pregunta de nuevo, sin lo recordado: la web pudo subir otra mientras.
++  // (`ultimaVersion` no lanza: sin red da lo último que se vio.)
+   let n = (await ultimaVersion(destino.base, { fresca: true })) + 1;
++  const primero = n;
+   // Si alguien subió esa misma al mismo tiempo, Cloudinary devuelve la que ya
+   // existía (`existing`): se pasa a la siguiente, como en la web.
+   for (let intento = 0; intento < 4; intento += 1, n += 1) {
+@@ -337,7 +428,7 @@ async function subirAhora(uri: string, destino: DestinoFoto, opts: OpcionesSubid
+     const body = new FormData();
+     // React Native acepta este objeto {uri, name, type} como archivo.
+     body.append('file', {
+-      uri,
++      uri: archivo,
+       name: `foto-${n}.${esPdf ? 'pdf' : 'jpg'}`,
+       type: esPdf ? 'application/pdf' : 'image/jpeg',
+     } as unknown as Blob);
+@@ -356,22 +447,22 @@ async function subirAhora(uri: string, destino: DestinoFoto, opts: OpcionesSubid
+         body,
+         signal: corte.signal,
+       });
+-      if (!res.ok) return fallo(uri, opts);
++      if (!res.ok) return fallo(uri, opts, `Cloudinary respondió ${res.status}: ${await mensajeCloudinary(res)}`);
+       json = (await res.json()) as typeof json;
+-    } catch {
+-      return fallo(uri, opts);
++    } catch (e) {
++      return fallo(uri, opts, motivoDeExcepcion(e, corte));
+     } finally {
+       clearTimeout(reloj);
+     }
+     if (json.existing) continue;
+-    if (!json.secure_url) return fallo(uri, opts);
++    if (!json.secure_url) return fallo(uri, opts, 'Cloudinary no devolvió la dirección de la foto');
+     // La nueva es la vigente: se recuerda sin tener que volver a buscarla.
+     memoria.set(destino.base, { n: Promise.resolve(n), hasta: Date.now() + DURA_MEMORIA });
+     pistas.set(destino.base, n);
+     tipos.set(publicId, esPdf ? 'application/pdf' : 'image/jpeg');
+     return urlDeFoto(publicId);
+   }
+-  return fallo(uri, opts);
++  return fallo(uri, opts, `los números ${primero} a ${n - 1} de ${destino.base} ya estaban ocupados`);
+ }
+ 
+ /** Sube varias fotos a la misma dirección, una tras otra (cada una toma su número). */
+diff --git a/src/services/fomConduccion.ts b/src/services/fomConduccion.ts
+index 0c549ce..5000457 100644
+--- a/src/services/fomConduccion.ts
++++ b/src/services/fomConduccion.ts
+@@ -20,6 +20,16 @@ interface AsignacionFomFila {
+   vehicleId: string;
+   /** El id de la asignación, desde #445. */
+   assignmentId: string;
++  /** Desde cuándo la tiene (instante ISO). Un servidor viejo no lo manda. */
++  validFrom?: string | null;
++}
++
++/** El día local (AAAA-MM-DD) de un instante ISO, o nada si no se entiende. */
++function diaLocal(instante: string | null | undefined): string | undefined {
++  if (!instante) return undefined;
++  const d = new Date(instante);
++  if (Number.isNaN(d.getTime())) return undefined;
++  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+ }
+ 
+ /** Una asignación vigente de conductor. */
+@@ -30,6 +40,8 @@ export interface AsignacionConductor {
+   nombre: string;
+   rol: 'principal' | 'secundario';
+   vehicleId: string;
++  /** El día (AAAA-MM-DD) en que recibió la unidad: antes no le tocaba la diaria. */
++  desde?: string;
+ }
+ 
+ /** Una unidad que YO tengo asignada, y a qué título. */
+@@ -75,13 +87,17 @@ export async function getAsignacionesFom(vehicleId?: string): Promise<Asignacion
+   const filas = await todoFom<AsignacionFomFila>(
+     vehicleId ? `/drivers?vehicleId=${vehicleId}` : '/drivers',
+   );
+-  return filas.map((f) => ({
+-    id: f.assignmentId,
+-    userId: f.userId,
+-    nombre: f.displayName?.trim() || 'Conductor',
+-    rol: f.role,
+-    vehicleId: f.vehicleId,
+-  }));
++  return filas.map((f) => {
++    const desde = diaLocal(f.validFrom);
++    return {
++      id: f.assignmentId,
++      userId: f.userId,
++      nombre: f.displayName?.trim() || 'Conductor',
++      rol: f.role,
++      vehicleId: f.vehicleId,
++      ...(desde ? { desde } : {}),
++    };
++  });
+ }
+ 
+ /** Asigna un conductor a una unidad: titular, o secundario con su PIN. */
+diff --git a/src/services/fomOrdenes.ts b/src/services/fomOrdenes.ts
+index 253fe6c..69fae70 100644
+--- a/src/services/fomOrdenes.ts
++++ b/src/services/fomOrdenes.ts
+@@ -53,13 +53,19 @@ interface EventoFom {
+ /**
+  * Cómo se dice cada estatus de FOM en la app.
+  *
+- * FOM tiene cinco; la app, tres. `aprobada` sigue en curso —se aprobó y falta
+- * cerrarla— y `cancelada` ya no espera nada, igual que una resuelta.
++ * FOM tiene nueve; la app, tres, agrupados como en la web. Todo lo que pasa
++ * entre aprobarla y cerrarla —aprobada, con responsable, en taller, pausada o
++ * entregada a calidad— sigue En revisión: alguien ya la atiende. `cancelada` ya
++ * no espera nada, igual que una resuelta.
+  */
+ const ESTADO: Record<string, OdtEstado> = {
+   abierta: 'abierta',
+   en_revision: 'en_revision',
+   aprobada: 'en_revision',
++  asignada: 'en_revision',
++  en_ejecucion: 'en_revision',
++  pausada: 'en_revision',
++  en_calidad: 'en_revision',
+   cerrada: 'cerrada',
+   cancelada: 'cerrada',
+ };
+@@ -352,3 +358,216 @@ export async function subirFotosOrden(destino: DestinoFoto, uris: string[], titu
+   }
+   return urls;
+ }
++
++// ───────────────────────── Ejecución en taller ─────────────────────────
++
++/*
++ * EL TRABAJO DE TALLER de una ODT con responsable.
++ *
++ * El supervisor asigna a una persona (la orden pasa a `asignada`) y esa persona
++ * —y nadie más— la inicia, la pausa, la reanuda y la entrega a calidad. FOM
++ * lleva el reloj con esos eventos. Rutas del servidor:
++ *
++ *   · GET  /api/v1/mobile/work-orders/assigned         sus ODT con asignación vigente.
++ *   · GET  /api/v1/mobile/work-orders/:id/execution    responsable, eventos y reloj.
++ *   · POST /api/v1/mobile/work-orders/:id/execution-events
++ *
++ * Las tres pasan por la puerta de lecturas operativas: hoy solo un supervisor,
++ * un operador o el admin FOM; a un conductor FOM le contesta 403. Con 403 o 404
++ * aquí se devuelve `null` y quien pinta no enseña nada.
++ */
++
++/** Los estatus de FOM en los que el responsable hace algo (o ya lo entregó). */
++export type EstadoTaller = 'asignada' | 'en_ejecucion' | 'pausada' | 'en_calidad';
++
++/** Los cuatro eventos que acepta FOM, con sus nombres exactos. */
++export type EventoTaller = 'inicio' | 'pausa' | 'reanudacion' | 'entrega';
++
++/** Desde qué estatus sale cada evento, como lo valida FOM (si no, 409). */
++export const DESDE_EVENTO: Record<EventoTaller, EstadoTaller> = {
++  inicio: 'asignada',
++  pausa: 'en_ejecucion',
++  reanudacion: 'pausada',
++  entrega: 'en_ejecucion',
++};
++
++/** Pausar y entregar exigen nota (3 a 1000 letras); iniciar y reanudar, no. */
++export function eventoPideNota(evento: EventoTaller): boolean {
++  return evento === 'pausa' || evento === 'entrega';
++}
++
++const ESTADOS_TALLER: readonly string[] = ['asignada', 'en_ejecucion', 'pausada', 'en_calidad'];
++
++/** ¿Es un estatus de taller? Lo demás (cerrada, cancelada…) ya no se trabaja. */
++export function esEstadoTaller(s: string): s is EstadoTaller {
++  return ESTADOS_TALLER.includes(s);
++}
++
++/** Una ODT asignada a quien tiene la sesión, con la forma de la app. */
++export interface OdtAsignada {
++  id: string;
++  /** El estatus de FOM tal cual: decide qué botones tocan. */
++  estadoFom: EstadoTaller;
++  /** Y en las tres palabras de la app (Abierta / En revisión / Resuelta). */
++  estado: OdtEstado;
++  tipo: OdtTipo;
++  descripcion: string;
++  gravedad: OdtGravedad;
++  vehicleId: string;
++  /** «08 · V88AS5T». */
++  vehicleLabel: string;
++  asignadaEn: string;
++}
++
++/** Responsable, eventos y reloj de una ODT. */
++export interface EjecucionOdt {
++  id: string;
++  estadoFom: string;
++  estado: OdtEstado;
++  vehicleId: string;
++  /** El responsable vigente; `null` si nadie la tiene asignada. */
++  responsable: { userId: string; nombre: string; desde: string } | null;
++  eventos: { id: string; tipo: EventoTaller; nota: string | null; actorNombre: string | null; en: string }[];
++  /** Tiempo trabajado y en pausa hasta que FOM contestó, en segundos. */
++  segundosTrabajados: number;
++  segundosPausados: number;
++  /**
++   * Cuándo se leyó, con el reloj del TELÉFONO: con él sigue corriendo el
++   * tiempo trabajado mientras está en taller, sin mezclar la hora del servidor
++   * con la del teléfono (pueden ir desfasadas).
++   */
++  leidoEn: number;
++}
++
++interface AsignadaFom {
++  id: string;
++  status: string;
++  kind: string;
++  description: string;
++  severity: string;
++  vehicleId: string;
++  vehicleCode: string;
++  vehiclePlate: string | null;
++  assignedAt: string;
++}
++
++interface EjecucionFom {
++  workOrder: { id: string; status: string; vehicleId: string; vehicleCode: string };
++  assignments?: { userId: string; displayName: string; assignedAt: string; endedAt: string | null }[];
++  events?: { id: string; eventKind: string; note: string | null; actorName?: string | null; occurredAt: string }[];
++  totals?: { productiveSeconds: number; pausedSeconds: number };
++}
++
++/**
++ * Nada que enseñar: 403 (su rol no entra), 404 (no es suya o no existe) o la
++ * ruta aún no publicada en ese servidor.
++ */
++function sinAcceso(e: unknown): boolean {
++  if (!(e instanceof ErrorFom)) return false;
++  return e.code === 'respuesta_no_json' || e.statusCode === 403 || e.statusCode === 404;
++}
++
++/**
++ * Las ODT que tiene asignadas quien entró, de la más urgente a la menos (así
++ * las ordena FOM). Solo las que siguen en taller: FOM no cierra la asignación
++ * al resolverla, y una resuelta ya no tiene nada que hacer aquí.
++ *
++ * `null` si FOM no se las enseña a esta sesión.
++ */
++export async function getOdtAsignadas(): Promise<OdtAsignada[] | null> {
++  let datos: { items?: AsignadaFom[] };
++  try {
++    datos = (await pedir('/api/v1/mobile/work-orders/assigned?limit=200', { fresco: true })) as typeof datos;
++  } catch (e) {
++    if (sinAcceso(e)) return null;
++    throw errorDeOrden(e);
++  }
++  return (datos.items ?? []).flatMap((o) =>
++    esEstadoTaller(o.status)
++      ? [
++          {
++            id: o.id,
++            estadoFom: o.status,
++            estado: ESTADO[o.status] ?? 'en_revision',
++            tipo: o.kind === 'preventiva' ? ('preventiva' as const) : ('correctiva' as const),
++            descripcion: o.description,
++            gravedad: GRAVEDADES.includes(o.severity) ? (o.severity as OdtGravedad) : 'media',
++            vehicleId: o.vehicleId,
++            vehicleLabel: [o.vehicleCode?.toUpperCase(), o.vehiclePlate].filter(Boolean).join(' · '),
++            asignadaEn: o.assignedAt,
++          },
++        ]
++      : [],
++  );
++}
++
++/**
++ * Responsable, eventos y reloj de una ODT. Un gestor ve los de cualquiera; los
++ * demás, solo los de las suyas.
++ *
++ * `null` si FOM no la enseña a esta sesión.
++ */
++export async function getEjecucionOdt(id: string): Promise<EjecucionOdt | null> {
++  let datos: EjecucionFom;
++  try {
++    datos = (await pedir(`/api/v1/mobile/work-orders/${id}/execution`, { fresco: true })) as EjecucionFom;
++  } catch (e) {
++    if (sinAcceso(e)) return null;
++    throw errorDeOrden(e);
++  }
++  const vigente = (datos.assignments ?? []).find((a) => !a.endedAt) ?? null;
++  return {
++    id: datos.workOrder.id,
++    estadoFom: datos.workOrder.status,
++    estado: ESTADO[datos.workOrder.status] ?? 'abierta',
++    vehicleId: datos.workOrder.vehicleId,
++    responsable: vigente ? { userId: vigente.userId, nombre: vigente.displayName, desde: vigente.assignedAt } : null,
++    eventos: (datos.events ?? []).map((e) => ({
++      id: e.id,
++      tipo: e.eventKind as EventoTaller,
++      nota: e.note ?? null,
++      actorNombre: e.actorName ?? null,
++      en: e.occurredAt,
++    })),
++    segundosTrabajados: Math.max(0, Number(datos.totals?.productiveSeconds ?? 0)),
++    segundosPausados: Math.max(0, Number(datos.totals?.pausedSeconds ?? 0)),
++    leidoEn: Date.now(),
++  };
++}
++
++/**
++ * El responsable inicia, pausa, reanuda o entrega su ODT.
++ *
++ * `clave` identifica el INTENTO: viaja como `clientEventId` y como cabecera
++ * `Idempotency-Key`. Si un reintento llega con la misma clave y lo mismo, FOM
++ * contesta el evento ya guardado en vez de registrar otro; por eso quien llama
++ * la conserva hasta que sale bien.
++ */
++export async function registrarEventoOdt(
++  id: string,
++  evento: { accion: EventoTaller; desde: EstadoTaller; nota?: string; clave: string },
++): Promise<void> {
++  const nota = evento.nota?.trim();
++  try {
++    await pedir(`/api/v1/mobile/work-orders/${id}/execution-events`, {
++      metodo: 'POST',
++      idempotencia: evento.clave,
++      cuerpo: {
++        clientEventId: evento.clave,
++        action: evento.accion,
++        expectedStatus: evento.desde,
++        ...(nota ? { note: nota.slice(0, 1000) } : {}),
++      },
++    });
++  } catch (e) {
++    if (e instanceof ErrorFom && e.code !== 'respuesta_no_json') {
++      if (e.statusCode === 404) throw new Error('Ya no tienes esta ODT asignada. Vuelve a cargarla.');
++      if (e.statusCode === 403) throw new Error('Tu rol no puede trabajar ODT desde la app.');
++      if (e.statusCode === 400 && /note/i.test(e.message)) throw new Error('Escribe una nota de al menos 3 letras.');
++      if (e.statusCode === 409 && /different content|in use/i.test(e.message)) {
++        throw new Error('Ese paso ya se registró con otros datos. Vuelve a cargar la ODT.');
++      }
++    }
++    throw errorDeOrden(e);
++  }
++}
+diff --git a/src/services/inspeccionService.ts b/src/services/inspeccionService.ts
+index 548f103..3be4f3f 100644
+--- a/src/services/inspeccionService.ts
++++ b/src/services/inspeccionService.ts
+@@ -58,25 +58,15 @@ interface FormatoFom {
+  *
+  * FOM ya lo filtra por el tipo de la unidad. Si la empresa tiene más de uno
+  * publicado se usa el primero; sin ninguno, sale vacío.
+- *
+- * Con `formatoId` se pide ESE formato: el de una inspección programada, que la
+- * cita fija y FOM vuelve a comprobar al recibirla. Si ya no está publicado no
+- * se cambia por otro: se dice.
+  */
+-export async function getPlantillaInspeccion(
+-  vehicle: Pick<Vehicle, 'id' | 'tipo'>,
+-  formatoId?: string,
+-): Promise<InspeccionPlantilla> {
++export async function getPlantillaInspeccion(vehicle: Pick<Vehicle, 'id' | 'tipo'>): Promise<InspeccionPlantilla> {
+   let formato: FormatoFom | undefined;
+   try {
+     const datos = (await pedir(`/api/v1/mobile/vehicles/${vehicle.id}/inspection-templates`)) as { items: FormatoFom[] };
+-    formato = formatoId ? datos.items.find((f) => f.id === formatoId) : datos.items[0];
++    formato = datos.items[0];
+   } catch (e) {
+     throw errorDeInspeccion(e);
+   }
+-  if (formatoId && !formato) {
+-    throw new Error('El formato de esta inspección ya no está publicado. Avísale a tu supervisor.');
+-  }
+   const categorias: InspeccionCategoria[] = [];
+   for (const item of [...(formato?.items ?? [])].sort((a, b) => a.displayOrder - b.displayOrder)) {
+     let categoria = categorias.find((c) => c.nombre === item.category);
+@@ -185,7 +175,8 @@ export async function getInspeccionesDeHoy(companyId: string): Promise<Record<st
+ /**
+  * La CLASE de una inspección, como la guarda FOM (`kind`): `diaria` cuando el
+  * conductor la hace por su cuenta —una por unidad y día— y `programada` cuando
+- * cumple una cita puesta desde la web. FOM la decide; la app solo la muestra.
++ * cumplía una cita puesta desde la web. La app ya no programa ni la pinta: solo
++ * sirve para que una programada vieja no cuente como la diaria del cumplimiento.
+  */
+ export type ClaseInspeccion = 'diaria' | 'programada';
+ 
+@@ -209,6 +200,8 @@ interface FilaInspeccionFom {
+   vehicleCode: string;
+   vehiclePlate: string | null;
+   driverName: string | null;
++  /** Quién la hizo, por su id. Lo lee también la web; un servidor viejo no lo manda. */
++  driverUserId?: string | null;
+   templateName: string;
+ }
+ 
+@@ -227,6 +220,8 @@ export interface InspeccionResumen {
+   unidad: string;
+   placa?: string;
+   conductor: string;
++  /** El id de quien la hizo, si FOM lo manda: sin él se cruza por el nombre. */
++  conductorId?: string;
+   ubicacion?: string;
+   /** El formato que respondió: en la hoja impresa es su título. */
+   formato: string;
+@@ -268,6 +263,7 @@ function aResumen(f: FilaInspeccionFom): InspeccionResumen {
+     unidad: f.vehicleCode,
+     ...(f.vehiclePlate ? { placa: f.vehiclePlate } : {}),
+     conductor: f.driverName?.trim() || 'Sin conductor',
++    ...(f.driverUserId ? { conductorId: f.driverUserId } : {}),
+     ...(f.location?.trim() ? { ubicacion: f.location.trim() } : {}),
+     formato: f.templateName,
+   };
+@@ -281,21 +277,40 @@ function aResumen(f: FilaInspeccionFom): InspeccionResumen {
+  * de la empresa para enseñar la pantalla.
+  */
+ export async function getInspeccionesFom(
+-  opciones: { vehicleId?: string; tope?: number } = {},
++  opciones: {
++    vehicleId?: string;
++    tope?: number;
++    /**
++     * Un RANGO de días (AAAA-MM-DD, ambos incluidos): las de un mes, para el
++     * calendario por persona. FOM no filtra por fecha, así que se lee de la más
++     * nueva hacia atrás y se para en cuanto asoma una de antes de `desde`.
++     */
++    desde?: string;
++    hasta?: string;
++  } = {},
+ ): Promise<InspeccionResumen[]> {
+-  const tope = opciones.tope ?? 200;
++  const { desde, hasta } = opciones;
++  // Un mes entero de una flota grande pasa de 200; el tope sigue de guardia.
++  const tope = opciones.tope ?? (desde ? 3000 : 200);
+   // El filtro por unidad va en la RUTA: `paginaFom` solo compone el tramo.
+   const ruta = opciones.vehicleId ? `/inspections?vehicleId=${opciones.vehicleId}` : '/inspections';
+   const filas: FilaInspeccionFom[] = [];
+   try {
+-    for (let offset = 0; filas.length < tope; ) {
++    for (let offset = 0, leidas = 0; leidas < tope; ) {
+       const { items, page } = await paginaFom<FilaInspeccionFom>(ruta, {
+-        limit: Math.min(100, tope - filas.length),
++        limit: Math.min(100, tope - leidas),
+         offset,
+       });
+-      filas.push(...items);
++      leidas += items.length;
++      filas.push(
++        ...items.filter(
++          (i) => (!desde || i.inspectionDate >= desde) && (!hasta || i.inspectionDate <= hasta),
++        ),
++      );
+       offset += items.length;
+       if (items.length === 0 || offset >= page.total) break;
++      // Vienen de la más nueva a la más vieja: pasada `desde`, lo que sigue es más viejo.
++      if (desde && items.some((i) => i.inspectionDate < desde)) break;
+     }
+   } catch (e) {
+     throw errorDeInspeccion(e);
+@@ -350,153 +365,6 @@ export async function getInspeccionFom(id: string): Promise<InspeccionDetalle> {
+   }
+ }
+ 
+-// ──────────── Las inspecciones PROGRAMADAS para quien tiene la sesión ─────────
+-
+-/** Una cita de inspección, tal como la lista FOM (`/mobile/inspection-schedules`). */
+-interface ProgramacionFom {
+-  id: string;
+-  /** `programada` | `completada` | `cancelada`. */
+-  status: string;
+-  /** El día de la cita (AAAA-MM-DD). */
+-  scheduledFor: string;
+-  vehicleId: string;
+-  vehicleCode: string;
+-  vehiclePlate: string | null;
+-  templateId: string;
+-  templateName: string;
+-  inspectionId: string | null;
+-}
+-
+-/**
+- * Cómo se le dice al conductor: PENDIENTE (aún le toca, hoy o más adelante),
+- * VENCIDA (era para un día que ya pasó y no se hizo) o HECHA. Las canceladas no
+- * se le enseñan: ya no le piden nada.
+- */
+-export type EstadoProgramada = 'pendiente' | 'vencida' | 'hecha';
+-
+-/** Una inspección programada para el conductor, como la lee la app. */
+-export interface InspeccionProgramada {
+-  id: string;
+-  estado: EstadoProgramada;
+-  /** El día de la cita (AAAA-MM-DD). */
+-  fecha: string;
+-  /** Es para hoy: la única que FOM deja enviar es la del mismo día. */
+-  deHoy: boolean;
+-  vehicleId: string;
+-  unidad: string;
+-  placa?: string;
+-  /** El formato que fija la cita: se responde ese y no otro. */
+-  formatoId: string;
+-  formato: string;
+-  /** La inspección con la que se cumplió, si ya está hecha. */
+-  inspeccionId?: string;
+-}
+-
+-/** Cuántas hechas se enseñan: las últimas, para que el conductor vea que contaron. */
+-const HECHAS_A_LA_VISTA = 5;
+-
+-/** Cuántas citas se piden por página (FOM admite hasta 200). */
+-const CITAS_POR_PAGINA = 100;
+-
+-function aProgramada(p: ProgramacionFom, fechaHoy: string): InspeccionProgramada | null {
+-  const estado: EstadoProgramada | null =
+-    p.status === 'completada'
+-      ? 'hecha'
+-      : p.status === 'programada'
+-        ? p.scheduledFor < fechaHoy
+-          ? 'vencida'
+-          : 'pendiente'
+-        : null;
+-  if (!estado) return null;
+-  return {
+-    id: p.id,
+-    estado,
+-    fecha: p.scheduledFor,
+-    deHoy: p.scheduledFor === fechaHoy,
+-    vehicleId: p.vehicleId,
+-    unidad: p.vehicleCode,
+-    ...(p.vehiclePlate ? { placa: p.vehiclePlate } : {}),
+-    formatoId: p.templateId,
+-    formato: p.templateName,
+-    ...(p.inspectionId ? { inspeccionId: p.inspectionId } : {}),
+-  };
+-}
+-
+-/** Las citas que siguen abiertas, página a página (con tope, por si el total no baja). */
+-async function abiertasFom(): Promise<ProgramacionFom[]> {
+-  const citas: ProgramacionFom[] = [];
+-  for (let offset = 0, vueltas = 0; vueltas < 20; vueltas++) {
+-    const { items, page } = await paginaFom<ProgramacionFom>('/inspection-schedules?status=programada', {
+-      limit: CITAS_POR_PAGINA,
+-      offset,
+-    });
+-    citas.push(...items);
+-    offset += items.length;
+-    if (items.length === 0 || offset >= page.total) break;
+-  }
+-  return citas;
+-}
+-
+-/**
+- * Las últimas citas HECHAS. FOM las ordena de la más vieja a la más nueva, así
+- * que se lee el total y, si hay más de una página, solo el final.
+- */
+-async function ultimasHechasFom(): Promise<ProgramacionFom[]> {
+-  const ruta = '/inspection-schedules?status=completada';
+-  const primera = await paginaFom<ProgramacionFom>(ruta, { limit: 50, offset: 0 });
+-  if (primera.page.total <= primera.items.length) return primera.items.slice(-HECHAS_A_LA_VISTA);
+-  const final = await paginaFom<ProgramacionFom>(ruta, {
+-    limit: HECHAS_A_LA_VISTA,
+-    offset: Math.max(0, primera.page.total - HECHAS_A_LA_VISTA),
+-  });
+-  return final.items;
+-}
+-
+-/**
+- * Las inspecciones PROGRAMADAS para quien tiene la sesión: las que le asignaron
+- * desde la web, con su unidad, su formato y su día.
+- *
+- * Primero lo que le toca —las de hoy arriba, luego las próximas, luego las
+- * vencidas—, y al final sus últimas hechas.
+- *
+- * Si FOM todavía no publica la ruta (403/404, producción vieja) sale vacía:
+- * es un extra de la pantalla, no algo que deba tumbarla.
+- */
+-export async function getMisProgramadas(): Promise<InspeccionProgramada[]> {
+-  let abiertas: ProgramacionFom[];
+-  let hechas: ProgramacionFom[];
+-  try {
+-    [abiertas, hechas] = await Promise.all([abiertasFom(), ultimasHechasFom()]);
+-  } catch (e) {
+-    if (e instanceof ErrorFom && (e.statusCode === 403 || e.statusCode === 404)) return [];
+-    throw new Error(mensajeDe(e));
+-  }
+-  const fechaHoy = hoy();
+-  const orden: Record<EstadoProgramada, number> = { pendiente: 0, vencida: 1, hecha: 2 };
+-  return [...abiertas, ...hechas.reverse()]
+-    .map((p) => aProgramada(p, fechaHoy))
+-    .filter((p): p is InspeccionProgramada => p !== null)
+-    .sort(
+-      (a, b) =>
+-        orden[a.estado] - orden[b.estado] ||
+-        // Pendientes: la más cercana primero. Vencidas y hechas: la más reciente.
+-        (a.estado === 'pendiente' ? a.fecha.localeCompare(b.fecha) : b.fecha.localeCompare(a.fecha)),
+-    );
+-}
+-
+-/** Lo que contesta FOM al enviar una inspección programada, dicho para el conductor. */
+-function errorDeProgramada(e: unknown): Error {
+-  if (e instanceof ErrorFom && e.code !== 'respuesta_no_json') {
+-    if (e.statusCode === 404) {
+-      return new Error('Esta inspección programada ya no está disponible: se hizo, se canceló o no es tuya.');
+-    }
+-    if (e.statusCode === 409 && /not due today/i.test(e.message)) {
+-      return new Error('Esta inspección programada no es para hoy. Solo se puede enviar el día de la cita.');
+-    }
+-  }
+-  return errorDeInspeccion(e);
+-}
+-
+ /**
+  * Envía la inspección (FOM-02 §4.1): tres respuestas por ítem, Conforme,
+  * Observación o Falla.
+@@ -504,13 +372,8 @@ function errorDeProgramada(e: unknown): Error {
+  * Las fallas en ítems CRÍTICOS piden su orden siempre; las demás, si el
+  * conductor respondió que sí. FOM decide el resultado y crea las órdenes.
+  * Bloqueada, se le avisa al supervisor.
+- *
+- * Con `programacionId` cumple esa cita (`scheduleId` en FOM) y queda como
+- * PROGRAMADA; sin él es la diaria, como siempre.
+  */
+-export async function enviarInspeccion(
+-  input: EnviarInspeccionInput & { programacionId?: string },
+-): Promise<ResultadoInspeccion> {
++export async function enviarInspeccion(input: EnviarInspeccionInput): Promise<ResultadoInspeccion> {
+   const { formatoId } = input.plantilla;
+   if (!formatoId) throw new Error('Tu empresa no tiene un formato de inspección publicado.');
+   const items = new Map(input.plantilla.categorias.flatMap((c) => c.items).map((i) => [i.id, i]));
+@@ -522,7 +385,6 @@ export async function enviarInspeccion(
+       metodo: 'POST',
+       cuerpo: {
+         templateId: formatoId,
+-        ...(input.programacionId ? { scheduleId: input.programacionId } : {}),
+         ...(ubicacion.length >= 2 ? { location: ubicacion.slice(0, 200) } : {}),
+         answers: input.respuestas.map((r) => ({
+           templateItemId: r.itemId,
+@@ -535,7 +397,7 @@ export async function enviarInspeccion(
+       },
+     })) as typeof enviada;
+   } catch (e) {
+-    throw input.programacionId ? errorDeProgramada(e) : errorDeInspeccion(e);
++    throw errorDeInspeccion(e);
+   }
+ 
+   // Las fotos viajan aparte, por la cola: si no llegan, quedan pendientes a la
+diff --git a/src/services/workOrderService.ts b/src/services/workOrderService.ts
+index bd41d06..24047e7 100644
+--- a/src/services/workOrderService.ts
++++ b/src/services/workOrderService.ts
+@@ -74,20 +74,29 @@ export async function crearOrdenDeTrabajo(input: NuevaOrdenInput): Promise<WorkO
+   // verse ya en Mantenimiento, no al minuto.
+   olvidarPanelConductor();
+ 
++  // La dirección de cada foto ya subida, por posición. Si la cola reintenta,
++  // solo sube las que faltan: re-subir la 1 la duplicaría como `/2`.
++  const subidas: (string | undefined)[] = [];
+   if (input.evidenciaUris.length > 0) {
++    const destino = etiquetaFotosOrden(orden.id);
+     await encolar(
+       'ot',
+       `Fotos de la ODT (${input.evidenciaUris.length})`,
+       async () => {
+-        await subirFotosOrden(etiquetaFotosOrden(orden.id), input.evidenciaUris, input.evidenciaTitulos);
++        for (const [i, uri] of input.evidenciaUris.entries()) {
++          if (subidas[i]) continue;
++          [subidas[i]] = await subirFotosOrden(destino, [uri], [input.evidenciaTitulos?.[i] ?? '']);
++        }
+       },
+       { reintentar: true },
+     );
+   }
+-  // Lo que ve la pantalla ahora mismo: las fotos del teléfono, hasta que la cola las suba.
++  // Lo que ve la pantalla ahora mismo: la foto ya en la nube si subió, y si no
++  // la del teléfono, hasta que la cola la suba.
++  const evidencia = input.evidenciaUris.map((uri, i) => subidas[i] ?? uri);
+   return {
+     ...orden,
+-    evidenciaUrls: input.evidenciaUris.length > 0 ? input.evidenciaUris : undefined,
++    evidenciaUrls: evidencia.length > 0 ? evidencia : undefined,
+     evidenciaTitulos: input.evidenciaTitulos,
+   };
+ }
+diff --git a/src/sync/outbox.ts b/src/sync/outbox.ts
+index 2147bee..3650649 100644
+--- a/src/sync/outbox.ts
++++ b/src/sync/outbox.ts
+@@ -9,8 +9,14 @@
+  * Es un singleton observable (sin React) para que lo usen tanto la capa de
+  * servicios (`encolar`) como la interfaz (`useSync`, vía `subscribe`/`getSnapshot`).
+  * No importa nada de `@/services`, así que no hay dependencias circulares.
++ *
++ * La cola vive en memoria: lo pendiente se reintenta solo al volver la app al
++ * frente y, mientras quede algo, cada cierto tiempo (no hay quien escuche la
++ * red: el reintento hace de «volvió la conexión»).
+  */
+ 
++import { AppState } from 'react-native';
++
+ /** Tipo de operación encolada (para agrupar y mostrar). */
+ export type OutboxOpTipo = 'ot' | 'inspeccion' | 'sos' | 'alerta' | 'mantenimiento';
+ 
+@@ -22,6 +28,12 @@ export interface OutboxOpInfo {
+   descripcion: string;
+   /** ISO de cuando se encoló. */
+   creadaEn: string;
++  /** Por qué falló la última vez (lo que dijo el servidor o el teléfono). */
++  motivo?: string;
++  /** Cuántas veces se intentó. */
++  intentos: number;
++  /** ISO del último intento. */
++  ultimoIntento?: string;
+ }
+ 
+ /** Operación completa: los datos + la función que hace la sincronización real. */
+@@ -29,21 +41,34 @@ interface OutboxOp extends OutboxOpInfo {
+   ejecutar: () => Promise<void>;
+ }
+ 
++/** Cómo salió el último envío de la cola (el botón «Enviar ahora» o el reintento solo). */
++export interface ResultadoEnvio {
++  /** ISO de cuando terminó. */
++  en: string;
++  enviadas: number;
++  fallidas: number;
++}
++
+ /** Estado observable de la sincronización. */
+ export interface EstadoSync {
+   online: boolean;
+   sincronizando: boolean;
+   pendientes: OutboxOpInfo[];
++  /** El último envío de la cola, o `null` si aún no hubo. */
++  ultimoEnvio: ResultadoEnvio | null;
+ }
+ 
+ let _online = true;
+ let _sincronizando = false;
+ let _cola: OutboxOp[] = [];
+ let _seq = 0;
++let _ultimoEnvio: ResultadoEnvio | null = null;
++/** Vueltas seguidas en que no salió nada: alargan la espera del reintento solo. */
++let _fallosSeguidos = 0;
+ 
+ // Snapshot cacheado: `useSyncExternalStore` exige una referencia ESTABLE que
+ // solo cambie cuando cambia el estado (si no, entra en bucle).
+-let _snapshot: EstadoSync = { online: true, sincronizando: false, pendientes: [] };
++let _snapshot: EstadoSync = { online: true, sincronizando: false, pendientes: [], ultimoEnvio: null };
+ const listeners = new Set<() => void>();
+ 
+ function reconstruirSnapshot() {
+@@ -52,9 +77,16 @@ function reconstruirSnapshot() {
+     sincronizando: _sincronizando,
+     // Se excluye la función ejecutora (no es serializable ni se muestra).
+     pendientes: _cola.map(({ ejecutar: _ejecutar, ...info }) => info),
++    ultimoEnvio: _ultimoEnvio,
+   };
+ }
+ 
++/** El motivo legible de un fallo: el `motivo` de la subida si lo trae, si no el mensaje. */
++function motivoDe(e: unknown): string {
++  if (e && typeof e === 'object' && 'motivo' in e && typeof e.motivo === 'string') return e.motivo;
++  return e instanceof Error ? e.message : String(e);
++}
++
+ function emitir() {
+   reconstruirSnapshot();
+   listeners.forEach((l) => l());
+@@ -99,49 +131,94 @@ export async function encolar(
+   ejecutar: () => Promise<void>,
+   opciones: OpcionesEncolar = {},
+ ): Promise<void> {
++  const ahora = new Date().toISOString();
++  let motivo: string | undefined;
+   if (_online) {
+     try {
+       await ejecutar();
+       return;
+     } catch (e) {
+       if (!opciones.reintentar) throw e;
+-      // Cae a la cola: se reintenta al sincronizar.
++      // Cae a la cola con su motivo: se reintenta al sincronizar.
++      motivo = motivoDe(e);
+     }
+   }
+   _cola.push({
+     id: `op-${Date.now()}-${++_seq}`,
+     tipo,
+     descripcion,
+-    creadaEn: new Date().toISOString(),
++    creadaEn: ahora,
++    motivo,
++    intentos: motivo ? 1 : 0,
++    ultimoIntento: motivo ? ahora : undefined,
+     ejecutar,
+   });
+   emitir();
++  programarReintento();
+ }
+ 
+ /**
+- * Procesa la cola en orden. Idempotente por diseño: cada operación se quita solo
+- * tras completarse; si una falla, se detiene y se reintenta luego (en la API
+- * real, además, cada operación llevará su clave de idempotencia).
++ * Procesa la cola en orden. Cada operación se quita solo tras completarse; la
++ * que falla se queda con su motivo y se reintenta luego.
++ *
++ * No se corta en la primera que falla: son fotos de cosas distintas, y una que
++ * Cloudinary rechaza no puede dejar atascadas a las demás para siempre.
+  */
+ async function procesarCola(): Promise<void> {
+-  if (_sincronizando || !_online) return;
++  if (_sincronizando || !_online || _cola.length === 0) return;
+   _sincronizando = true;
+   emitir();
+-  while (_online && _cola.length > 0) {
+-    const op = _cola[0];
++  let enviadas = 0;
++  let fallidas = 0;
++  for (const op of [..._cola]) {
++    if (!_online) break;
+     try {
+       await op.ejecutar();
+-      _cola = _cola.slice(1);
+-      emitir();
+-    } catch {
+-      // Se corta y se reintentará en la próxima sincronización.
+-      break;
++      _cola = _cola.filter((o) => o.id !== op.id);
++      enviadas += 1;
++    } catch (e) {
++      fallidas += 1;
++      _cola = _cola.map((o) =>
++        o.id === op.id
++          ? { ...o, motivo: motivoDe(e), intentos: o.intentos + 1, ultimoIntento: new Date().toISOString() }
++          : o,
++      );
+     }
++    emitir();
+   }
++  _fallosSeguidos = fallidas > 0 && enviadas === 0 ? _fallosSeguidos + 1 : 0;
++  _ultimoEnvio = { en: new Date().toISOString(), enviadas, fallidas };
+   _sincronizando = false;
+   emitir();
++  programarReintento();
+ }
+ 
++// ─────────────────────── Reintento solo ───────────────────────
++
++/** Primera espera antes de reintentar; se dobla con cada vuelta fallida, hasta el tope. */
++const ESPERA_BASE = 30_000;
++const ESPERA_MAX = 5 * 60_000;
++let _reloj: ReturnType<typeof setTimeout> | null = null;
++
++/** Deja programado el próximo intento si queda algo. Con la app en segundo plano no gasta. */
++function programarReintento() {
++  if (_reloj || _cola.length === 0) return;
++  const espera = Math.min(ESPERA_BASE * 2 ** _fallosSeguidos, ESPERA_MAX);
++  _reloj = setTimeout(() => {
++    _reloj = null;
++    // En segundo plano no se intenta: al volver al frente lo hace el oyente de abajo.
++    if (AppState.currentState === 'active') void procesarCola();
++  }, espera);
++}
++
++// Al volver la app al frente (abrirla de nuevo), se intenta lo pendiente.
++AppState.addEventListener('change', (estado) => {
++  if (estado === 'active' && _cola.length > 0) {
++    _fallosSeguidos = 0;
++    void procesarCola();
++  }
++});
++
+ /** Cambia el estado de conexión (hoy simulado desde la UI). Al reconectar, sincroniza. */
+ export async function setOnline(online: boolean): Promise<void> {
+   if (_online === online) return;
+@@ -150,7 +227,11 @@ export async function setOnline(online: boolean): Promise<void> {
+   if (online) await procesarCola();
+ }
+ 
+-/** Fuerza la sincronización de lo pendiente (botón "Sincronizar ahora"). */
++/**
++ * Fuerza la sincronización de lo pendiente (botón «Enviar ahora»). Cómo salió
++ * queda en `ultimoEnvio` y, la que falló, con su `motivo`.
++ */
+ export async function sincronizarAhora(): Promise<void> {
++  _fallosSeguidos = 0;
+   await procesarCola();
+ }
 -- 
 2.55.0.windows.3
 

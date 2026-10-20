@@ -12,7 +12,7 @@ import { listarTodasOdts } from './listar-odts'
 // "0 km/h" cuando en realidad no sabe la velocidad miente, y nadie se entera.
 // ============================================================
 
-import { api, empresaGestionActualId } from './api'
+import { api, empresaGestionActualId, pedir } from './api'
 import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
@@ -209,6 +209,32 @@ function motivo(texto, porDefecto = 'consola') {
     .replace(/-$/u, '')
     .slice(0, 100)
   return base || porDefecto
+}
+
+/**
+ * Inspecciones de la empresa desde `desde` hasta hoy, página a página.
+ * `GET /inspections` llega de la más nueva a la más vieja y solo acepta
+ * `vehicleId`, `limit` (hasta 200) y `offset`: se sigue pidiendo hasta que la
+ * última de la página es anterior a `desde`. Tope de 25 páginas (5 000
+ * inspecciones); si se alcanza, la lista sale marcada como incompleta.
+ */
+export async function inspeccionesDelPeriodo({ vehiculoId = '', desde }, pedirPagina = (offset) => {
+  const p = new URLSearchParams({ limit: 200, offset })
+  if (vehiculoId) p.set('vehicleId', vehiculoId)
+  return pedir(`/api/v1/console/inspections?${p}`)
+}) {
+  const items = new Map()
+  for (let vuelta = 0; vuelta < 25; vuelta++) {
+    const r = await pedirPagina(items.size)
+    const pagina = r?.items ?? []
+    const antes = items.size
+    for (const i of pagina) items.set(i.id, i)
+    const total = Number(r?.page?.total)
+    const ultima = String(pagina.at(-1)?.inspectionDate ?? '').slice(0, 10)
+    if (pagina.length < 200 || (Number.isFinite(total) && items.size >= total) || (ultima && ultima < desde)) return { items: [...items.values()] }
+    if (items.size === antes) throw new Error('No se pudieron leer todas las inspecciones del mes: el servidor repitió una página. Vuelve a intentarlo.')
+  }
+  return { items: [...items.values()], incompleta: true }
 }
 
 function conductoresPorVehiculo(lista) {
@@ -1395,10 +1421,16 @@ export const repoApi = {
       const revisadas = new Set(hechas.filter((i) => String(i.fecha ?? '').slice(0, 10) === hoy).map((i) => i.vehiculoId))
       return flota.filter((v) => !revisadas.has(v.id))
     },
-    async listar({ vehiculoId = '', fecha = '', q = '' } = {}) {
+    /**
+     * Con `desde`/`hasta` (YYYY-MM-DD) se lee el periodo entero: el servidor no
+     * filtra por fecha, pero ordena de la más nueva a la más vieja, así que se
+     * pasan páginas de 200 hasta cruzar `desde`. Una lectura por periodo, no
+     * una por día ni por persona. Sin `desde`, la lectura de siempre (100).
+     */
+    async listar({ vehiculoId = '', fecha = '', q = '', desde = '', hasta = '' } = {}) {
       try {
-        const r = await api.inspecciones({ vehiculoId })
-        return (r?.items ?? []).map((i) => ({
+        const r = desde ? await inspeccionesDelPeriodo({ vehiculoId, desde }) : await api.inspecciones({ vehiculoId })
+        const lista = (r?.items ?? []).map((i) => ({
           id: i.id,
           resultado: i.result,
           fecha: i.inspectionDate,
@@ -1418,7 +1450,12 @@ export const repoApi = {
           observaciones: null,
           tipoVehiculo: null,
         })).filter(i => !fecha || String(i.fecha).slice(0, 10) === fecha)
+          .filter(i => !desde || String(i.fecha).slice(0, 10) >= desde)
+          .filter(i => !hasta || String(i.fecha).slice(0, 10) <= hasta)
           .filter(i => !q || `${i.vehiculoNombre} ${i.conductorNombre}`.toLowerCase().includes(q.toLowerCase()))
+        // Si se agotó el tope de páginas sin llegar a `desde`, la pantalla lo dice en vez de contar «no hecha».
+        if (r?.incompleta) lista.incompleta = true
+        return lista
       } catch (error) {
         throw error
       }

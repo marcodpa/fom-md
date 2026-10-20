@@ -361,7 +361,7 @@ export default function Consola() {
           <Route path="mantenimiento" element={area === 'conductor' ? <MantenimientoConductor /> : <Mantenimiento />} />
           <Route path="mantenimiento/planes" element={<Navigate to="/panel/mantenimiento?vista=planes" replace />} />
           <Route path="inspecciones" element={<Inspecciones />} />
-          <Route path="inspecciones/programa" element={<Navigate to="/panel/inspecciones?vista=agenda" replace />} />
+          <Route path="inspecciones/programa" element={<Navigate to="/panel/inspecciones?vista=plantillas" replace />} />
           <Route path="documentos" element={<Documentos />} />
           <Route path="personal" element={<AdminUsuarios />} />
           <Route path="personal/:id" element={<ExpedienteConductor />} />

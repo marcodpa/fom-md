@@ -26,6 +26,7 @@ import { ESTADOS_VISIBLES, estadoVisible, presentarHistorial } from '../datos/hi
 import { GaleriaArchivos, SelectorArchivos } from '../comp/Archivos'
 import { subirVarios } from '../datos/archivos'
 import { Icono } from '../Iconos'
+import OdtAsignadas from '../comp/OdtAsignadas'
 
 // ============================================================
 // MANTENIMIENTO — órdenes de trabajo de la flota.
@@ -168,6 +169,8 @@ function Ordenes({ listaCompleta = false }) {
     {estado === 'cargando' && <Cargando filas={6}/>}
     {estado === 'error' && <ErrorCarga onReintentar={recargar} texto={error?.message}/>}
     {estado === 'ok' && <>
+      {/* Arriba de todo, lo que le toca hacer a quien tiene la sesión (solo si es responsable de alguna). */}
+      {!listaCompleta && <OdtAsignadas odts={odts} perfil={sesion?.perfil ?? null} alCambiar={recargar} alAbrir={setDetalleId}/>}
       <Indicadores odts={odts}/>
       {vista === 'lista' && <div className="mnt-filters"><Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/>{!listaCompleta && <div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Prioridades</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div>}</div>}
       {vista === 'lista' && (listaCompleta ? <div className="mnt-all-filters">

@@ -118,7 +118,58 @@ function todasNotificaciones() {
     .sort((a, b) => new Date(b.creadaEn) - new Date(a.creadaEn))
 }
 function todasInspecciones() {
-  return [...agregados('inspecciones'), ...INSPECCIONES].map((i) => aplicar('inspecciones', i))
+  return [...agregados('inspecciones'), ...INSPECCIONES, ...historialInspecciones()].map((i) => aplicar('inspecciones', i))
+}
+
+// La semilla trae 12 días de inspecciones; la vista «Por persona» necesita el
+// mes entero. Este historial cubre del día 12 al 50 hacia atrás con la misma
+// regla que la operación: cada conductor hace la diaria todos los días con
+// su propia constancia, y de vez en cuando le toca una programada. Sale de un
+// hash de (conductor, fecha): la misma persona, el mismo día, el mismo resultado.
+function hashSemilla(texto) {
+  let h = 2166136261
+  for (let i = 0; i < texto.length; i++) {
+    h ^= texto.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  // Mezcla final (fmix32): sin ella, dos fechas seguidas dan casi el mismo número.
+  h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16
+  return (h >>> 0) / 4294967296
+}
+let historialCache = null
+function historialInspecciones() {
+  const hoy = hoyISO()
+  if (historialCache?.hoy === hoy) return historialCache.lista
+  const lista = []
+  for (const veh of VEHICULOS) {
+    const conductorId = veh.conductorPrincipalId
+    if (!conductorId) continue
+    // Constancia propia de cada conductor: entre 55 % y 100 % de los días.
+    const constancia = 0.55 + hashSemilla(conductorId) * 0.45
+    for (let d = 12; d <= 50; d++) {
+      const dia = new Date(); dia.setHours(12, 0, 0, 0); dia.setDate(dia.getDate() - d)
+      const fecha = hoyISO(dia)
+      const base = { vehiculoId: veh.id, conductorId, fecha, ubicacion: veh.ubicacionTexto }
+      const hora = (n) => { const t = new Date(dia); t.setHours(6 + Math.floor(n * 3), Math.floor(n * 59)); return t.toISOString() }
+      if (hashSemilla(conductorId + fecha) < constancia) {
+        const r = hashSemilla(fecha + conductorId)
+        const resultado = r > 0.93 ? 'bloqueada' : r > 0.75 ? 'aprobada_con_observaciones' : 'aprobada'
+        lista.push({
+          ...base, id: `insp-h-${conductorId}-${fecha}`, clase: 'daily', resultado, creadaEn: hora(r),
+          observaciones: resultado === 'aprobada' ? 0 : 1 + Math.floor(r * 10) % 3,
+          fallasCriticas: resultado === 'bloqueada' ? 1 : 0,
+        })
+      }
+      if (hashSemilla(conductorId + fecha + 'programada') < 0.07) {
+        lista.push({
+          ...base, id: `insp-p-${conductorId}-${fecha}`, clase: 'scheduled', resultado: 'aprobada',
+          creadaEn: hora(0.9), observaciones: 0, fallasCriticas: 0,
+        })
+      }
+    }
+  }
+  historialCache = { hoy, lista }
+  return lista
 }
 
 // Plantillas de inspección: cada empresa tiene las suyas (la del admin FOM
@@ -546,7 +597,7 @@ export const repo = {
     itemsPlantilla: (tipo = 'otro') =>
       ITEMS_INSPECCION.filter((i) => i.tipos.length === 0 || i.tipos.includes(tipo)),
 
-    async listar({ fecha = '', resultado = '', q = '' } = {}) {
+    async listar({ fecha = '', resultado = '', q = '', desde = '', hasta = '' } = {}) {
       const veh = todosVehiculos()
       const perfiles = todosPerfiles()
       let lista = todasInspecciones().map((i) => {
@@ -561,6 +612,8 @@ export const repo = {
         }
       })
       if (fecha) lista = lista.filter((i) => i.fecha === fecha)
+      if (desde) lista = lista.filter((i) => i.fecha >= desde)
+      if (hasta) lista = lista.filter((i) => i.fecha <= hasta)
       if (resultado) lista = lista.filter((i) => i.resultado === resultado)
       if (q) {
         const t = q.toLowerCase()

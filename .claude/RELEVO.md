@@ -37,6 +37,15 @@ turnos a menudo: continuarlos con SendMessage.
 - Web local: `fom-demo` (5174, datos de prueba). La web con datos reales (`npm run dev`, 5173)
   la tiene que prender Marco: el sistema bloquea a Claude contra producción.
 
+## Pendiente con Marco
+
+- Regla de fines de semana del calendario de inspecciones (Inspecciones › Por persona, web y app):
+  hoy cuentan TODOS los días (lunes a domingo). Marco duda entre eso y que sábado y domingo NO
+  cuenten, salvo que el conductor «habilite» ese día porque le toca trabajar (por ejemplo, un
+  botón «Hoy trabajo» en la app o que se tome como laborable si hizo jornada/km). Sin decidir:
+  no cambiar hasta que Marco elija. Código: app src/components/inspecciones-por-persona.tsx
+  (`debia`), web src/panel/modulos/InspeccionesPorPersona.jsx.
+
 ## Pendiente con Juan
 
 1. Activar la web nueva: `sudo bash /home/fomadmin/deploy-20261019-normalizado/activate-publication.sh`

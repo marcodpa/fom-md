@@ -1,0 +1,162 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useDatos } from '../useDatos'
+import { Campo, ErrorCarga, Tag, Tarjeta } from './ui'
+import { Icono } from '../Iconos'
+import { etiqueta } from '../datos/catalogos'
+import { estadoVisible } from '../datos/historial-odt'
+import { ESTADOS_DE_TALLER, MOMENTOS, accionesDe, listarAsignadas, registrarEvento, textoTiempo } from '../datos/odtAsignadas'
+
+// ============================================================
+// «ASIGNADAS A TI» — las ODT que la persona de la sesión tiene a su cargo.
+// Igual que en la app: Iniciar trabajo, Pausar, Reanudar y Entregar, con el
+// tiempo trabajado. Va arriba en Mantenimiento (supervisor y conductor) y no
+// aparece si no tiene ninguna o si el servidor no se lo deja ver.
+// ============================================================
+
+const COLOR_MOMENTO = { asignada: 'gris', en_ejecucion: 'verde', pausada: 'ambar', en_calidad: 'azul' }
+
+export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir }) {
+  // Se vuelve a preguntar solo si cambia alguna orden en taller (no por cada refresco de la lista).
+  const clave = useMemo(
+    () => (odts ?? []).filter((o) => ESTADOS_DE_TALLER.includes(o.estado)).map((o) => `${o.id}:${o.estado}`).join(','),
+    [odts],
+  )
+  const odtsRef = useRef(odts)
+  odtsRef.current = odts
+  const lectura = useDatos(() => listarAsignadas({ odts: odtsRef.current ?? [], perfil }), [clave, perfil?.id, perfil?.correo])
+  const [ahora, setAhora] = useState(() => Date.now())
+  const [aviso, setAviso] = useState('')
+  const items = lectura.datos ?? []
+  // «Ver orden» solo para las que están en la lista de la pantalla (el detalle se abre desde ahí).
+  const conocidas = useMemo(() => new Set((odts ?? []).map((o) => o.id)), [odts])
+  const corriendo = items.some((o) => o.estado === 'en_ejecucion')
+
+  // Mientras alguien trabaja, el tiempo sigue contando en pantalla sin pedir nada al servidor.
+  useEffect(() => {
+    if (!corriendo) return undefined
+    const id = setInterval(() => setAhora(Date.now()), 30_000)
+    return () => clearInterval(id)
+  }, [corriendo])
+
+  if (lectura.estado === 'error') {
+    return (
+      <Tarjeta titulo="Asignadas a ti">
+        <ErrorCarga compacto error={lectura.error} onReintentar={lectura.recargar} />
+      </Tarjeta>
+    )
+  }
+  // Sin órdenes a su cargo (o sin permiso para verlas): la sección no aparece.
+  if (!lectura.datos || items.length === 0) return null
+
+  async function despues(texto) {
+    setAviso(texto)
+    setAhora(Date.now())
+    await Promise.all([lectura.recargar(), alCambiar?.()])
+  }
+
+  return (
+    <section className="pnl-card mnt-asig" aria-labelledby="mnt-asig-titulo">
+      <div className="pnl-card-cab">
+        <h2 id="mnt-asig-titulo">Asignadas a ti</h2>
+        <span className="mnt-asig-cuenta">{items.length} {items.length === 1 ? 'orden a tu cargo' : 'órdenes a tu cargo'}</span>
+      </div>
+      {aviso && <div className="mnt-success mnt-asig-aviso" role="status"><Icono nombre="check" tam={20} />{aviso}</div>}
+      <div className="mnt-asig-lista">
+        {items.map((o) => <Asignada key={o.id} item={o} ahora={ahora} alHacer={despues} alAbrir={alAbrir && conocidas.has(o.id) ? alAbrir : null} />)}
+      </div>
+    </section>
+  )
+}
+
+function Asignada({ item, ahora, alHacer, alAbrir }) {
+  const [entregando, setEntregando] = useState(false)
+  const [nota, setNota] = useState('')
+  const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  const notaRef = useRef(null)
+  const momento = MOMENTOS[item.estado] ?? { t: etiqueta('odt_estado', item.estado), ayuda: '' }
+  const visible = estadoVisible(item.estado)
+  const acciones = accionesDe(item.estado)
+  // Lo que el servidor midió, más lo que pasó desde entonces si el reloj sigue corriendo.
+  const segundos = item.segundos + (item.estado === 'en_ejecucion' ? Math.max(0, (ahora - item.medidoEn) / 1000) : 0)
+
+  useEffect(() => {
+    if (entregando) notaRef.current?.focus()
+  }, [entregando])
+
+  async function hacer(paso) {
+    if (guardando) return
+    setError('')
+    if (paso.pideNota && !entregando) {
+      setEntregando(true)
+      return
+    }
+    if (paso.pideNota && nota.trim().length < 3) {
+      setError('Cuenta qué se hizo (al menos 3 letras).')
+      return
+    }
+    setGuardando(true)
+    try {
+      await registrarEvento(item, paso.accion, paso.pideNota ? nota : '')
+      setEntregando(false)
+      setNota('')
+      await alHacer(
+        paso.accion === 'inicio' ? 'Trabajo iniciado. El tiempo empieza a contar.'
+          : paso.accion === 'pausa' ? 'Trabajo pausado.'
+            : paso.accion === 'reanudacion' ? 'Trabajo reanudado.'
+              : 'Trabajo entregado. El supervisor lo revisa y lo cierra.',
+      )
+    } catch (e) {
+      setError(e?.message || 'No pudimos guardar el cambio. Inténtalo otra vez.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <article className="mnt-asig-item">
+      <div className="mnt-asig-fila">
+        <div className="mnt-thumb"><Icono nombre="llave" tam={24} /></div>
+        <div className="mnt-asig-copia">
+          <span>{item.vehiculoNombre}{item.tipoFalla ? ` · ${etiqueta('tipo_falla', item.tipoFalla)}` : ''}</span>
+          <h3>{item.titulo}</h3>
+          <div className="mnt-asig-tags">
+            <Tag color={visible.color}>{visible.etiqueta}</Tag>
+            <Tag color={COLOR_MOMENTO[item.estado] ?? 'gris'} plano>{momento.t}</Tag>
+          </div>
+          {momento.ayuda && <p>{momento.ayuda}</p>}
+        </div>
+        <dl className="mnt-asig-tiempo">
+          <dt><Icono nombre="reloj" tam={16} />Tiempo trabajado</dt>
+          <dd>{textoTiempo(segundos)}</dd>
+        </dl>
+      </div>
+
+      {!entregando && (acciones.length > 0 || alAbrir) && (
+        <div className="mnt-asig-acciones" role="group" aria-label={`Acciones de la orden ${item.titulo}`}>
+          {acciones.map((p) => (
+            <button key={p.accion} type="button" className={`pnl-btn${p.sutil ? '' : ' primario'}`} onClick={() => hacer(p)} disabled={guardando}>
+              {guardando && !p.sutil ? 'Guardando…' : p.t}
+            </button>
+          ))}
+          {alAbrir && <button type="button" className="pnl-btn sutil" onClick={() => alAbrir(item.id)}>Ver orden →</button>}
+        </div>
+      )}
+
+      {entregando && (
+        <div className="mnt-asig-entrega">
+          <Campo etiqueta="Qué se hizo" error={error} ayuda="Queda en el historial de la orden. El costo lo registra el supervisor al cerrarla.">
+            <textarea ref={notaRef} className="pnl-textarea" rows={3} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Se cambiaron las pastillas delanteras y se probó el frenado." />
+          </Campo>
+          <div className="mnt-asig-acciones">
+            <button type="button" className="pnl-btn primario" onClick={() => hacer(acciones.find((p) => p.accion === 'entrega') ?? { accion: 'entrega', pideNota: true })} disabled={guardando}>
+              {guardando ? 'Guardando…' : 'Entregar'}
+            </button>
+            <button type="button" className="pnl-btn sutil" onClick={() => { setEntregando(false); setError('') }} disabled={guardando}>Volver</button>
+          </div>
+        </div>
+      )}
+      {error && !entregando && <p className="pnl-campo-error" role="alert">{error}</p>}
+    </article>
+  )
+}

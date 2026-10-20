@@ -78,3 +78,41 @@
 .mnt-view{border-radius:10px}.mnt-view button,.mnt-states button{border-radius:10px}
 .mnt-guide-step>div>p{margin-top:8px}
 @media(max-width:700px){.mnt-heading h1{font-size:28px;line-height:32px}.mnt-summary b{font-size:28px;line-height:34px}}
+/* T-62 «Asignadas a ti»: las ODT a cargo de quien tiene la sesión, arriba del módulo (igual que la app). */
+.mnt-asig{margin-bottom:20px;border-radius:24px}
+.mnt-asig .pnl-card-cab{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mnt-asig-cuenta{font-size:12px;font-weight:600;color:var(--e-texto-2)}
+.mnt-asig-aviso{margin:0 22px 8px}
+.mnt-asig-item{padding:18px 22px;border-top:1px solid var(--mnt-line);display:grid;gap:14px}
+.mnt-asig-fila{display:flex;align-items:flex-start;gap:16px}
+.mnt-asig-fila .mnt-thumb{width:48px;height:48px;border-radius:10px;color:var(--e-info)}
+.mnt-asig-copia{flex:1;min-width:0}
+.mnt-asig-copia>span{font-size:13px;color:var(--e-texto-2)}
+.mnt-asig-copia h3{margin:4px 0 10px;font-size:17px;font-weight:600;overflow-wrap:anywhere}
+.mnt-asig-copia p{margin:10px 0 0;font-size:13px;color:var(--e-texto-2)}
+.mnt-asig-tags{display:flex;gap:8px;flex-wrap:wrap}
+.mnt-asig-tiempo{margin:0;flex:none;text-align:right;min-width:150px}
+.mnt-asig-tiempo dt{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:12px;font-weight:600;color:var(--e-texto-2)}
+.mnt-asig-tiempo dd{margin:4px 0 0;font-size:24px;line-height:30px;font-weight:700;font-variant-numeric:tabular-nums}
+.mnt-asig-acciones{display:flex;gap:10px;flex-wrap:wrap;padding-left:64px}
+.mnt-asig-acciones .pnl-btn{border-radius:999px;min-height:44px}
+.mnt-asig-entrega{padding-left:64px}
+.mnt-asig-entrega .pnl-campo{margin-bottom:12px}
+.mnt-asig-entrega .mnt-asig-acciones{padding-left:0}
+.mnt-asig-item>.pnl-campo-error{margin:0;padding-left:64px}
+/* En el teléfono, como la app: el tiempo debajo del título y botones de 48 a todo el ancho. */
+@media(max-width:767px){
+  .mnt-asig .pnl-card-cab{padding:16px}
+  .mnt-asig-aviso{margin:0 16px 8px}
+  .mnt-asig-item{padding:16px;gap:12px}
+  .mnt-asig-fila{flex-wrap:wrap;gap:12px}
+  .mnt-asig-fila .mnt-thumb{width:40px;height:40px}
+  .mnt-asig-copia{flex-basis:calc(100% - 52px)}
+  .mnt-asig-copia h3{font-size:15px;line-height:20px}
+  .mnt-asig-tiempo{width:100%;min-width:0;text-align:left;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:16px;background:var(--e-sup-baja);border:1px solid var(--mnt-line)}
+  .mnt-asig-tiempo dt{justify-content:flex-start}
+  .mnt-asig-tiempo dd{margin:0;font-size:20px;line-height:26px}
+  .mnt-asig-acciones,.mnt-asig-entrega,.mnt-asig-item>.pnl-campo-error{padding-left:0}
+  .mnt-asig-acciones{flex-direction:column}
+  .mnt-asig-acciones .pnl-btn{width:100%;min-height:48px;justify-content:center;font-size:15px}
+}
