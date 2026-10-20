@@ -1,6 +1,6 @@
 import LogoFom from '../components/LogoFom'
 import { useEffect, useState } from 'react'
-import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
@@ -9,6 +9,8 @@ import { estaLeida } from './modulos/alertas-presentacion'
 import { Icono } from './Iconos'
 import repo, { alCambiarDatos, CONECTADO } from './datos/repo'
 import '../styles/apariencia.css'
+import { accesosDe, esPestana, MovilContexto, pestanasDe, tituloDe, useEsMovil } from './comp/movil-navegacion'
+import { MovilBarra, MovilEncabezado, MovilPantalla } from './comp/movil-piezas'
 
 import Resumen from './modulos/Resumen'
 import CentroControl from './modulos/CentroControl'
@@ -35,6 +37,8 @@ import Jornadas from './modulos/Jornadas'
 import Transferencias from './modulos/Transferencias'
 import Plataforma from './modulos/Plataforma'
 import AdminVehiculos from './modulos/AdminVehiculos'
+// Al final: el teléfono manda sobre los estilos de escritorio de los módulos.
+import '../styles/movil-app.css'
 
 // Módulos de la consola, agrupados como en la arquitectura FOM-WEB.
 const MENU = [
@@ -139,10 +143,15 @@ function inicioDe(area) {
   return '/panel'
 }
 
-function Lateral({ perfil, abierto, cerrar, sinLeer }) {
-  const menu = esAdminFom(perfil) && perfil.empresaGestion
+/** El menú de esta persona: el mismo para el lateral y para el teléfono. */
+function menuDe(perfil) {
+  return esAdminFom(perfil) && perfil.empresaGestion
     ? [MENU_ADMIN, ...MENU]
     : MENU_POR_AREA[areaDe(perfil)] ?? MENU_POR_AREA.conductor
+}
+
+function Lateral({ perfil, abierto, cerrar, sinLeer }) {
+  const menu = menuDe(perfil)
   return (
     <aside id="panel-navigation" className={`pnl-side${abierto ? ' abierto' : ''}`} onKeyDown={e => { if (e.key === 'Escape') cerrar() }}>
       <div className="pnl-side-top">
@@ -211,6 +220,8 @@ export default function Consola() {
   const sesion = useSesion()
   const { diseno } = useApariencia(sesion?.perfil)
   const { pathname } = useLocation()
+  const navegar = useNavigate()
+  const esMovil = useEsMovil()
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [sinLeer, setSinLeer] = useState(0)
 
@@ -276,8 +287,19 @@ export default function Consola() {
     return <Navigate to={inicioDe(area)} replace />
   }
 
+  // En el teléfono: las pestañas del rol abajo y, fuera de ellas, el botón atrás.
+  const menu = menuDe(perfil)
+  const pestanas = pestanasDe(perfil, area)
+  const enPestana = esPestana(pathname, pestanas)
+  const titulo = tituloDe(pathname, menu, pestanas)
+  const etiquetaCampana = esAdminFom(perfil) && !perfil.empresaGestion ? 'Alertas: elegir empresa' : `Alertas: ${sinLeer} sin leer`
+  // Sin historial (se abrió el enlace directo) atrás lleva al inicio: nadie se queda encerrado.
+  const volver = () => (window.history.state?.idx > 0 ? navegar(-1) : navegar(inicioDe(area)))
+  const movil = { esMovil, accesos: accesosDe(menu, pestanas), sinLeer, perfil }
+
   return (
-    <div className="pnl fom-dark" data-diseno={diseno} data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'}>
+    <MovilContexto.Provider value={movil}>
+    <div className="pnl fom-dark" data-diseno={diseno} data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'} data-movil={esMovil ? (enPestana ? 'pestana' : 'pila') : undefined}>
       <Lateral
         perfil={perfil}
         abierto={menuAbierto}
@@ -297,7 +319,7 @@ export default function Consola() {
         <div className="pnl-topbar">
           <div className="pnl-topbar-contexto"><span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{esAdminFom(perfil) && pathname.includes('/admin/') ? 'Administración global FOM' : perfil.empresa || 'FOM · Administración'}</span><span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span></div>
           <div className="pnl-topbar-derecha">
-            <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={esAdminFom(perfil) && !perfil.empresaGestion ? 'Alertas: elegir empresa' : `Alertas: ${sinLeer} sin leer`}>
+            <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={etiquetaCampana}>
               <Icono nombre="campana" tam={21} />
               {sinLeer > 0 && <span>{sinLeer}</span>}
             </Link>
@@ -314,6 +336,15 @@ export default function Consola() {
         >
           <Icono nombre="menu" />
         </button>
+        {esMovil && (enPestana
+          ? <MovilEncabezado
+              seccion={titulo}
+              nombre={perfil.empresaGestion?.nombre || (esAdminFom(perfil) ? '' : perfil.empresa)}
+              sinLeer={sinLeer}
+              etiquetaCampana={etiquetaCampana}
+              iniciales={perfil.iniciales}
+            />
+          : <MovilPantalla titulo={titulo} alVolver={volver} />)}
 
         <Routes key={perfil.empresaGestion?.id || 'global'}>
           <Route path="mi-perfil" element={<MiPerfil />} />
@@ -351,6 +382,8 @@ export default function Consola() {
           <Route path="*" element={<Navigate to="/panel" replace />} />
         </Routes>
       </main>
+      {esMovil && enPestana && <MovilBarra pestanas={pestanas} />}
     </div>
+    </MovilContexto.Provider>
   )
 }

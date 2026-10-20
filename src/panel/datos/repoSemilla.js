@@ -21,6 +21,8 @@ import {
   estadoDocumento, etiquetaRol, puedeGestionarA, validarRolEmpresa,
 } from './catalogos'
 import { hoyISO } from './formato'
+import { empresaGestionActualId } from './api'
+import { argumentosDeFormato, cuerpoPlantilla, publicarSiHaceFalta } from './repoApi'
 
 const CLAVE_CAMBIOS = 'fom.panel.cambios'
 
@@ -117,6 +119,46 @@ function todasNotificaciones() {
 }
 function todasInspecciones() {
   return [...agregados('inspecciones'), ...INSPECCIONES].map((i) => aplicar('inspecciones', i))
+}
+
+// Plantillas de inspección: cada empresa tiene las suyas (la del admin FOM
+// es la empresa en la que entró).
+const empresaDePlantillas = () => empresaGestionActualId() || EMPRESA.id
+function plantillasDeLaEmpresa() {
+  const empresaId = empresaDePlantillas()
+  return agregados('plantillasInspeccion')
+    .map((t) => aplicar('plantillasInspeccion', t))
+    .filter((t) => t.empresaId === empresaId)
+}
+function conflicto(mensaje) {
+  const error = new Error(mensaje)
+  error.estado = 409
+  return error
+}
+/** Crea el borrador con las mismas reglas del servidor; devuelve el id. */
+function crearPlantillaSemilla(datos) {
+  const cuerpo = cuerpoPlantilla(datos)
+  if (plantillasDeLaEmpresa().some((t) => t.codigo === cuerpo.code && t.version === cuerpo.version)) {
+    throw conflicto('Ya existe uno igual.')
+  }
+  const id = `pla-n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+  agregar('plantillasInspeccion', {
+    id, empresaId: empresaDePlantillas(), codigo: cuerpo.code, version: cuerpo.version, nombre: cuerpo.name,
+    descripcion: cuerpo.description ?? null, estado: 'borrador', items: cuerpo.items, creadaEn: new Date().toISOString(),
+  })
+  return id
+}
+const TRANSICIONES_PLANTILLA = { borrador: ['publicada', 'archivada'], publicada: ['archivada'], archivada: [] }
+function moverPlantillaSemilla(id, esperado, destino) {
+  const t = plantillasDeLaEmpresa().find((x) => x.id === id)
+  if (!t) throw new Error('Ese elemento ya no existe.')
+  if (t.estado !== esperado) throw conflicto('Alguien más cambió esto mientras lo mirabas. Recarga y vuelve a intentarlo.')
+  if (!TRANSICIONES_PLANTILLA[esperado]?.includes(destino)) throw conflicto('Ese cambio de estado no está permitido.')
+  // Como la base: una sola versión publicada por código.
+  if (destino === 'publicada' && plantillasDeLaEmpresa().some((x) => x.codigo === t.codigo && x.estado === 'publicada')) {
+    throw conflicto('Ya hay otra versión de esta plantilla publicada en esta empresa. Archívala antes de publicar esta.')
+  }
+  guardarParche('plantillasInspeccion', id, { estado: destino })
 }
 function todasEmpresas() {
   return [...EMPRESAS, ...agregados('empresas')]
@@ -538,6 +580,32 @@ export const repo = {
           .filter((v) => !hechas.has(v.id))
           .map((v) => enriquecerVehiculo(v, perfiles, docs))
       )
+    },
+  },
+
+  // ---------------- Plantillas de inspección ----------------
+  // Misma forma que repoApi.programaInspecciones (solo plantillas), para
+  // probar crear y publicar formatos sin servidor.
+  programaInspecciones: {
+    plantillas: ({ estado = '' } = {}) =>
+      responder(() => plantillasDeLaEmpresa()
+        .filter((t) => !estado || t.estado === estado)
+        .map(({ id, codigo, version, nombre, estado: e, items }) => ({ id, codigo, version, nombre, estado: e, puntos: items.length }))),
+    async crearPlantilla(datos) {
+      return responder({ id: crearPlantillaSemilla(datos) }, 200)
+    },
+    async cambiarPlantilla(plantilla, estado) {
+      moverPlantillaSemilla(plantilla.id, plantilla.estado, estado)
+      return responder(true, 200)
+    },
+    async publicarFormato(formato) {
+      const igual = () => plantillasDeLaEmpresa().find((t) => t.codigo === formato.code && Number(t.version) === Number(formato.version))
+      const existente = igual()
+      const actual = existente
+        ? { id: existente.id, estado: existente.estado }
+        : { id: crearPlantillaSemilla(argumentosDeFormato(formato)), estado: 'borrador' }
+      const r = await publicarSiHaceFalta(actual, !existente, async (id, { expectedStatus, status }) => moverPlantillaSemilla(id, expectedStatus, status))
+      return responder(r, 300)
     },
   },
 

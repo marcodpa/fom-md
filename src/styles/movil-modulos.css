@@ -1,0 +1,485 @@
+/* ============================================================
+   MÓDULOS EN EL TELÉFONO (< 768 px) — como la app
+   ------------------------------------------------------------
+   Solo cambia el teléfono: todo vive dentro del @media de abajo, salvo las
+   dos clases que esconden la versión que no toca (escritorio o teléfono).
+   El marco (cápsula, barra de abajo, encabezado) es de Consola; aquí solo
+   el contenido de cada módulo.
+
+   Piezas:
+   - Tablas marcadas con `.mv-lista`: cada fila pasa a ser una fila de lista
+     como las de la app — título y etiqueta arriba, detalle debajo y flecha
+     si se abre. Cada celda dice qué es: `.mv-t` título, `.mv-e` estado,
+     `.mv-d` detalle, `.mv-pie` etiquetas debajo, `.mv-a` acciones. La que no
+     lleva marca se esconde en el teléfono. `.mv-u1`/`.mv-u2` en la fila la
+     suben (lo urgente arriba) y `.mv-ir` le pone la flecha.
+   - Cifras 2×2 compactas, chips desplazables, buscador de 46, botones
+     principales de 48 a todo el ancho y modales como hoja desde abajo.
+   ============================================================ */
+
+.mv-solo-movil { display: none; }
+/* El nombre de una cifra que en la tabla da la columna y en la lista no. */
+.mv-rotulo { display: none; }
+
+@media (max-width: 767px) {
+  .mv-solo-movil { display: block; }
+  .mv-solo-escritorio { display: none !important; }
+
+  /* El cuerpo de cada módulo no se ensancha por una pieza ancha (una gráfica,
+     una fila larga): todo cabe en el ancho del teléfono. */
+  .pnl.fom-dark[data-diseno] .pnl-cuerpo { grid-template-columns: minmax(0, 1fr); }
+
+  /* ---------- Cifras de arriba: 2×2 compactas (CifrasFicha de la app) ---------- */
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) > :is(.pnl-kpi, .km-card > .pnl-kpi),
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi {
+    position: relative;
+    min-height: 0;
+    padding: 10px 12px;
+    border-radius: 24px;
+  }
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi-icono {
+    top: 10px;
+    left: 12px;
+    width: 16px;
+    height: 16px;
+    border-radius: 0;
+    background: none;
+  }
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi-icono .ico,
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi-icono svg { width: 16px; height: 16px; }
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi.con-icono .pnl-kpi-top { padding-left: 22px; }
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi-top { margin: 0; min-height: 16px; }
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi-top span {
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi > b {
+    margin-top: 4px;
+    font-size: 26px;
+    line-height: 30px;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: normal;
+  }
+  .pnl.fom-dark[data-diseno] :is(.pnl-grid.k4, .pnl-grid.k3) .pnl-kpi em {
+    margin-top: 0;
+    font-size: 11px;
+    line-height: 16px;
+    color: var(--e-texto-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Con tres cifras, la tercera ocupa la fila entera: no queda un hueco. */
+  .pnl.fom-dark[data-diseno] .pnl-grid.k3 > .pnl-kpi:nth-child(3):last-child { grid-column: 1 / -1; }
+
+  /* ---------- Buscador a todo el ancho, alto 46 (search-bar.tsx) ---------- */
+  .pnl.fom-dark[data-diseno] .pnl-buscar { min-width: 0; width: 100%; flex: 1 1 100%; }
+  .pnl.fom-dark[data-diseno] .pnl-buscar input { height: 46px; border-radius: 16px; font-size: 15px; }
+  .pnl.fom-dark[data-diseno] .pnl-card-cab:has(> .pnl-buscar) { flex-wrap: wrap; }
+
+  /* ---------- Filtros como chips que se desplazan de lado ---------- */
+  .pnl.fom-dark[data-diseno] .pnl-chips[role='group'] {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    margin-inline: -16px;
+    padding: 2px 16px;
+    scroll-padding-inline: 16px;
+  }
+  .pnl.fom-dark[data-diseno] .pnl-chips[role='group']::-webkit-scrollbar { display: none; }
+  .pnl.fom-dark[data-diseno] .pnl-chips[role='group'] > .pnl-chip { flex: none; height: 36px; padding: 0 14px; font-size: 13px; }
+  /* Dentro de una tarjeta el borde es el de la tarjeta, no el de la pantalla. */
+  .pnl.fom-dark[data-diseno] .pnl-card .pnl-chips[role='group'] { margin-inline: -16px; }
+
+  /* ---------- Botones principales: a todo el ancho y 48 de alto ---------- */
+  .pnl.fom-dark[data-diseno] .pnl-cab-acciones { width: 100%; }
+  .pnl.fom-dark[data-diseno] .pnl-cab-acciones > .pnl-btn { flex: 1 1 auto; min-height: 48px; }
+  .pnl.fom-dark[data-diseno] .pnl-cab-acciones > .pnl-btn.primario { flex: 1 1 100%; }
+  .pnl.fom-dark[data-diseno] :is(.mnt-toolbar, .doc-cab) > .pnl-btn.primario { width: 100%; min-height: 48px; }
+
+  /* ---------- Modales como hoja desde abajo, radio 28 ---------- */
+  .pnl.fom-dark[data-diseno] .pnl-modal-fondo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 0;
+  }
+  .pnl.fom-dark[data-diseno] .pnl-modal {
+    position: relative;
+    width: 100%;
+    max-width: none !important; /* el ancho de escritorio llega en línea */
+    max-height: calc(100dvh - 36px);
+    border-radius: 28px 28px 0 0;
+    border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    animation: mv-hoja var(--e-d-lento) var(--e-curva);
+  }
+  /* El asa de la hoja, como la de la app. */
+  .pnl.fom-dark[data-diseno] .pnl-modal::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 999px;
+    background: var(--e-borde-fuerte);
+  }
+  .pnl.fom-dark[data-diseno] .pnl-modal-cab { padding: 22px 16px 12px; }
+  .pnl.fom-dark[data-diseno] .pnl-modal-cab h2 { font-size: 18px; line-height: 24px; }
+  .pnl.fom-dark[data-diseno] .pnl-modal-cuerpo { padding: 16px; }
+  /* La fila de botones de una hoja: el principal a todo el ancho, encima. */
+  .pnl.fom-dark[data-diseno] .pnl-modal-cuerpo :is(.pnl-chips, .pnl-cab-acciones):has(> .pnl-btn.primario) {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pnl.fom-dark[data-diseno] .pnl-modal-cuerpo :is(.pnl-chips, .pnl-cab-acciones):has(> .pnl-btn.primario) > .pnl-btn {
+    flex: 1 1 100%;
+    min-height: 48px;
+    white-space: normal;
+  }
+  .pnl.fom-dark[data-diseno] .pnl-modal-cuerpo :is(.pnl-chips, .pnl-cab-acciones) > .pnl-btn.primario { order: -1; }
+
+  /* ---------- Tabla → lista de filas (como las listas de la app) ---------- */
+  .pnl.fom-dark[data-diseno] .pnl-tabla-wrap:has(> .mv-lista) { overflow: visible; border-radius: 0; }
+  .pnl.fom-dark[data-diseno] table.mv-lista,
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody { display: flex; flex-direction: column; width: 100%; }
+  .pnl.fom-dark[data-diseno] table.mv-lista > thead { display: none; }
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 0;
+    min-height: 70px;
+    padding: 12px 16px;
+    border-top: var(--e-borde-fino) solid var(--e-borde);
+    background: transparent;
+  }
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr.mv-u1 { order: -2; }
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr.mv-u2 { order: -1; }
+  /* El salto de línea entre el título y el detalle. */
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr::before {
+    content: '';
+    order: 3;
+    flex-basis: 100%;
+    height: 0;
+  }
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr > td {
+    display: none;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    min-width: 0;
+  }
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr > td:is(.mv-t, .mv-e, .mv-d, .mv-pie, .mv-a) { display: block; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-t {
+    order: 1;
+    flex: 1 1 0;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--e-texto);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-t :is(b, .usr-nombre, .mnt-table-link) { font-size: 15px; line-height: 20px; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-t .pnl-doble span,
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-t small {
+    display: block;
+    font-size: 12.5px;
+    line-height: 17px;
+    font-weight: 400;
+    color: var(--e-texto-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-e { order: 2; flex: none; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-d {
+    order: 4;
+    margin-top: 3px;
+    font-size: 12.5px;
+    line-height: 17px;
+    color: var(--e-texto-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Todo el detalle en una línea: cada parte toma lo suyo y la última se recorta. */
+    flex: 1 1 0;
+    max-width: max-content;
+  }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-d ~ td.mv-d::before { content: '·'; margin-right: 6px; color: var(--e-texto-3); }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-d :is(.pnl-doble, .pnl-doble b, .pnl-doble span) {
+    display: inline;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+  }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-d .pnl-doble span { margin-left: 4px; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td:is(.mv-pie, .mv-a) { order: 6; flex-basis: 100%; margin-top: 8px; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-a { order: 7; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-a .pnl-chips { flex-wrap: wrap; gap: 6px; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td.mv-a .pnl-btn { min-height: 40px; padding: 8px 14px; font-size: 14px; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td .pnl-input { width: 100%; }
+
+  .pnl.fom-dark[data-diseno] table.mv-lista .mv-rotulo { display: inline; }
+  /* Algunas tablas piden un ancho mínimo para desplazarse de lado: la lista no. */
+  .pnl.fom-dark[data-diseno] table.mv-lista { min-width: 0; }
+  /* Usuarios: la fila entera abre el perfil; el «Ver perfil» sobra. */
+  .pnl.fom-dark[data-diseno] table.mv-lista .usr-ver-perfil { display: none; }
+  .pnl.fom-dark[data-diseno] table.mv-lista .usr-acciones-fila { justify-content: flex-start; }
+  /* Documentos · Atención inmediata: el botón no se sale de la tarjeta. */
+  .pnl.fom-dark[data-diseno] .doc-fila > .pnl-btn { flex: 1 1 calc(100% - 52px); margin-left: 52px; min-height: 40px; }
+
+  /* La flecha de las filas que se abren. */
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr:is(.mv-ir, .pnl-tabla-fila-link) { padding-right: 38px; }
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr:is(.mv-ir, .pnl-tabla-fila-link)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-top: 2px solid var(--e-texto-3);
+    border-right: 2px solid var(--e-texto-3);
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr:hover { background: transparent; }
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr:active { background: var(--e-sup-baja); }
+  /* Un enlace que abre la fila entera: toda la fila es el blanco del dedo. */
+  .pnl.fom-dark[data-diseno] table.mv-lista .mv-estira::after { content: ''; position: absolute; inset: 0; }
+  .pnl.fom-dark[data-diseno] table.mv-lista td:is(.mv-a, .mv-pie) :is(a, button, details, summary) { position: relative; z-index: 1; }
+
+  /* ---------- Encabezado de un tramo (EncabezadoGrupo de la app) ---------- */
+  .mv-grupo { display: grid; gap: 8px; }
+  .mv-grupo-cab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 2px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--e-texto-2);
+  }
+  .mv-grupo-cab::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--e-borde), transparent);
+  }
+  .mv-grupo-cab.rojo { color: var(--e-peligro); }
+  .mv-grupo-cab.ambar { color: var(--e-aviso); }
+  .mv-grupo-cab em { order: 2; font-style: normal; font-weight: 500; letter-spacing: 0; color: var(--e-texto-2); }
+
+  .mv-tramos { display: grid; gap: 18px; }
+  /* Vehículos: en el teléfono la tarjeta de la tabla se vuelve solo el
+     contenedor de los tramos; cada tramo trae su propia tarjeta. */
+  .pnl.fom-dark[data-diseno] .mv-flota-lista > .pnl-card {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .pnl.fom-dark[data-diseno] .mv-flota-lista > .pnl-card > .pnl-card-cab { flex-wrap: wrap; padding: 0 2px 10px; }
+  .pnl.fom-dark[data-diseno] .mv-flota-lista > .pnl-card > .pnl-card-cab h2 { font-size: 15px; color: var(--e-texto-2); font-weight: 500; }
+  .pnl.fom-dark[data-diseno] .mv-flota-lista .pnl-card-cab .pnl-chips { width: 100%; }
+  .pnl.fom-dark[data-diseno] .mv-flota-lista .pnl-card-cab .pnl-btn.primario { flex: 1 1 100%; min-height: 48px; white-space: normal; }
+
+  /* ---------- Una fila de lista (FilaUnidad de la app) ---------- */
+  .mv-lista-card {
+    overflow: hidden;
+    border-radius: 24px;
+    border: var(--e-borde-fino) solid var(--e-borde);
+    background: var(--e-sup);
+    box-shadow: var(--apariencia-sombra, none);
+    -webkit-backdrop-filter: var(--apariencia-blur, none);
+    backdrop-filter: var(--apariencia-blur, none);
+  }
+  .mv-fila {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 70px;
+    padding: 10px 38px 10px 16px;
+    border: 0;
+    border-top: var(--e-borde-fino) solid var(--e-borde);
+    background: transparent;
+    color: var(--e-texto);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .mv-fila:first-child { border-top: 0; }
+  .mv-fila:active { background: var(--e-sup-baja); }
+  .mv-fila::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-top: 2px solid var(--e-texto-3);
+    border-right: 2px solid var(--e-texto-3);
+    transform: rotate(45deg);
+  }
+  .mv-fila-retrato {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 46px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--e-texto-3) 12%, transparent);
+    color: var(--e-texto-3);
+  }
+  .mv-fila-retrato > * { max-width: 100%; max-height: 100%; }
+  .mv-fila-retrato img { width: 100%; height: 100%; object-fit: cover; }
+  .mv-fila-txt { flex: 1; min-width: 0; display: grid; gap: 3px; }
+  .mv-fila-arriba { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .mv-fila-arriba b {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mv-fila-arriba .pnl-tag { flex: none; }
+  .mv-fila-detalle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    font-size: 12.5px;
+    line-height: 17px;
+    color: var(--e-texto-2);
+  }
+  .mv-fila-detalle span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mv-fila-detalle .ico { flex: none; color: var(--e-texto-3); }
+
+  /* ---------- Tira de cifras (TiraEstado de la app) ---------- */
+  .mv-tira {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px;
+    border-radius: 24px;
+    border: var(--e-borde-fino) solid var(--e-borde);
+    background: var(--e-sup);
+    -webkit-backdrop-filter: var(--apariencia-blur, none);
+    backdrop-filter: var(--apariencia-blur, none);
+  }
+  .mv-tira > div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    padding: 10px 8px;
+    border-radius: 16px;
+    background: var(--e-sup-baja);
+  }
+  .mv-tira-num { display: flex; align-items: center; gap: 6px; }
+  .mv-tira-num b { font-size: 22px; line-height: 26px; font-weight: 700; color: var(--e-texto); font-variant-numeric: tabular-nums; }
+  .mv-tira-num i { width: 7px; height: 7px; border-radius: 999px; background: var(--e-texto-3); }
+  .mv-tira-num i.verde { background: var(--e-exito); }
+  .mv-tira-num i.ambar { background: var(--e-aviso); }
+  .mv-tira-num i.rojo { background: var(--e-peligro); }
+  .mv-tira span { font-size: 11px; line-height: 14px; font-weight: 500; color: var(--e-texto-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mv-tira-pista { height: 3px; border-radius: 2px; overflow: hidden; background: var(--e-borde); }
+  .mv-tira-pista > i { display: block; height: 3px; border-radius: 2px; background: var(--e-texto-3); }
+  .mv-tira-pista > i.verde { background: var(--e-exito); }
+  .mv-tira-pista > i.ambar { background: var(--e-aviso); }
+  .mv-tira-pista.vacia { background: transparent; }
+
+  /* ---------- Fila de partes de la ficha (PartesFicha de la app) ---------- */
+  .mv-partes {
+    position: sticky;
+    /* Debajo de la cápsula de arriba (74 px de Consola), que también se pega. */
+    top: calc(74px + env(safe-area-inset-top, 0px));
+    z-index: 12;
+    display: flex;
+    gap: 8px;
+    margin-inline: -16px;
+    padding: 8px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--e-bg);
+  }
+  .mv-partes::-webkit-scrollbar { display: none; }
+  .mv-partes button {
+    flex: none;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: var(--e-borde-fino) solid var(--e-borde);
+    background: var(--e-sup-baja);
+    color: var(--e-texto-2);
+    font: inherit;
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .mv-partes button[aria-current='true'] {
+    border-color: color-mix(in srgb, var(--e-primario) 50%, transparent);
+    background: color-mix(in srgb, var(--e-primario) 18%, transparent);
+    color: var(--e-primario);
+    font-weight: 600;
+  }
+  .pnl.fom-dark[data-diseno='glass'] .mv-partes { background: #5a5f66; }
+  .pnl.fom-dark[data-diseno='glass'] .mv-partes button[aria-current='true'] { background: var(--e-activo-sup); color: var(--e-activo-texto); border-color: var(--e-activo-borde); }
+  /* Cada sección de la ficha: al saltar, queda justo debajo de la fila de partes. */
+  .mv-seccion { display: grid; gap: 12px; scroll-margin-top: calc(132px + env(safe-area-inset-top, 0px)); }
+  .mv-seccion-titulo {
+    margin: 4px 2px 0;
+    font-size: 17px;
+    line-height: 22px;
+    font-weight: 600;
+    color: var(--e-texto);
+  }
+
+  /* ---------- Glass gris: superficies legibles sobre el gris ---------- */
+  .pnl.fom-dark[data-diseno='glass'] :is(.mv-lista-card, .mv-tira) { background: var(--e-sup); border-color: var(--e-borde); }
+  .pnl.fom-dark[data-diseno='glass'] .mv-tira > div { background: rgb(28 31 36 / .72); }
+  .pnl.fom-dark[data-diseno='glass'] :is(.mv-fila-detalle, .mv-tira span) { color: #dfe3ea; }
+  .pnl.fom-dark[data-diseno='glass'] .mv-grupo-cab { color: #e8ebf0; }
+  .pnl.fom-dark[data-diseno='glass'] .mv-grupo-cab.rojo { color: #ff8a8e; }
+  .pnl.fom-dark[data-diseno='glass'] .mv-grupo-cab.ambar { color: #ffc85a; }
+  .pnl.fom-dark[data-diseno='glass'] .pnl-chips[role='group'] > .pnl-chip:not(.activo) { background: rgb(39 42 48 / .88); border-color: var(--e-borde); color: var(--e-texto-2); }
+  .pnl.fom-dark[data-diseno='glass'] table.mv-lista > tbody > tr { border-top-color: rgb(255 255 255 / .1); }
+}
+
+@keyframes mv-hoja {
+  from { transform: translateY(28px); opacity: 0.4; }
+  to { transform: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pnl.fom-dark[data-diseno] .pnl-modal { animation: none; }
+}

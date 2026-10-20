@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import Planes from './Planes'
 import VehicleVisual from '../../components/VehicleVisual'
 import './mantenimiento.css'
+import '../../styles/movil-modulos.css'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -234,7 +235,7 @@ function Lista({ odts, alAbrir }) {
 
   return (
     <div className="pnl-tabla-wrap">
-      <table className="pnl-tabla">
+      <table className="pnl-tabla mv-lista">
         <thead>
           <tr>
             <th>Descripción</th>
@@ -251,7 +252,7 @@ function Lista({ odts, alAbrir }) {
           {odts.map((o) => (
             <tr
               key={o.id}
-              className="pnl-tabla-fila-link"
+              className={`pnl-tabla-fila-link${estadoVisible(o.estado).clave === 'abierta' ? ' mv-u1' : estadoVisible(o.estado).clave === 'revision' ? ' mv-u2' : ''}`}
               onClick={() => alAbrir(o.id)}
               tabIndex={0}
               role="button"
@@ -262,20 +263,20 @@ function Lista({ odts, alAbrir }) {
                 }
               }}
             >
-              <td>
+              <td className="mv-t">
                 <div className="pnl-doble">
                   <button type="button" className="mnt-table-link" onClick={e => { e.stopPropagation(); alAbrir(o.id) }}>{o.descripcion}</button>
                   <span>{o.ubicacion || 'Sin ubicación'}</span>
                 </div>
               </td>
-              <td>{o.vehiculoNombre}</td>
+              <td className="mv-d">{o.vehiculoNombre}</td>
               <td>
                 <Tag color={colorTipo(o.tipo)}>{etiqueta('odt_tipo', o.tipo)}</Tag>
               </td>
               <td>{o.tipoFalla ? etiqueta('tipo_falla', o.tipoFalla) : 'No especificado'}</td>
               <td>{o.creadorNombre}</td>
-              <td>{f.fechaCorta(o.creadaEn)}</td>
-              <td>
+              <td className="mv-d">{f.fechaCorta(o.creadaEn)}</td>
+              <td className="mv-e">
                 <EstadoOdt estado={o.estado}/>
               </td>
               <td className="num">{o.costo != null ? f.moneda(o.costo) : '·'}</td>
@@ -289,7 +290,7 @@ function Lista({ odts, alAbrir }) {
 
 function Cierres({ odts, alAbrir }) {
  if (!odts.length) return <Vacio icono="check" titulo="Aún no hay cierres con estos filtros" texto="Aquí aparecerán las órdenes resueltas y su costo registrado."/>
- return <div className="pnl-tabla-wrap"><table className="pnl-tabla"><thead><tr><th>Cierre</th><th>Unidad</th><th>Trabajo realizado</th><th>Tipo</th><th className="num">Costo</th></tr></thead><tbody>{odts.map(o => <tr key={o.id} className="pnl-tabla-fila-link" onClick={() => alAbrir(o.id)}><td>{o.resueltaEn ? f.fechaCorta(o.resueltaEn) : 'Sin fecha'}</td><td>{o.vehiculoNombre}</td><td><button type="button" className="mnt-table-link" onClick={() => alAbrir(o.id)}>{o.descripcion}</button></td><td>{etiqueta('odt_tipo',o.tipo)}</td><td className="num">{o.costo != null ? f.moneda(o.costo) : o.estado === 'cancelada' ? 'Cancelada' : 'Sin registrar'}</td></tr>)}</tbody></table></div>
+ return <div className="pnl-tabla-wrap"><table className="pnl-tabla mv-lista"><thead><tr><th>Cierre</th><th>Unidad</th><th>Trabajo realizado</th><th>Tipo</th><th className="num">Costo</th></tr></thead><tbody>{odts.map(o => <tr key={o.id} className="pnl-tabla-fila-link" onClick={() => alAbrir(o.id)}><td className="mv-d">{o.resueltaEn ? f.fechaCorta(o.resueltaEn) : 'Sin fecha'}</td><td className="mv-d">{o.vehiculoNombre}</td><td className="mv-t"><button type="button" className="mnt-table-link" onClick={() => alAbrir(o.id)}>{o.descripcion}</button></td><td>{etiqueta('odt_tipo',o.tipo)}</td><td className="num mv-e">{o.costo != null ? f.moneda(o.costo) : o.estado === 'cancelada' ? 'Cancelada' : 'Sin registrar'}</td></tr>)}</tbody></table></div>
 }
 
 // ---------------- Detalle de una ODT ----------------

@@ -1479,12 +1479,24 @@ export const repoApi = {
       const corte = Date.now() - dias * 86400000
       const items = []
       let offset = 0
+      // La ruta no filtra por fecha. Si llega del más nuevo al más viejo, al pasar
+      // el corte ya no queda nada útil y se deja de pedir; si el orden no es ese,
+      // se baja todo como antes para no perder eventos.
+      let descendente = true
+      let previo = Infinity
       while (true) {
         const r = await api.eventosDeAlerta({ limit: 100, offset })
         const page = r.items ?? []
         items.push(...page)
         offset += page.length
+        for (const e of page) {
+          const t = new Date(e.occurredAt).getTime()
+          if (!Number.isFinite(t)) continue
+          if (t > previo) descendente = false
+          previo = t
+        }
         if (!page.length || offset >= (r.page?.total ?? offset)) break
+        if (descendente && previo < corte) break
       }
       return items.filter(e => new Date(e.occurredAt).getTime() >= corte).map(e => ({ id: e.id, vehiculoId: e.vehicleId, vehiculo: e.vehicleId ? { id: e.vehicleId, alias: e.vehicleCode || e.vehiclePlate } : null, clave: e.ruleType === 'velocidad' ? 'exceso_velocidad' : 'condicion', nombre: e.ruleType === 'velocidad' ? 'Exceso de velocidad' : 'Condición de telemetría', severidad: e.severity === 'critical' ? 'alta' : e.severity === 'warning' ? 'media' : 'baja', valor: e.observedValue, creadaEn: e.occurredAt, conductorNombre: e.driverName ?? 'Sin dato', ubicacion: e.location ?? 'Sin dato' }))
     },
@@ -1889,11 +1901,37 @@ Object.assign(repoApi, {
 
   /** Programa de inspecciones: plantillas, citas y hallazgos con seguimiento. */
   programaInspecciones: {
-    async crearPlantilla({ codigo, nombre, version = 1, puntos }) {
-      const code = normalizarCodigoPlan(codigo).slice(0, 50)
-      if (!code || nombre.trim().length < 2 || !puntos.length) throw new Error('Completa código, nombre y al menos un punto de inspección.')
-      const r = await api.crearPlantillaInspeccion({ code, name: nombre.trim(), version: Number(version), items: puntos.map((p, i) => ({ code: `punto-${i + 1}`, category: p.categoria || 'General', name: p.nombre.trim(), isCritical: Boolean(p.critico), displayOrder: i + 1, vehicleTypes: [] })) })
+    async crearPlantilla({ codigo, nombre, version = 1, descripcion, puntos }) {
+      const cuerpo = cuerpoPlantilla({ codigo, nombre, version, descripcion, puntos })
+      const r = await api.crearPlantillaInspeccion(cuerpo)
       return { id: r?.template?.id ?? r?.id ?? r?.templateId }
+    },
+    /**
+     * Formato listo (JSON con code, version, items…): lo crea y lo publica.
+     * Si esa versión ya existe en la empresa no la duplica: si está en
+     * borrador la publica y si ya está publicada lo dice.
+     */
+    async publicarFormato(formato) {
+      const buscar = async () => {
+        const r = await api.plantillasDeInspeccion({})
+        const t = (r?.items ?? []).find((x) => x.code === formato.code && Number(x.version) === Number(formato.version))
+        return t ? { id: t.id, estado: t.status } : null
+      }
+      let actual = await buscar()
+      let creada = false
+      if (!actual) {
+        try {
+          const r = await api.crearPlantillaInspeccion(cuerpoPlantilla(argumentosDeFormato(formato)))
+          actual = { id: r?.template?.id ?? r?.id ?? r?.templateId, estado: 'borrador' }
+          creada = true
+        } catch (e) {
+          // Otro la creó a la vez: se trabaja sobre la que ya existe.
+          if (e?.estado !== 409) throw e
+          actual = await buscar()
+          if (!actual) throw e
+        }
+      }
+      return publicarSiHaceFalta(actual, creada, (id, cuerpo) => api.moverPlantillaInspeccion(id, cuerpo))
     },
     async cambiarPlantilla(plantilla, estado) {
       return api.moverPlantillaInspeccion(plantilla.id, { expectedStatus: plantilla.estado, status: estado })
@@ -1960,6 +1998,74 @@ Object.assign(repoApi, {
     },
   },
 })
+
+// --- Plantillas de inspección: piezas compartidas con la semilla -----------
+
+/**
+ * Cuerpo de POST /inspection-templates. Lo opcional (descripción, código del
+ * punto, ayuda, tipos de vehículo, orden) se manda tal cual si viene; si no,
+ * se genera como siempre.
+ */
+export function cuerpoPlantilla({ codigo, nombre, version = 1, descripcion, puntos }) {
+  const code = normalizarCodigoPlan(codigo).slice(0, 50)
+  if (!code || String(nombre ?? '').trim().length < 2 || !puntos?.length) throw new Error('Completa código, nombre y al menos un punto de inspección.')
+  const cuerpo = {
+    code,
+    name: nombre.trim(),
+    version: Number(version),
+    items: puntos.map((p, i) => ({
+      code: p.codigo || `punto-${i + 1}`,
+      category: p.categoria || 'General',
+      name: p.nombre.trim(),
+      isCritical: Boolean(p.critico),
+      ...(p.ayuda ? { helpText: p.ayuda } : {}),
+      displayOrder: p.orden ?? i + 1,
+      vehicleTypes: Array.isArray(p.tiposVehiculo) ? p.tiposVehiculo : [],
+    })),
+  }
+  if (descripcion) cuerpo.description = descripcion
+  return cuerpo
+}
+
+/** Un formato listo (forma del servidor) en los argumentos de crearPlantilla. */
+export function argumentosDeFormato(formato) {
+  return {
+    codigo: formato.code,
+    nombre: formato.name,
+    version: formato.version,
+    descripcion: formato.description,
+    puntos: [...formato.items].sort((a, b) => a.displayOrder - b.displayOrder).map((i) => ({
+      codigo: i.code,
+      categoria: i.category,
+      nombre: i.name,
+      critico: i.isCritical,
+      ayuda: i.helpText,
+      tiposVehiculo: i.vehicleTypes,
+      orden: i.displayOrder,
+    })),
+  }
+}
+
+/**
+ * Último paso de publicarFormato: borrador → publicada, o decir por qué no.
+ * resultado: creada | borrador_publicada | ya_publicada | archivada.
+ */
+export async function publicarSiHaceFalta(actual, creada, mover) {
+  if (actual.estado === 'publicada') return { id: actual.id, resultado: 'ya_publicada' }
+  if (actual.estado !== 'borrador') return { id: actual.id, resultado: 'archivada' }
+  try {
+    await mover(actual.id, { expectedStatus: 'borrador', status: 'publicada' })
+  } catch (e) {
+    // La base admite una sola versión publicada por código.
+    if (e?.estado === 409 && /published version/iu.test(e.message || '')) {
+      const error = new Error('Ya hay otra versión de este formato publicada en esta empresa. Archívala en Plantillas y vuelve a publicar; esta quedó guardada como borrador.')
+      error.estado = 409
+      throw error
+    }
+    throw e
+  }
+  return { id: actual.id, resultado: creada ? 'creada' : 'borrador_publicada' }
+}
 
 /** Los cambios de una entrada de auditoría, en una línea legible. */
 function resumirCambios(cambios) {

@@ -17,6 +17,7 @@ import FotosDe from '../comp/FotosDe'
 import { claveDeTipo, huecosPersona } from '../comp/FotosIdentidad'
 import { ArchivosDeDocumento } from './Documentos'
 import './usuarios-perfil.css'
+import MovilAccesos from '../comp/movil-accesos'
 
 const PESTANAS_PROPIAS = PESTANAS
 
@@ -120,6 +121,8 @@ function Perfil() {
           {pestana === 'documentos' && <Documentos persona={persona} alActualizar={() => setRevision(v => v + 1)} documentos={documentos} error={perfil.documentosError} alVer={setDocumento} />}
         </section>
       </>}
+      {/* Solo en el teléfono: lo que no está en la barra de abajo, y cerrar sesión. */}
+      <MovilAccesos />
     </div>
     <EditarMisDatos abierto={editando} perfil={perfil} borrador={borrador} setBorrador={setBorrador}
       guardando={guardando} error={error} alGuardar={guardar} alCancelar={cancelar} />

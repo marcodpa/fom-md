@@ -12,6 +12,7 @@ import { ROLES_ASIGNABLES, etiquetaRol } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import AccionesUsuario from '../comp/AccionesUsuario'
 import './usuarios-perfil.css'
+import '../../styles/movil-modulos.css'
 
 // Gente pertenece a la empresa de la sesión. El directorio global vive
 // en «Usuarios generales» y no se mezcla con esta vista.
@@ -300,7 +301,7 @@ function Contenido({
           </div>
         ) : (
           <div className="pnl-tabla-wrap">
-            <table className="pnl-tabla">
+            <table className="pnl-tabla mv-lista">
               <thead>
                 <tr>
                   <th>Persona</th>
@@ -312,12 +313,12 @@ function Contenido({
               </thead>
               <tbody>
                 {lista.map((p) => (
-                  <tr key={p.id}>
-                    <td>
+                  <tr key={p.id} className={`mv-ir${p.estado === 'revoked' || (p.documentoDias != null && p.documentoDias < 0) ? ' mv-u1' : p.estado === 'suspended' || p.claveTemporal || (p.documentoDias != null && p.documentoDias <= 30) ? ' mv-u2' : ''}`}>
+                    <td className="mv-t">
                       <div className="pnl-persona">
                         <i className="pnl-avatar">{f.iniciales(p.nombre)}</i>
                         <div className="pnl-doble">
-                          <Link className="usr-nombre" to={`/panel/personal/${encodeURIComponent(p.userId ?? p.id)}`}>{p.nombre}</Link>
+                          <Link className="usr-nombre mv-estira" to={`/panel/personal/${encodeURIComponent(p.userId ?? p.id)}`}>{p.nombre}</Link>
                           {/* La empresa debajo del nombre, como pidio Marco: en la
                               vista de un contratista, o en la del admin FOM, es lo
                               que distingue a dos personas con el mismo nombre. Si
@@ -329,7 +330,7 @@ function Contenido({
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td className="mv-d">
                       {/* La unidad que maneja HOY. Antes esto vivía en la
                           pantalla «Personal», que estaba vacía porque nunca
                           tuvo servidor. Verlo aquí ahorra el cruce entre dos
@@ -347,10 +348,10 @@ function Contenido({
                         p.empresaNombre
                       )}
                     </td>
-                    <td>
+                    <td className="mv-e">
                       <Tag color={p.rol === 'admin' ? 'azul' : 'gris'} plano>{p.rolEtiqueta}</Tag>
                     </td>
-                    <td>
+                    <td className="mv-pie">
                       <div className="pnl-chips">
                         {p.claveTemporal && <Tag color="ambar" plano>Clave temporal</Tag>}
                         {p.esDesempleado && <Tag color="gris">Desempleado</Tag>}
@@ -375,7 +376,7 @@ function Contenido({
                         )}
                       </div>
                     </td>
-                    <td className="num">
+                    <td className="num mv-a">
                       <div className="usr-acciones-fila">
                         <Link className="usr-ver-perfil" to={`/panel/personal/${encodeURIComponent(p.userId ?? p.id)}`} aria-label={`Ver perfil de ${p.nombre}`}>
                           Ver perfil <Icono nombre="volver" tam={16} />

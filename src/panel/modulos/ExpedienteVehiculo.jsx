@@ -22,6 +22,7 @@ import UsuariosUnidad from './UsuariosUnidad'
 import * as f from '../datos/formato'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
 import './expediente-unidad.css'
+import '../../styles/movil-modulos.css'
 
 // ============================================================
 // EXPEDIENTE DEL VEHÍCULO
@@ -240,6 +241,61 @@ function ResumenCostos({ costos, verTodo }) {
   )
 }
 
+// ---------------- Teléfono: la ficha en una sola página ----------------
+// Como unidad.tsx de la app: las ocho pestañas se vuelven una fila de chips
+// que lleva a cada sección, y las secciones van una debajo de otra.
+
+const CONSULTA_MOVIL = '(max-width: 767px)'
+
+/** ¿Pantalla de teléfono? Sigue al ancho en vivo (girar, cambiar de ventana). */
+function useEsMovil() {
+  const [movil, setMovil] = useState(() => typeof window !== 'undefined' && Boolean(window.matchMedia?.(CONSULTA_MOVIL).matches))
+  useEffect(() => {
+    const mq = window.matchMedia?.(CONSULTA_MOVIL)
+    if (!mq) return undefined
+    const cambio = () => setMovil(mq.matches)
+    cambio()
+    mq.addEventListener?.('change', cambio)
+    return () => mq.removeEventListener?.('change', cambio)
+  }, [])
+  return movil
+}
+
+/** En el teléfono, cada parte es una sección con su nombre; en escritorio, nada. */
+function Parte({ clave, movil, children }) {
+  if (!movil) return children
+  const nombre = PESTANAS.find((p) => p.v === clave)?.t
+  return (
+    <section id={`parte-${clave}`} data-parte={clave} className="mv-seccion" aria-label={nombre}>
+      {clave !== 'resumen' && <h2 className="mv-seccion-titulo">{nombre}</h2>}
+      {children}
+    </section>
+  )
+}
+
+/**
+ * La fila de partes: se queda arriba al bajar y enciende la sección que se
+ * está leyendo.
+ */
+function PartesMovil({ activa, alElegir }) {
+  const fila = useRef(null)
+  useEffect(() => {
+    // El chip encendido, siempre a la vista dentro de la fila.
+    const nav = fila.current
+    const chip = nav?.querySelector('[aria-current="true"]')
+    if (nav && chip) nav.scrollTo({ left: chip.offsetLeft - 16, behavior: 'smooth' })
+  }, [activa])
+  return (
+    <nav ref={fila} className="mv-partes" aria-label="Partes de la ficha">
+      {PESTANAS.map((p) => (
+        <button key={p.v} type="button" aria-current={p.v === activa ? 'true' : undefined} onClick={() => alElegir(p.v)}>
+          {p.t}
+        </button>
+      ))}
+    </nav>
+  )
+}
+
 function ModalOdometro({ unidad, abierto, alCerrar, alGuardar }) {
   const [km, setKm] = useState('')
   const [error, setError] = useState('')
@@ -283,6 +339,10 @@ export default function ExpedienteVehiculo() {
     return siguientes
   }, { replace: true })
   const sesion = useSesion()
+  const movil = useEsMovil()
+  // En el teléfono: la parte que se está leyendo, para encender su chip.
+  const [parteVista, setParteVista] = useState('resumen')
+  const saltando = useRef(null)
 
   const { datos: v, estado, error, recargar } = useDatos(() => repo.vehiculos.obtener(id), [id])
   const areas = useDatos(() => repo.areas(), [])
@@ -308,7 +368,32 @@ export default function ExpedienteVehiculo() {
   const [archivosDe, setArchivosDe] = useState(null)
 
   const reloj = useRef(null)
-  useEffect(() => () => clearTimeout(reloj.current), [])
+  useEffect(() => () => { clearTimeout(reloj.current); clearTimeout(saltando.current) }, [])
+
+  /** Ir a una parte: en escritorio cambia la pestaña; en el teléfono baja hasta su sección. */
+  function irAParte(clave) {
+    if (!movil) return setPestana(clave)
+    setParteVista(clave)
+    // Mientras dura el salto, el desplazamiento no va encendiendo las de en medio.
+    clearTimeout(saltando.current)
+    saltando.current = setTimeout(() => { saltando.current = null }, 900)
+    document.getElementById(`parte-${clave}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  // Al bajar a mano, el chip encendido sigue a la sección que se lee.
+  const hayFicha = estado === 'ok' && Boolean(v)
+  useEffect(() => {
+    if (!movil || !hayFicha || typeof IntersectionObserver === 'undefined') return undefined
+    const obs = new IntersectionObserver((entradas) => {
+      if (saltando.current) return
+      const visible = entradas
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
+      if (visible) setParteVista(visible.target.dataset.parte)
+    }, { rootMargin: '-140px 0px -55% 0px' })
+    document.querySelectorAll('.mv-seccion[data-parte]').forEach((s) => obs.observe(s))
+    return () => obs.disconnect()
+  }, [movil, hayFicha])
 
   function avisarGuardado(texto = 'Guardado') {
     setGuardado(texto)
@@ -413,6 +498,8 @@ export default function ExpedienteVehiculo() {
   }
 
   const cargando = estado === 'cargando'
+  // En el teléfono se pintan todas las partes, una debajo de otra.
+  const ver = (clave) => movil || pestana === clave
   const abiertas = (v?.odts ?? []).filter((o) => o.estado === 'abierta').length
   const enRevision = (v?.odts ?? []).filter((o) => o.estado === 'en_revision').length
 
@@ -489,34 +576,30 @@ export default function ExpedienteVehiculo() {
               />
             </div>
 
-            <Pestanas opciones={PESTANAS} valor={pestana} alCambiar={setPestana} />
+            {movil
+              ? <PartesMovil activa={parteVista} alElegir={irAParte} />
+              : <Pestanas opciones={PESTANAS} valor={pestana} alCambiar={setPestana} />}
 
             {/* ---------------- Resumen ---------------- */}
-            {pestana === 'resumen' && (
-              <>
-                <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto="470px" ficha={false} /></Tarjeta></div>
+            {ver('resumen') && (
+              <Parte clave="resumen" movil={movil}>
+                <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto={movil ? '280px' : '470px'} ficha={false} /></Tarjeta></div>
                 <div className="eu-resumen-grid">
-                  <ResumenDocumentos documentos={v.documentos} verTodo={() => setPestana('documentos')} />
-                  <ResumenCostos costos={v.costos} verTodo={() => setPestana('costos')} />
+                  <ResumenDocumentos documentos={v.documentos} verTodo={() => irAParte('documentos')} />
+                  <ResumenCostos costos={v.costos} verTodo={() => irAParte('costos')} />
                 </div>
-              </>
+              </Parte>
             )}
 
-            {pestana === 'ficha' && <FichaDatosUnidad
+            {ver('ficha') && <Parte clave="ficha" movil={movil}><FichaDatosUnidad
               unidad={v} areas={areas} puedeEditar={esGestor(sesion?.perfil)} cambiarArea={cambiarArea}
               guardandoArea={guardandoArea} errorArea={errorArea} guardado={guardado}
-              verUsuarios={() => setPestana('usuarios')}
-            />}
-
-            {pestana === 'usuarios' && <UsuariosUnidad key={v.id}
-              unidad={v} conductores={conductores} puedeEditar={esGestor(sesion?.perfil)}
-              elegido={conductorElegido} elegir={valor => { setConductorElegido(valor); setErrorForma('') }}
-              asignando={asignandoConductor} asignar={cambiarConductor} error={errorForma} guardado={guardado}
-            />}
+              verUsuarios={() => irAParte('usuarios')}
+            /></Parte>}
 
             {/* ---------------- Telemetría ---------------- */}
-            {pestana === 'telemetria' && (
-              <>
+            {ver('telemetria') && (
+              <Parte clave="telemetria" movil={movil}>
                 {v.aceitePct != null && (
                   <Tarjeta titulo="Niveles">
                     <div className="pnl-filas">
@@ -566,11 +649,67 @@ export default function ExpedienteVehiculo() {
                     </div>
                   </div>
                 </Tarjeta>
-              </>
+              </Parte>
+            )}
+
+            {ver('usuarios') && <Parte clave="usuarios" movil={movil}><UsuariosUnidad key={v.id}
+              unidad={v} conductores={conductores} puedeEditar={esGestor(sesion?.perfil)}
+              elegido={conductorElegido} elegir={valor => { setConductorElegido(valor); setErrorForma('') }}
+              asignando={asignandoConductor} asignar={cambiarConductor} error={errorForma} guardado={guardado}
+            /></Parte>}
+
+            {/* ---------------- Inspecciones ---------------- */}
+            {ver('inspecciones') && (
+              <Parte clave="inspecciones" movil={movil}>
+              <Tarjeta titulo="Inspecciones diarias" sinCuerpo>
+                {!v.inspecciones.length ? (
+                  <Vacio
+                    icono="check"
+                    titulo="Sin inspecciones registradas"
+                    texto="Todavía nadie ha hecho el chequeo de esta unidad desde la app."
+                  />
+                ) : (
+                  <div className="pnl-tabla-wrap">
+                    <table className="pnl-tabla mv-lista">
+                      <thead>
+                        <tr>
+                          <th>Fecha</th>
+                          <th>Resultado</th>
+                          <th className="num">Observaciones</th>
+                          <th className="num">Fallas críticas</th>
+                          <th>Ubicación</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {v.inspecciones.map((i) => (
+                          <tr key={i.id} className={i.resultado === 'bloqueada' ? 'mv-u1' : i.resultado === 'aprobada_con_observaciones' ? 'mv-u2' : undefined}>
+                            <td className="mv-t">
+                              <div className="pnl-doble">
+                                <b>{f.fecha(i.fecha)}</b>
+                                <span>{f.desde(i.creadaEn)}</span>
+                              </div>
+                            </td>
+                            <td className="mv-e">
+                              <Tag color={color('inspeccion_resultado', i.resultado)}>
+                                {etiqueta('inspeccion_resultado', i.resultado)}
+                              </Tag>
+                            </td>
+                            <td className="num mv-d"><span className="mv-rotulo">Observaciones </span>{i.observaciones ?? 0}</td>
+                            <td className="num mv-d"><span className="mv-rotulo">Fallas críticas </span>{i.fallasCriticas ?? 0}</td>
+                            <td className="mv-d">{i.ubicacion || 'Sin registrar'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </Tarjeta>
+              </Parte>
             )}
 
             {/* ---------------- Mantenimiento ---------------- */}
-            {pestana === 'mantenimiento' && (
+            {ver('mantenimiento') && (
+              <Parte clave="mantenimiento" movil={movil}>
               <Tarjeta
                 titulo="Órdenes de trabajo"
                 accion={
@@ -609,57 +748,12 @@ export default function ExpedienteVehiculo() {
                   </div>
                 )}
               </Tarjeta>
-            )}
-
-            {/* ---------------- Inspecciones ---------------- */}
-            {pestana === 'inspecciones' && (
-              <Tarjeta titulo="Inspecciones diarias" sinCuerpo>
-                {!v.inspecciones.length ? (
-                  <Vacio
-                    icono="check"
-                    titulo="Sin inspecciones registradas"
-                    texto="Todavía nadie ha hecho el chequeo de esta unidad desde la app."
-                  />
-                ) : (
-                  <div className="pnl-tabla-wrap">
-                    <table className="pnl-tabla">
-                      <thead>
-                        <tr>
-                          <th>Fecha</th>
-                          <th>Resultado</th>
-                          <th className="num">Observaciones</th>
-                          <th className="num">Fallas críticas</th>
-                          <th>Ubicación</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {v.inspecciones.map((i) => (
-                          <tr key={i.id}>
-                            <td>
-                              <div className="pnl-doble">
-                                <b>{f.fecha(i.fecha)}</b>
-                                <span>{f.desde(i.creadaEn)}</span>
-                              </div>
-                            </td>
-                            <td>
-                              <Tag color={color('inspeccion_resultado', i.resultado)}>
-                                {etiqueta('inspeccion_resultado', i.resultado)}
-                              </Tag>
-                            </td>
-                            <td className="num">{i.observaciones ?? 0}</td>
-                            <td className="num">{i.fallasCriticas ?? 0}</td>
-                            <td>{i.ubicacion || 'Sin registrar'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </Tarjeta>
+              </Parte>
             )}
 
             {/* ---------------- Documentos ---------------- */}
-            {pestana === 'documentos' && (
+            {ver('documentos') && (
+              <Parte clave="documentos" movil={movil}>
               <Tarjeta
                 titulo="Documentos de la unidad"
                 accion={
@@ -680,7 +774,7 @@ export default function ExpedienteVehiculo() {
                   />
                 ) : (
                   <div className="pnl-tabla-wrap">
-                    <table className="pnl-tabla">
+                    <table className="pnl-tabla mv-lista">
                       <thead>
                         <tr>
                           <th>Documento</th>
@@ -692,20 +786,20 @@ export default function ExpedienteVehiculo() {
                       </thead>
                       <tbody>
                         {v.documentos.map((d) => (
-                          <tr key={d.id}>
-                            <td><b>{d.tipo}</b></td>
-                            <td>
+                          <tr key={d.id} className={d.estado === 'vencido' ? 'mv-u1' : d.estado === 'por_vencer' ? 'mv-u2' : undefined}>
+                            <td className="mv-t"><b>{d.tipo}</b></td>
+                            <td className="mv-d">
                               <div className="pnl-doble">
                                 <b>{f.fecha(d.venceEn)}</b>
                                 <span>({f.vencimiento(d.venceEn)})</span>
                               </div>
                             </td>
-                            <td>
+                            <td className="mv-e">
                               <Tag color={color('documento_estado', d.estado)}>
                                 {etiqueta('documento_estado', d.estado)}
                               </Tag>
                             </td>
-                            <td>
+                            <td className="mv-pie">
                               <input
                                 type="date"
                                 className="pnl-input"
@@ -715,7 +809,7 @@ export default function ExpedienteVehiculo() {
                                 onChange={(e) => cambiarVencimiento(d.id, e.target.value)}
                               />
                             </td>
-                            <td>
+                            <td className="mv-a">
                               <button type="button" className="pnl-btn sutil" onClick={() => setArchivosDe(d)}>
                                 <Icono nombre="documento" tam={15} />Fotos y PDF
                               </button>
@@ -727,10 +821,12 @@ export default function ExpedienteVehiculo() {
                   </div>
                 )}
               </Tarjeta>
+              </Parte>
             )}
 
             {/* ---------------- Costos ---------------- */}
-            {pestana === 'costos' && (
+            {ver('costos') && (
+              <Parte clave="costos" movil={movil}>
               <Tarjeta
                 titulo="Gasto por categoría"
                 accion={<span className="pnl-link">Total: {f.moneda(totalCostos)}</span>}
@@ -756,6 +852,7 @@ export default function ExpedienteVehiculo() {
                   </>
                 )}
               </Tarjeta>
+              </Parte>
             )}
           </>
         )}

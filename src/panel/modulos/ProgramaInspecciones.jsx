@@ -5,6 +5,7 @@ import { useDatos } from '../useDatos'
 import { Buscador, Campo, Cargando, Chips, Datos, ErrorCarga, Modal, Tag, Tarjeta, Vacio } from '../comp/ui'
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
+import FormatosListos from '../comp/FormatosListos'
 
 const CITAS = {programada:['Programada','azul'],completada:['Completada','verde'],cancelada:['Cancelada','gris']}
 const HALLAZGOS = {pendiente:['Pendiente','ambar'],en_seguimiento:['En seguimiento','azul'],resuelto:['Resuelto','verde'],descartado:['Descartado','gris']}
@@ -33,6 +34,7 @@ export default function ProgramaInspecciones({vista='agenda',abrirPrograma}) {
   return <>
     {aviso&&<p className="insp-success" role="status">{aviso}</p>}
     <div className="insp-toolbar"><div><h2>{vista==='agenda'?'Agenda de inspecciones':vista==='hallazgos'?'Atiende lo que salió mal':'Listas claras para cada revisión'}</h2><p>{vista==='agenda'?'A quién le toca revisar qué unidad y cuándo.':vista==='hallazgos'?'Hallazgos registrados desde la app y su seguimiento.':'Crea un borrador, añade puntos y publícalo para programar inspecciones.'}</p></div>{vista==='plantillas'&&<button className="pnl-btn primario" type="button" onClick={()=>setCreando(true)}><Icono nombre="mas" tam={18}/>Nueva plantilla</button>}</div>
+    {vista==='plantillas'&&<FormatosListos plantillas={carga.datos} alPublicar={m=>{carga.recargar();setAviso(m)}}/>}
     <div className="insp-filters"><Chips opciones={opciones} valor={filtro} alCambiar={setFiltro}/><Buscador valor={q} alCambiar={setQ} placeholder={vista==='plantillas'?'Buscar plantilla…':'Buscar unidad, responsable o punto…'}/></div>
     <div className={vista==='plantillas'?'':'insp-split'}>
       <Tarjeta titulo={vista==='agenda'?'Citas de inspección':vista==='hallazgos'?'Hallazgos':'Plantillas'} sinCuerpo>

@@ -1,0 +1,226 @@
+/* ============================================================
+   INFORME IMPRIMIBLE (P1..P8) — papel claro, tinta #141A22, azul #1F6FC0
+   para texto y #3D9BF5 de acento. El estado se lee también en blanco y
+   negro: cada etiqueta lleva icono y borde (sólido, discontinuo, punteado).
+   ============================================================ */
+.inf{--tinta:#141A22;--azul:#1F6FC0;--acento:#3D9BF5;--gris:#4A5463;--linea:#D5DAE1;--linea-2:#C9D0D9;color:var(--tinta);background:#fff;font-family:'Spline Sans','Segoe UI',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13px;line-height:18px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.inf *{box-sizing:border-box}
+.inf :is(h1,h2,p,ol,ul){margin:0}
+.inf h1{margin-top:4px;font-size:28px;line-height:34px;font-weight:700;letter-spacing:-.6px}
+.inf h2{font-size:16px;line-height:22px;font-weight:600}
+
+/* Hoja: la tabla repite encabezado y pie en cada página impresa */
+.inf-hoja{width:100%;border-collapse:collapse;break-before:page;page-break-before:always}
+.inf-hoja:first-child{break-before:auto;page-break-before:auto}
+.inf-hoja>thead>tr>td,.inf-hoja>tfoot>tr>td{padding:0}
+.inf-hoja>tbody>tr>td.inf-mn{padding:18px 0 12px;vertical-align:top}
+.inf-mn>*+*{margin-top:12px}
+.inf-hd{height:52px;display:flex;flex-direction:column;justify-content:space-between}
+.inf-hd-fila{display:flex;align-items:center;gap:14px}
+.inf-logo{width:112px;height:40px;border-radius:10px;background:#0A0D12;display:flex;align-items:center;justify-content:center;flex:none}
+.inf-logo img{display:block;width:93px;height:28px}
+.inf-hd-t{display:flex;flex-direction:column;flex:1;min-width:0}
+.inf-hd-t b{font-size:14px;line-height:18px;font-weight:600}
+.inf-hd-t span,.inf-hd-r span{font-size:12px;line-height:16px;color:var(--gris)}
+.inf-hd-r{display:flex;flex-direction:column;align-items:flex-end}
+.inf-hd-r b{font-size:12px;line-height:16px;font-weight:600;color:var(--azul);letter-spacing:1px;text-transform:uppercase}
+.inf-regla{display:flex;align-items:flex-end;height:3px}
+.inf-regla i{width:112px;height:3px;background:var(--acento);display:block}
+.inf-regla s{flex:1;height:1px;background:var(--linea-2);display:block}
+.inf-ft{height:40px;border-top:1px solid var(--linea-2);display:flex;justify-content:space-between;align-items:flex-end;gap:12px;font-size:12px;line-height:16px;color:var(--gris)}
+.inf-ft>span:first-child{display:flex;flex-direction:column}
+.inf-ft b{color:var(--tinta);font-weight:600}
+
+/* Textos */
+.inf-eb{font-size:12px;line-height:16px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--azul)}
+.inf-eb.gris{color:var(--gris);letter-spacing:1px}
+.inf-baj{margin-top:6px!important;font-size:15px;line-height:22px;color:var(--gris)}
+.inf-sub{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px}
+.inf-sub>span{font-size:12px;line-height:16px;color:var(--gris);text-align:right}
+.inf-lec,.inf-txt{font-size:13px;line-height:18px;color:var(--gris)}
+.inf-txt{font-size:14px;line-height:20px;color:var(--tinta)}
+.inf-lec b{color:var(--tinta);font-weight:600}
+.inf-lec.abajo{margin-top:auto!important}
+.inf-nota{font-size:12px;line-height:16px;color:var(--gris)}
+.inf-nota.abajo{margin-top:12px!important}
+.inf-mb{margin-bottom:4px!important}
+.inf .gris{color:var(--gris)}
+.inf-si{color:var(--gris);font-style:italic}
+.inf-raya{color:var(--gris)}
+
+/* Cajas */
+.inf-box{border:1px solid var(--linea);border-radius:16px;padding:14px 16px;break-inside:avoid}
+.inf-box.gris{background:#F6F8FA}
+.inf-box.azul{background:#F3F8FE;border-color:#A9CBEF}
+.inf-box.aviso{background:#FFF5DA;border:1px dashed #7A4F00}
+.inf-box h2+p{margin-top:4px}
+.inf-col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.inf-dos{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px}
+.inf-dos-cajas{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:12px}
+.inf-datos{border-left:1px solid var(--linea);padding-left:20px;justify-content:center}
+.inf-datos>div{display:flex;justify-content:space-between;gap:12px;font-size:14px;line-height:20px}
+.inf-datos span{color:var(--gris)}
+
+/* Etiquetas y marcas */
+.inf-ti{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+.inf-tg{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px;border-radius:10px;font-size:12px;line-height:14px;font-weight:600;white-space:nowrap;border:1px solid;vertical-align:middle}
+.inf-tg.ok{color:#1A7F37;background:#E7F5EC;border-color:#1A7F37}
+.inf-tg.wa{color:#7A4F00;background:#FFF5DA;border-color:#7A4F00;border-style:dashed}
+.inf-tg.ba{color:#fff;background:#B42318;border-color:#B42318}
+.inf-tg.ne{color:var(--gris);background:#EEF1F5;border-color:#9AA3AF;border-style:dotted}
+.inf-tg.az{color:var(--azul);background:#E8F2FE;border-color:var(--azul)}
+.inf-mk{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:4px;border:1px solid;vertical-align:-3px;margin-left:4px}
+.inf-mk.wa{color:#7A4F00;background:#FFF5DA;border-style:dashed}
+.inf-mk.ba{color:#fff;background:#B42318;border-color:#B42318}
+.inf-mk.ne{color:var(--gris);background:#EEF1F5;border-style:dotted}
+.inf-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.inf-dot.m{background:var(--acento);border:1px solid var(--azul)}
+.inf-dot.d{background:#fff;border:1.5px solid var(--gris)}
+.inf-dot.x{background:#fff;border:1.5px dotted var(--gris)}
+
+/* Tablas: encabezado oscuro de línea, números a la derecha */
+.inf-tabla{width:100%;border-collapse:collapse;font-size:12px;line-height:14px;table-layout:fixed}
+.inf-tabla thead{display:table-header-group}
+.inf-tabla tr{break-inside:avoid;page-break-inside:avoid}
+.inf-tabla th{background:#EEF1F5;color:var(--tinta);font-weight:600;text-align:left;padding:0 5px;height:24px;border-top:1px solid var(--tinta);border-bottom:1px solid var(--tinta);white-space:nowrap;overflow:hidden}
+.inf-tabla td{padding:1px 5px;height:18px;border-bottom:1px solid var(--linea);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inf-tabla.alta td{height:27px;white-space:normal}
+/* Texto libre (descripción, nombres): baja de línea en vez de cortarse con «…», como el PDF de la app. */
+.inf-tabla td.w{white-space:normal;overflow-wrap:anywhere;text-overflow:clip;padding-top:2px;padding-bottom:2px}
+.inf-tabla .r{text-align:right}
+.inf-tabla td.b,.inf-tabla .b{font-weight:600}
+.inf-tabla .bl{display:block;font-size:13px}
+.inf-tabla .grande{font-size:16px;font-weight:700}
+.inf-tabla tr.tot td{font-weight:700;height:24px;border-top:1px solid var(--tinta);border-bottom:2px solid var(--tinta);background:#F6F8FA}
+.inf-tabla tr.si td{color:var(--gris);font-style:italic}
+
+/* Cifras */
+.inf-kp{border:1px solid var(--linea);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0;break-inside:avoid}
+.inf-kp .l{font-size:13px;line-height:18px;font-weight:600;color:var(--gris)}
+.inf-kp .v{font-size:28px;line-height:34px;font-weight:700;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inf-kp .v.chica{font-size:22px}
+.inf-kp .v small{font-size:14px;font-weight:600;color:var(--gris);margin-left:4px;letter-spacing:0}
+.inf-kp .cmp{display:flex;align-items:center;gap:6px;font-size:13px;line-height:18px;font-weight:600;flex-wrap:wrap}
+.inf-kp .cmp.sin{font-weight:500;color:var(--gris)}
+.inf-kp .p{font-size:12px;line-height:16px;color:var(--gris)}
+.inf-kp3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.inf-kp4b{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.inf-kp4b .inf-kp{padding:10px 12px}
+.inf-kp4b .inf-kp .l{font-size:12px;line-height:16px}
+.inf-kp4b .inf-kp .v{font-size:22px;line-height:30px}
+
+/* Portada */
+.inf-portada{padding-top:4px;display:flex;flex-direction:column;gap:6px}
+.inf-grande{margin:0!important;font-size:34px!important;line-height:40px!important;letter-spacing:-1.2px!important}
+.inf-empresa{margin-top:4px!important;font-size:22px;line-height:28px;font-weight:600}
+.inf-portada .inf-baj{margin-top:0!important}
+.inf-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}
+.inf-meta>div{padding:7px 0;border-top:1px solid var(--linea)}
+.inf-meta .v{margin-top:2px;font-size:16px;line-height:22px;font-weight:600}
+.inf-meta .s{margin-top:2px;font-size:13px;line-height:18px;color:var(--gris)}
+.inf-pocas{background:#EAF3FE;border-left:4px solid var(--acento);border-radius:0 12px 12px 0;padding:10px 14px;display:flex;flex-direction:column;gap:4px;break-inside:avoid}
+.inf-pocas .inf-eb{color:#2D5D88}
+.inf-pocas p:last-child{font-size:14px;line-height:20px;font-weight:600}
+.inf-kp4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.inf-kp4>div{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border:1px solid #E1E6ED;border-radius:10px;min-width:0}
+.inf-kp4 span{font-size:11px;line-height:14px;color:#5A6676}
+.inf-kp4 b{font-size:20px;line-height:26px;font-weight:700;white-space:nowrap}
+.inf-kp4 b small{font-size:12px;color:var(--gris)}
+.inf-kp4 i{font-style:normal;font-size:11px;line-height:14px;font-weight:700;color:var(--azul)}
+.inf-h2-contenido{font-size:18px!important;margin-bottom:6px!important}
+.inf-indice{padding:0;list-style:none;border-bottom:1px solid var(--linea)}
+.inf-indice li{display:grid;grid-template-columns:40px minmax(0,1fr) 86px;align-items:center;gap:12px;min-height:28px;padding:1px 0;border-top:1px solid var(--linea)}
+.inf-indice .num{width:24px;height:24px;border-radius:10px;border:1px solid #9AA3AF;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.inf-indice .num.on{border-color:var(--azul);background:#E8F2FE;color:var(--azul)}
+.inf-indice b{display:block;font-size:14px;line-height:17px;font-weight:600}
+.inf-indice b+span{display:block;font-size:12px;line-height:16px;color:var(--gris)}
+.inf-indice .sec{text-align:right;font-size:13px;color:var(--gris)}
+
+/* Resumen */
+.inf-conclusion{border-left:4px solid var(--acento);background:#F3F8FE;border-radius:0 16px 16px 0;padding:14px 18px;break-inside:avoid}
+.inf-conclusion p{font-size:16px;line-height:24px}
+.inf-ahora{display:flex;flex-direction:column;gap:4px;padding:10px 16px}
+.inf-ahora .t{font-size:13px;line-height:18px;font-weight:600;color:var(--gris)}
+.inf-ahora .f{display:flex;gap:16px;flex-wrap:wrap;font-size:16px;line-height:22px}
+.inf-puntos{padding:0;list-style:none}
+.inf-puntos li{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:start;padding:6px 0;border-top:1px solid var(--linea);break-inside:avoid}
+.inf-puntos li>span:first-child{padding-top:2px}
+.inf-puntos b{display:block;font-size:15px;line-height:20px;font-weight:600}
+.inf-puntos b+span{display:block;font-size:13px;line-height:18px;color:var(--gris)}
+
+/* Vehículos */
+.inf-marcha{display:flex;height:26px;border:1px solid var(--tinta);border-radius:6px;overflow:hidden;font-size:13px;font-weight:700}
+.inf-marcha>span{display:flex;align-items:center;padding-left:8px;min-width:22px}
+.inf-marcha>span+span{border-left:1px solid var(--tinta)}
+.inf-marcha .m{background:var(--acento);color:#08121C}
+.inf-marcha .x{background:#fff;justify-content:center;padding:0}
+.inf-trama{background:repeating-linear-gradient(135deg,#7D8794 0 2px,#fff 2px 6px)}
+.inf-trama b{background:#fff;padding:0 3px}
+.inf-leyenda{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;line-height:18px}
+
+/* Mantenimiento */
+.inf-dona-fila{display:flex;gap:14px;align-items:center}
+.inf-dona{flex:none;display:block}
+.inf-estados{padding:0;list-style:none;flex:1;min-width:0}
+.inf-estados li{display:grid;grid-template-columns:14px minmax(0,1fr) 24px 40px;gap:6px;align-items:center;font-size:14px;line-height:26px;border-top:1px solid #EEF1F5}
+.inf-estados i{display:block;width:14px;height:14px;border-radius:4px;border:1px solid var(--tinta)}
+.inf-estados b{text-align:right}
+.inf-estados .r{text-align:right;color:var(--gris);font-size:13px}
+.inf-barras{display:flex;flex-direction:column;gap:7px;padding:4px 0}
+.inf-bar{display:grid;grid-template-columns:96px minmax(0,1fr) 28px;align-items:center;gap:10px;font-size:13px;line-height:18px}
+.inf-bar.cat{grid-template-columns:180px minmax(0,1fr) 60px 36px}
+.inf-bar>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inf-bar em{font-style:normal;font-size:10px;font-weight:700;color:var(--gris);border:1px solid #9AA3AF;border-radius:4px;padding:0 3px;margin-left:4px}
+.inf-bar .t{height:14px;background:#EEF1F5;border:1px solid var(--linea);border-radius:4px;overflow:hidden}
+.inf-bar .t i{display:block;height:100%;background:var(--acento);border-right:1px solid var(--azul)}
+.inf-bar b{text-align:right;font-weight:600}
+.inf-bar .r{text-align:right;font-size:12px}
+
+/* Conductores */
+.inf-ident{display:grid;grid-template-columns:290px repeat(3,minmax(0,1fr));gap:12px;align-items:center}
+.inf-ident-a{display:flex;gap:12px;align-items:center}
+.inf-aro{flex:none;display:block}
+.inf-ident .g{font-size:15px;line-height:22px}
+.inf-ident-c{border-left:1px solid var(--linea);padding-left:12px;min-width:0}
+.inf-ident-c .v{margin-top:2px;font-size:22px;line-height:28px;font-weight:700;white-space:nowrap}
+.inf-ident-c .v small{font-size:13px;color:var(--gris);margin-left:3px}
+
+/* Estadístico */
+.inf-escala{position:relative;height:22px;padding-top:8px}
+.inf-escala-b{display:flex;height:10px;border:1px solid var(--tinta);border-radius:3px;overflow:hidden}
+.inf-escala-b span+span{border-left:1px solid var(--tinta)}
+.inf-escala-t{position:absolute;top:0;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid var(--tinta)}
+
+/* Notas y firmas */
+.inf-glosario{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px}
+.inf-glosario>div{padding:5px 0;border-top:1px solid var(--linea)}
+.inf-glosario b{font-size:14px;line-height:20px}
+.inf-glosario p{margin-top:2px;font-size:13px;line-height:18px;color:var(--gris)}
+.inf-firmas-bloque{break-inside:avoid}
+.inf-firmas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.inf-firmas>div{border:1px solid #9AA3AF;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;height:124px}
+.inf-firmas .esp{flex:1}
+.inf-firmas .linea{border-top:1px solid var(--tinta)}
+.inf-firmas span{font-size:13px;line-height:18px}
+
+/* Vista previa en pantalla: una hoja A4 (794 × 1123) reducida */
+.inf-pliego{width:794px;height:1123px;padding:45px 56px 40px;overflow:hidden;border-radius:4px}
+.inf-pliego .inf-hoja{height:100%}
+.inf-mini{width:calc(794px * var(--escala,.38));height:calc(1123px * var(--escala,.38));overflow:hidden;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.5);background:#fff;flex:none}
+.inf-mini>.inf{transform:scale(var(--escala,.38));transform-origin:0 0}
+
+/* Impresión: solo el informe, en A4 vertical. «Página N de M» va en el margen
+   inferior (Chrome y Edge 131 o más nuevos); el pie de cada hoja lleva además
+   el número de sección, que se ve en cualquier navegador. */
+.inf-raiz{display:none}
+@page informe{
+  size:A4 portrait;
+  margin:12mm 14.8mm 12mm;
+  @bottom-right{content:"Página " counter(page) " de " counter(pages);font-family:'Spline Sans','Segoe UI',sans-serif;font-size:8pt;color:#4A5463;vertical-align:top;padding-top:2mm}
+}
+@media print{
+  html:has(body>.inf-raiz),body:has(>.inf-raiz){background:#fff!important;height:auto!important;overflow:visible!important}
+  body:has(>.inf-raiz)>:not(.inf-raiz){display:none!important}
+  .inf-raiz{display:block;page:informe}
+  .inf-raiz .inf{width:100%}
+}

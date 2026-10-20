@@ -286,7 +286,7 @@ const repo = HAY_API
       jornadas: soloConBaseReal(repoApi.jornadas),
       planes: soloConBaseReal(repoApi.planes),
       transferencias: soloConBaseReal(repoApi.transferencias),
-      programaInspecciones: soloConBaseReal(repoApi.programaInspecciones),
+      programaInspecciones: { ...soloConBaseReal(repoApi.programaInspecciones), ...repoSemilla.programaInspecciones },
       admin: {
         ...repoSemilla.admin,
         plataforma: soloConBaseReal(repoApi.plataforma),

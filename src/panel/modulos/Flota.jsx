@@ -14,6 +14,7 @@ import {
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
+import '../../styles/movil-modulos.css'
 
 // ============================================================
 // FLOTA — listado maestro de unidades
@@ -85,6 +86,117 @@ function TagDocumentos({ v }) {
   }
   if (v.docsPorVencer > 0) return <Tag color="ambar">{v.docsPorVencer} por vencer</Tag>
   return <Tag color="verde">Al día</Tag>
+}
+
+/**
+ * La PEOR novedad de una unidad, como la escala de Flota en la app: decide en
+ * qué tramo va en el teléfono («No pueden salir», «Atención», «Sin novedad»)
+ * y la única etiqueta que lleva su fila. Solo con lo que la lista ya trae: la
+ * web no tiene aquí ni el SOS ni la inspección del día.
+ */
+function novedadDe(v) {
+  if (v.docsVencidos > 0) {
+    return { peso: 3, grupo: 'no-salen', color: 'rojo', t: v.docsVencidos === 1 ? 'Documento vencido' : `${v.docsVencidos} vencidos` }
+  }
+  if (v.docsPorVencer > 0) return { peso: 5, grupo: 'atencion', color: 'ambar', t: `${v.docsPorVencer} por vencer` }
+  if (!v.conductorPrincipalId) return { peso: 7, grupo: 'atencion', color: 'ambar', t: 'Sin conductor' }
+  return null
+}
+
+const TRAMOS = [
+  { clave: 'no-salen', t: 'No pueden salir', color: 'rojo' },
+  { clave: 'atencion', t: 'Atención', color: 'ambar' },
+  { clave: 'sin-novedad', t: 'Sin novedad', color: '' },
+]
+
+/**
+ * La lista del teléfono, como flota.tsx: tres tramos por gravedad y dentro de
+ * cada uno lo peor primero (luego, el orden elegido en la tabla). Cada fila es
+ * una sola línea de estado; el detalle va debajo.
+ */
+function ListaMovil({ unidades, alAbrir }) {
+  const tramos = useMemo(() => {
+    const conNovedad = unidades.map((v, i) => ({ v, i, n: novedadDe(v) }))
+    const orden = (a, b) => (a.n?.peso ?? 99) - (b.n?.peso ?? 99) || a.i - b.i
+    return TRAMOS
+      .map((t) => ({ ...t, items: conNovedad.filter((u) => (u.n?.grupo ?? 'sin-novedad') === t.clave).sort(orden) }))
+      .filter((t) => t.items.length > 0)
+  }, [unidades])
+  return (
+    <div className="mv-solo-movil mv-tramos">
+      {tramos.map((t) => (
+        <section key={t.clave} className="mv-grupo" aria-label={t.t}>
+          <h3 className={`mv-grupo-cab ${t.color}`}>{t.t}</h3>
+          <div className="mv-lista-card">
+            {t.items.map(({ v, n }) => (
+              <button
+                key={v.id}
+                type="button"
+                className="mv-fila"
+                onClick={() => alAbrir(v.id)}
+                aria-label={`${v.alias}, ${v.placa}${n ? `, ${n.t}` : ''}`}
+              >
+                <span className="mv-fila-retrato">
+                  <MiniFoto vehiculoId={v.id} alto={46} ancho={60}><VehicleVisual modelo={v.modelo ?? ''} compacta /></MiniFoto>
+                </span>
+                <span className="mv-fila-txt">
+                  <span className="mv-fila-arriba">
+                    <b>{v.alias}</b>
+                    {n && <Tag color={n.color}>{n.t}</Tag>}
+                  </span>
+                  <span className="mv-fila-detalle">
+                    <Icono nombre="gente" tam={12} />
+                    <span>{[nombreConductor(v), v.placa, v.areaNombre].filter(Boolean).join(' · ')}</span>
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * El pulso de la flota en el teléfono (TiraEstado de la app): cuatro casillas
+ * sobre lo que se ve con el filtro puesto. Si la fuente no sabe de marcha, se
+ * cuenta lo que sí consta: quién reporta y quién no.
+ */
+function TiraMovil({ unidades, sabeMarcha }) {
+  const total = unidades.length
+  const sinSenal = unidades.filter((v) => v.conectado === false).length
+  const enMarcha = unidades.filter((v) => v.estadoMarcha === 'en_marcha' && v.conectado !== false).length
+  const cifras = sabeMarcha
+    ? [
+        { t: total === 1 ? 'unidad' : 'unidades', n: total },
+        { t: 'en marcha', n: enMarcha, c: 'verde' },
+        { t: 'detenidas', n: total - enMarcha - sinSenal, c: 'ambar' },
+        { t: 'sin señal', n: sinSenal, c: 'gris' },
+      ]
+    : [
+        { t: total === 1 ? 'unidad' : 'unidades', n: total },
+        { t: 'reportando', n: total - sinSenal, c: 'verde' },
+        { t: 'sin señal', n: sinSenal, c: 'gris' },
+        { t: 'sin conductor', n: unidades.filter((v) => !v.conductorPrincipalId).length, c: 'ambar' },
+      ]
+  return (
+    <div className="mv-solo-movil mv-tira" aria-label="Estado de la flota">
+      {cifras.map((x) => {
+        // Un cero no es un estado: va en gris, como en la app.
+        const tono = x.c && x.n > 0 ? x.c : ''
+        return (
+          <div key={x.t}>
+            <span className="mv-tira-num">{x.c && <i className={tono} />}<b>{x.n}</b></span>
+            <span>{x.t}</span>
+            {x.c && total > 0
+              ? <span className="mv-tira-pista"><i className={tono} style={{ width: `${Math.min(100, (x.n / total) * 100)}%` }} /></span>
+              : <span className="mv-tira-pista vacia" />}
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 /** Descarga la tabla tal como se ve, sin librerías: Blob + enlace temporal. */
@@ -272,7 +384,8 @@ export default function Flota() {
 
         {estado === 'ok' && (
           <>
-            <div className="pnl-grid k4">
+            <TiraMovil unidades={filtradas} sabeMarcha={sabeMarcha} />
+            <div className="pnl-grid k4 mv-solo-escritorio">
               <Kpi titulo="Total de unidades" valor={lista.length} icono="camion" />
               {sabeMarcha ? (
                 <Kpi
@@ -312,6 +425,7 @@ export default function Flota() {
             <Chips opciones={chipsEstado} valor={filtro} alCambiar={setFiltro} />
             <Chips opciones={chipsArea} valor={areaId} alCambiar={setAreaId} />
 
+            <div className="mv-flota-lista">
             <Tarjeta
               titulo={`${ordenadas.length} ${ordenadas.length === 1 ? 'unidad' : 'unidades'}`}
               accion={
@@ -322,7 +436,7 @@ export default function Flota() {
                       Agregar vehículos a «{(areas.datos ?? []).find((a) => a.id === areaId)?.nombre ?? 'esta área'}»
                     </button>
                   )}
-                  <span className="pnl-link">Toca una fila para ver el expediente</span>
+                  <span className="pnl-link mv-solo-escritorio">Toca una fila para ver el expediente</span>
                 </span>
               }
               sinCuerpo
@@ -356,8 +470,9 @@ export default function Flota() {
                 />
               )}
 
+              {ordenadas.length > 0 && <ListaMovil unidades={ordenadas} alAbrir={abrir} />}
               {ordenadas.length > 0 && (
-                <div className="pnl-tabla-wrap">
+                <div className="pnl-tabla-wrap mv-solo-escritorio">
                   <table className="pnl-tabla">
                     <thead>
                       <tr>
@@ -463,6 +578,7 @@ export default function Flota() {
                 </div>
               )}
             </Tarjeta>
+            </div>
           </>
         )}
       </div>

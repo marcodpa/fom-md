@@ -8,6 +8,7 @@ import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import ProgramaInspecciones, { ProgramarInspeccion } from './ProgramaInspecciones'
 import './inspecciones.css'
+import '../../styles/movil-modulos.css'
 
 /** Hash FNV-1a: misma inspección, mismo checklist, siempre. */
 function hash(texto) {
@@ -163,7 +164,7 @@ function Resultados({ vista, abrirPrograma, cambiarVista, inspeccionId }) {
 }
 
 function TablaResultados({ lista, abrir, programadas = new Set() }) {
-  return <div className="pnl-tabla-wrap"><table className="pnl-tabla insp-table"><thead><tr>{['Fecha y hora','Tipo','Unidad','Conductor','Resultado','Observaciones','Fallas críticas','Ubicación','Detalle'].map(t=><th key={t}>{t}</th>)}</tr></thead><tbody>{lista.map(i=><tr key={i.id}><td>{f.fechaHora(i.creadaEn || i.fecha)}</td><td><Tag color={(i.clase ? i.clase === 'scheduled' : programadas.has(i.id)) ? 'azul' : 'gris'}>{(i.clase ? i.clase === 'scheduled' : programadas.has(i.id)) ? 'Programada' : 'Diaria'}</Tag></td><td><b>{i.vehiculo?.alias || i.vehiculoNombre}</b><small>{i.vehiculo?.placa || etiqueta('vehiculo_tipo',i.tipoVehiculo)}</small></td><td>{i.conductorNombre}</td><td><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag></td><td>{f.numero(i.observaciones)}</td><td>{f.numero(i.fallasCriticas)}</td><td>{i.ubicacion || 'Sin ubicación'}</td><td><button className="pnl-table-action" type="button" aria-label={'Ver resultado de '+i.vehiculoNombre} onClick={()=>abrir(i)}>Ver resultado →</button></td></tr>)}</tbody></table></div>
+  return <div className="pnl-tabla-wrap"><table className="pnl-tabla insp-table mv-lista"><thead><tr>{['Fecha y hora','Tipo','Unidad','Conductor','Resultado','Observaciones','Fallas críticas','Ubicación','Detalle'].map(t=><th key={t}>{t}</th>)}</tr></thead><tbody>{lista.map(i=><tr key={i.id} className={i.resultado === 'bloqueada' ? 'mv-ir mv-u1' : i.resultado === 'aprobada_con_observaciones' ? 'mv-ir mv-u2' : 'mv-ir'}><td className="mv-d">{f.fechaHora(i.creadaEn || i.fecha)}</td><td><Tag color={(i.clase ? i.clase === 'scheduled' : programadas.has(i.id)) ? 'azul' : 'gris'}>{(i.clase ? i.clase === 'scheduled' : programadas.has(i.id)) ? 'Programada' : 'Diaria'}</Tag></td><td className="mv-t"><b>{i.vehiculo?.alias || i.vehiculoNombre}</b><small>{i.vehiculo?.placa || etiqueta('vehiculo_tipo',i.tipoVehiculo)}</small></td><td className="mv-d">{i.conductorNombre}</td><td className="mv-e"><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag></td><td>{f.numero(i.observaciones)}</td><td>{f.numero(i.fallasCriticas)}</td><td>{i.ubicacion || 'Sin ubicación'}</td><td className="mv-a"><button className="pnl-table-action mv-estira" type="button" aria-label={'Ver resultado de '+i.vehiculoNombre} onClick={()=>abrir(i)}>Ver resultado →</button></td></tr>)}</tbody></table></div>
 }
 function DetalleInspeccion({ inspeccion, alCerrar, alHallazgos }) {
   const detalle = useDatos(() => CONECTADO ? repo.inspecciones.obtener(inspeccion.id) : Promise.resolve(checklistDe(inspeccion)), [inspeccion.id])

@@ -1,0 +1,80 @@
+{
+  "code": "iogp.conduccion",
+  "version": 1,
+  "name": "Conducción",
+  "description": "Verificaciones para el inicio del trabajo (IOGP). Formato firmado en papel por el ente.",
+  "items": [
+    {
+      "code": "conduccion.01",
+      "category": "Conducción",
+      "name": "Se ha implementado un plan para gestionar los peligros del viaje.",
+      "isCritical": true,
+      "helpText": "El plan de gestión del viaje incluye y el conductor está al tanto de:\n- el destino\n- el recorrido que hará\n- el tráfico local\n- el clima y las condiciones viales\n- los contactos designados de emergencia\nEl conductor está autorizado y cuenta con un permiso de conducir vigente para conducir el tipo de vehículo dentro del área geográfica.\nEl conductor asigna tiempo durante el cronograma del viaje para descansar.\nSi el vehículo está equipado con un sistema de monitoreo, el sistema está activado durante el viaje.",
+      "vehicleTypes": [],
+      "displayOrder": 1
+    },
+    {
+      "code": "conduccion.02",
+      "category": "Conducción",
+      "name": "El conductor se encuentra en buenas condiciones físicas, está descansado y en estado pleno de alerta.",
+      "isCritical": true,
+      "helpText": "El conductor:\n- está bien descansado\n- está en buenas condiciones para emprender el viaje\n- no está bajo la influencia de drogas, alcohol o medicamentos que puedan afectar su habilidad para conducir\nSe implementaron controles para manejar la fatiga personal, entre los que se incluyen:\n- tiempo máximo de conducción\n- cantidad mínima de horas de descanso antes de conducir\n- períodos de descanso durante el viaje, según corresponda",
+      "vehicleTypes": [],
+      "displayOrder": 2
+    },
+    {
+      "code": "conduccion.03",
+      "category": "Conducción",
+      "name": "El conductor está familiarizado con las normas locales viales y de conducción.",
+      "isCritical": true,
+      "helpText": "El conductor está familiarizado con los límites de velocidad, las señales locales y las comunicaciones generales (como el uso de radio, según corresponda, y de canales).",
+      "vehicleTypes": [],
+      "displayOrder": 3
+    },
+    {
+      "code": "conduccion.04",
+      "category": "Conducción",
+      "name": "El conductor conoce de antemano los peligros viales y las condiciones climáticas.",
+      "isCritical": true,
+      "helpText": "El conductor verificó los pronósticos meteorológicos, el tráfico local y el entorno donde conducirá (p. ej. hielo, nieve, lluvia, inundación) y confirmó las condiciones de la carretera (p. ej. pavimento, grava, obras en la carretera).",
+      "vehicleTypes": [],
+      "displayOrder": 4
+    },
+    {
+      "code": "conduccion.05",
+      "category": "Conducción",
+      "name": "Se realizó un paseo a modo de inspección antes del viaje para confirmar que el vehículo seleccionado estuviera en condiciones para el viaje.",
+      "isCritical": true,
+      "helpText": "Se completó una inspección previa al viaje y antes de usar el vehículo.\nEl vehículo:\n- está en buenas condiciones de funcionamiento\n- es específico para el viaje\n- está equipado teniendo en cuenta el clima, las condiciones de la carretera y cualquier emergencia\nHaga un recorrido de 360° alrededor del vehículo para asegurarse de que no corra peligros antes de entrar en movimiento.",
+      "vehicleTypes": [],
+      "displayOrder": 5
+    },
+    {
+      "code": "conduccion.06",
+      "category": "Conducción",
+      "name": "Los objetos que están dentro y fuera del vehículo se sujetaron antes del viaje.",
+      "isCritical": true,
+      "helpText": "Se implementaron sistemas de seguridad y sujeción para asegurar la carga.\nSe eliminaron o se sujetaron las herramientas, los equipos y demás objetos sueltos tanto dentro como fuera del vehículo (p. ej. con cajas de herramientas y redes de carga).\nSegún corresponda, se completó una lista de verificación para sujetar la carga.",
+      "vehicleTypes": [],
+      "displayOrder": 6
+    },
+    {
+      "code": "conduccion.07",
+      "category": "Conducción",
+      "name": "Todos los ocupantes del vehículo usan cinturones de seguridad.",
+      "isCritical": true,
+      "helpText": "Los cinturones de seguridad funcionan correctamente y se utilizan en forma adecuada (p. ej. sujeción de tres puntos).",
+      "vehicleTypes": [],
+      "displayOrder": 7
+    },
+    {
+      "code": "conduccion.08",
+      "category": "Conducción",
+      "name": "Se implementó un plan para eliminar o minimizar las distracciones al conducir.",
+      "isCritical": true,
+      "helpText": "El conductor no interactuará por teléfono ni operará un dispositivo mientras conduzca.\nDurante la conducción, se desactivarán las llamadas entrantes.\nEl conductor se detendrá en un área segura para utilizar el teléfono o un dispositivo móvil.\nEl dispositivo de cartografía digital (p. ej. GPS/cartografía/guía direccional) se programó antes del viaje.",
+      "vehicleTypes": [],
+      "displayOrder": 8
+    }
+  ]
+}

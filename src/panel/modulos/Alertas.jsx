@@ -11,6 +11,7 @@ import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import { agruparAvisos, esDeHoy, estaLeida } from './alertas-presentacion'
 import './perfil-alertas.css'
+import '../../styles/movil-modulos.css'
 
 const DIAS_EVENTOS = 28
 const PESTANAS = [{ v: 'notificaciones', t: 'Notificaciones' }, { v: 'eventos', t: 'Eventos de manejo' }]
@@ -132,6 +133,6 @@ function BandejaAlertas() {
 }
 
 function TablaEventos({ eventos }) {
-  return <div className="pnl-tabla-wrap"><table className="pnl-tabla fa-eventos-tabla"><thead><tr><th>Evento</th><th>Severidad</th><th>Unidad</th><th>Conductor</th><th className="num">Valor</th><th>Ubicación</th><th>Cuándo</th></tr></thead><tbody>{eventos.map(e => <tr key={e.id}><td>{e.nombre || 'Sin dato'}</td><td><Tag color={color('alerta_severidad', e.severidad)}>{etiqueta('alerta_severidad', e.severidad) || 'Sin dato'}</Tag></td><td>{e.vehiculo ? <Link to={`/panel/flota/${e.vehiculo.id}`} className="pnl-link">{e.vehiculo.alias || 'Ver unidad'}</Link> : 'Sin unidad'}</td><td>{e.conductorNombre || 'Sin dato'}</td><td className="num">{e.valor == null ? 'Sin dato' : e.clave === 'exceso_velocidad' ? f.velocidad(e.valor) : f.numero(e.valor)}</td><td>{e.ubicacion || 'Sin dato'}</td><td>{e.creadaEn ? f.fechaHora(e.creadaEn) : 'Sin fecha'}</td></tr>)}</tbody></table></div>
+  return <div className="pnl-tabla-wrap"><table className="pnl-tabla fa-eventos-tabla mv-lista"><thead><tr><th>Evento</th><th>Severidad</th><th>Unidad</th><th>Conductor</th><th className="num">Valor</th><th>Ubicación</th><th>Cuándo</th></tr></thead><tbody>{eventos.map(e => <tr key={e.id} className={e.severidad === 'alta' ? 'mv-u1' : e.severidad === 'media' ? 'mv-u2' : undefined}><td className="mv-t">{e.nombre || 'Sin dato'}</td><td className="mv-e"><Tag color={color('alerta_severidad', e.severidad)}>{etiqueta('alerta_severidad', e.severidad) || 'Sin dato'}</Tag></td><td className="mv-d">{e.vehiculo ? <Link to={`/panel/flota/${e.vehiculo.id}`} className="pnl-link">{e.vehiculo.alias || 'Ver unidad'}</Link> : 'Sin unidad'}</td><td className="mv-d">{e.conductorNombre || 'Sin dato'}</td><td className="num mv-d">{e.valor == null ? 'Sin dato' : e.clave === 'exceso_velocidad' ? f.velocidad(e.valor) : f.numero(e.valor)}</td><td>{e.ubicacion || 'Sin dato'}</td><td className="mv-d">{e.creadaEn ? f.fechaHora(e.creadaEn) : 'Sin fecha'}</td></tr>)}</tbody></table></div>
 }
 

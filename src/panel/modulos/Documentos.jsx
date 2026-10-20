@@ -14,6 +14,7 @@ import { GaleriaArchivos, SelectorArchivos } from '../comp/Archivos'
 import { etiquetas, ids } from '../datos/cloudinary'
 import { subirVarios } from '../datos/archivos'
 import './documentos.css'
+import '../../styles/movil-modulos.css'
 
 // ============================================================
 // DOCUMENTOS
@@ -306,7 +307,7 @@ function Contenido({ todos, lista, ambito, setAmbito, estadoDoc, setEstadoDoc, q
           </div>
         ) : (
           <div className="pnl-tabla-wrap">
-            <table className="pnl-tabla">
+            <table className="pnl-tabla mv-lista">
               <thead>
                 <tr>
                   <th>Documento</th>
@@ -321,28 +322,28 @@ function Contenido({ todos, lista, ambito, setAmbito, estadoDoc, setEstadoDoc, q
                 {lista.map((d) => {
                   const ruta = rutaTitular(d)
                   return (
-                    <tr key={d.id}>
-                      <td>{d.tipo}</td>
-                      <td>
+                    <tr key={d.id} className={d.estado === 'vencido' ? 'mv-u1' : d.estado === 'por_vencer' ? 'mv-u2' : undefined}>
+                      <td className="mv-t">{d.tipo}</td>
+                      <td className="mv-d">
                         {ruta ? (
                           <Link to={ruta} className="pnl-link">{d.titular}</Link>
                         ) : (
                           d.titular
                         )}
                       </td>
-                      <td>{nombreAmbito(d.ambito)}</td>
-                      <td>
+                      <td className="mv-d">{nombreAmbito(d.ambito)}</td>
+                      <td className="mv-d">
                         <div className="pnl-doble">
                           <b>{f.fecha(d.venceEn)}</b>
                           <span>({f.vencimiento(d.venceEn)})</span>
                         </div>
                       </td>
-                      <td>
+                      <td className="mv-e">
                         <Tag color={color('documento_estado', d.estado)}>
                           {etiqueta('documento_estado', d.estado)}
                         </Tag>
                       </td>
-                      <td className="num">
+                      <td className="num mv-a">
                         <div className="pnl-chips">
                           <button type="button" className="pnl-btn sutil" onClick={() => verFotos(d)}>
                             <Icono nombre="ver" tam={15} />
