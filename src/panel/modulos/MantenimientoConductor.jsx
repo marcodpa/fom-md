@@ -206,7 +206,7 @@ function Historia({ odt, perfil }) {
     t: h.actor ? `${h.titulo} · ${h.actor}` : h.titulo,
     d: [i === 0 && !h.de ? odt.descripcion : null, ...h.notas].filter(Boolean).join(' · '),
     en: h.en,
-  }))
+  })).reverse() // lo último que pasó, arriba (como la app)
 
   return (
     <div className="mnt-detail" style={{ gridTemplateColumns: '1fr' }}>

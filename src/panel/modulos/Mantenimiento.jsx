@@ -558,7 +558,9 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
 
       {ejecucion.estado === 'error' && <ErrorCarga texto={ejecucion.error?.message} onReintentar={ejecucion.recargar}/>}
       {(() => {
-        const hitos = presentarHistorial(odt, historial.datos ?? [], ejecucion.datos)
+        // Lo último que pasó, arriba (como la app). Se da la vuelta sin reordenar por fecha para que
+        // dos pasos del mismo instante sigan en el orden en que ocurrieron.
+        const hitos = presentarHistorial(odt, historial.datos ?? [], ejecucion.datos).reverse()
         const grupos = []
         for (const hito of hitos) {
           const fecha = hito.fechaValida ? f.fecha(hito.en) : 'Sin fecha registrada'
@@ -568,7 +570,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
         return (
           <section className="mnt-history">
             <h3>Historial de la orden</h3>
-            <p className="mnt-history-intro">Del reporte al cierre, en el orden en que ocurrió.</p>
+            <p className="mnt-history-intro">Lo último que pasó, arriba.</p>
             {historial.estado === 'cargando' && <p role="status">Consultando los cambios registrados…</p>}
             {historial.estado === 'error' && <ErrorCarga texto="No se pudo cargar el historial completo. Estas son las fechas disponibles de la orden." onReintentar={historial.recargar}/>}
             {grupos.map(grupo => <div className="mnt-history-day" key={grupo.fecha}>
