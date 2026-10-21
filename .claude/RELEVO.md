@@ -61,3 +61,9 @@ turnos a menudo: continuarlos con SendMessage.
    unidad, costos de la unidad (repoApi devuelve `costos: []`).
 5. Si se quiere: rutas para que el supervisor programe inspecciones desde la app.
 6. La clave de demo vieja sigue en el historial del repo de la app: cambiarla si fue real.
+7. Rendimiento con 340 unidades (servidor): https://github.com/juancpachecog/fom-core/issues/713
+   (consultas de última posición sin índice, consola GPS, pool de 10, retención GPS, filtro por
+   fecha en órdenes). Informe: https://claude.ai/artifact/BrP3b7cdSLKRBqc2JQSgBf. Web y app ya
+   arregladas (T-83 a T-85). Prueba local: `npx vite --mode demo` y `/panel?estres=1`.
+8. Web del 21 oct lista para publicar: ops/deploy-20261021-escala (comandos en su README; sirve
+   aunque la activa sea la del 6 o la del 20 oct).
