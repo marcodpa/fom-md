@@ -490,6 +490,8 @@ function fila(id, nombre, v, p, m, desglose, odts) {
   return {
     id, nombre: nombre || 'Sin nombre', unidad: v ? v.alias : (p?.unidadAlias || null), area: v?.areaNombre || null,
     km: m ? m.km : null, eventosPor100: m ? m.eventosPor100 : null, desglose, odts, indice, papeles, motivos, atencion: motivos.length > 0,
+    // La calificación del servidor acompaña al índice solo cuando el índice es el suyo (pastilla igual a la del Resumen).
+    rating: indiceValido(p?.indiceSeguro) ? null : m?.rating ?? null,
   }
 }
 

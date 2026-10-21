@@ -34,7 +34,7 @@ function Perfil() {
   const [parametros, setParametros] = useSearchParams()
   const pestana = PESTANAS_PROPIAS.some(t => t.v === parametros.get('vista')) ? parametros.get('vista') : 'datos'
   const setPestana = vista => setParametros(actual => { const siguientes = new URLSearchParams(actual); siguientes.set('vista', vista); return siguientes }, { replace: true })
-  const scorePropio = useDatos(() => rolCanonico(sesion?.perfil.rol) === 'conductor' ? repo.manejo.miScore({ dias: 28 }) : Promise.resolve(null), [sesion?.perfil.id])
+  const scorePropio = useDatos(() => rolCanonico(sesion?.perfil.rol) === 'conductor' ? repo.manejo.miScore({ dias: 7 }) : Promise.resolve(null), [sesion?.perfil.id])
   const [perfil, setPerfil] = useState(null)
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(true)
@@ -84,6 +84,7 @@ function Perfil() {
     manejo: scorePropio.datos || perfil.manejo,
     indiceSeguro: indiceDePersona(scorePropio.datos) ?? perfil.indiceSeguro,
     manejoError: scorePropio.estado === 'error' ? scorePropio.error.message : perfil.manejoError,
+    manejoCargando: scorePropio.estado === 'cargando',
     eventosDisponibles: perfil.eventosDisponibles ?? Boolean(perfil.modoDemo),
     inspeccionesDisponibles: perfil.inspeccionesDisponibles ?? Boolean(perfil.modoDemo),
     odtsDisponibles: perfil.odtsDisponibles ?? Boolean(perfil.modoDemo),
@@ -109,7 +110,7 @@ function Perfil() {
       {cargando ? <Cargando filas={4} /> : !perfil ? <ErrorCarga error={{ message: error }} onReintentar={() => setRevision(v => v + 1)} /> : <>
         {aviso && <p className="pa-confirmacion" role="status"><Icono nombre="check" tam={18} />{aviso}</p>}
         <Identidad persona={persona} avatar={<Avatar userId={perfil.id} iniciales={iniciales(perfil.nombre)} nombre={perfil.nombre} clase="pnl-avatar-l" tam={160} />} />
-        <MetricasPerfil persona={persona} />
+        <MetricasPerfil persona={persona} propio />
         <PestanasPerfil valor={pestana} alCambiar={setPestana} opciones={PESTANAS_PROPIAS} />
         <section className="usr-panel-pestana" role="tabpanel" id={`usr-panel-${pestana}`} aria-labelledby={`usr-tab-${pestana}`}>
           {pestana === 'datos' && <div className="pnl-grid dos-tercios">

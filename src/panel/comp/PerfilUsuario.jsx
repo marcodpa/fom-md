@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { Campo, Datos, Kpi, Modal, Tag, Tarjeta, Vacio } from './ui'
 import { BarrasH } from './Grafico'
-import { TarjetaManejo } from './ScoreManejo'
+import ManejoConductor from './ManejoConductor'
+import { eventosManejo } from '../datos/manejo'
 import * as f from '../datos/formato'
 import { color, estadoDocumento, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
@@ -436,33 +437,45 @@ function ModalPerfil({ persona: p, alCerrar, alHecho }) {
 
 export { PestanasPerfil, Identidad, FichaDatos, UnidadAsignada, Conduccion, Inspecciones, Documentos, ModalPerfil }
 
-export function MetricasPerfil({ persona: p }) {
+/**
+ * Cabecera de cifras de una persona. La tarjeta «Manejo» solo sale si la persona conduce; `propio` lee
+ * el score de la sesión (Mi perfil) y si no, el del ranking de la empresa (ficha que mira el supervisor).
+ */
+export function MetricasPerfil({ persona: p, propio = false }) {
   const indice = indiceDePersona({ indice: p?.indiceSeguro })
   const eventos = p?.eventos ?? []
   const inspecciones = p?.inspecciones ?? []
   const odts = p?.odts ?? []
   const score = p?.manejo
-  const totalEventos = score && [score.frenadas, score.aceleraciones, score.excesos].every(Number.isFinite)
-    ? score.frenadas + score.aceleraciones + score.excesos
+  const conduce = Boolean(p?.conduce || p?.unidad || p?.rol === 'conductor')
+  const delPeriodo = eventosManejo(score)
+  const totalEventos = delPeriodo !== null ? delPeriodo
     : p?.eventosDisponibles === false ? null : eventos.length
+  // Lo que la ficha ya leyó (7 días) abre la tarjeta sin otra consulta. En la semilla solo existe el índice de la unidad.
+  const inicial = score ?? (indice !== null ? { indice } : null)
   return (
   <>
-  <TarjetaManejo
-    score={{ ...score, indice }}
+  {conduce && <ManejoConductor
+    userId={p.userId ?? p.id}
+    propio={propio}
+    inicial={inicial}
+    diasInicial={7}
+    cargandoInicial={Boolean(p.manejoCargando)}
     empresa={p.empresaNombre || p.empresa}
     logoEmpresa={p.logoEmpresa}
     error={p.manejoError}
+    enlaceEventos="?vista=conduccion"
     nota={p.indiceFuente !== 'conductor' && !p.manejo
       ? `Índice de la unidad asignada${p.unidad ? ` · ${p.unidad.alias} · ${p.unidad.placa}` : ''}`
       : undefined}
-  />
+  />}
   <div className="pnl-grid k3">
     <Kpi
       titulo="Eventos de manejo"
       valor={totalEventos === null ? 'Sin dato' : f.numero(totalEventos)}
       icono="alerta"
       tono={totalEventos > 8 ? 'aviso' : ''}
-      nota="en los últimos 28 días"
+      nota={`en los últimos ${score?.dias ?? 7} días`}
     />
     <Kpi
       titulo="Inspecciones hechas"

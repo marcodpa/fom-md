@@ -4,6 +4,7 @@ import { Icono } from '../Iconos'
 import { estadoUnidad } from '../datos/estadoUnidad'
 import { conSenalAlDia, textoSinSenal, textoUltimoReporte, useMinuto } from '../datos/sinSenal'
 import FotoUnidad from './FotoUnidad'
+import { PastillaConductor } from './ManejoConductor'
 import { useSesion } from '../useSesion'
 import { esGestor } from '../roles'
 import '../../styles/fleet-map.css'
@@ -49,7 +50,11 @@ export default function FichaUnidad({ unidad, variante = 'panel', conCabecera = 
   const extras = datosDe(v).filter(([k]) => !['Velocidad', 'Última señal', 'Conductor', 'Ubicación', 'Odómetro'].includes(k))
   const filas = [
     ['reloj', 'Última señal', v.ultimoReporte ? f.desde(v.ultimoReporte) : 'Sin reportes'],
-    ['gente', 'Conductor', v.conductorNombre && v.conductorNombre !== 'Sin asignar' ? v.conductorNombre : 'Sin conductor asignado'],
+    // El conductor actual con su pastilla de manejo (la del ranking guardado, sin una lectura por unidad).
+    // Solo quien gestiona la empresa ve el ranking; al conductor le basta su tarjeta en Mi unidad.
+    ['gente', 'Conductor', v.conductorNombre && v.conductorNombre !== 'Sin asignar'
+      ? <>{v.conductorNombre}{puedeEditar && v.conductorPrincipalId && <> <PastillaConductor userId={v.conductorPrincipalId} /></>}</>
+      : 'Sin conductor asignado'],
     ['pin', 'Ubicación', v.ubicacionTexto || (Number.isFinite(v.lat) && Number.isFinite(v.lng) ? `${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}` : 'Sin posición disponible')],
   ]
   return <article className={`fleet-card ${variante}`} aria-label={`Vehículo ${v.placa || v.alias || ''}`}>

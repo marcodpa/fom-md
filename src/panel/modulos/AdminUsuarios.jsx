@@ -11,6 +11,7 @@ import * as f from '../datos/formato'
 import { ROLES_ASIGNABLES, etiquetaRol } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import AccionesUsuario from '../comp/AccionesUsuario'
+import { PastillaManejo } from '../comp/ManejoConductor'
 import './usuarios-perfil.css'
 import '../../styles/movil-modulos.css'
 
@@ -258,6 +259,11 @@ function Contenido({
   actor, suspender, reactivar, revocarAcceso,
 }) {
   const { lista } = datos
+  // Una sola lectura del ranking de manejo (7 días, guardada unos minutos) para todas las filas.
+  // Si el servidor no lo da, la lista sale igual, sin pastillas.
+  const hayConductores = lista.some((p) => p.conduce)
+  const { datos: ranking } = useDatos(() => (hayConductores ? repo.manejo.ranking({ dias: 7 }).catch(() => null) : Promise.resolve(null)), [hayConductores])
+  const manejoPorId = new Map((ranking ?? []).map((m) => [m.id, m]))
 
   return (
     <>
@@ -350,6 +356,7 @@ function Contenido({
                     </td>
                     <td className="mv-e">
                       <Tag color={p.rol === 'admin' ? 'azul' : 'gris'} plano>{p.rolEtiqueta}</Tag>
+                      {p.conduce && manejoPorId.has(p.userId ?? p.id) && <> <PastillaManejo score={manejoPorId.get(p.userId ?? p.id)} /></>}
                     </td>
                     <td className="mv-pie">
                       <div className="pnl-chips">

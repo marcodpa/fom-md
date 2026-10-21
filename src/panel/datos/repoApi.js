@@ -376,6 +376,9 @@ function scoreDe(s, aunSinIndice = false) {
   }
 }
 
+const RANKING_MS = 5 * 60_000
+const rankingsGuardados = new Map()
+
 function puntosDe(filas) {
   return quitarSaltos(filas
     .filter((p) => p.positionValid && p.latitude != null && p.longitude != null)
@@ -401,10 +404,22 @@ export const repoApi = {
     async miScore({ dias = 7 } = {}) {
       return scoreDe(await api.miScoreManejo(dias))
     },
-    /** Ranking de los conductores de la empresa, del mejor al peor. */
-    async ranking({ dias = 7 } = {}) {
-      const r = await api.scoresManejo(dias)
-      return (Array.isArray(r) ? r : r?.items ?? []).map((x) => ({ id: x.userId, nombre: x.displayName, ...scoreDe(x, true) }))
+    /**
+     * Ranking de los conductores de la empresa, del mejor al peor. Una lectura por empresa y período,
+     * guardada 5 minutos: la lista de Usuarios, la ficha del vehículo y la de la persona sacan de aquí
+     * la pastilla de cada conductor en vez de pedir una por persona.
+     */
+    ranking({ dias = 7, fresco = false } = {}) {
+      const clave = `${empresaGestionActualId() || ''}:${dias}`
+      const g = rankingsGuardados.get(clave)
+      if (!fresco && g && Date.now() - g.desde < RANKING_MS) return g.peticion
+      const peticion = api.scoresManejo(dias).then((r) =>
+        (Array.isArray(r) ? r : r?.items ?? []).map((x) => ({ id: x.userId, nombre: x.displayName, ...scoreDe(x, true) })))
+      const guardado = { desde: Date.now(), peticion }
+      rankingsGuardados.set(clave, guardado)
+      // Un fallo no se guarda: el siguiente intento sale de verdad al servidor.
+      peticion.catch(() => { if (rankingsGuardados.get(clave) === guardado) rankingsGuardados.delete(clave) })
+      return peticion
     },
   },
 
@@ -767,7 +782,8 @@ export const repoApi = {
         // Un conductor con unidad: solo las órdenes de esa unidad (filtro del servidor). Sin unidad, todas.
         repoApi.odts.listar(p.conduce && p.unidad ? { vehiculoId: p.unidad } : {}),
         repoApi.documentos.listar({ ambito: 'persona' }),
-        p.conduce ? repoApi.manejo.ranking({ dias: 28 }) : Promise.resolve([]),
+        // Los mismos 7 días que la tarjeta «Manejo» abre por defecto: es la misma lectura guardada.
+        p.conduce ? repoApi.manejo.ranking({ dias: 7 }) : Promise.resolve([]),
       ])
       const inspecciones = coleccionDePersona(insp, p.userId, ['conductorId'])
       const ordenes = coleccionDePersona(odts, p.userId, ['creadorId'])

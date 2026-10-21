@@ -5,6 +5,7 @@ import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import { Buscador, Cargando, ErrorCarga, Modal, Vacio } from '../comp/ui'
 import { hoyISO } from '../datos/formato'
+import { etiquetaManejo, tonoManejo } from '../datos/manejo'
 import {
   CATEGORIAS, COMPLETO, FORMATOS, alcanceAlCambiar, armarModelo, cifrasDe, cortesDelPeriodo, crearCsv, crearPeriodo, diasDesde,
   diasServidor, dineroVE, duracionHoras, enVentana, esProducto, formatoPorId, kmVE,
@@ -44,6 +45,8 @@ const TRAZOS = {
 const Ico = ({ n, tam = 18 }) => <svg className="rp-ico" width={tam} height={tam} viewBox="0 0 24 24" aria-hidden="true">{TRAZOS[n]}</svg>
 const Etiqueta = ({ tono, children }) => <span className={`rp-tag t-${tono || 'neu'}`}><i />{children}</span>
 const TONO_PAPELES = { vencido: 'bad', por_vencer: 'warn', al_dia: 'ok' }
+// Color de la pastilla de manejo (datos/manejo.js) → color de celda de Reportes: mismo tono que el Resumen.
+const TONO_MANEJO_REPORTE = { verde: 'ok', ambar: 'warn', rojo: 'bad', gris: 'none' }
 const n2 = v => numeroValido(v) ? numeroVE(v, 2) : '—'
 const csvNum = v => numeroValido(v) ? String(Math.round(Number(v) * 1000) / 1000).replace('.', ',') : ''
 const claveDe = sel => sel.tipo === 'mes' ? 'mes' : `${sel.desdeMes}_${sel.hastaMes}`
@@ -189,7 +192,7 @@ function PestanaUsuarios({ m, csv, filtro, setFiltro }) {
         <td className="nr">{p.odts ?? '—'}</td>
         <td className="nr">{p.desglose ? `${p.desglose.excesos} · ${p.desglose.frenadas} · ${p.desglose.aceleraciones}` : '—'}</td>
         <td className={`nr b c-${tonoScore(p.eventosPor100) || 'none'}`}>{n2(p.eventosPor100)}</td>
-        <td className={`nr b c-${tonoIndice(p.indice) || 'none'}`}>{p.indice ?? '—'}</td>
+        <td className={`nr b c-${p.indice == null ? 'none' : TONO_MANEJO_REPORTE[tonoManejo({ indice: p.indice, rating: p.rating })]}`}>{p.indice == null ? '—' : etiquetaManejo({ indice: p.indice, rating: p.rating })}</td>
         <td><Etiqueta tono={TONO_PAPELES[p.papeles.estado]}>{p.papeles.texto}</Etiqueta></td>
       </tr>} />
     <div className="rp-lado">

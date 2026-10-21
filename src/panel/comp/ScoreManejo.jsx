@@ -1,67 +1,56 @@
 import { useState } from 'react'
-import repo from '../datos/repo'
-import { useDatos } from '../useDatos'
-import { useSesion } from '../useSesion'
-import { Tarjeta, Cargando, ErrorCarga } from './ui'
-import { indiceDePersona } from '../datos/perfilUsuario'
+import { Link } from 'react-router-dom'
+import { Tag } from './ui'
+import { DIAS_MANEJO, cifrasManejo, etiquetaManejo, eventosManejo, tonoManejo } from '../datos/manejo'
 import * as f from '../datos/formato'
 import './score-manejo.css'
 
-const DIAS = 7
-const ETIQUETA = { verde: 'Manejo seguro', amarillo: 'Puedes mejorar', rojo: 'Requiere atención' }
-const numeroDisponible = n => Number.isFinite(n) ? f.numero(n) : '—'
+// Tono de la pastilla → variante de color de la tarjeta (escala y cifra del score).
+const RANGO = { verde: 'verde', ambar: 'amarillo', rojo: 'rojo', gris: 'sin-dato' }
 
-function IconoEvento({ tipo }) {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {tipo === 'frenada' ? <><circle cx="12" cy="12" r="6" /><path d="M4 5a10 10 0 0 0 0 14M20 5a10 10 0 0 1 0 14M12 8v5m0 3h.01" /></>
-      : tipo === 'aceleracion' ? <path d="M4 17 11 10l4 4 5-9M15 5h5v5M4 21h16" />
-        : <><path d="M4 18a9 9 0 1 1 16 0M12 5v2M5 9l2 1M19 9l-2 1M12 14l4-5" /><circle cx="12" cy="14" r="2" /></>}
-  </svg>
-}
-
-/** El índice y los eventos vienen del servidor; esta tarjeta no los calcula. */
-export default function ScoreManejo({ titulo = 'Índice de manejo seguro' }) {
-  const sesion = useSesion()
-  const { datos, estado, error, recargar } = useDatos(() => repo.manejo.miScore({ dias: DIAS }), [sesion?.perfil.id, sesion?.perfil.empresaId])
-  if (estado === 'cargando') return <Tarjeta titulo={titulo}><Cargando filas={2} /></Tarjeta>
-  if (estado === 'error') return <Tarjeta titulo={titulo}><ErrorCarga error={error} onReintentar={recargar} /></Tarjeta>
-  return <TarjetaManejo titulo={titulo} score={datos} empresa={sesion?.perfil.empresa} />
-}
-
-/** Compartida por Mi unidad, Mi perfil y el expediente; conserva la fuente de cada persona. */
-export function TarjetaManejo({ titulo = 'Índice de manejo seguro', score, empresa, logoEmpresa, nota, error }) {
+/**
+ * La pieza «Manejo»: pastilla con el mismo tono y texto que la tabla del Resumen, las 6 cifras
+ * del período y, si hay eventos, el enlace a verlos. Es solo presentación: los datos llegan
+ * de `ManejoConductor` (o de quien ya los tenga) y vienen del servidor; aquí no se calcula nada.
+ */
+export function TarjetaManejo({
+  titulo = 'Manejo', score, dias = 7, alCambiarDias, cargando = false,
+  empresa, logoEmpresa, nota, error, enlaceEventos,
+}) {
   const [logoFallido, setLogoFallido] = useState(null)
-  const indice = indiceDePersona(score)
   const logo = logoEmpresa && logoFallido !== logoEmpresa ? logoEmpresa : null
-  const rango = indice === null ? 'sin-dato' : ({ green: 'verde', yellow: 'amarillo', red: 'rojo' }[score?.rating] ?? f.rangoIndice(indice))
-  const dias = Number.isFinite(score?.dias) && score.dias > 0 ? score.dias : null
-  const eventos = [
-    ['Frenadas bruscas', score?.frenadas, 'frenada'],
-    ['Aceleraciones bruscas', score?.aceleraciones, 'aceleracion'],
-    ['Excesos de velocidad', score?.excesos, 'velocidad'],
-  ]
+  const tono = tonoManejo(score)
+  const sinDato = tono === 'gris'
+  const eventos = eventosManejo(score)
+  const ayuda = cargando ? 'Consultando el período…'
+    : error ? error
+      : sinDato ? 'Sin kilómetros recorridos en este período: el servidor no califica el manejo.'
+        : nota || 'Frenadas, aceleraciones y excesos de velocidad por cada 100 km recorridos.'
   return (
-    <section className="pnl-card sm-card">
-      <div className={`sm-compacta ${rango}`}>
+    <section className="pnl-card sm-card" aria-busy={cargando}>
+      <div className={`sm-compacta ${RANGO[tono]}`}>
         {logo ? <img className="sm-marca-agua" src={logo} alt="" aria-hidden="true" onError={() => setLogoFallido(logo)} />
           : empresa && <span className="sm-marca-agua sm-marca-iniciales" aria-hidden="true">{f.iniciales(empresa)}</span>}
         <header className="sm-cabecera">
           <div><h2>{titulo}</h2>{empresa && <p className="sm-empresa">
             {logo && <img src={logo} alt="" onError={() => setLogoFallido(logo)} />}{empresa}
           </p>}</div>
-          {dias && <span className="sm-periodo">Últimos {dias} días</span>}
+          {alCambiarDias && <div className="pnl-chips sm-dias" role="group" aria-label="Período del manejo">{DIAS_MANEJO.map((d) => (
+            <button key={d} type="button" className={`pnl-chip${d === dias ? ' activo' : ''}`} aria-pressed={d === dias} onClick={() => alCambiarDias(d)}>{d} días</button>
+          ))}</div>}
         </header>
-        <div className="sm-protagonista">
-          <div className="sm-indice" aria-label={indice === null ? 'Índice no disponible' : `Índice ${f.numero(indice)} de 100`}><strong>{indice === null ? '—' : f.numero(indice)}</strong><small>/100</small></div>
-          <div><p className="sm-estado"><i aria-hidden="true" />{indice === null ? 'Sin dato' : ETIQUETA[rango]}</p>
-            <p className="sm-ayuda">{indice === null ? error || 'Todavía no hay índice disponible. Aparecerá cuando el servidor entregue los datos de tus recorridos.' : nota || 'Frenadas, aceleraciones y excesos de velocidad de tus recorridos.'}</p></div>
+        <div className="sm-estado">
+          <Tag color={cargando ? 'gris' : tono}>{cargando ? '…' : etiquetaManejo(score)}</Tag>
+          <p className="sm-ayuda">{ayuda}</p>
         </div>
-        {indice !== null && <div className="sm-escala" aria-hidden="true"><span style={{ width: `${indice}%` }} /></div>}
-        <ul className="sm-eventos">{eventos.map(([texto, n, icono]) => <li key={texto}>
-          <IconoEvento tipo={icono} /><b>{numeroDisponible(n)}</b><span>{texto}</span>
-        </li>)}</ul>
-        <footer className="sm-pie"><span><b>{Number.isFinite(score?.km) ? f.numero(Math.round(score.km)) : '—'} km</b> evaluados</span>
-          <span><b>{numeroDisponible(score?.eventosPor100)} eventos</b> por cada 100 km</span></footer>
+        {!sinDato && !cargando && <div className="sm-escala" aria-hidden="true"><span style={{ width: `${score.indice}%` }} /></div>}
+        <dl className="sm-cifras">{cifrasManejo(cargando ? null : score).map((c) => (
+          <div key={c.clave} className={c.clave === 'score' ? 'sm-cifra-score' : undefined}><dt>{c.etiqueta}</dt><dd>{c.valor}</dd></div>
+        ))}</dl>
+        <footer className="sm-pie">
+          <span>Últimos {dias} días</span>
+          {enlaceEventos && !cargando && eventos > 0 && <Link className="sm-ver-eventos" to={enlaceEventos}>Ver eventos →</Link>}
+        </footer>
       </div>
     </section>
   )

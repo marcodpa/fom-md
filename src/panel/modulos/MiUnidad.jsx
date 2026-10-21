@@ -11,7 +11,7 @@ import { color, etiqueta } from '../datos/catalogos'
 import { conSenalAlDia, tiempoSinSenal, transmitiendo, useMinuto } from '../datos/sinSenal'
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
-import ScoreManejo from '../comp/ScoreManejo'
+import ManejoConductor from '../comp/ManejoConductor'
 
 // ============================================================
 // MI UNIDAD — el inicio del conductor
@@ -223,7 +223,9 @@ export default function MiUnidad() {
             </div>
           </section>
 
-          <ScoreManejo />
+          {/* La misma pieza «Manejo» de Mi perfil y de la ficha que mira el supervisor. */}
+          <ManejoConductor key={`${perfil?.id}:${perfil?.empresaId}`} propio empresa={perfil?.empresa}
+            enlaceEventos="/panel/mi-perfil?vista=conduccion" />
           <div className="mu-vehicle"><Tarjeta titulo="Tu vehículo"><FichaUnidad unidad={unidad} conEnlace={false} /></Tarjeta></div>
           {/* --- Posición y cifras de la unidad -------------------------- */}
           <section className="mu-mapa" aria-label="Posición de la unidad">
