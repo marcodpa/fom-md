@@ -46,7 +46,8 @@ turnos a menudo: continuarlos con SendMessage.
   tardó». El servidor ya guarda la hora de cada paso (fom.work_order_events). PR a Juan:
   https://github.com/juancpachecog/fom-core/pull/706 (rama simplificar-odt; copia en
   comparativa/fom-core/simplificar-odt.patch). Botones simples en web/app: después de que Juan
-  publique. Falta que Marco diga si «cuánto tardó» va desde que se reportó, se asignó o ambos.
+  publique. «Cuánto tardó» = desde que se reportó la falla (creación de la ODT) hasta que se
+  resolvió (decidido por Marco el 21 oct); un solo número, igual en web y app.
 
 ## Pendiente con Juan
 
