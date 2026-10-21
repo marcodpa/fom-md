@@ -39,7 +39,8 @@
 .control-panel-heading button{width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:9px;background:#10202f;color:#f3f7fc}
 .control-panel .pnl-fila{cursor:pointer;gap:8px}
 .control-panel .pnl-fila-txt{min-width:0}
-.control-panel .pnl-fila em{font-size:11px;white-space:nowrap}
+/* «Sin señal · hace 2 h 15 min» puede bajar a dos líneas en vez de aplastar el nombre. */
+.control-panel .pnl-fila em{font-size:11px;white-space:normal;text-align:right;max-width:46%}
 .control-panel .pnl-fila-txt span{font-size:12px}
 .control-detail-note{font-size:12px;color:#b7c7d9;margin:12px 0 0}
 .control-detail-note button{color:#85c9ff;background:none;border:0;min-height:44px;cursor:pointer}
@@ -76,6 +77,8 @@
  .control-unit{height:44dvh}
  .control-unit .fleet-card-content{position:relative}
  .control-unit .fleet-plate{padding-right:110px;font-size:24px}
+ /* «Sin señal · hace …» es más largo que antes: que no se meta bajo la foto. */
+ .control-unit :is(.fleet-status,.fleet-status-nota){max-width:calc(100% - 110px)}
  .control-unit .fleet-description{max-width:calc(100% - 110px);font-size:11px;min-height:28px}
  .control-unit .fleet-vehicle-image{position:absolute;right:0;top:20px;width:100px;margin:0;border:0}
  .control-unit .fleet-vehicle-image img{height:66px}

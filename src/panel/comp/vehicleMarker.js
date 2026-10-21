@@ -1,4 +1,5 @@
 import { estadoUnidad } from '../datos/estadoUnidad.js'
+import { tiempoSinSenal } from '../datos/sinSenal.js'
 
 export const MARKER_SIZE = [174, 76]
 export const MARKER_ANCHOR = [26, 40]
@@ -6,8 +7,12 @@ const COLORS = { verde: '#35e888', ambar: '#ffbf43', gris: '#a1afbf' }
 export const escapeXml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]))
 
 /** SVG shared by Leaflet, Google Maps and the schematic fallback. No HTML from API. */
-export function vehicleMarkerSvg(vehicle, selected = false) {
+export function vehicleMarkerSvg(vehicle, selected = false, ahora = Date.now()) {
   const status = estadoUnidad(vehicle)
+  // Sin señal, el tiempo va en una segunda línea chica debajo (como en la app): el cartel
+  // no se ensancha, las tres líneas se aprietan dentro del mismo alto.
+  const callada = status.clave === 'sin_senal'
+  const tiempo = callada ? escapeXml(tiempoSinSenal(vehicle?.ultimoReporte, ahora)) : ''
   const color = COLORS[status.color]
   const accent = selected ? '#168fff' : color
   const heading = Number.isFinite(vehicle.rumbo) ? ((vehicle.rumbo % 360) + 360) % 360 : null
@@ -20,9 +25,10 @@ export function vehicleMarkerSvg(vehicle, selected = false) {
       <rect x="45" y="5" width="127" height="49" rx="13" fill="#000" fill-opacity=".14"/>
       <rect x="46" y="5.5" width="125" height="46.5" rx="12" fill="#000" fill-opacity=".2"/>
       <rect x="46" y="3" width="125" height="46" rx="12" fill="#0b1927" stroke="${accent}" stroke-width="${selected ? 2.5 : 1}"/>
-      <circle cx="58" cy="18" r="4" fill="${color}"/>
-      <text x="69" y="23" fill="#f5f8fc" font-family="Arial,sans-serif" font-size="${labelSize}" font-weight="700">${plate}</text>
-      <text x="69" y="39" fill="${color}" font-family="Arial,sans-serif" font-size="11">${status.texto}</text>
+      <circle cx="58" cy="${callada ? 14 : 18}" r="4" fill="${color}"/>
+      <text x="69" y="${callada ? 19 : 23}" fill="#f5f8fc" font-family="Arial,sans-serif" font-size="${labelSize}" font-weight="700">${plate}</text>
+      <text x="69" y="${callada ? 32 : 39}" fill="${color}" font-family="Arial,sans-serif" font-size="11">${status.texto}</text>
+      ${callada ? `<text x="69" y="44" fill="#b7c7d9" font-family="Arial,sans-serif" font-size="9">${tiempo}</text>` : ''}
     </g>
     <g transform="rotate(${heading ?? 0} 26 40)">
       <rect x="13" y="19" width="26" height="47" rx="9" fill="#000" fill-opacity=".14"/>

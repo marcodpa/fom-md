@@ -8,6 +8,7 @@ import Mapa from '../comp/Mapa'
 import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
 import PanelRecorrido from '../comp/PanelRecorrido'
 import { analizar, COLA_MIN, colaReciente } from '../datos/recorrido'
+import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import '../../styles/control-map.css'
@@ -95,10 +96,13 @@ export default function CentroControl() {
   const datosFlota = useEstable(flota.datos, firmaFlota)
   // Diferido: el campo responde al instante y el mapa se filtra cuando React tiene un respiro.
   const texto = useDeferredValue(q.trim().toLowerCase())
+  // Cada minuto se recalcula la señal (5 min sin reportar = «Sin señal»), sin pedir nada más.
+  const ahora = useMinuto()
   const lista = useMemo(
     () => (datosFlota ?? []).filter((v) =>
-      (!areaId || v.areaId === areaId) && (!estadoMarcha || v.estadoMarcha === estadoMarcha) && coincide(v, texto)),
-    [datosFlota, areaId, estadoMarcha, texto]
+      (!areaId || v.areaId === areaId) && (!estadoMarcha || v.estadoMarcha === estadoMarcha) && coincide(v, texto))
+      .map((v) => conSenalAlDia(v, ahora)),
+    [datosFlota, areaId, estadoMarcha, texto, ahora]
   )
   const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
 
@@ -189,10 +193,15 @@ export default function CentroControl() {
   )
 }
 
+const esSinSenal = (v) => estadoUnidad(v).clave === 'sin_senal'
+
 function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
+  // Cada minuto se rehace el «hace …» y el orden de las calladas, sin pedir nada al servidor.
+  const ahora = useMinuto()
+  const filas = useMemo(() => ordenarSinSenal(vehiculos, esSinSenal, ahora), [vehiculos, ahora])
   return (
     <div className="pnl-filas">
-      {vehiculos.map((v) => {
+      {filas.map((v) => {
         const estado = estadoUnidad(v)
         const viva = estado.color === 'verde'
         const abierta = seleccionado === v.id
@@ -220,10 +229,12 @@ function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
                 {v.conductorNombre === 'Sin asignar' ? 'Sin conductor' : v.conductorNombre}
               </span>
             </div>
-            {/* Con velocidad en la base se muestra; sin ella, lo único que
-                consta es cuándo reportó el equipo por última vez. */}
+            {/* Sin señal, cuánto lleva callada. Con velocidad en la base se muestra; sin ella, lo
+                único que consta es cuándo reportó el equipo por última vez. */}
             <em>
-              {v.velocidadKmh != null
+              {estado.clave === 'sin_senal'
+                ? textoSinSenal(v.ultimoReporte, ahora)
+                : v.velocidadKmh != null
                 ? f.velocidad(v.velocidadKmh)
                 : v.estadoMarcha === 'parada'
                   ? 'Detenida'

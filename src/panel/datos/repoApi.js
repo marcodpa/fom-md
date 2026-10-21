@@ -17,6 +17,7 @@ import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
 import { quitarSaltos } from './recorrido'
+import { transmitiendo } from './sinSenal.js'
 import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
 import { cuerpoCredencial, credencialesVigentes } from './credencialesPersona'
 import { cambiosGps } from './metadatosGps'
@@ -68,8 +69,10 @@ function comoUnidad(v) {
     lng: v.longitude ?? null,
     ultimoReporte: v.lastReportAt ?? null,
     posicionEn: v.lastPositionAt ?? null,
-    conectado: Boolean(v.lastReportAt),
-    conexion: v.lastReportAt ? 'reportando' : 'sin_senal',
+    // Con señal = reportó hace menos de 5 min, la regla de la app (no «alguna vez reportó»).
+    // Las pantallas la recalculan cada minuto con `conSenalAlDia`.
+    conectado: transmitiendo(v.lastReportAt),
+    conexion: transmitiendo(v.lastReportAt) ? 'reportando' : 'sin_senal',
 
     // Sin respaldo todavía en la superficie de lectura.
     conductorPrincipalId: null,
@@ -176,9 +179,9 @@ async function conPosicionDirecta(lista) {
       posicionEn: p.receivedAt ?? v.posicionEn ?? null,
       rumbo: p.telemetry?.headingDeg ?? null,
       velocidadKmh: p.telemetry?.speedKph ?? null,
-      conectado: Boolean(p.receivedAt ?? v.ultimoReporte),
+      conectado: transmitiendo(p.receivedAt ?? v.ultimoReporte),
       conexion:
-        (p.receivedAt ?? v.ultimoReporte) ? 'reportando' : 'sin_senal',
+        transmitiendo(p.receivedAt ?? v.ultimoReporte) ? 'reportando' : 'sin_senal',
     }
   })
 }

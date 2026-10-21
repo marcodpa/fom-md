@@ -118,9 +118,6 @@
 .inf-meta>div{padding:7px 0;border-top:1px solid var(--linea)}
 .inf-meta .v{margin-top:2px;font-size:16px;line-height:22px;font-weight:600}
 .inf-meta .s{margin-top:2px;font-size:13px;line-height:18px;color:var(--gris)}
-.inf-pocas{background:#EAF3FE;border-left:4px solid var(--acento);border-radius:0 12px 12px 0;padding:10px 14px;display:flex;flex-direction:column;gap:4px;break-inside:avoid}
-.inf-pocas .inf-eb{color:#2D5D88}
-.inf-pocas p:last-child{font-size:14px;line-height:20px;font-weight:600}
 .inf-kp4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .inf-kp4>div{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border:1px solid #E1E6ED;border-radius:10px;min-width:0}
 .inf-kp4 span{font-size:11px;line-height:14px;color:#5A6676}

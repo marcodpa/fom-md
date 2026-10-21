@@ -14,6 +14,7 @@ import {
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
+import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
 import '../../styles/movil-modulos.css'
 
 // ============================================================
@@ -252,8 +253,11 @@ export default function Flota() {
 
   const vehiculos = useDatos(() => repo.vehiculos.listar(), [])
   const areas = useDatos(() => repo.areas(), [])
+  // «Sin señal · hace …» corre solo cada minuto, sin volver a pedir la flota, y con el mismo
+  // reloj se recalcula la señal: a los 5 min sin reportar la unidad pasa sola a «Sin señal».
+  const ahora = useMinuto()
 
-  const lista = vehiculos.datos ?? []
+  const lista = useMemo(() => (vehiculos.datos ?? []).map((v) => conSenalAlDia(v, ahora)), [vehiculos.datos, ahora])
   const estado = vehiculos.estado === 'error' || areas.estado === 'error'
     ? 'error'
     : vehiculos.estado === 'ok' && areas.estado === 'ok'
@@ -276,13 +280,15 @@ export default function Flota() {
 
   const ordenadas = useMemo(() => {
     const dir = orden.dir === 'asc' ? 1 : -1
-    return [...filtradas].sort((a, b) => {
+    const lista = [...filtradas].sort((a, b) => {
       const va = valorOrden(a, orden.k)
       const vb = valorOrden(b, orden.k)
       if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir
       return String(va).localeCompare(String(vb), 'es', { numeric: true }) * dir
     })
-  }, [filtradas, orden])
+    // Al ordenar por estado, dentro de su grupo las sin señal van de más tiempo callada a menos.
+    return orden.k === 'estado' ? ordenarSinSenal(lista, (v) => v.conexion === 'sin_senal', ahora) : lista
+  }, [filtradas, orden, ahora])
 
   const chipsEstado = [
     { v: 'todas', t: 'Todas', n: porArea.length },
@@ -555,12 +561,18 @@ export default function Flota() {
                               ) : (
                                 /* Sin velocidad en la base no se puede afirmar
                                    marcha ni parada; se informa la conexión. */
-                                <>
+                                v.conexion === 'sin_senal' ? (
                                   <Tag color={color('conexion', v.conexion)}>
-                                    {etiqueta('conexion', v.conexion)}
+                                    {textoSinSenal(v.ultimoReporte, ahora)}
                                   </Tag>
-                                  <span>{f.desde(v.ultimoReporte)}</span>
-                                </>
+                                ) : (
+                                  <>
+                                    <Tag color={color('conexion', v.conexion)}>
+                                      {etiqueta('conexion', v.conexion)}
+                                    </Tag>
+                                    <span>{f.desde(v.ultimoReporte)}</span>
+                                  </>
+                                )
                               )}
                             </div>
                           </td>

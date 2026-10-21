@@ -15,6 +15,8 @@
 .fleet-status.verde { color:#35e888; background:#0d3028; }
 .fleet-status.ambar { color:#ffbf43; background:#312617; }
 .fleet-status i { width:8px; height:8px; background:currentColor; border-radius:50%; }
+/* Debajo de «Sin señal · hace …», en chico: la hora exacta del último reporte. */
+.fleet-status-nota { display:block; margin:6px 0 0; font-size:11px; color:var(--fleet-muted); font-variant-numeric:tabular-nums; }
 .fleet-plate { margin:14px 0 0; font-size:32px; font-weight:700; line-height:1.1; letter-spacing:-.025em; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
 .fleet-description { margin:6px 0 0; font-size:13px; color:var(--fleet-muted); }
 .fleet-vehicle-image { margin:12px 0 14px; border-bottom:1px solid var(--fleet-line); background:radial-gradient(ellipse at 50% 65%,#243c4d 0%,#0c192600 70%); }

@@ -8,6 +8,7 @@ import MiniFoto from '../comp/MiniFoto'
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
+import { ordenarSinSenal, textoSinSenal, textoUltimoReporte, transmitiendo, useMinuto } from '../datos/sinSenal'
 import './mantenimiento.css'
 import './admin-vehiculos.css'
 
@@ -26,7 +27,8 @@ const SENALES = [
   { v: 'sin_senal', t: 'Sin señal' },
 ]
 const POR_PAGINA = 60
-const reportando = (v) => Boolean(v.ultimoReporte) && Date.now() - Date.parse(v.ultimoReporte) < 24 * 3600 * 1000
+// Con señal = reportó hace menos de 5 min, la misma regla de la app y del resto del panel.
+const reportando = (v, ahora) => transmitiendo(v.ultimoReporte, ahora)
 
 export default function AdminVehiculos() {
   const navegar = useNavigate()
@@ -40,6 +42,8 @@ export default function AdminVehiculos() {
   const [abriendo, setAbriendo] = useState(false)
   const [error, setError] = useState('')
   const [creando, setCreando] = useState(false)
+  // «Sin señal · hace …» corre solo cada minuto, sin volver a leer las empresas.
+  const ahora = useMinuto()
 
   const todos = datos.datos?.vehiculos ?? []
   const empresas = datos.datos?.empresas ?? []
@@ -47,15 +51,17 @@ export default function AdminVehiculos() {
 
   const lista = useMemo(() => {
     const texto = q.trim().toLowerCase()
-    return todos.filter((v) =>
+    const filtradas = todos.filter((v) =>
       (!empresaId || v.empresaId === empresaId) &&
       (!tipo || v.tipo === tipo) &&
-      (senal === 'todas' || (senal === 'reportando' ? reportando(v) : !reportando(v))) &&
+      (senal === 'todas' || (senal === 'reportando' ? reportando(v, ahora) : !reportando(v, ahora))) &&
       (!texto || [v.alias, v.placa, v.numero, v.marca, v.modelo, v.empresaNombre, v.conductorNombre].join(' ').toLowerCase().includes(texto)))
-  }, [todos, q, empresaId, tipo, senal])
+    // Las sin señal, de más tiempo callada a menos, en los puestos que ya ocupaban.
+    return ordenarSinSenal(filtradas, (v) => !reportando(v, ahora), ahora)
+  }, [todos, q, empresaId, tipo, senal, ahora])
 
   const conEmpresas = new Set(todos.map((v) => v.empresaId)).size
-  const vivas = todos.filter(reportando).length
+  const vivas = todos.filter((v) => reportando(v, ahora)).length
 
   async function abrirExpediente(v) {
     if (abriendo) return
@@ -86,8 +92,8 @@ export default function AdminVehiculos() {
       <div className="pnl-grid k4 av-kpis">
         <Kpi titulo="Unidades" valor={f.numero(todos.length)} icono="camion" nota="En toda la plataforma" />
         <Kpi titulo="Empresas con unidades" valor={`${conEmpresas} de ${empresas.length}`} icono="empresa" />
-        <Kpi titulo="Reportando" valor={f.numero(vivas)} icono="pin" tono="ok" nota="Señal en las últimas 24 h" />
-        <Kpi titulo="Sin señal" valor={f.numero(todos.length - vivas)} icono="alerta" tono="aviso" nota="Más de 24 h o nunca" />
+        <Kpi titulo="Reportando" valor={f.numero(vivas)} icono="pin" tono="ok" nota="Señal en los últimos 5 min" />
+        <Kpi titulo="Sin señal" valor={f.numero(todos.length - vivas)} icono="alerta" tono="aviso" nota="Más de 5 min o nunca" />
       </div>
 
       <div className="av-filtros">
@@ -134,7 +140,7 @@ export default function AdminVehiculos() {
                     <td>{v.empresaNombre}</td>
                     <td>{[v.marca, v.modelo, v.anio].filter(Boolean).join(' ') || '—'}<small className="av-sub">{etiqueta('vehiculo_tipo', v.tipo)}</small></td>
                     <td>{v.conductorNombre || <span className="av-tenue">Sin conductor</span>}</td>
-                    <td>{reportando(v) ? <Tag color="verde">{f.desde(v.ultimoReporte)}</Tag> : <Tag color="gris">{v.ultimoReporte ? f.desde(v.ultimoReporte) : 'Nunca'}</Tag>}</td>
+                    <td>{reportando(v, ahora) ? <Tag color="verde">{f.desde(v.ultimoReporte)}</Tag> : <Tag color="gris">{textoSinSenal(v.ultimoReporte, ahora)}</Tag>}</td>
                     <td className="num">{v.km != null ? `${f.numero(Math.round(v.km))} km` : '—'}</td>
                     <td className="num">
                       <button type="button" className="pnl-btn sutil" onClick={(e) => { e.stopPropagation(); setSeleccion(v) }}>Ver ficha</button>
@@ -159,7 +165,8 @@ export default function AdminVehiculos() {
               <div>
                 <b>{seleccion.alias}</b>
                 <span>{seleccion.empresaNombre}</span>
-                {reportando(seleccion) ? <Tag color="verde">Reportando · {f.desde(seleccion.ultimoReporte)}</Tag> : <Tag color="gris">Sin señal{seleccion.ultimoReporte ? ` · ${f.desde(seleccion.ultimoReporte)}` : ''}</Tag>}
+                {reportando(seleccion, ahora) ? <Tag color="verde">Reportando · {f.desde(seleccion.ultimoReporte)}</Tag> : <Tag color="gris">{textoSinSenal(seleccion.ultimoReporte, ahora)}</Tag>}
+                {!reportando(seleccion, ahora) && textoUltimoReporte(seleccion.ultimoReporte) && <small className="av-ultimo">{textoUltimoReporte(seleccion.ultimoReporte)}</small>}
               </div>
             </div>
             <Datos items={[

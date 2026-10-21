@@ -20,6 +20,8 @@
 .av-ficha-cab > div { display: grid; gap: 6px; justify-items: start; }
 .av-ficha-cab b { font-size: 20px; }
 .av-ficha-cab span { color: var(--e-texto-2); font-size: 14px; }
+/* Debajo de «Sin señal · hace …», en chico: la hora exacta del último reporte. */
+.av-ficha-cab .av-ultimo { color: var(--e-texto-3); font-size: 12px; font-variant-numeric: tabular-nums; }
 .av-nota { margin: 0; color: var(--e-texto-2); font-size: 13px; line-height: 1.5; }
 .av-acciones { display: flex; justify-content: flex-end; gap: 12px; padding-top: 14px; border-top: 1px solid var(--e-borde); }
 @media (max-width: 700px) {

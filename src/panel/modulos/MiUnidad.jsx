@@ -8,6 +8,7 @@ import { Cabecera, Cargando, Datos, ErrorCarga, Tag, Tarjeta, Vacio } from '../c
 import Mapa from '../comp/Mapa'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
+import { conSenalAlDia, tiempoSinSenal, transmitiendo, useMinuto } from '../datos/sinSenal'
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
 import ScoreManejo from '../comp/ScoreManejo'
@@ -85,8 +86,9 @@ export function conPosicionFresca(unidad, punto) {
     ignition: 'ignition' in punto ? punto.ignition : unidad.ignition,
     // Igual que la base: la marcha se deduce de la velocidad; sin velocidad no se afirma.
     estadoMarcha: v == null ? null : v > 0 ? 'en_marcha' : 'parada',
-    conectado: true,
-    conexion: 'reportando',
+    // Un punto más nuevo no basta: con señal solo si llegó hace menos de 5 min (regla de la app).
+    conectado: transmitiendo(punto.hora),
+    conexion: transmitiendo(punto.hora) ? 'reportando' : 'sin_senal',
   }
 }
 
@@ -112,6 +114,8 @@ export default function MiUnidad() {
   // del servidor gastado en la misma respuesta.
   const CINCO_MINUTOS = 5 * 60_000
   const asignaciones = useDatos(() => repo.conductores(), [], CINCO_MINUTOS)
+  // Sin señal, «hace …» corre solo cada minuto sin pedir nada al servidor.
+  const ahora = useMinuto()
 
   const asignacion = useMemo(
     () => miAsignacion(perfil, asignaciones.datos ?? []),
@@ -138,9 +142,10 @@ export default function MiUnidad() {
   const recorridoVivo = ficha && vivo.datos?.vehiculoId === ficha.id ? vivo.datos.recorrido : null
   const unidad = useMemo(() => {
     if (!ficha) return null
-    if (!recorridoVivo?.length) return ficha
-    return conPosicionFresca({ ...ficha, recorrido: recorridoVivo }, recorridoVivo.at(-1))
-  }, [ficha, recorridoVivo])
+    // La señal se recalcula con el reloj de cada minuto: pasa sola a «Sin señal» a los 5 min.
+    if (!recorridoVivo?.length) return conSenalAlDia(ficha, ahora)
+    return conSenalAlDia(conPosicionFresca({ ...ficha, recorrido: recorridoVivo }, recorridoVivo.at(-1)), ahora)
+  }, [ficha, recorridoVivo, ahora])
 
   // El expediente no trae coordenadas; el recorrido sí. El último punto es
   // donde está la unidad, y es lo que el mapa necesita para pintarla.
@@ -211,7 +216,9 @@ export default function MiUnidad() {
               {reportando ? 'Reportando' : 'Sin señal'}
               <span className="mu-estado-sep" aria-hidden="true">·</span>
               <span className="mu-estado-nota">
-                {unidad.ultimoReporte ? `última señal ${f.desde(unidad.ultimoReporte)}` : 'sin reportes todavía'}
+                {reportando
+                  ? `última señal ${f.desde(unidad.ultimoReporte)}`
+                  : tiempoSinSenal(unidad.ultimoReporte, ahora)}
               </span>
             </div>
           </section>
@@ -239,7 +246,10 @@ export default function MiUnidad() {
             )}
             <div className="pnl-cifras" aria-label="Cifras de la unidad">
               <Cifra etiqueta="Estado" valor={reportando ? 'Reportando' : 'Sin señal'} tono={reportando ? 'ok' : 'aviso'} />
-              <Cifra etiqueta="Última señal" valor={unidad.ultimoReporte ? f.desde(unidad.ultimoReporte) : '—'} />
+              <Cifra
+                etiqueta="Última señal"
+                valor={reportando ? (unidad.ultimoReporte ? f.desde(unidad.ultimoReporte) : '—') : tiempoSinSenal(unidad.ultimoReporte, ahora)}
+              />
               <Cifra etiqueta="Recorrido hoy" valor={kmHoy != null ? `${kmHoy.toFixed(kmHoy < 10 ? 1 : 0).replace('.', ',')} km` : '—'} />
               <Cifra etiqueta="Posición" valor={posicion ?? '—'} />
             </div>

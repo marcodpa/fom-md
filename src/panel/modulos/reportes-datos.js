@@ -559,7 +559,7 @@ export const formatoPorId = id => FORMATOS.find(f => f.id === id) || (id === 'co
 
 const cifra = (c) => ({ unidad: '', pista: '', tono: null, cmp: null, antes: null, ahora: false, nota: '', ...c })
 
-/** Las 4 cifras de la franja «En pocas palabras» de cada formato. */
+/** Las 4 cifras de arriba del tablero de cada formato (y de la portada del PDF). */
 export function cifrasDe(formato, m) {
   const { act, ant, vista } = m
   const km = cifra({
@@ -606,7 +606,7 @@ export function cifrasDe(formato, m) {
   })]
 }
 
-/** La frase de «En pocas palabras»: { texto, aviso } (el aviso va resaltado). */
+/** La frase de la antigua franja «En pocas palabras»: { texto, aviso }. Desde T-88 no sale en pantalla ni en el PDF (la reemplazan el tablero y sus chips); se deja por sus pruebas. */
 export function fraseDe(formato, m, nombre) {
   const { act, ant, vista, filasU } = m
   const que = nombre.queAnterior

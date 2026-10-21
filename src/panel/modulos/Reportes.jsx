@@ -7,10 +7,12 @@ import { Buscador, Cargando, ErrorCarga, Modal, Vacio } from '../comp/ui'
 import { hoyISO } from '../datos/formato'
 import {
   CATEGORIAS, COMPLETO, FORMATOS, alcanceAlCambiar, armarModelo, cifrasDe, cortesDelPeriodo, crearCsv, crearPeriodo, diasDesde,
-  diasServidor, dineroVE, duracionHoras, enVentana, esProducto, formatoPorId, fraseDe, horaVE, kmVE,
+  diasServidor, dineroVE, duracionHoras, enVentana, esProducto, formatoPorId, kmVE,
   mesesDisponibles, nombrarPeriodo, numeroValido, numeroVE, porScore, porcentajeVE, rangoPorDefecto, restarCostos,
   restarManejo, resultadoDe, tonoIndice, tonoScore,
 } from './reportes-datos'
+import { tableroDe, textoCifras } from './reportes-tablero-datos'
+import Tablero from './reportes-tablero.jsx'
 import { InformeImprimible, VistaHoja, seccionesDe } from './informe/Informe'
 import './reportes.css'
 
@@ -40,10 +42,8 @@ const TRAZOS = {
   alerta: <><path d="M12 3.5 2.5 20h19z" /><path d="M12 10v4.5M12 17.2v.3" /></>,
 }
 const Ico = ({ n, tam = 18 }) => <svg className="rp-ico" width={tam} height={tam} viewBox="0 0 24 24" aria-hidden="true">{TRAZOS[n]}</svg>
-const Flecha = ({ dir }) => dir === 'igual' ? null : <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d={dir === 'sube' ? 'M5 1.5 9 8.5H1z' : 'M5 8.5 1 1.5h8z'} fill="currentColor" /></svg>
 const Etiqueta = ({ tono, children }) => <span className={`rp-tag t-${tono || 'neu'}`}><i />{children}</span>
 const TONO_PAPELES = { vencido: 'bad', por_vencer: 'warn', al_dia: 'ok' }
-const TONO_DELTA = { bien: 'g', mal: 'rj', neutro: 'n' }
 const n2 = v => numeroValido(v) ? numeroVE(v, 2) : '—'
 const csvNum = v => numeroValido(v) ? String(Math.round(Number(v) * 1000) / 1000).replace('.', ',') : ''
 const claveDe = sel => sel.tipo === 'mes' ? 'mes' : `${sel.desdeMes}_${sel.hastaMes}`
@@ -101,16 +101,6 @@ function filasCsv(formato, m) {
 }
 
 // --- Piezas de la pantalla ------------------------------------------------------
-function Cifra({ c }) {
-  return <div className="rp-kc">
-    <span className="rp-lbl">{c.etiqueta}{c.pista && <span className="rp-hint"> · {c.pista}</span>}</span>
-    <span className={`rp-kv${c.tono ? ` c-${c.tono}` : ''}`}>{c.valor}{c.unidad && <small> {c.unidad}</small>}</span>
-    {c.ahora ? <span className="rp-dl"><Etiqueta tono="info">Ahora</Etiqueta><small>{c.nota || 'Vista actual, sin comparar'}</small></span>
-      : c.cmp ? <span className={`rp-dl ${c.cmp.direccion === 'igual' ? '' : TONO_DELTA[c.cmp.tono]}`}><Flecha dir={c.cmp.direccion} />{c.cmp.texto}<small>{[c.antes, c.nota].filter(Boolean).join(' · ')}</small></span>
-        : <span className="rp-dl"><small>{c.nota || 'Sin dato del período anterior'}</small></span>}
-  </div>
-}
-
 function Barra({ partes, etiqueta }) {
   const total = partes.reduce((s, p) => s + p.valor, 0)
   return <>
@@ -154,8 +144,8 @@ function TablaFiltrada({ titulo, detalle, accion, filas, texto, buscar: placehol
 }
 
 // --- Pestañas -------------------------------------------------------------------
-function PestanaVehiculos({ m, nombre, csv, filtro, setFiltro }) {
-  const { act, vista } = m
+function PestanaVehiculos({ m, csv, filtro, setFiltro }) {
+  const { act } = m
   return <div className="rp-cuerpo">
     <TablaFiltrada titulo="Por unidad" detalle="Eventos y ODT del período; estado, índice y papeles de ahora." filas={m.filasU} filtro={filtro} setFiltro={setFiltro}
       accion={<button type="button" className="rp-link rp-con-ico" onClick={csv}><Ico n="descargar" tam={16} />Descargar tabla (CSV)</button>}
@@ -172,15 +162,10 @@ function PestanaVehiculos({ m, nombre, csv, filtro, setFiltro }) {
         <td><Etiqueta tono={TONO_PAPELES[f.papeles.estado]}>{f.papeles.texto}</Etiqueta></td>
       </tr>} />
     <div className="rp-lado">
+      {/* Marcha y ODT por estado están en el tablero (T-88); aquí queda lo que el tablero no da. */}
       <section className="rp-card rp-col">
-        <div className="rp-hd"><h2 className="rp-st">Operación de la flota</h2><Etiqueta tono="info">Ahora</Etiqueta></div>
-        <Barra etiqueta={`${vista.enMarcha} en marcha, ${vista.detenidas} detenidas y ${vista.sinDato} sin dato`} partes={[{ etiqueta: 'En marcha', valor: vista.enMarcha, clase: 'azul', pct: 1 }, { etiqueta: 'Detenidas', valor: vista.detenidas, clase: 'gris', pct: 1 }, { etiqueta: 'Sin dato', valor: vista.sinDato, clase: 'vacio', pct: 1 }]} />
-      </section>
-      <section className="rp-card rp-col">
-        <div className="rp-hd"><h2 className="rp-st">Mantenimiento del período</h2><Link className="rp-link" to="/panel/mantenimiento">Ver detalle →</Link></div>
-        <span className="rp-lbl">{act.odts.length} ODT creadas del {nombre.fechas}</span>
-        <Barra etiqueta={`${act.odts.length} ODT: ${act.abiertas} abiertas, ${act.revision} en revisión y ${act.resueltas} resueltas`} partes={[{ etiqueta: 'Abiertas', valor: act.abiertas, clase: 'ambar' }, { etiqueta: 'En revisión', valor: act.revision, clase: 'azul' }, { etiqueta: 'Resueltas', valor: act.resueltas, clase: 'verde' }]} />
-        <div className="rp-par"><span className="rp-lbl">Costo en ODT resueltas</span><b>{dineroVE(act.costoResueltas)}</b></div>
+        <div className="rp-hd"><h2 className="rp-st">Costo y tiempo de las ODT</h2><Link className="rp-link" to="/panel/mantenimiento">Ver detalle →</Link></div>
+        <div className="rp-par rp-sin-linea"><span className="rp-lbl">Costo en ODT resueltas</span><b>{dineroVE(act.costoResueltas)}</b></div>
         <span className="rp-hint">{act.conCosto} de {act.resueltas} resueltas con costo registrado.</span>
         <div className="rp-par rp-linea"><span className="rp-lbl">Tiempo promedio para resolver</span><b>{duracionHoras(act.resolucionHoras)}</b></div>
       </section>
@@ -227,16 +212,12 @@ function PestanaUsuarios({ m, csv, filtro, setFiltro }) {
 
 function PestanaCostos({ m, csv, filtro, setFiltro }) {
   const { act } = m
-  const max = act.porCategoria?.[0]?.monto || 1
   const filas = m.filasU.filter(f => f.resueltas > 0).map(f => ({ ...f, atencion: f.conCosto < f.resueltas }))
   return <div className="rp-cuerpo">
+    {/* «Gasto por categoría» está en el tablero (T-88); el CSV (categorías y unidades) sigue en la tabla. */}
     <div className="rp-principal">
-      <section className="rp-card rp-col">
-        <div className="rp-hd"><div><h2 className="rp-st">Gasto por categoría</h2><span className="rp-hint">Toda la empresa · USD · P = producto, S = servicio</span></div><button type="button" className="rp-link rp-con-ico" onClick={csv}><Ico n="descargar" tam={16} />Descargar tabla (CSV)</button></div>
-        {act.porCategoria?.length ? <ul className="rp-barras ancho">{act.porCategoria.map(x => <li key={x.categoria}><div><span>{CATEGORIAS[x.categoria] || x.categoria} <em className="rp-ps">{esProducto(x.categoria) ? 'P' : 'S'}</em></span><b>{dineroVE(x.monto)} <small>{Math.round(x.monto / act.gasto * 100)} %</small></b></div><div className="pista"><div style={{ width: `${x.monto / max * 100}%` }} /></div></li>)}</ul>
-          : <Vacio compacto icono="reporte" titulo={act.gasto == null ? 'Costos no disponibles' : 'Sin gastos en el período'} texto={act.gasto == null ? 'El servidor todavía no entrega los costos de operación. Abajo está el costo registrado al cerrar las ODT.' : 'No hay gastos registrados en este período.'} />}
-      </section>
       <TablaFiltrada titulo="Costo registrado en ODT por unidad" detalle="Unidades con ODT resueltas en el período. El servidor no reparte los gastos por unidad." filas={filas} filtro={filtro} setFiltro={setFiltro}
+        accion={<button type="button" className="rp-link rp-con-ico" onClick={csv}><Ico n="descargar" tam={16} />Descargar tabla (CSV)</button>}
         texto={f => `${f.v.alias} ${f.v.placa}`} buscar="Buscar unidad o placa" vacio="Todas las ODT resueltas tienen su costo registrado." sinFilas="No se resolvieron ODT en el período."
         columnas={[['Unidad'], ['ODT resueltas', 1], ['Con costo', 1], ['Costo registrado', 1]]}
         fila={f => <tr key={f.id}>
@@ -283,11 +264,7 @@ function PestanaEstadistico({ m, ant, csv, filtro, setFiltro }) {
         fila={x => <tr key={x.id}><td><b>{x.nombre}</b></td><td>{x.unidad || '—'}</td><td className="nr">{numeroVE(Math.round(x.km))}</td><td className="nr">{por100(x, 'aceleraciones')}</td><td className="nr">{por100(x, 'frenadas')}</td><td className="nr">{por100(x, 'excesos')}</td><td className={`nr b c-${tonoScore(x.eventosPor100) || 'none'}`}>{n2(x.eventosPor100)}</td></tr>} />
     </div>
     <div className="rp-lado">
-      <section className="rp-card rp-col">
-        <div className="rp-hd"><h2 className="rp-st">Eventos de alerta</h2><b className="rp-num">{numeroVE(act.eventos)}</b></div>
-        {act.eventosPorClave.length ? <ul className="rp-barras">{act.eventosPorClave.map(e => <li key={e.clave}><div><span>{e.nombre}</span><b>{e.valor}</b></div><div className="pista"><div style={{ width: `${e.valor / act.eventosPorClave[0].valor * 100}%` }} /></div></li>)}</ul> : <span className="rp-hint">Sin eventos de alerta en el período.</span>}
-        <span className="rp-hint">Antes: {numeroVE(ant.eventos)} eventos.</span>
-      </section>
+      {/* «Eventos de alerta» por tipo y su «antes» están en el tablero (T-88). */}
       <section className="rp-card rp-col">
         <div className="rp-hd"><h2 className="rp-st">Cómo se califica</h2></div>
         <div className="rp-umbrales col"><span><Etiqueta tono="ok">Conforme</Etiqueta> menos de 1,5 eventos / 100 km</span><span><Etiqueta tono="warn">Alerta</Etiqueta> de 1,5 a 3,49</span><span><Etiqueta tono="bad">Atención</Etiqueta> 3,5 o más</span></div>
@@ -387,8 +364,7 @@ export default function Reportes() {
   const alcanceDe = (f, a = alcance) => (f === 'costos' || f === 'completo' ? EMPRESA : a)
   const textoAlcance = (a, f) => a.tipo === 'area' ? listaAreas.find(x => x.id === a.areaId)?.nombre || 'Un área' : a.tipo === 'elegidos' ? `${((f === 'usuarios' ? a.personas : a.vehiculos) || []).length} ${f === 'usuarios' ? 'personas elegidas' : 'unidades elegidas'}` : 'Toda la empresa'
   const m = useMemo(() => d ? armarModelo(d, d.periodo, alcanceDe(vista), vista) : null, [d, alcance, vista]) // eslint-disable-line react-hooks/exhaustive-deps
-  const cifras = m ? cifrasDe(vista, m) : []
-  const frase = m ? fraseDe(vista, m, nombre) : null
+  const tablero = useMemo(() => m ? tableroDe(vista, m, d.periodo, nombre) : null, [m]) // eslint-disable-line react-hooks/exhaustive-deps
   const listo = carga.estado === 'ok' && !falta('Vehículos') && (d?.vehiculos.length ?? 0) > 0 && m?.alcance.unidades.length > 0
 
   // Datos de la ventana: los de su período cuando llegan; mientras tanto sigue la hoja que se veía.
@@ -405,13 +381,11 @@ export default function Reportes() {
     const mm = armarModelo(dV, dV.periodo, a, base)
     const nom = nombrarPeriodo(dV.periodo)
     let cs = cifrasDe(base, mm)
-    let fr = fraseDe(base, mm, nom)
     if (formatoPdf === 'completo') {
       const cc = cifrasDe('costos', mm)
       cs = [cs[0], cs[1], cc[0], cs[2]]
-      fr = { ...fr, texto: `${fr.texto}${mm.act.gasto != null ? ` La flota gastó ${dineroVE(mm.act.gasto)}.` : ''}` }
     }
-    return { formato: formatoPdf, empresa, autor, generado: new Date(), periodo: dV.periodo, nombre: nom, alcanceTexto: textoAlcance(a, base), m: mm, cifras: cs, frase: fr, faltantes: dV.faltantes }
+    return { formato: formatoPdf, empresa, autor, generado: new Date(), periodo: dV.periodo, nombre: nom, alcanceTexto: textoAlcance(a, base), m: mm, cifras: cs, faltantes: dV.faltantes }
   }, [dV, ventana, formatoPdf, alcancePdf, empresa]) // eslint-disable-line react-hooks/exhaustive-deps
   const pdfListo = !!doc && !actualizando && !errorPdf && !doc.faltantes.some(x => x.nombre === 'Vehículos') && doc.m.alcance.unidades.length > 0
 
@@ -439,8 +413,8 @@ export default function Reportes() {
   const descargarCsv = () => { descargar(nombreCsv(vista, d.periodo), crearCsv(filasCsv(vista, m))); setAviso('Descarga CSV iniciada. Incluye todas las filas del alcance elegido.') }
   /**
    * El navegador no sabe convertir el informe en un archivo PDF sin una
-   * librería: se comparte el CSV del formato (o la frase, si no comparte
-   * archivos) y el PDF sale con «Descargar PDF».
+   * librería: se comparte el CSV del formato (o, si no comparte
+   * archivos, las 4 cifras en una línea) y el PDF sale con «Descargar PDF».
    */
   async function compartir() {
     if (!pdfListo) return
@@ -448,7 +422,7 @@ export default function Reportes() {
     const nombreArchivo = nombreCsv(formatoPdf, doc.periodo)
     const contenido = crearCsv(filasCsv(base, doc.m))
     const titulo = `${formatoPorId(formatoPdf).titulo} · ${empresa} · ${doc.nombre.corto}`
-    const texto = [doc.frase.texto, doc.frase.aviso].filter(Boolean).join(' ')
+    const texto = textoCifras(doc.cifras)
     try {
       const archivo = typeof File === 'function' ? new File([contenido], nombreArchivo, { type: 'text/csv' }) : null
       if (archivo && navigator.canShare?.({ files: [archivo] })) { await navigator.share({ files: [archivo], title: titulo, text: texto }); setAviso('Tabla del reporte compartida (CSV).'); return }
@@ -492,36 +466,15 @@ export default function Reportes() {
     {carga.estado === 'ok' && !falta('Vehículos') && m && !m.alcance.unidades.length && <section className="rp-card"><Vacio icono="camion" titulo="No hay unidades en este alcance" texto="Elige otra área u otras unidades, o mira toda la empresa. El período se conserva." accion={<button type="button" className="pnl-btn primario" onClick={() => setAlcance(EMPRESA)}>Ver toda la empresa</button>} /></section>}
 
     {listo && <>
-      <section className="rp-hero" aria-label={`Resumen del ${formato.titulo.toLocaleLowerCase('es')}`}>
-        <div className="rp-hero-arriba">
-          <div className="rp-pt" aria-hidden="true"><div className="rp-hoja"><div className="rp-hb"><i /><s /></div><div className="rp-hc"><div className="l1" /><div className="l2" /><div className="rp-hbar"><b style={{ height: '40%' }} /><b style={{ height: '70%' }} /><b style={{ height: '55%' }} /><b style={{ height: '90%' }} className="on" /></div></div></div><span className="rp-ins"><Ico n={vista} tam={13} /></span></div>
-          <div className="rp-hero-id">
-            <p className="rp-ov az">Vista previa</p>
-            <p className="rp-hero-t">{formato.titulo}</p>
-            <div className="rp-pases"><span className="rp-pas"><Ico n="calendario" tam={11} />{nombre.corto}</span><span className="rp-pas"><Ico n="usuarios" tam={11} />{textoAlcance(alcanceDe(vista), vista)}</span></div>
-            <span className="rp-hint">Se compara con {nombre.comparaCon}.</span>
-          </div>
-          <div className="rp-vsep" />
-          <div className="rp-pocas">
-            <p className="rp-ov">En pocas palabras</p>
-            <p className="rp-frase">{frase.texto}{frase.aviso && <> <span className="c-warn">{frase.aviso}</span></>}</p>
-            <div className="rp-enlaces">
-              {vista === 'vehiculos' && m.act.sinResolver > 0 && <Link className="rp-link" to="/panel/mantenimiento">Ver las {m.act.sinResolver} ODT sin resolver →</Link>}
-              {vista !== 'costos' && <button type="button" className="rp-link" onClick={() => { setFiltros({ ...filtros, [vista]: 'atencion' }); document.getElementById('rp-tabla')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}>Ver {vista === 'vehiculos' ? 'las unidades' : 'los'} que piden atención →</button>}
-              {vista === 'usuarios' && m.vista.sinConductor > 0 && <Link className="rp-link" to="/panel/flota">Ver las {m.vista.sinConductor} unidades sin conductor →</Link>}
-              {vista === 'costos' && <Link className="rp-link" to="/panel/mantenimiento">Ir a mantenimiento →</Link>}
-              <span className={`rp-hint rp-fuentes${d.faltantes.length ? ' parcial' : ''}`} title={d.faltantes.map(x => `${x.nombre}: ${x.motivo}`).join('\n')}>
-                <Ico n={d.faltantes.length ? 'alerta' : 'check'} tam={15} />{6 - d.faltantes.length} de 6 fuentes al día · {horaVE(d.ahora)}
-                {d.faltantes.length > 0 && <button type="button" className="rp-link" onClick={carga.recargar}>Reintentar</button>}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="rp-kpis">{cifras.map(c => <Cifra key={c.clave} c={c} />)}</div>
-        {d.faltantes.length > 0 && <p className="rp-hint rp-parcial">Reporte parcial: {d.faltantes.map(x => x.motivo).join(' ')}</p>}
-      </section>
+      {/* Tablero en lugar de «En pocas palabras» (T-88): cifras, gráficos, chips y fuentes. */}
+      <Tablero t={tablero} faltantes={d.faltantes} ahora={d.ahora} alRecargar={carga.recargar}
+        cabecera={{
+          titulo: formato.titulo, comparaCon: nombre.comparaCon,
+          pases: [<span key="p" className="rp-pas"><Ico n="calendario" tam={11} />{nombre.corto}</span>, <span key="a" className="rp-pas"><Ico n="usuarios" tam={11} />{textoAlcance(alcanceDe(vista), vista)}</span>],
+        }}
+        alVerTabla={() => { setFiltros({ ...filtros, [vista]: 'atencion' }); document.getElementById('rp-tabla')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} />
 
-      {vista === 'vehiculos' && <PestanaVehiculos m={m} nombre={nombre} csv={descargarCsv} filtro={filtros.vehiculos || 'todas'} setFiltro={v => setFiltros({ ...filtros, vehiculos: v })} />}
+      {vista === 'vehiculos' && <PestanaVehiculos m={m} csv={descargarCsv} filtro={filtros.vehiculos || 'todas'} setFiltro={v => setFiltros({ ...filtros, vehiculos: v })} />}
       {vista === 'usuarios' && <PestanaUsuarios m={m} csv={descargarCsv} filtro={filtros.usuarios || 'todas'} setFiltro={v => setFiltros({ ...filtros, usuarios: v })} />}
       {vista === 'costos' && <PestanaCostos m={m} csv={descargarCsv} filtro={filtros.costos || 'todas'} setFiltro={v => setFiltros({ ...filtros, costos: v })} />}
       {vista === 'estadistico' && <PestanaEstadistico m={m} ant={m.ant} csv={descargarCsv} filtro={filtros.estadistico || 'todas'} setFiltro={v => setFiltros({ ...filtros, estadistico: v })} />}

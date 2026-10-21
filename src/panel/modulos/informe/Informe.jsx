@@ -136,7 +136,7 @@ function Portada({ doc, secciones }) {
       <p className="inf-baj">{completo ? 'Operación, mantenimiento, conductores, costos e indicadores de conducción del período, comparados con el período anterior.' : `${f.frase} Comparado con el período anterior.`}</p>
     </div>
     <div className="inf-meta">{meta.map(([k, v, s]) => <div key={k}><p className="inf-eb gris">{k}</p><p className="v">{v}</p><p className="s">{s}</p></div>)}</div>
-    <div className="inf-pocas"><p className="inf-eb">En pocas palabras</p><p>{doc.frase.texto}{doc.frase.aviso && <> <b>{doc.frase.aviso}</b></>}</p></div>
+    {/* Sin frase (T-88): las 4 cifras de la pestaña en fila, como el tablero. */}
     <div className="inf-kp4">{doc.cifras.map(c => <div key={c.clave}><span>{c.etiqueta}</span><b>{c.valor}{c.unidad && <small> {c.unidad}</small>}</b><i>{c.ahora ? 'Vista actual' : c.cmp ? textoCmp(c.cmp) : 'Sin comparación'}</i></div>)}</div>
     <div>
       <h2 className="inf-h2-contenido">Contenido</h2>

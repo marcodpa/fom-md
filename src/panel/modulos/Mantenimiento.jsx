@@ -167,24 +167,24 @@ function cargarMantenimiento() {
 
 export default function Mantenimiento() {
   const [params, setParams] = useSearchParams()
-  const vista = ['planes', 'todas'].includes(params.get('vista')) ? params.get('vista') : 'ordenes'
+  // «Todas las órdenes» ya no es pestaña: es lo mismo que Órdenes › Lista (enlaces viejos caen ahí).
+  const vista = params.get('vista') === 'planes' ? 'planes' : 'ordenes'
   function cambiar(v) { setParams(v === 'ordenes' ? {} : { vista: v }) }
   return <div className="mnt-root">
     <div className="mnt-heading"><div><span className="mnt-breadcrumb">Inicio › Mantenimiento</span><h1>Mantenimiento</h1><p>Qué necesita atención y qué sigue.</p></div></div>
     <nav className="mnt-nav" aria-label="Secciones de mantenimiento">
-      {[['ordenes', 'llave', 'Órdenes'], ['todas', 'documento', 'Todas las órdenes'], ['planes', 'sync', 'Planes']].map(([v, icono, t]) => <button key={v} type="button" aria-current={vista === v ? 'page' : undefined} className={vista === v ? 'activo' : ''} onClick={() => cambiar(v)}><Icono nombre={icono} tam={18}/>{t}</button>)}
+      {[['ordenes', 'llave', 'Órdenes'], ['planes', 'sync', 'Planes']].map(([v, icono, t]) => <button key={v} type="button" aria-current={vista === v ? 'page' : undefined} className={vista === v ? 'activo' : ''} onClick={() => cambiar(v)}><Icono nombre={icono} tam={18}/>{t}</button>)}
     </nav>
-    {['ordenes', 'todas'].includes(vista) ? <Ordenes key={vista} listaCompleta={vista === 'todas'} /> : <Planes key={vista} vista={vista} integrado />}
+    {vista === 'ordenes' ? <Ordenes key={vista} enLista={params.get('vista') === 'todas'} /> : <Planes key={vista} vista={vista} integrado />}
   </div>
 }
 
-function Ordenes({ listaCompleta = false }) {
+function Ordenes({ enLista = false }) {
   const sesion = useSesion()
   const { datos, estado, error, recargar } = useDatos(cargarMantenimiento, [])
   const [q, setQ] = useState('')
   const [tipo, setTipo] = useState('')
-  const [vista, setVista] = useState(listaCompleta ? 'lista' : 'atencion')
-  const [unidadFiltro, setUnidadFiltro] = useState('')
+  const [vista, setVista] = useState(enLista ? 'lista' : 'atencion')
   const [grupo, setGrupo] = useState('')
   const [params] = useSearchParams()
   const [detalleId, setDetalleId] = useState(() => params.get('orden'))
@@ -196,33 +196,23 @@ function Ordenes({ listaCompleta = false }) {
   // cuentas del control de estado. Siempre de la más nueva a la más vieja, como la app.
   const sinEstado = useMemo(() => masNuevasPrimero(odts.filter(o => {
     if (tipo && o.tipo !== tipo) return false
-    if (unidadFiltro && o.vehiculoId !== unidadFiltro) return false
     return [o.id, o.descripcion, o.vehiculoNombre, o.creadorNombre, etiqueta('tipo_falla', o.tipoFalla)].join(' ').toLowerCase().includes(q.trim().toLowerCase())
-  })), [odts, q, tipo, unidadFiltro])
+  })), [odts, q, tipo])
   const visibles = useMemo(() => (grupo ? sinEstado.filter(o => estadoVisible(o.estado).clave === grupo) : sinEstado), [sinEstado, grupo])
   const detalle = detalleId ? odts.find(o => o.id === detalleId) : null
   // Arriba de la lista, justo debajo del título y el buscador: el estado y el tipo de orden.
   const filtrosArriba = <div className="mnt-filtrar"><FiltroEstado odts={sinEstado} valor={grupo} alCambiar={setGrupo}/><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/></div>
   const cambioVista = <div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Prioridades</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div>
   return <div className="mnt-content">
-    <div className="mnt-toolbar"><div><h2>{listaCompleta ? 'Todas las órdenes de mantenimiento' : 'Órdenes de trabajo'}</h2><p>{listaCompleta ? 'Consulta abiertas, en revisión y resueltas de esta empresa.' : 'De la falla reportada a la unidad lista para volver.'}</p></div><button className="pnl-btn primario" type="button" onClick={() => setCreando(true)}><Icono nombre="mas" tam={18}/>Nueva ODT</button></div>
+    <div className="mnt-toolbar"><div><h2>Órdenes de trabajo</h2><p>De la falla reportada a la unidad lista para volver.</p></div><button className="pnl-btn primario" type="button" onClick={() => setCreando(true)}><Icono nombre="mas" tam={18}/>Nueva ODT</button></div>
     {aviso && <div className="mnt-success" role="status"><Icono nombre="check" tam={20}/>{aviso}</div>}
     {estado === 'cargando' && <Cargando filas={6}/>}
     {estado === 'error' && <ErrorCarga onReintentar={recargar} texto={error?.message}/>}
     {estado === 'ok' && <>
       {/* Arriba de todo, lo que le toca hacer a quien tiene la sesión (solo si es responsable de alguna). */}
-      {!listaCompleta && <OdtAsignadas odts={odts} perfil={sesion?.perfil ?? null} alCambiar={recargar} alAbrir={setDetalleId}/>}
+      <OdtAsignadas odts={odts} perfil={sesion?.perfil ?? null} alCambiar={recargar} alAbrir={setDetalleId}/>
       <Indicadores odts={odts}/>
-      {listaCompleta && <div className="mnt-filters"><Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>}
-      {listaCompleta && filtrosArriba}
-      {listaCompleta && <div className="mnt-all-filters">
-        <Campo etiqueta="Vehículo"><select aria-label="Vehículo" className="pnl-input" value={unidadFiltro} onChange={e => setUnidadFiltro(e.target.value)}><option value="">Todos los vehículos</option>{[...new Map(odts.map(o => [o.vehiculoId, o.vehiculoNombre])).entries()].filter(([id]) => id).map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></Campo>
-        <p role="status">{visibles.length} de {odts.length} órdenes</p>
-        {(q || tipo || unidadFiltro || grupo) && <button type="button" className="pnl-btn sutil" onClick={() => { setQ(''); setTipo(''); setUnidadFiltro(''); setGrupo('') }}>Limpiar filtros</button>}
-      </div>}
-      {listaCompleta
-        ? <Tarjeta titulo="Todas las órdenes" sinCuerpo><div className="mnt-lista-cuerpo"><Tarjetas odts={visibles} alAbrir={setDetalleId} tanda={30}/></div></Tarjeta>
-        : <div className="mnt-overview"><div><Tarjeta titulo="Órdenes de trabajo" accion={<div className="mnt-attention-tools">{cambioVista}<Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>} sinCuerpo>{filtrosArriba}<div className="mnt-lista-cuerpo">{vista === 'atencion' ? <PorEstado odts={visibles} alAbrir={setDetalleId} alCrear={() => setCreando(true)}/> : <Tarjetas odts={visibles} alAbrir={setDetalleId} tanda={30}/>}</div></Tarjeta></div><aside className="mnt-guide"><h3>Cómo avanza una ODT</h3><p className="mnt-guide-intro">Del reporte al cierre, en tres pasos.</p>{ESTADOS_VISIBLES.map((g,i) => <div className="mnt-guide-step" key={g.clave}><b>{i+1}</b><div><Tag color={g.color}>{g.etiqueta}</Tag><p>{PASOS_GUIA[g.clave]}</p></div></div>)}<Link to="/panel/mantenimiento?vista=planes" className="pnl-link">Prepara tus servicios con un plan →</Link></aside></div>}
+      <div className="mnt-overview"><div><Tarjeta titulo="Órdenes de trabajo" accion={<div className="mnt-attention-tools">{cambioVista}<Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>} sinCuerpo>{filtrosArriba}<div className="mnt-lista-cuerpo">{vista === 'atencion' ? <PorEstado odts={visibles} alAbrir={setDetalleId} alCrear={() => setCreando(true)}/> : <Tarjetas odts={visibles} alAbrir={setDetalleId} tanda={30}/>}</div></Tarjeta></div><aside className="mnt-guide"><h3>Cómo avanza una ODT</h3><p className="mnt-guide-intro">Del reporte al cierre, en tres pasos.</p>{ESTADOS_VISIBLES.map((g,i) => <div className="mnt-guide-step" key={g.clave}><b>{i+1}</b><div><Tag color={g.color}>{g.etiqueta}</Tag><p>{PASOS_GUIA[g.clave]}</p></div></div>)}<Link to="/panel/mantenimiento?vista=planes" className="pnl-link">Prepara tus servicios con un plan →</Link></aside></div>
       <details className="mnt-legacy"><summary>Consultar reglas heredadas</summary><ReglasHeredadas/></details>
     </>}
     <Modal titulo="Detalle de la orden" abierto={Boolean(detalle)} alCerrar={() => setDetalleId(null)} ancho={1080}>{detalle && <Detalle key={detalle.id} odt={detalle} perfil={sesion?.perfil ?? null} vehiculo={vehiculos.find(v => v.id === detalle.vehiculoId)} recargar={recargar} alCerrar={() => setDetalleId(null)}/>}</Modal>

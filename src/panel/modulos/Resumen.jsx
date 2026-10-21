@@ -8,6 +8,7 @@ import Mapa from '../comp/Mapa'
 import FichaUnidad from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
+import { conSenalAlDia, msSinReportar, SIN_SENAL_MS, textoSinSenal, useMinuto } from '../datos/sinSenal'
 import { Icono } from '../Iconos'
 import RankingManejo from '../comp/RankingManejo'
 
@@ -24,8 +25,8 @@ import RankingManejo from '../comp/RankingManejo'
 // de la pantalla para decir «no sé»; cuando haya dato, se pone.
 // ============================================================
 
-/** Una unidad cuenta como «reportando» si mandó algo en el último cuarto de hora. */
-const VIVO_MS = 15 * 60 * 1000
+/** Una unidad cuenta como «reportando» si mandó algo en los últimos 5 min: la regla de la app. */
+const VIVO_MS = SIN_SENAL_MS
 
 // Cada dato a su ritmo. Antes todo se pedía junto cada 30 s (~8 pedidos más
 // todas las páginas de ODT de la historia) y el servidor limita a cada usuario.
@@ -57,9 +58,10 @@ function cargarEventos() {
 
 /** ¿Viva o callada? Con la hora de la última señal, no con «alguna vez reportó». */
 function senalDe(v, ahora) {
-  if (!v.ultimoReporte) return { viva: false, texto: 'nunca ha reportado' }
-  const hace = ahora - new Date(v.ultimoReporte).getTime()
-  return { viva: hace <= VIVO_MS, texto: f.desde(v.ultimoReporte) }
+  const hace = msSinReportar(v.ultimoReporte, ahora)
+  const viva = hace < VIVO_MS
+  // Callada: «Sin señal · hace 2 h 15 min» (o «nunca reportó»), con la misma cuenta que la app.
+  return { viva, hace, texto: viva ? f.desde(v.ultimoReporte) : textoSinSenal(v.ultimoReporte, ahora) }
 }
 
 /**
@@ -114,7 +116,7 @@ function eventosDeHoy({ vehiculos, odts, alertas, inspecciones }, hoy, ahora) {
         en: v.ultimoReporte,
         tono: 'malo',
         texto: `${v.alias} · ${v.placa} dejó de reportar`,
-        detalle: `Última señal ${f.desde(v.ultimoReporte)}`,
+        detalle: textoSinSenal(v.ultimoReporte, ahora),
         a: `/panel/flota/${v.id}`,
       }),
     )
@@ -173,15 +175,19 @@ function Cifra({ etiqueta: k, valor, tono = '' }) {
 }
 
 function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccionado, alSeleccionar }) {
-  const ahora = Date.now()
+  // La hora se renueva cada minuto: el «hace …» de las calladas corre solo sin pedir nada.
+  const ahora = useMinuto()
   const hoy = new Date()
 
   const unidades = useMemo(
     () =>
       vehiculos
-        .map((v) => ({ ...v, senal: senalDe(v, ahora) }))
-        // Las calladas primero: son las que hay que mirar.
-        .sort((a, b) => Number(a.senal.viva) - Number(b.senal.viva) || a.alias.localeCompare(b.alias)),
+        .map((v) => ({ ...conSenalAlDia(v, ahora), senal: senalDe(v, ahora) }))
+        // Las calladas primero, la de más tiempo sin señal arriba: son las que hay que mirar.
+        .sort((a, b) =>
+          Number(a.senal.viva) - Number(b.senal.viva) ||
+          (a.senal.viva ? 0 : (b.senal.hace - a.senal.hace) || 0) ||
+          a.alias.localeCompare(b.alias)),
     [vehiculos, ahora],
   )
   const reportando = unidades.filter((u) => u.senal.viva).length
@@ -230,7 +236,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
         <div className="pnl-resumen-unidad">
         <Tarjeta titulo="Vehículo seleccionado" accion={unidades.length > 0 && (
           <select className="pnl-input pnl-resumen-select" aria-label="Seleccionar vehículo" value={seleccion?.id ?? ''} onChange={e => alSeleccionar(e.target.value)}>
-            {unidades.map(u => <option key={u.id} value={u.id}>{u.alias} · {u.placa}</option>)}
+            {unidades.map(u => <option key={u.id} value={u.id}>{u.alias} · {u.placa}{u.senal.viva ? '' : ` — ${u.senal.texto}`}</option>)}
           </select>
         )}>
           {seleccion ? <FichaUnidad unidad={seleccion} conCabecera={false} /> : <Vacio icono="camion" titulo="Sin unidades todavía" texto="Las unidades registradas aparecerán aquí." accion={<Link className="pnl-btn" to="/panel/flota">Ver vehículos</Link>} />}

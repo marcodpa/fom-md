@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 import { vehicleMarkerSvg, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
 import { pintarCola, pintarRuta } from './rutaMapbox'
+import { textoSinSenal } from '../datos/sinSenal'
 import CapasMapa from './CapasMapa'
 import HerramientasRuta from './HerramientasRuta'
 import { limitesDe, mensajeLlegada, pintarLlegada } from './herramientasMapbox'
@@ -104,14 +105,17 @@ function elementoUnidad() {
  */
 function pintarUnidad(el, v, sel) {
   const estado = estadoUnidad(v)
-  const firma = [sel ? 1 : 0, v.placa ?? '', v.alias ?? '', v.rumbo ?? '', estado.clave].join('|')
+  // Sin señal, el texto accesible y el globo del cursor dicen cuánto lleva callada.
+  const sinSenal = estado.clave === 'sin_senal'
+  const texto = sinSenal ? textoSinSenal(v.ultimoReporte) : estado.texto
+  const firma = [sel ? 1 : 0, v.placa ?? '', v.alias ?? '', v.rumbo ?? '', estado.clave, texto].join('|')
   if (el.dataset.firma === firma) return
   el.dataset.firma = firma
   el.innerHTML = vehicleMarkerSvg(v, sel)
   el.classList.toggle('selected', sel)
   el.style.zIndex = sel ? '1000' : '0'
-  el.title = `${v.alias} · ${v.placa}`
-  el.setAttribute('aria-label', `${v.placa || v.alias || 'Sin placa'}, ${estado.texto}`)
+  el.title = `${v.alias} · ${v.placa}${sinSenal ? ` · ${texto}` : ''}`
+  el.setAttribute('aria-label', `${v.placa || v.alias || 'Sin placa'}, ${texto}`)
   el.setAttribute('aria-pressed', String(sel))
 }
 
