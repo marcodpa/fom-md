@@ -92,13 +92,14 @@ ol.pasos li{padding-left:4px}
 
   <section>
     <h2>Lo que le toca a Juan (servidor)</h2>
-    <p class="nota">Recibir el GPS de 340 unidades (unas 30 posiciones por segundo) aguanta con margen. Lo que preocupa es lo que se va acumulando.</p>
+    <p class="nota">Recibir el GPS de 340 unidades (unas 30 posiciones por segundo) aguanta con margen. Lo que preocupa es lo que se va acumulando. Todo esto está en el issue para Juan: <a href="https://github.com/juancpachecog/fom-core/issues/713">fom-core #713</a>.</p>
     <ul class="lista">
       <li class="item"><span class="chip rojo">Grave</span><div><h3>«Última posición» lee toda la historia de la unidad</h3><p>Las consultas ordenan por <code>event_time</code>, que siempre está vacío y no tiene índice. Con los meses cada pedido del mapa se hace más lento. Arreglo pequeño: ordenar por <code>received_at DESC, id DESC</code> y leer la última posición de <code>vehicle_live_state</code>. Archivo: <code>src/gps-console/gps-position-query.service.ts</code>, también <code>src/mobile/mobile-vehicles.service.ts</code>.</p></div></li>
       <li class="item"><span class="chip rojo">Grave</span><div><h3>La consola GPS cuenta tablas enteras</h3><p>Si alguien la abre, puede frenar la entrada de GPS. Usar conteos aproximados o una tabla resumen, y siempre límite y rango de fechas. Archivos: <code>gps-observability.service.ts</code>, <code>gps-console.service.ts</code>.</p></div></li>
       <li class="item"><span class="chip rojo">Grave</span><div><h3>Solo 10 conexiones a la base para todo</h3><p>GPS, web y app comparten las mismas 10. Si se llenan, se cortan equipos GPS. Separar el GPS en su propio grupo de conexiones y poner un tiempo máximo a las consultas de la consola. Archivo: <code>src/database/database.service.ts</code>.</p></div></li>
       <li class="item"><span class="chip ambar">Pronto</span><div><h3>Las tablas de GPS crecen sin límite</h3><p>Con 340 unidades son unos 2 a 6 GB por día, y hoy no se pueden limpiar. Partirlas por mes y decidir cuánto se guarda.</p></div></li>
       <li class="item"><span class="chip ambar">Pronto</span><div><h3>La lista de vehículos tiene tope de 200 y no trae coordenadas</h3><p>Subir el tope para esa ruta o confirmar que se pagina, y agregar latitud y longitud a la lista.</p></div></li>
+      <li class="item"><span class="chip ambar">Pronto</span><div><h3>Falta un filtro por fecha en las órdenes</h3><p>El servidor las entrega ordenadas por prioridad, así que el Resumen del panel no puede leer solo las de hoy y baja todas.</p></div></li>
       <li class="item"><span class="chip azul">Menor</span><div><h3>Cada petición escribe la hora de la sesión</h3><p>Actualizarla solo si pasó más de un minuto.</p></div></li>
     </ul>
   </section>
