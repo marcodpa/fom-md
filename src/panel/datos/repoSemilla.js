@@ -12,10 +12,8 @@
 // navegador, para que lo que edite el supervisor siga ahí al recargar.
 // ============================================================
 
-import {
-  AREAS, AUDITORIA, COSTOS, DOCUMENTOS, EMPRESA, EMPRESAS, EVENTOS, GPS_LIBRES,
-  INSPECCIONES, NOTIFICACIONES, ODTS, PAGOS, PERFILES, REGLAS, VEHICULOS, recorridoDe, recorridoDetalladoDe,
-} from './semilla'
+import * as semillaBase from './semilla'
+import { semillaActiva } from './semillaEstres'
 import {
   CLAVE_POR_DEFECTO, DESEMPLEADOS_ID, ETIQUETA, ITEMS_INSPECCION, ROLES_ASIGNABLES,
   estadoDocumento, etiquetaRol, puedeGestionarA, validarRolEmpresa,
@@ -24,7 +22,15 @@ import { hoyISO } from './formato'
 import { empresaGestionActualId } from './api'
 import { argumentosDeFormato, cuerpoPlantilla, publicarSiHaceFalta } from './repoApi'
 
-const CLAVE_CAMBIOS = 'fom.panel.cambios'
+// Flota de estrés (T-80): solo con `?estres=…` o `fom.demo.estres` guardado.
+// Sin eso, `semillaActiva` devuelve la semilla de siempre, tal cual.
+const SEMILLA = semillaActiva(semillaBase)
+const {
+  AREAS, AUDITORIA, COSTOS, DOCUMENTOS, EMPRESA, EMPRESAS, EVENTOS, GPS_LIBRES,
+  INSPECCIONES, NOTIFICACIONES, ODTS, PAGOS, PERFILES, REGLAS, VEHICULOS, recorridoDe, recorridoDetalladoDe,
+} = SEMILLA
+
+const CLAVE_CAMBIOS = SEMILLA.claveCambios ?? 'fom.panel.cambios'
 
 // --- Capa de cambios locales ----------------------------------------------
 function leerCambios() {
@@ -138,6 +144,8 @@ function hashSemilla(texto) {
 }
 let historialCache = null
 function historialInspecciones() {
+  // La flota de estrés ya trae su año de inspecciones.
+  if (SEMILLA.sinHistorialExtra) return []
   const hoy = hoyISO()
   if (historialCache?.hoy === hoy) return historialCache.lista
   const lista = []

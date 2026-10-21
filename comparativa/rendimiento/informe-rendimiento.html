@@ -1,0 +1,121 @@
+<title>FOM con 340 unidades</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: una sola columna de lectura (~70ch); semáforo por fila para que se vea qué urge. */
+:root{
+  --bg:#F5F8FB; --sup:#FFFFFF; --fg:#0D1824; --fg2:#4E5D6E; --borde:#D9E2EC;
+  --azul:#1F7FDB; --azul-sup:#E6F1FC;
+  --rojo:#C8343F; --rojo-sup:#FBEAEC; --ambar:#A86A00; --ambar-sup:#FBF1DE; --verde:#1D8A55; --verde-sup:#E3F4EB;
+  --display:"Manrope",system-ui,sans-serif; --texto:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A121B; --sup:#111C28; --fg:#E8EEF5; --fg2:#9AABBD; --borde:#22313F;
+  --azul:#3D9BF5; --azul-sup:#0F2740;
+  --rojo:#F06A72; --rojo-sup:#331418; --ambar:#F2B43D; --ambar-sup:#2E2410; --verde:#3CCB84; --verde-sup:#0F2A1E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A121B; --sup:#111C28; --fg:#E8EEF5; --fg2:#9AABBD; --borde:#22313F;
+  --azul:#3D9BF5; --azul-sup:#0F2740;
+  --rojo:#F06A72; --rojo-sup:#331418; --ambar:#F2B43D; --ambar-sup:#2E2410; --verde:#3CCB84; --verde-sup:#0F2A1E; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 var(--texto)}
+main{max-width:760px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:36px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.1;font-weight:800;letter-spacing:-.02em}
+h2{font-size:22px;font-weight:700;letter-spacing:-.01em}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--azul)}
+.intro{display:grid;gap:12px}
+.intro p{color:var(--fg2);max-width:62ch}
+.veredicto{display:grid;gap:10px;padding:20px;border-radius:16px;background:var(--azul-sup);border:1px solid var(--borde)}
+.veredicto p{max-width:65ch}
+section{display:grid;gap:14px}
+.lista{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.item{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:14px 16px;border-radius:12px;background:var(--sup);border:1px solid var(--borde)}
+.item>div{min-width:0;display:grid;gap:4px}
+.item p{color:var(--fg2);font-size:15px}
+.chip{font:600 12px/1 var(--texto);padding:6px 10px;border-radius:999px;white-space:nowrap}
+.chip.rojo{color:var(--rojo);background:var(--rojo-sup)} .chip.ambar{color:var(--ambar);background:var(--ambar-sup)} .chip.verde{color:var(--verde);background:var(--verde-sup)} .chip.azul{color:var(--azul);background:var(--azul-sup)}
+.tabla{overflow-x:auto;border:1px solid var(--borde);border-radius:12px;background:var(--sup)}
+table{border-collapse:collapse;width:100%;min-width:480px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--borde)}
+th{font:500 12px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--fg2)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--mono);white-space:nowrap}
+.nota{font-size:14px;color:var(--fg2)}
+code{font-family:var(--mono);font-size:.88em;background:var(--azul-sup);padding:1px 5px;border-radius:5px;overflow-wrap:anywhere}
+ol.pasos{margin:0;padding-left:22px;display:grid;gap:8px}
+ol.pasos li{padding-left:4px}
+</style>
+
+<main>
+  <header class="intro">
+    <span class="eyebrow">Prueba de rendimiento · 21 oct 2026</span>
+    <h1>¿Aguanta FOM una empresa de 340 unidades?</h1>
+    <p>Probamos una empresa inventada con 340 unidades (287 moviéndose), 340 conductores, 2.992 órdenes de mantenimiento y 31.184 inspecciones. Todo en la web de prueba: los datos reales no se tocaron. Tres agentes revisaron el servidor, la web y la app.</p>
+  </header>
+
+  <div class="veredicto">
+    <h2>En corto</h2>
+    <p>Rápido, sí: la web carga cada pantalla en menos de 2 segundos y el mapa se mueve fluido con las 340 unidades. Lo que falla con una empresa grande es que <strong>faltan datos</strong>: la web y la app solo piden las primeras 200 unidades, y algunos números de inspecciones salen mal. Y en el servidor hay cuatro cosas que, con los meses, lo van a poner lento.</p>
+  </div>
+
+  <section>
+    <h2>Lo que medimos en la web</h2>
+    <div class="tabla">
+      <table>
+        <thead><tr><th>Pantalla</th><th>Abre en</th><th>Cómo está</th></tr></thead>
+        <tbody>
+          <tr><td>Resumen</td><td class="num">0,2 s</td><td><span class="chip verde">Bien</span></td></tr>
+          <tr><td>Mantenimiento (2.992 órdenes)</td><td class="num">0,4 s</td><td><span class="chip verde">Bien</span></td></tr>
+          <tr><td>Inspecciones</td><td class="num">0,7 s</td><td><span class="chip verde">Bien</span></td></tr>
+          <tr><td>Vehículos (340)</td><td class="num">1,5 s</td><td><span class="chip ambar">Aceptable</span></td></tr>
+          <tr><td>Mapa: moverlo y hacer zoom</td><td class="num">60 cuadros/s</td><td><span class="chip verde">Fluido</span></td></tr>
+          <tr><td>Mapa: cada actualización (15 s)</td><td class="num">0,05–0,17 s</td><td><span class="chip ambar">Pequeño tirón</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nota">Medido en esta computadora con el navegador del escritorio. En una laptop sencilla será algo más lento. La app no se pudo medir en un teléfono; sus riesgos salen de leer el código.</p>
+  </section>
+
+  <section>
+    <h2>Lo que arreglamos nosotros (web y app)</h2>
+    <ul class="lista">
+      <li class="item"><span class="chip rojo">Urgente</span><div><h3>Solo se ven 200 unidades y 200 conductores</h3><p>Con 340, unas 140 unidades no salen en el mapa ni en las listas, y muchas dicen «Sin conductor». Se arregla pidiendo todas las páginas, en la web y en la app.</p></div></li>
+      <li class="item"><span class="chip rojo">Urgente</span><div><h3>«Faltan hoy» en Inspecciones sale mal</h3><p>Solo mira las últimas 100 inspecciones (200 en la app). Con 290 unidades haciendo su diaria, salen como pendientes unidades que sí la hicieron.</p></div></li>
+      <li class="item"><span class="chip ambar">Importante</span><div><h3>La app pinta las 340 filas de Vehículos de una vez</h3><p>Y lo recalcula todo cada 20 s. En un Android normal se puede trabar un momento. Igual pasa con Inspecciones del mes. Se arregla con listas que solo pintan lo que se ve.</p></div></li>
+      <li class="item"><span class="chip ambar">Importante</span><div><h3>Algunas pantallas bajan las 3.000 órdenes para usar pocas</h3><p>El inicio, la ficha del vehículo, la del conductor y «Más» del conductor. En la app eso puede tardar casi un minuto. Se arregla pidiendo solo las de esa unidad o de hoy.</p></div></li>
+      <li class="item"><span class="chip azul">Mejora</span><div><h3>El mapa de la web dibuja cada unidad aparte</h3><p>Hoy va bien, pero con más de 340 unidades se notará. La app ya lo hace de la forma rápida; la web puede copiarla.</p></div></li>
+      <li class="item"><span class="chip azul">Mejora</span><div><h3>El buscador del mapa pide al servidor con cada letra</h3><p>Mejor esperar a que termines de escribir.</p></div></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Lo que le toca a Juan (servidor)</h2>
+    <p class="nota">Recibir el GPS de 340 unidades (unas 30 posiciones por segundo) aguanta con margen. Lo que preocupa es lo que se va acumulando.</p>
+    <ul class="lista">
+      <li class="item"><span class="chip rojo">Grave</span><div><h3>«Última posición» lee toda la historia de la unidad</h3><p>Las consultas ordenan por <code>event_time</code>, que siempre está vacío y no tiene índice. Con los meses cada pedido del mapa se hace más lento. Arreglo pequeño: ordenar por <code>received_at DESC, id DESC</code> y leer la última posición de <code>vehicle_live_state</code>. Archivo: <code>src/gps-console/gps-position-query.service.ts</code>, también <code>src/mobile/mobile-vehicles.service.ts</code>.</p></div></li>
+      <li class="item"><span class="chip rojo">Grave</span><div><h3>La consola GPS cuenta tablas enteras</h3><p>Si alguien la abre, puede frenar la entrada de GPS. Usar conteos aproximados o una tabla resumen, y siempre límite y rango de fechas. Archivos: <code>gps-observability.service.ts</code>, <code>gps-console.service.ts</code>.</p></div></li>
+      <li class="item"><span class="chip rojo">Grave</span><div><h3>Solo 10 conexiones a la base para todo</h3><p>GPS, web y app comparten las mismas 10. Si se llenan, se cortan equipos GPS. Separar el GPS en su propio grupo de conexiones y poner un tiempo máximo a las consultas de la consola. Archivo: <code>src/database/database.service.ts</code>.</p></div></li>
+      <li class="item"><span class="chip ambar">Pronto</span><div><h3>Las tablas de GPS crecen sin límite</h3><p>Con 340 unidades son unos 2 a 6 GB por día, y hoy no se pueden limpiar. Partirlas por mes y decidir cuánto se guarda.</p></div></li>
+      <li class="item"><span class="chip ambar">Pronto</span><div><h3>La lista de vehículos tiene tope de 200 y no trae coordenadas</h3><p>Subir el tope para esa ruta o confirmar que se pagina, y agregar latitud y longitud a la lista.</p></div></li>
+      <li class="item"><span class="chip azul">Menor</span><div><h3>Cada petición escribe la hora de la sesión</h3><p>Actualizarla solo si pasó más de un minuto.</p></div></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>La prueba de carga que falta</h2>
+    <p class="nota">Lo de arriba sale de leer el código. Para tener números del servidor de verdad hay que probarlo en un servidor de pruebas, nunca en producción:</p>
+    <ol class="pasos">
+      <li>Copia de la base con 60 a 90 días de posiciones inventadas de 340 unidades.</li>
+      <li>340 equipos GPS simulados mandando cada 10 s durante 2 horas, luego el doble y el triple.</li>
+      <li>20 supervisores simulados mirando el mapa cada 15 s, más la app.</li>
+      <li>Medir: cuánto tarda una posición en verse, conexiones esperando, consultas más lentas y cuánto crece el disco por hora.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Cómo repetir la prueba</h2>
+    <p class="nota">En la web de prueba (<code>npx vite --mode demo</code>), entra al panel y agrega <code>?estres=1</code> a la dirección: <code>/panel?estres=1</code>. Con <code>?estres=0</code> vuelve la demo normal. Los tiempos de cálculo se miden con <code>npm run medir:estres</code>.</p>
+  </section>
+</main>
