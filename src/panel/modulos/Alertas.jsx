@@ -10,6 +10,7 @@ import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import { agruparAvisos, esDeHoy, estaLeida } from './alertas-presentacion'
+import { masNuevoPrimero } from '../datos/orden'
 import './perfil-alertas.css'
 import '../../styles/movil-modulos.css'
 
@@ -67,7 +68,8 @@ function BandejaAlertas() {
   const notif = useDatos(() => repo.alertas.listar({}), [])
   const manejo = useDatos(() => repo.alertas.eventos({ dias: DIAS_EVENTOS }), [])
   const lista = useMemo(() => notif.datos ?? [], [notif.datos])
-  const eventos = useMemo(() => manejo.datos ?? [], [manejo.datos])
+  // Lo más nuevo arriba, llegue como llegue del servidor.
+  const eventos = useMemo(() => masNuevoPrimero(manejo.datos, 'creadaEn'), [manejo.datos])
   const sinLeer = lista.filter(n => !estaLeida(n)).length
   const deHoy = lista.filter(n => esDeHoy(n.creadaEn)).length
   const filtrosNotif = [

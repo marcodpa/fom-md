@@ -6,6 +6,7 @@ import { BarrasH } from './Grafico'
 import ManejoConductor from './ManejoConductor'
 import { eventosManejo } from '../datos/manejo'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { color, estadoDocumento, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import { etiquetaRolSesion } from '../roles'
@@ -210,7 +211,8 @@ function UnidadAsignada({ persona: p, unidadActual, puedeEditar, unidades, carga
 }
 
 function Conduccion({ persona: p, porTipo }) {
-  const eventos = p.eventos ?? []
+  // Lo más nuevo arriba (regla de toda lista con fecha).
+  const eventos = masNuevoPrimero(p.eventos, 'creadaEn')
 
   return (
     <div className="pnl-grid">
@@ -287,7 +289,7 @@ function Inspecciones({ inspecciones, error }) {
             </tr>
           </thead>
           <tbody>
-            {inspecciones.map((i) => (
+            {masNuevoPrimero(inspecciones, ['creadaEn', 'fecha']).map((i) => (
               <tr key={i.id}>
                 <td>{f.fecha(i.fecha)}</td>
                 <td>

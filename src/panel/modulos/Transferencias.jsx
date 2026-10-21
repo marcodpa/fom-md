@@ -4,6 +4,7 @@ import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import { Cabecera, Campo, Cargando, Chips, ErrorCarga, Modal, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { esAdminFom } from '../roles'
 import { Icono } from '../Iconos'
 
@@ -72,7 +73,9 @@ export default function Transferencias() {
       setOcupado(false)
     }
   }
-  const seleccion = lista.datos?.find(t => t.id === seleccionId) ?? lista.datos?.[0]
+  // La más nueva arriba (y elegida por defecto).
+  const filas = masNuevoPrimero(lista.datos, 'creadaEn')
+  const seleccion = filas.find(t => t.id === seleccionId) ?? filas[0]
   const modulo = () => (pestana === 'identidad' ? repo.transferencias.identidad : repo.transferencias.vehiculo)
 
   return (
@@ -104,7 +107,7 @@ export default function Transferencias() {
             </div>
           ) : (
             <div className="pnl-filas">
-              {lista.datos.map((t) => {
+              {filas.map((t) => {
                 const [esT, esC] = ESTADO[t.estado] ?? [t.estado, 'gris']
                 const siguiente = paso(t)
                 return (

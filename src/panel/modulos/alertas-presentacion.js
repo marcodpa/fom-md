@@ -1,3 +1,5 @@
+import { masNuevoPrimero } from '../datos/orden.js'
+
 export function estaLeida(aviso) {
   return Boolean(aviso.leida || aviso.leidaEn)
 }
@@ -9,7 +11,7 @@ export function esDeHoy(iso, ahora = new Date()) {
 }
 
 export function agruparAvisos(lista, ahora = new Date()) {
-  const ordenados = [...lista].sort((a, b) => (Date.parse(b.creadaEn) || 0) - (Date.parse(a.creadaEn) || 0))
+  const ordenados = masNuevoPrimero(lista, 'creadaEn')
   return [
     { titulo: 'Hoy', items: ordenados.filter(n => esDeHoy(n.creadaEn, ahora)) },
     { titulo: 'Anteriores', items: ordenados.filter(n => !esDeHoy(n.creadaEn, ahora)) },

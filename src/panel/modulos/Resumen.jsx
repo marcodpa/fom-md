@@ -11,14 +11,15 @@ import { etiqueta } from '../datos/catalogos'
 import { conSenalAlDia, msSinReportar, SIN_SENAL_MS, textoSinSenal, useMinuto } from '../datos/sinSenal'
 import { Icono } from '../Iconos'
 import RankingManejo from '../comp/RankingManejo'
+import { masNuevoPrimero } from '../datos/orden'
 
 // ============================================================
 // RESUMEN — el inicio del supervisor
 // ------------------------------------------------------------
 // «Opción B · Mapa protagonista», elegida por Marco: el mapa ocupa casi toda
 // la pantalla con las cifras del día encima; a la izquierda la lista de
-// unidades (tocar una la centra en el mapa) y abajo lo que pasó hoy, en
-// orden de hora.
+// unidades (tocar una la centra en el mapa) y abajo lo que pasó hoy, lo
+// más nuevo arriba.
 //
 // Lo que NO está: las cajas que el servidor todavía no alimenta (manejo
 // seguro, unidades bloqueadas). Una caja con un guion ocupa el mejor sitio
@@ -67,7 +68,7 @@ function senalDe(v, ahora) {
 /**
  * Lo que pasó HOY, armado con lo que el servidor sí sabe: inspecciones
  * enviadas, órdenes abiertas, avisos y unidades que dejaron de reportar.
- * En orden de hora, de la mañana a ahora.
+ * Lo más nuevo arriba (regla de Marco para toda lista con hora).
  */
 function eventosDeHoy({ vehiculos, odts, alertas, inspecciones }, hoy, ahora) {
   const esDeHoy = (iso) => iso && new Date(iso).toDateString() === hoy.toDateString()
@@ -121,7 +122,7 @@ function eventosDeHoy({ vehiculos, odts, alertas, inspecciones }, hoy, ahora) {
       }),
     )
   // Los últimos doce: el resumen es de reojo, el detalle vive en cada módulo.
-  return eventos.sort((a, b) => new Date(a.en) - new Date(b.en)).slice(-12)
+  return masNuevoPrimero(eventos, 'en').slice(0, 12)
 }
 
 export default function Resumen() {

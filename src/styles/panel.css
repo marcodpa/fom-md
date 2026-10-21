@@ -549,6 +549,11 @@ button.pnl-kpi:active { transform: scale(var(--e-escala-press)); }
 
 /* ---- Tabla ---- */
 .pnl-tabla-wrap { overflow-x: auto; }
+/* Fila que abre una ficha al tocarla (p. ej. el ranking de manejo). */
+.pnl-tabla tr.pnl-fila-enlace { cursor: pointer; }
+.pnl-tabla tr.pnl-fila-enlace:hover td { background: color-mix(in srgb, var(--e-info, #3D9BF5) 7%, transparent); }
+.pnl-tabla tr.pnl-fila-enlace a { color: inherit; font-weight: 600; text-decoration: none; }
+.pnl-tabla tr.pnl-fila-enlace a:hover, .pnl-tabla tr.pnl-fila-enlace a:focus-visible { text-decoration: underline; }
 .pnl-tabla {
   width: 100%;
   border-collapse: collapse;

@@ -3,6 +3,7 @@ import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { Cabecera, Cargando, Chips, ErrorCarga, Kpi, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { Icono } from '../Iconos'
 import '../../styles/movil-modulos.css'
 
@@ -49,7 +50,7 @@ export default function Jornadas() {
             </div>
           ) : (
             <div className="pnl-tabla-wrap"><table className="pnl-tabla mv-lista"><thead><tr><th>Conductor</th><th>Unidad</th><th>Inicio</th><th>Fin</th><th>Duración</th><th>Estado</th></tr></thead><tbody>
-              {jornadas.datos.map(j => <tr key={j.id} className={j.estado === 'active' ? 'mv-u2' : undefined}>
+              {masNuevoPrimero(jornadas.datos, 'inicio').map(j => <tr key={j.id} className={j.estado === 'active' ? 'mv-u2' : undefined}>
                 <td className="mv-t"><div className="pnl-persona"><i className="pnl-avatar">{f.iniciales(j.conductor)}</i><div className="pnl-doble"><b>{j.conductor}</b><span>{j.rol === 'secundario' ? 'Conductor secundario' : 'Conductor principal'} · {ORIGEN[j.origen] ?? j.origen}</span></div></div></td>
                 <td className="mv-d"><div className="pnl-doble"><b>{j.vehiculo}</b><span>{j.placa}</span></div></td>
                 <td className="mv-d">{f.fechaHora(j.inicio)}</td><td>{j.fin ? f.fechaHora(j.fin) : 'En curso'}</td><td className="mv-d">{duracion(j.inicio,j.fin)}</td>

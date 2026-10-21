@@ -28,6 +28,7 @@
 import { HAY_API, api, claveIdempotente } from './api'
 import { esGestor, rolCanonico } from '../roles'
 import { VEHICULOS } from './semilla'
+import { masNuevoPrimero } from './orden'
 
 /** Estados en los que la orden está en manos de su responsable. */
 export const ESTADOS_DE_TALLER = ['asignada', 'en_ejecucion', 'pausada', 'en_calidad']
@@ -61,12 +62,6 @@ export function accionesDe(estado) {
   return ACCIONES[estado] ?? []
 }
 
-/** Cuándo se reportó una orden, en milisegundos; sin fecha válida, null. */
-function reportadaEn(o) {
-  const t = Date.parse(o?.creadaEn ?? '')
-  return Number.isFinite(t) ? t : null
-}
-
 /**
  * Las órdenes de la MÁS NUEVA a la más vieja, por cuándo se reportaron: el
  * mismo orden en todas las listas de Mantenimiento (supervisor, conductor y
@@ -74,14 +69,7 @@ function reportadaEn(o) {
  * entre iguales, se respeta el orden en que llegaron. Devuelve una copia.
  */
 export function masNuevasPrimero(odts) {
-  return [...(odts ?? [])].sort((a, b) => {
-    const ta = reportadaEn(a)
-    const tb = reportadaEn(b)
-    if (ta === tb) return 0
-    if (ta === null) return 1
-    if (tb === null) return -1
-    return tb - ta
-  })
+  return masNuevoPrimero(odts, 'creadaEn')
 }
 
 /**

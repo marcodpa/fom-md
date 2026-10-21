@@ -6,6 +6,7 @@ import {
   Buscador, Cargando, Datos, ErrorCarga, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { Icono } from '../Iconos'
 import './mantenimiento.css'
 import './admin-rediseno.css'
@@ -82,7 +83,8 @@ export default function AdminAuditoria() {
 
   const { datos, estado, error, recargar } = useDatos(() => cargar(empresaId, q), [empresaId, q])
 
-  const todos = useMemo(() => datos?.lista ?? [], [datos])
+  // Lo más nuevo arriba, llegue como llegue: los días y, dentro de cada día, las horas.
+  const todos = useMemo(() => masNuevoPrimero(datos?.lista, 'fecha'), [datos])
   const visibles = useMemo(
     () => (categoria ? todos.filter((a) => categoriaDe(a.tipo) === categoria) : todos),
     [todos, categoria],

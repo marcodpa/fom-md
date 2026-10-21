@@ -5,6 +5,7 @@ import { useDatos } from '../useDatos'
 import { Cabecera, Campo, Cargando, Chips, ErrorCarga, Kpi, Modal, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
+import { masNuevoPrimero } from '../datos/orden'
 
 // ============================================================
 // EVENTOS Y SOS
@@ -123,7 +124,7 @@ export default function Seguridad() {
               </div>
             ) : (
               <div className="pnl-filas">
-                {eventos.datos.map((e) => {
+                {masNuevoPrimero(eventos.datos, 'ocurrioEn').map((e) => {
                   const [sevT, sevC] = SEVERIDAD[e.severidad] ?? [e.severidad, 'gris']
                   return (
                     <div className={`pnl-fila${e.estado === 'open' && e.severidad === 'critical' ? ' critica' : ''}`} key={e.id}>
@@ -173,7 +174,7 @@ export default function Seguridad() {
               </div>
             ) : (
               <div className="pnl-filas">
-                {sos.datos.map((s) => {
+                {masNuevoPrimero(sos.datos, 'reportadaEn').map((s) => {
                   const donde = coords(s.ubicacionVehiculo) ?? coords(s.ubicacionReportante)
                   return (
                     <div className={`pnl-fila${s.estado === 'active' ? ' critica' : ''}`} key={s.id}>

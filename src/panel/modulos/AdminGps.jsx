@@ -10,6 +10,7 @@ import { Icono } from '../Iconos'
 import CamposGps from '../comp/CamposGps'
 import { cambiosGps } from '../datos/metadatosGps'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import './mantenimiento.css'
 import './admin-rediseno.css'
 
@@ -247,7 +248,7 @@ function Detalle({ g, vehiculos, fila, acciones, alEditar }) {
   const [ubicacionInventario, setUbicacionInventario] = useState('')
   // Lo que ha pasado con el equipo, de la bitácora.
   const historial = useDatos(
-    () => repo.admin.auditoria.listar({ q: g.imei }).then((l) => [...l].slice(0, 6)).catch(() => []),
+    () => repo.admin.auditoria.listar({ q: g.imei }).then((l) => masNuevoPrimero(l, 'fecha').slice(0, 6)).catch(() => []),
     [g.imei],
   )
 

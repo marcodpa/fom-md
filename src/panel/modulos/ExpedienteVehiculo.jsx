@@ -20,6 +20,7 @@ import FotoUnidad from '../comp/FotoUnidad'
 import FichaDatosUnidad from './FichaDatosUnidad'
 import UsuariosUnidad from './UsuariosUnidad'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
 import './expediente-unidad.css'
 import '../../styles/movil-modulos.css'
@@ -681,7 +682,7 @@ export default function ExpedienteVehiculo() {
                         </tr>
                       </thead>
                       <tbody>
-                        {v.inspecciones.map((i) => (
+                        {masNuevoPrimero(v.inspecciones, ['creadaEn', 'fecha']).map((i) => (
                           <tr key={i.id} className={i.resultado === 'bloqueada' ? 'mv-u1' : i.resultado === 'aprobada_con_observaciones' ? 'mv-u2' : undefined}>
                             <td className="mv-t">
                               <div className="pnl-doble">
@@ -727,7 +728,7 @@ export default function ExpedienteVehiculo() {
                   />
                 ) : (
                   <div className="pnl-filas">
-                    {v.odts.map((o) => (
+                    {masNuevoPrimero(v.odts, 'creadaEn').map((o) => (
                       <div
                         key={o.id}
                         className={`pnl-fila${o.estado === 'abierta' ? ' critica' : o.estado === 'en_revision' ? ' aviso' : ''}`}

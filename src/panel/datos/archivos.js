@@ -19,6 +19,7 @@
 // ============================================================
 import { HAY_API, pedir } from './api'
 import { cloudinaryConfigurado, problemaDelArchivo, subirImagen, ultimaVersion, urlDe, urlOriginal } from './cloudinary'
+import { masNuevoPrimero } from './orden'
 
 const CONSOLA = '/api/v1/console'
 
@@ -190,12 +191,16 @@ export async function urlDelServidor({ coleccion, padreId, objetoId }) {
   return r?.request?.url ?? null
 }
 
-/** Todo lo que hay para `{ coleccion, padreId, proposito }`, del servidor y de Cloudinary. */
+/**
+ * Todo lo que hay para `{ coleccion, padreId, proposito }`, del servidor y de Cloudinary, lo más nuevo
+ * primero. En Cloudinary cada archivo es el número siguiente (1, 2, 3…): el último número es el último
+ * subido. Lo del servidor va delante: es el almacén que se enciende después.
+ */
 export async function listarArchivos({ coleccion, padreId, proposito }) {
   if (!padreId) return []
   const [servidor, nube] = await Promise.all([
     listarServidor(coleccion, padreId, proposito),
     listarCloudinary(coleccion, padreId, proposito),
   ])
-  return [...servidor, ...nube]
+  return [...masNuevoPrimero(servidor, 'creadoEn'), ...[...nube].reverse()]
 }

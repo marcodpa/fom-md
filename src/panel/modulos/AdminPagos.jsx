@@ -6,6 +6,7 @@ import {
   Cabecera, Campo, Cargando, Chips, Datos, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 
@@ -21,7 +22,8 @@ function cargar(empresaId, estadoPago) {
     repo.admin.empresas.listar({}),
   ]).then(([todos, empresas]) => ({
     todos,
-    lista: todos.filter(p => (!empresaId || p.empresaId === empresaId) && (!estadoPago || p.estado === estadoPago)),
+    // La cuota más nueva arriba, por su período («2026-08»); sin período, por cuándo se registró.
+    lista: masNuevoPrimero(todos.filter(p => (!empresaId || p.empresaId === empresaId) && (!estadoPago || p.estado === estadoPago)), (p) => (p.periodo ? `${p.periodo}-01` : p.creadaEn)),
     empresas: empresas.filter((e) => !e.respaldo),
   }))
 }

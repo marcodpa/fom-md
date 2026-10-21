@@ -7,6 +7,7 @@ export { miAsignacion } from '../datos/asignacion-conductor'
 import { Cabecera, Cargando, Datos, ErrorCarga, Tag, Tarjeta, Vacio } from '../comp/ui'
 import Mapa from '../comp/Mapa'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { color, etiqueta } from '../datos/catalogos'
 import { conSenalAlDia, tiempoSinSenal, transmitiendo, useMinuto } from '../datos/sinSenal'
 import { Icono } from '../Iconos'
@@ -166,7 +167,7 @@ export default function MiUnidad() {
     vehiculos.estado === 'cargando' ||
     (asignacion != null && vehiculos.estado !== 'error' && unidad?.id !== asignacion.vehiculoId)
   const error = asignaciones.error ?? vehiculos.error
-  const abiertas = (unidad?.odts ?? []).filter((o) => o.estado === 'abierta' || o.estado === 'en_revision')
+  const abiertas = masNuevoPrimero(unidad?.odts, 'creadaEn').filter((o) => o.estado === 'abierta' || o.estado === 'en_revision')
   const hoy = f.hoyISO()
   const inspeccionHoy = (unidad?.inspecciones ?? []).find((i) => String(i.fecha ?? '').slice(0, 10) === hoy)
   const reportando = unidad?.conexion === 'reportando'

@@ -4,6 +4,7 @@ import repo, { CONECTADO } from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { Buscador, Cargando, Chips, Datos, ErrorCarga, Modal, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import ProgramaInspecciones from './ProgramaInspecciones'
@@ -85,7 +86,8 @@ function cuandoSeHizo(insp) {
   return soloFecha ? nombreDia : `${nombreDia} ${f.hora(iso)}`
 }
 
-const momento = i => new Date(i.creadaEn || i.fecha || 0).getTime() || 0
+/** Cuándo se hizo una inspección, para ordenar de la más nueva a la más vieja: el envío y, si falta, el día. */
+const CUANDO = ['creadaEn', 'fecha']
 
 /** Lo que se respondió en cada ítem: el detalle real conectado; en demostración, el checklist de siempre. */
 const leerRespuestas = i => CONECTADO ? repo.inspecciones.obtener(i.id) : Promise.resolve(checklistDe(i))
@@ -162,7 +164,7 @@ export default function Inspecciones() {
 function ImprimirHallazgos() {
   const imp = useImpresion()
   const lectura = useDatos(() => repo.inspecciones.listar({}), [])
-  const graves = useMemo(() => [...(lectura.datos ?? [])].sort((a, b) => momento(b) - momento(a)).slice(0, 100).filter(esGrave), [lectura.datos])
+  const graves = useMemo(() => masNuevoPrimero(lectura.datos, CUANDO).slice(0, 100).filter(esGrave), [lectura.datos])
   if (lectura.estado !== 'ok' || !graves.length) return null
   return <div className="insp-imp-barra">
     <p><Icono nombre="reporte" tam={18}/><span><b>{f.numero(graves.length)}</b> {graves.length === 1 ? 'inspección bloqueada o con observaciones' : 'inspecciones bloqueadas o con observaciones'} entre las últimas registradas.</span></p>
@@ -184,7 +186,7 @@ function Resumen({ cambiarVista }) {
   const base = hoy.datos ?? []
   const abrir = i => setDetalle(i)
   // Requiere tu atención: bloqueadas y con observaciones, de la más reciente a la más antigua.
-  const atencion = base.filter(i => i.resultado !== 'aprobada').sort((a, b) => momento(b) - momento(a))
+  const atencion = masNuevoPrimero(base.filter(i => i.resultado !== 'aprobada'), CUANDO)
   const faltan = pendientes.datos ?? []
   const verTodas = () => cambiarVista('historial', { modo: 'todas' })
   const imp = useImpresion()
@@ -265,7 +267,8 @@ function TodasDelMes({ mes, abrir, imp }) {
   // Otro mes, otra lista: lo marcado era de la de antes.
   useEffect(() => { setMarcadas(null) }, [mes])
   const t = q.trim().toLowerCase()
-  const base = (registros.datos ?? []).filter(i => !t || `${i.vehiculoNombre} ${i.vehiculo?.placa ?? ''} ${i.conductorNombre}`.toLowerCase().includes(t))
+  // La más nueva arriba, en la tabla y al imprimir «todas».
+  const base = masNuevoPrimero(registros.datos, CUANDO).filter(i => !t || `${i.vehiculoNombre} ${i.vehiculo?.placa ?? ''} ${i.conductorNombre}`.toLowerCase().includes(t))
   const lista = resultado ? base.filter(i => i.resultado === resultado) : base
   const alternar = id => setMarcadas(m => { const n = new Set(m); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const elegidas = marcadas ? (registros.datos ?? []).filter(i => marcadas.has(i.id)) : []

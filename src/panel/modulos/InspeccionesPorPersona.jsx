@@ -5,6 +5,7 @@ import { Barra, Buscador, Cargando, ErrorCarga, Modal, Tag, Tarjeta, Vacio } fro
 import Avatar from '../comp/Avatar'
 import CalendarioInspecciones, { TEXTO_REGLA, diaDe, limitesDelMes, mesDeLaPersona, nombreDelMes } from '../comp/CalendarioInspecciones'
 import * as f from '../datos/formato'
+import { masNuevoPrimero } from '../datos/orden'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 
@@ -52,8 +53,6 @@ async function cargarMes(mes) {
   }
 }
 
-const momento = (i) => new Date(i.creadaEn || i.fecha || 0).getTime() || 0
-
 /** Una fila por persona con su mes ya calculado. */
 function armarFilas(datos, hoy) {
   const mes = datos.mes
@@ -71,7 +70,7 @@ function armarFilas(datos, hoy) {
       const conUnidad = Boolean(p.unidad || asignacion)
       const calc = mesDeLaPersona({ mes, hoy, inspecciones: suyas, desde, conUnidad })
       // Para la lista de la ficha: todas las del mes, también las que no son la diaria; la más reciente arriba.
-      const delMes = suyas.filter((i) => diaDe(i.fecha || i.creadaEn).startsWith(mes)).sort((a, b) => momento(b) - momento(a))
+      const delMes = masNuevoPrimero(suyas.filter((i) => diaDe(i.fecha || i.creadaEn).startsWith(mes)), ['creadaEn', 'fecha'])
       return { id, persona: p, nombre: p.nombre || '—', unidad, conUnidad, desde, inspecciones: delMes, ...calc }
     })
     // Del peor al mejor; los que no tienen días que contar, al final.
