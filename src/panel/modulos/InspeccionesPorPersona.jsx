@@ -3,7 +3,7 @@ import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { Barra, Buscador, Cargando, ErrorCarga, Modal, Tag, Tarjeta, Vacio } from '../comp/ui'
 import Avatar from '../comp/Avatar'
-import CalendarioInspecciones, { diaDe, limitesDelMes, mesDeLaPersona, nombreDelMes } from '../comp/CalendarioInspecciones'
+import CalendarioInspecciones, { TEXTO_REGLA, diaDe, limitesDelMes, mesDeLaPersona, nombreDelMes } from '../comp/CalendarioInspecciones'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
@@ -110,7 +110,7 @@ export default function InspeccionesPorPersona({ mes, alCambiarMes, puedeAvanzar
 
   return <div className={`insp-pp${elegido && !telefono ? ' con-ficha' : ''}`}>
     <Tarjeta titulo={`Cumplimiento de ${nombreDelMes(mes)}`} sinCuerpo>
-      <p className="insp-card-hint">Del que menos cumple al que más. Toca a una persona para ver su mes día por día.</p>
+      <p className="insp-card-hint">Del que menos cumple al que más. Toca a una persona para ver su mes día por día. {TEXTO_REGLA}</p>
       <div className="insp-pp-buscar"><Buscador valor={q} alCambiar={setQ} placeholder="Buscar persona o unidad…" /></div>
       {datos.estado === 'cargando' && !datos.datos && <Cargando filas={6} />}
       {datos.estado === 'error' && <ErrorCarga error={datos.error} onReintentar={datos.recargar} />}
@@ -141,9 +141,10 @@ function FichaPersona({ fila, mes, hoy, cargando, incompleta, alCambiarMes, pued
   const tieneDesde = conUnidad
     ? `Tiene la unidad ${unidad.replace(/^Unidad\s+/i, '') || 'asignada'}${desde ? ` desde el ${f.fecha(desde)}` : ''}.`
     : 'No tiene unidad asignada.'
+  // La misma frase que la app (T-75): el fin de semana solo cuenta si ese día trabajó.
   const textoRegla = conUnidad
-    ? desde ? 'Se cuentan todos los días desde ese día hasta hoy.' : 'No se sabe desde cuándo la tiene: se cuenta todo el mes hasta hoy.'
-    : 'Solo cuentan los días que la hizo.'
+    ? `${TEXTO_REGLA}${desde ? '' : ' No se sabe desde cuándo la tiene: se cuenta desde el día 1 del mes.'}`
+    : 'No tiene unidad: solo cuentan los días que la hizo.'
   return <div className="insp-ficha">
     {!telefono && <div className="insp-ficha-cab">
       <Avatar userId={fila.id} iniciales={f.iniciales(nombre)} nombre={nombre} clase="pnl-avatar insp-pp-av grande" tam={112} />

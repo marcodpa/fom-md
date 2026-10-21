@@ -24,9 +24,10 @@ import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { ESTADOS_VISIBLES, estadoVisible, presentarHistorial } from '../datos/historial-odt'
 import { GaleriaArchivos, SelectorArchivos } from '../comp/Archivos'
-import { subirVarios } from '../datos/archivos'
+import { puedeSubirArchivos, subirArchivo, subirVarios } from '../datos/archivos'
 import { Icono } from '../Iconos'
 import OdtAsignadas from '../comp/OdtAsignadas'
+import { esGestor } from '../roles'
 
 // ============================================================
 // MANTENIMIENTO — órdenes de trabajo de la flota.
@@ -53,49 +54,59 @@ const PASOS_GUIA = {
   resuelta: 'Se confirma la solución y se registra el costo si lo hay.',
 }
 
-// Los pasos posibles desde cada estado. Es la tabla de transiciones del
-// servidor más los dos caminos aparte que usa la app: asignar responsable
-// (aprobada → asignada) y los eventos de ejecución (inicio, pausa,
-// reanudación, entrega).
+// La nota que pide cada paso, igual que en la app. Las obligatorias exigen 3
+// letras (el servidor guarda la nota en el historial y no acepta menos).
+const NOTA_OPCIONAL = { etiqueta: 'Nota (opcional)', ayuda: 'Si la escribes, queda en el historial de la orden.' }
+const NOTA_CANCELAR = { etiqueta: 'Por qué se cancela', obligatoria: true, ejemplo: 'Se reportó dos veces; la atiende la otra orden.' }
+const NOTA_QUE_FALTA = { etiqueta: 'Qué falta', obligatoria: true, ejemplo: 'Falta la foto del tablero con el testigo encendido.' }
+const NOTA_REABRIR = { etiqueta: 'Por qué se reabre', obligatoria: true, ejemplo: 'El ruido volvió a los dos días.' }
+const NOTA_PAUSA = { etiqueta: 'Motivo de la pausa', obligatoria: true, ejemplo: 'Falta el repuesto; llega mañana.' }
+const NOTA_ENTREGA = { etiqueta: 'Qué se hizo', obligatoria: true, ejemplo: 'Se cambiaron las pastillas delanteras y se probó el frenado.' }
+
+// Los pasos posibles desde cada estado: la tabla de transiciones del servidor
+// más los dos caminos aparte que usa la app, asignar responsable (aprobada o
+// asignada → asignada) y los eventos de ejecución (inicio, pausa, reanudación,
+// entrega). Reasignar solo existe antes de empezar: el servidor no lo admite
+// con el trabajo en curso.
 const PASOS_ODT = {
   abierta: [
-    { a: 'en_revision', t: 'Pasar a revisión' },
+    { a: 'en_revision', t: 'Pasar a revisión', nota: NOTA_OPCIONAL, sinNota: 'Pasada a revisión' },
     { a: 'cerrada', t: 'Resolver sin taller' },
-    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true, nota: NOTA_CANCELAR },
   ],
   en_revision: [
-    { a: 'aprobada', t: 'Aprobar' },
-    { a: 'abierta', t: 'Devolver a abierta', sutil: true },
+    { a: 'aprobada', t: 'Aprobar', nota: NOTA_OPCIONAL, sinNota: 'Aprobada' },
+    { a: 'abierta', t: 'Devolver a abierta', sutil: true, nota: NOTA_QUE_FALTA },
     { a: 'cerrada', t: 'Resolver sin taller' },
-    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true, nota: NOTA_CANCELAR },
   ],
   aprobada: [
-    { a: 'asignar', t: 'Asignar responsable' },
-    { a: 'en_revision', t: 'Volver a revisión', sutil: true },
+    { a: 'asignar', t: 'Asignar responsable', nota: NOTA_OPCIONAL },
+    { a: 'en_revision', t: 'Volver a revisión', sutil: true, nota: NOTA_QUE_FALTA },
     { a: 'cerrada', t: 'Resolver sin taller' },
-    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true, nota: NOTA_CANCELAR },
   ],
   asignada: [
     { a: 'inicio', t: 'Iniciar trabajo', ejecucion: true },
-    { a: 'asignar', t: 'Reasignar', sutil: true },
-    { a: 'en_revision', t: 'Volver a revisión', sutil: true },
-    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+    { a: 'asignar', t: 'Reasignar', sutil: true, nota: NOTA_OPCIONAL },
+    { a: 'en_revision', t: 'Volver a revisión', sutil: true, nota: NOTA_QUE_FALTA },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true, nota: NOTA_CANCELAR },
   ],
   en_ejecucion: [
-    { a: 'entrega', t: 'Entregar a calidad', ejecucion: true },
-    { a: 'pausa', t: 'Pausar', ejecucion: true, sutil: true },
-    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+    { a: 'entrega', t: 'Entregar', ejecucion: true, nota: NOTA_ENTREGA },
+    { a: 'pausa', t: 'Pausar', ejecucion: true, sutil: true, nota: NOTA_PAUSA },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true, nota: NOTA_CANCELAR },
   ],
   pausada: [
     { a: 'reanudacion', t: 'Reanudar', ejecucion: true },
-    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true, nota: NOTA_CANCELAR },
   ],
   en_calidad: [
     { a: 'cerrada', t: 'Cerrar' },
-    { a: 'en_ejecucion', t: 'Devolver a ejecución', sutil: true },
-    { a: 'cancelada', t: 'Cancelar orden', sutil: true },
+    { a: 'en_ejecucion', t: 'Devolver a ejecución', sutil: true, nota: NOTA_QUE_FALTA },
+    { a: 'cancelada', t: 'Cancelar orden', sutil: true, nota: NOTA_CANCELAR },
   ],
-  cerrada: [{ a: 'en_revision', t: 'Reabrir' }],
+  cerrada: [{ a: 'en_revision', t: 'Reabrir', nota: NOTA_REABRIR }],
   cancelada: [],
 }
 const AYUDA_ODT = {
@@ -103,7 +114,7 @@ const AYUDA_ODT = {
   en_revision: 'Se está evaluando. Apruébala para llevarla a taller, o resuélvela sin taller si ya se atendió.',
   aprobada: 'Aprobada. Asigna quién la ejecuta en taller (lo verá en su app), o resuélvela sin taller.',
   asignada: 'Tiene responsable. El trabajo empieza cuando el responsable lo inicia desde su app.',
-  en_ejecucion: 'En taller. Cuando termine, se entrega a calidad.',
+  en_ejecucion: 'En taller. Cuando termine, el responsable la entrega con lo que se hizo.',
   pausada: 'El trabajo está detenido. Reanúdalo cuando siga.',
   en_calidad: 'Terminó el trabajo: revisa y cierra con lo que se hizo y el costo.',
   cerrada: 'Si la falla volvió, reábrela: pasa a revisión y el cierre queda en el historial.',
@@ -111,6 +122,33 @@ const AYUDA_ODT = {
 }
 
 const TIPOS_FALLA = ['motor', 'frenos', 'neumaticos', 'electrico', 'carroceria', 'otro']
+const PRIORIDADES = ['baja', 'media', 'alta']
+
+// Letras (con tildes), números y lo poco que se usa al nombrar una pieza: como la app.
+const RE_TEXTO_CORTO = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 .\-/]+$/u
+const RE_ALGUNA_LETRA = /[A-Za-zÁÉÍÓÚáéíóúÑñÜü]/u
+
+/** La parte que falló («Otro») o el título de una foto: corto, con alguna letra y sin símbolos. */
+function revisarTextoCorto(valor, { min = 3, max = 40, vacio = 'Escríbelo.', sinLetras = 'Usa palabras, no solo números.' } = {}) {
+  const v = String(valor ?? '').trim()
+  if (!v) return vacio
+  if (v.length < min) return `Muy corto: mínimo ${min} caracteres.`
+  if (v.length > max) return `Máximo ${max} caracteres.`
+  if (!RE_TEXTO_CORTO.test(v)) return 'Solo letras, números y espacios.'
+  if (!RE_ALGUNA_LETRA.test(v)) return sinLetras
+  return null
+}
+
+/**
+ * Un monto o un kilometraje escrito a mano: ≥ 0, hasta 2 decimales, con punto
+ * o coma. Devuelve el número, null si está vacío, o NaN si no se entiende.
+ */
+function leerMonto(texto) {
+  const t = String(texto ?? '').trim().replace(/\s/gu, '')
+  if (t === '') return null
+  if (!/^\d+([.,]\d{1,2})?$/u.test(t)) return Number.NaN
+  return Number(t.replace(',', '.'))
+}
 
 const UBICACION_POR_DEFECTO = 'Registrada desde el panel'
 
@@ -313,6 +351,9 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
   const [nota, setNota] = useState('')
   const [notaSolucion, setNotaSolucion] = useState(odt.notaSolucion ?? '')
   const [costo, setCosto] = useState(odt.costo != null ? String(odt.costo) : '')
+  // Kilometraje al cerrar una preventiva de un plan: arranca con la última lectura de la unidad.
+  const [km, setKm] = useState(vehiculo?.km != null ? String(Math.round(Number(vehiculo.km))) : '')
+  const [fotosCierre, setFotosCierre] = useState([])
   const [responsableId, setResponsableId] = useState('')
   const [buscarPersona, setBuscarPersona] = useState('')
   const confirmacionRef = useRef(null)
@@ -347,6 +388,12 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
   // que en la app: el gestor asigna, revisa y cierra.
   const yo = (gente.datos ?? []).find((p) => p.email && perfil?.correo && p.email.toLowerCase() === perfil.correo.toLowerCase())
   const soyResponsable = Boolean(responsable && yo && (yo.userId ?? yo.id) === responsable.id)
+  // Quien reportó la falla: en la base por su identificador; en el modo demo el perfil ya lo trae.
+  const soyQuienReporto = Boolean(odt.creadorId && ((yo && (yo.userId ?? yo.id) === odt.creadorId) || perfil?.id === odt.creadorId))
+  const gestor = esGestor(perfil)
+  // El servidor solo acepta el kilometraje de cierre en una orden que viene de un plan, y lo
+  // exige si el plan cuenta por km: se pide en toda preventiva de plan, como hace la app.
+  const pideKm = odt.tipo === 'preventiva' && Boolean(odt.planId)
 
   const items = [
     {
@@ -385,17 +432,18 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
   // Antes de llegar al taller, la orden puede resolverse directo (una revisión rápida, un ajuste en sitio…).
   const sinTaller = ['abierta', 'en_revision', 'aprobada'].includes(odt.estado) ? (PASOS_ODT[odt.estado] ?? []).find((p) => p.a === 'cerrada') : null
 
-  // Solo piden datos (y por eso abren formulario) asignar, cerrar y cancelar. Iniciar, pausar, reanudar,
-  // entregar, aprobar o devolver no tienen nada que preguntar: se hacen con un clic.
-  const PIDEN_DATOS = ['asignar', 'cerrada', 'cancelada']
+  // Todos los pasos abren su formulario (persona, nota o cierre), menos iniciar y
+  // reanudar: no tienen nada que preguntar y se hacen con un clic, como en la app.
+  const UN_CLIC = ['inicio', 'reanudacion']
   function elegir(paso) {
     if (guardando) return
     setFallo('')
     setErrores({})
-    if (!PIDEN_DATOS.includes(paso.a)) {
+    if (UN_CLIC.includes(paso.a)) {
       confirmar(paso)
       return
     }
+    setNota('')
     setPendiente(pendiente?.a === paso.a ? null : paso)
   }
 
@@ -403,15 +451,21 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
     // Llamado desde un botón recibe el evento; llamado desde `elegir`, el paso.
     const paso = directo?.a ? directo : pendiente
     const err = {}
-    // La nota es opcional: si no se escribe, el historial guarda qué paso se dio y desde dónde.
-    const notaFinal = nota.trim().length >= 3 ? nota.trim() : `${paso.t} (desde la consola)`
+    const texto = nota.trim()
+    if (paso.nota?.obligatoria && texto.length < 3) err.nota = `${paso.nota.etiqueta}: escribe al menos 3 letras.`
+    else if (texto && texto.length < 3) err.nota = 'Si escribes una nota, que tenga al menos 3 letras.'
     if (paso.a === 'asignar' && !responsableId) err.responsable = 'Elige quién se hace cargo.'
     let monto = null
+    let kmCierre = null
     if (paso.a === 'cerrada') {
-      if (!notaSolucion.trim()) err.notaSolucion = 'Cuenta qué se hizo para resolver la falla.'
-      const crudo = costo.trim()
-      monto = crudo === '' ? null : Number(crudo)
-      if (monto !== null && (!Number.isFinite(monto) || monto < 0)) err.costo = 'El costo no puede ser negativo.'
+      if (notaSolucion.trim().length < 3) err.notaSolucion = 'Cuenta qué se hizo para resolver la falla (al menos 3 letras).'
+      monto = leerMonto(costo)
+      if (Number.isNaN(monto) || monto > 9999999999.99) err.costo = 'Escribe el costo con números: 0 o más, hasta 2 decimales (por ejemplo 120,50).'
+      if (pideKm) {
+        kmCierre = leerMonto(km)
+        if (kmCierre === null) err.km = 'Escribe el kilometraje con que se cerró el servicio.'
+        else if (Number.isNaN(kmCierre) || kmCierre > 9999999999.99) err.km = 'Escribe el kilometraje con números: 0 o más, hasta 2 decimales.'
+      }
     }
     setErrores(err)
     if (Object.keys(err).length > 0) return
@@ -420,21 +474,32 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
     setFallo('')
     try {
       if (paso.a === 'asignar') {
-        await repo.odts.asignarResponsable(odt.id, { usuarioId: responsableId, nota: notaFinal })
+        await repo.odts.asignarResponsable(odt.id, { usuarioId: responsableId, nota: texto })
       } else if (paso.ejecucion) {
-        await repo.odts.ejecutar(odt, paso.a, notaFinal)
+        await repo.odts.ejecutar(odt, paso.a, texto)
       } else {
         await repo.odts.cambiarEstado(odt.id, paso.a, {
           estadoActual: odt.estado,
-          nota: notaFinal,
+          // El servidor guarda una nota en CADA cambio de estado (mín. 3 letras). Al cerrar es «qué se hizo»,
+          // como en la app; en un paso de nota opcional que se deja vacía, el paso dicho en pasado.
+          nota: paso.a === 'cerrada' ? notaSolucion.trim() : texto || paso.sinNota || paso.t,
           notaSolucion: paso.a === 'cerrada' ? notaSolucion.trim() : undefined,
           costo: paso.a === 'cerrada' ? monto : undefined,
           moneda: paso.a === 'cerrada' && monto != null ? 'USD' : undefined,
+          odometro: paso.a === 'cerrada' && pideKm ? kmCierre : undefined,
         })
+      }
+      // Las fotos del cierre suben con la orden ya cerrada: si alguna falla, el cierre no se pierde.
+      let faltaron = ''
+      if (paso.a === 'cerrada' && fotosCierre.length) {
+        const r = await subirVarios({ coleccion: 'work-orders', padreId: odt.id, proposito: 'work_order_closure', archivos: fotosCierre })
+        if (r.errores.length) faltaron = `La orden quedó cerrada, pero ${r.errores.length} de ${fotosCierre.length} fotos no se subieron: ${r.errores[0]} Puedes agregarlas en «Fotos del trabajo terminado».`
       }
       setAviso(paso.a === 'asignar' ? 'Responsable asignado.' : `Cambio confirmado: ${paso.t}.`)
       setPendiente(null)
       setNota('')
+      setFotosCierre([])
+      if (faltaron) setFallo(faltaron)
       await recargar()
     } catch (e) {
       setFallo(e?.message || 'No pudimos guardar el cambio. Inténtalo otra vez.')
@@ -445,7 +510,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
 
   if (pendiente) return <div className="mnt-action-dialog"><aside className="mnt-action-context"><VehicleVisual modelo={vehiculo?.modelo ?? ''}/><h3>{odt.vehiculoNombre}</h3><p>{odt.descripcion}</p><hr/><span className="mnt-muted">Estado actual</span><EstadoOdt estado={odt.estado}/><p>El cambio y la nota quedarán registrados en la orden.</p>{pendiente.a === 'cerrada' && <p>La solución se conserva como historial de la unidad.</p>}{pendiente.a === 'asignar' && <p>Solo el responsable asignado podrá iniciar, pausar y entregar el trabajo.</p>}</aside><div>
         <section ref={confirmacionRef} className="mnt-confirm mnt-action-form">
-          <h3>{pendiente.t}</h3><p>{pendiente.a === 'cancelada' ? 'La orden quedará cancelada y no admitirá más cambios.' : pendiente.a === 'asignar' ? 'El responsable verá el trabajo en su app.' : `Confirma este paso para ${odt.vehiculoNombre}.`}</p>
+          <h3>{pendiente.t}</h3><p>{pendiente.a === 'cancelada' ? 'La orden quedará cancelada y no admitirá más cambios.' : pendiente.a === 'asignar' ? 'El responsable verá el trabajo en su app.' : pendiente.a === 'pausa' ? 'El tiempo trabajado deja de contar hasta que reanudes.' : pendiente.a === 'entrega' ? 'El supervisor la revisa y la cierra con el costo.' : `Confirma este paso para ${odt.vehiculoNombre}.`}</p>
           {pendiente.a === 'asignar' && (
             <div className="mnt-assignee"><Buscador valor={buscarPersona} alCambiar={setBuscarPersona} placeholder="Buscar responsable por nombre…"/>
               {gente.estado === 'cargando' && <Cargando filas={3}/>}
@@ -465,14 +530,30 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
                   placeholder="Se cambiaron las pastillas delanteras y se purgó el sistema."
                 />
               </Campo>
-              <Campo etiqueta="Costo (USD)" error={errores.costo} ayuda="Opcional. Déjalo vacío si aún no lo tienes.">
-                <input type="number" className="pnl-input" min="0" step="0.01" value={costo} onChange={(e) => setCosto(e.target.value)} placeholder="0" />
+              {/* Texto y no «number»: así acepta la coma decimal, como la app. */}
+              <Campo etiqueta="Costo (USD)" error={errores.costo} ayuda="Opcional. Hasta 2 decimales, con punto o coma. Déjalo vacío si aún no lo tienes.">
+                <input type="text" inputMode="decimal" className="pnl-input" value={costo} onChange={(e) => setCosto(e.target.value)} placeholder="0,00" />
               </Campo>
+              {pideKm && (
+                <Campo etiqueta="Kilometraje al cerrar" error={errores.km} ayuda="Con este kilometraje vuelve a empezar la cuenta del plan.">
+                  <input type="text" inputMode="decimal" className="pnl-input" value={km} onChange={(e) => setKm(e.target.value)} placeholder="Ej.: 45200" />
+                </Campo>
+              )}
+              <SelectorArchivos
+                archivos={fotosCierre}
+                alCambiar={setFotosCierre}
+                coleccion="work-orders"
+                titulo="Fotos del trabajo terminado (opcional)"
+                ayuda="Hasta 10 fotos. Se suben al cerrar la orden."
+                deshabilitado={guardando}
+              />
             </>
           )}
-          <Campo etiqueta={pendiente.a === 'cerrada' ? 'Nota del cierre (opcional)' : 'Nota (opcional)'} error={errores.nota} ayuda="Si la escribes, queda en el historial de la orden.">
-            <textarea className="pnl-textarea" rows={2} value={nota} onChange={(e) => setNota(e.target.value)} />
-          </Campo>
+          {pendiente.nota && (
+            <Campo etiqueta={pendiente.nota.etiqueta} error={errores.nota} ayuda={pendiente.nota.ayuda ?? 'Queda en el historial de la orden. Al menos 3 letras.'}>
+              <textarea className="pnl-textarea" rows={pendiente.nota.obligatoria ? 3 : 2} value={nota} onChange={(e) => setNota(e.target.value)} placeholder={pendiente.nota.ejemplo} />
+            </Campo>
+          )}
           <div className="pnl-kanban-cab">
             <button type="button" className={`pnl-btn primario${pendiente.a === 'cancelada' ? ' mnt-critical' : ''}`} onClick={confirmar} disabled={guardando}>
               {guardando ? 'Guardando…' : pendiente.t}
@@ -510,8 +591,9 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
       </section>
       <details className="mnt-record"><summary>Datos del reporte <span>Unidad, responsable, fechas y ubicación</span></summary><Datos items={items}/><p className="mnt-order-reference">Identificador completo: <code>{odt.id}</code></p></details>
       <div className="arch-bloque">
-        <GaleriaArchivos coleccion="work-orders" padreId={odt.id} proposito="work_order_opening" titulo="Fotos del reporte" vacio="Nadie ha subido fotos de la falla todavía." />
-        <GaleriaArchivos coleccion="work-orders" padreId={odt.id} proposito="work_order_closure" titulo="Fotos del trabajo terminado" vacio="Todavía no hay fotos del trabajo hecho." />
+        {/* Agregan fotos el gestor y el responsable; las del reporte, también quien la reportó (como la app). */}
+        <GaleriaArchivos coleccion="work-orders" padreId={odt.id} proposito="work_order_opening" titulo="Fotos del reporte" vacio="Nadie ha subido fotos de la falla todavía." puedeSubir={gestor || soyResponsable || soyQuienReporto} />
+        <GaleriaArchivos coleccion="work-orders" padreId={odt.id} proposito="work_order_closure" titulo="Fotos del trabajo terminado" vacio="Todavía no hay fotos del trabajo hecho." puedeSubir={gestor || soyResponsable} />
       </div>
 
       {ejecucion.estado === 'error' && <ErrorCarga texto={ejecucion.error?.message} onReintentar={ejecucion.recargar}/>}
@@ -594,12 +676,18 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
   const [paso, setPaso] = useState(vehiculos.length === 1 ? 2 : 1)
   const [busqueda, setBusqueda] = useState('')
   const [descripcion, setDescripcion] = useState('')
-  const [tipoFalla, setTipoFalla] = useState('motor')
+  // Sin tipo elegido de entrada, como la app: preseleccionar uno hace que se envíe sin pensarlo.
+  const [tipoFalla, setTipoFalla] = useState('')
+  const [parte, setParte] = useState('')
+  // Media por defecto, como la app: ni se minimiza ni se grita antes de mirarla.
+  const [prioridad, setPrioridad] = useState('media')
   const [ubicacion, setUbicacion] = useState(UBICACION_POR_DEFECTO)
   const [errores, setErrores] = useState({})
   const [guardando, setGuardando] = useState(false)
   const [fallo, setFallo] = useState('')
   const [fotos, setFotos] = useState([])
+  // El título de cada foto, por archivo: al quitar una, las demás conservan el suyo.
+  const [titulos, setTitulos] = useState(() => new Map())
   // La orden ya se creó pero alguna foto no subió: el botón pasa a «Listo».
   const [creada, setCreada] = useState(false)
 
@@ -623,17 +711,31 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
     // corregir.
     if (!descripcion.trim()) err.descripcion = 'Describe la falla.'
     else if (descripcion.trim().length < 10)
-      err.descripcion = 'Describe un poco mas: al menos 10 caracteres.'
+      err.descripcion = 'Describe un poco más: al menos 10 caracteres.'
+    // «Otro» sin decir qué es no le sirve a quien va a atender la orden.
+    if (tipoFalla === 'otro') {
+      const mal = revisarTextoCorto(parte, { max: 40, vacio: 'Escribe qué parte falló.', sinLetras: 'Ponle nombre a la parte, no solo números.' })
+      if (mal) err.parte = mal
+    }
+    // El conductor manda al menos una foto (como en la app); el supervisor, si quiere. Si esta web no tiene
+    // dónde guardar fotos, no se le puede pedir.
+    if (comoConductor && puedeSubirArchivos() && fotos.length === 0) err.fotos = 'Agrega al menos una foto de la falla.'
+    // Cada foto con su título: una foto suelta no dice por qué se adjuntó.
+    const malTitulos = fotos.map((a) => revisarTextoCorto(titulos.get(a), { max: 60, vacio: 'Ponle un título a la foto.', sinLetras: 'El título necesita palabras, no solo números.' }))
+    if (malTitulos.some(Boolean)) err.titulos = malTitulos
     setErrores(err)
     if (Object.keys(err).length > 0) return
 
     setGuardando(true)
     setFallo('')
+    // Con «Otro», la parte va delante de la descripción: el catálogo del servidor es cerrado (igual que la app).
+    const texto = tipoFalla === 'otro' ? `${parte.trim()}: ${descripcion.trim()}` : descripcion.trim()
     repo.odts
       .crear({
         vehiculoId,
-        descripcion: descripcion.trim(),
-        tipoFalla,
+        descripcion: texto.slice(0, 2000),
+        tipoFalla: tipoFalla || undefined,
+        prioridad,
         ubicacion: ubicacion.trim() || UBICACION_POR_DEFECTO,
         creadorId,
         comoConductor,
@@ -643,7 +745,14 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
         // El servidor devuelve { id }; el modo demo, el id solo.
         const odtId = typeof r === 'string' ? r : r?.id
         if (fotos.length && odtId) {
-          const s = await subirVarios({ coleccion: 'work-orders', padreId: odtId, proposito: 'work_order_opening', archivos: fotos })
+          const s = { errores: [] }
+          for (const archivo of fotos) {
+            try {
+              await subirArchivo({ coleccion: 'work-orders', padreId: odtId, proposito: 'work_order_opening', archivo, titulo: titulos.get(archivo).trim() })
+            } catch (e) {
+              s.errores.push(e?.message || `No se pudo subir «${archivo.name}».`)
+            }
+          }
           if (s.errores.length) {
             setFallo(`La orden quedó creada, pero ${s.errores.length} de ${fotos.length} fotos no se subieron: ${s.errores[0]} Puedes agregarlas desde el detalle de la orden.`)
             setCreada(true)
@@ -686,7 +795,16 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
         />
       </Campo>
 
-      <fieldset className="mnt-failure"><legend>Tipo de falla</legend><div>{TIPOS_FALLA.map(t => <button type="button" key={t} aria-pressed={tipoFalla === t} onClick={() => setTipoFalla(t)}><Icono nombre="llave" tam={18}/>{etiqueta('tipo_falla', t)}</button>)}</div></fieldset>
+      {/* Tocar el tipo elegido lo quita: el tipo de falla es opcional. */}
+      <fieldset className="mnt-failure"><legend>Tipo de falla (opcional)</legend><div>{TIPOS_FALLA.map(t => <button type="button" key={t} aria-pressed={tipoFalla === t} onClick={() => setTipoFalla(tipoFalla === t ? '' : t)}><Icono nombre="llave" tam={18}/>{etiqueta('tipo_falla', t)}</button>)}</div></fieldset>
+
+      {tipoFalla === 'otro' && (
+        <Campo etiqueta="Qué parte falló" error={errores.parte} ayuda="Como se llama la pieza: «Puerta trasera», «Eje 3».">
+          <input type="text" className="pnl-input" maxLength={40} value={parte} onChange={(e) => setParte(e.target.value)} placeholder="Puerta trasera" />
+        </Campo>
+      )}
+
+      <fieldset className="mnt-failure mnt-prioridad"><legend>Prioridad</legend><div>{PRIORIDADES.map(p => <button type="button" key={p} aria-pressed={prioridad === p} onClick={() => setPrioridad(p)}><i className={color('odt_prioridad', p)}/>{etiqueta('odt_prioridad', p)}</button>)}</div></fieldset>
 
       <Campo etiqueta="Ubicación" ayuda="Dónde está la unidad o dónde ocurrió la falla.">
         <input
@@ -702,10 +820,28 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
         archivos={fotos}
         alCambiar={setFotos}
         coleccion="work-orders"
-        titulo="Fotos de la falla (opcional)"
-        ayuda="Hasta 10 fotos de lo que se dañó. Se suben al crear la orden."
+        titulo={comoConductor ? 'Fotos de la falla' : 'Fotos de la falla (opcional)'}
+        ayuda={comoConductor ? 'Al menos 1 foto de lo que se dañó, cada una con su título. Se suben al enviar el reporte.' : 'Hasta 10 fotos de lo que se dañó, cada una con su título. Se suben al crear la orden.'}
         deshabilitado={guardando || creada}
       />
+      {errores.fotos && <p className="pnl-campo-error" role="alert">{errores.fotos}</p>}
+      {fotos.length > 0 && (
+        <div className="mnt-titulos-fotos">
+          {fotos.map((a, i) => (
+            <Campo key={`${a.name}-${a.size}-${i}`} etiqueta={`Título de la foto ${i + 1}`} error={errores.titulos?.[i] || undefined} ayuda={a.name}>
+              <input
+                type="text"
+                className="pnl-input"
+                maxLength={60}
+                value={titulos.get(a) ?? ''}
+                onChange={(e) => { const v = e.target.value; setTitulos((m) => new Map(m).set(a, v)) }}
+                placeholder="Pastilla delantera gastada"
+                disabled={guardando || creada}
+              />
+            </Campo>
+          ))}
+        </div>
+      )}
 
       {fallo && (
         <div className="pnl-fila critica">

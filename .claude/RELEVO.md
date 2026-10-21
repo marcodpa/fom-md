@@ -37,14 +37,16 @@ turnos a menudo: continuarlos con SendMessage.
 - Web local: `fom-demo` (5174, datos de prueba). La web con datos reales (`npm run dev`, 5173)
   la tiene que prender Marco: el sistema bloquea a Claude contra producción.
 
-## Pendiente con Marco
+## Decidido con Marco (21 oct)
 
-- Regla de fines de semana del calendario de inspecciones (Inspecciones › Por persona, web y app):
-  hoy cuentan TODOS los días (lunes a domingo). Marco duda entre eso y que sábado y domingo NO
-  cuenten, salvo que el conductor «habilite» ese día porque le toca trabajar (por ejemplo, un
-  botón «Hoy trabajo» en la app o que se tome como laborable si hizo jornada/km). Sin decidir:
-  no cambiar hasta que Marco elija. Código: app src/components/inspecciones-por-persona.tsx
-  (`debia`), web src/panel/modulos/InspeccionesPorPersona.jsx.
+- Fines de semana en inspecciones: el sábado/domingo la app le pregunta al conductor si va a
+  trabajar; el calendario cuenta lunes a viernes siempre y sábado/domingo solo si ese día hizo
+  la inspección (T-75, web y app iguales).
+- ODT: sin reloj ni Empezar/Pausar; flujo simple Abierta → En curso → Resuelta con «cuánto
+  tardó». El servidor ya guarda la hora de cada paso (fom.work_order_events). PR a Juan:
+  https://github.com/juancpachecog/fom-core/pull/706 (rama simplificar-odt; copia en
+  comparativa/fom-core/simplificar-odt.patch). Botones simples en web/app: después de que Juan
+  publique. Falta que Marco diga si «cuánto tardó» va desde que se reportó, se asignó o ambos.
 
 ## Pendiente con Juan
 

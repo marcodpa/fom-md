@@ -32,27 +32,28 @@ import { VEHICULOS } from './semilla'
 /** Estados en los que la orden está en manos de su responsable. */
 export const ESTADOS_DE_TALLER = ['asignada', 'en_ejecucion', 'pausada', 'en_calidad']
 
-/** En qué va el trabajo, dicho para el responsable (además de los 3 estados visibles). */
+/** En qué va el trabajo, dicho para el responsable (además de los 3 estados visibles). Mismos textos que la app. */
 export const MOMENTOS = {
-  asignada: { t: 'Por empezar', ayuda: 'Te la asignaron. Inicia el trabajo cuando empieces.' },
-  en_ejecucion: { t: 'En trabajo', ayuda: 'El reloj está corriendo. Pausa si te detienes o entrega al terminar.' },
-  pausada: { t: 'Pausada', ayuda: 'El trabajo está detenido. Reanúdalo cuando sigas.' },
-  en_calidad: { t: 'Entregada', ayuda: 'Ya la entregaste. Falta que el supervisor la revise y la cierre.' },
+  asignada: { t: 'Sin iniciar', ayuda: 'Te la asignaron. Inicia el trabajo cuando empieces.' },
+  en_ejecucion: { t: 'Trabajo en curso', ayuda: 'El reloj está corriendo. Pausa si te detienes o entrega al terminar.' },
+  pausada: { t: 'Trabajo pausado', ayuda: 'El trabajo está detenido. Reanúdalo cuando sigas.' },
+  en_calidad: { t: 'Entregada: la revisa el supervisor', ayuda: 'Ya no tienes nada pendiente en esta orden.' },
 }
 
 // Los botones de cada momento, con los mismos textos que la app. Pausar y
-// entregar llevan nota: el servidor la exige (3 a 1000 letras).
+// entregar piden nota: el servidor la exige (3 a 1000 letras) y no se rellena
+// sola, porque el motivo de la pausa o lo que se hizo solo lo sabe quien trabaja.
 const ACCIONES = {
   asignada: [{ accion: 'inicio', t: 'Iniciar trabajo' }],
-  en_ejecucion: [{ accion: 'entrega', t: 'Entregar', pideNota: true }, { accion: 'pausa', t: 'Pausar', sutil: true }],
+  en_ejecucion: [
+    { accion: 'entrega', t: 'Entregar', pideNota: 'Qué se hizo' },
+    { accion: 'pausa', t: 'Pausar', sutil: true, pideNota: 'Motivo de la pausa' },
+  ],
   pausada: [{ accion: 'reanudacion', t: 'Reanudar' }],
   en_calidad: [],
 }
-const NOTA_POR_DEFECTO = {
-  inicio: 'Trabajo iniciado desde la web',
-  pausa: 'Trabajo pausado desde la web',
-  reanudacion: 'Trabajo reanudado desde la web',
-}
+/** Las acciones que no salen sin su nota escrita. */
+const CON_NOTA = { pausa: 'Escribe el motivo de la pausa', entrega: 'Cuenta qué se hizo antes de entregar' }
 const SIGUIENTE = { inicio: 'en_ejecucion', pausa: 'pausada', reanudacion: 'en_ejecucion', entrega: 'en_calidad' }
 const DESDE = { inicio: 'asignada', pausa: 'en_ejecucion', reanudacion: 'pausada', entrega: 'en_ejecucion' }
 
@@ -188,14 +189,16 @@ export async function listarAsignadas({ odts = [], perfil = null } = {}) {
  * no pisar a nadie y con una clave propia por si la petición se repite.
  */
 export async function registrarEvento(item, accion, nota = '') {
-  const texto = nota.trim().length >= 3 ? nota.trim() : NOTA_POR_DEFECTO[accion]
-  if (accion === 'entrega' && !texto) throw new Error('Cuenta qué se hizo antes de entregar (al menos 3 letras).')
-  if (!HAY_API) return demo.evento(item.id, accion, texto)
+  const texto = String(nota ?? '').trim()
+  if (CON_NOTA[accion] && texto.length < 3) throw new Error(`${CON_NOTA[accion]} (al menos 3 letras).`)
+  // Iniciar y reanudar no piden nota: si no la hay, no viaja.
+  const final = texto.length >= 3 ? texto : undefined
+  if (!HAY_API) return demo.evento(item.id, accion, final ?? '')
   const r = await api.ejecutarOdt(item.id, {
     clientEventId: claveIdempotente(),
     action: accion,
     expectedStatus: item.estado,
-    note: texto,
+    note: final,
   })
   return { estado: r?.event?.toStatus ?? SIGUIENTE[accion] }
 }

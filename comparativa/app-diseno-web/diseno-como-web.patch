@@ -1,7 +1,7 @@
 From 2581cf83b19ae476227262327ab72489b2526c13 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 14 Oct 2026 11:40:13 -0400
-Subject: [PATCH 01/17] Mapas con Mapbox, el mismo proveedor que el panel web
+Subject: [PATCH 01/18] Mapas con Mapbox, el mismo proveedor que el panel web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -3095,7 +3095,7 @@ index 0000000..269766b
 From de62044848b392b8caa43332444bea9c335718c8 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 09:05:25 -0400
-Subject: [PATCH 02/17] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
+Subject: [PATCH 02/18] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
  =?UTF-8?q?=20panel=20web:=20encabezado=20redondo=20en=20todas=20las=20pes?=
  =?UTF-8?q?ta=C3=B1as?=
 MIME-Version: 1.0
@@ -5530,7 +5530,7 @@ index 2ab97e8..1921048 100644
 From c000b636fd810bcce2f3a312f10fed67ade6af1c Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:14:53 -0400
-Subject: [PATCH 03/17] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
+Subject: [PATCH 03/18] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
  =?UTF-8?q?(tambi=C3=A9n=20en=20Expo=20Go),=20recorrido=20y=20entrada=20nu?=
  =?UTF-8?q?eva=20con=20el=20logo=20FOM?=
 MIME-Version: 1.0
@@ -26153,7 +26153,7 @@ index 5119764..7db24d0 100644
 From 50a59f9d818534889d46e3a94168948db6d9afa9 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:32:24 -0400
-Subject: [PATCH 04/17] Pantalla de carga FOM (motion) al arrancar y dentro de
+Subject: [PATCH 04/18] Pantalla de carga FOM (motion) al arrancar y dentro de
  la app, igual que la web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -27297,7 +27297,7 @@ index 9c82d64..8328c9a 100644
 From 1056c6b78ec4ebc10b57f795e36b0e6a5699274d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:04:43 -0400
-Subject: [PATCH 05/17] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
+Subject: [PATCH 05/18] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
  =?UTF-8?q?tas,=20mapa=20completo=20de=20la=20flota=20y=20arreglo=20del=20?=
  =?UTF-8?q?mapa=20en=20el=20tel=C3=A9fono?=
 MIME-Version: 1.0
@@ -29762,7 +29762,7 @@ index 0d9b55d..39566b2 100644
 From 3e5342f146d3967ea90b01f55ab4c251a554cc74 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:48:17 -0400
-Subject: [PATCH 06/17] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
+Subject: [PATCH 06/18] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
  =?UTF-8?q?,=20recorrido=20en=20el=20mapa=20completo,=20=C3=ADcono=20de=20?=
  =?UTF-8?q?veh=C3=ADculo=20de=20la=20web=20y=20espera=20nueva?=
 MIME-Version: 1.0
@@ -31408,7 +31408,7 @@ index 4fb8a10..ef7b519 100644
 From 6ec07ef815bd8196b71c53b9772e567d5931bf30 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 14:14:13 -0400
-Subject: [PATCH 07/17] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
+Subject: [PATCH 07/18] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
  =?UTF-8?q?=20el=20error=20=C2=ABStyle=20is=20not=20done=20loading=C2=BB?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32480,7 +32480,7 @@ index f6b5a22..e116c51 100644
 From 5f38ad38cd96d2426b421be91809e3017cbe4954 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 16:18:12 -0400
-Subject: [PATCH 08/17] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
+Subject: [PATCH 08/18] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
  =?UTF-8?q?=20200=20(el=20servidor=20de=20la=20app=20no=20acepta=20m=C3=A1?=
  =?UTF-8?q?s=20por=20pedido)?=
 MIME-Version: 1.0
@@ -32569,7 +32569,7 @@ index 8836fdd..2804942 100644
 From d8db74159e7bf9e52efb1c6faa6ee0abf78ee2ff Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:29:50 -0400
-Subject: [PATCH 09/17] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
+Subject: [PATCH 09/18] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
  =?UTF-8?q?=20tel=C3=A9fono=20sin=20Expo=20Go?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32732,7 +32732,7 @@ index 0086b83..f9ddcca 100644
 From 95b304af6cf2094fdef87a3885ce76ac6a994e5e Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:54:24 -0400
-Subject: [PATCH 10/17] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
+Subject: [PATCH 10/18] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
  =?UTF-8?q?nativo=20completo,=20animaciones=20y=20proyecto=20de=20Expo=20p?=
  =?UTF-8?q?ara=20la=20APK?=
 MIME-Version: 1.0
@@ -36626,7 +36626,7 @@ index 7e0fe42..23cabaa 100644
 From 2e0a3b7e59cee9887a7171b60f89f64efcde644f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:55:54 -0400
-Subject: [PATCH 11/17] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
+Subject: [PATCH 11/18] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
  =?UTF-8?q?o=20la=20compilaci=C3=B3n=20en=20Expo=20falla=20por=20mapbox-gl?=
  =?UTF-8?q?=203=20vs=20@rnmapbox/maps?=
 MIME-Version: 1.0
@@ -36656,7 +36656,7 @@ index 0000000..7c5134a
 From 8f73cfc0c36be11e3414c10a41964cce6e5b8cd2 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:20:22 -0400
-Subject: [PATCH 12/17] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
+Subject: [PATCH 12/18] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
  =?UTF-8?q?=20pedidos=20al=20servidor;=20teclado=20en=20la=20entrada=20(T-?=
  =?UTF-8?q?06=20a=20T-09,=20T-15)?=
 MIME-Version: 1.0
@@ -42315,7 +42315,7 @@ index 47f45a4..bd41d06 100644
 From f6b767485f055b63843290b9d57751bba10f5f60 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:42:17 -0400
-Subject: [PATCH 13/17] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
+Subject: [PATCH 13/18] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
  =?UTF-8?q?6,=20T-17):=20tarjetas=20del=20mapa=20en=20iOS,=20memorias=20po?=
  =?UTF-8?q?r=20generaci=C3=B3n,=20flota=20sin=20red?=
 MIME-Version: 1.0
@@ -42752,7 +42752,7 @@ index b1893fe..11e8247 100644
 From a72f6240bc42f357d00cc22fc14132a23dadc999 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 10:22:30 -0400
-Subject: [PATCH 14/17] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
+Subject: [PATCH 14/18] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
  =?UTF-8?q?=20app=20(T-19=20a=20T-23):=20SOS,=20sesi=C3=B3n,=20red,=20pant?=
  =?UTF-8?q?allas,=20mapas=20y=20limpieza?=
 MIME-Version: 1.0
@@ -48916,7 +48916,7 @@ index 479ba30..63d5a63 100644
 From d5515163a0aaed218e618724c348a98585f81a5b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Mon, 19 Oct 2026 15:15:53 -0400
-Subject: [PATCH 15/17] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
+Subject: [PATCH 15/18] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
  =?UTF-8?q?=20app=20(T-33=20a=20T-41)=20y=20trabajo=20pendiente=20de=20otr?=
  =?UTF-8?q?a=20sesi=C3=B3n?=
 MIME-Version: 1.0
@@ -57967,7 +57967,7 @@ index 0000000..287208e
 From 792b0cbbe44bdd70d321c2fa9e504dd306d27d9f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 09:56:46 -0400
-Subject: [PATCH 16/17] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
+Subject: [PATCH 16/18] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
  =?UTF-8?q?inspecciones=20programadas=20y=20carga=20en=20c=C3=ADrculo=20(T?=
  =?UTF-8?q?-47=20a=20T-53)?=
 MIME-Version: 1.0
@@ -66593,7 +66593,7 @@ index 9c4c0ac..548f103 100644
 From 2fb6ae2ec8e7be32857eceac6d91afcee458c710 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 11:15:45 -0400
-Subject: [PATCH 17/17] Inspecciones simples, calendario por persona, ODT
+Subject: [PATCH 17/18] Inspecciones simples, calendario por persona, ODT
  asignadas, fotos y teclado (T-60 a T-65)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -70039,6 +70039,3869 @@ index 2147bee..3650649 100644
 +  _fallosSeguidos = 0;
    await procesarCola();
  }
+-- 
+2.55.0.windows.3
+
+
+From 31237d42b58cf5b50abb359a3f6f92a2dc2d966b Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 09:02:22 -0400
+Subject: [PATCH 18/18] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
+ =?UTF-8?q?ue=20suben,=20una=20inspecci=C3=B3n=20por=20d=C3=ADa=20y=20fine?=
+ =?UTF-8?q?s=20de=20semana=20(T-67=20a=20T-75)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- ODT: un botón por paso con el estado real del servidor, mismos datos que la web,
+  fotos del reporte y del cierre, historial con nombres por evento.
+- Fotos: se envían con XMLHttpRequest (el fetch de Expo no aceptaba el archivo:
+  «Unsupported FormDataPart implementation»), reducidas a 1600 px.
+- Inspección: «Ya hiciste la inspección de hoy»; sábado y domingo pregunta si vas
+  a trabajar; calendario cuenta fines de semana solo si se hizo.
+- Teclado: barra «Listo» en iPhone, Enter = salto de línea en campos largos,
+  deslizar baja el teclado también en Android.
+- Sin «Pendientes por enviar»: el reintento sigue en segundo plano con aviso único.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/inspeccion.tsx             | 182 +++---
+ src/app/(driver)/mas.tsx                    |  23 +-
+ src/app/crear-odt.tsx                       |  62 +-
+ src/app/login.tsx                           |   1 +
+ src/app/orden.tsx                           | 591 +++++++-------------
+ src/components/calendario-inspecciones.tsx  |   5 +-
+ src/components/inspeccion-fin-de-semana.tsx | 158 ++++++
+ src/components/inspeccion-hecha-hoy.tsx     | 141 +++++
+ src/components/inspecciones-por-persona.tsx |  21 +-
+ src/components/odt-paso-acciones.tsx        | 279 +++++++++
+ src/components/odt-paso-fotos.tsx           | 170 ++++++
+ src/components/perfil-hojas.tsx             | 158 +-----
+ src/components/scroll-visible.tsx           |   2 +-
+ src/components/teclado-listo.tsx            |  76 +++
+ src/components/text-field.tsx               |  20 +-
+ src/lib/cloudinary.ts                       |  88 +--
+ src/services/fomOrdenes.ts                  | 137 ++++-
+ src/services/inspeccionService.ts           | 197 ++++++-
+ src/services/workOrderService.ts            |  31 +-
+ src/sync/outbox.ts                          |  74 ++-
+ src/sync/sync-banner.tsx                    |  92 +--
+ src/types/index.ts                          |  25 +
+ src/utils/odt.ts                            | 353 +++++++++++-
+ 23 files changed, 2072 insertions(+), 814 deletions(-)
+ create mode 100644 src/components/inspeccion-fin-de-semana.tsx
+ create mode 100644 src/components/inspeccion-hecha-hoy.tsx
+ create mode 100644 src/components/odt-paso-acciones.tsx
+ create mode 100644 src/components/odt-paso-fotos.tsx
+ create mode 100644 src/components/teclado-listo.tsx
+
+diff --git a/src/app/(driver)/inspeccion.tsx b/src/app/(driver)/inspeccion.tsx
+index b69181b..1ffc715 100644
+--- a/src/app/(driver)/inspeccion.tsx
++++ b/src/app/(driver)/inspeccion.tsx
+@@ -8,6 +8,8 @@ import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
+ import { EncabezadoFom, TituloPantalla } from '@/components/encabezado-fom';
+ import { Escalonado } from '@/components/escalonado';
++import { PreguntaFinDeSemana, useFinDeSemana } from '@/components/inspeccion-fin-de-semana';
++import { InspeccionHechaHoy } from '@/components/inspeccion-hecha-hoy';
+ import { InspectionItem } from '@/components/inspection-item';
+ import { OTStatusBadge } from '@/components/ot-status-badge';
+ import { PressableScale } from '@/components/pressable-scale';
+@@ -16,14 +18,15 @@ import { EmptyState } from '@/components/empty-state';
+ import { Skeleton } from '@/components/skeleton';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+-import { identidadDeUnidad } from '@/lib/vehiculos';
++import { etiquetaCortaDeUnidad, identidadDeUnidad } from '@/lib/vehiculos';
+ import { useDriving } from '@/session';
++import { getPlantillaInspeccion, getTelemetria, solicitarOtraUnidad } from '@/services';
+ import {
+-  enviarInspeccion,
+-  getPlantillaInspeccion,
+-  getTelemetria,
+-  solicitarOtraUnidad,
+-} from '@/services';
++  enviarInspeccionDiaria,
++  getDiariaDeHoy,
++  InspeccionYaHecha,
++  type DiariaDeHoy,
++} from '@/services/inspeccionService';
+ import { useTheme } from '@/theme';
+ import type {
+   InspeccionItem as InspeccionItemType,
+@@ -40,6 +43,12 @@ import type {
+  * pregunta "¿crear ODT?" en fallas no críticas). Si la falla es de un ítem
+  * CRÍTICO, la app bloquea la salida y genera la ODT automáticamente (regla
+  * nuestra que se conserva). Guarda con o sin señal (offline-first).
++ *
++ * Es UNA por unidad y día: si la unidad ya tiene la de hoy —la hiciera quien
++ * la hiciera—, en vez del formulario se ve cuándo, quién y cómo salió.
++ *
++ * Sábado y domingo, si aún no está hecha, antes del formulario se pregunta si
++ * va a trabajar con la unidad (ver `inspeccion-fin-de-semana`).
+  */
+ export default function InspeccionScreen() {
+   const { colors, spacing } = useTheme();
+@@ -55,8 +64,15 @@ export default function InspeccionScreen() {
+   const [respuestas, setRespuestas] = useState<Record<string, InspeccionItemRespuesta>>({});
+   const [error, setError] = useState<string | null>(null);
+   const [submitting, setSubmitting] = useState(false);
++  /** Lo que se acaba de enviar desde aquí: trae las ODT que se generaron. */
+   const [resultado, setResultado] = useState<ResultadoInspeccion | null>(null);
+   const [errorCarga, setErrorCarga] = useState<string | null>(null);
++  /** La diaria de hoy de la unidad; `null` mientras se comprueba. */
++  const [diaria, setDiaria] = useState<DiariaDeHoy | null>(null);
++  /** Por qué se ve «ya está hecha» tras pulsar Enviar (FOM la rechazó). */
++  const [avisoHecha, setAvisoHecha] = useState<string | undefined>(undefined);
++  /** Fin de semana: si dijo que trabaja hoy. De lunes a viernes `dia` es `null`. */
++  const finDeSemana = useFinDeSemana(user?.id);
+ 
+   useEffect(() => {
+     // Sin vehículo asignado no se carga nada (se muestra el aviso). La unidad es
+@@ -65,6 +81,12 @@ export default function InspeccionScreen() {
+     if (!user || !driving || !vehiculoSesion) return;
+     const v = vehiculoSesion;
+     let active = true;
++    // Antes que el formulario: si la unidad ya tiene la de hoy, no se ofrece.
++    (async () => {
++      setDiaria(null);
++      const d = await getDiariaDeHoy(v.id);
++      if (active) setDiaria(d);
++    })();
+     (async () => {
+       setVehicle(v);
+       setErrorCarga(null);
+@@ -136,21 +158,43 @@ export default function InspeccionScreen() {
+ 
+     setSubmitting(true);
+     try {
+-      const res = await enviarInspeccion({
+-        vehicleId: vehicle.id,
+-        plantilla,
+-        ubicacionTexto: telemetry.ubicacionTexto,
+-        respuestas: Object.values(respuestas),
+-      });
++      const { resultado: res, detalle } = await enviarInspeccionDiaria(
++        {
++          vehicleId: vehicle.id,
++          plantilla,
++          ubicacionTexto: telemetry.ubicacionTexto,
++          respuestas: Object.values(respuestas),
++        },
++        {
++          id: user.id,
++          nombre: user.name,
++          unidad: etiquetaCortaDeUnidad(vehicle) || 'Unidad',
++          ...(vehicle.placa ? { placa: vehicle.placa } : {}),
++        },
++      );
++      // Pasa a «ya está hecha»: el formulario no vuelve hasta mañana.
+       setResultado(res);
++      setDiaria({ estado: 'hecha', inspeccion: detalle, detalle });
++      setRespuestas({});
+     } catch (e) {
+-      setError(e instanceof Error ? e.message : 'No se pudo enviar la inspección.');
++      if (e instanceof InspeccionYaHecha) {
++        // Alguien se adelantó: se muestra la que ya está, si FOM deja verla.
++        const d = await getDiariaDeHoy(vehicle.id);
++        setAvisoHecha(d.estado === 'hecha' && d.inspeccion ? e.message : undefined);
++        setDiaria(d.estado === 'hecha' ? d : { estado: 'hecha', inspeccion: null });
++      } else {
++        setError(e instanceof Error ? e.message : 'No se pudo enviar la inspección.');
++      }
+     } finally {
+       setSubmitting(false);
+     }
+   }
+ 
+-  const cargando = !vehicle || !telemetry || !plantilla;
++  const cargando =
++    !vehicle || !telemetry || !plantilla || !diaria || (!!finDeSemana.dia && !finDeSemana.lista);
++  // Sábado o domingo sin la diaria hecha: primero la pregunta, luego (si trabaja) el formulario.
++  const preguntar =
++    !!finDeSemana.dia && !!diaria && finDeSemana.lista && finDeSemana.respuesta !== 'trabajo';
+ 
+   // El título va con el contenido (se desplaza con él); la barra de arriba, fija.
+   const titulo = <TituloPantalla titulo="Inspección" bajada="Revisa tu unidad antes de salir." />;
+@@ -170,13 +214,25 @@ export default function InspeccionScreen() {
+               description="La inspección es de tu unidad. Cuando tu administrador te asigne tu vehículo, cargamos su checklist para que la hagas antes de salir."
+             />
+           </ScrollView>
+-        ) : resultado ? (
+-          <ResultadoView
++        ) : diaria?.estado === 'hecha' ? (
++          <HechaHoyView
++            diaria={diaria}
+             resultado={resultado}
+-            vehicleId={vehicle?.id ?? ''}
++            aviso={avisoHecha}
++            yo={{ id: user.id, nombre: user.name }}
++            vehicleId={vehicle?.id ?? vehiculoSesion?.id ?? ''}
+             onInicio={() => router.navigate('/')}
+             titulo={titulo}
+           />
++        ) : preguntar && finDeSemana.dia ? (
++          <ScrollView contentContainerStyle={caja} showsVerticalScrollIndicator={false}>
++            {titulo}
++            <PreguntaFinDeSemana
++              dia={finDeSemana.dia}
++              respuesta={finDeSemana.respuesta}
++              onResponder={finDeSemana.responder}
++            />
++          </ScrollView>
+         ) : errorCarga ? (
+           <ScrollView contentContainerStyle={caja} showsVerticalScrollIndicator={false}>
+             {titulo}
+@@ -213,6 +269,7 @@ export default function InspeccionScreen() {
+             <ScrollView
+               contentContainerStyle={caja}
+               keyboardShouldPersistTaps="handled"
++              keyboardDismissMode="on-drag"
+               showsVerticalScrollIndicator={false}>
+               <Escalonado indice={0}>{titulo}</Escalonado>
+               <Escalonado indice={1} style={{ gap: spacing.xs }}>
+@@ -287,6 +344,13 @@ export default function InspeccionScreen() {
+                 loading={submitting}
+                 disabled={respondidos === 0}
+               />
++
++              {/* No se pudo saber si ya está hecha: se deja hacer, pero se dice. */}
++              {diaria.estado === 'sin_comprobar' ? (
++                <ThemedText variant="caption" color="textMuted">
++                  {diaria.motivo}
++                </ThemedText>
++              ) : null}
+             </ScrollView>
+           </KeyboardAvoidingView>
+         )}
+@@ -295,41 +359,43 @@ export default function InspeccionScreen() {
+   );
+ }
+ 
+-/** Vista de resultado: aprobada (puede salir) o bloqueada (falla crítica + OT). */
+-function ResultadoView({
++/**
++ * La diaria de hoy ya está hecha: la tarjeta de cuándo, quién y cómo salió y,
++ * debajo, lo que toca según el resultado. Recién enviada desde aquí también
++ * enseña las ODT que se generaron.
++ */
++function HechaHoyView({
++  diaria,
+   resultado,
++  aviso,
++  yo,
+   vehicleId,
+   onInicio,
+   titulo: cabecera,
+ }: {
+-  resultado: ResultadoInspeccion;
++  diaria: Extract<DiariaDeHoy, { estado: 'hecha' }>;
++  /** Lo que se acaba de enviar desde aquí, si fue así. */
++  resultado: ResultadoInspeccion | null;
++  aviso?: string;
++  yo: { id: string; nombre: string };
+   vehicleId: string;
+   onInicio: () => void;
+   /** El título de la pantalla, primero del scroll. */
+   titulo: ReactNode;
+ }) {
+-  const { colors, spacing, radii } = useTheme();
++  const { spacing } = useTheme();
+   const { user } = useAuth();
+   const router = useRouter();
+-  const bloqueada = resultado.estado === 'bloqueada';
+-  const conObservaciones = resultado.estado === 'aprobada_con_observaciones';
+-
+-  const accent = bloqueada ? colors.danger : conObservaciones ? colors.warning : colors.success;
+-  const surface = bloqueada
+-    ? colors.dangerSurface
+-    : conObservaciones
+-      ? colors.warningSurface
+-      : colors.successSurface;
+-  const titulo = bloqueada
+-    ? 'Salida bloqueada'
+-    : conObservaciones
+-      ? 'Aprobada con observaciones'
+-      : 'Inspección aprobada';
++  const estado = diaria.inspeccion?.resultado;
++  const bloqueada = estado === 'bloqueada';
+   const detalle = bloqueada
+     ? 'Encontramos una falla crítica. Por tu seguridad, no puedes salir. Avisamos a tu supervisor para reasignarte otra unidad o esperar la reparación.'
+-    : conObservaciones
++    : estado === 'aprobada_con_observaciones'
+       ? 'Puedes salir, pero registramos observaciones para darles seguimiento. Maneja con cuidado y que llegues bien.'
+-      : 'Tu unidad está lista. Maneja con cuidado y que llegues bien.';
++      : estado === 'aprobada'
++        ? 'Tu unidad está lista. Maneja con cuidado y que llegues bien.'
++        : null;
++  const ordenes = resultado?.ordenesGeneradas ?? [];
+ 
+   async function pedirOtraUnidad() {
+     try {
+@@ -347,29 +413,21 @@ function ResultadoView({
+   return (
+     <ScrollView contentContainerStyle={[styles.content, { paddingHorizontal: spacing.lg, gap: spacing.lg }]}>
+       {cabecera}
+-      <View style={styles.resultCenter}>
+-        <View style={[styles.resultDot, { backgroundColor: surface, borderRadius: radii.pill }]}>
+-          <ThemedText variant="title" style={{ color: accent }}>
+-            {bloqueada ? '!' : '✓'}
+-          </ThemedText>
+-        </View>
+-        <View style={{ gap: spacing.xs, alignItems: 'center' }}>
+-          <ThemedText variant="title" style={styles.center}>
+-            {titulo}
+-          </ThemedText>
+-          <ThemedText variant="body" color="textSecondary" style={styles.center}>
+-            {detalle}
+-          </ThemedText>
+-        </View>
+-      </View>
++      <InspeccionHechaHoy inspeccion={diaria.inspeccion} detalle={diaria.detalle} yo={yo} aviso={aviso} />
+ 
+-      {/* ODT generadas por las fallas críticas */}
+-      {resultado.ordenesGeneradas.length > 0 ? (
++      {detalle ? (
++        <ThemedText variant="body" color="textSecondary">
++          {detalle}
++        </ThemedText>
++      ) : null}
++
++      {/* ODT generadas por las fallas críticas, si se acaba de enviar desde aquí */}
++      {ordenes.length > 0 ? (
+         <View style={{ gap: spacing.sm }}>
+           <ThemedText variant="overline" color="textMuted">
+-            {`ODT generadas (${resultado.ordenesGeneradas.length})`}
++            {`ODT generadas (${ordenes.length})`}
+           </ThemedText>
+-          {resultado.ordenesGeneradas.map((ot) => (
++          {ordenes.map((ot) => (
+             /* Tocar la ODT entra a verla por dentro (directriz PDF-4). */
+             <PressableScale
+               key={ot.id}
+@@ -428,16 +486,4 @@ const styles = StyleSheet.create({
+   divider: {
+     height: StyleSheet.hairlineWidth,
+   },
+-  resultCenter: {
+-    alignItems: 'center',
+-    gap: 16,
+-    marginTop: 16,
+-  },
+-  resultDot: {
+-    width: 72,
+-    height: 72,
+-    alignItems: 'center',
+-    justifyContent: 'center',
+-  },
+-  center: { textAlign: 'center' },
+ });
+diff --git a/src/app/(driver)/mas.tsx b/src/app/(driver)/mas.tsx
+index e7b63b8..c1ef43e 100644
+--- a/src/app/(driver)/mas.tsx
++++ b/src/app/(driver)/mas.tsx
+@@ -1,4 +1,4 @@
+-import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
++import { Redirect, useRouter } from 'expo-router';
+ import { useState } from 'react';
+ import Constants from 'expo-constants';
+ import { ScrollView, StyleSheet, View } from 'react-native';
+@@ -32,7 +32,6 @@ import {
+   type MiPerfil,
+ } from '@/services';
+ import { useDriving } from '@/session';
+-import { useSync } from '@/sync';
+ import { useTheme, type ColorTokens } from '@/theme';
+ import type { DriverScore } from '@/types';
+ import { paisPorCodigo, separarTelefono } from '@/lib/paises';
+@@ -52,16 +51,11 @@ export default function PerfilScreen() {
+   const { user, status } = useAuth();
+   const router = useRouter();
+   const signOut = useSignOut();
+-  const { pendientes } = useSync();
+   const { driving, vehicle, via } = useDriving();
+ 
+-  /*
+-   * La hoja abierta. Se puede pedir al llegar (`?hoja=sync`): es lo que hace
+-   * el aviso de la barra, que antes abría una PANTALLA gemela de esta hoja.
+-   * Dos superficies para lo mismo acaban diciendo cosas distintas.
+-   */
+-  const { hoja: hojaPedida } = useLocalSearchParams<{ hoja?: string }>();
+-  const [hoja, setHoja] = useState<HojaPerfil>(hojaPedida === 'sync' ? 'sync' : null);
++  // La hoja abierta (hoy solo «Cerrar sesión»). Sin «Pendientes por enviar»
++  // (T-74): la cola reintenta sola y, si se rinde, lo avisa una vez.
++  const [hoja, setHoja] = useState<HojaPerfil>(null);
+   /** Cierra la hoja y sale. Sin escena de despedida: al login, y ya. */
+   function despedirse() {
+     setHoja(null);
+@@ -250,15 +244,6 @@ export default function PerfilScreen() {
+                         },
+                       ]
+                     : []),
+-                  {
+-                    icon: 'sync' as const,
+-                    tono: 'accent' as const,
+-                    label: 'Pendientes por enviar',
+-                    // Lo que hay, no si hay señal: eso ya lo dice el teléfono.
+-                    estado: pendientes.length ? `${pendientes.length} sin enviar` : 'Nada pendiente',
+-                    badge: pendientes.length,
+-                    onPress: () => setHoja('sync'),
+-                  },
+                 ]}
+               />
+             </Appear>
+diff --git a/src/app/crear-odt.tsx b/src/app/crear-odt.tsx
+index 78a2434..6b5cd13 100644
+--- a/src/app/crear-odt.tsx
++++ b/src/app/crear-odt.tsx
+@@ -11,6 +11,7 @@ import { CampoFalla, CampoGravedad, MAX_DESC_ODT } from '@/components/campos-odt
+ import { Card } from '@/components/card';
+ import { EmptyState } from '@/components/empty-state';
+ import { ErrorState } from '@/components/error-state';
++import { EvidenceField } from '@/components/evidence-field';
+ import { OptionPickerModal } from '@/components/option-picker';
+ import { Paso } from '@/components/paso';
+ import { PressableScale } from '@/components/pressable-scale';
+@@ -25,11 +26,16 @@ import { VehiculoRetrato } from '@/components/vehiculo-retrato';
+ import { useAsyncData } from '@/hooks/use-async-data';
+ import { tinte } from '@/lib/color';
+ import { identidadDeUnidad } from '@/lib/vehiculos';
+-import { validarParte } from '@/lib/validate';
+-import { crearOrdenDeTrabajo, getAccionMantenimiento, getUnidadesFlota } from '@/services';
++import { validarParte, validarTituloEvidencia } from '@/lib/validate';
++import { crearOrdenDeTrabajo, getAccionMantenimiento, getTelemetria, getUnidadesFlota } from '@/services';
+ import { useTheme } from '@/theme';
+ import type { FaultType, UnidadFlota, OdtGravedad } from '@/types';
+-import { fallaDeAlerta, MIN_DESC_ODT, odtCorto } from '@/utils/odt';
++import { MIN_DESC_ODT, odtCorto } from '@/utils/odt';
++
++/** El título de una foto: opcional para el supervisor, pero si lo escribe, que sirva. */
++function tituloOpcional(v: string): string | null {
++  return v.trim() ? validarTituloEvidencia(v) : null;
++}
+ 
+ /** Cómo se nombra una unidad: su id y, al lado, su placa. */
+ function nombreUnidad(f: UnidadFlota): string {
+@@ -43,11 +49,12 @@ function nombreUnidad(f: UnidadFlota): string {
+  * campos de la orden son los MISMOS del reporte del conductor
+  * (`@/components/campos-odt`): una ODT se pide igual la pida quien la pida. Lo
+  * que cambia es la unidad —el conductor reporta la suya; el supervisor la
+- * elige— y que aquí no se piden fotos.
++ * elige— y que aquí las fotos son opcionales (con título si se quiere). La
++ * ubicación es la última posición GPS de la unidad, si la hay.
+  *
+  * Desde una alerta (`accionId`), el formulario llega RELLENO con ella: arriba
+- * de dónde sale, la unidad fija, y lo que hay que hacer, la gravedad y el tipo
+- * de falla que sugiere. Se revisa, se cambia lo que haga falta y se crea: la
++ * de dónde sale, la unidad fija, y lo que hay que hacer y la gravedad. El tipo
++ * de falla no se preselecciona, como en la web. Se revisa, se cambia lo que haga falta y se crea: la
+  * alerta queda enlazada a su ODT y deja de salir aparte.
+  *
+  * El botón no se apaga: pulsarlo con algo sin llenar señala qué falta y lleva
+@@ -81,6 +88,9 @@ export default function CrearOdtScreen() {
+   // Media por defecto: ni se minimiza ni se grita antes de mirarla.
+   const [gravedad, setGravedad] = useState<OdtGravedad>('media');
+   const [descripcion, setDescripcion] = useState('');
++  // Fotos opcionales, cada una con su título (también opcional).
++  const [fotos, setFotos] = useState<string[]>([]);
++  const [titulos, setTitulos] = useState<string[]>([]);
+   // ¿Ya intentó crearla? Hasta entonces no se le señala nada.
+   const [intento, setIntento] = useState(false);
+   const [enviando, setEnviando] = useState(false);
+@@ -88,6 +98,14 @@ export default function CrearOdtScreen() {
+ 
+   const scrollRef = useRef<ScrollVisibleHandle>(null);
+   const unidadRef = useRef<View>(null);
++  const fotosRef = useRef<View>(null);
++
++  // Dónde está la unidad elegida (su última posición GPS), si se sabe: viaja
++  // con la ODT como en el reporte del conductor.
++  const { data: telemetria } = useAsyncData(
++    () => (vehicleId ? getTelemetria(vehicleId).catch(() => null) : Promise.resolve(null)),
++    [vehicleId],
++  );
+ 
+   const flota = data?.flota ?? null;
+   const accion = data?.accion ?? null;
+@@ -101,7 +119,7 @@ export default function CrearOdtScreen() {
+     setDescripcion(`${accion.titulo}: ${accion.detalle}`.slice(0, MAX_DESC_ODT));
+     // La gravedad sale de la relevancia que le da el sistema a la alerta.
+     setGravedad(accion.relevancia);
+-    setTipoFalla(fallaDeAlerta(accion.titulo));
++    // El tipo de falla no se preselecciona (igual que en la web): lo elige quien la crea.
+   }
+ 
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+@@ -116,7 +134,9 @@ export default function CrearOdtScreen() {
+   // "Otro" sin decir qué es no le sirve a quien va a atender la orden.
+   const esOtro = tipoFalla === 'otro';
+   const errorParte = esOtro ? validarParte(parte) : null;
+-  const lista = !!unidad && conDescripcion && !errorParte;
++  const errorFotos = fotos.some((_, i) => tituloOpcional(titulos[i] ?? '') !== null) ? 'Revisa los títulos.' : null;
++  const lista = !!unidad && conDescripcion && !errorParte && !errorFotos;
++  const ubicacion = telemetria?.vehicleId === vehicleId ? (telemetria?.ubicacionTexto ?? '') : '';
+ 
+   async function crear() {
+     if (!unidad || !user) return;
+@@ -130,8 +150,9 @@ export default function CrearOdtScreen() {
+         tipoFalla,
+         parteFalla: esOtro ? parte : undefined,
+         gravedad,
+-        ubicacionTexto: 'Registrada desde el panel',
+-        evidenciaUris: [],
++        ubicacionTexto: ubicacion,
++        evidenciaUris: fotos,
++        evidenciaTitulos: titulos.map((t) => t.trim()),
+         ...(accion ? { accion: { id: accion.id, tipo: accion.tipo } } : {}),
+       });
+       router.replace({ pathname: '/orden', params: { id: odt.id, companyId: cid } });
+@@ -148,7 +169,11 @@ export default function CrearOdtScreen() {
+       setIntento(true);
+       // La unidad va arriba del todo: si falta, es lo primero.
+       if (!unidad) scrollRef.current?.centrarCampo(unidadRef);
+-      else scrollRef.current?.irAlPrimerError({ parte: errorParte, descripcion: conDescripcion ? null : 'falta' });
++      else {
++        const fue = scrollRef.current?.irAlPrimerError({ parte: errorParte, descripcion: conDescripcion ? null : 'falta' });
++        // Las fotos van al final: solo si lo demás está bien.
++        if (!fue && errorFotos) scrollRef.current?.centrarCampo(fotosRef);
++      }
+       return;
+     }
+     void crear();
+@@ -308,6 +333,21 @@ export default function CrearOdtScreen() {
+               />
+             </Appear>
+ 
++            {/* FOTOS (opcionales), cada una con su título si se quiere decir qué es. */}
++            <View ref={fotosRef} collapsable={false}>
++              <Appear delay={150} distance={10} style={{ gap: spacing.sm }}>
++                <Paso texto="Fotos (opcional)" />
++                <EvidenceField
++                  uris={fotos}
++                  onChange={setFotos}
++                  titulos={titulos}
++                  onTitulos={setTitulos}
++                  validarTitulo={tituloOpcional}
++                  editable={!enviando}
++                />
++              </Appear>
++            </View>
++
+             {error ? (
+               <View
+                 style={[
+diff --git a/src/app/login.tsx b/src/app/login.tsx
+index b0c496a..aaf9b97 100644
+--- a/src/app/login.tsx
++++ b/src/app/login.tsx
+@@ -517,6 +517,7 @@ export default function LoginScreen() {
+           style={styles.flex1}
+           contentContainerStyle={styles.crece}
+           keyboardShouldPersistTaps="handled"
++          keyboardDismissMode="on-drag"
+           onScroll={(e) => {
+             scrollYRef.current = e.nativeEvent.contentOffset.y;
+           }}
+diff --git a/src/app/orden.tsx b/src/app/orden.tsx
+index aa541b8..2da2b50 100644
+--- a/src/app/orden.tsx
++++ b/src/app/orden.tsx
+@@ -1,74 +1,48 @@
+ import * as Clipboard from 'expo-clipboard';
+-import { LinearGradient } from 'expo-linear-gradient';
+ import { Redirect, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+-import { useCallback, useEffect, useRef, useState } from 'react';
+-import { Animated, Easing, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
++import { useCallback, useEffect, useState } from 'react';
++import { Animated, Easing, StyleSheet, View } from 'react-native';
+ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+ 
+ import { esAdmin, puedeConducir, useAuth } from '@/auth';
+-import { BotonDestacado } from '@/components/boton-destacado';
+ import { Card } from '@/components/card';
+ import { Chip } from '@/components/chip';
+ import { EmptyState } from '@/components/empty-state';
+ import { ErrorState } from '@/components/error-state';
+-import { EvidenceField } from '@/components/evidence-field';
+ import { AccionesOdtAsignada, MOMENTO_TALLER, RelojOdt } from '@/components/odt-asignada-acciones';
++import { AccionesOdtGestor } from '@/components/odt-paso-acciones';
++import { GaleriaOdt } from '@/components/odt-paso-fotos';
+ import { ODT_ESTADO_LABEL, otStatusColor } from '@/components/ot-status-badge';
+ import { FilaDato } from '@/components/perfil-piezas';
+ import { PhotoViewer } from '@/components/photo-viewer';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { ScreenHeader } from '@/components/screen-header';
+-import { ScrollVisible, type ScrollVisibleHandle } from '@/components/scroll-visible';
+-import { SegmentedControl, type SegmentOption } from '@/components/segmented-control';
++import { ScrollVisible } from '@/components/scroll-visible';
+ import { Skeleton } from '@/components/skeleton';
+ import { TabIcon, type TabIconName } from '@/components/tab-icon';
+-import { TextField } from '@/components/text-field';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { Toast } from '@/components/toast';
+ import { useAsyncData } from '@/hooks/use-async-data';
+-import { useTecladoVisible } from '@/hooks/use-teclado-visible';
+ import { tinte } from '@/lib/color';
+ import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
+-import {
+-  actualizarEstadoOrden,
+-  getAlertaDeOdt,
+-  getAreas,
+-  getCompanyBrandById,
+-  getOdometroUnidad,
+-  getUnidadesFlota,
+-  getHistorialDeOrden,
+-  getOrdenDeTrabajo,
+-  getVehiculo,
+-} from '@/services';
+-import { esEstadoTaller, getEjecucionOdt } from '@/services/fomOrdenes';
++import { getAlertaDeOdt, getAreas, getCompanyBrandById, getOdometroUnidad, getUnidadesFlota, getVehiculo } from '@/services';
++import { esIdDb } from '@/services/db';
++import { esEstadoTaller, getEjecucionOdt, getOrdenDetalleFom, type EjecucionOdt } from '@/services/fomOrdenes';
+ import { useReducedMotion, useTheme, useThemeController, type ColorTokens } from '@/theme';
+-import {
+-  ODT_ESTADOS,
+-  type Area,
+-  type AuditoriaEvento,
+-  type FaultType,
+-  type OdtEstado,
+-  type OdtGravedad,
+-  type WorkOrderListItem,
+-} from '@/types';
++import { type Area, type FaultType, type OdtEstado, type OdtEstadoFom, type OdtGravedad, type WorkOrderListItem } from '@/types';
+ import { formatFecha } from '@/utils/date';
+ import { miles } from '@/utils/numero';
+-import { errorDeTransicion, esOdtDelSistema, etiquetaFalla, MIN_NOTA_ODT, odtCorto } from '@/utils/odt';
+-
+-/**
+- * El estatus, en orden de avance (FOM-02 §3.3), cada uno con su color. Lo que
+- * no se puede elegir desde el estatus guardado se ve apagado: con la orden
+- * resuelta, "Abierta" (se reabre a En revisión).
+- */
+-function opcionesDeEstatus(guardado: OdtEstado): SegmentOption<OdtEstado>[] {
+-  return ODT_ESTADOS.map((e) => ({
+-    value: e,
+-    label: ODT_ESTADO_LABEL[e],
+-    tone: otStatusColor(e),
+-    disabled: e !== guardado && errorDeTransicion(guardado, e) !== null,
+-  }));
+-}
++import {
++  ESTADO_FOM_LABEL,
++  esOdtDelSistema,
++  estadoVisibleDe,
++  etiquetaFalla,
++  odtCorto,
++  presentarHistorialOdt,
++  type CambioHistorial,
++  type HitoOdt,
++} from '@/utils/odt';
+ 
+ /** La prioridad: las mismas palabras y colores que la pone quien reporta. */
+ const GRAVEDAD: Record<OdtGravedad, { label: string; tono: keyof ColorTokens }> = {
+@@ -109,105 +83,75 @@ function tituloDeTarea(o: WorkOrderListItem, alerta: string | null): string {
+   return frase && frase.length <= 60 ? frase : 'Falla reportada';
+ }
+ 
+-/** Un hito del historial de la orden, con la nota del cambio si la lleva. */
+-type Hito = { id: string; titulo: string; quien?: string; fecha: string; tono: keyof ColorTokens; nota?: string };
+-
+-/** Un estatus como lo escribe la auditoría ("En revisión", "Resuelta"; antes, "Cerrada"). */
+-function estatusDe(texto: string | undefined): OdtEstado | null {
+-  const t = texto?.trim().toLowerCase();
+-  if (!t) return null;
+-  if (t.startsWith('abierta')) return 'abierta';
+-  if (t.startsWith('en revisi')) return 'en_revision';
+-  if (t.startsWith('cerrada') || t.startsWith('resuelta')) return 'cerrada';
+-  return null;
+-}
++/** Un hito del historial ya listo para pintar. */
++type Hito = { id: string; titulo: string; quien?: string; fecha: string; tono: keyof ColorTokens; nota?: string; detalle?: string };
+ 
+-/** De qué estatus a cuál llevó un cambio, leído de su detalle ("Estado: Abierta → En revisión"). */
+-function tramoDe(detalle?: string): { desde: OdtEstado | null; hacia: OdtEstado | null } {
+-  const m = detalle ? /^Estado:\s*(.+?)\s*→\s*(.+)$/.exec(detalle) : null;
+-  return { desde: estatusDe(m?.[1]), hacia: estatusDe(m?.[2]) };
++/** El color de un hito: el del estado (de los tres) al que llevó; cancelada, en rojo. */
++function tonoDeHito(h: HitoOdt): keyof ColorTokens {
++  if (h.a === 'cancelada') return 'danger';
++  return otStatusColor(h.a ? estadoVisibleDe(h.a) : 'abierta');
+ }
+ 
+ /**
+- * Los hitos de la orden, del más viejo al más nuevo, sacados de SU AUDITORÍA
+- * —por su `objeto_id`, migración 0027—: cada cambio de estatus lo registra la
+- * base con quién, cuándo y su nota (0028).
+- *
+- * Lo que la auditoría no tiene —las órdenes de antes, o quien no puede leerla,
+- * como el conductor— se completa con lo que la propia orden sabe: cuándo se
+- * creó y cuándo se resolvió. No se inventa ningún hito.
++ * Los hitos de la orden, del más viejo al más nuevo, con un nombre por evento
++ * como la web («Trabajo aprobado», «Responsable asignado», «Orden cancelada»…):
++ * los cambios de estado de FOM más los eventos de taller, sin duplicarlos.
+  */
+-function hitosDe(o: WorkOrderListItem, historial: AuditoriaEvento[]): Hito[] {
+-  const hitos: Hito[] = [];
+-  let hayCreacion = false;
+-  let hayResolucion = false;
+-  for (const e of historial) {
+-    if (e.accion === 'crear') {
+-      hayCreacion = true;
+-      hitos.push({ id: e.id, titulo: 'Orden creada', quien: e.actorNombre, fecha: e.fecha, tono: otStatusColor('abierta') });
+-      continue;
+-    }
+-    const { desde, hacia } = tramoDe(e.detalle);
+-    if (!hacia) continue;
+-    if (hacia === 'cerrada') hayResolucion = true;
+-    hitos.push({
+-      id: e.id,
+-      // Salir de Resuelta es reabrirla; volver de En revisión a Abierta, no.
+-      titulo: desde === 'cerrada' ? 'Reabierta' : ODT_ESTADO_LABEL[hacia],
+-      quien: e.actorNombre,
+-      fecha: e.fecha,
+-      tono: otStatusColor(hacia),
+-      nota: e.nota,
+-    });
+-  }
+-  if (!hayCreacion) {
+-    hitos.unshift({
+-      id: 'creada',
+-      titulo: 'Orden creada',
+-      quien: esOdtDelSistema(o) ? 'Sistema' : o.driverName,
+-      fecha: o.creadaEn,
+-      tono: otStatusColor('abierta'),
+-    });
+-  }
+-  if (o.estado === 'cerrada' && o.resueltaEn && !hayResolucion) {
+-    hitos.push({ id: 'resuelta', titulo: ODT_ESTADO_LABEL.cerrada, fecha: o.resueltaEn, tono: otStatusColor('cerrada') });
+-  }
+-  return hitos;
++function hitosDe(
++  o: WorkOrderListItem,
++  cambios: CambioHistorial[],
++  ejecucion: EjecucionOdt | null,
++): Hito[] {
++  return presentarHistorialOdt(
++    {
++      id: o.id,
++      creadorNombre: esOdtDelSistema(o) ? 'Sistema' : o.driverName,
++      creadaEn: o.creadaEn,
++      estado: o.estado,
++      resueltaEn: o.resueltaEn,
++      notaSolucion: o.notaSolucion,
++    },
++    cambios,
++    ejecucion,
++  ).map((h) => ({
++    id: h.id,
++    titulo: h.titulo,
++    quien: h.actor ?? undefined,
++    fecha: h.en,
++    tono: tonoDeHito(h),
++    nota: h.notas.length > 0 ? h.notas.join('\n') : undefined,
++    detalle: h.responsable ? `Responsable: ${h.responsable}` : undefined,
++  }));
+ }
+ 
+-/** Lo que el supervisor cambió y aún no guardó, encima de lo guardado. */
+-type Cambios = {
+-  estado?: OdtEstado;
+-  /** Por qué cambia el estatus. */
+-  nota?: string;
+-  /** Al resolverla: qué se hizo, el costo y la factura. */
+-  queSeHizo?: string;
+-  costo?: string;
+-  facturas?: string[];
+-};
+-
+-/** Un monto en USD: hasta diez cifras y dos decimales, con punto o coma. */
+-const MONTO = /^\d{1,10}([.,]\d{1,2})?$/;
++/** Une las fotos leídas con las recién subidas (la nube tarda en listarlas), sin repetir. */
++function unirFotos(urls: string[] = [], titulos: string[] = [], extra: { url: string; titulo: string }[]) {
++  const vistas = new Set(urls);
++  const nuevas = extra.filter((f) => !vistas.has(f.url));
++  return {
++    urls: [...urls, ...nuevas.map((f) => f.url)],
++    titulos: [...urls.map((_, i) => titulos[i] ?? ''), ...nuevas.map((f) => f.titulo)],
++  };
++}
+ 
+ /**
+  * DETALLE DE UNA ODT: primero el ESTATUS, que es lo accionable; luego la
+- * tarea, la unidad, la evidencia y el historial.
++ * tarea, la unidad, las fotos y el historial.
+  *
+- * El supervisor mueve el estatus en el segmentado, dice por qué en la nota y lo
+- * guarda con el botón de abajo, que se enciende al cambiar el estatus. Al
+- * elegir "Resuelta" aparece el cierre (§3.3) —qué se hizo, costo en USD y
+- * factura—, y "qué se hizo" es la nota. Todo a la par de fom-core: la nota es
+- * obligatoria, una resuelta se reabre solo a En revisión y no se edita sin
+- * reabrirla. Cada cambio lo registra la base en la auditoría, con su nota, y de
+- * ahí sale el historial.
++ * El estatus se ve en los tres de siempre (Abierta / En revisión / Resuelta) y,
++ * debajo, en qué punto real va. El gestor (supervisor o admin) avanza la orden
++ * con UN BOTÓN POR PASO, los mismos de la web: Pasar a revisión, Aprobar,
++ * Resolver sin taller, Devolver, Cancelar, Cerrar, Reabrir… Cada paso pide lo
++ * suyo en una hoja y manda a FOM el estado REAL de partida, que es con el que
++ * valida la transición.
+  *
+  * Si la ODT tiene responsable (el supervisor se la asignó a alguien para
+  * trabajarla en taller), se dice quién, desde cuándo y el tiempo trabajado; y
+  * si el responsable es quien mira, sus botones: iniciar, pausar, reanudar y
+  * entregar. FOM solo enseña eso a un gestor o al propio responsable.
+  *
+- * El conductor también entra (sus avisos enlazan aquí) pero en solo lectura:
+- * ve el estatus y el cierre, sin campos ni botón.
++ * El conductor también entra (sus avisos enlazan aquí) en solo lectura, salvo
++ * las fotos: si él la reportó, puede agregar fotos al reporte.
+  */
+ export default function OrdenScreen() {
+   const { colors, spacing, radii } = useTheme();
+@@ -215,7 +159,6 @@ export default function OrdenScreen() {
+   const { user, status } = useAuth();
+   const router = useRouter();
+   const insets = useSafeAreaInsets();
+-  const teclado = useTecladoVisible();
+   const params = useLocalSearchParams<{ id?: string; companyId?: string }>();
+   const id = params.id ?? '';
+   const companyId = params.companyId ?? '';
+@@ -243,16 +186,15 @@ export default function OrdenScreen() {
+    */
+   const { data, estado: carga, recargar } = useAsyncData(
+     async () => {
+-      const orden = await getOrdenDeTrabajo(id);
+-      if (!orden) return null;
++      // Una sola lectura trae la orden, sus fotos y sus cambios con los
++      // estados reales (antes eran dos lecturas de lo mismo).
++      const detalle = esIdDb(id) ? await getOrdenDetalleFom(id) : null;
++      if (!detalle) return null;
++      const { orden, cambios } = detalle;
+       // La empresa sale de la navegación o, si no vino, de la propia unidad.
+       const cid = companyId || (await getVehiculo(orden.vehicleId))?.companyId || '';
+-      const [historial, alerta, odometro] = await Promise.all([
+-        getHistorialDeOrden(orden.id),
+-        getAlertaDeOdt(orden),
+-        getOdometroUnidad(orden.vehicleId),
+-      ]);
+-      return { orden, cid, historial, alerta, odometro };
++      const [alerta, odometro] = await Promise.all([getAlertaDeOdt(orden), getOdometroUnidad(orden.vehicleId)]);
++      return { orden, cid, cambios, alerta, odometro };
+     },
+     [id, companyId],
+     { onFocus: true },
+@@ -291,87 +233,33 @@ export default function OrdenScreen() {
+     onFocus: true,
+   });
+ 
+-  const [cambios, setCambios] = useState<Cambios>({});
+-  const [guardando, setGuardando] = useState(false);
+-  // Lo recién guardado se ve AL MOMENTO, sin esperar a la relectura; cuando
+-  // llega la lectura nueva, manda ella.
+-  const [guardada, setGuardada] = useState<{ orden: WorkOrderListItem; sobre: unknown } | null>(null);
+-  if (guardada && data !== guardada.sobre) setGuardada(null);
++  // El paso recién dado se ve AL MOMENTO (y no deja pulsar el de antes), sin
++  // esperar a la relectura; cuando llega la lectura nueva, manda ella.
++  const [tras, setTras] = useState<{ estadoFom: OdtEstadoFom; sobre: unknown } | null>(null);
++  if (tras && data !== tras.sobre) setTras(null);
++  // Las fotos recién subidas: la lista de la nube tarda un momento en verlas.
++  const [extras, setExtras] = useState<{ reporte: { url: string; titulo: string }[]; cierre: { url: string; titulo: string }[] }>(
++    { reporte: [], cierre: [] },
++  );
+   const [fotoAbierta, setFotoAbierta] = useState<string | null>(null);
+   const [aviso, setAviso] = useState<string | null>(null);
+-  const [error, setError] = useState<string | null>(null);
+-  const [errores, setErrores] = useState<Record<string, string | undefined>>({});
+-  const scrollRef = useRef<ScrollVisibleHandle>(null);
+ 
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+   if (!esAdmin(user) && !puedeConducir(user)) return <Redirect href="/" />;
+-  const soloLectura = !esAdmin(user);
++  const gestor = esAdmin(user);
+ 
+-  const orden = guardada?.orden ?? data?.orden ?? null;
++  const orden = data?.orden ?? null;
+   const cid = data?.cid ?? companyId;
+-
+-  // Lo que se ve: lo cambiado, o lo guardado. Al resolverla se parte de su
+-  // cierre anterior, si se reabrió: así se corrige sin reescribirlo todo.
+-  const costoGuardado = orden?.costo != null ? String(orden.costo) : '';
+-  const estadoSel = cambios.estado ?? orden?.estado ?? 'abierta';
+-  const cambiaEstatus = !!orden && estadoSel !== orden.estado;
+-  const resolviendo = cambiaEstatus && estadoSel === 'cerrada';
+-  const nota = cambios.nota ?? '';
+-  const queSeHizo = cambios.queSeHizo ?? orden?.notaSolucion ?? '';
+-  const costo = cambios.costo ?? costoGuardado;
+-  const facturas = cambios.facturas ?? orden?.evidenciaResolucionUrls ?? [];
+-  // Solo se guarda un cambio de estatus: una resuelta no se edita sin reabrirla.
+-  const hayCambios = cambiaEstatus;
+-  const conDock = !!orden && !soloLectura;
+-
+-  /** Cambia un campo y le quita el error: ya lo están arreglando. */
+-  function editar<K extends keyof Cambios>(campo: K, valor: Cambios[K]) {
+-    setCambios((c) => ({ ...c, [campo]: valor }));
+-    if (errores[campo]) setErrores((x) => ({ ...x, [campo]: undefined }));
+-  }
+-
+-  /**
+-   * Guarda el cambio de estatus con su nota y, si es Resuelta, el cierre
+-   * completo (§3.3). Lo que falte se marca en su campo y la vista va hasta él.
+-   * La fecha de resolución la pone la base.
+-   */
+-  async function guardar() {
+-    if (!orden || guardando || !hayCambios) return;
+-    const faltan: Record<string, string | undefined> = {};
+-    if (resolviendo) {
+-      if (queSeHizo.trim().length < MIN_NOTA_ODT) faltan.queSeHizo = 'Cuenta qué se hizo.';
+-      if (costo.trim() && !MONTO.test(costo.trim())) faltan.costo = 'Monto no válido.';
+-    } else if (nota.trim().length < MIN_NOTA_ODT) {
+-      faltan.nota = 'Escribe por qué cambia.';
+-    }
+-    if (Object.values(faltan).some(Boolean)) {
+-      setErrores(faltan);
+-      scrollRef.current?.irAlPrimerError(faltan);
+-      return;
+-    }
+-    setGuardando(true);
+-    setError(null);
+-    try {
+-      const monto = costo.trim();
+-      const actualizada = await actualizarEstadoOrden(orden.id, {
+-        desde: orden.estado,
+-        hacia: estadoSel,
+-        nota: resolviendo ? queSeHizo : nota,
+-        cierre: resolviendo
+-          ? { costo: monto ? Number(monto.replace(',', '.')) : undefined, evidenciaResolucionUrls: facturas }
+-          : undefined,
+-      });
+-      setGuardada({ orden: actualizada, sobre: data });
+-      setCambios({});
+-      setErrores({});
+-      setAviso('Cambios guardados');
+-      // Relee la orden y su historial: el hito nuevo ya lo escribió la base.
+-      recargar();
+-    } catch (e) {
+-      setError(e instanceof Error ? e.message : 'No se pudieron guardar los cambios. Intenta de nuevo.');
+-    } finally {
+-      setGuardando(false);
+-    }
++  // El estado REAL (de los nueve) y los tres que se ven, a partir de él.
++  const estadoFom = tras?.estadoFom ?? orden?.estadoFom;
++  const estadoVisto: OdtEstado = estadoFom ? estadoVisibleDe(estadoFom) : (orden?.estado ?? 'abierta');
++
++  /** Tras un paso: se dice, se ve ya, y se relee la orden, su historial y el taller. */
++  function pasoHecho(mensaje: string, hacia?: OdtEstadoFom) {
++    if (hacia) setTras({ estadoFom: hacia, sobre: data });
++    setAviso(mensaje);
++    taller.recargar();
++    recargar();
+   }
+ 
+   /** Copia el identificador para pasarlo por mensaje. */
+@@ -395,7 +283,20 @@ export default function OrdenScreen() {
+   const soyResponsable = !!responsable && responsable.userId === user.id;
+ 
+   // El expediente de quien la reportó solo lo abre un administrador.
+-  const verAutor = !!orden && !soloLectura && autorPersona && !!orden.driverId && orden.driverId !== 'sistema';
++  const verAutor = !!orden && gestor && autorPersona && !!orden.driverId && orden.driverId !== 'sistema';
++  // Quien la reportó (FOM da su NOMBRE, no su id) puede sumar fotos al reporte.
++  const soyAutor = !!orden && autorPersona && orden.driverName === user.name;
++  const agregaReporte = gestor || soyResponsable || soyAutor;
++  const agregaCierre = gestor || soyResponsable;
++
++  const fotosReporte = unirFotos(orden?.evidenciaUrls, orden?.evidenciaTitulos, extras.reporte);
++  const fotosCierre = unirFotos(orden?.evidenciaResolucionUrls, orden?.evidenciaResolucionTitulos, extras.cierre);
++  // Las del trabajo terminado se enseñan desde que el taller lo entrega, o si ya hay alguna.
++  const verCierreFotos =
++    fotosCierre.urls.length > 0 ||
++    estadoFom === 'en_calidad' ||
++    estadoFom === 'cerrada' ||
++    (soyResponsable && !!estadoFom && esEstadoTaller(estadoFom));
+ 
+   return (
+     <ThemedView style={styles.root} ambient>
+@@ -437,35 +338,29 @@ export default function OrdenScreen() {
+           <EmptyState title="No se encontró la ODT" />
+         ) : (
+           <ScrollVisible
+-            ref={scrollRef}
+             contentContainerStyle={[
+               styles.content,
+-              // Con el botón abajo, lo último necesita aire para no quedar debajo de él.
+-              { padding: spacing.lg, paddingBottom: conDock ? 112 : spacing.xl, gap: spacing.lg + 2 },
++              { padding: spacing.lg, paddingBottom: spacing.xl, gap: spacing.lg + 2 },
+             ]}>
+-            {/* ESTATUS: lo primero y lo accionable. Al moverlo, su nota. */}
++            {/* ESTATUS: lo primero y lo accionable. Los tres de siempre, en qué
++                punto real va y, al gestor, un botón por paso. */}
+             <Seccion titulo="Estatus">
+-              {soloLectura ? (
+-                <BadgeEstado estado={orden.estado} />
+-              ) : (
+-                <SegmentedControl
+-                  options={opcionesDeEstatus(orden.estado)}
+-                  value={estadoSel}
+-                  onChange={(e) => editar('estado', e)}
+-                />
+-              )}
+-              {cambiaEstatus && !resolviendo && !soloLectura ? (
+-                <TextField
+-                  label="Nota"
+-                  nombre="nota"
+-                  value={nota}
+-                  onChangeText={(t) => editar('nota', t)}
+-                  placeholder={orden.estado === 'cerrada' ? 'Por qué se reabre…' : 'Por qué cambia…'}
+-                  multiline
+-                  maxLength={1000}
+-                  editable={!guardando}
+-                  style={styles.nota}
+-                  error={errores.nota}
++              <View style={[styles.fila, { gap: spacing.sm }]}>
++                <BadgeEstado estado={estadoVisto} />
++                {estadoFom ? (
++                  <ThemedText variant="caption" color="textSecondary" style={styles.flex1} numberOfLines={2}>
++                    {ESTADO_FOM_LABEL[estadoFom]}
++                  </ThemedText>
++                ) : null}
++              </View>
++              {gestor && estadoFom ? (
++                <AccionesOdtGestor
++                  id={orden.id}
++                  estadoFom={estadoFom}
++                  tipo={orden.tipo}
++                  conMantenimiento={!!orden.accionMantenimientoId}
++                  odometro={data?.odometro ?? null}
++                  onHecho={pasoHecho}
+                 />
+               ) : null}
+             </Seccion>
+@@ -494,93 +389,36 @@ export default function OrdenScreen() {
+                     <AccionesOdtAsignada
+                       id={orden.id}
+                       estadoFom={ejecucion.estadoFom}
+-                      onHecho={() => {
+-                        // El paso cambia el estado de la orden y su historial: se relee todo.
+-                        taller.recargar();
+-                        recargar();
+-                      }}
++                      // El paso cambia el estado de la orden y su historial: se relee todo.
++                      onHecho={() => pasoHecho('Paso registrado')}
+                     />
+                   ) : null}
+                 </Card>
+               </Seccion>
+             ) : null}
+ 
+-            {/* EL CIERRE (§3.3), justo debajo del estatus: se llena al elegir
+-                Resuelta y se guarda con él; ya resuelta, se lee. */}
+-            {estadoSel === 'cerrada' ? (
+-              <Seccion
+-                titulo="Cierre"
+-                derecha={orden.estado === 'cerrada' && orden.resueltaEn ? formatFechaLarga(orden.resueltaEn) : undefined}>
+-                {soloLectura || !resolviendo ? (
+-                  <Card style={{ gap: spacing.md }}>
+-                    <View style={{ gap: spacing.xs }}>
+-                      <ThemedText variant="caption" color="textSecondary">
+-                        Qué se hizo
++            {/* EL CIERRE (§3.3), ya resuelta: qué se hizo y el costo. Las
++                fotos del trabajo terminado van en su galería. */}
++            {estadoFom === 'cerrada' || (!estadoFom && orden.estado === 'cerrada') ? (
++              <Seccion titulo="Cierre" derecha={orden.resueltaEn ? formatFechaLarga(orden.resueltaEn) : undefined}>
++                <Card style={{ gap: spacing.md }}>
++                  <View style={{ gap: spacing.xs }}>
++                    <ThemedText variant="caption" color="textSecondary">
++                      Qué se hizo
++                    </ThemedText>
++                    <ThemedText variant="body">{orden.notaSolucion || 'Sin nota de cierre.'}</ThemedText>
++                  </View>
++                  {orden.costo != null ? (
++                    <View style={[styles.fila, { gap: spacing.md }]}>
++                      <ThemedText variant="caption" color="textSecondary" style={styles.flex1}>
++                        Costo
+                       </ThemedText>
+-                      <ThemedText variant="body">{orden.notaSolucion || 'Sin nota de cierre.'}</ThemedText>
+-                    </View>
+-                    {orden.costo != null ? (
+-                      <View style={[styles.fila, { gap: spacing.md }]}>
+-                        <ThemedText variant="caption" color="textSecondary" style={styles.flex1}>
+-                          Costo
+-                        </ThemedText>
+-                        <ThemedText variant="button" tabular>
+-                          {`${miles(orden.costo, 2)} USD`}
+-                        </ThemedText>
+-                      </View>
+-                    ) : null}
+-                    {(orden.evidenciaResolucionUrls?.length ?? 0) > 0 ? (
+-                      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
+-                        {(orden.evidenciaResolucionUrls ?? []).map((url) => (
+-                          <Pressable
+-                            key={url}
+-                            onPress={() => setFotoAbierta(url)}
+-                            accessibilityRole="imagebutton"
+-                            accessibilityLabel="Ver la foto de la resolución a pantalla completa">
+-                            <Image
+-                              source={{ uri: url }}
+-                              style={[
+-                                styles.foto,
+-                                { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg },
+-                              ]}
+-                            />
+-                          </Pressable>
+-                        ))}
+-                      </ScrollView>
+-                    ) : null}
+-                  </Card>
+-                ) : (
+-                  <Card style={{ gap: spacing.md }}>
+-                    <TextField
+-                      label="Qué se hizo"
+-                      nombre="queSeHizo"
+-                      value={queSeHizo}
+-                      onChangeText={(t) => editar('queSeHizo', t)}
+-                      placeholder="Qué se hizo para resolverla…"
+-                      multiline
+-                      maxLength={2000}
+-                      editable={!guardando}
+-                      error={errores.queSeHizo}
+-                    />
+-                    <TextField
+-                      label="Costo (USD)"
+-                      nombre="costo"
+-                      value={costo}
+-                      onChangeText={(t) => editar('costo', t)}
+-                      placeholder="0.00"
+-                      keyboardType="decimal-pad"
+-                      inputMode="decimal"
+-                      editable={!guardando}
+-                      error={errores.costo}
+-                    />
+-                    <View style={{ gap: spacing.sm }}>
+-                      <ThemedText variant="caption" color="textSecondary">
+-                        Factura o foto de la resolución
++                      <ThemedText variant="button" tabular>
++                        {`${miles(orden.costo, 2)} USD`}
+                       </ThemedText>
+-                      <EvidenceField uris={facturas} onChange={(u) => editar('facturas', u)} />
+                     </View>
+-                  </Card>
+-                )}
++                  ) : null}
++                </Card>
+               </Seccion>
+             ) : null}
+ 
+@@ -643,7 +481,7 @@ export default function OrdenScreen() {
+                       <TabIcon name="chevron" color={colors.textMuted} size={13} />
+                     </View>
+                   </PressableScale>
+-                ) : orden.reglaAlertaId && !soloLectura ? (
++                ) : orden.reglaAlertaId && gestor ? (
+                   <PressableScale
+                     onPress={() => router.navigate({ pathname: '/control', params: { id: orden.reglaAlertaId, companyId: cid } })}
+                     accessibilityRole="button"
+@@ -698,95 +536,51 @@ export default function OrdenScreen() {
+               </Card>
+             </Seccion>
+ 
+-            {/* LA EVIDENCIA que se reportó, con el título de cada foto. */}
+-            <Seccion titulo="Evidencia reportada">
+-              {orden.evidenciaUrls && orden.evidenciaUrls.length > 0 ? (
+-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
+-                  {orden.evidenciaUrls.map((url, i) => {
+-                    // El título que escribió quien la tomó: dice POR QUÉ está esa foto ahí.
+-                    const titulo = orden.evidenciaTitulos?.[i]?.trim();
+-                    return (
+-                      <View key={`${url}-${i}`} style={styles.fotoItem}>
+-                        <Pressable
+-                          onPress={() => setFotoAbierta(url)}
+-                          accessibilityRole="imagebutton"
+-                          accessibilityLabel={titulo ? `Ver a pantalla completa: ${titulo}` : 'Ver la foto a pantalla completa'}>
+-                          <Image
+-                            source={{ uri: url }}
+-                            style={[
+-                              styles.foto,
+-                              { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg },
+-                            ]}
+-                          />
+-                        </Pressable>
+-                        {titulo ? (
+-                          <ThemedText variant="caption" color="textSecondary" numberOfLines={2}>
+-                            {titulo}
+-                          </ThemedText>
+-                        ) : null}
+-                      </View>
+-                    );
+-                  })}
+-                </ScrollView>
+-              ) : (
+-                <Card>
+-                  <ThemedText variant="body" color="textMuted">
+-                    Sin fotos adjuntas.
+-                  </ThemedText>
+-                </Card>
+-              )}
+-            </Seccion>
++            {/* LAS FOTOS: las del reporte y las del trabajo terminado, cada
++                una con su título y su «Agregar» para quien puede sumar. */}
++            <GaleriaOdt
++              id={orden.id}
++              galeria="reporte"
++              titulo="Fotos del reporte"
++              urls={fotosReporte.urls}
++              titulos={fotosReporte.titulos}
++              puedeAgregar={agregaReporte}
++              vacio="Sin fotos adjuntas."
++              onAbrir={setFotoAbierta}
++              onAgregadas={(urls, titulos) => {
++                setExtras((x) => ({ ...x, reporte: [...x.reporte, ...urls.map((url, i) => ({ url, titulo: titulos[i] ?? '' }))] }));
++                setAviso('Fotos agregadas');
++              }}
++            />
++            {verCierreFotos ? (
++              <GaleriaOdt
++                id={orden.id}
++                galeria="cierre"
++                titulo="Fotos del trabajo terminado"
++                urls={fotosCierre.urls}
++                titulos={fotosCierre.titulos}
++                puedeAgregar={agregaCierre}
++                vacio="Todavía no hay fotos del trabajo terminado."
++                onAbrir={setFotoAbierta}
++                onAgregadas={(urls, titulos) => {
++                  setExtras((x) => ({ ...x, cierre: [...x.cierre, ...urls.map((url, i) => ({ url, titulo: titulos[i] ?? '' }))] }));
++                  setAviso('Fotos agregadas');
++                }}
++              />
++            ) : null}
+ 
+-            {/* EL HISTORIAL, de su auditoría. */}
++            {/* EL HISTORIAL: cada evento con su nombre, como en la web. */}
+             <Seccion titulo="Historial">
+-              <LineaDeTiempo hitos={hitosDe(orden, data?.historial ?? [])} />
++              <LineaDeTiempo hitos={hitosDe(orden, data?.cambios ?? [], ejecucion)} />
+             </Seccion>
+-
+-            {error ? (
+-              <View
+-                style={[
+-                  styles.fila,
+-                  { backgroundColor: colors.dangerSurface, borderRadius: radii.md, padding: spacing.md, gap: spacing.sm },
+-                ]}>
+-                <TabIcon name="aviso" color={colors.danger} size={18} />
+-                <ThemedText variant="caption" color="danger" style={styles.flex1}>
+-                  {error}
+-                </ThemedText>
+-              </View>
+-            ) : null}
+           </ScrollVisible>
+         )}
+ 
+-        {/* GUARDAR, fijo abajo sobre un desvanecido. Se enciende solo si hay
+-            algo que guardar, y se esconde mientras se escribe: encima del
+-            teclado taparía el campo. */}
+-        {conDock && !teclado ? (
+-          <View
+-            pointerEvents="box-none"
+-            style={[
+-              styles.dock,
+-              { paddingHorizontal: spacing.lg, paddingBottom: Math.max(insets.bottom, spacing.md) },
+-            ]}>
+-            <LinearGradient
+-              pointerEvents="none"
+-              colors={[tinte(colors.background, 0), colors.background]}
+-              locations={[0, 0.45]}
+-              style={StyleSheet.absoluteFill}
+-            />
+-            <BotonDestacado
+-              label={guardando ? 'Guardando…' : 'Guardar cambios'}
+-              icon="check"
+-              onPress={guardar}
+-              disabled={!hayCambios || guardando}
+-            />
+-          </View>
+-        ) : null}
+-
+         {/* Visor a pantalla completa: tocar una foto la abre entera. */}
+         <PhotoViewer uri={fotoAbierta} onClose={() => setFotoAbierta(null)} />
+ 
+-        {/* "Hecho" sin robar el foco, por encima del botón. */}
+-        <Toast mensaje={aviso} onOculto={() => setAviso(null)} bottom={(conDock ? 92 : 24) + insets.bottom} />
++        {/* "Hecho" sin robar el foco. */}
++        <Toast mensaje={aviso} onOculto={() => setAviso(null)} bottom={24 + insets.bottom} />
+       </SafeAreaView>
+     </ThemedView>
+   );
+@@ -834,6 +628,7 @@ function LineaDeTiempo({ hitos }: { hitos: Hito[] }) {
+             </View>
+             <View style={[styles.flex1, { gap: 1, paddingBottom: ultimo ? 0 : spacing.md + 2 }]}>
+               <ThemedText variant="button">{h.titulo}</ThemedText>
++              {h.detalle ? <ThemedText variant="caption">{h.detalle}</ThemedText> : null}
+               {h.nota ? <ThemedText variant="caption">{h.nota}</ThemedText> : null}
+               <ThemedText variant="caption" color="textSecondary">
+                 {[quien, formatFechaLarga(h.fecha)].filter(Boolean).join(' · ')}
+@@ -847,7 +642,7 @@ function LineaDeTiempo({ hitos }: { hitos: Hito[] }) {
+ }
+ 
+ /**
+- * El estatus en solo lectura (el conductor), con un halo que late mientras la
++ * El estatus (uno de los tres que se ven), con un halo que late mientras la
+  * orden siga VIVA. Resuelta no late: ya no hay nada esperando.
+  */
+ function BadgeEstado({ estado }: { estado: OdtEstado }) {
+@@ -914,18 +709,14 @@ const styles = StyleSheet.create({
+   content: { width: '100%', maxWidth: 720, alignSelf: 'center' },
+   fila: { flexDirection: 'row', alignItems: 'center' },
+   flex1: { flex: 1, minWidth: 0 },
+-  nota: { minHeight: 72 },
+   boton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth },
+   iconoTarea: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+   origen: { alignItems: 'center' },
+-  foto: { width: 220, height: 150, borderWidth: StyleSheet.hairlineWidth },
+-  fotoItem: { width: 220, gap: 6 },
+   hito: { flexDirection: 'row' },
+   eje: { alignItems: 'center', width: 15 },
+   anillo: { width: 15, height: 15, borderRadius: 8, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
+   punto: { width: 9, height: 9, borderRadius: 5 },
+   tramo: { flex: 1, width: 2, marginVertical: 2 },
+-  dock: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 28 },
+   badgeCaja: { alignSelf: 'flex-start' },
+   badge: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, borderWidth: StyleSheet.hairlineWidth },
+   badgePunto: { width: 7, height: 7, borderRadius: 3.5 },
+diff --git a/src/components/calendario-inspecciones.tsx b/src/components/calendario-inspecciones.tsx
+index 3385d7f..ddafdcb 100644
+--- a/src/components/calendario-inspecciones.tsx
++++ b/src/components/calendario-inspecciones.tsx
+@@ -14,8 +14,9 @@ import { useTheme, type ColorTokens } from '@/theme';
+  */
+ 
+ /**
+- * Cómo quedó un día. `no_cuenta` es el gris: futuro, sin unidad o sin
+- * jornada; `hoy` es el gris de hoy mientras la diaria todavía está a tiempo.
++ * Cómo quedó un día. `no_cuenta` es el gris: futuro, sin unidad, sin jornada
++ * o fin de semana sin la diaria; `hoy` es el gris de hoy mientras la diaria
++ * todavía está a tiempo (de lunes a viernes).
+  */
+ export type EstadoDia = 'hecha' | 'observaciones' | 'bloqueada' | 'no_hecha' | 'hoy' | 'no_cuenta';
+ 
+diff --git a/src/components/inspeccion-fin-de-semana.tsx b/src/components/inspeccion-fin-de-semana.tsx
+new file mode 100644
+index 0000000..492bdd0
+--- /dev/null
++++ b/src/components/inspeccion-fin-de-semana.tsx
+@@ -0,0 +1,158 @@
++import AsyncStorage from '@react-native-async-storage/async-storage';
++import { useCallback, useEffect, useState } from 'react';
++import { StyleSheet, View } from 'react-native';
++
++import { Button } from '@/components/button';
++import { Card } from '@/components/card';
++import { TabIcon } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import { useTheme } from '@/theme';
++
++/**
++ * SÁBADO Y DOMINGO EN LA DIARIA (decisión de Marco).
++ *
++ * De lunes a viernes la diaria se hace siempre. El fin de semana, antes del
++ * formulario, se pregunta si va a trabajar con la unidad: si no, ese día no le
++ * toca. La respuesta se recuerda en el teléfono solo ese día (fecha local);
++ * mañana se vuelve a preguntar. El calendario del supervisor aplica la misma
++ * regla: el fin de semana solo cuenta si ese día la hizo.
++ */
++
++export type RespuestaFinDeSemana = 'trabajo' | 'no_trabajo';
++export type DiaFinDeSemana = 'sábado' | 'domingo';
++
++/** Hoy (o la fecha dada), como AAAA-MM-DD local. */
++function fechaLocal(d: Date): string {
++  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
++}
++
++/** «sábado» o «domingo» si la fecha cae en fin de semana; si no, `null`. */
++export function diaDeFinDeSemana(d: Date = new Date()): DiaFinDeSemana | null {
++  const n = d.getDay();
++  return n === 6 ? 'sábado' : n === 0 ? 'domingo' : null;
++}
++
++/** Por persona: en un teléfono compartido cada conductor responde lo suyo. */
++const clave = (userId: string) => `fom:inspeccion-fin-de-semana:${userId}`;
++
++interface Guardada {
++  fecha: string;
++  respuesta: RespuestaFinDeSemana;
++}
++
++async function leer(userId: string, fecha: string): Promise<RespuestaFinDeSemana | null> {
++  try {
++    const crudo = await AsyncStorage.getItem(clave(userId));
++    const g = crudo ? (JSON.parse(crudo) as Guardada) : null;
++    // La de otro día ya no vale: cada sábado y cada domingo se pregunta de nuevo.
++    return g?.fecha === fecha && (g.respuesta === 'trabajo' || g.respuesta === 'no_trabajo') ? g.respuesta : null;
++  } catch {
++    return null;
++  }
++}
++
++async function guardar(userId: string, fecha: string, respuesta: RespuestaFinDeSemana): Promise<void> {
++  try {
++    await AsyncStorage.setItem(clave(userId), JSON.stringify({ fecha, respuesta } satisfies Guardada));
++  } catch {
++    // Sin almacenamiento solo se pierde el recuerdo: se vuelve a preguntar.
++  }
++}
++
++/**
++ * La pregunta del fin de semana para quien mira.
++ *
++ * - `dia`: «sábado»/«domingo», o `null` de lunes a viernes (no se pregunta).
++ * - `lista`: ya se leyó lo guardado (mientras no, no se decide nada).
++ * - `respuesta`: lo que dijo hoy, o `null` si aún no respondió.
++ */
++export function useFinDeSemana(userId: string | undefined) {
++  const fecha = fechaLocal(new Date());
++  const dia = diaDeFinDeSemana();
++  const [leida, setLeida] = useState<{ fecha: string; respuesta: RespuestaFinDeSemana | null } | null>(null);
++
++  useEffect(() => {
++    if (!dia || !userId) return;
++    let activo = true;
++    void leer(userId, fecha).then((respuesta) => {
++      if (activo) setLeida({ fecha, respuesta });
++    });
++    return () => {
++      activo = false;
++    };
++  }, [dia, userId, fecha]);
++
++  const responder = useCallback(
++    (respuesta: RespuestaFinDeSemana) => {
++      setLeida({ fecha, respuesta });
++      if (userId) void guardar(userId, fecha, respuesta);
++    },
++    [userId, fecha],
++  );
++
++  const deHoy = leida?.fecha === fecha ? leida : null;
++  return {
++    dia,
++    lista: !dia || !userId || deHoy !== null,
++    respuesta: deHoy?.respuesta ?? null,
++    responder,
++  };
++}
++
++/**
++ * La tarjeta del fin de semana, antes del formulario: la pregunta o, si dijo
++ * que no trabaja, el «hoy no te toca» con la vuelta atrás.
++ */
++export function PreguntaFinDeSemana({
++  dia,
++  respuesta,
++  onResponder,
++}: {
++  dia: DiaFinDeSemana;
++  respuesta: RespuestaFinDeSemana | null;
++  onResponder: (r: RespuestaFinDeSemana) => void;
++}) {
++  const { colors, spacing, radii } = useTheme();
++  const libre = respuesta === 'no_trabajo';
++  return (
++    <Card style={{ gap: spacing.md }}>
++      <View style={[styles.cabeza, { gap: spacing.md }]}>
++        <View
++          style={[
++            styles.circulo,
++            { backgroundColor: libre ? colors.successSurface : colors.infoSurface, borderRadius: radii.pill },
++          ]}>
++          <TabIcon name={libre ? 'check' : 'calendario'} color={libre ? colors.success : colors.info} size={22} />
++        </View>
++        <ThemedText variant="subtitle" style={styles.flex1} accessibilityRole="header">
++          {libre ? 'Listo, hoy no te toca la inspección.' : `Hoy es ${dia}. ¿Vas a trabajar con la unidad?`}
++        </ThemedText>
++      </View>
++
++      {libre ? (
++        <>
++          <ThemedText variant="body" color="textSecondary">
++            Si sales con la unidad, vuelve aquí y hazla.
++          </ThemedText>
++          <Button label="Cambié de idea, voy a trabajar" variant="secondary" onPress={() => onResponder('trabajo')} />
++        </>
++      ) : (
++        <>
++          <ThemedText variant="body" color="textSecondary">
++            El fin de semana la inspección solo hace falta si sales con la unidad.
++          </ThemedText>
++          <View style={{ gap: spacing.sm }}>
++            <Button label="Sí, voy a trabajar" onPress={() => onResponder('trabajo')} />
++            <Button label="No trabajo hoy" variant="secondary" onPress={() => onResponder('no_trabajo')} />
++          </View>
++        </>
++      )}
++    </Card>
++  );
++}
++
++const styles = StyleSheet.create({
++  cabeza: { flexDirection: 'row', alignItems: 'center' },
++  circulo: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
++  flex1: { flex: 1, minWidth: 0 },
++});
+diff --git a/src/components/inspeccion-hecha-hoy.tsx b/src/components/inspeccion-hecha-hoy.tsx
+new file mode 100644
+index 0000000..344c91c
+--- /dev/null
++++ b/src/components/inspeccion-hecha-hoy.tsx
+@@ -0,0 +1,141 @@
++import { useRef, useState } from 'react';
++import { Alert, StyleSheet, View } from 'react-native';
++
++import { Button } from '@/components/button';
++import { Card } from '@/components/card';
++import { InspeccionesResultado, VISTA_INSPECCION } from '@/components/inspecciones-resultado';
++import { Pastilla } from '@/components/pastilla';
++import { normalizar } from '@/components/search-bar';
++import { TabIcon } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import { exportarPdf } from '@/lib/pdf';
++import { htmlInspecciones } from '@/lib/pdf-inspeccion';
++import {
++  getAyudasFormatoFom,
++  getInspeccionFom,
++  type InspeccionDetalle,
++  type InspeccionResumen,
++} from '@/services';
++import { useTheme } from '@/theme';
++import { formatHora } from '@/utils/date';
++
++/**
++ * LA INSPECCIÓN DE HOY YA ESTÁ HECHA: lo que ve el conductor en vez del
++ * formulario. Es una por unidad y día, la haga quien la haga.
++ *
++ * Dice cuándo, quién y cómo salió, y deja ver el resultado. Si la hizo otra
++ * persona de la unidad se nombra, para que nadie piense que se perdió la suya.
++ * Sin `inspeccion` solo se sabe que existe (FOM rechazó el envío con 409).
++ */
++export function InspeccionHechaHoy({
++  inspeccion,
++  detalle,
++  yo,
++  aviso,
++}: {
++  inspeccion: InspeccionResumen | null;
++  /** Lo respondido, si ya se tiene: así «Ver resultado» no lo pide a FOM. */
++  detalle?: InspeccionDetalle;
++  /** Quien mira, para decir «la hiciste» o «la hizo …». */
++  yo: { id: string; nombre: string };
++  /** Una línea de arriba, en aviso: por qué se ve esto en vez de lo enviado. */
++  aviso?: string;
++}) {
++  const { colors, spacing, radii } = useTheme();
++  const [abierta, setAbierta] = useState<InspeccionResumen | null>(null);
++  const imprimiendo = useRef(false);
++
++  const v = inspeccion ? VISTA_INSPECCION[inspeccion.resultado] : null;
++  const bloqueada = inspeccion?.resultado === 'bloqueada';
++  const tono = v?.tono ?? 'success';
++  const fondo = bloqueada
++    ? colors.dangerSurface
++    : tono === 'warning'
++      ? colors.warningSurface
++      : colors.successSurface;
++
++  // Con el id se sabe seguro; sin él (servidor viejo), por el nombre.
++  const mia =
++    !!inspeccion &&
++    (inspeccion.conductorId
++      ? inspeccion.conductorId === yo.id
++      : normalizar(inspeccion.conductor) === normalizar(yo.nombre));
++  const hora = inspeccion?.enviadaEn ? `a las ${formatHora(inspeccion.enviadaEn)}` : 'hoy';
++  const titulo = !inspeccion
++    ? 'La inspección de hoy de esta unidad ya está hecha'
++    : mia
++      ? 'Ya hiciste la inspección de hoy'
++      : 'La inspección de hoy ya está hecha';
++  const quien = !inspeccion ? null : mia ? `La hiciste ${hora}.` : `La hizo ${inspeccion.conductor} ${hora}.`;
++
++  /** La hoja impresa de esta inspección, con las viñetas de su formato. */
++  async function imprimir(id: string) {
++    if (imprimiendo.current) return;
++    imprimiendo.current = true;
++    try {
++      const d = detalle?.id === id ? detalle : await getInspeccionFom(id);
++      await exportarPdf(htmlInspecciones([d], await getAyudasFormatoFom(d.vehicleId)));
++    } catch (e) {
++      Alert.alert('No pudimos armar el PDF', e instanceof Error ? e.message : 'Intenta de nuevo.');
++    } finally {
++      imprimiendo.current = false;
++    }
++  }
++
++  return (
++    <>
++      <Card style={{ gap: spacing.md }}>
++        {aviso ? (
++          <ThemedText variant="caption" color="warning">
++            {aviso}
++          </ThemedText>
++        ) : null}
++
++        <View style={[styles.cabeza, { gap: spacing.md }]}>
++          <View style={[styles.circulo, { backgroundColor: fondo, borderRadius: radii.pill }]}>
++            <TabIcon name={bloqueada ? 'aviso' : 'check'} color={colors[tono]} size={22} />
++          </View>
++          <View style={[styles.flex1, { gap: 2 }]}>
++            <ThemedText variant="subtitle">{titulo}</ThemedText>
++            {quien ? (
++              <ThemedText variant="caption" color="textSecondary">
++                {quien}
++              </ThemedText>
++            ) : null}
++          </View>
++        </View>
++
++        {inspeccion && v ? (
++          <View style={[styles.fila, { gap: spacing.sm }]}>
++            <ThemedText variant="caption" color="textMuted" style={styles.flex1} numberOfLines={1}>
++              {[inspeccion.unidad, inspeccion.placa].filter(Boolean).join(' · ')}
++            </ThemedText>
++            <Pastilla tono={v.tono} label={v.label} conPunto />
++          </View>
++        ) : null}
++
++        {inspeccion ? (
++          <Button label="Ver resultado" variant="secondary" onPress={() => setAbierta(inspeccion)} />
++        ) : null}
++
++        <ThemedText variant="caption" color="textMuted">
++          La próxima la puedes hacer mañana.
++        </ThemedText>
++      </Card>
++
++      <InspeccionesResultado
++        inspeccion={abierta}
++        detalleLeido={detalle}
++        onClose={() => setAbierta(null)}
++        onImprimir={(id) => void imprimir(id)}
++      />
++    </>
++  );
++}
++
++const styles = StyleSheet.create({
++  cabeza: { flexDirection: 'row', alignItems: 'center' },
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  circulo: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
++  flex1: { flex: 1, minWidth: 0 },
++});
+diff --git a/src/components/inspecciones-por-persona.tsx b/src/components/inspecciones-por-persona.tsx
+index 39b191e..53a2184 100644
+--- a/src/components/inspecciones-por-persona.tsx
++++ b/src/components/inspecciones-por-persona.tsx
+@@ -62,9 +62,17 @@ export type ReglaDias = 'jornada' | 'semana';
+ /** Cómo se explica la regla en pantalla (igual que en la web). */
+ export const TEXTO_REGLA: Record<ReglaDias, string> = {
+   jornada: 'Se cuentan los días con jornada.',
+-  semana: 'Se cuentan todos los días desde que tiene unidad asignada, hasta hoy.',
++  semana:
++    'De lunes a viernes cuentan todos los días desde que tiene la unidad. Sábado y domingo solo cuentan si ese día trabajó.',
+ };
+ 
++/** ¿Sábado o domingo? (AAAA-MM-DD, fecha local). */
++function esFinDeSemana(fecha: string): boolean {
++  const [a, m, d] = fecha.split('-').map(Number);
++  const n = new Date(a, m - 1, d).getDay();
++  return n === 0 || n === 6;
++}
++
+ /** Un mes juzgado: sus días y las cuentas. */
+ export interface MesJuzgado {
+   dias: DiaCalendario[];
+@@ -100,7 +108,8 @@ export function moverMes(mes: string, paso: number): string {
+  * LA REGLA de «día que debía hacerla», igual que la web:
+  *
+  * - Si hay dato de jornada (o km) por día de la persona, cuentan SOLO esos días.
+- * - Si no, cuentan todos los días (de lunes a domingo), hasta hoy, si tiene unidad.
++ * - Si no, cuentan de lunes a viernes, hasta hoy, si tiene unidad. Sábado y
++ *   domingo solo cuentan si ese día la hizo (decisión de Marco): si no, «No cuenta».
+  * - En los dos casos, nunca antes del día en que recibió la unidad (`desde`):
+  *   antes no le tocaba hacerla. Sin ese dato se cuenta desde el día 1.
+  *
+@@ -162,10 +171,12 @@ export function juzgarMes({
+     } else if (fecha > hoy) {
+       estado = 'no_cuenta';
+     } else {
+-      // Todos los días cuentan, domingos incluidos (lo pidió Marco), pero solo
+-      // desde que tiene la unidad.
++      // De lunes a viernes, desde que tiene la unidad. El fin de semana sin la
++      // diaria no cuenta: ese día no trabajó (lo pidió Marco). Con dato de
++      // jornada manda la jornada, que ya dice si trabajó.
+       const debia =
+-        (!desde || fecha >= desde) && (diasConJornada ? diasConJornada.has(fecha) : conUnidad);
++        (!desde || fecha >= desde) &&
++        (diasConJornada ? diasConJornada.has(fecha) : conUnidad && !esFinDeSemana(fecha));
+       estado = !debia ? 'no_cuenta' : fecha === hoy ? 'hoy' : 'no_hecha';
+     }
+     cuenta[estado] += 1;
+diff --git a/src/components/odt-paso-acciones.tsx b/src/components/odt-paso-acciones.tsx
+new file mode 100644
+index 0000000..276e427
+--- /dev/null
++++ b/src/components/odt-paso-acciones.tsx
+@@ -0,0 +1,279 @@
++import { useRef, useState } from 'react';
++import { StyleSheet, View } from 'react-native';
++
++import { Button } from '@/components/button';
++import { EvidenceField } from '@/components/evidence-field';
++import { HojaModal } from '@/components/hoja-modal';
++import { TextField } from '@/components/text-field';
++import { ThemedText } from '@/components/themed-text';
++import { uuidV4 } from '@/lib/fom-api';
++import { validarTituloEvidencia } from '@/lib/validate';
++import { cambiarEstadoOrdenFom } from '@/services/fomOrdenes';
++import { encolarFotosCierre } from '@/services/workOrderService';
++import { useTheme } from '@/theme';
++import type { OdtEstadoFom, OdtTipo } from '@/types';
++import { MIN_NOTA_ODT, PASO_ODT, pasosDelGestor, type PasoOdt } from '@/utils/odt';
++
++/**
++ * LOS PASOS DEL GESTOR (supervisor o admin) en el detalle de una ODT: un botón
++ * por paso según su estado REAL, con los mismos nombres que la web. Sustituye
++ * al selector de estatus + «Guardar cambios».
++ *
++ * Cada botón abre una hoja con lo que pide su paso:
++ * - Pasar a revisión y Aprobar: nota opcional.
++ * - Devolver, Cancelar y Reabrir: nota obligatoria (3 letras como mínimo).
++ * - Cerrar y Resolver sin taller: qué se hizo, costo en USD, fotos del trabajo
++ *   terminado (opcionales) y, en una preventiva de un mantenimiento
++ *   programado, el kilometraje con que se cerró (FOM lo exige).
++ *
++ * Asignar y Reasignar responsable NO tienen ruta móvil en FOM (solo la de la
++ * consola web): el botón sale apagado y se dice dónde hacerlo.
++ */
++
++/** Un monto en USD: hasta diez cifras y dos decimales, con punto o coma. */
++const MONTO = /^\d{1,10}([.,]\d{1,2})?$/;
++/** Un kilometraje: hasta diez cifras y dos decimales, con punto o coma. */
++const KM = /^\d{1,10}([.,]\d{1,2})?$/;
++
++/** El título de una foto de cierre: opcional, pero si se escribe, que sirva. */
++function tituloOpcional(v: string): string | null {
++  return v.trim() ? validarTituloEvidencia(v) : null;
++}
++
++/** Lo que se escribe en la hoja de un paso. */
++type Formulario = {
++  nota: string;
++  costo: string;
++  km: string;
++  fotos: string[];
++  titulos: string[];
++};
++
++const VACIO: Formulario = { nota: '', costo: '', km: '', fotos: [], titulos: [] };
++
++/** El aviso que confirma cada paso. */
++const AVISO: Partial<Record<PasoOdt, string>> = {
++  revision: 'Pasada a revisión',
++  aprobar: 'ODT aprobada',
++  resolver: 'ODT resuelta',
++  cerrar: 'ODT resuelta',
++  devolver_abierta: 'Devuelta a abierta',
++  devolver_ejecucion: 'Devuelta a ejecución',
++  cancelar: 'ODT cancelada',
++  reabrir: 'ODT reabierta',
++};
++
++export function AccionesOdtGestor({
++  id,
++  estadoFom,
++  tipo,
++  conMantenimiento,
++  odometro,
++  onHecho,
++}: {
++  id: string;
++  /** El estado REAL que se leyó: es el que se manda como estado de partida. */
++  estadoFom: OdtEstadoFom;
++  tipo?: OdtTipo;
++  /** ¿Sale de un mantenimiento programado? Pide km al cerrarla y no se reabre. */
++  conMantenimiento: boolean;
++  /** El odómetro de la unidad, para proponer el km del cierre. */
++  odometro: number | null;
++  /** Tras el paso: qué se hizo (para el aviso) y a qué estado quedó. */
++  onHecho: (mensaje: string, hacia: OdtEstadoFom) => void;
++}) {
++  const { spacing } = useTheme();
++  const [paso, setPaso] = useState<PasoOdt | null>(null);
++  const [form, setForm] = useState<Formulario>(VACIO);
++  const [errores, setErrores] = useState<Partial<Record<keyof Formulario, string>>>({});
++  const [enviando, setEnviando] = useState(false);
++  const [error, setError] = useState<string | null>(null);
++  // Un reintento del MISMO paso con lo mismo reusa su clave: si el primero
++  // llegó, FOM no registra el cambio dos veces.
++  const intento = useRef<{ firma: string; clave: string } | null>(null);
++
++  const pasos = pasosDelGestor(estadoFom, { conMantenimiento });
++  if (pasos.length === 0) return null;
++
++  // El km solo lo lleva una preventiva enlazada a su acción de mantenimiento:
++  // a una orden sin ella FOM se lo rechaza, y lo exige si su plan va por km
++  // (eso la app no lo sabe: se propone el odómetro y, si falta, FOM lo dice).
++  const pideKm = tipo === 'preventiva' && conMantenimiento;
++  const def = paso ? PASO_ODT[paso] : null;
++  const hayPersona = pasos.some((p) => PASO_ODT[p].datos === 'persona');
++
++  function abrir(p: PasoOdt) {
++    setError(null);
++    setErrores({});
++    setForm({ ...VACIO, km: pideKm && odometro != null ? String(Math.round(odometro)) : '' });
++    setPaso(p);
++  }
++
++  function editar<K extends keyof Formulario>(campo: K, valor: Formulario[K]) {
++    setForm((f) => ({ ...f, [campo]: valor }));
++    if (errores[campo]) setErrores((x) => ({ ...x, [campo]: undefined }));
++  }
++
++  async function confirmar() {
++    if (!paso || !def?.hacia || enviando) return;
++    const cierre = def.datos === 'cierre';
++    const nota = form.nota.trim();
++    const costo = form.costo.trim();
++    const km = form.km.trim();
++    const faltan: Partial<Record<keyof Formulario, string>> = {};
++    if (def.datos === 'nota' && nota.length < MIN_NOTA_ODT) faltan.nota = `Escribe ${def.etiquetaNota.toLowerCase()}.`;
++    if (def.datos === 'nota_opcional' && nota.length > 0 && nota.length < MIN_NOTA_ODT) {
++      faltan.nota = `Al menos ${MIN_NOTA_ODT} letras, o déjala vacía.`;
++    }
++    if (cierre) {
++      if (nota.length < MIN_NOTA_ODT) faltan.nota = 'Cuenta qué se hizo.';
++      if (costo && !MONTO.test(costo)) faltan.costo = 'Monto no válido.';
++      if (pideKm && km && !KM.test(km)) faltan.km = 'Kilometraje no válido.';
++      if (form.fotos.some((_, i) => tituloOpcional(form.titulos[i] ?? '') !== null)) faltan.fotos = 'Revisa los títulos.';
++    }
++    if (Object.values(faltan).some(Boolean)) {
++      setErrores(faltan);
++      return;
++    }
++    const enviar = {
++      desde: estadoFom,
++      hacia: def.hacia,
++      nota: nota || def.notaPorDefecto || '',
++      ...(cierre && costo ? { costo: Number(costo.replace(',', '.')) } : {}),
++      ...(cierre && pideKm && km ? { odometroKm: Number(km.replace(',', '.')) } : {}),
++    };
++    const firma = JSON.stringify([id, enviar]);
++    if (intento.current?.firma !== firma) intento.current = { firma, clave: uuidV4() };
++    setEnviando(true);
++    setError(null);
++    try {
++      await cambiarEstadoOrdenFom(id, { ...enviar, clave: intento.current.clave });
++      intento.current = null;
++      if (cierre && form.fotos.length > 0) {
++        await encolarFotosCierre(
++          id,
++          form.fotos,
++          form.titulos.map((t) => t.trim()),
++        );
++      }
++      setPaso(null);
++      onHecho(AVISO[paso] ?? 'Listo', def.hacia);
++    } catch (e) {
++      setError(e instanceof Error ? e.message : 'No pudimos registrar el paso. Intenta de nuevo.');
++    } finally {
++      setEnviando(false);
++    }
++  }
++
++  return (
++    <View style={{ gap: spacing.sm }}>
++      <View style={[styles.botones, { gap: spacing.sm }]}>
++        {pasos.map((p) => {
++          const d = PASO_ODT[p];
++          return (
++            <Button
++              key={p}
++              label={d.label}
++              variant={d.variante}
++              icon={p === 'cerrar' || p === 'resolver' ? 'check' : p === 'cancelar' ? 'cerrar' : undefined}
++              onPress={() => abrir(p)}
++              // Asignar no tiene ruta móvil en FOM: se hace desde la web.
++              disabled={d.datos === 'persona' || enviando}
++              style={styles.boton}
++            />
++          );
++        })}
++      </View>
++      {hayPersona ? (
++        <ThemedText variant="caption" color="textSecondary">
++          Asignar o cambiar el responsable todavía se hace desde la web: FOM aún no lo permite desde la app.
++        </ThemedText>
++      ) : null}
++
++      <HojaModal
++        visible={paso !== null}
++        onClose={() => (enviando ? undefined : setPaso(null))}
++        titulo={def?.label.replace(' →', '') ?? ''}
++        icon={def?.datos === 'cierre' ? 'check' : paso === 'cancelar' ? 'cerrar' : 'ot'}
++        tone={def?.variante === 'danger' ? 'danger' : 'primary'}>
++        <TextField
++          label={def?.etiquetaNota ?? 'Nota'}
++          nombre="nota"
++          value={form.nota}
++          onChangeText={(t) => editar('nota', t)}
++          placeholder={def?.placeholder}
++          multiline
++          maxLength={def?.datos === 'cierre' ? 2000 : 1000}
++          editable={!enviando}
++          style={styles.nota}
++          error={errores.nota}
++        />
++        {def?.datos === 'cierre' ? (
++          <>
++            <TextField
++              label="Costo (USD)"
++              nombre="costo"
++              value={form.costo}
++              onChangeText={(t) => editar('costo', t)}
++              placeholder="0.00"
++              keyboardType="decimal-pad"
++              inputMode="decimal"
++              editable={!enviando}
++              error={errores.costo}
++            />
++            {pideKm ? (
++              <TextField
++                label="Kilometraje al cerrar"
++                nombre="km"
++                value={form.km}
++                onChangeText={(t) => editar('km', t)}
++                placeholder="Ej. 125400"
++                keyboardType="decimal-pad"
++                inputMode="decimal"
++                editable={!enviando}
++                error={errores.km}
++              />
++            ) : null}
++            <View style={{ gap: spacing.sm }}>
++              <ThemedText variant="caption" color="textSecondary">
++                Fotos del trabajo terminado (opcional)
++              </ThemedText>
++              <EvidenceField
++                uris={form.fotos}
++                onChange={(u) => editar('fotos', u)}
++                titulos={form.titulos}
++                onTitulos={(t) => editar('titulos', t)}
++                validarTitulo={tituloOpcional}
++                editable={!enviando}
++              />
++              {errores.fotos ? (
++                <ThemedText variant="caption" color="danger">
++                  {errores.fotos}
++                </ThemedText>
++              ) : null}
++            </View>
++          </>
++        ) : null}
++        {error ? (
++          <ThemedText variant="caption" color="danger">
++            {error}
++          </ThemedText>
++        ) : null}
++        <Button
++          label={def?.label.replace(' →', '') ?? ''}
++          variant={def?.variante === 'danger' ? 'danger' : 'primary'}
++          icon={def?.datos === 'cierre' ? 'check' : undefined}
++          onPress={() => void confirmar()}
++          loading={enviando}
++        />
++      </HojaModal>
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  // Los botones se acomodan de dos en dos y bajan de línea si no caben.
++  botones: { flexDirection: 'row', flexWrap: 'wrap' },
++  boton: { flexGrow: 1, flexBasis: '45%' },
++  nota: { minHeight: 72 },
++});
+diff --git a/src/components/odt-paso-fotos.tsx b/src/components/odt-paso-fotos.tsx
+new file mode 100644
+index 0000000..db5f291
+--- /dev/null
++++ b/src/components/odt-paso-fotos.tsx
+@@ -0,0 +1,170 @@
++import { useState } from 'react';
++import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
++
++import { Button } from '@/components/button';
++import { Card } from '@/components/card';
++import { EvidenceField } from '@/components/evidence-field';
++import { HojaModal } from '@/components/hoja-modal';
++import { PressableScale } from '@/components/pressable-scale';
++import { TabIcon } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import { validarTituloEvidencia } from '@/lib/validate';
++import { agregarFotosOrden } from '@/services/fomOrdenes';
++import { useTheme } from '@/theme';
++
++/**
++ * UNA GALERÍA DE FOTOS de la ODT, con su «Agregar»: «Fotos del reporte» o
++ * «Fotos del trabajo terminado», igual que en la web.
++ *
++ * Agregar abre una hoja para tomar o elegir fotos, cada una con su título, y
++ * las sube ya (la foto es la acción entera: si no sube, se dice). Las fotos del
++ * reporte piden título, como al reportar; las del trabajo terminado, no.
++ */
++export function GaleriaOdt({
++  id,
++  galeria,
++  titulo,
++  urls,
++  titulos,
++  puedeAgregar,
++  vacio,
++  onAbrir,
++  onAgregadas,
++}: {
++  id: string;
++  galeria: 'reporte' | 'cierre';
++  titulo: string;
++  urls: string[];
++  titulos?: string[];
++  puedeAgregar: boolean;
++  /** Qué se dice sin fotos. */
++  vacio: string;
++  onAbrir: (url: string) => void;
++  /** Las direcciones ya subidas, con su título: la lista de la nube tarda un momento en verlas. */
++  onAgregadas: (urls: string[], titulos: string[]) => void;
++}) {
++  const { colors, spacing, radii } = useTheme();
++  const [abierta, setAbierta] = useState(false);
++  const [fotos, setFotos] = useState<string[]>([]);
++  const [nombres, setNombres] = useState<string[]>([]);
++  const [subiendo, setSubiendo] = useState(false);
++  const [error, setError] = useState<string | null>(null);
++
++  const validar = galeria === 'reporte' ? validarTituloEvidencia : (v: string) => (v.trim() ? validarTituloEvidencia(v) : null);
++
++  async function subir() {
++    if (subiendo) return;
++    if (fotos.length === 0) {
++      setError('Toma o elige al menos una foto.');
++      return;
++    }
++    const mal = fotos.findIndex((_, i) => validar(nombres[i] ?? '') !== null);
++    if (mal >= 0) {
++      setError(`Revisa el título de la foto ${mal + 1}.`);
++      return;
++    }
++    setSubiendo(true);
++    setError(null);
++    try {
++      const limpios = nombres.map((t) => t.trim());
++      const subidas = await agregarFotosOrden(id, galeria, fotos, limpios);
++      onAgregadas(subidas, limpios);
++      setFotos([]);
++      setNombres([]);
++      setAbierta(false);
++    } catch (e) {
++      setError(e instanceof Error ? e.message : 'No se pudieron subir las fotos. Intenta de nuevo.');
++    } finally {
++      setSubiendo(false);
++    }
++  }
++
++  return (
++    <View style={{ gap: spacing.sm }}>
++      <View style={[styles.fila, { gap: spacing.sm }]}>
++        <ThemedText variant="overline" color="textMuted" style={styles.flex1}>
++          {titulo}
++        </ThemedText>
++        {puedeAgregar ? (
++          <PressableScale
++            onPress={() => {
++              setError(null);
++              setAbierta(true);
++            }}
++            hitSlop={8}
++            accessibilityRole="button"
++            accessibilityLabel={`Agregar ${titulo.toLowerCase()}`}>
++            <View style={[styles.fila, { gap: 4 }]}>
++              <TabIcon name="anadir" color={colors.primary} size={14} />
++              <ThemedText variant="caption" color="primary">
++                Agregar
++              </ThemedText>
++            </View>
++          </PressableScale>
++        ) : null}
++      </View>
++
++      {urls.length > 0 ? (
++        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
++          {urls.map((url, i) => {
++            // El título que escribió quien la tomó: dice POR QUÉ está esa foto ahí.
++            const nombre = titulos?.[i]?.trim();
++            return (
++              <View key={`${url}-${i}`} style={styles.fotoItem}>
++                <Pressable
++                  onPress={() => onAbrir(url)}
++                  accessibilityRole="imagebutton"
++                  accessibilityLabel={nombre ? `Ver a pantalla completa: ${nombre}` : 'Ver la foto a pantalla completa'}>
++                  <Image
++                    source={{ uri: url }}
++                    style={[styles.foto, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg }]}
++                  />
++                </Pressable>
++                {nombre ? (
++                  <ThemedText variant="caption" color="textSecondary" numberOfLines={2}>
++                    {nombre}
++                  </ThemedText>
++                ) : null}
++              </View>
++            );
++          })}
++        </ScrollView>
++      ) : (
++        <Card>
++          <ThemedText variant="body" color="textMuted">
++            {vacio}
++          </ThemedText>
++        </Card>
++      )}
++
++      <HojaModal
++        visible={abierta}
++        onClose={() => (subiendo ? undefined : setAbierta(false))}
++        titulo={titulo}
++        icon="camara"
++        tone="primary">
++        <EvidenceField
++          uris={fotos}
++          onChange={setFotos}
++          titulos={nombres}
++          onTitulos={setNombres}
++          validarTitulo={validar}
++          editable={!subiendo}
++        />
++        {error ? (
++          <ThemedText variant="caption" color="danger">
++            {error}
++          </ThemedText>
++        ) : null}
++        <Button label={subiendo ? 'Subiendo…' : 'Subir fotos'} icon="camara" onPress={() => void subir()} loading={subiendo} />
++      </HojaModal>
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  flex1: { flex: 1, minWidth: 0 },
++  foto: { width: 220, height: 150, borderWidth: StyleSheet.hairlineWidth },
++  fotoItem: { width: 220, gap: 6 },
++});
+diff --git a/src/components/perfil-hojas.tsx b/src/components/perfil-hojas.tsx
+index 6efb1e4..d68be90 100644
+--- a/src/components/perfil-hojas.tsx
++++ b/src/components/perfil-hojas.tsx
+@@ -1,52 +1,6 @@
+-import { StyleSheet, View } from 'react-native';
+-
+-import { Card } from '@/components/card';
+ import { ConfirmarSalida } from '@/components/confirmar-salida';
+-import { HojaModal } from '@/components/hoja-modal';
+-import { PressableScale } from '@/components/pressable-scale';
+-import { PulseDot } from '@/components/pulse-dot';
+-import { TabIcon, type TabIconName } from '@/components/tab-icon';
+-import { ThemedText } from '@/components/themed-text';
+-import { useSync } from '@/sync';
+-import { useTheme, type ColorTokens } from '@/theme';
+-import { formatFecha, formatHora } from '@/utils/date';
+-
+-export type HojaPerfil = 'sync' | 'cerrar' | null;
+ 
+-/** Botón ancho secundario, el que remata las hojas simples. */
+-function BotonHoja({
+-  label,
+-  icon,
+-  tone,
+-  onPress,
+-}: {
+-  label: string;
+-  icon?: TabIconName;
+-  tone?: keyof ColorTokens;
+-  onPress: () => void;
+-}) {
+-  const { colors, radii, spacing } = useTheme();
+-  const color = tone ? colors[tone] : colors.textSecondary;
+-  return (
+-    <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
+-      <View
+-        style={[
+-          styles.boton,
+-          {
+-            backgroundColor: colors.surfaceElevated,
+-            borderColor: colors.border,
+-            borderRadius: radii.lg,
+-            gap: spacing.sm,
+-          },
+-        ]}>
+-        {icon ? <TabIcon name={icon} color={color} size={17} /> : null}
+-        <ThemedText variant="button" style={{ color }}>
+-          {label}
+-        </ThemedText>
+-      </View>
+-    </PressableScale>
+-  );
+-}
++export type HojaPerfil = 'cerrar' | null;
+ 
+ type Props = {
+   hoja: HojaPerfil;
+@@ -55,114 +9,16 @@ type Props = {
+ };
+ 
+ /**
+- * Las VENTANAS del Perfil, una por apartado: editar tus datos, el PIN, la
+- * sincronización y salir.
++ * Las VENTANAS del Perfil. Hoy solo queda salir.
+  *
+  * Documentos NO está aquí: es una PANTALLA (`/documentos`). Un documento se
+  * abre desde ella y volver debe devolverte a la lista — con una hoja era
+  * imposible, porque un Modal se pinta encima de la pantalla que abres.
+  *
+- * Cada una hace exactamente lo que hacía su pantalla —los mismos servicios y
+- * las mismas validaciones—, pero sin sacarte del perfil. Nada de lo que va
+- * dentro es un modal: los selectores y el calendario se despliegan en su sitio,
+- * porque un modal dentro de otro deja la pantalla bloqueada en iOS.
++ * Se fue «Pendientes por enviar» (T-74): el conductor no administra envíos. La
++ * cola sigue reintentando sola por detrás (`@/sync/outbox`) y, si se rinde con
++ * algo, lo dice una vez con un aviso; no hace falta una lista que mirar.
+  */
+-export function HojasPerfil({
+-  hoja,
+-  onCerrar,
+-  onSignOut,
+-}: Props) {
+-  const { colors, spacing } = useTheme();
+-  const { sincronizando, pendientes, ultimoEnvio, sincronizarAhora } = useSync();
+-  // Qué pasó al tocar «Enviar ahora» (o en el reintento solo), dicho en llano.
+-  const resumenEnvio = ultimoEnvio
+-    ? ultimoEnvio.fallidas === 0
+-      ? `Último intento (${formatHora(ultimoEnvio.en)}): se envió todo.`
+-      : `Último intento (${formatHora(ultimoEnvio.en)}): no se pudo enviar ${ultimoEnvio.fallidas}` +
+-        (ultimoEnvio.enviadas > 0 ? `; se enviaron ${ultimoEnvio.enviadas}.` : '.')
+-    : null;
+-
+-  return (
+-    <>
+-      {/* ── PENDIENTES POR ENVIAR ─────────────────────────────────────────
+-          Lo que la cola guarda son las FOTOS que no llegaron a la nube: lo que
+-          va a FOM —la inspección, la ODT, el costo— se manda en el momento y,
+-          si falla, lo dice ahí. Así que esta hoja enseña eso y nada más.
+-
+-          Se fue el interruptor de "simular sin conexión": era una herramienta
+-          NUESTRA de pruebas en la mano de quien conduce, y activarla dejaba de
+-          enviar lo que reportaba sin que él supiera por qué. Y se fue el
+-          "Conectado · Todo al día": el teléfono ya dice si hay señal, y una
+-          pantalla que solo habla de sí misma no es un dato. ── */}
+-      <HojaModal
+-        visible={hoja === 'sync'}
+-        onClose={onCerrar}
+-        titulo="Pendientes por enviar"
+-        icon="sync"
+-        tone="accent">
+-        {pendientes.length === 0 ? (
+-          <Card style={{ padding: spacing.lg, gap: 2 }}>
+-            <ThemedText variant="subtitle">Nada pendiente</ThemedText>
+-            {resumenEnvio ? (
+-              <ThemedText variant="caption" color="textMuted">
+-                {resumenEnvio}
+-              </ThemedText>
+-            ) : null}
+-          </Card>
+-        ) : (
+-          <>
+-            {sincronizando ? (
+-              <View style={[styles.inline, { gap: spacing.sm }]}>
+-                <PulseDot color={colors.info} active size={10} />
+-                <ThemedText variant="caption" color="textSecondary">
+-                  Enviando…
+-                </ThemedText>
+-              </View>
+-            ) : null}
+-            {pendientes.map((p) => (
+-              <Card key={p.id} style={{ padding: spacing.md, gap: 2 }}>
+-                <ThemedText variant="button" numberOfLines={1}>
+-                  {p.descripcion}
+-                </ThemedText>
+-                <ThemedText variant="caption" color="textMuted">
+-                  {formatFecha(p.creadaEn)}
+-                  {p.intentos > 0 ? ` · ${p.intentos} ${p.intentos === 1 ? 'intento' : 'intentos'}` : ''}
+-                </ThemedText>
+-                {/* El porqué real (lo que dijo Cloudinary o el teléfono): que no sea un misterio. */}
+-                {p.motivo ? (
+-                  <ThemedText variant="caption" color="danger">
+-                    {`No se envió: ${p.motivo}`}
+-                  </ThemedText>
+-                ) : null}
+-              </Card>
+-            ))}
+-            {resumenEnvio && !sincronizando ? (
+-              <ThemedText variant="caption" color="textSecondary">
+-                {resumenEnvio}
+-              </ThemedText>
+-            ) : null}
+-            <BotonHoja
+-              label={sincronizando ? 'Enviando…' : 'Enviar ahora'}
+-              icon="sync"
+-              onPress={() => void sincronizarAhora()}
+-            />
+-          </>
+-        )}
+-      </HojaModal>
+-
+-      {/* ── CERRAR SESIÓN ── */}
+-      <ConfirmarSalida visible={hoja === 'cerrar'} onCancelar={onCerrar} onSalir={onSignOut} />
+-    </>
+-  );
++export function HojasPerfil({ hoja, onCerrar, onSignOut }: Props) {
++  return <ConfirmarSalida visible={hoja === 'cerrar'} onCancelar={onCerrar} onSalir={onSignOut} />;
+ }
+-
+-const styles = StyleSheet.create({
+-  boton: {
+-    height: 52,
+-    flexDirection: 'row',
+-    alignItems: 'center',
+-    justifyContent: 'center',
+-    borderWidth: StyleSheet.hairlineWidth,
+-  },
+-  inline: { flexDirection: 'row', alignItems: 'center' },
+-});
+diff --git a/src/components/scroll-visible.tsx b/src/components/scroll-visible.tsx
+index b1c972d..9f6b794 100644
+--- a/src/components/scroll-visible.tsx
++++ b/src/components/scroll-visible.tsx
+@@ -306,7 +306,7 @@ export const ScrollVisible = forwardRef<ScrollVisibleHandle, Props>(function Scr
+           // lo conseguían con un `flexGrow: 1` en este mismo estilo.
+           contentContainerStyle={styles.crece}
+           keyboardShouldPersistTaps="handled"
+-          keyboardDismissMode="interactive"
++          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+           // El propio scroll deja hueco al teclado (iOS): sin esto, el último
+           // campo del formulario no tiene a dónde subir.
+           automaticallyAdjustKeyboardInsets
+diff --git a/src/components/teclado-listo.tsx b/src/components/teclado-listo.tsx
+new file mode 100644
+index 0000000..fd6c5e2
+--- /dev/null
++++ b/src/components/teclado-listo.tsx
+@@ -0,0 +1,76 @@
++import { useId } from 'react';
++import { InputAccessoryView, Keyboard, Platform, Pressable, StyleSheet, View } from 'react-native';
++
++import { ThemedText } from '@/components/themed-text';
++import { useTheme } from '@/theme';
++
++/** Prefijo del `nativeID` de la barra «Listo» que lleva cada campo. */
++export const TECLADO_LISTO_ID = 'fom-teclado-listo';
++
++/**
++ * El `nativeID` de la barra de UN campo.
++ *
++ * No puede ser uno común para toda la app: en la arquitectura nueva, cada
++ * `InputAccessoryView` busca en la ventana el PRIMER campo con su id al
++ * montarse y se queda solo con ese. Con un id compartido, la barra saldría
++ * en un único campo de toda la app. Uno por campo y cada uno lleva la suya.
++ */
++export function useTecladoListoId(): string {
++  return `${TECLADO_LISTO_ID}-${useId()}`;
++}
++
++/**
++ * Barra «Listo» encima del teclado (solo iPhone).
++ *
++ * Es la forma obvia de bajar el teclado en cualquier campo: en los de varias
++ * líneas Enter hace salto de línea, y el teclado numérico ni siquiera tiene
++ * Enter. En Android no existe `InputAccessoryView`: allí se baja con el botón
++ * del sistema, tocando fuera o deslizando la lista.
++ */
++export function TecladoListo({ nativeID }: { nativeID: string }) {
++  const { colors, colorScheme, spacing, borderWidths } = useTheme();
++  if (Platform.OS !== 'ios') return null;
++  // En claro el azul FOM como texto sobre blanco no llega al contraste: ahí
++  // va el azul oscuro de «elegido» (lo mismo que hace la píldora).
++  const azul = colorScheme === 'light' ? colors.onActive : colors.primary;
++
++  return (
++    <InputAccessoryView nativeID={nativeID} backgroundColor={colors.surfaceElevated}>
++      <View
++        style={[
++          styles.barra,
++          {
++            backgroundColor: colors.surfaceElevated,
++            borderTopColor: colors.border,
++            borderTopWidth: borderWidths.thin,
++            paddingHorizontal: spacing.md,
++          },
++        ]}>
++        <Pressable
++          onPress={() => Keyboard.dismiss()}
++          hitSlop={8}
++          accessibilityRole="button"
++          accessibilityLabel="Listo, cerrar el teclado"
++          style={({ pressed }) => [styles.boton, { opacity: pressed ? 0.6 : 1 }]}>
++          <ThemedText variant="button" style={{ color: azul }}>
++            Listo
++          </ThemedText>
++        </Pressable>
++      </View>
++    </InputAccessoryView>
++  );
++}
++
++const styles = StyleSheet.create({
++  barra: {
++    height: 44,
++    flexDirection: 'row',
++    alignItems: 'center',
++    justifyContent: 'flex-end',
++  },
++  boton: {
++    height: 44,
++    justifyContent: 'center',
++    paddingHorizontal: 4,
++  },
++});
+diff --git a/src/components/text-field.tsx b/src/components/text-field.tsx
+index e70d8ef..1958e72 100644
+--- a/src/components/text-field.tsx
++++ b/src/components/text-field.tsx
+@@ -3,6 +3,7 @@ import { Animated, Pressable, StyleSheet, TextInput, View, type TextInputProps }
+ 
+ import { EyeIcon } from '@/components/eye-icon';
+ import { useScrollVisible } from '@/components/scroll-visible';
++import { TecladoListo, useTecladoListoId } from '@/components/teclado-listo';
+ import { ThemedText } from '@/components/themed-text';
+ import { familiaPorPeso, useReducedMotion, useTheme } from '@/theme';
+ 
+@@ -29,7 +30,7 @@ export type TextFieldProps = TextInputProps & {
+  * halo es de peligro. Respeta "reducir movimiento" (enciende sin animar).
+  */
+ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
+-  { label, error, nombre, style, onFocus, onBlur, multiline, secureTextEntry, ...rest },
++  { label, error, nombre, style, onFocus, onBlur, multiline, secureTextEntry, inputAccessoryViewID, returnKeyType, ...rest },
+   ref,
+ ) {
+   const { colors, colorScheme, spacing, radii, typography, borderWidths, motion } = useTheme();
+@@ -50,6 +51,12 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
+   }, [nombre, registrarCampo]);
+ 
+   const esPassword = !!secureTextEntry;
++
++  // Barra «Listo» encima del teclado (iPhone): la propia del campo, salvo que
++  // quien lo usa traiga otra.
++  const idListo = useTecladoListoId();
++  const idBarra = inputAccessoryViewID ?? idListo;
++
+   // Prioridad de borde: error > foco > reposo.
+   const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
+   const borderWidth = error || focused ? borderWidths.focus : borderWidths.thin;
+@@ -102,11 +109,11 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
+           placeholderTextColor={colors.textMuted}
+           selectionColor={colors.primary}
+           multiline={multiline}
+-          // En un campo de varias líneas, Enter cierra el teclado (como esperan
+-          // todos): nadie escribe párrafos en una falla y no había otra forma
+-          // obvia de bajarlo. Quien necesite saltos de línea lo pide por props.
+-          returnKeyType={multiline ? 'done' : undefined}
+-          submitBehavior={multiline ? 'blurAndSubmit' : undefined}
++          // En varias líneas Enter hace salto de línea; el teclado se baja con
++          // la barra «Listo», tocando fuera o deslizando. En una sola línea,
++          // Enter cierra salvo que la pantalla pida «next» y salte al siguiente.
++          returnKeyType={returnKeyType ?? (multiline ? undefined : 'done')}
++          inputAccessoryViewID={idBarra}
+           accessibilityLabel={label}
+           // En contraseña, se oculta salvo que el usuario pulse el ojito.
+           secureTextEntry={esPassword && !revelado}
+@@ -156,6 +163,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
+           </Pressable>
+         ) : null}
+       </View>
++      {inputAccessoryViewID ? null : <TecladoListo nativeID={idListo} />}
+       {error ? (
+         <ThemedText variant="caption" color="danger">
+           {error}
+diff --git a/src/lib/cloudinary.ts b/src/lib/cloudinary.ts
+index e5abf95..32ce082 100644
+--- a/src/lib/cloudinary.ts
++++ b/src/lib/cloudinary.ts
+@@ -25,6 +25,7 @@
+  */
+ 
+ import { File } from 'expo-file-system';
++import { Platform } from 'react-native';
+ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+ 
+ const NUBE = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME ?? '';
+@@ -345,29 +346,6 @@ async function prepararFoto(uri: string): Promise<string> {
+   }
+ }
+ 
+-/** El mensaje de error que trae Cloudinary en el cuerpo (`{error:{message}}`), si lo trae. */
+-async function mensajeCloudinary(res: Response): Promise<string> {
+-  try {
+-    const texto = await res.text();
+-    try {
+-      const json = JSON.parse(texto) as { error?: { message?: string } };
+-      if (json.error?.message) return json.error.message;
+-    } catch {
+-      // No era JSON: va el texto, recortado.
+-    }
+-    return texto.slice(0, 160) || res.statusText || 'sin detalle';
+-  } catch {
+-    return res.statusText || 'sin detalle';
+-  }
+-}
+-
+-/** El motivo legible de una excepción de `fetch` (sin red, tiempo agotado…). */
+-function motivoDeExcepcion(e: unknown, corte: AbortController): string {
+-  if (corte.signal.aborted) return `la subida tardó más de ${TIEMPO_LIMITE / 1000} s (señal lenta)`;
+-  const texto = e instanceof Error ? e.message : String(e);
+-  return /network request failed/i.test(texto) ? 'sin conexión con Cloudinary (Network request failed)' : texto;
+-}
+-
+ export type OpcionesSubida = {
+   /**
+    * FALLA en vez de devolver la ruta local del teléfono.
+@@ -426,33 +404,31 @@ async function subirAhora(uri: string, destino: DestinoFoto, opts: OpcionesSubid
+   for (let intento = 0; intento < 4; intento += 1, n += 1) {
+     const publicId = `${destino.base}/${n}`;
+     const body = new FormData();
+-    // React Native acepta este objeto {uri, name, type} como archivo.
+-    body.append('file', {
+-      uri: archivo,
+-      name: `foto-${n}.${esPdf ? 'pdf' : 'jpg'}`,
+-      type: esPdf ? 'application/pdf' : 'image/jpeg',
+-    } as unknown as Blob);
++    // En el teléfono, XMLHttpRequest acepta este objeto {uri, name, type} como
++    // archivo; el `fetch` de Expo NO (falla con «Unsupported FormDataPart
++    // implementation»). En la versión web se manda el archivo de verdad.
++    const nombre = `foto-${n}.${esPdf ? 'pdf' : 'jpg'}`;
++    const tipo = esPdf ? 'application/pdf' : 'image/jpeg';
++    if (Platform.OS === 'web') {
++      body.append('file', await (await fetch(archivo)).blob(), nombre);
++    } else {
++      body.append('file', { uri: archivo, name: nombre, type: tipo } as unknown as Blob);
++    }
+     body.append('upload_preset', PRESET);
+     body.append('public_id', publicId);
+     if (destino.etiqueta) body.append('tags', destino.etiqueta);
+     // `|` y `=` separan los pares del contexto: dentro de un título lo romperían.
+     if (opts.titulo) body.append('context', `caption=${opts.titulo.replace(/[|=]/g, ' ')}`);
+ 
+-    let json: { secure_url?: string; existing?: boolean };
+-    const corte = new AbortController();
+-    const reloj = setTimeout(() => corte.abort(), TIEMPO_LIMITE);
++    let json: { secure_url?: string; existing?: boolean; error?: { message?: string } };
+     try {
+-      const res = await fetch(`https://api.cloudinary.com/v1_1/${NUBE}/image/upload`, {
+-        method: 'POST',
+-        body,
+-        signal: corte.signal,
+-      });
+-      if (!res.ok) return fallo(uri, opts, `Cloudinary respondió ${res.status}: ${await mensajeCloudinary(res)}`);
+-      json = (await res.json()) as typeof json;
++      const r = await enviarFormulario(`https://api.cloudinary.com/v1_1/${NUBE}/image/upload`, body, TIEMPO_LIMITE);
++      json = r.json as typeof json;
++      if (r.status < 200 || r.status >= 300) {
++        return fallo(uri, opts, `Cloudinary respondió ${r.status}: ${json?.error?.message ?? r.texto.slice(0, 160)}`);
++      }
+     } catch (e) {
+-      return fallo(uri, opts, motivoDeExcepcion(e, corte));
+-    } finally {
+-      clearTimeout(reloj);
++      return fallo(uri, opts, e instanceof Error ? e.message : String(e));
+     }
+     if (json.existing) continue;
+     if (!json.secure_url) return fallo(uri, opts, 'Cloudinary no devolvió la dirección de la foto');
+@@ -465,6 +441,34 @@ async function subirAhora(uri: string, destino: DestinoFoto, opts: OpcionesSubid
+   return fallo(uri, opts, `los números ${primero} a ${n - 1} de ${destino.base} ya estaban ocupados`);
+ }
+ 
++/**
++ * POST multipart con XMLHttpRequest: en React Native es el que entiende los
++ * archivos `{uri, name, type}` dentro de un FormData (el `fetch` de Expo no).
++ */
++function enviarFormulario(
++  url: string,
++  body: FormData,
++  limite: number,
++): Promise<{ status: number; texto: string; json: unknown }> {
++  return new Promise((resolve, reject) => {
++    const xhr = new XMLHttpRequest();
++    xhr.open('POST', url);
++    xhr.timeout = limite;
++    xhr.onload = () => {
++      let json: unknown = null;
++      try {
++        json = JSON.parse(xhr.responseText);
++      } catch {
++        json = null;
++      }
++      resolve({ status: xhr.status, texto: xhr.responseText ?? '', json });
++    };
++    xhr.onerror = () => reject(new Error('sin conexión con Cloudinary'));
++    xhr.ontimeout = () => reject(new Error(`tardó más de ${Math.round(limite / 1000)} s`));
++    xhr.send(body);
++  });
++}
++
+ /** Sube varias fotos a la misma dirección, una tras otra (cada una toma su número). */
+ export async function subirFotosEn(uris: string[], destino: DestinoFoto, opts: OpcionesSubida = {}): Promise<string[]> {
+   const urls: string[] = [];
+diff --git a/src/services/fomOrdenes.ts b/src/services/fomOrdenes.ts
+index 69fae70..3b8c1a3 100644
+--- a/src/services/fomOrdenes.ts
++++ b/src/services/fomOrdenes.ts
+@@ -4,6 +4,7 @@ import type {
+   AuditoriaEvento,
+   FaultType,
+   OdtEstado,
++  OdtEstadoFom,
+   OdtGravedad,
+   OdtTipo,
+   WorkOrderListItem,
+@@ -38,6 +39,7 @@ interface OrdenFom {
+   vehicleCode: string;
+   vehiclePlate: string | null;
+   createdByName: string | null;
++  maintenanceActionId?: string | null;
+ }
+ 
+ /** Un cambio de estatus de la orden, tal como lo devuelve FOM. */
+@@ -58,7 +60,7 @@ interface EventoFom {
+  * entregada a calidad— sigue En revisión: alguien ya la atiende. `cancelada` ya
+  * no espera nada, igual que una resuelta.
+  */
+-const ESTADO: Record<string, OdtEstado> = {
++const ESTADO: Record<OdtEstadoFom, OdtEstado> = {
+   abierta: 'abierta',
+   en_revision: 'en_revision',
+   aprobada: 'en_revision',
+@@ -73,6 +75,19 @@ const ESTADO: Record<string, OdtEstado> = {
+ /** Como lo escribe la línea de tiempo de la orden. */
+ const ETIQUETA: Record<OdtEstado, string> = { abierta: 'Abierta', en_revision: 'En revisión', cerrada: 'Resuelta' };
+ 
++const ESTADOS_FOM = Object.keys(ESTADO) as OdtEstadoFom[];
++
++/** El estado real de FOM, si es uno de los nueve que se conocen. */
++function estadoFomDe(s: string): OdtEstadoFom | undefined {
++  return (ESTADOS_FOM as string[]).includes(s) ? (s as OdtEstadoFom) : undefined;
++}
++
++/** Los tres de la app para un estado de FOM; uno desconocido se lee como abierta. */
++function agrupado(s: string | null | undefined): OdtEstado {
++  const real = s ? estadoFomDe(s) : undefined;
++  return real ? ESTADO[real] : 'abierta';
++}
++
+ const FALLAS: readonly string[] = ['motor', 'frenos', 'neumaticos', 'electrico', 'carroceria', 'otro'];
+ const GRAVEDADES: readonly string[] = ['baja', 'media', 'alta'];
+ 
+@@ -105,7 +120,9 @@ function aOrden(o: OrdenFom): WorkOrderListItem {
+     tipoFalla: o.failureType && FALLAS.includes(o.failureType) ? (o.failureType as FaultType) : undefined,
+     gravedad: GRAVEDADES.includes(o.severity) ? (o.severity as OdtGravedad) : undefined,
+     tipo: o.kind === 'preventiva' ? 'preventiva' : 'correctiva',
+-    estado: ESTADO[o.status] ?? 'abierta',
++    estado: agrupado(o.status),
++    estadoFom: estadoFomDe(o.status),
++    accionMantenimientoId: o.maintenanceActionId ?? undefined,
+     creadaEn: o.createdAt,
+     ubicacionTexto: o.location ?? '',
+     notaSolucion: o.resolutionNote ?? undefined,
+@@ -126,8 +143,8 @@ function aEvento(ev: EventoFom, orden: WorkOrderListItem): AuditoriaEvento {
+     fecha: ev.occurredAt,
+   };
+   if (!ev.fromStatus) return { ...base, accion: 'crear' };
+-  const desde = ESTADO[ev.fromStatus] ?? 'abierta';
+-  const hacia = ESTADO[ev.toStatus] ?? 'abierta';
++  const desde = agrupado(ev.fromStatus);
++  const hacia = agrupado(ev.toStatus);
+   return {
+     ...base,
+     accion: 'editar',
+@@ -151,15 +168,21 @@ function errorDeOrden(e: unknown): Error {
+           ? 'La ODT cambió mientras la tenías abierta. Vuelve a cargarla.'
+           : /already/i.test(e.message)
+             ? 'La ODT ya está en ese estatus.'
+-            : 'Ese cambio de estatus no se puede hacer.',
++            : /reopened/i.test(e.message)
++              ? 'Una ODT de un mantenimiento programado no se reabre.'
++              : 'Ese cambio de estatus no se puede hacer.',
+       );
+     case 400:
+       return new Error(
+         /resolutionNote/i.test(e.message)
+           ? 'Cuenta qué se hizo para resolverla.'
+-          : /odometer/i.test(e.message)
+-            ? 'La unidad no tiene odómetro registrado: no se puede cerrar su mantenimiento.'
+-            : 'Revisa los datos de la orden.',
++          : /completionOdometerKm is required/i.test(e.message)
++            ? 'Escribe el kilometraje con que se cerró el mantenimiento.'
++            : /odometer/i.test(e.message)
++              ? 'Ese kilometraje no sirve para cerrar este mantenimiento.'
++              : /note/i.test(e.message)
++                ? 'Escribe una nota de al menos 3 letras.'
++                : 'Revisa los datos de la orden.',
+       );
+     default:
+       return new Error(mensajeDe(e));
+@@ -205,12 +228,27 @@ export async function getOrdenesDeUnidadFom(vehicleId: string): Promise<WorkOrde
+ }
+ 
+ /**
+- * Una orden por id, con las fotos de su reporte y de su cierre, y su historial.
+- * `null` si no existe o no es de la empresa de la sesión.
++ * Un cambio de estado de la orden con sus estados REALES (de los nueve): con
++ * ellos se nombra cada evento del historial como en la web («Trabajo aprobado»,
++ * «Orden cancelada»…). Sin `de`, es su creación.
++ */
++export interface CambioOdt {
++  id: string;
++  de: OdtEstadoFom | null;
++  a: OdtEstadoFom;
++  nota: string | null;
++  actor: string | null;
++  en: string;
++}
++
++/**
++ * Una orden por id, con las fotos de su reporte y de su cierre, y su historial
++ * (como auditoría y, con los estados reales, como `cambios`). `null` si no
++ * existe o no es de la empresa de la sesión.
+  */
+ export async function getOrdenDetalleFom(
+   id: string,
+-): Promise<{ orden: WorkOrderListItem; historial: AuditoriaEvento[] } | null> {
++): Promise<{ orden: WorkOrderListItem; historial: AuditoriaEvento[]; cambios: CambioOdt[] } | null> {
+   let datos: { workOrder: OrdenFom; events?: EventoFom[] };
+   try {
+     datos = (await pedir(`/api/v1/mobile/work-orders/${id}`)) as typeof datos;
+@@ -223,17 +261,30 @@ export async function getOrdenDetalleFom(
+     fotosEn(etiquetaCierreOrden(id)),
+   ]);
+   const orden = aOrden(datos.workOrder);
++  const eventos = (datos.events ?? []).slice().sort((a, b) => a.sequence - b.sequence);
+   return {
+     orden: {
+       ...orden,
+       evidenciaUrls: fotos.length > 0 ? fotos.map((f) => f.url) : undefined,
+       evidenciaTitulos: fotos.length > 0 ? fotos.map((f) => f.titulo ?? '') : undefined,
+       evidenciaResolucionUrls: cierre.length > 0 ? cierre.map((f) => f.url) : undefined,
++      evidenciaResolucionTitulos: cierre.length > 0 ? cierre.map((f) => f.titulo ?? '') : undefined,
+     },
+-    historial: (datos.events ?? [])
+-      .slice()
+-      .sort((a, b) => a.sequence - b.sequence)
+-      .map((ev) => aEvento(ev, orden)),
++    historial: eventos.map((ev) => aEvento(ev, orden)),
++    cambios: eventos.flatMap((ev) => {
++      const a = estadoFomDe(ev.toStatus);
++      if (!a) return [];
++      return [
++        {
++          id: `${orden.id}-${ev.sequence}`,
++          de: ev.fromStatus ? (estadoFomDe(ev.fromStatus) ?? null) : null,
++          a,
++          nota: ev.note,
++          actor: ev.actorName,
++          en: ev.occurredAt,
++        },
++      ];
++    }),
+   };
+ }
+ 
+@@ -300,6 +351,8 @@ export async function crearOrdenFom(
+         ...(d.accionId ? { maintenanceActionId: d.accionId } : {}),
+         ...(d.gravedad ? { severity: d.gravedad } : {}),
+         ...(d.tipoFalla ? { failureType: d.tipoFalla } : {}),
++        // Dónde está la unidad, si se sabe: igual que en el reporte del conductor.
++        ...(d.ubicacion && d.ubicacion.trim().length >= 2 ? { location: d.ubicacion.trim().slice(0, 200) } : {}),
+       },
+     })) as typeof creada;
+   } catch (e) {
+@@ -309,29 +362,50 @@ export async function crearOrdenFom(
+   return getOrdenFom(creada.workOrderId ?? '');
+ }
+ 
+-/** El odómetro con que se cierra una orden preventiva; las correctivas no lo llevan. */
++/**
++ * El odómetro con que se cierra una preventiva enlazada a su mantenimiento.
++ * Las demás no lo llevan: FOM lo rechaza en una orden sin mantenimiento.
++ */
+ async function odometroDeCierre(id: string): Promise<number | null> {
+   const orden = await getOrdenFom(id).catch(() => null);
+-  if (orden?.tipo !== 'preventiva') return null;
++  if (orden?.tipo !== 'preventiva' || !orden.accionMantenimientoId) return null;
+   const km = await odometroFom(orden.vehicleId);
+   return km === null ? null : redondear(km);
+ }
+ 
+ /**
+- * Cambia el estatus de una orden. Cada cambio lleva su nota; al resolverla, la
+- * nota es "qué se hizo" y va con el costo en USD.
++ * Cambia el estatus de una orden. Cada cambio lleva su nota (FOM la exige, de 3
++ * a 1000 letras); al resolverla, la nota es "qué se hizo" y va con el costo en
++ * USD.
++ *
++ * `desde` es el estado REAL que se leyó (de los nueve): FOM lo compara con el
++ * suyo y valida la transición con él. Mandar el agrupado («En revisión» por una
++ * aprobada o en taller) acababa en 409.
+  *
+  * Al cerrar un mantenimiento programado, FOM pide con qué km se cerró: con él
+- * vuelve a empezar la cuenta de su control.
++ * vuelve a empezar la cuenta de su control. Si no viene, se toma el odómetro
++ * de la unidad.
++ *
++ * `clave` identifica el intento (cabecera `Idempotency-Key`): un reintento con
++ * la misma clave y lo mismo no registra el cambio dos veces.
+  */
+ export async function cambiarEstadoOrdenFom(
+   id: string,
+-  c: { desde: OdtEstado; hacia: OdtEstado; nota: string; costo?: number },
++  c: {
++    desde: OdtEstadoFom;
++    hacia: OdtEstadoFom;
++    nota: string;
++    costo?: number;
++    odometroKm?: number;
++    clave?: string;
++  },
+ ): Promise<void> {
+-  const odometro = c.hacia === 'cerrada' ? await odometroDeCierre(id) : null;
++  const odometro =
++    c.hacia !== 'cerrada' ? null : c.odometroKm !== undefined ? redondear(c.odometroKm) : await odometroDeCierre(id);
+   try {
+     await pedir(`/api/v1/mobile/work-orders/${id}/status`, {
+       metodo: 'PATCH',
++      ...(c.clave ? { idempotencia: c.clave } : {}),
+       cuerpo: {
+         expectedStatus: c.desde,
+         status: c.hacia,
+@@ -350,6 +424,21 @@ export async function cambiarEstadoOrdenFom(
+   }
+ }
+ 
++/**
++ * AÑADE fotos a una orden ya creada: a las de su reporte o a las del trabajo
++ * terminado. Aquí la foto es la acción entera: sube ya y falla a la cara si no
++ * sube. Devuelve sus direcciones en la nube.
++ */
++export async function agregarFotosOrden(
++  id: string,
++  galeria: 'reporte' | 'cierre',
++  uris: string[],
++  titulos: string[] = [],
++): Promise<string[]> {
++  const destino = galeria === 'reporte' ? etiquetaFotosOrden(id) : etiquetaCierreOrden(id);
++  return subirFotosOrden(destino, uris, titulos);
++}
++
+ /** Sube fotos a Cloudinary en la dirección de su orden, con el título de cada una. */
+ export async function subirFotosOrden(destino: DestinoFoto, uris: string[], titulos: string[] = []): Promise<string[]> {
+   const urls: string[] = [];
+@@ -488,7 +577,7 @@ export async function getOdtAsignadas(): Promise<OdtAsignada[] | null> {
+           {
+             id: o.id,
+             estadoFom: o.status,
+-            estado: ESTADO[o.status] ?? 'en_revision',
++            estado: ESTADO[o.status],
+             tipo: o.kind === 'preventiva' ? ('preventiva' as const) : ('correctiva' as const),
+             descripcion: o.description,
+             gravedad: GRAVEDADES.includes(o.severity) ? (o.severity as OdtGravedad) : 'media',
+@@ -519,7 +608,7 @@ export async function getEjecucionOdt(id: string): Promise<EjecucionOdt | null>
+   return {
+     id: datos.workOrder.id,
+     estadoFom: datos.workOrder.status,
+-    estado: ESTADO[datos.workOrder.status] ?? 'abierta',
++    estado: agrupado(datos.workOrder.status),
+     vehicleId: datos.workOrder.vehicleId,
+     responsable: vigente ? { userId: vigente.userId, nombre: vigente.displayName, desde: vigente.assignedAt } : null,
+     eventos: (datos.events ?? []).map((e) => ({
+diff --git a/src/services/inspeccionService.ts b/src/services/inspeccionService.ts
+index 3be4f3f..308c4c0 100644
+--- a/src/services/inspeccionService.ts
++++ b/src/services/inspeccionService.ts
+@@ -1,3 +1,5 @@
++import AsyncStorage from '@react-native-async-storage/async-storage';
++
+ import { destinoArchivo, subirFotosEn } from '@/lib/cloudinary';
+ import { ErrorFom, mensajeDe, pedir } from '@/lib/fom-api';
+ import { encolar } from '@/sync/outbox';
+@@ -34,15 +36,27 @@ function errorDeInspeccion(e: unknown): Error {
+   if (e.statusCode === 404) return new Error('Esta unidad o su formato de inspección ya no están disponibles.');
+   if (e.statusCode === 400 && /every item/i.test(e.message)) return new Error('Responde todos los ítems antes de enviar.');
+   // FOM admite UNA diaria por unidad y día, la haga quien la haga.
+-  if (e.statusCode === 409 && /already submitted today/i.test(e.message)) {
+-    return new Error('Esta unidad ya tiene su inspección diaria de hoy.');
+-  }
++  if (e.statusCode === 409 && /already submitted today/i.test(e.message)) return new InspeccionYaHecha();
+   return new Error(mensajeDe(e));
+ }
+ 
++/**
++ * FOM rechazó el envío porque la unidad ya tiene su diaria de hoy (409).
++ *
++ * Es su propia clase para que la pantalla no muestre un error y ya: pasa a
++ * «ya está hecha», que es lo que de verdad ocurre.
++ */
++export class InspeccionYaHecha extends Error {
++  constructor() {
++    super('La inspección de hoy de esta unidad ya está hecha.');
++    this.name = 'InspeccionYaHecha';
++  }
++}
++
+ /** Un formato de inspección tal como lo devuelve FOM. */
+ interface FormatoFom {
+   id: string;
++  name?: string;
+   items: {
+     id: string;
+     category: string;
+@@ -67,6 +81,7 @@ export async function getPlantillaInspeccion(vehicle: Pick<Vehicle, 'id' | 'tipo
+   } catch (e) {
+     throw errorDeInspeccion(e);
+   }
++  if (formato?.name) nombresDeFormato.set(formato.id, formato.name);
+   const categorias: InspeccionCategoria[] = [];
+   for (const item of [...(formato?.items ?? [])].sort((a, b) => a.displayOrder - b.displayOrder)) {
+     let categoria = categorias.find((c) => c.nombre === item.category);
+@@ -365,6 +380,12 @@ export async function getInspeccionFom(id: string): Promise<InspeccionDetalle> {
+   }
+ }
+ 
++/**
++ * El nombre de cada formato leído, por su id: la plantilla de la app no lo
++ * guarda y la diaria recordada en el teléfono lo lleva como título de la hoja.
++ */
++const nombresDeFormato = new Map<string, string>();
++
+ /**
+  * Envía la inspección (FOM-02 §4.1): tres respuestas por ítem, Conforme,
+  * Observación o Falla.
+@@ -374,6 +395,13 @@ export async function getInspeccionFom(id: string): Promise<InspeccionDetalle> {
+  * Bloqueada, se le avisa al supervisor.
+  */
+ export async function enviarInspeccion(input: EnviarInspeccionInput): Promise<ResultadoInspeccion> {
++  return (await enviar(input)).resultado;
++}
++
++/** El envío en sí; además del resultado devuelve el id que le dio FOM. */
++async function enviar(
++  input: EnviarInspeccionInput,
++): Promise<{ resultado: ResultadoInspeccion; inspectionId: string }> {
+   const { formatoId } = input.plantilla;
+   if (!formatoId) throw new Error('Tu empresa no tiene un formato de inspección publicado.');
+   const items = new Map(input.plantilla.categorias.flatMap((c) => c.items).map((i) => [i.id, i]));
+@@ -435,11 +463,14 @@ export async function enviarInspeccion(input: EnviarInspeccionInput): Promise<Re
+   const fallas = input.respuestas.filter((r) => r.estado === 'falla');
+   const ordenes = await Promise.all(enviada.workOrderIds.map((id) => getOrdenFom(id).catch(() => null)));
+   return {
+-    estado: enviada.result,
+-    fallas: fallas.length,
+-    fallasCriticas: fallas.filter((r) => items.get(r.itemId)?.critico).length,
+-    ordenesGeneradas: ordenes.filter((o): o is WorkOrderListItem => o !== null),
+-    completadaEn: new Date().toISOString(),
++    inspectionId: enviada.inspectionId,
++    resultado: {
++      estado: enviada.result,
++      fallas: fallas.length,
++      fallasCriticas: fallas.filter((r) => items.get(r.itemId)?.critico).length,
++      ordenesGeneradas: ordenes.filter((o): o is WorkOrderListItem => o !== null),
++      completadaEn: new Date().toISOString(),
++    },
+   };
+ }
+ 
+@@ -472,3 +503,153 @@ export async function solicitarOtraUnidad(vehicleId: string): Promise<void> {
+     throw new Error(mensajeDe(e));
+   }
+ }
++
++// ───────────────── La DIARIA de hoy de una unidad, para el conductor ─────────
++
++/**
++ * Lo que se sabe de la diaria de hoy de una unidad.
++ *
++ * `hecha` puede venir sin la inspección (`null`): FOM dijo que ya existe (409)
++ * pero no quién ni cuándo. `detalle` es lo respondido, si el teléfono lo tiene.
++ */
++export type DiariaDeHoy =
++  | { estado: 'hecha'; inspeccion: InspeccionResumen | null; detalle?: InspeccionDetalle }
++  | { estado: 'pendiente' }
++  | { estado: 'sin_comprobar'; motivo: string };
++
++/** Lo que el teléfono recuerda de la diaria de una unidad. */
++interface DiariaGuardada {
++  fecha: string;
++  /** Sin detalle cuando solo se sabe que existe (FOM respondió 409). */
++  detalle: InspeccionDetalle | null;
++}
++
++/** Por empresa y unidad: la misma unidad en otra empresa es otra cuenta. */
++function claveDiaria(vehicleId: string): string {
++  return `fom:inspeccion-diaria:${enteActivoFom() ?? ''}:${vehicleId}`;
++}
++
++async function leerDiariaGuardada(vehicleId: string): Promise<DiariaGuardada | null> {
++  try {
++    const crudo = await AsyncStorage.getItem(claveDiaria(vehicleId));
++    const guardada = crudo ? (JSON.parse(crudo) as DiariaGuardada) : null;
++    // La de otro día ya no dice nada de hoy.
++    return guardada?.fecha === hoy() ? guardada : null;
++  } catch {
++    return null;
++  }
++}
++
++async function guardarDiaria(vehicleId: string, detalle: InspeccionDetalle | null): Promise<void> {
++  const guardada: DiariaGuardada = { fecha: hoy(), detalle };
++  try {
++    await AsyncStorage.setItem(claveDiaria(vehicleId), JSON.stringify(guardada));
++  } catch {
++    // Sin almacenamiento solo se pierde el recuerdo; FOM sigue teniendo la inspección.
++  }
++}
++
++/**
++ * ¿La unidad ya tiene su inspección DIARIA de hoy (fecha del teléfono)?
++ *
++ * FOM rechaza la segunda solo donde ya corre la regla de una por unidad y día;
++ * donde no, la app lo impide por su cuenta. Mira en dos sitios:
++ *  - FOM, la lista de la unidad: ve también la que hizo otra persona. Las sin
++ *    clase (servidor viejo) cuentan como diarias; las programadas, no.
++ *  - El teléfono: la que se envió desde aquí. Cubre al conductor, a quien FOM
++ *    no le deja leer esa lista (403).
++ * Si FOM no contesta y el teléfono no sabe nada, sale `sin_comprobar`: quien
++ * llama deja hacerla —mejor que bloquear sin datos— y lo avisa.
++ */
++export async function getDiariaDeHoy(vehicleId: string): Promise<DiariaDeHoy> {
++  const fecha = hoy();
++  const guardada = await leerDiariaGuardada(vehicleId);
++  try {
++    // Vienen de la más nueva a la más vieja: las de hoy caben en la primera página.
++    const { items } = await paginaFom<FilaInspeccionFom>(`/inspections?vehicleId=${vehicleId}`, {
++      limit: 20,
++      offset: 0,
++    });
++    // Si hubo dos (servidor sin la regla), manda la última, como en el Resumen.
++    const diaria = items
++      .map(aResumen)
++      .filter((i) => i.fecha === fecha && i.clase !== 'programada' && i.resultado !== 'pendiente')
++      .sort((a, b) => (b.enviadaEn ?? '').localeCompare(a.enviadaEn ?? ''))[0];
++    if (diaria) {
++      const detalle = guardada?.detalle?.id === diaria.id ? guardada.detalle : undefined;
++      return { estado: 'hecha', inspeccion: diaria, ...(detalle ? { detalle } : {}) };
++    }
++  } catch (e) {
++    if (!guardada) {
++      return {
++        estado: 'sin_comprobar',
++        motivo:
++          e instanceof ErrorFom
++            ? 'No pudimos comprobar en FOM si esta unidad ya tiene la inspección de hoy. Puedes hacerla igual.'
++            : 'Sin conexión: no pudimos comprobar si esta unidad ya tiene la inspección de hoy. Puedes hacerla igual.',
++      };
++    }
++  }
++  // Lo enviado desde este teléfono vale aunque la lista de FOM no lo enseñe.
++  if (guardada) {
++    return { estado: 'hecha', inspeccion: guardada.detalle, ...(guardada.detalle ? { detalle: guardada.detalle } : {}) };
++  }
++  return { estado: 'pendiente' };
++}
++
++/**
++ * Envía la DIARIA y la recuerda en el teléfono con lo respondido.
++ *
++ * Así la pantalla pasa a «ya está hecha» y su resultado se puede ver e
++ * imprimir sin pedírselo a FOM, que al conductor no se lo deja leer. Si FOM
++ * contesta que ya había una (409), también se recuerda: ese formulario no
++ * se vuelve a ofrecer hoy.
++ */
++export async function enviarInspeccionDiaria(
++  input: EnviarInspeccionInput,
++  quien: { id: string; nombre: string; unidad: string; placa?: string },
++): Promise<{ resultado: ResultadoInspeccion; detalle: InspeccionDetalle }> {
++  let enviada: Awaited<ReturnType<typeof enviar>>;
++  try {
++    enviada = await enviar(input);
++  } catch (e) {
++    if (e instanceof InspeccionYaHecha) await guardarDiaria(input.vehicleId, null);
++    throw e;
++  }
++  // El orden del formato es el de la hoja impresa.
++  const items = new Map(
++    input.plantilla.categorias.flatMap((c) => c.items).map((item, orden) => [item.id, { item, orden }]),
++  );
++  const ubicacion = input.ubicacionTexto.trim();
++  const detalle: InspeccionDetalle = {
++    id: enviada.inspectionId,
++    resultado: enviada.resultado.estado,
++    clase: 'diaria',
++    fecha: hoy(),
++    enviadaEn: enviada.resultado.completadaEn,
++    vehicleId: input.vehicleId,
++    unidad: quien.unidad,
++    ...(quien.placa ? { placa: quien.placa } : {}),
++    conductor: quien.nombre,
++    conductorId: quien.id,
++    ...(ubicacion ? { ubicacion } : {}),
++    formato: nombresDeFormato.get(input.plantilla.formatoId ?? '') ?? 'Inspección preoperacional',
++    respuestas: input.respuestas
++      .map((r) => {
++        const deFormato = items.get(r.itemId);
++        return {
++          id: r.itemId,
++          itemId: r.itemId,
++          categoria: deFormato?.item.categoria ?? '',
++          nombre: deFormato?.item.nombre ?? r.itemId,
++          estado: r.estado,
++          critico: deFormato?.item.critico ?? false,
++          ...(r.nota?.trim() ? { nota: r.nota.trim() } : {}),
++          orden: deFormato?.orden ?? 0,
++        };
++      })
++      .sort((a, b) => a.orden - b.orden),
++  };
++  await guardarDiaria(input.vehicleId, detalle);
++  return { resultado: enviada.resultado, detalle };
++}
+diff --git a/src/services/workOrderService.ts b/src/services/workOrderService.ts
+index 24047e7..b3f2701 100644
+--- a/src/services/workOrderService.ts
++++ b/src/services/workOrderService.ts
+@@ -10,7 +10,13 @@ import { encolar } from '@/sync/outbox';
+ import type { FaultType, OdtGravedad, WorkOrder } from '@/types';
+ import { MIN_DESC_ODT } from '@/utils/odt';
+ 
+-import { crearOrdenFom, etiquetaFotosOrden, reportarFallaFom, subirFotosOrden } from './fomOrdenes';
++import {
++  crearOrdenFom,
++  etiquetaCierreOrden,
++  etiquetaFotosOrden,
++  reportarFallaFom,
++  subirFotosOrden,
++} from './fomOrdenes';
+ import { accionEnFom, type AccionMantenimiento } from './maintenanceService';
+ import { olvidarPanelConductor } from './notiConductorService';
+ 
+@@ -100,3 +106,26 @@ export async function crearOrdenDeTrabajo(input: NuevaOrdenInput): Promise<WorkO
+     evidenciaTitulos: input.evidenciaTitulos,
+   };
+ }
++
++/**
++ * Sube por la cola las fotos del trabajo terminado que se adjuntaron al
++ * cerrar la ODT. Lo que importa del cierre es el ESTADO: que una foto no suba
++ * no puede impedirlo. Lo que ya es una URL ya está en la nube.
++ */
++export async function encolarFotosCierre(id: string, uris: string[], titulos: string[] = []): Promise<void> {
++  const locales = uris.flatMap((uri, i) => (/^https?:\/\//.test(uri) ? [] : [{ uri, titulo: titulos[i] ?? '' }]));
++  if (locales.length === 0) return;
++  const destino = etiquetaCierreOrden(id);
++  const subidas: (string | undefined)[] = [];
++  await encolar(
++    'ot',
++    `Fotos del cierre de la ODT (${locales.length})`,
++    async () => {
++      for (const [i, f] of locales.entries()) {
++        if (subidas[i]) continue;
++        [subidas[i]] = await subirFotosOrden(destino, [f.uri], [f.titulo]);
++      }
++    },
++    { reintentar: true },
++  );
++}
+diff --git a/src/sync/outbox.ts b/src/sync/outbox.ts
+index 3650649..488fa20 100644
+--- a/src/sync/outbox.ts
++++ b/src/sync/outbox.ts
+@@ -13,6 +13,10 @@
+  * La cola vive en memoria: lo pendiente se reintenta solo al volver la app al
+  * frente y, mientras quede algo, cada cierto tiempo (no hay quien escuche la
+  * red: el reintento hace de «volvió la conexión»).
++ *
++ * La cola NO se enseña (Marco, T-74): el conductor no administra envíos. Lo que
++ * se rinde —demasiados intentos o demasiado tiempo— sale de la cola y deja un
++ * aviso único en `avisos`, para que la interfaz lo diga una vez y lo descarte.
+  */
+ 
+ import { AppState } from 'react-native';
+@@ -34,6 +38,14 @@ export interface OutboxOpInfo {
+   intentos: number;
+   /** ISO del último intento. */
+   ultimoIntento?: string;
++  /** Qué decirle al conductor si se rinde (si no, se arma con la descripción). */
++  aviso?: string;
++}
++
++/** Aviso de algo que se dejó de reintentar: se muestra una vez y se descarta. */
++export interface AvisoSync {
++  id: string;
++  texto: string;
+ }
+ 
+ /** Operación completa: los datos + la función que hace la sincronización real. */
+@@ -56,6 +68,8 @@ export interface EstadoSync {
+   pendientes: OutboxOpInfo[];
+   /** El último envío de la cola, o `null` si aún no hubo. */
+   ultimoEnvio: ResultadoEnvio | null;
++  /** Lo que se dejó de reintentar, por avisar. */
++  avisos: AvisoSync[];
+ }
+ 
+ let _online = true;
+@@ -65,10 +79,17 @@ let _seq = 0;
+ let _ultimoEnvio: ResultadoEnvio | null = null;
+ /** Vueltas seguidas en que no salió nada: alargan la espera del reintento solo. */
+ let _fallosSeguidos = 0;
++let _avisos: AvisoSync[] = [];
+ 
+ // Snapshot cacheado: `useSyncExternalStore` exige una referencia ESTABLE que
+ // solo cambie cuando cambia el estado (si no, entra en bucle).
+-let _snapshot: EstadoSync = { online: true, sincronizando: false, pendientes: [], ultimoEnvio: null };
++let _snapshot: EstadoSync = {
++  online: true,
++  sincronizando: false,
++  pendientes: [],
++  ultimoEnvio: null,
++  avisos: [],
++};
+ const listeners = new Set<() => void>();
+ 
+ function reconstruirSnapshot() {
+@@ -78,6 +99,7 @@ function reconstruirSnapshot() {
+     // Se excluye la función ejecutora (no es serializable ni se muestra).
+     pendientes: _cola.map(({ ejecutar: _ejecutar, ...info }) => info),
+     ultimoEnvio: _ultimoEnvio,
++    avisos: _avisos,
+   };
+ }
+ 
+@@ -113,9 +135,15 @@ export interface OpcionesEncolar {
+    * Para lo que va DESPUÉS de algo que ya se guardó —las fotos de una
+    * inspección que ya está registrada— fallar hacia arriba es mentir: le dirías
+    * al conductor que su inspección no se envió cuando sí se envió. Mejor que
+-   * quede pendiente, se vea en Sincronización y se reintente.
++   * quede pendiente y se reintente solo.
+    */
+   reintentar?: boolean;
++  /**
++   * Qué decir si se deja de reintentar (p. ej. «No pudimos enviar la foto de
++   * la ODT 0123. Vuelve a agregarla desde la orden.»). Sin él, se arma con la
++   * descripción.
++   */
++  aviso?: string;
+ }
+ 
+ /**
+@@ -151,6 +179,7 @@ export async function encolar(
+     motivo,
+     intentos: motivo ? 1 : 0,
+     ultimoIntento: motivo ? ahora : undefined,
++    aviso: opciones.aviso,
+     ejecutar,
+   });
+   emitir();
+@@ -186,6 +215,7 @@ async function procesarCola(): Promise<void> {
+     }
+     emitir();
+   }
++  rendirVencidas();
+   _fallosSeguidos = fallidas > 0 && enviadas === 0 ? _fallosSeguidos + 1 : 0;
+   _ultimoEnvio = { en: new Date().toISOString(), enviadas, fallidas };
+   _sincronizando = false;
+@@ -193,6 +223,46 @@ async function procesarCola(): Promise<void> {
+   programarReintento();
+ }
+ 
++// ─────────────────────── Rendirse ───────────────────────
++
++/** Pasados estos intentos o este tiempo, no se insiste más: se avisa y se suelta. */
++const MAX_INTENTOS = 10;
++const MAX_EDAD = 24 * 60 * 60_000;
++
++/** El aviso de una operación que se suelta, en llano y con qué hacer. */
++function avisoDe(op: OutboxOp): string {
++  if (op.aviso) return op.aviso;
++  // «Fotos de la ODT (2)» → «las fotos de la ODT»: sin la cuenta, que no dice nada.
++  const que = op.descripcion.replace(/\s*\(\d+\)\s*$/, '');
++  const donde = op.tipo === 'inspeccion' ? 'la inspección' : 'la orden';
++  const agregar = /^fotos/i.test(que) ? 'agregarlas' : 'agregarla';
++  return `No pudimos enviar ${que.charAt(0).toLowerCase()}${que.slice(1)}. Vuelve a ${agregar} desde ${donde}.`;
++}
++
++/**
++ * Saca de la cola lo que lleva demasiados intentos o demasiado tiempo y deja
++ * un aviso por cada una. Seguir reintentando algo que no va a salir solo gasta
++ * datos y batería, y el conductor no sabría que tiene que volver a hacerlo.
++ */
++function rendirVencidas() {
++  const ahora = Date.now();
++  const vencidas = _cola.filter(
++    (o) => o.intentos > MAX_INTENTOS || (o.intentos > 0 && ahora - Date.parse(o.creadaEn) > MAX_EDAD),
++  );
++  if (vencidas.length === 0) return;
++  const ids = new Set(vencidas.map((o) => o.id));
++  _cola = _cola.filter((o) => !ids.has(o.id));
++  _avisos = [..._avisos, ...vencidas.map((o) => ({ id: o.id, texto: avisoDe(o) }))];
++  emitir();
++}
++
++/** Quita un aviso ya mostrado (lo llama la interfaz al ocultarlo). */
++export function descartarAviso(id: string): void {
++  if (!_avisos.some((a) => a.id === id)) return;
++  _avisos = _avisos.filter((a) => a.id !== id);
++  emitir();
++}
++
+ // ─────────────────────── Reintento solo ───────────────────────
+ 
+ /** Primera espera antes de reintentar; se dobla con cada vuelta fallida, hasta el tope. */
+diff --git a/src/sync/sync-banner.tsx b/src/sync/sync-banner.tsx
+index 3c9ffc5..4fc20e2 100644
+--- a/src/sync/sync-banner.tsx
++++ b/src/sync/sync-banner.tsx
+@@ -1,82 +1,28 @@
+-import { useRouter } from 'expo-router';
+-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+-
+-import { PressableScale } from '@/components/pressable-scale';
+-import { ThemedText } from '@/components/themed-text';
+-import { useTheme } from '@/theme';
++import { Toast } from '@/components/toast';
+ 
++import { descartarAviso } from './outbox';
+ import { useSync } from './use-sync';
+ 
+ /**
+- * Indicador global de sincronización de FOM-DRIVER. Flota sobre las pestañas y
+- * solo aparece cuando hace falta: sin conexión, sincronizando o con cosas por
+- * enviar. Al tocarlo abre la hoja "Pendientes por enviar" del perfil —la misma
+- * que se abre desde ahí—, no una pantalla aparte: eran dos superficies para lo
+- * mismo. Cuando no hay nada que mandar, no muestra nada.
++ * Aviso global de sincronización de FOM-DRIVER. Va montado sobre las pestañas.
++ *
++ * Ya no enseña la cola («N por enviar»): el conductor no administra envíos
++ * (T-74). Lo pendiente se reintenta solo por detrás; aquí solo aparece, una
++ * vez, lo que se dejó de reintentar y qué hacer con ello. Al ocultarse se
++ * descarta y, si hay otro, sale el siguiente.
+  */
+ export function SyncBanner() {
+-  const { colors, spacing, radii, shadows } = useTheme();
+-  const router = useRouter();
+-  const { sincronizando, pendientes } = useSync();
+-
+-  const nPend = pendientes.length;
+-
+-  // Nada que mandar: no estorbar.
+-  if (!sincronizando && nPend === 0) return null;
+-
+-  /*
+-   * Dice lo que hay, no si hay señal.
+-   *
+-   * Tenía una rama de "Sin conexión" que nadie podía encender: lo único que
+-   * marcaba la app como desconectada era el interruptor de pruebas, que ya no
+-   * existe. Cuando alguien escuche la conexión de verdad, vuelve —con un dato
+-   * detrás, no con un estado que solo se fingía—.
+-   */
+-  const color = colors.info;
+-  const texto = sincronizando ? 'Enviando…' : `${nPend} por enviar`;
+-
++  const { avisos } = useSync();
++  const aviso = avisos[0] ?? null;
+   return (
+-    <View style={styles.wrap} pointerEvents="box-none">
+-      <PressableScale onPress={() => router.navigate({ pathname: '/mas', params: { hoja: 'sync' } })}>
+-        <View
+-          style={[
+-            styles.pill,
+-            shadows.card,
+-            {
+-              backgroundColor: colors.surfaceElevated,
+-              borderColor: color,
+-              borderRadius: radii.pill,
+-              paddingHorizontal: spacing.lg,
+-              paddingVertical: spacing.sm,
+-              gap: spacing.sm,
+-            },
+-          ]}>
+-          {sincronizando ? (
+-            <ActivityIndicator size="small" color={color} />
+-          ) : (
+-            <View style={[styles.dot, { backgroundColor: color }]} />
+-          )}
+-          <ThemedText variant="caption" style={{ color: colors.text }}>
+-            {texto}
+-          </ThemedText>
+-        </View>
+-      </PressableScale>
+-    </View>
++    <Toast
++      key={aviso?.id ?? 'nada'}
++      mensaje={aviso?.texto ?? null}
++      tone="danger"
++      duracion={5200}
++      onOculto={() => {
++        if (aviso) descartarAviso(aviso.id);
++      }}
++    />
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  wrap: {
+-    position: 'absolute',
+-    left: 0,
+-    right: 0,
+-    bottom: 72, // sobre la barra de pestañas
+-    alignItems: 'center',
+-  },
+-  pill: {
+-    flexDirection: 'row',
+-    alignItems: 'center',
+-    borderWidth: StyleSheet.hairlineWidth,
+-  },
+-  dot: { width: 8, height: 8, borderRadius: 4 },
+-});
+diff --git a/src/types/index.ts b/src/types/index.ts
+index 63d5a63..b5779b0 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -817,6 +817,22 @@ export type OdtEstado = 'abierta' | 'en_revision' | 'cerrada';
+ /** Estados de ODT en su orden de avance (para selectores y stepper). */
+ export const ODT_ESTADOS: OdtEstado[] = ['abierta', 'en_revision', 'cerrada'];
+ 
++/**
++ * Los NUEVE estados con que FOM lleva la ODT por dentro. En pantalla se agrupan
++ * en los tres de `OdtEstado`; al servidor se le manda siempre el real, que es
++ * el que valida sus transiciones.
++ */
++export type OdtEstadoFom =
++  | 'abierta'
++  | 'en_revision'
++  | 'aprobada'
++  | 'asignada'
++  | 'en_ejecucion'
++  | 'pausada'
++  | 'en_calidad'
++  | 'cerrada'
++  | 'cancelada';
++
+ /**
+  * Origen de una ODT (FOM-02 §3.3–§3.4): `correctiva` la reporta un conductor;
+  * `preventiva` la crea sola el sistema cuando se cumple una alerta de
+@@ -878,6 +894,13 @@ export interface WorkOrder {
+   /** Regla que la generó (solo preventivas, §3.4): al cerrarla, el contador se reinicia. */
+   reglaAlertaId?: string;
+   estado: OdtEstado;
++  /** El estado REAL en FOM (de los nueve), cuando se leyó de allí. */
++  estadoFom?: OdtEstadoFom;
++  /**
++   * La acción de mantenimiento a la que está enlazada, si sale de una. FOM le
++   * pide el kilometraje al cerrarla y no deja reabrirla.
++   */
++  accionMantenimientoId?: string;
+   /** Marca de tiempo ISO de creación. */
+   creadaEn: string;
+   ubicacionTexto: string;
+@@ -897,6 +920,8 @@ export interface WorkOrder {
+   costo?: number;
+   /** Factura / foto de la resolución (URLs), parte del cierre (§3.3). */
+   evidenciaResolucionUrls?: string[];
++  /** Título de cada foto de `evidenciaResolucionUrls`, en el mismo orden (puede ir vacío). */
++  evidenciaResolucionTitulos?: string[];
+   /** Fecha de resolución (ISO); se fija al cerrar la ODT (§3.3). */
+   resueltaEn?: string;
+ }
+diff --git a/src/utils/odt.ts b/src/utils/odt.ts
+index 08bddf9..16d9fef 100644
+--- a/src/utils/odt.ts
++++ b/src/utils/odt.ts
+@@ -11,7 +11,7 @@
+  * viaja en la navegación.
+  */
+ 
+-import type { FaultType, OdtEstado, OdtTipo } from '@/types';
++import type { FaultType, OdtEstado, OdtEstadoFom, OdtTipo } from '@/types';
+ 
+ /** Un id de mock antiguo, del estilo `wo-292`. */
+ const MOCK = /^wo-(\d+)$/i;
+@@ -148,3 +148,354 @@ export function errorDeTransicion(desde: OdtEstado, hacia: OdtEstado): string |
+   if (desde === 'cerrada' && hacia === 'abierta') return 'Una ODT resuelta se reabre a En revisión.';
+   return null;
+ }
++
++// ─────────────────────── Los pasos de la ODT (igual que la web) ──────────────
++
++/**
++ * Un paso del ciclo de la ODT que da el GESTOR (supervisor o admin). Los del
++ * responsable de taller (iniciar, pausar, reanudar, entregar) van aparte, en
++ * `odt-asignada-acciones`.
++ */
++export type PasoOdt =
++  | 'revision'
++  | 'aprobar'
++  | 'asignar'
++  | 'reasignar'
++  | 'resolver'
++  | 'cerrar'
++  | 'devolver_abierta'
++  | 'devolver_ejecucion'
++  | 'cancelar'
++  | 'reabrir';
++
++/** Qué pide cada paso: nota opcional, nota obligatoria, el cierre completo o una persona. */
++export type DatosPaso = 'nota_opcional' | 'nota' | 'cierre' | 'persona';
++
++export interface DefinicionPaso {
++  /** El texto del botón: el mismo en la web y en la app. */
++  label: string;
++  /** El estado real al que lleva; `null` si no es un cambio de estado (asignar). */
++  hacia: OdtEstadoFom | null;
++  datos: DatosPaso;
++  /** El rótulo y la pista de la nota. */
++  etiquetaNota: string;
++  placeholder: string;
++  /**
++   * La nota que viaja si la opcional se deja vacía: FOM exige una en cada
++   * cambio de estado (3 letras como mínimo).
++   */
++  notaPorDefecto?: string;
++  variante: 'primary' | 'secondary' | 'danger';
++}
++
++export const PASO_ODT: Record<PasoOdt, DefinicionPaso> = {
++  revision: {
++    label: 'Pasar a revisión →',
++    hacia: 'en_revision',
++    datos: 'nota_opcional',
++    etiquetaNota: 'Nota (opcional)',
++    placeholder: 'Algo que deba saber quien la revisa…',
++    notaPorDefecto: 'Pasada a revisión',
++    variante: 'primary',
++  },
++  aprobar: {
++    label: 'Aprobar',
++    hacia: 'aprobada',
++    datos: 'nota_opcional',
++    etiquetaNota: 'Nota (opcional)',
++    placeholder: 'Indicaciones para el trabajo…',
++    notaPorDefecto: 'Aprobada',
++    variante: 'primary',
++  },
++  asignar: {
++    label: 'Asignar responsable',
++    hacia: null,
++    datos: 'persona',
++    etiquetaNota: 'Nota (opcional)',
++    placeholder: 'Indicaciones para el responsable…',
++    variante: 'primary',
++  },
++  reasignar: {
++    label: 'Reasignar',
++    hacia: null,
++    datos: 'persona',
++    etiquetaNota: 'Nota (opcional)',
++    placeholder: 'Por qué cambia el responsable…',
++    variante: 'secondary',
++  },
++  resolver: {
++    label: 'Resolver sin taller',
++    hacia: 'cerrada',
++    datos: 'cierre',
++    etiquetaNota: 'Qué se hizo',
++    placeholder: 'Qué se hizo para resolverla…',
++    variante: 'secondary',
++  },
++  cerrar: {
++    label: 'Cerrar',
++    hacia: 'cerrada',
++    datos: 'cierre',
++    etiquetaNota: 'Qué se hizo',
++    placeholder: 'Qué se hizo para resolverla…',
++    variante: 'primary',
++  },
++  devolver_abierta: {
++    label: 'Devolver a abierta',
++    hacia: 'abierta',
++    datos: 'nota',
++    etiquetaNota: 'Qué falta',
++    placeholder: 'Qué falta para revisarla…',
++    variante: 'secondary',
++  },
++  devolver_ejecucion: {
++    label: 'Devolver a ejecución',
++    hacia: 'en_ejecucion',
++    datos: 'nota',
++    etiquetaNota: 'Qué falta',
++    placeholder: 'Qué falta del trabajo…',
++    variante: 'secondary',
++  },
++  cancelar: {
++    label: 'Cancelar orden',
++    hacia: 'cancelada',
++    datos: 'nota',
++    etiquetaNota: 'Por qué se cancela',
++    placeholder: 'Por qué ya no hace falta…',
++    variante: 'danger',
++  },
++  reabrir: {
++    label: 'Reabrir',
++    hacia: 'en_revision',
++    datos: 'nota',
++    etiquetaNota: 'Por qué se reabre',
++    placeholder: 'Qué quedó pendiente…',
++    variante: 'secondary',
++  },
++};
++
++/**
++ * Los pasos del gestor en cada estado REAL, ajustados a lo que FOM acepta (su
++ * tabla de transiciones y la de asignación):
++ *
++ * - Reasignar solo con la orden `asignada`: FOM no cambia al responsable de
++ *   una que ya está en taller (409).
++ * - Una cancelada no sale de ahí, y una cerrada enlazada a un mantenimiento
++ *   programado no se reabre (409): ahí no se ofrece «Reabrir».
++ */
++export function pasosDelGestor(estado: OdtEstadoFom, o: { conMantenimiento?: boolean } = {}): PasoOdt[] {
++  switch (estado) {
++    case 'abierta':
++      return ['revision', 'resolver', 'cancelar'];
++    case 'en_revision':
++      return ['aprobar', 'resolver', 'devolver_abierta', 'cancelar'];
++    case 'aprobada':
++      return ['asignar', 'resolver', 'cancelar'];
++    case 'asignada':
++      return ['reasignar', 'cancelar'];
++    case 'en_ejecucion':
++    case 'pausada':
++      return ['cancelar'];
++    case 'en_calidad':
++      return ['cerrar', 'devolver_ejecucion'];
++    case 'cerrada':
++      return o.conMantenimiento ? [] : ['reabrir'];
++    case 'cancelada':
++      return [];
++  }
++}
++
++/**
++ * Cuál de los tres que se ven corresponde a un estado real, como en la web:
++ * lo que va entre revisarla y cerrarla sigue En revisión; una cancelada ya no
++ * espera nada, igual que una resuelta.
++ */
++export function estadoVisibleDe(e: OdtEstadoFom): OdtEstado {
++  if (e === 'abierta') return 'abierta';
++  if (e === 'cerrada' || e === 'cancelada') return 'cerrada';
++  return 'en_revision';
++}
++
++/** El estado real dicho en corto, debajo de los tres que se ven. */
++export const ESTADO_FOM_LABEL: Record<OdtEstadoFom, string> = {
++  abierta: 'Reportada, sin revisar',
++  en_revision: 'La revisa el supervisor',
++  aprobada: 'Aprobada, sin responsable',
++  asignada: 'Con responsable, sin iniciar',
++  en_ejecucion: 'En taller',
++  pausada: 'Trabajo pausado',
++  en_calidad: 'Entregada: la revisa el supervisor',
++  cerrada: 'Resuelta',
++  cancelada: 'Cancelada',
++};
++
++// ─────────────────────── El historial, nombrado como en la web ───────────────
++
++/** Un cambio de estado tal como lo da FOM, con sus estados reales. */
++export interface CambioHistorial {
++  id: string;
++  de: OdtEstadoFom | null;
++  a: OdtEstadoFom;
++  nota: string | null;
++  actor: string | null;
++  en: string;
++}
++
++/** Un evento del responsable en taller. */
++export interface EventoTallerHistorial {
++  id: string;
++  tipo: 'inicio' | 'pausa' | 'reanudacion' | 'entrega';
++  nota: string | null;
++  actorNombre: string | null;
++  en: string;
++}
++
++/** Un hito del historial ya nombrado. `a` es el estado real al que llevó. */
++export interface HitoOdt {
++  id: string;
++  titulo: string;
++  actor: string | null;
++  /** El responsable, en el hito en que se asignó. */
++  responsable?: string;
++  en: string;
++  a: OdtEstadoFom | null;
++  notas: string[];
++}
++
++/** Los mismos títulos que `historial-odt.js` de la web. */
++const TITULO_ESTADO: Record<OdtEstadoFom, string> = {
++  abierta: 'Falla reportada',
++  en_revision: 'Enviada a revisión',
++  aprobada: 'Trabajo aprobado',
++  asignada: 'Responsable asignado',
++  en_ejecucion: 'Trabajo iniciado',
++  pausada: 'Trabajo pausado',
++  en_calidad: 'Trabajo entregado para revisión de calidad',
++  cerrada: 'Orden resuelta',
++  cancelada: 'Orden cancelada',
++};
++const ESTADO_EVENTO: Record<EventoTallerHistorial['tipo'], OdtEstadoFom> = {
++  inicio: 'en_ejecucion',
++  pausa: 'pausada',
++  reanudacion: 'en_ejecucion',
++  entrega: 'en_calidad',
++};
++const TITULO_EVENTO: Record<EventoTallerHistorial['tipo'], string> = {
++  inicio: 'Trabajo iniciado',
++  pausa: 'Trabajo pausado',
++  reanudacion: 'Trabajo reanudado',
++  entrega: TITULO_ESTADO.en_calidad,
++};
++
++const instante = (en: string | null | undefined) => (en ? new Date(en).getTime() : NaN);
++const nombreVisible = (v: string | null | undefined) => (v && v !== '—' ? v : null);
++
++/** El mismo paso leído dos veces (cambio de estado y evento de taller): mismo actor y destino, ±1,5 s. */
++function mismaOperacion(h: HitoOdt, e: { a: OdtEstadoFom; actor: string | null; en: string }): boolean {
++  const actor = nombreVisible(h.actor);
++  return (
++    h.a === e.a &&
++    !!actor &&
++    actor === nombreVisible(e.actor) &&
++    Number.isFinite(instante(h.en)) &&
++    Math.abs(instante(h.en) - instante(e.en)) <= 1500
++  );
++}
++
++/**
++ * El HISTORIAL de la ODT con un nombre por evento, como la web: junta los
++ * cambios de estado con los eventos de taller (FOM registra el mismo paso por
++ * las dos vías) sin duplicarlos, y pone el responsable en su asignación. Del
++ * más viejo al más nuevo.
++ *
++ * Sin cambios que leer (órdenes viejas), se completa con lo que la orden sabe:
++ * cuándo se creó y cuándo se resolvió. No se inventa ningún hito.
++ */
++export function presentarHistorialOdt(
++  odt: {
++    id: string;
++    creadorNombre: string | null;
++    creadaEn: string;
++    estado: OdtEstado;
++    resueltaEn?: string;
++    notaSolucion?: string;
++  },
++  cambios: CambioHistorial[],
++  ejecucion: { eventos: EventoTallerHistorial[]; responsable: { nombre: string; desde: string } | null } | null,
++): HitoOdt[] {
++  const hitos: HitoOdt[] = cambios.map((c) => ({
++    id: c.id,
++    titulo: !c.de
++      ? 'Falla reportada'
++      : c.a === 'en_revision' && c.de === 'cerrada'
++        ? 'Orden reabierta'
++        : c.a === 'en_ejecucion' && c.de === 'pausada'
++          ? 'Trabajo reanudado'
++          : c.a === 'en_ejecucion' && c.de === 'en_calidad'
++            ? 'Trabajo devuelto al taller'
++            : TITULO_ESTADO[c.a],
++    actor: nombreVisible(c.actor) ?? (!c.de ? nombreVisible(odt.creadorNombre) : null),
++    en: c.en,
++    a: c.a,
++    notas: c.nota ? [c.nota] : [],
++  }));
++  if (hitos.length === 0) {
++    hitos.push({
++      id: `${odt.id}-creada`,
++      titulo: 'Falla reportada',
++      actor: nombreVisible(odt.creadorNombre),
++      en: odt.creadaEn,
++      a: 'abierta',
++      notas: [],
++    });
++    if (odt.estado === 'cerrada' && odt.resueltaEn) {
++      hitos.push({
++        id: `${odt.id}-resuelta`,
++        titulo: TITULO_ESTADO.cerrada,
++        actor: null,
++        en: odt.resueltaEn,
++        a: 'cerrada',
++        notas: odt.notaSolucion ? [odt.notaSolucion] : [],
++      });
++    }
++  }
++  for (const e of ejecucion?.eventos ?? []) {
++    const a = ESTADO_EVENTO[e.tipo];
++    if (!a) continue;
++    const existente = hitos.find((h) => mismaOperacion(h, { a, actor: e.actorNombre, en: e.en }));
++    if (existente) {
++      existente.titulo = TITULO_EVENTO[e.tipo];
++      if (e.nota && !existente.notas.includes(e.nota)) existente.notas.push(e.nota);
++    } else {
++      hitos.push({
++        id: `ev-${e.id}`,
++        titulo: TITULO_EVENTO[e.tipo],
++        actor: nombreVisible(e.actorNombre),
++        en: e.en,
++        a,
++        notas: e.nota ? [e.nota] : [],
++      });
++    }
++  }
++  const responsable = ejecucion?.responsable;
++  if (responsable?.desde) {
++    const asignada = hitos.find(
++      (h) =>
++        h.a === 'asignada' &&
++        Number.isFinite(instante(h.en)) &&
++        Math.abs(instante(h.en) - instante(responsable.desde)) <= 1500,
++    );
++    if (asignada) asignada.responsable = responsable.nombre;
++    else {
++      hitos.push({
++        id: `${odt.id}-responsable`,
++        titulo: TITULO_ESTADO.asignada,
++        actor: null,
++        responsable: responsable.nombre,
++        en: responsable.desde,
++        a: 'asignada',
++        notas: [],
++      });
++    }
++  }
++  return hitos.sort((x, y) => (instante(x.en) || 0) - (instante(y.en) || 0));
++}
 -- 
 2.55.0.windows.3
 

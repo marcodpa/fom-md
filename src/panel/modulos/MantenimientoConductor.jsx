@@ -12,6 +12,7 @@ import { NuevaOdt } from './Mantenimiento'
 import './mantenimiento.css'
 import { GaleriaArchivos } from '../comp/Archivos'
 import OdtAsignadas from '../comp/OdtAsignadas'
+import { ESTADOS_DE_TALLER } from '../datos/odtAsignadas'
 
 // ============================================================
 // MANTENIMIENTO DEL CONDUCTOR
@@ -158,7 +159,7 @@ export default function MantenimientoConductor() {
         )}
       </Modal>
       <Modal titulo="Qué pasó con esta orden" abierto={Boolean(detalle)} alCerrar={() => setAbierta(null)} ancho={640}>
-        {detalle && <Historia odt={detalle} />}
+        {detalle && <Historia odt={detalle} perfil={perfil} />}
       </Modal>
     </div>
   )
@@ -186,7 +187,17 @@ function Filas({ ordenes, alAbrir }) {
 }
 
 /** Solo lectura: cada cambio de estado de la orden, con quién, cuándo y la nota. */
-function Historia({ odt }) {
+function Historia({ odt, perfil }) {
+  // Agrega fotos del reporte quien la reportó o quien la tiene a cargo, como en la app. Al conductor
+  // el servidor solo le muestra la ejecución de las órdenes que tiene asignadas: si contesta, es suya.
+  const ejecucion = useDatos(
+    () => (repo.odts.ejecucion && ESTADOS_DE_TALLER.includes(odt.estado) ? repo.odts.ejecucion(odt.id).catch(() => null) : Promise.resolve(null)),
+    [odt.id, odt.estado],
+  )
+  const soyResponsable = Boolean(ejecucion.datos?.responsable)
+  // La sesión real no trae el identificador de la persona (sí el modo demo): se compara también por nombre.
+  const normal = (t) => String(t ?? '').trim().toLowerCase()
+  const soyQuienReporto = Boolean(odt.creadorId) && (odt.creadorId === perfil?.id || (Boolean(perfil?.nombre) && normal(odt.creadorNombre) === normal(perfil.nombre)))
   const historial = useDatos(() => repo.odts.historial(odt.id), [odt.id, odt.estado])
   // Los pasos se cuentan con palabras («Responsable asignado», «Trabajo iniciado»…), no con los nueve estados del servidor.
   const hitos = presentarHistorial(odt, historial.datos ?? []).map((h, i) => ({
@@ -203,7 +214,7 @@ function Historia({ odt }) {
           <em>{f.desde(odt.creadaEn)}</em>
         </div>
         <div className="pnl-fila-txt"><b>{odt.descripcion}</b><span>{AYUDA[odt.estado] ?? ''}</span></div>
-        <GaleriaArchivos coleccion="work-orders" padreId={odt.id} proposito="work_order_opening" titulo="Fotos del reporte" vacio="Sin fotos. Puedes agregar fotos de la falla." />
+        <GaleriaArchivos coleccion="work-orders" padreId={odt.id} proposito="work_order_opening" titulo="Fotos del reporte" vacio={soyQuienReporto || soyResponsable ? 'Sin fotos. Puedes agregar fotos de la falla.' : 'Sin fotos de la falla.'} puedeSubir={soyQuienReporto || soyResponsable} />
         {odt.estado === 'cerrada' && odt.notaSolucion && (
           <div className="adm-sigue"><b>Qué se hizo</b><p>{odt.notaSolucion}</p></div>
         )}

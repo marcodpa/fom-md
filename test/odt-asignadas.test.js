@@ -73,23 +73,42 @@ test('supervisor: compara el responsable con su identificador y un 403 esconde l
   } finally { globalThis.fetch = original }
 })
 
-test('los eventos viajan con el estado que se vio, una clave nueva y la nota que exige el servidor', async () => {
+test('los eventos viajan con el estado que se vio, una clave nueva y la nota que escribió quien trabaja', async () => {
   const m = await cargar(true)
   const original = globalThis.fetch
   const cuerpos = []
   globalThis.fetch = async (url, op) => { cuerpos.push({url, cuerpo:JSON.parse(op.body)}); return respuesta(201, {event:{toStatus:'pausada'}}) }
   try {
-    const r = await m.registrarEvento({id:'b',estado:'en_ejecucion'}, 'pausa')
+    // T-70: pausar y entregar sin nota no salen al servidor (ya no se rellena «Trabajo pausado desde la web»).
+    await assert.rejects(m.registrarEvento({id:'b',estado:'en_ejecucion'}, 'pausa'), /motivo de la pausa/)
+    await assert.rejects(m.registrarEvento({id:'b',estado:'en_ejecucion'}, 'pausa', 'ok'))
+    await assert.rejects(m.registrarEvento({id:'b',estado:'en_ejecucion'}, 'entrega', ''), /qué se hizo/)
+    assert.equal(cuerpos.length, 0)
+
+    const r = await m.registrarEvento({id:'b',estado:'en_ejecucion'}, 'pausa', '  Falta el repuesto  ')
     assert.equal(r.estado, 'pausada')
     assert.match(cuerpos[0].url, /\/api\/v1\/console\/work-orders\/b\/execution-events$/)
     assert.equal(cuerpos[0].cuerpo.action, 'pausa')
     assert.equal(cuerpos[0].cuerpo.expectedStatus, 'en_ejecucion')
     assert.match(cuerpos[0].cuerpo.clientEventId, /^[0-9a-f-]{36}$/)
-    assert.ok(cuerpos[0].cuerpo.note.length >= 3)
-    // Entregar sin contar qué se hizo no sale al servidor.
-    await assert.rejects(m.registrarEvento({id:'b',estado:'en_ejecucion'}, 'entrega', ''))
-    assert.equal(cuerpos.length, 1)
+    assert.equal(cuerpos[0].cuerpo.note, 'Falta el repuesto')
+    // Iniciar no pide nota: si no la hay, no viaja ninguna inventada.
+    await m.registrarEvento({id:'a',estado:'asignada'}, 'inicio')
+    assert.equal(cuerpos[1].cuerpo.action, 'inicio')
+    assert.equal('note' in cuerpos[1].cuerpo, false)
   } finally { globalThis.fetch = original }
+})
+
+test('textos del momento y nota que pide cada acción, iguales a la app', async () => {
+  const m = await cargar(false)
+  assert.deepEqual(Object.fromEntries(Object.entries(m.MOMENTOS).map(([k, v]) => [k, v.t])), {
+    asignada: 'Sin iniciar',
+    en_ejecucion: 'Trabajo en curso',
+    pausada: 'Trabajo pausado',
+    en_calidad: 'Entregada: la revisa el supervisor',
+  })
+  assert.deepEqual(m.accionesDe('en_ejecucion').map(a=>[a.t, a.pideNota]), [['Entregar','Qué se hizo'],['Pausar','Motivo de la pausa']])
+  assert.equal(m.accionesDe('asignada')[0].pideNota, undefined)
 })
 
 test('demo: el conductor de prueba tiene órdenes asignadas y las puede trabajar', async () => {

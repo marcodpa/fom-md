@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ODT en 3 pasos</title>
+<style>
+/*FONTS*/
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#05070A;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;background:#0A0D12;overflow:hidden;font-family:'Spline Sans',sans-serif;color:#F3F5F8;transform-origin:0 0;-webkit-font-smoothing:antialiased}
+#glow{position:absolute;inset:0;background:radial-gradient(900px 700px at 50% 18%,rgba(61,155,245,.13),transparent 70%),radial-gradient(700px 600px at 50% 105%,rgba(61,155,245,.07),transparent 70%)}
+.L{position:absolute;will-change:transform,opacity}
+.ico{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+.fillico{fill:currentColor;stroke:none}
+
+/* logo arriba */
+#topLogo{left:72px;top:66px;width:170px;height:51px}
+#topLogo svg{width:100%;height:100%}
+
+/* portada */
+#cover{left:0;top:0;width:1080px;height:1920px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 80px}
+#cover .cl{width:520px;height:156px;margin-bottom:110px}
+#cover .cl svg{width:100%;height:100%}
+#cover h1{margin:0;font-size:104px;line-height:1.02;font-weight:700;letter-spacing:-3px}
+#cover h1 .b{color:#3D9BF5}
+#cover p{margin:40px 0 0;font-size:42px;color:#ABB3BF}
+#cover .dots{display:flex;gap:22px;margin-top:90px}
+#cover .dots span{height:22px;border-radius:999px;display:block}
+
+/* rótulos */
+.capbox{left:70px;top:160px;width:940px}
+.kick{display:inline-flex;align-items:center;gap:12px;height:58px;padding:0 24px;border-radius:16px;font-size:30px;font-weight:600}
+.kick i{width:12px;height:12px;border-radius:50%;background:currentColor;display:block}
+.capbox h2{margin:22px 0 0;font-size:68px;line-height:1.1;font-weight:700;letter-spacing:-1.8px}
+.capbox h2 .hl{color:#8BC6FF}
+.capbox p{margin:18px 0 0;font-size:38px;line-height:1.25;color:#ABB3BF}
+.k-warn{background:#2A2410;color:#F5C242}.k-info{background:#10202E;color:#8BC6FF}.k-ok{background:#13281D;color:#3DD68C}.k-bad{background:#2A1416;color:#FF6369}
+
+/* antes */
+#before{left:0;top:0;width:1080px;height:1920px}
+.oc{position:absolute;left:0;top:0;white-space:nowrap;display:inline-flex;align-items:center;gap:12px;font-weight:600}
+.oc.st{height:66px;padding:0 24px;border-radius:16px;font-size:34px}
+.oc.st i{width:13px;height:13px;border-radius:50%;background:currentColor;display:block}
+.oc.bt{height:78px;padding:0 32px;border-radius:999px;font-size:34px;background:#1D2530;color:#F3F5F8;border:2px solid #39424F}
+.c-amber{background:#2A2410;color:#F5C242}.c-blue{background:#10202E;color:#8BC6FF}.c-green{background:#13281D;color:#3DD68C}.c-red{background:#2A1416;color:#FF6369}.c-grey{background:#1D2530;color:#ABB3BF}.c-violet{background:#221a33;color:#B79CFF}.c-teal{background:#0f2626;color:#5BD3C9}
+#stamp{left:540px;top:1090px;width:0;height:0}
+#stamp div{position:absolute;left:-380px;top:-110px;width:760px;height:220px;border:12px solid #FF6369;border-radius:32px;color:#FF6369;font-size:132px;font-weight:700;letter-spacing:-3px;display:flex;align-items:center;justify-content:center;background:rgba(10,13,18,.88)}
+
+/* ahora: 3 pasos */
+.stepc{left:90px;width:900px;height:280px;background:#141A22;border:2px solid #262E39;border-radius:44px;display:flex;align-items:center;gap:44px;padding:0 50px}
+.stepc .n{width:150px;height:150px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:84px;font-weight:700;color:#08121C;flex:none}
+.stepc h3{margin:0;font-size:84px;line-height:1;font-weight:700;letter-spacing:-2px}
+.stepc p{margin:16px 0 0;font-size:36px;color:#ABB3BF}
+.arr{left:500px;width:80px;height:80px;color:#39424F;font-size:80px}
+
+/* teléfono */
+#phone{left:227px;top:540px;width:626px;height:1210px;border-radius:98px;background:#030406;border:2px solid #39424F;padding:18px;box-shadow:0 40px 90px rgba(0,0,0,.65),inset 0 0 0 7px #10151C}
+#screen{position:relative;width:586px;height:1170px;border-radius:80px;overflow:hidden;background:#0A0D12}
+.scr{position:absolute;left:0;top:0;width:586px;height:1170px}
+.hdr{position:absolute;left:24px;right:24px;top:34px;display:flex;gap:14px;align-items:center}
+.round{width:84px;height:84px;border-radius:999px;background:#141A22;border:2px solid #262E39;display:flex;align-items:center;justify-content:center;flex:none;color:#F3F5F8;font-size:34px}
+.cap{flex:1;height:84px;background:#141A22;border:2px solid #262E39;border-radius:36px;display:flex;align-items:center;gap:14px;padding:0 26px;min-width:0}
+.capt{font-size:30px;font-weight:600;flex:1;white-space:nowrap}
+.cap .ml{width:74px;height:22px}
+.cap .ml svg,.cap .bl svg{width:100%;height:100%;display:block}
+.cap .bl{width:100px;height:30px}
+.cap .kk{font-size:18px;font-weight:600;letter-spacing:2px;color:#8C97A7;text-transform:uppercase}
+.av{width:84px;height:84px;border-radius:999px;background:#194A74;border:2px solid #31608B;color:#EEF7FF;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.body{position:absolute;left:28px;right:28px;top:146px;display:flex;flex-direction:column;gap:20px}
+.lab{font-size:25px;font-weight:600;color:#ABB3BF;margin-bottom:-6px}
+.field{min-height:96px;border-radius:30px;background:#0F141B;border:2px solid #262E39;padding:24px 26px;font-size:31px;line-height:1.3;color:#F3F5F8}
+.field.on{border-color:#3D9BF5}
+.caret{display:inline-block;width:3px;height:34px;background:#3D9BF5;vertical-align:-6px;margin-left:2px}
+.unit{display:flex;align-items:center;gap:20px;background:#141A22;border:2px solid #262E39;border-radius:36px;padding:20px 22px}
+.ibox{width:72px;height:72px;border-radius:18px;background:#10202E;color:#3D9BF5;display:flex;align-items:center;justify-content:center;font-size:36px;flex:none}
+.ut{font-size:31px;font-weight:600}
+.us{font-size:24px;color:#ABB3BF;margin-top:4px}
+.slot{position:relative;height:290px;border-radius:30px;overflow:hidden}
+.add{position:absolute;inset:0;border:3px dashed #39424F;border-radius:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#ABB3BF;font-size:28px;font-weight:600;background:#0F141B}
+.add .ico{font-size:58px;color:#3D9BF5}
+.photo{position:absolute;inset:0;border-radius:30px;overflow:hidden;border:2px solid #262E39}
+.photo svg{width:100%;height:100%;display:block}
+.flash{position:absolute;inset:0;background:#fff;border-radius:30px}
+.btn{height:92px;border-radius:999px;border:0;background:#3D9BF5;color:#08121C;font:600 31px 'Spline Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:14px;width:100%}
+.btn2{height:92px;border-radius:999px;background:#1D2530;color:#F3F5F8;border:2px solid #39424F;font:600 31px 'Spline Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:14px;width:100%}
+.btn .ico,.btn2 .ico{font-size:34px}
+.tag{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 18px;border-radius:14px;font-size:25px;font-weight:600;white-space:nowrap}
+.tag i{width:10px;height:10px;border-radius:50%;background:currentColor;display:block}
+.t-ok{background:#13281D;color:#3DD68C}.t-warn{background:#2A2410;color:#F5C242}.t-bad{background:#2A1416;color:#FF6369}.t-info{background:#10202E;color:#8BC6FF}.t-mute{background:#1D2530;color:#ABB3BF}
+.tags{display:flex;gap:12px;align-items:center}
+.h2{font-size:44px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin:0}
+.meta{font-size:26px;color:#ABB3BF;margin-top:-8px}
+.rows{background:#141A22;border:2px solid #262E39;border-radius:36px;padding:4px 26px}
+.rw{display:flex;justify-content:space-between;align-items:center;height:76px;font-size:27px;border-top:2px solid #262E39}
+.rw:first-child{border-top:0}
+.rw span:first-child{color:#ABB3BF}
+.rw span:last-child{font-weight:600}
+.pill{position:relative}
+.toast{position:absolute;left:28px;right:28px;height:92px;border-radius:30px;display:flex;align-items:center;gap:16px;padding:0 26px;font-size:28px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.toast .ico{font-size:36px}
+.toast.ok{background:#13281D;color:#3DD68C;border:2px solid #22553A}
+.dim{position:absolute;inset:0;background:rgba(3,5,8,.62)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#141A22;border-top:2px solid #262E39;border-radius:56px 56px 0 0;padding:22px 30px 54px;display:flex;flex-direction:column;gap:20px;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+.handle{width:90px;height:8px;border-radius:999px;background:#39424F;margin:0 auto 6px}
+.sh{font-size:38px;font-weight:700;letter-spacing:-.6px;margin:0}
+.person{display:flex;align-items:center;gap:20px;height:110px;padding:0 22px;border-radius:30px;border:2px solid #262E39;background:#0F141B;font-size:31px;font-weight:600}
+.person.sel{background:#173553;border-color:#2D5D88;color:#8BC6FF}
+.person .av{width:70px;height:70px;font-size:24px}
+.person .chk{margin-left:auto;font-size:40px;color:#3D9BF5}
+.notif{position:absolute;left:22px;right:22px;top:26px;background:#1D2530;border:2px solid #39424F;border-radius:36px;padding:22px 24px;display:flex;gap:20px;align-items:center;box-shadow:0 14px 40px rgba(0,0,0,.6);z-index:5}
+.notif .ib{width:76px;height:76px;border-radius:20px;background:#2A2410;color:#F5C242;display:flex;align-items:center;justify-content:center;font-size:40px;flex:none}
+.notif b{display:block;font-size:29px}
+.notif span{display:block;font-size:24px;color:#ABB3BF;margin-top:4px}
+.card{background:#141A22;border:2px solid #262E39;border-radius:40px;padding:26px;display:flex;flex-direction:column;gap:18px}
+.timer{background:#0F141B;border:2px solid #262E39;border-radius:30px;padding:20px 24px;display:flex;align-items:center;gap:20px}
+.timer .ico{font-size:52px;color:#3D9BF5}
+.timer .tl{font-size:24px;color:#ABB3BF;font-weight:600}
+.timer .tv{white-space:nowrap;font-size:50px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-1px;line-height:1.1}
+.runs{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:23px;font-weight:600}
+.runs i{width:16px;height:16px;border-radius:50%;background:currentColor;display:block}
+.acts{position:relative;height:92px}
+.acts > *{position:absolute;left:0;right:0;top:0}
+.two{display:flex;gap:16px}
+.note{font-size:25px;color:#ABB3BF;background:#0F141B;border-radius:22px;padding:16px 20px;border:2px solid #262E39}
+.note b{color:#F3F5F8;font-weight:600}
+.tabbar{position:absolute;left:26px;right:26px;bottom:30px;height:118px;background:#141A22;border:2px solid #262E39;border-radius:48px;display:grid;grid-template-columns:repeat(4,1fr)}
+.tb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#8C97A7;font-size:20px;font-weight:600}
+.tb .ico{font-size:34px}
+.tb.on{color:#8BC6FF}
+.tb.on .pp{background:#173553}
+.pp{width:80px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center}
+.did{background:#0F141B;border:2px solid #262E39;border-radius:30px;padding:22px 24px;font-size:28px;line-height:1.35}
+.did .lab{display:block;margin-bottom:8px}
+.okbar{display:flex;align-items:center;gap:16px;background:#13281D;border:2px solid #22553A;color:#3DD68C;border-radius:30px;padding:0 24px;height:92px;font-size:28px;font-weight:600}
+.okbar .ico{font-size:38px}
+.bigchk{position:absolute;left:193px;top:420px;width:200px;height:200px;border-radius:50%;background:#3DD68C;color:#08121C;display:flex;align-items:center;justify-content:center;font-size:120px;box-shadow:0 0 0 24px rgba(61,214,140,.18)}
+.bigchk .ico{stroke-width:2.6}
+
+/* toque y foco */
+.tapdot{left:0;top:0;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:rgba(243,245,248,.30);border:4px solid rgba(255,255,255,.9);z-index:20;pointer-events:none}
+.ripple{left:0;top:0;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;border:5px solid rgba(255,255,255,.8);z-index:19;pointer-events:none}
+.ring{left:0;top:0;border:5px solid #F3F5F8;border-radius:999px;z-index:18;pointer-events:none;box-shadow:0 0 0 12px rgba(61,155,245,.30),0 0 40px rgba(61,155,245,.55)}
+
+/* indicador de pasos */
+#tracker{left:60px;top:1784px;width:960px;height:92px;display:flex;gap:18px}
+.tk{flex:1;height:92px;border-radius:999px;border:2px solid #262E39;background:#0F141B;color:#8C97A7;display:flex;align-items:center;justify-content:center;gap:14px;font-size:32px;font-weight:600}
+.tk b{width:52px;height:52px;border-radius:50%;background:#1D2530;color:#ABB3BF;display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:700}
+.tk b .ico{font-size:30px;stroke-width:2.6}
+
+/* web */
+#web{left:40px;top:520px;transform-origin:0 0;width:820px;height:540px;background:#0A0D12;border:2px solid #39424F;border-radius:30px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.wbar{height:44px;background:#141A22;border-bottom:2px solid #262E39;display:flex;align-items:center;gap:10px;padding:0 18px}
+.wbar i{width:14px;height:14px;border-radius:50%;background:#39424F;display:block}
+.wbar span{margin-left:16px;height:26px;border-radius:999px;background:#0F141B;flex:1;max-width:360px;font-size:15px;color:#8C97A7;display:flex;align-items:center;padding:0 14px}
+.wrap{display:flex;gap:14px;padding:14px;height:494px}
+.wside{width:190px;flex:none;background:#141A22;border:2px solid #262E39;border-radius:24px;padding:16px 10px;display:flex;flex-direction:column;gap:4px}
+.wside .wl{width:110px;height:33px;margin:2px 8px 14px}
+.wside .wl svg{width:100%;height:100%;display:block}
+.wn{display:flex;align-items:center;gap:10px;height:38px;padding:0 10px;border-radius:10px;font-size:17px;color:#ABB3BF;font-weight:500}
+.wn .ico{font-size:20px}
+.wn.on{background:#173553;color:#8BC6FF}
+.wmain{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0}
+.wtop{height:50px;background:#141A22;border:2px solid #262E39;border-radius:24px;display:flex;align-items:center;padding:0 16px;font-size:16px;color:#ABB3BF;gap:10px}
+.wtop .av{width:34px;height:34px;font-size:13px;margin-left:auto;border-width:1px}
+.wh{font-size:32px;font-weight:700;letter-spacing:-.8px;margin:4px 4px 0;display:flex;align-items:center;gap:14px}
+.wcard{background:#141A22;border:2px solid #262E39;border-radius:24px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.wcard .wt{font-size:26px;font-weight:600}
+.wcard .wm{font-size:17px;color:#ABB3BF}
+.wsteps{display:flex;gap:8px}
+.wsteps span{flex:1;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;gap:8px}
+.wbtns{display:flex;gap:10px}
+.wbtns div{height:44px;border-radius:999px;padding:0 20px;display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;background:#1D2530;border:1px solid #39424F}
+.wbtns .ico{font-size:20px}
+.wrows{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.wrows div{background:#0F141B;border:1px solid #262E39;border-radius:16px;padding:10px 14px;font-size:14px;color:#8C97A7}
+.wrows b{display:block;font-size:18px;color:#F3F5F8;font-weight:600;margin-top:4px}
+
+/* más */
+#mas{left:90px;top:640px;width:900px;height:900px}
+.mhead{display:flex;gap:20px;align-items:center}
+.mhead .round{width:120px;height:120px;font-size:48px}
+.mhead .cap{height:120px;border-radius:48px;padding:0 36px}
+.mhead .capt{font-size:42px}
+.menu{position:absolute;right:0;top:150px;width:600px;background:#1D2530;border:2px solid #39424F;border-radius:48px;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.mi{display:flex;align-items:center;gap:24px;height:120px;padding:0 30px;border-radius:32px;font-size:40px;font-weight:600}
+.mi .ico{font-size:48px}
+.mi.red{color:#FF6369}
+.msep{height:2px;background:#39424F;margin:8px 20px}
+
+/* cierre */
+#outro{left:0;top:0;width:1080px;height:1920px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#outro .ol{width:560px;height:168px}
+#outro .ol svg{width:100%;height:100%}
+#outro p{margin:36px 0 0;font-size:40px;color:#ABB3BF}
+#outro .chain{display:flex;align-items:center;gap:18px;margin-top:120px}
+#outro .chain span{height:92px;padding:0 34px;border-radius:999px;display:flex;align-items:center;font-size:38px;font-weight:600;gap:14px}
+#outro .chain .ico{font-size:40px;color:#39424F}
+#outro h4{margin:80px 0 0;font-size:46px;font-weight:600}
+
+/* control del reproductor */
+#play{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(5,7,10,.55);cursor:pointer;z-index:99}
+#play div{width:120px;height:120px;border-radius:50%;background:#3D9BF5;color:#08121C;display:flex;align-items:center;justify-content:center;font-size:56px}
+@media (prefers-reduced-motion: reduce){ #play{display:flex} }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="glow"></div>
+  <div class="L" id="topLogo" data-logo="full"></div>
+
+  <!-- 1 portada -->
+  <div class="L" id="cover">
+    <div class="cl" data-logo="full"></div>
+    <h1>Órdenes de trabajo:<br>ahora en <span class="b">3 pasos</span></h1>
+    <p>Cómo quedan las ODT simplificadas</p>
+    <div class="dots"><span style="background:#F5C242;width:120px"></span><span style="background:#3D9BF5;width:120px"></span><span style="background:#3DD68C;width:120px"></span></div>
+  </div>
+
+  <!-- 2 antes -->
+  <div class="L" id="before"></div>
+  <div class="L" id="stamp"><div>Demasiado</div></div>
+
+  <!-- 3 ahora -->
+  <div class="L stepc" id="s1" style="top:560px"><div class="n" style="background:#F5C242">1</div><div><h3 style="color:#F5C242">Abierta</h3><p>Se reporta y se asigna</p></div></div>
+  <div class="L arr" id="a1" style="top:850px"><i data-ico="down"></i></div>
+  <div class="L stepc" id="s2" style="top:940px"><div class="n" style="background:#3D9BF5">2</div><div><h3 style="color:#3D9BF5">En curso</h3><p>Se trabaja con reloj</p></div></div>
+  <div class="L arr" id="a2" style="top:1230px"><i data-ico="down"></i></div>
+  <div class="L stepc" id="s3" style="top:1320px"><div class="n" style="background:#3DD68C">3</div><div><h3 style="color:#3DD68C">Resuelta</h3><p>Se cierra con costo y foto</p></div></div>
+
+  <!-- rótulos (se llenan desde CAPS) -->
+  <div id="caps"></div>
+
+  <!-- web (cierre) -->
+  <div class="L" id="web">
+    <div class="wbar"><i></i><i></i><i></i><span>FOM · Mantenimiento</span></div>
+    <div class="wrap">
+      <div class="wside">
+        <div class="wl" data-logo="full"></div>
+        <div class="wn"><i data-ico="grid"></i>Resumen</div>
+        <div class="wn"><i data-ico="truck"></i>Vehículos</div>
+        <div class="wn on"><i data-ico="wrench"></i>Mantenimiento</div>
+        <div class="wn"><i data-ico="clip"></i>Inspecciones</div>
+        <div class="wn"><i data-ico="doc"></i>Documentos</div>
+        <div class="wn"><i data-ico="users"></i>Usuarios</div>
+      </div>
+      <div class="wmain">
+        <div class="wtop"><i data-ico="truck"></i>Transporte Lago Sur, C.A.<div class="av">YM</div></div>
+        <div class="wh">ODT 0142 <span class="tag t-ok" style="height:34px;font-size:16px;padding:0 12px;border-radius:10px"><i style="width:7px;height:7px"></i>Resuelta</span></div>
+        <div class="wcard">
+          <div class="wt">No prende el tablero</div>
+          <div class="wm">Unidad 01 · Toyota Hilux 2022 · Z69FC7W</div>
+          <div class="wsteps">
+            <span style="background:#2A2410;color:#F5C242">1 Abierta</span>
+            <span style="background:#10202E;color:#8BC6FF">2 En curso</span>
+            <span style="background:#3DD68C;color:#08121C"><i data-ico="check"></i>3 Resuelta</span>
+          </div>
+          <div class="wrows">
+            <div>Responsable<b>Aliri Alira</b></div>
+            <div>Tiempo trabajado<b>1 h 25 min</b></div>
+            <div>Costo<b>18,00 USD</b></div>
+          </div>
+          <div class="wbtns"><div><i data-ico="redo"></i>Reabrir</div><div><i data-ico="dots" class="f"></i>Más</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- teléfono -->
+  <div class="L" id="phone"><div id="screen">
+
+    <!-- A: el conductor reporta -->
+    <div class="L scr" id="scrA">
+      <div class="hdr"><div class="round"><i data-ico="back"></i></div><div class="cap"><span class="capt">Reportar falla</span><span class="ml" data-logo="full"></span></div></div>
+      <div class="body">
+        <div class="unit"><div class="ibox"><i data-ico="truck"></i></div><div><div class="ut">Unidad 01</div><div class="us">Toyota Hilux 2022 · Z69FC7W</div></div></div>
+        <div class="lab">¿Qué pasa?</div>
+        <div class="field" id="aField"><span id="aTxt"></span><i class="caret" id="aCaret"></i></div>
+        <div class="lab">Foto</div>
+        <div class="slot">
+          <div class="add" id="aAdd"><i data-ico="camera"></i>Tomar foto</div>
+          <div class="photo L" id="aPhoto" style="left:0;top:0;right:0;bottom:0" data-art="dash"></div>
+          <div class="flash L" id="aFlash"></div>
+        </div>
+        <div class="btn" id="aSend"><i data-ico="send"></i>Enviar reporte</div>
+      </div>
+      <div class="L toast ok" id="aToast" style="bottom:60px"><i data-ico="check"></i>Enviado al supervisor</div>
+    </div>
+
+    <!-- B: el supervisor recibe y asigna -->
+    <div class="L scr" id="scrB">
+      <div class="hdr"><div class="round"><i data-ico="back"></i></div><div class="cap"><span class="capt">ODT 0142</span><span class="ml" data-logo="full"></span></div><div class="round"><i data-ico="dots" class="f"></i></div></div>
+      <div class="body">
+        <div class="tags"><span class="tag t-warn"><i></i>Abierta</span><span class="tag t-mute">Correctiva</span></div>
+        <div class="h2">No prende el tablero</div>
+        <div class="meta">Unidad 01 · Toyota Hilux 2022</div>
+        <div class="slot" style="height:220px"><div class="photo" data-art="dash"></div></div>
+        <div class="rows">
+          <div class="rw"><span>Reportó</span><span>Pedro Villalobos</span></div>
+          <div class="rw"><span>Responsable</span><span id="bResp">Sin asignar</span></div>
+        </div>
+        <div class="btn" id="bAsig"><i data-ico="user"></i>Asignar a…</div>
+        <div class="btn2" id="bRes"><i data-ico="check"></i>Resolver ya</div>
+      </div>
+      <div class="L toast ok" id="bToast" style="bottom:60px"><i data-ico="check"></i>Asignada a Aliri Alira</div>
+      <div class="L" id="shC" style="left:0;top:0;width:586px;height:1170px">
+        <div class="dim"></div>
+        <div class="sheet" id="shCs">
+          <div class="handle"></div>
+          <p class="sh">Asignar a…</p>
+          <div class="person" id="cAliri"><div class="av">AA</div>Aliri Alira<i class="chk" data-ico="check" id="cChk"></i></div>
+          <div class="person"><div class="av" style="background:#1D2530;border-color:#39424F">LP</div>Luis Parra</div>
+          <div class="person"><div class="av" style="background:#1D2530;border-color:#39424F">MC</div>Maikel Chourio</div>
+          <div class="person"><div class="av" style="background:#1D2530;border-color:#39424F">YM</div>Yo (Yeison Márquez)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D: Aliri trabaja -->
+    <div class="L scr" id="scrD">
+      <div class="hdr"><div class="cap"><span class="bl" data-logo="full"></span><span class="kk">Mantenimiento</span></div><div class="round"><i data-ico="bell"></i></div><div class="av">AA</div></div>
+      <div class="body">
+        <div><div class="h2" style="font-size:52px">Asignadas a ti</div><div class="meta" style="margin-top:8px">1 orden a tu cargo</div></div>
+        <div class="card">
+          <div class="tags" style="justify-content:space-between"><span class="tag t-warn" id="dTag"><i></i><span id="dTagT">Abierta</span></span><span style="font-size:24px;color:#8C97A7;font-weight:600">ODT 0142</span></div>
+          <div class="h2" style="font-size:40px">No prende el tablero</div>
+          <div class="meta">Unidad 01 · Toyota Hilux 2022</div>
+          <div class="timer"><i data-ico="clock"></i><div style="flex:1;min-width:0"><div style="display:flex;align-items:center"><div class="tl">Tiempo trabajado</div><div class="runs" id="dRuns"><i></i><span id="dRunsT">En marcha</span></div></div><div class="tv" id="dClock">Sin empezar</div></div></div>
+          <div class="note" id="dNote"><b>En pausa:</b> Falta el repuesto; llega mañana.</div>
+          <div class="acts">
+            <div class="btn" id="dStart"><i data-ico="play" class="f"></i>Empezar</div>
+            <div class="two" id="dRun"><div class="btn2" id="dPause"><i data-ico="pause"></i>Pausar</div><div class="btn" id="dEnd"><i data-ico="check"></i>Terminé</div></div>
+            <div class="okbar" id="dDone" style="background:#10202E;border-color:#2D5D88;color:#8BC6FF"><i data-ico="send"></i>Enviada al supervisor</div>
+          </div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tb"><div class="pp"><i data-ico="grid"></i></div>Resumen</div>
+        <div class="tb"><div class="pp"><i data-ico="truck"></i></div>Mi unidad</div>
+        <div class="tb on"><div class="pp"><i data-ico="wrench"></i></div>Mantenim.</div>
+        <div class="tb"><div class="pp"><i data-ico="user"></i></div>Mi perfil</div>
+      </div>
+      <div class="L" id="shE" style="left:0;top:0;width:586px;height:1170px">
+        <div class="dim"></div>
+        <div class="sheet" id="shEs">
+          <div class="handle"></div>
+          <p class="sh">Pausar el trabajo</p>
+          <div class="lab">Motivo de la pausa</div>
+          <div class="field on" style="min-height:150px"><span id="eTxt"></span><i class="caret"></i></div>
+          <div class="btn" id="ePause"><i data-ico="pause"></i>Pausar</div>
+        </div>
+      </div>
+      <div class="L" id="shF" style="left:0;top:0;width:586px;height:1170px">
+        <div class="dim"></div>
+        <div class="sheet" id="shFs">
+          <div class="handle"></div>
+          <p class="sh">¿Qué hiciste?</p>
+          <div class="lab">Cuenta qué se hizo</div>
+          <div class="field on" style="min-height:150px"><span id="fTxt"></span><i class="caret"></i></div>
+          <div class="btn" id="fSend"><i data-ico="send"></i>Enviar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- G: el supervisor revisa y cierra; luego Resuelta -->
+    <div class="L scr" id="scrG">
+      <div class="hdr"><div class="round"><i data-ico="back"></i></div><div class="cap"><span class="capt">ODT 0142</span><span class="ml" data-logo="full"></span></div><div class="round" id="gMas"><i data-ico="dots" class="f"></i></div></div>
+      <div class="body">
+        <div class="tags"><span class="tag t-info" id="gTag"><i></i><span id="gTagT">Terminada, por revisar</span></span></div>
+        <div class="h2">No prende el tablero</div>
+        <div class="meta">Unidad 01 · Toyota Hilux 2022</div>
+        <div class="did"><span class="lab">Qué hizo Aliri Alira</span>Cambié el fusible del tablero y probé las luces.</div>
+        <div class="rows">
+          <div class="rw"><span>Tiempo trabajado</span><span>1 h 25 min</span></div>
+          <div class="rw"><span>Responsable</span><span>Aliri Alira</span></div>
+          <div class="rw"><span>Costo</span><span id="gCost">Sin cargar</span></div>
+        </div>
+        <div class="acts">
+          <div class="two" id="gAct"><div class="btn2" id="gDev"><i data-ico="undo"></i>Devolver</div><div class="btn" id="gClose"><i data-ico="check"></i>Cerrar</div></div>
+          <div class="two" id="gDone"><div class="okbar" style="flex:1.25"><i data-ico="check"></i>Resuelta</div><div class="btn2" id="gReab" style="flex:1"><i data-ico="redo"></i>Reabrir</div></div>
+        </div>
+      </div>
+      <div class="L" id="gCheckWrap" style="left:0;top:0;width:586px;height:1170px">
+        <div class="dim" style="background:rgba(3,5,8,.45)"></div>
+        <div class="bigchk" id="gCheck"><i data-ico="check"></i></div>
+      </div>
+      <div class="L" id="shH" style="left:0;top:0;width:586px;height:1170px">
+        <div class="dim"></div>
+        <div class="sheet" id="shHs">
+          <div class="handle"></div>
+          <p class="sh">Cerrar la ODT</p>
+          <div class="lab">Costo (USD)</div>
+          <div class="field on" style="min-height:92px;padding:22px 26px"><span id="hTxt"></span><i class="caret"></i></div>
+          <div class="lab">Foto de la factura</div>
+          <div class="slot" style="height:220px">
+            <div class="add" id="hAdd"><i data-ico="camera"></i>Tomar foto</div>
+            <div class="photo L" id="hPhoto" style="left:0;top:0;right:0;bottom:0" data-art="bill"></div>
+            <div class="flash L" id="hFlash"></div>
+          </div>
+          <div class="btn" id="hClose"><i data-ico="check"></i>Cerrar ODT</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- aviso que le llega al supervisor -->
+    <div class="L notif" id="notif"><div class="ib"><i data-ico="alert"></i></div><div><b>Nueva falla · Unidad 01</b><span>No prende el tablero · Pedro Villalobos</span></div></div>
+
+    <div class="L ring" id="ringS"></div>
+    <div class="L ripple" id="ripS"></div>
+    <div class="L tapdot" id="tapS"></div>
+  </div></div>
+
+  <!-- «Más» -->
+  <div class="L" id="mas">
+    <div class="mhead"><div class="round"><i data-ico="back"></i></div><div class="cap"><span class="capt">ODT 0142</span></div><div class="round" id="mBtn"><i data-ico="dots" class="f"></i></div></div>
+    <div class="menu L" id="mMenu" style="left:auto">
+      <div class="mi"><i data-ico="clock"></i>Ver historial</div>
+      <div class="msep"></div>
+      <div class="mi red" id="mCancel"><i data-ico="x"></i>Cancelar ODT</div>
+    </div>
+  </div>
+
+  <!-- indicador de pasos -->
+  <div class="L" id="tracker">
+    <div class="tk" id="tk1"><b>1</b>Abierta</div>
+    <div class="tk" id="tk2"><b>2</b>En curso</div>
+    <div class="tk" id="tk3"><b>3</b>Resuelta</div>
+  </div>
+
+  <!-- cierre -->
+  <div class="L" id="outro">
+    <div class="ol" data-logo="full"></div>
+    <p>Fleet Operations &amp; Maintenance</p>
+    <div class="chain">
+      <span style="background:#2A2410;color:#F5C242">Abierta</span><i data-ico="fwd"></i>
+      <span style="background:#10202E;color:#8BC6FF">En curso</span><i data-ico="fwd"></i>
+      <span style="background:#13281D;color:#3DD68C">Resuelta</span>
+    </div>
+    <h4>Órdenes de trabajo en 3 pasos</h4>
+  </div>
+
+  <div class="L ring" id="ringG"></div>
+  <div class="L ripple" id="ripG"></div>
+  <div class="L tapdot" id="tapG"></div>
+</div>
+<div id="play" aria-label="Reproducir"><div>&#9654;</div></div>
+
+<script>
+// ---------- recursos ----------
+const LOGO = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 84" aria-hidden="true"><g fill="#349bfa" transform="translate(0 1)"><path d="M3 25h14a4 4 0 0 1 3.4 1.9l9.7 15a4 4 0 0 1 0 4.3l-9.7 15A4 4 0 0 1 17 63H4a3 3 0 0 1-2.5-4.7L10 45a4 4 0 0 0 0-4.3L.5 29.7A3 3 0 0 1 3 25Z"/><path d="M24 13h18a5 5 0 0 1 4.2 2.3l16.2 25a5 5 0 0 1 0 5.4L46.2 71A5 5 0 0 1 42 73H26a4 4 0 0 1-3.4-6.1l13.6-21a5 5 0 0 0 0-5.4l-15.6-21A4 4 0 0 1 24 13Z"/><path d="M50 0h24a6 6 0 0 1 5 2.7l24 36a6 6 0 0 1 0 6.6L79 79.3a6 6 0 0 1-5 2.7H53a5 5 0 0 1-4.2-7.7l20.7-29a6 6 0 0 0 0-6.6L45.8 7.7A5 5 0 0 1 50 0Z"/></g><g fill="#f7f8fa"><path d="M118 16h40v11h-28v12h25v11h-25v17h-12Z"/><path fill-rule="evenodd" d="M189 15a27 27 0 1 1 0 54 27 27 0 0 1 0-54Zm0 12a15 15 0 1 0 0 30 15 15 0 0 0 0-30Z"/><path d="M222 16h12l17 19 17-19h12v51h-12V34l-17 18-17-18v33h-12Z"/></g></svg>';
+const ICO = {
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  truck:'<path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+  users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 19c.8-3.2 3.2-5 6-5s5.2 1.8 6 5"/><path d="M16 5.5a3 3 0 0 1 0 5.6M18 14c1.6.6 2.6 2.2 3 4.5"/>',
+  wrench:'<path d="M15 4a5 5 0 0 0-4.6 6.9L4 17.3V20h2.7l6.4-6.4A5 5 0 0 0 20 9l-3 1-2-2 1-3z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c1.2-3.6 4.3-6 8-6s6.8 2.4 8 6"/>',
+  bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  alert:'<path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.2v.3"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  doc:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',
+  clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  back:'<path d="m15 5-7 7 7 7"/>', fwd:'<path d="m9 5 7 7-7 7"/>',
+  down:'<path d="m5 9 7 7 7-7"/>',
+  clip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12l2 2 4-4"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  send:'<path d="M4 12 20 4l-6 16-3-7z"/><path d="m11 13 9-9"/>',
+  play:'<path d="M8 5v14l11-7z"/>', pause:'<path d="M9 5v14M15 5v14"/>',
+  dots:'<circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+  redo:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/>'
+};
+const ART = {
+  dash:'<svg viewBox="0 0 530 290" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#323a46"/><stop offset="1" stop-color="#0c0f14"/></linearGradient><radialGradient id="dl" cx=".5" cy=".2" r=".8"><stop offset="0" stop-color="#5a6575" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs><rect width="530" height="290" fill="url(#dg)"/><rect width="530" height="290" fill="url(#dl)"/><rect x="38" y="52" width="454" height="176" rx="70" fill="#07090c" stroke="#3a434f" stroke-width="5"/><circle cx="170" cy="140" r="64" fill="#0b0e12" stroke="#2b323c" stroke-width="6"/><circle cx="360" cy="140" r="64" fill="#0b0e12" stroke="#2b323c" stroke-width="6"/><g stroke="#2b323c" stroke-width="5" stroke-linecap="round"><path d="M125 140h12M215 140h-12M170 95v12M138 108l8 8M202 108l-8 8"/><path d="M315 140h12M405 140h-12M360 95v12M328 108l8 8M392 108l-8 8"/></g><g stroke="#4a5462" stroke-width="6" stroke-linecap="round"><path d="M170 140l-36 26"/><path d="M360 140l-36 26"/></g><rect x="246" y="118" width="38" height="44" rx="8" fill="#0b0e12" stroke="#2b323c" stroke-width="4"/><path d="M95 300a170 130 0 0 1 340 0" fill="none" stroke="#161b22" stroke-width="40"/></svg>',
+  bill:'<svg viewBox="0 0 530 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="530" height="220" fill="#2a2f37"/><g transform="rotate(-4 265 110)"><rect x="150" y="18" width="230" height="230" rx="6" fill="#e9ecef"/><rect x="172" y="40" width="110" height="14" rx="3" fill="#9aa3ad"/><g fill="#c3c9d0"><rect x="172" y="72" width="186" height="8" rx="3"/><rect x="172" y="92" width="150" height="8" rx="3"/><rect x="172" y="112" width="170" height="8" rx="3"/></g><rect x="172" y="140" width="186" height="2" fill="#9aa3ad"/><rect x="172" y="156" width="70" height="12" rx="3" fill="#6b7480"/><rect x="290" y="152" width="68" height="18" rx="3" fill="#3b434d"/></g></svg>'
+};
+function icoSvg(name, filled){ return '<svg class="ico'+(filled?' fillico':'')+'" viewBox="0 0 24 24" aria-hidden="true">'+ICO[name]+'</svg>'; }
+document.querySelectorAll('[data-ico]').forEach(el=>{ const f = el.classList.contains('f') || el.dataset.ico==='play' || el.dataset.ico==='dots'; const keep = el.className.replace(/\bf\b/,'').trim(); const id = el.id; el.outerHTML = icoSvg(el.dataset.ico, f).replace('<svg class="ico', '<svg '+(id?'id="'+id+'" ':'')+'class="ico'+(keep?' '+keep:'')); });
+document.querySelectorAll('[data-logo]').forEach(el=>el.innerHTML=LOGO);
+document.querySelectorAll('[data-art]').forEach(el=>el.innerHTML=ART[el.dataset.art]);
+document.getElementById('tapS').style.zIndex=30;
+
+// ---------- utilidades ----------
+const $ = id => document.getElementById(id);
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const eo=x=>1-Math.pow(1-x,3);
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const eback=x=>{const c1=1.6,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);};
+const P=(t,a,b,e=eo)=>e(clamp((t-a)/(b-a)));
+const win=(t,a,b,fi=.4,fo=.4)=> (t<a||t>b)?0:Math.min(fi?clamp((t-a)/fi):1, fo?clamp((b-t)/fo):1);
+function st(el,o,x=0,y=0,s=1,r=0){ el.style.opacity=o; el.style.visibility=o>0.002?'visible':'hidden'; el.style.transform='translate('+x+'px,'+y+'px) scale('+s+') rotate('+r+'deg)'; }
+function show(el,on){ el.style.visibility=on?'visible':'hidden'; el.style.opacity=on?1:0; }
+function typed(el,txt,t,a,b){ const n=Math.round(txt.length*clamp((t-a)/(b-a))); el.textContent=txt.slice(0,n); }
+
+// ---------- rótulos ----------
+const CAPS = [
+ [4.6,11.0,'bad','Antes','9 estados y 12 botones','Así se movía una orden de trabajo'],
+ [11.0,16.9,'info','Ahora','Solo 3 pasos','Cada uno con su color'],
+ [16.9,21.8,'warn','Paso 1 · Abierta','El conductor reporta la falla con foto','Pedro Villalobos · Unidad 01'],
+ [21.8,23.7,'warn','Paso 1 · Abierta','Le llega al supervisor','Yeison Márquez la ve en su teléfono'],
+ [23.7,27.3,'warn','Paso 1 · Abierta','Toca <span class="hl">«Asignar a…»</span> y elige a la persona','Un solo toque'],
+ [27.3,29.6,'warn','Paso 1 · Abierta','¿No necesita taller? <span class="hl">«Resolver ya»</span>','Se resuelve en el momento'],
+ [29.6,31.4,'info','Paso 2 · En curso','A Aliri le aparece en <span class="hl">«Asignadas a ti»</span>','En la app o en la web'],
+ [31.4,34.0,'info','Paso 2 · En curso','Toca <span class="hl">«Empezar»</span> y corre el reloj','«Tiempo trabajado» cuenta solo'],
+ [34.0,37.3,'info','Paso 2 · En curso','¿Hay que parar? <span class="hl">«Pausar»</span> con el motivo','El reloj se detiene'],
+ [37.3,38.95,'info','Paso 2 · En curso','Sigue con <span class="hl">«Empezar»</span>','El reloj sigue donde quedó'],
+ [38.95,42.6,'info','Paso 2 · En curso','<span class="hl">«Terminé»</span> y escribe qué hizo','Le llega al supervisor'],
+ [42.6,44.4,'info','Paso 2 · Por revisar','El supervisor ve <span class="hl">«Terminada, por revisar»</span>','Qué se hizo y cuánto tiempo tomó'],
+ [44.4,46.4,'info','Paso 2 · Por revisar','¿Falta algo? <span class="hl">«Devolver»</span>','Vuelve a Aliri con una nota'],
+ [46.4,49.6,'info','Paso 2 · Por revisar','Todo bien: <span class="hl">«Cerrar»</span> con costo y foto','La foto de la factura queda guardada'],
+ [49.6,53.5,'ok','Paso 3 · Resuelta','Resuelta','Queda en el historial de la unidad'],
+ [53.5,56.5,'ok','Paso 3 · Resuelta','¿Volvió la falla? <span class="hl">«Reabrir»</span>','Vuelve a empezar, con el motivo'],
+ [56.5,61.2,'info','Web y app','Lo mismo en la web y en la app','Mismos pasos, mismos nombres, mismos colores'],
+ [61.2,64.7,'bad','Cancelar','Cancelar está en <span class="hl">«Más»</span>','Aparte, para no tocarlo por error']
+];
+const capEls = CAPS.map(c=>{ const d=document.createElement('div'); d.className='L capbox'; d.innerHTML='<span class="kick k-'+c[2]+'"><i></i>'+c[3]+'</span><h2>'+c[4]+'</h2><p>'+c[5]+'</p>'; $('caps').appendChild(d); return d; });
+
+// ---------- antes: estados y botones amontonados ----------
+const OLD = [
+ ['st','c-amber','Abierta'],['bt','','Pasar a revisión'],['st','c-blue','En revisión'],
+ ['bt','','Aprobar'],['st','c-teal','Aprobada'],['bt','','Asignar responsable'],
+ ['st','c-violet','Asignada'],['bt','','Iniciar trabajo'],['bt','','Resolver sin taller'],
+ ['st','c-blue','En ejecución'],['bt','','Pausar'],['st','c-grey','Pausada'],
+ ['bt','','Reanudar'],['bt','','Devolver a abierta'],['st','c-violet','En calidad'],
+ ['bt','','Entregar'],['bt','','Reasignar'],['st','c-green','Cerrada'],
+ ['bt','','Volver a revisión'],['st','c-red','Cancelada'],['bt','','Devolver a ejecución']
+];
+let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+const oldEls = OLD.map((o,i)=>{ const d=document.createElement('div'); d.className='oc '+o[0]+' '+o[1]; d.innerHTML=(o[0]==='st'?'<i></i>':'')+o[2]; $('before').appendChild(d);
+  const col=i%3, row=Math.floor(i/3); return {el:d, cx:[250,540,830][col]+(rnd()-.5)*170, cy:560+row*150+(rnd()-.5)*70, r:(rnd()-.5)*16, w:0}; });
+function measureOld(){ oldEls.forEach(o=>{ o.w=o.el.offsetWidth; o.h=o.el.offsetHeight; }); }
+
+// ---------- toques ----------
+const TAPS = [
+ [19.3,'aAdd','S'],[20.4,'aSend','S'],[23.55,'bAsig','S'],[25.2,'cAliri','S'],
+ [31.2,'dStart','S'],[34.0,'dPause','S'],[36.1,'ePause','S'],[37.4,'dStart','S'],[39.0,'dEnd','S'],[41.4,'fSend','S'],
+ [46.55,'gClose','S'],[48.1,'hAdd','S'],[49.2,'hClose','S'],[62.0,'mBtn','G']
+];
+const RINGS = [[27.35,29.5,'bRes','S'],[44.45,46.3,'gDev','S'],[53.6,56.2,'gReab','S'],[62.7,64.6,'mCancel','G']];
+function rel(el, root){ const r=el.getBoundingClientRect(), R=root.getBoundingClientRect(); const k=R.width/root.offsetWidth; return {x:(r.left-R.left)/k, y:(r.top-R.top)/k, w:r.width/k, h:r.height/k}; }
+function doTaps(t){
+  ['S','G'].forEach(k=>{ st($('tap'+k),0); st($('rip'+k),0); st($('ring'+k),0); });
+  TAPS.forEach(([tt,id])=>{ $(id).style.transform=''; });
+  for(const [tt,id,k] of TAPS){
+    if(t<tt-.45||t>tt+.6) continue;
+    const root = k==='S'?$('screen'):$('stage'); const b=rel($(id),root); const cx=b.x+b.w/2, cy=b.y+b.h/2;
+    const a = t<tt ? P(t,tt-.45,tt-.15) : 1-P(t,tt+.25,tt+.6);
+    const s = t<tt ? 1.25-.25*P(t,tt-.45,tt) : .9;
+    st($('tap'+k), a, cx, cy, s);
+    if(t>=tt){ const q=P(t,tt,tt+.55); st($('rip'+k), (1-q)*.9, cx, cy, 1+q*1.6); }
+    if(t>=tt-.04 && t<tt+.2) $(id).style.transform='scale(.95)';
+  }
+  for(const [a,b,id,k] of RINGS){
+    const o=win(t,a,b,.3,.3); if(!o) continue;
+    const root = k==='S'?$('screen'):$('stage'); const r=rel($(id),root); const pad=10+4*Math.sin((t-a)*7);
+    const ring=$('ring'+k); ring.style.width=(r.w+pad*2)+'px'; ring.style.height=(r.h+pad*2)+'px';
+    ring.style.borderRadius = getComputedStyle($(id)).borderRadius==='999px'?'999px':(parseFloat(getComputedStyle($(id)).borderTopLeftRadius)+pad)+'px';
+    st(ring,o,r.x-pad,r.y-pad);
+  }
+}
+
+// ---------- estado de las pantallas ----------
+function fmtMin(m){ m=Math.floor(m+1e-6); if(m<60) return m+' min'; return Math.floor(m/60)+' h '+(m%60)+' min'; }
+function workedMin(t){ let m=0; if(t>31.4) m+=48*clamp((Math.min(t,36.3)-31.4)/4.9); if(t>37.6) m+=37*clamp((Math.min(t,41.6)-37.6)/4.0); return m; }
+function sheet(id,t,a,b){ const o=win(t,a,b,.3,.3); const wrap=$(id), s=$(id+'s'); wrap.style.visibility=o>0?'visible':'hidden'; wrap.style.opacity=1; wrap.querySelector('.dim').style.opacity=o; const y = t<(a+b)/2 ? (1-P(t,a,a+.38))*640 : P(t,b-.32,b,x=>x*x)*640; s.style.transform='translateY('+y+'px)'; }
+function setTag(el,cls,txtEl,txt){ el.className='tag '+cls; txtEl.textContent=txt; }
+
+const SLOW = 74/68.5;
+function render(v){ const t = v/SLOW;
+  // portada
+  { const o = win(t,-1,4.6,0,.45); const k=P(t,0,1.1); st($('cover'),o,0,(1-k)*40);
+    const dots=$('cover').querySelectorAll('.dots span'); dots.forEach((d,i)=>{ d.style.transform='scaleX('+P(t,1.0+i*.25,1.6+i*.25,eback)+')'; });
+    $('cover').querySelector('.cl').style.transform='scale('+(0.85+0.15*P(t,0,1.2))+')'; }
+  st($('topLogo'), win(t,4.6,64.7,.5,.4));
+  // rótulos
+  CAPS.forEach((c,i)=>{ const o=win(t,c[0],c[1],.35,.3); const y=(1-P(t,c[0],c[0]+.5))*26; st(capEls[i],o,0,y); });
+  // antes
+  { const o=win(t,4.6,11.0,.3,.4); st($('before'),o);
+    const bad = P(t,8.7,9.1);
+    oldEls.forEach((c,i)=>{ const a=4.9+i*.15; const k=P(t,a,a+.35,eback); const jit = t>8.7? Math.sin(t*40+i)*4*bad:0; const fall = P(t,10.2,11.0,x=>x*x)*(200+i*12);
+      c.el.style.opacity = clamp((t-a)/.15)*(1-.6*bad); c.el.style.transform='translate('+(c.cx-c.w/2+jit)+'px,'+(c.cy-c.h/2+fall)+'px) scale('+k+') rotate('+(c.r*(1+bad))+'deg)'; });
+    const so=win(t,8.7,11.0,.12,.4); const ss=1.7-.7*P(t,8.7,9.0,eo); st($('stamp'),so,0,0,ss,-7); }
+  // ahora
+  { const out=1-P(t,16.4,16.9); [['s1',11.5],['a1',12.1],['s2',12.3],['a2',12.9],['s3',13.1]].forEach(([id,a])=>{ const k=P(t,a,a+.5); st($(id),(t<11?0:k)*out,(1-k)*-60,0,1); });
+    const pulse = (id,a,b)=>{ const k=win(t,a,b,.2,.3); $(id).querySelector('.n')&&($(id).querySelector('.n').style.transform='scale('+(1+.12*k)+')'); };
+    pulse('s1',13.9,14.7); pulse('s2',14.7,15.5); pulse('s3',15.5,16.3); }
+  // teléfono
+  { let o = win(t,16.6,61.3,.5,.4), k=P(t,16.6,17.3); const m=P(t,56.4,57.4,eio);
+    st($('phone'),o,300*m,(1-k)*260+255*m,1-.45*m); }
+  // web
+  { const o=win(t,56.7,61.3,.5,.4); const k=P(t,56.7,57.5); st($('web'),o,-(1-k)*80,0,1.15); }
+  // pantallas
+  const scr=(id,a,b,fi=.35,fo=.3)=>{ const o=win(t,a,b,fi,fo); st($(id),o,(1-P(t,a,a+.45))*70,0); };
+  scr('scrA',16.6,22.0,0,.3); scr('scrB',21.8,29.75); scr('scrD',29.6,42.75); scr('scrG',42.6,70,.35,0);
+  // A
+  typed($('aTxt'),'No prende el tablero',t,17.7,19.0);
+  $('aCaret').style.opacity = (t<19.1 && Math.floor(t*2.5)%2===0)?1:0; $('aField').classList.toggle('on',t<19.2);
+  show($('aPhoto'), t>=19.45); st($('aFlash'), t>=19.45? 1-P(t,19.45,19.9):0);
+  st($('aToast'), win(t,20.6,21.9,.25,.25),0,(1-P(t,20.6,20.9))*40);
+  st($('notif'), win(t,21.25,22.9,.3,.35),0,(1-P(t,21.25,21.65))*-120);
+  // B
+  sheet('shC',t,23.75,25.75); const chosen=t>=25.2; $('cAliri').classList.toggle('sel',chosen); $('cChk').style.opacity=chosen?1:0;
+  $('bResp').textContent = t>=25.65?'Aliri Alira':'Sin asignar'; $('bResp').style.color = t>=25.65?'#8BC6FF':'';
+  st($('bToast'), win(t,25.8,27.2,.25,.25),0,(1-P(t,25.8,26.1))*40);
+  // D
+  { let s = t<31.35?'ab': t<36.3?'cu': t<37.55?'pa': t<41.65?'cu':'te';
+    if(s==='ab') setTag($('dTag'),'t-warn',$('dTagT'),'Abierta');
+    if(s==='cu') setTag($('dTag'),'t-info',$('dTagT'),'En curso');
+    if(s==='pa') setTag($('dTag'),'t-mute',$('dTagT'),'En pausa');
+    if(s==='te') setTag($('dTag'),'t-info',$('dTagT'),'Terminada, por revisar');
+    $('dClock').textContent = s==='ab'?'Sin empezar':fmtMin(workedMin(t));
+    const runs=$('dRuns'); runs.style.visibility = (s==='cu'||s==='pa')?'visible':'hidden'; runs.style.color = s==='cu'?'#3DD68C':'#ABB3BF';
+    $('dRunsT').textContent = s==='cu'?'En marcha':'Detenido'; runs.querySelector('i').style.opacity = s==='cu'? (.45+.55*Math.abs(Math.sin(t*3.2))):1;
+    show($('dNote'), s==='pa'); $('dNote').style.display = s==='pa'?'block':'none';
+    show($('dStart'), s==='ab'||s==='pa'); show($('dRun'), s==='cu'); show($('dDone'), s==='te');
+    typed($('eTxt'),'Falta el repuesto; llega mañana.',t,34.6,35.8);
+    typed($('fTxt'),'Cambié el fusible del tablero y probé las luces.',t,39.6,41.0);
+    sheet('shE',t,34.15,36.35); sheet('shF',t,39.15,41.65); }
+  // G
+  { const res = t>=49.55; setTag($('gTag'),res?'t-ok':'t-info',$('gTagT'),res?'Resuelta':'Terminada, por revisar');
+    $('gCost').textContent = res?'18,00 USD':'Sin cargar';
+    show($('gAct'),!res); show($('gDone'),res);
+    sheet('shH',t,46.75,49.55); typed($('hTxt'),'18,00',t,47.2,47.7);
+    show($('hPhoto'), t>=48.25); st($('hFlash'), t>=48.25?1-P(t,48.25,48.7):0);
+    const co=win(t,49.6,51.3,.15,.45); st($('gCheckWrap'),co); $('gCheck').style.transform='scale('+(P(t,49.6,50.1,eback))+')'; }
+  // tracker
+  { const o=win(t,16.8,56.7,.4,.4); st($('tracker'),o,0,(1-P(t,16.8,17.3))*40);
+    const cur = t<31.35?1: t<49.55?2:3; const C={1:['#F5C242','#2A2410','#F5C242'],2:['#3D9BF5','#10202E','#8BC6FF'],3:['#3DD68C','#13281D','#3DD68C']};
+    [1,2,3].forEach(i=>{ const el=$('tk'+i), b=el.querySelector('b'); const [c,bg,tx]=C[i];
+      if(i===cur){ el.style.background=bg; el.style.borderColor=c; el.style.color=tx; b.style.background=c; b.style.color='#08121C'; b.innerHTML=String(i); el.style.transform='scale(1.04)'; }
+      else if(i<cur){ el.style.background='#0F141B'; el.style.borderColor='#262E39'; el.style.color='#ABB3BF'; b.style.background=bg; b.style.color=c; b.innerHTML=icoSvg('check'); el.style.transform=''; }
+      else { el.style.background='#0F141B'; el.style.borderColor='#262E39'; el.style.color='#8C97A7'; b.style.background='#1D2530'; b.style.color='#8C97A7'; b.innerHTML=String(i); el.style.transform=''; } }); }
+  // más
+  { const o=win(t,61.3,64.7,.4,.4); st($('mas'),o,0,(1-P(t,61.3,61.8))*40);
+    const mk=P(t,62.15,62.45,eback); const mm=$('mMenu'); mm.style.opacity=t>=62.15?1:0; mm.style.visibility=t>=62.15?'visible':'hidden'; mm.style.transform='scale('+(0.85+.15*mk)+')'; mm.style.transformOrigin='top right'; }
+  // cierre
+  { const o=win(t,64.7,99,.5,0); const k=P(t,64.7,65.5); st($('outro'),o,0,(1-k)*40);
+    $('outro').querySelectorAll('.chain span').forEach((s,i)=>{ s.style.transform='scale('+P(t,65.3+i*.3,65.8+i*.3,eback)+')'; }); }
+  doTaps(t);
+}
+const TOTAL = 74;
+window.render = render; window.TOTAL = TOTAL;
+
+// ---------- reproducción ----------
+function fit(){ const s=Math.min(innerWidth/1080, innerHeight/1920); const st=$('stage'); st.style.transform='scale('+s+')'; st.style.left=((innerWidth-1080*s)/2)+'px'; st.style.top=((innerHeight-1920*s)/2)+'px'; }
+const capture = /capture/.test(location.search);
+document.fonts.ready.then(()=>{
+  measureOld(); render(0); window.READY = true;
+  if(capture) return;
+  fit(); addEventListener('resize',fit);
+  let t0=null, paused=false, at=0;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function loop(now){ if(t0===null) t0=now-at*1000; if(!paused){ at=((now-t0)/1000)%TOTAL; render(at); } requestAnimationFrame(loop); }
+  const start=()=>{ $('play').style.display='none'; requestAnimationFrame(loop); };
+  $('play').addEventListener('click', start, {once:true});
+  addEventListener('keydown', e=>{ if(e.code==='Space'){ paused=!paused; if(!paused) t0=performance.now()-at*1000; } });
+  $('stage').addEventListener('click', ()=>{ paused=!paused; if(!paused) t0=performance.now()-at*1000; });
+  if(!reduce) start(); else render(1.5);
+});
+</script>
+</body>
+</html>

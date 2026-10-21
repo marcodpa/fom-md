@@ -1334,6 +1334,7 @@ export const repoApi = {
       if (comoConductor) {
         const c = await api.reportarFallaConductor(vehiculoId, {
           description: descripcion,
+          severity: prioridad || undefined,
           failureType: tipoFalla || undefined,
           location: ubicacion || undefined,
         })

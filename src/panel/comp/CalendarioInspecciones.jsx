@@ -4,7 +4,7 @@ import { Icono } from '../Iconos'
 // CALENDARIO DE INSPECCIONES DE UNA PERSONA
 // ------------------------------------------------------------
 // Un mes, día por día: si hizo la diaria, si no la hizo, o si ese día no se
-// cuenta. Cada día lleva icono además del color, para leerse sin depender
+// cuenta (antes de la unidad, futuro, o fin de semana sin la diaria). Cada día lleva icono además del color, para leerse sin depender
 // del color. Solo la diaria cuenta; el resto de inspecciones del mes se ve
 // en la lista de la ficha, sin marca en el calendario.
 //
@@ -74,6 +74,9 @@ export function nombreDelMes(mes) {
   return `${t.charAt(0).toUpperCase()}${t.slice(1)} ${a}`
 }
 
+/** La regla en palabras, igual que en la app. */
+export const TEXTO_REGLA = 'De lunes a viernes cuentan todos los días desde que tiene la unidad. Sábado y domingo solo cuentan si ese día trabajó.'
+
 /** ¿Cuenta como diaria? Lo clasifica el servidor (`clase`); las que llegan sin clase se toman como diarias. */
 const esDiaria = (i) => i.clase !== 'scheduled'
 
@@ -81,8 +84,10 @@ const esDiaria = (i) => i.clase !== 'scheduled'
  * El mes de una persona, día por día.
  *
  * La misma regla que la app (T-60), para que las dos den las mismas cifras:
- *   · Debía hacerla todos los días, de lunes a domingo, desde que tiene
- *     unidad asignada (`desde`) hasta hoy. Sin unidad, ninguno.
+ *   · Debía hacerla de lunes a viernes, desde que tiene unidad asignada
+ *     (`desde`) hasta hoy. Sin unidad, ninguno.
+ *   · Sábado y domingo solo cuentan si ese día la hizo (decisión de Marco):
+ *     si no, «No cuenta», no «No hecha».
  *   · Un día en que la hizo cuenta siempre, aunque no tenga unidad.
  *   · Hoy no cuenta como «No hecha» mientras siga a tiempo.
  *   · Solo las diarias suman (las que llegan sin clase se toman como diarias).
@@ -107,7 +112,8 @@ export function mesDeLaPersona({ mes, hoy = isoLocal(new Date()), inspecciones =
     const inspeccion = [...diarias].sort((a, b) =>
       (GRAVEDAD[b.resultado] ?? 0) - (GRAVEDAD[a.resultado] ?? 0) ||
       new Date(b.creadaEn || b.fecha || 0) - new Date(a.creadaEn || a.fecha || 0))[0] ?? null
-    const debia = fecha <= hoy && (!inicio || fecha >= inicio) && conUnidad
+    const finDeSemana = [0, 6].includes(diaSemana(fecha))
+    const debia = fecha <= hoy && (!inicio || fecha >= inicio) && conUnidad && !finDeSemana
 
     let estado
     if (inspeccion) estado = ESTADO_DE_RESULTADO[inspeccion.resultado] ?? 'hecha'

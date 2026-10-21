@@ -69,7 +69,8 @@ export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir }) {
 }
 
 function Asignada({ item, ahora, alHacer, alAbrir }) {
-  const [entregando, setEntregando] = useState(false)
+  // El paso que pide nota (Pausar o Entregar) mientras se escribe; null si no hay ninguno abierto.
+  const [pidiendo, setPidiendo] = useState(null)
   const [nota, setNota] = useState('')
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -81,24 +82,25 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
   const segundos = item.segundos + (item.estado === 'en_ejecucion' ? Math.max(0, (ahora - item.medidoEn) / 1000) : 0)
 
   useEffect(() => {
-    if (entregando) notaRef.current?.focus()
-  }, [entregando])
+    if (pidiendo) notaRef.current?.focus()
+  }, [pidiendo])
 
   async function hacer(paso) {
     if (guardando) return
     setError('')
-    if (paso.pideNota && !entregando) {
-      setEntregando(true)
+    if (paso.pideNota && pidiendo?.accion !== paso.accion) {
+      setNota('')
+      setPidiendo(paso)
       return
     }
     if (paso.pideNota && nota.trim().length < 3) {
-      setError('Cuenta qué se hizo (al menos 3 letras).')
+      setError(paso.accion === 'pausa' ? 'Escribe el motivo de la pausa (al menos 3 letras).' : 'Cuenta qué se hizo (al menos 3 letras).')
       return
     }
     setGuardando(true)
     try {
       await registrarEvento(item, paso.accion, paso.pideNota ? nota : '')
-      setEntregando(false)
+      setPidiendo(null)
       setNota('')
       await alHacer(
         paso.accion === 'inicio' ? 'Trabajo iniciado. El tiempo empieza a contar.'
@@ -132,7 +134,7 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
         </dl>
       </div>
 
-      {!entregando && (acciones.length > 0 || alAbrir) && (
+      {!pidiendo && (acciones.length > 0 || alAbrir) && (
         <div className="mnt-asig-acciones" role="group" aria-label={`Acciones de la orden ${item.titulo}`}>
           {acciones.map((p) => (
             <button key={p.accion} type="button" className={`pnl-btn${p.sutil ? '' : ' primario'}`} onClick={() => hacer(p)} disabled={guardando}>
@@ -143,20 +145,31 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
         </div>
       )}
 
-      {entregando && (
+      {pidiendo && (
         <div className="mnt-asig-entrega">
-          <Campo etiqueta="Qué se hizo" error={error} ayuda="Queda en el historial de la orden. El costo lo registra el supervisor al cerrarla.">
-            <textarea ref={notaRef} className="pnl-textarea" rows={3} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Se cambiaron las pastillas delanteras y se probó el frenado." />
+          <Campo
+            etiqueta={pidiendo.pideNota}
+            error={error}
+            ayuda={pidiendo.accion === 'pausa' ? 'Queda en el historial de la orden. El tiempo deja de contar hasta que reanudes.' : 'Queda en el historial de la orden. El costo lo registra el supervisor al cerrarla.'}
+          >
+            <textarea
+              ref={notaRef}
+              className="pnl-textarea"
+              rows={3}
+              value={nota}
+              onChange={(e) => setNota(e.target.value)}
+              placeholder={pidiendo.accion === 'pausa' ? 'Falta el repuesto; llega mañana.' : 'Se cambiaron las pastillas delanteras y se probó el frenado.'}
+            />
           </Campo>
           <div className="mnt-asig-acciones">
-            <button type="button" className="pnl-btn primario" onClick={() => hacer(acciones.find((p) => p.accion === 'entrega') ?? { accion: 'entrega', pideNota: true })} disabled={guardando}>
-              {guardando ? 'Guardando…' : 'Entregar'}
+            <button type="button" className="pnl-btn primario" onClick={() => hacer(pidiendo)} disabled={guardando}>
+              {guardando ? 'Guardando…' : pidiendo.t}
             </button>
-            <button type="button" className="pnl-btn sutil" onClick={() => { setEntregando(false); setError('') }} disabled={guardando}>Volver</button>
+            <button type="button" className="pnl-btn sutil" onClick={() => { setPidiendo(null); setError('') }} disabled={guardando}>Volver</button>
           </div>
         </div>
       )}
-      {error && !entregando && <p className="pnl-campo-error" role="alert">{error}</p>}
+      {error && !pidiendo && <p className="pnl-campo-error" role="alert">{error}</p>}
     </article>
   )
 }

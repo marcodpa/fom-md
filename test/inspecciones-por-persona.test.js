@@ -6,8 +6,9 @@ import { build } from 'vite'
 // ============================================================
 // T-59 / T-64: Historial «Por persona» y su calendario
 // ------------------------------------------------------------
-// 1. La regla del mes (la misma que la app, T-60): todos los días desde que
-//    tiene unidad, hoy no es «No hecha» mientras siga a tiempo, sin unidad
+// 1. La regla del mes (la misma que la app, T-60/T-75): de lunes a viernes
+//    todos los días desde que tiene unidad; sábado y domingo solo si ese día
+//    la hizo. Hoy no es «No hecha» mientras siga a tiempo, sin unidad
 //    solo cuentan los días que la hizo, solo las diarias suman. Desde T-64
 //    las programadas no llevan marca propia: no suman ni se cuentan aparte.
 // 2. Conectado, el mes se lee por páginas de 200 hasta cruzar su primer día:
@@ -35,15 +36,15 @@ function localStorageEnMemoria() {
 
 const insp = (id, fecha, resultado = 'aprobada', extra = {}) => ({ id, fecha, resultado, creadaEn: `${fecha}T07:00:00`, ...extra })
 
-test('calendario: todos los días desde la unidad, hoy no es «No hecha», solo diarias', async () => {
-  const { mesDeLaPersona, ESTADO_DIA } = await compilar('src/panel/comp/CalendarioInspecciones.jsx', '')
+test('calendario: lunes a viernes desde la unidad, fin de semana solo si la hizo, hoy no es «No hecha», solo diarias', async () => {
+  const { mesDeLaPersona, ESTADO_DIA, TEXTO_REGLA } = await compilar('src/panel/comp/CalendarioInspecciones.jsx', '')
   // Octubre 2026: el 1 es jueves, el 4 domingo. Hoy es martes 6.
   const { dias, totales } = mesDeLaPersona({
     mes: '2026-10', hoy: '2026-10-06', desde: '2026-10-02', conUnidad: true,
     inspecciones: [
       insp('a', '2026-10-02'),
-      insp('b', '2026-10-03', 'aprobada_con_observaciones'),
-      insp('c', '2026-10-04'), // domingo: cuenta como cualquier día
+      insp('b', '2026-10-03', 'aprobada_con_observaciones'), // sábado: la hizo, cuenta
+      insp('c', '2026-10-04'), // domingo: la hizo, cuenta
       insp('d', '2026-10-05', 'aprobada'),
       insp('e', '2026-10-05', 'bloqueada'), // dos el mismo día: manda la peor
       insp('p', '2026-10-01', 'aprobada', { clase: 'scheduled' }), // kind=scheduled: no suma
@@ -69,12 +70,26 @@ test('calendario: todos los días desde la unidad, hoy no es «No hecha», solo 
   )
   assert.equal('programadas' in totales, false, 'sin total de programadas')
 
-  // Un día laborable sin la diaria sí es «No hecha» y baja el cumplimiento.
+  assert.equal(TEXTO_REGLA, 'De lunes a viernes cuentan todos los días desde que tiene la unidad. Sábado y domingo solo cuentan si ese día trabajó.')
+
+  // Un día laborable sin la diaria sí es «No hecha» y baja el cumplimiento;
+  // el fin de semana sin la diaria es «No cuenta» y no suma ni resta.
   const otro = mesDeLaPersona({ mes: '2026-10', hoy: '2026-10-06', conUnidad: true, inspecciones: [insp('a', '2026-10-01'), insp('b', '2026-10-02')] })
-  assert.equal(otro.dias[2].estado, 'no_hecha') // sábado 3
-  assert.equal(otro.dias[3].estado, 'no_hecha') // domingo 4 también cuenta
-  assert.equal(otro.totales.debidos, 5) // del 1 al 5; hoy (6) aún a tiempo
-  assert.equal(otro.totales.pct, 40)
+  assert.equal(otro.dias[2].estado, 'libre') // sábado 3 sin la diaria
+  assert.equal(otro.dias[3].estado, 'libre') // domingo 4 sin la diaria
+  assert.equal(otro.dias[2].cuenta, false)
+  assert.equal(ESTADO_DIA[otro.dias[3].estado].texto, 'No cuenta')
+  assert.equal(otro.dias[4].estado, 'no_hecha') // lunes 5
+  assert.deepEqual(
+    { debidos: otro.totales.debidos, cumplidos: otro.totales.cumplidos, noHechas: otro.totales.noHechas, pct: otro.totales.pct },
+    { debidos: 3, cumplidos: 2, noHechas: 1, pct: 67 }, // jueves 1, viernes 2 y lunes 5; hoy (6) aún a tiempo
+  )
+
+  // Hoy sábado sin la diaria: no es «Hoy» pendiente ni «No hecha», no cuenta.
+  const sabado = mesDeLaPersona({ mes: '2026-10', hoy: '2026-10-10', conUnidad: true, inspecciones: [] })
+  assert.equal(sabado.dias[9].estado, 'libre')
+  assert.equal(sabado.totales.debidos, 7) // 1, 2, 5, 6, 7, 8, 9
+  assert.equal(sabado.totales.noHechas, 7)
 
   // Sin unidad: solo cuentan los días que la hizo.
   const sinUnidad = mesDeLaPersona({ mes: '2026-10', hoy: '2026-10-06', conUnidad: false, inspecciones: [insp('a', '2026-10-02')] })
