@@ -26,6 +26,7 @@ import Reportes from './modulos/Reportes'
 import AdminEmpresas from './modulos/AdminEmpresas'
 import AdminPagos from './modulos/AdminPagos'
 import AdminGps from './modulos/AdminGps'
+import { ReceptorMenu } from './comp/GpsPiezas'
 import AdminUsuarios from './modulos/AdminUsuarios'
 import AdminAuditoria from './modulos/AdminAuditoria'
 import MiUnidad from './modulos/MiUnidad'
@@ -83,7 +84,7 @@ const MENU_ADMIN = {
     { a: '/panel/admin/vehiculos', icono: 'camion', texto: 'Vehículos generales' },
     { a: '/panel/admin/transferencias', icono: 'comparar', texto: 'Transferencias' },
     { a: '/panel/admin/pagos', icono: 'costos', texto: 'Facturación' },
-    { a: '/panel/admin/gps', icono: 'pin', texto: 'GPS' },
+    { a: '/panel/admin/gps', icono: 'pin', texto: 'Inventario GPS' },
     { a: '/panel/admin/auditoria', icono: 'auditoria', texto: 'Auditoría' },
   ],
 }
@@ -194,6 +195,8 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
       </nav>
 
       <div className="pnl-side-pie">
+        {/* Estado del receptor GPS: solo para el Administrador FOM y solo si el servidor lo publica. */}
+        {esAdminFom(perfil) && <ReceptorMenu />}
         <NavLink to="/panel/mi-perfil" className="pnl-usuario" aria-label="Abrir mi perfil" onClick={cerrar}>
           <i className="pnl-avatar">{perfil.iniciales}</i>
           <div>
@@ -374,7 +377,7 @@ export default function Consola() {
               <Route path="admin/vehiculos" element={<AdminVehiculos />} />
               <Route path="admin/transferencias" element={<Transferencias />} />
               <Route path="admin/pagos" element={<AdminPagos />} />
-              <Route path="admin/gps" element={<AdminGps />} />
+              <Route path="admin/gps/*" element={<AdminGps />} />
               <Route path="admin/auditoria" element={<AdminAuditoria />} />
             </>
           )}

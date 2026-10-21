@@ -363,11 +363,26 @@ export const api = {
     pedir(`${CONSOLA}/gps-devices`, { metodo: 'POST', cuerpo }),
   actualizarEquipoGps: (equipoId, cuerpo) =>
     pedir(`${CONSOLA}/gps-devices/${equipoId}`, { metodo: 'PATCH', cuerpo }),
-  instalarEquipoGps: (equipoId, cuerpo) =>
+  // `empresaId`: la unidad es de otra empresa; la instalación viaja por su ruta `/tenants/{id}`.
+  instalarEquipoGps: (equipoId, cuerpo, empresaId) =>
     pedir(`${CONSOLA}/gps-devices/${equipoId}/installation`, {
       metodo: 'POST',
       cuerpo,
+      ...(empresaId ? { empresaContexto: empresaId } : {}),
     }),
+  // Lecturas del equipo (T-95). El id va en la ruta; el IMEI y el ICCID nunca.
+  equipoGps: (equipoId) => pedir(`${CONSOLA}/gps-devices/${equipoId}`),
+  telemetriaGps: (equipoId, limite = 50) =>
+    pedir(`${CONSOLA}/gps-devices/${equipoId}/telemetry?limit=${limite}`),
+  ultimaPosicionGps: (equipoId) => pedir(`${CONSOLA}/gps-devices/${equipoId}/position/latest`),
+  posicionesGps: (equipoId, limite = 50) =>
+    pedir(`${CONSOLA}/gps-devices/${equipoId}/positions?limit=${limite}`),
+  capacidadesGps: (equipoId) => pedir(`${CONSOLA}/gps-devices/${equipoId}/capabilities`),
+  // Prueba de señal: abre (o retoma) la sesión y la cierra aprobada o fallida.
+  iniciarPruebaGps: (equipoId) =>
+    pedir(`${CONSOLA}/gps-devices/${equipoId}/commissioning`, { metodo: 'POST', cuerpo: {} }),
+  completarPruebaGps: (sesionId, cuerpo) =>
+    pedir(`${CONSOLA}/gps-commissioning/${sesionId}/complete`, { metodo: 'POST', cuerpo }),
   desmontarEquipoGps: (instalacionId, cuerpo = {}) =>
     pedir(`${CONSOLA}/gps-installations/${instalacionId}/remove`, {
       metodo: 'PATCH',

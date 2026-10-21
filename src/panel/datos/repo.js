@@ -75,6 +75,12 @@ const FALTA_GPS_CAMPO =
   'delante: se hacen desde la app de campo, al comisionarlo. Registrarlo y ' +
   'asociarlo a una unidad sí se hace desde aquí.'
 
+// El estado del receptor (puertos, último mensaje, fallos) vive solo en la
+// superficie interna del servidor: la consola no lo publica todavía.
+const FALTA_GPS_RECEPTOR =
+  'Disponible cuando el servidor lo publique: el estado del receptor GPS ' +
+  '(puertos, último mensaje y fallos) todavía no sale por la consola.'
+
 const FALTA_COSTOS =
   'Cargar costos todavía no existe en el servidor como módulo propio: hoy ' +
   'el costo se registra al cerrar la orden de trabajo que lo generó.'
@@ -177,14 +183,15 @@ const repo = HAY_API
           listar: repoApi.gente.listar,
           actualizarPerfil: repoApi.gente.actualizarPerfil,
         },
-        // Registrar, asociar y desmontar son reales desde el #260. Verificar
+        // Registrar, asociar y desmontar son reales desde el #260; detalle,
+        // tramas, posiciones, capacidades y prueba de señal, desde T-95. Verificar
         // y probar el botón de pánico siguen siendo de campo: exigen el
         // aparato delante, y fingirlos desde una pantalla sería peor que no
         // tenerlos.
         gps: conRespaldoParcial(
           repoSemilla.admin.gps,
           repoApi.gpsEscritura,
-          { verificar: FALTA_GPS_CAMPO, probarPanico: FALTA_GPS_CAMPO },
+          { verificar: FALTA_GPS_CAMPO, probarPanico: FALTA_GPS_CAMPO, receptor: FALTA_GPS_RECEPTOR },
         ),
         pagos: pagosApi,
         // Bitácora real desde `GET /audit`.
@@ -290,7 +297,7 @@ const repo = HAY_API
       admin: {
         ...repoSemilla.admin,
         plataforma: soloConBaseReal(repoApi.plataforma),
-        gps: { ...repoSemilla.admin.gps, sinEmparejar: faltaEnElServidor(SOLO_CON_BASE_REAL) },
+        // GPS (T-95): la semilla trae su propio inventario, detectados, tramas y prueba de señal.
       },
     }
 

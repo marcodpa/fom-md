@@ -74,7 +74,8 @@ test('gps: la instalación se manda aunque el equipo nunca haya reportado', asyn
   } finally { globalThis.fetch = original }
 
   // La pantalla ya no esconde el selector tras «verificado» y avisa de comprobar la señal.
-  const fuente = readFileSync(join(raiz, 'src/panel/modulos/AdminGps.jsx'), 'utf8')
+  // Desde T-95 la instalación vive en su propia pantalla, AdminGpsInstalar.
+  const fuente = readFileSync(join(raiz, 'src/panel/modulos/AdminGpsInstalar.jsx'), 'utf8')
   assert.doesNotMatch(fuente, /activo && g\.verificado && !instalado/u)
   assert.match(fuente, /Este equipo aún no ha reportado; tras instalarlo comprueba que empiece a enviar señal\./u)
 })

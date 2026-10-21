@@ -1,465 +1,219 @@
-import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
-import { useSesion } from '../useSesion'
+import { Cargando, ErrorCarga, Vacio } from '../comp/ui'
+import { Cabeza, Detectado, IcoGps, Pastilla, ReceptorTarjeta, useAhora } from '../comp/GpsPiezas'
 import {
-  Buscador, Campo, Cargando, Datos, ErrorCarga, Modal, Tag, Tarjeta, Vacio,
-} from '../comp/ui'
-import { Icono } from '../Iconos'
-import CamposGps from '../comp/CamposGps'
-import { cambiosGps } from '../datos/metadatosGps'
-import * as f from '../datos/formato'
-import { masNuevoPrimero } from '../datos/orden'
-import './mantenimiento.css'
-import './admin-rediseno.css'
+  FILTROS_INVENTARIO, buscarEquipos, cifrasInventario, estadoEquipo, nombreEquipo, senalDe,
+} from '../datos/gps'
+import AdminGpsNuevo from './AdminGpsNuevo'
+import AdminGpsDetalle from './AdminGpsDetalle'
+import AdminGpsInstalar from './AdminGpsInstalar'
+import { ProbarGps } from './AdminGpsProbar'
+import './admin-gps.css'
 
 // ============================================================
-// INVENTARIO GPS (solo Administrador FOM)
-// Mismo estilo que Mantenimiento: arriba lo que importa, a la izquierda
-// la lista de equipos y a la derecha el equipo elegido con sus acciones
-// (verificar, instalar, desmontar, editar) y lo que ha pasado con él.
-// El ciclo del equipo es el de la app: registrar → verificar por ping →
-// instalar en una unidad → desmontar. Sin GPS verificado no hay vehículo.
+// INVENTARIO GPS (solo Administrador FOM) — T-95
+// Cuatro pantallas, como en el diseño aprobado el 21 oct:
+//   /panel/admin/gps              Inventario (GW1)
+//   /panel/admin/gps/nuevo        Nuevo GPS en 3 pasos (GW2, GW3)
+//   /panel/admin/gps/:id          Detalle y diagnóstico (GW5)
+//   /panel/admin/gps/:id/instalar Instalar en una unidad (GW4)
+//   /panel/admin/gps/:id/probar   Repetir la prueba de señal
+// En la dirección va solo el id del equipo: el IMEI, el ICCID y la clave
+// SMS nunca viajan en la URL.
 // ============================================================
-
-function cargar(q) {
-  return Promise.all([
-    repo.admin.gps.listar({ q }),
-    repo.vehiculos.listar({}),
-  ]).then(([lista, vehiculos]) => ({ lista, vehiculos }))
-}
-
-const ETAPAS = [
-  { clave: 'todos', titulo: 'Todos', color: '', filtro: () => true },
-  { clave: 'sinverificar', titulo: 'Sin verificar', color: 'ambar', filtro: (g) => g.estado !== 'inactive' && !g.verificado },
-  { clave: 'libres', titulo: 'Libres para instalar', color: 'verde', filtro: (g) => g.estado !== 'inactive' && g.verificado && !g.vehiculoId },
-  { clave: 'instalados', titulo: 'Instalados', color: '', filtro: (g) => !!g.vehiculoId },
-  { clave: 'inactivos', titulo: 'Inactivos', color: 'gris', filtro: (g) => g.estado === 'inactive' },
-]
-
-const estadoDe = (g) => {
-  if (g.estado === 'inactive') return { texto: 'Inactivo', color: 'gris' }
-  if (!g.verificado) return { texto: 'Sin verificar', color: 'ambar' }
-  if (g.vehiculoId) return { texto: 'Instalado', color: 'azul' }
-  return { texto: 'Listo para instalar', color: 'verde' }
-}
-
-const SIGUIENTE = (g) => {
-  if (g.estado === 'inactive') return 'El equipo está inactivo. Actívalo desde «Editar» para volver a usarlo.'
-  if (!g.verificado && g.vehiculoId) return `Está instalado en ${g.vehiculoNombre} pero aún no ha reportado. Comprueba que empiece a enviar señal.`
-  if (!g.verificado) return 'Aún no ha reportado. Lo ideal es verificarlo por ping en campo, con el aparato delante; si ya está montado puedes instalarlo igual y comprobar después que envíe señal.'
-  if (g.vehiculoId) return `Está instalado en ${g.vehiculoNombre}. Si cambia de unidad, desmóntalo primero.`
-  return 'Ya responde. Instálalo en la unidad que va a rastrear.'
-}
 
 export default function AdminGps() {
-  const sesion = useSesion()
-  const actor = sesion?.perfil
+  return (
+    <Routes>
+      <Route index element={<Inventario />} />
+      <Route path="nuevo" element={<AdminGpsNuevo />} />
+      <Route path=":id" element={<AdminGpsDetalle />} />
+      <Route path=":id/instalar" element={<AdminGpsInstalar />} />
+      <Route path=":id/probar" element={<ProbarGps />} />
+    </Routes>
+  )
+}
+
+function cargarInventario() {
+  return Promise.all([
+    repo.admin.gps.listar({}),
+    // Solo para la línea chica de la unidad (marca, modelo y año): si falla, la lista sale igual.
+    repo.vehiculos.listar({}).catch(() => []),
+  ]).then(([equipos, vehiculos]) => ({ equipos, vehiculos }))
+}
+
+function Inventario() {
+  const navegar = useNavigate()
+  const { state } = useLocation()
   const [params, setParams] = useSearchParams()
-  const [q, setQ] = useState(params.get('q') ?? '')
-  const [vista, setVista] = useState('equipos')
-  const [etapa, setEtapa] = useState('todos')
-  const [seleccionId, setSeleccionId] = useState(null)
-  const [registrando, setRegistrando] = useState(null) // null | { imei }
-  const [editando, setEditando] = useState(null)
-  const [aviso, setAviso] = useState('')
-  // Estado por equipo: { [id]: { ocupado, error, mensaje } }
-  const [filas, setFilas] = useState({})
-
-  const { datos, estado, error, recargar } = useDatos(() => cargar(q), [q])
-  const sinEmparejar = useDatos(async () => { try { return await repo.admin.gps.sinEmparejar() } catch { return [] } }, [])
-
-  const marcarFila = (id, patch) => setFilas((s) => ({ ...s, [id]: { ...(s[id] || {}), ...patch } }))
-
-  const cambiarBusqueda = (v) => {
-    setQ(v)
+  // Enlaces viejos traían el IMEI en `?q=`: se usa para buscar y se borra de la dirección.
+  const [q, setQ] = useState(() => params.get('q') ?? '')
+  useEffect(() => {
     if (params.get('q')) setParams({}, { replace: true })
-  }
+  }, [params, setParams])
+  const [filtro, setFiltro] = useState('todos')
+  const ahora = useAhora()
 
-  const ejecutar = async (g, hacer, ok) => {
-    marcarFila(g.id, { ocupado: true, error: '', mensaje: '' })
-    try {
-      const r = await hacer()
-      if (r && r.ok === false) { marcarFila(g.id, { ocupado: false, error: r.error }); return }
-      marcarFila(g.id, { ocupado: false, mensaje: r?.mensaje ?? '' })
-      if (ok) setAviso(ok)
-      await recargar()
-    } catch (e) {
-      marcarFila(g.id, { ocupado: false, error: e.message })
-    }
-  }
+  const { datos, estado, error, recargar } = useDatos(cargarInventario, [], 30_000)
+  const detectados = useDatos(() => repo.admin.gps.sinEmparejar(), [], 30_000)
 
-  const acciones = {
-    verificar: (g) => ejecutar(g, () => repo.admin.gps.verificar(g.id, actor)),
-    probarPanico: (g) => ejecutar(g, () => repo.admin.gps.probarPanico(g.id, actor)),
-    instalar: (g, vehiculoId, metadatos) => vehiculoId && ejecutar(g, () => repo.admin.gps.asociar(g.id, vehiculoId, undefined, metadatos), g.verificado ? 'Equipo instalado en la unidad.' : 'Equipo instalado en la unidad. Aún no ha reportado: comprueba que empiece a enviar señal.'),
-    desmontar: (g, ubicacion) => ejecutar(g, () => repo.admin.gps.desmontar(g.instalacionId, undefined, ubicacion), 'Equipo desmontado: vuelve al inventario.'),
-  }
+  const equipos = useMemo(() => datos?.equipos ?? [], [datos])
+  const porUnidad = useMemo(() => new Map((datos?.vehiculos ?? []).map((v) => [v.id, v])), [datos])
+  const cifras = cifrasInventario(equipos, ahora)
+  const buscados = buscarEquipos(equipos, q)
+  const elegido = FILTROS_INVENTARIO.find((x) => x.clave === filtro) ?? FILTROS_INVENTARIO[0]
+  // Primero los montados en una unidad (por nombre), después los del inventario.
+  const visibles = buscados
+    .filter((g) => elegido.pasa(g, ahora))
+    .sort((a, b) => (a.vehiculoId ? 0 : 1) - (b.vehiculoId ? 0 : 1)
+      || String(a.vehiculoNombre ?? '').localeCompare(String(b.vehiculoNombre ?? ''), 'es', { numeric: true }))
+  const lista = detectados.datos ?? []
 
-  const lista = datos?.lista ?? []
-  const visibles = lista.filter((ETAPAS.find((e) => e.clave === etapa) ?? ETAPAS[0]).filtro)
-  const seleccion = lista.find((g) => g.id === seleccionId) ?? visibles[0] ?? null
-  const huerfanos = sinEmparejar.datos ?? []
-
-  const resumen = [
-    ['Equipos', lista.length, 'En el inventario', 'pin'],
-    ['Sin verificar', lista.filter(ETAPAS[1].filtro).length, 'Pendientes de ping', 'alerta'],
-    ['Libres', lista.filter(ETAPAS[2].filtro).length, 'Listos para una unidad', 'check'],
-    ['Instalados', lista.filter(ETAPAS[3].filtro).length, 'Asignados a una unidad', 'camion'],
-  ]
+  const registrar = (imei) => navegar('nuevo', imei ? { state: { imei } } : undefined)
 
   return (
-    <div className="mnt-root">
-      <div className="mnt-heading">
-        <div>
-          <span className="mnt-breadcrumb">Inicio › Administración › GPS</span>
-          <h1>Inventario GPS</h1>
-          <p>Registra el equipo, instálalo en una unidad y mira cuáles reportan.</p>
-        </div>
-      </div>
-      <nav className="mnt-nav" aria-label="Secciones de GPS">
-        <button type="button" className={vista === 'equipos' ? 'activo' : ''} onClick={() => setVista('equipos')}><Icono nombre="pin" tam={18} />Equipos</button>
-        <button type="button" className={vista === 'huerfanos' ? 'activo' : ''} onClick={() => setVista('huerfanos')}><Icono nombre="alerta" tam={18} />Sin emparejar{huerfanos.length > 0 ? ` (${huerfanos.length})` : ''}</button>
-      </nav>
-
-      <div className="mnt-content">
-        <div className="mnt-toolbar">
-          <div><h2>Equipos</h2></div>
-          <button type="button" className="pnl-btn primario" onClick={() => setRegistrando({ imei: '' })}><Icono nombre="mas" tam={18} />Registrar equipo</button>
-        </div>
-        {aviso && <div className="mnt-success" role="status"><Icono nombre="check" tam={20} />{aviso}</div>}
-
-        {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
-
-        {estado === 'ok' && vista === 'equipos' && (
+    <div className="gp">
+      <Cabeza
+        ruta={[['Administración FOM'], ['Inventario GPS']]}
+        titulo="Inventario GPS"
+        bajada="Equipos registrados, en qué unidad están y si envían señal."
+        acciones={(
           <>
-            <div className="mnt-summary">
-              {resumen.map(([t, v, d, i]) => (
-                <div key={t}><Icono nombre={i} tam={28} /><span>{t}</span><b>{v}</b><small>{d}</small></div>
-              ))}
-            </div>
-            <div className="mnt-filters">
-              <Buscador valor={q} alCambiar={cambiarBusqueda} placeholder="Buscar por modelo, IMEI, línea o unidad…" />
-            </div>
-            <div className="mnt-states" aria-label="Filtrar por estado">
-              {ETAPAS.map((e) => (
-                <button type="button" key={e.clave} aria-pressed={etapa === e.clave} onClick={() => setEtapa(e.clave)}>
-                  {e.color && <i className={e.color} />}{e.titulo}<b>{lista.filter(e.filtro).length}</b>
-                </button>
-              ))}
-            </div>
-
-            {lista.length === 0 ? (
-              <Tarjeta><Vacio icono="pin" titulo="Inventario vacío" texto="Registra el primer equipo GPS para comenzar." /></Tarjeta>
-            ) : (
-              <div className="adm-layout">
-                <Tarjeta titulo={etapa === 'todos' ? 'Todos los equipos' : ETAPAS.find((e) => e.clave === etapa).titulo} sinCuerpo>
-                  {visibles.length === 0 ? (
-                    <div className="pnl-card-cuerpo"><Vacio icono="check" titulo="Nada en este grupo" texto="Cambia el filtro para ver los demás equipos." /></div>
-                  ) : (
-                    <div className="mnt-orders">
-                      {visibles.map((g) => {
-                        const e = estadoDe(g)
-                        return (
-                          <article
-                            key={`${g.id}-${g.imei}`}
-                            className={`mnt-order adm-item${seleccion?.id === g.id ? ' sel' : ''}`}
-                            onClick={() => setSeleccionId(g.id)}
-                          >
-                            <div className="mnt-thumb"><Icono nombre="pin" tam={28} /></div>
-                            <div className="mnt-order-copy">
-                              <span>{g.vehiculoNombre || 'En inventario'}</span>
-                              <h3>{g.modelo}</h3>
-                              <div><Tag color={e.color}>{e.texto}</Tag><small>IMEI {g.imei}{g.linea ? ` · ${g.linea}` : ''}</small></div>
-                            </div>
-                            <button type="button" className="pnl-btn" aria-pressed={seleccion?.id === g.id} onClick={(ev) => { ev.stopPropagation(); setSeleccionId(g.id) }}>
-                              {seleccion?.id === g.id ? 'Abierto' : 'Ver'} →
-                            </button>
-                          </article>
-                        )
-                      })}
-                    </div>
-                  )}
-                </Tarjeta>
-
-                <aside className="adm-panel">
-                  {seleccion ? (
-                    <Detalle
-                      g={seleccion}
-                      vehiculos={datos.vehiculos}
-                      fila={filas[seleccion.id] || {}}
-                      acciones={acciones}
-                      alEditar={() => setEditando(seleccion)}
-                    />
-                  ) : (
-                    <Vacio icono="pin" titulo="Elige un equipo" texto="Aquí verás sus datos y lo que puedes hacer con él." />
-                  )}
-                </aside>
-              </div>
+            {lista.length > 0 && (
+              <button type="button" className="gp-btn2" onClick={() => document.getElementById('gp-detectados')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+                <IcoGps nombre="senal" />Detectados sin registrar · {lista.length}
+              </button>
             )}
+            <button type="button" className="gp-btn" onClick={() => registrar()}><IcoGps nombre="mas" />Nuevo GPS</button>
           </>
         )}
-
-        {vista === 'huerfanos' && (
-          <Tarjeta titulo="Equipos que reportan sin empresa" sinCuerpo>
-            {sinEmparejar.estado === 'cargando' && <Cargando filas={2} />}
-            {sinEmparejar.estado === 'ok' && (huerfanos.length === 0 ? (
-              <div className="pnl-card-cuerpo"><Vacio icono="pin" titulo="Nada sin emparejar" texto="Todo IMEI que llega al receptor ya está registrado en alguna empresa." /></div>
-            ) : (
-              <div className="mnt-orders">
-                {huerfanos.map((d) => (
-                  <article className="mnt-order" key={d.imei}>
-                    <div className="mnt-thumb"><Icono nombre="alerta" tam={26} /></div>
-                    <div className="mnt-order-copy">
-                      <span>{d.mensajes} mensajes por {String(d.transporte).toUpperCase()}</span>
-                      <h3>IMEI {d.imei}</h3>
-                      <div><Tag color={d.reportando ? 'verde' : 'gris'}>{d.reportando ? 'Reportando' : 'Callado'}</Tag><small>Primera vez {f.desde(d.primeraVez)} · último {f.desde(d.ultimaVez)}</small></div>
-                    </div>
-                    <button type="button" className="pnl-btn primario" onClick={() => setRegistrando({ imei: d.imei })}>Registrar este equipo →</button>
-                  </article>
-                ))}
-              </div>
-            ))}
-          </Tarjeta>
-        )}
-      </div>
-
-      <ModalRegistrar
-        abierto={!!registrando}
-        inicial={registrando?.imei ?? ''}
-        alCerrar={() => setRegistrando(null)}
-        alGuardar={async () => { setAviso('Equipo registrado en el inventario.'); await recargar(); await sinEmparejar.recargar() }}
-        actor={actor}
       />
-      <ModalEditar equipo={editando} alCerrar={() => setEditando(null)} alGuardar={async () => { setAviso('Datos del equipo actualizados.'); await recargar() }} />
-    </div>
-  )
-}
 
-function Detalle({ g, vehiculos, fila, acciones, alEditar }) {
-  const e = estadoDe(g)
-  const instalado = !!g.vehiculoId
-  const activo = g.estado !== 'inactive'
-  const [vehiculoId, setVehiculoId] = useState('')
-  const [tecnico, setTecnico] = useState('')
-  const [ubicacionInstalacion, setUbicacionInstalacion] = useState('')
-  const [ubicacionInventario, setUbicacionInventario] = useState('')
-  // Lo que ha pasado con el equipo, de la bitácora.
-  const historial = useDatos(
-    () => repo.admin.auditoria.listar({ q: g.imei }).then((l) => masNuevoPrimero(l, 'fecha').slice(0, 6)).catch(() => []),
-    [g.imei],
-  )
+      {state?.aviso && <div className="gp-aviso" role="status"><IcoGps nombre="check" />{state.aviso}</div>}
 
-  return (
-    <div className="adm-detalle">
-      <div className="adm-cab">
-        <div className="mnt-thumb"><Icono nombre="pin" tam={30} /></div>
-        <div>
-          <h3>{g.modelo}</h3>
-          <code>{g.imei}</code>
-        </div>
-      </div>
-      <div className="adm-tags">
-        <Tag color={e.color}>{e.texto}</Tag>
-        {g.conectado && <Tag color="verde" plano>Conectado ahora</Tag>}
-        {g.panicoProbado && <Tag color="verde" plano>Pánico OK</Tag>}
-      </div>
+      {estado === 'cargando' && <section className="gp-card"><Cargando filas={6} /></section>}
+      {estado === 'error' && <section className="gp-card"><ErrorCarga onReintentar={recargar} error={error} /></section>}
 
-      <Datos items={[
-        { etiqueta: 'Unidad', valor: g.vehiculoNombre || 'En inventario' },
-        { etiqueta: 'Línea', valor: g.linea || '—' },
-        { etiqueta: 'Fabricante', valor: g.fabricante || '—' },
-        { etiqueta: 'Protocolo', valor: g.protocolo || '—' },
-        { etiqueta: 'Última conexión', valor: g.ultimaConexion ? f.desde(g.ultimaConexion) : 'Nunca' },
-        { etiqueta: 'Operador SIM', valor: g.carrier || 'Sin registrar' },
-        { etiqueta: 'ICCID', valor: g.iccid || 'Sin registrar' },
-        { etiqueta: 'Firmware', valor: g.firmwareVersion || 'Sin registrar' },
-        { etiqueta: 'Transporte', valor: g.transport?.toUpperCase() || 'Sin registrar' },
-        { etiqueta: 'Ubicación en inventario', valor: g.ubicacion || 'Sin registrar' },
-      ]} />
+      {estado === 'ok' && (
+        <>
+          <section className="gp-card gp-cifras" aria-label="Cifras del inventario">
+            <Cifra punto="var(--e-texto-3, #8c97a7)" titulo="Equipos" valor={cifras.equipos} nota="En el inventario" />
+            <Cifra punto="var(--e-exito, #3dd68c)" titulo="Con señal" valor={cifras.conSenal} nota="Reportaron en los últimos 5 min" />
+            <Cifra punto="var(--e-peligro, #ff6369)" titulo="Sin señal" valor={cifras.sinSenal} nota="Instalados y sin reportar" />
+            <Cifra punto="#3d9bf5" titulo="Sin instalar" valor={cifras.sinInstalar} nota="Esperan una unidad" />
+          </section>
 
-      <div className="adm-sigue">
-        <b>Qué sigue</b>
-        <p>{SIGUIENTE(g)}</p>
-      </div>
-
-      {fila.mensaje && <div className="mnt-success" role="status">{fila.mensaje}</div>}
-      {fila.error && <p className="pnl-campo-error" role="alert">{fila.error}</p>}
-
-      <div className="adm-acciones" role="group" aria-label="Acciones sobre el equipo">
-        {activo && !g.verificado && (
-          <button type="button" className="pnl-btn primario" disabled={fila.ocupado} onClick={() => acciones.verificar(g)}>
-            <Icono nombre="sync" tam={16} />{fila.ocupado ? 'Verificando…' : fila.error ? 'Reintentar verificación' : 'Verificar por ping'}
-          </button>
-        )}
-        {/* El servidor deja instalar cualquier equipo en inventario: no exige que haya reportado. Un equipo
-            nuevo se monta antes de oírse por primera vez, así que se permite, avisando de comprobarlo. */}
-        {activo && !g.verificado && !instalado && (
-          <div className="adm-sigue" role="note">
-            <b>Aún no ha reportado</b>
-            <p>Este equipo aún no ha reportado; tras instalarlo comprueba que empiece a enviar señal.</p>
-          </div>
-        )}
-        {activo && !instalado && (
-          <div className="adm-instalar">
-            <select className="pnl-input" value={vehiculoId} disabled={fila.ocupado} onChange={(ev) => setVehiculoId(ev.target.value)} aria-label="Unidad donde instalar">
-              <option value="">Elige la unidad…</option>
-              {vehiculos.map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
-            </select>
-            <details><summary className="pnl-link">Datos de instalación (opcional)</summary><Campo etiqueta="Técnico"><input className="pnl-input" maxLength={120} value={tecnico} disabled={fila.ocupado} onChange={e => setTecnico(e.target.value)} /></Campo><Campo etiqueta="Ubicación de instalación"><input className="pnl-input" maxLength={255} value={ubicacionInstalacion} disabled={fila.ocupado} onChange={e => setUbicacionInstalacion(e.target.value)} /></Campo></details>
-            <button type="button" className="pnl-btn primario" disabled={!vehiculoId || fila.ocupado} onClick={() => acciones.instalar(g, vehiculoId, { tecnico, ubicacion: ubicacionInstalacion })}>Instalar →</button>
-          </div>
-        )}
-        {instalado && (
-          <Link className="pnl-btn" to={`/panel/flota/${g.vehiculoId}`}><Icono nombre="camion" tam={16} />Ver la unidad →</Link>
-        )}
-        {instalado && g.instalacionId && (
-          <div><Campo etiqueta="Ubicación al volver al inventario (opcional)"><input className="pnl-input" value={ubicacionInventario} maxLength={255} disabled={fila.ocupado} onChange={e => setUbicacionInventario(e.target.value)} /></Campo><button type="button" className="pnl-btn" disabled={fila.ocupado} onClick={() => acciones.desmontar(g, ubicacionInventario)}>Desmontar de la unidad</button></div>
-        )}
-        {activo && g.verificado && g.pinSupport && !g.panicoProbado && (
-          <button type="button" className="pnl-btn sutil" disabled={fila.ocupado} onClick={() => acciones.probarPanico(g)}>
-            <Icono nombre="alerta" tam={16} />{fila.ocupado ? 'Probando…' : 'Probar botón de pánico'}
-          </button>
-        )}
-        <button type="button" className="pnl-btn sutil" onClick={alEditar}><Icono nombre="editar" tam={16} />Editar datos</button>
-      </div>
-
-      <section className="mnt-history">
-        <h3>Qué ha pasado con este equipo</h3>
-        {historial.estado === 'cargando' && <Cargando filas={2} />}
-        {historial.estado === 'ok' && (historial.datos.length === 0
-          ? <p className="mnt-muted">Todavía no hay movimientos registrados.</p>
-          : historial.datos.map((a) => (
-            <div key={a.id}>
-              <i />
-              <div>
-                <b>{a.tipo}</b>
-                {a.detalle && <p>{a.detalle}</p>}
-                <small>{a.actorNombre} · {f.fechaHora(a.fecha)}</small>
+          <div className="gp-grid">
+            <section className="gp-card" style={{ padding: '18px 8px 6px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ padding: '0 12px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <h2 className="gp-st">Equipos</h2>
+                <div className="gp-chips" role="group" aria-label="Filtrar equipos" style={{ marginLeft: 8 }}>
+                  {FILTROS_INVENTARIO.map((x) => (
+                    <button key={x.clave} type="button" className="gp-chip" aria-pressed={filtro === x.clave} onClick={() => setFiltro(x.clave)}>
+                      {x.titulo} <b>{buscados.filter((g) => x.pasa(g, ahora)).length}</b>
+                    </button>
+                  ))}
+                </div>
               </div>
+              <div style={{ padding: '0 12px' }}>
+                <label htmlFor="gp-buscar" className="gp-sr">Buscar equipo</label>
+                <div className="gp-field">
+                  <IcoGps nombre="buscar" />
+                  <input id="gp-buscar" type="search" placeholder="Buscar IMEI, línea o unidad…" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
+                </div>
+              </div>
+
+              {equipos.length === 0 ? (
+                <Vacio icono="pin" titulo="Inventario vacío" texto="Registra el primer equipo con «Nuevo GPS»." />
+              ) : visibles.length === 0 ? (
+                <Vacio icono="buscar" titulo="Nada en este grupo" texto="Cambia el filtro o la búsqueda para ver los demás equipos." compacto />
+              ) : (
+                <div className="gp-tabla-caja">
+                  <table className="gp-tbl">
+                    <thead>
+                      <tr><th>Equipo</th><th>Unidad</th><th>Línea SIM</th><th>Estado</th><th>Señal</th><th><span className="gp-sr">Abrir</span></th></tr>
+                    </thead>
+                    <tbody>
+                      {visibles.map((g) => (
+                        <FilaEquipo key={g.id} g={g} unidad={porUnidad.get(g.vehiculoId)} ahora={ahora} abrir={() => navegar(g.id)} />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+
+            <div className="gp-pila">
+              <ReceptorTarjeta ahora={ahora} />
+              <section className="gp-card gp-col" id="gp-detectados" aria-labelledby="gp-det-t">
+                <div className="gp-titulo">
+                  <h2 className="gp-st" id="gp-det-t">Detectados sin registrar</h2>
+                  <span className="gp-hint">Ya transmiten al receptor y no están en ninguna empresa.</span>
+                </div>
+                {detectados.estado === 'cargando' && <span className="gp-hint">Buscando…</span>}
+                {detectados.estado === 'error' && <span className="gp-hint">{detectados.error?.message}</span>}
+                {detectados.estado === 'ok' && lista.length === 0 && (
+                  <span className="gp-hint">Nada sin registrar: todo IMEI que llega al receptor ya está en alguna empresa.</span>
+                )}
+                {lista.map((d) => (
+                  <Detectado key={d.imei} d={d} ahora={ahora}>
+                    <button type="button" className="gp-btn2 chico" onClick={() => registrar(d.imei)}>Registrar este</button>
+                  </Detectado>
+                ))}
+                {lista.length > 0 && (
+                  <button type="button" className="gp-btn2 ancho" onClick={() => registrar((lista.find((d) => d.reportando) ?? lista[0]).imei)}>
+                    Registrar un detectado
+                  </button>
+                )}
+              </section>
             </div>
-          )))}
-      </section>
+          </div>
+        </>
+      )}
     </div>
   )
 }
 
-function ModalRegistrar({ abierto, inicial, alCerrar, alGuardar, actor }) {
-  const [metadata, setMetadata] = useState({})
-  const [modelo, setModelo] = useState('')
-  const [imei, setImei] = useState('')
-  const [linea, setLinea] = useState('')
-  const [error, setError] = useState('')
-  const [guardando, setGuardando] = useState(false)
-  const [visto, setVisto] = useState(false)
-
-  // Al abrir desde «Sin emparejar», el IMEI ya viene puesto.
-  if (abierto && !visto) { setVisto(true); setImei(inicial) }
-  if (!abierto && visto) setVisto(false)
-
-  const cerrar = () => {
-    setMetadata({})
-    setModelo(''); setImei(''); setLinea(''); setError('')
-    alCerrar()
-  }
-
-  const confirmar = async () => {
-    setGuardando(true)
-    setError('')
-    try {
-      await repo.admin.gps.registrar({ modelo, imei, linea, ...metadata }, actor)
-      await alGuardar()
-      cerrar()
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setGuardando(false)
-    }
-  }
-
+function Cifra({ punto, titulo, valor, nota }) {
   return (
-    <Modal titulo="Registrar equipo GPS" abierto={abierto} alCerrar={cerrar} ancho={460}>
-      <Campo etiqueta="Modelo" error={error}>
-        <input type="text" className="pnl-input" value={modelo} onChange={(e) => setModelo(e.target.value)} placeholder="Teltonika FMB920" />
-      </Campo>
-      <Campo etiqueta="IMEI" ayuda="15 dígitos, único en el sistema.">
-        <input type="text" inputMode="numeric" className="pnl-input" value={imei} onChange={(e) => setImei(e.target.value)} placeholder="860000000000000" />
-      </Campo>
-      <Campo etiqueta="Línea (opcional)">
-        <input type="tel" className="pnl-input" value={linea} onChange={(e) => setLinea(e.target.value)} placeholder="+58 …" />
-      </Campo>
-      <CamposGps datos={metadata} alCambiar={setMetadata} ocupado={guardando} sinLinea />
-      <div className="pnl-chips">
-        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>
-          <Icono nombre="check" tam={16} />{guardando ? 'Registrando…' : 'Registrar'}
-        </button>
-        <button type="button" className="pnl-btn sutil" onClick={cerrar} disabled={guardando}>Cancelar</button>
-      </div>
-    </Modal>
+    <div className="gp-kcell">
+      <span className="gp-lbl"><i style={{ background: punto }} />{titulo}</span>
+      <span className="gp-num">{valor}</span>
+      <span className="gp-hint">{nota}</span>
+    </div>
   )
 }
 
-function ModalEditar({ equipo, alCerrar, alGuardar }) {
-  const [metadata, setMetadata] = useState({})
-  const [fabricante, setFabricante] = useState('')
-  const [serie, setSerie] = useState('')
-  const [activo, setActivo] = useState(true)
-  const [error, setError] = useState('')
-  const [guardando, setGuardando] = useState(false)
-  const [idCargado, setIdCargado] = useState(null)
-
-  if (equipo && idCargado !== equipo.id) {
-    setMetadata({ ...equipo, simPhone: equipo.linea || '' })
-    setIdCargado(equipo.id)
-    setFabricante(equipo.fabricante ?? '')
-    setSerie(equipo.serie ?? '')
-    setActivo(equipo.estado !== 'inactive')
-    setError('')
-  }
-  if (!equipo && idCargado) setIdCargado(null)
-
-  const confirmar = async () => {
-    setGuardando(true)
-    setError('')
-    try {
-      await repo.admin.gps.set(equipo.id, {
-        estado: activo ? 'active' : 'inactive',
-        fabricante: fabricante.trim() || undefined,
-        serie: serie.trim() || undefined,
-        metadatos: cambiosGps(metadata, { ...equipo, simPhone: equipo.linea || '' }),
-      })
-      await alGuardar()
-      alCerrar()
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setGuardando(false)
-    }
-  }
-
+function FilaEquipo({ g, unidad, ahora, abrir }) {
+  const est = estadoEquipo(g.estado)
+  const senal = senalDe(g, ahora)
+  const subUnidad = unidad ? [unidad.marca, unidad.modelo, unidad.anio].filter(Boolean).join(' ') : g.empresaNombre && g.empresaNombre !== '—' ? g.empresaNombre : ''
   return (
-    <Modal titulo={`Editar ${equipo?.modelo ?? 'equipo'}`} abierto={!!equipo} alCerrar={alCerrar} ancho={460}>
-      <Campo etiqueta="Fabricante" error={error}>
-        <input type="text" className="pnl-input" value={fabricante} onChange={(e) => setFabricante(e.target.value)} placeholder="Teltonika" />
-      </Campo>
-      <Campo etiqueta="Número de serie">
-        <input type="text" className="pnl-input" value={serie} onChange={(e) => setSerie(e.target.value)} />
-      </Campo>
-      <CamposGps datos={metadata} alCambiar={setMetadata} ocupado={guardando} />
-      <Campo etiqueta="Estado" ayuda="Un equipo inactivo no se puede instalar en ninguna unidad.">
-        <select className="pnl-input" value={activo ? 'active' : 'inactive'} onChange={(e) => setActivo(e.target.value === 'active')}>
-          <option value="active">Activo</option>
-          <option value="inactive">Inactivo</option>
-        </select>
-      </Campo>
-      <div className="pnl-chips">
-        <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>
-          <Icono nombre="check" tam={16} />{guardando ? 'Guardando…' : 'Guardar'}
-        </button>
-        <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
-      </div>
-    </Modal>
+    <tr className="abrible" onClick={abrir}>
+      <td>
+        <b>{nombreEquipo(g)}</b><br />
+        <span className="gp-hint gp-mono mono">IMEI {g.imei}</span>
+      </td>
+      <td>
+        {g.vehiculoId ? (
+          <><b>{g.vehiculoNombre || 'Unidad sin nombre'}</b>{subUnidad && <><br /><span className="gp-hint">{subUnidad}</span></>}</>
+        ) : (
+          <><span className="claro">En inventario</span>{g.ubicacion && <><br /><span className="gp-hint">{g.ubicacion}</span></>}</>
+        )}
+      </td>
+      <td>
+        {g.linea ? (
+          <><span className="claro">{g.linea}</span>{g.carrier && <><br /><span className="gp-hint">{g.carrier}</span></>}</>
+        ) : <span className="gp-hint">Sin línea</span>}
+      </td>
+      <td><Pastilla tono={est.tono}>{est.texto}</Pastilla></td>
+      <td><Pastilla tono={senal.tono} punto>{senal.texto}</Pastilla></td>
+      <td className="der">
+        <button type="button" className="gp-enlace" onClick={(e) => { e.stopPropagation(); abrir() }} aria-label={`Ver ${nombreEquipo(g)} ${g.vehiculoNombre ?? 'en inventario'}`}>Ver →</button>
+      </td>
+    </tr>
   )
 }

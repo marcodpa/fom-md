@@ -96,7 +96,7 @@ const responder = (valor, ms = 120) =>
 
 // --- Colecciones resueltas -------------------------------------------------
 function todosVehiculos() {
-  return [...VEHICULOS, ...agregados('vehiculos')].map((v) => aplicar('vehiculos', v))
+  return conGpsAlDia([...VEHICULOS, ...agregados('vehiculos')].map((v) => aplicar('vehiculos', v)))
 }
 function todosPerfiles() {
   // Los eliminados definitivamente no existen para nadie.
@@ -227,8 +227,156 @@ function todasEmpresas() {
 function todosPagos() {
   return [...PAGOS, ...agregados('pagos')].map((p) => aplicar('pagos', p))
 }
+// --- Inventario GPS de la demostración (T-95) -------------------------------
+// Todo equipo vive en UNA lista —los libres de la semilla, dos Coban GPS-403 de
+// la gaveta y los montados en cada unidad— y su `vehiculoId` dice dónde está.
+// Instalar o desmontar solo cambia ese campo, así la ficha de la unidad y el
+// inventario cuentan siempre lo mismo. Tres unidades salen sin GPS para que
+// «Instalar en una unidad» se pueda recorrer.
+const UNIDADES_SIN_GPS_DEMO = new Set(['veh-012', 'veh-015', 'veh-021'])
+const MIN = 60_000
+const GPS_GAVETA_DEMO = [
+  {
+    id: 'gps-201', fabricante: 'Coban', modelo: 'GPS-403', protocolo: 'coban-gps103', transport: 'tcp',
+    imei: '868166051449120', linea: '0414-9017745', simPhone: '0414-9017745', carrier: 'Movistar',
+    apn: 'internet.movistar.ve', iccid: '8958040119045539120', simStatus: 'active',
+    estado: 'inventory', ubicacion: 'Gaveta 2 · Maracaibo', empresaId: null,
+    verificado: true, pinSupport: false, panicoProbado: false,
+    ultimaConexion: new Date(Date.now() - 6 * 24 * 60 * MIN).toISOString(),
+  },
+  {
+    id: 'gps-202', fabricante: 'Coban', modelo: 'GPS-403', protocolo: 'coban-gps103', transport: 'tcp',
+    imei: '868166051443907', linea: null, estado: 'inventory', ubicacion: 'Gaveta 2 · Maracaibo', empresaId: null,
+    verificado: false, pinSupport: false, panicoProbado: false, ultimaConexion: null,
+  },
+]
+/** El operador sale del prefijo de la línea venezolana. */
+function operadorDe(linea) {
+  const d = String(linea ?? '').replace(/\D/gu, '').replace(/^58/u, '').replace(/^0/u, '')
+  if (/^4(14|24)/u.test(d)) return ['Movistar', 'internet.movistar.ve']
+  if (/^412/u.test(d)) return ['Digitel', 'gprsweb.digitel.ve']
+  if (/^4(16|26)/u.test(d)) return ['Movilnet', 'int.movilnet.com.ve']
+  return [null, null]
+}
+function equipoDeSemilla(g, extra = {}) {
+  const [carrier, apn] = operadorDe(g.linea)
+  const coban = /coban/iu.test(g.modelo ?? '')
+  return {
+    fabricante: null, protocolo: coban ? 'coban-gps103' : null, transport: 'tcp',
+    simPhone: g.linea ?? null, carrier, apn, simStatus: g.linea ? 'active' : null,
+    estado: 'inventory', ubicacion: null, ultimaConexion: null,
+    ...g,
+    ...extra,
+  }
+}
+function inventarioGps() {
+  const libres = GPS_LIBRES.map((g) => equipoDeSemilla(g, {
+    ubicacion: 'Oficina FOM · Maracaibo',
+    ultimaConexion: g.verificado ? new Date(Date.now() - 2 * 24 * 60 * MIN).toISOString() : null,
+  }))
+  const montados = VEHICULOS
+    .filter((v) => v.gps && !UNIDADES_SIN_GPS_DEMO.has(v.id))
+    .map((v) => equipoDeSemilla(v.gps, {
+      vehiculoId: v.id,
+      vehiculoNombre: `${v.alias} · ${v.placa}`,
+      empresaId: v.empresaId ?? EMPRESA.id,
+      estado: 'active',
+      ultimaConexion: v.ultimoReporte ?? null,
+      instalacionId: `ins-${v.gps.id}`,
+      instaladoEn: v.creadoEn ?? null,
+      ubicacionInstalacion: 'Bajo el tablero',
+    }))
+  return [...libres, ...GPS_GAVETA_DEMO, ...montados, ...agregados('gps').map((g) => equipoDeSemilla(g))]
+    .map((g) => aplicar('gps', g))
+}
 function todosGps() {
-  return [...GPS_LIBRES, ...agregados('gps')].map((g) => aplicar('gps', g))
+  return inventarioGps()
+}
+/** La unidad con el equipo que de verdad lleva hoy (o `null` si va sin GPS). */
+function conGpsAlDia(vehiculos) {
+  const porUnidad = new Map(inventarioGps().filter((g) => g.vehiculoId).map((g) => [g.vehiculoId, g]))
+  return vehiculos.map((v) => {
+    const g = porUnidad.get(v.id) ?? null
+    if (!g) return v.gps ? { ...v, gps: null } : v
+    return { ...v, gps: { ...(v.gps ?? {}), ...g } }
+  })
+}
+
+// Tramas de la demostración: una cada 30 s hacia atrás desde la última señal,
+// con un latido cada cuatro y algún hueco de 2 min. Al abrir una prueba sobre
+// un equipo callado, la primera trama llega a los 8 s, como en campo.
+const PRUEBA_TARDA_MS = 8000
+function ultimaSenalDemo(g, ahora = Date.now()) {
+  const desde = g.pruebaDesde ? new Date(g.pruebaDesde).getTime() : NaN
+  if (Number.isFinite(desde) && ahora - desde >= PRUEBA_TARDA_MS) {
+    return ahora - ((ahora - desde - PRUEBA_TARDA_MS) % 30_000)
+  }
+  const t = g.ultimaConexion ? new Date(g.ultimaConexion).getTime() : NaN
+  return Number.isFinite(t) ? t : null
+}
+function alDiaDemo(g, ahora = Date.now()) {
+  const t = ultimaSenalDemo(g, ahora)
+  if (!t) return g
+  return { ...g, ultimaConexion: new Date(t).toISOString(), conectado: ahora - t < 5 * MIN, verificado: true }
+}
+/** Huella de ejemplo, estable por trama (FNV-1a encadenado). No es SHA-256: es demostración. */
+function huellaDemo(texto) {
+  let h = 0x811c9dc5
+  let salida = ''
+  for (let r = 0; salida.length < 64; r += 1) {
+    for (const ch of `${texto}#${r}`) {
+      h ^= ch.charCodeAt(0)
+      h = Math.imul(h, 0x01000193) >>> 0
+    }
+    salida += h.toString(16).padStart(8, '0')
+  }
+  return salida.slice(0, 64)
+}
+function tramasDemo(g, ahora = Date.now(), limite = 50) {
+  const ultima = ultimaSenalDemo(g, ahora)
+  if (!ultima) return []
+  const pd = g.pruebaDesde ? new Date(g.pruebaDesde).getTime() : NaN
+  const desde = Number.isFinite(pd) ? pd + PRUEBA_TARDA_MS : -Infinity
+  const salida = []
+  let t = ultima
+  for (let i = 0; i < limite && t >= desde; i += 1) {
+    const latido = i % 4 === 3
+    salida.push({
+      id: `${g.id}-${t}`,
+      recibido: new Date(t).toISOString(),
+      via: String(g.transport || 'tcp').toUpperCase(),
+      bytes: latido ? 64 : 212,
+      diagnostico: `${g.protocolo || 'coban-gps103'} · ${latido ? 'heartbeat' : 'position_valid'}`,
+      fresco: ahora - t < 5 * MIN,
+      imeiCoincide: true,
+      huella: huellaDemo(`${g.imei}-${t}`),
+    })
+    t -= i % 7 === 6 ? 120_000 : 30_000
+  }
+  return salida
+}
+function posicionesDemo(g, tramas) {
+  const unidad = g.vehiculoId ? VEHICULOS.find((v) => v.id === g.vehiculoId) : null
+  const lat0 = unidad?.lat ?? 10.6427
+  const lng0 = unidad?.lng ?? -71.6125
+  return tramas
+    .filter((m) => m.diagnostico.endsWith('position_valid'))
+    .map((m, i) => {
+      const anda = i % 5 === 2
+      return {
+        id: `pos-${m.id}`, recibido: m.recibido, hora: m.recibido,
+        lat: lat0 + (anda ? i * 0.0004 : 0), lng: lng0 - (anda ? i * 0.0003 : 0), valida: true,
+        velocidad: anda ? 12 : 0, rumbo: anda ? 120 : null, encendido: i !== 0,
+      }
+    })
+}
+/** Dos IMEI que ya llegan al receptor sin estar registrados (los del diseño). */
+function detectadosDemo(ahora = Date.now()) {
+  const registrados = new Set(inventarioGps().map((g) => g.imei))
+  return [
+    { imei: '868166051450012', primeraVez: new Date(ahora - 3 * 60 * MIN).toISOString(), ultimaVez: new Date(ahora - 12_000).toISOString(), mensajes: 38, transporte: 'tcp', reportando: true, bytesUltimo: 212 },
+    { imei: '868166051441275', primeraVez: new Date(ahora - 26 * 60 * MIN).toISOString(), ultimaVez: new Date(ahora - 25 * MIN).toISOString(), mensajes: 6, transporte: 'udp', reportando: false, bytesUltimo: 96 },
+  ].filter((d) => !registrados.has(d.imei))
 }
 function todaAuditoria() {
   return [...agregados('auditoria'), ...AUDITORIA]
@@ -954,27 +1102,29 @@ export const repo = {
     },
 
     // ---------------- Inventario de GPS ----------------
+    // Mismas reglas que el servidor: se instala solo lo que está en el
+    // inventario, la prueba de señal se abre con el equipo ya instalado y se
+    // aprueba solo con una trama del mismo IMEI en los últimos 5 minutos.
     gps: {
       async listar({ q = '' } = {}) {
         const empresas = todasEmpresas()
-        const veh = todosVehiculos()
-        // Inventario libre + los equipos ya instalados en la flota.
-        const instalados = veh.map((v) => ({
-          ...v.gps,
-          empresaId: v.empresaId ?? EMPRESA.id,
-          vehiculoId: v.id,
-          vehiculoNombre: `${v.alias} · ${v.placa}`,
-        }))
-        let lista = [...todosGps(), ...instalados].map((g) => ({
-          ...g,
+        const ahora = Date.now()
+        let lista = inventarioGps().map((g) => ({
+          ...alDiaDemo(g, ahora),
           empresaNombre: g.empresaId ? (empresas.find((e) => e.id === g.empresaId)?.nombre ?? '—') : 'Sin asociar',
         }))
         if (q) {
           const t = q.toLowerCase()
           lista = lista.filter((g) => [g.modelo, g.imei, g.linea, g.empresaNombre, g.vehiculoNombre].join(' ').toLowerCase().includes(t))
         }
-        // Sin verificar primero: es lo que el admin tiene que atender.
-        return responder(lista.sort((a, b) => (a.verificado ? 1 : 0) - (b.verificado ? 1 : 0)))
+        return responder(lista)
+      },
+
+      async obtener(id) {
+        const g = inventarioGps().find((x) => x.id === id)
+        if (!g) return fallo('Ese GPS no está en el inventario.')
+        const empresa = todasEmpresas().find((e) => e.id === g.empresaId)
+        return responder({ ...alDiaDemo(g), empresaNombre: empresa?.nombre ?? '—' })
       },
 
       /** GPS verificados y sin unidad: los únicos válidos para crear vehículo. */
@@ -982,17 +1132,26 @@ export const repo = {
         return responder(todosGps().filter((g) => g.verificado && !g.vehiculoId))
       },
 
-      async registrar({ modelo, imei, linea = '' }, actor) {
+      async registrar({ modelo, imei, linea = '', fabricante, protocolo, serie, ...metadata }, actor) {
         if (!modelo?.trim()) return fallo('Indica el modelo del equipo.')
         const imeiN = String(imei || '').replace(/\D/g, '')
         if (!/^\d{15}$/.test(imeiN)) return fallo('El IMEI debe tener exactamente 15 dígitos.')
-        const veh = todosVehiculos()
-        if (todosGps().some((g) => g.imei === imeiN) || veh.some((v) => v.gps?.imei === imeiN))
-          return fallo('Ya hay un GPS registrado con ese IMEI.')
+        if (todosGps().some((g) => g.imei === imeiN)) return fallo('Ya hay un GPS registrado con ese IMEI.')
+        const ahora = Date.now()
+        // Si ya transmitía como «detectado», sigue transmitiendo: su señal no se corta al registrarlo.
+        const detectado = detectadosDemo(ahora).find((d) => d.imei === imeiN && d.reportando)
         const fila = {
-          id: `gps-n${Date.now().toString(36)}`,
-          modelo: modelo.trim(), imei: imeiN, linea,
+          id: `gps-n${ahora.toString(36)}`,
+          modelo: modelo.trim(), imei: imeiN,
+          fabricante: fabricante || null, protocolo: protocolo || null, serie: serie || null,
+          linea: linea || metadata.simPhone || null,
+          simPhone: linea || metadata.simPhone || null,
+          iccid: metadata.iccid || null, carrier: metadata.carrier || null, apn: metadata.apn || null,
+          simStatus: metadata.simStatus || null, simPlan: metadata.simPlan || null,
+          firmwareVersion: metadata.firmwareVersion || null, transport: metadata.transport || 'tcp',
+          estado: 'inventory', ubicacion: null,
           empresaId: null, verificado: false, pinSupport: false, panicoProbado: false,
+          ...(detectado ? { pruebaDesde: new Date(ahora - PRUEBA_TARDA_MS).toISOString() } : {}),
         }
         agregar('gps', fila)
         auditar('registrar_gps', { actor, objetivo: `${fila.modelo} · ${imeiN}`, detalle: 'Equipo agregado al inventario' })
@@ -1018,13 +1177,23 @@ export const repo = {
 
       /** Instala el equipo en una unidad (el mismo paso que `POST gps-devices/:id/installation`). */
       async asociar(id, vehiculoId, actor) {
+        return repo.admin.gps.instalar(id, { vehiculoId }, actor)
+      },
+
+      async instalar(id, { vehiculoId, tecnico = '', ubicacion = '', notas = '' } = {}, actor) {
         const g = todosGps().find((x) => x.id === id)
         if (!g) return fallo('Ese GPS no está en el inventario.')
-        if (g.vehiculoId) return fallo('Ese GPS ya está instalado en una unidad.')
-        // Como el servidor: solo exige que esté en inventario, no que haya reportado.
+        if (g.vehiculoId) return fallo('Ese GPS ya está instalado en una unidad. Desmóntalo primero.')
+        if (g.estado !== 'inventory') return fallo('Solo se instala un equipo que está en el inventario. Márcalo «En inventario» desde «Datos del equipo» y vuelve a intentarlo.')
         const v = todosVehiculos().find((x) => x.id === vehiculoId)
         if (!v) return fallo('Esa unidad no existe.')
-        guardarParche('gps', id, { vehiculoId: v.id, vehiculoNombre: `${v.alias} · ${v.placa}`, empresaId: v.empresaId ?? EMPRESA.id })
+        if (v.gps) return fallo('Esa unidad ya lleva un GPS, o este equipo ya está instalado en otra.')
+        guardarParche('gps', id, {
+          vehiculoId: v.id, vehiculoNombre: `${v.alias} · ${v.placa}`, empresaId: v.empresaId ?? EMPRESA.id,
+          estado: 'active', ubicacion: null,
+          instalacionId: `ins-${id}-${Date.now().toString(36)}`, instaladoEn: new Date().toISOString(),
+          tecnico: tecnico.trim() || null, ubicacionInstalacion: ubicacion.trim() || null, notasInstalacion: notas.trim() || null,
+        })
         auditar('asociar_gps', {
           actor, empresaId: v.empresaId ?? EMPRESA.id,
           objetivo: `${g.modelo} · ${g.imei}`,
@@ -1033,12 +1202,112 @@ export const repo = {
         return responder(true, 260)
       },
 
-      /** Edita los datos del equipo (fabricante, serie, activo o inactivo). */
-      async set(id, { estado, fabricante, serie }) {
+      /** Desmonta: el equipo vuelve al inventario con su historial (`PATCH gps-installations/:id/remove`). */
+      async desmontar(instalacionId, notas, ubicacion, actor) {
+        const g = todosGps().find((x) => x.instalacionId && x.instalacionId === instalacionId)
+        if (!g) return fallo('Esa instalación ya no está abierta.')
+        guardarParche('gps', g.id, {
+          vehiculoId: null, vehiculoNombre: null, estado: 'inventory', instalacionId: null,
+          ubicacion: String(ubicacion ?? '').trim() || null, pruebaDesde: null, sesionPrueba: null,
+        })
+        auditar('desmontar_gps', { actor, empresaId: g.empresaId, objetivo: `${g.modelo} · ${g.imei}`, detalle: notas ? `Desmontado: ${notas}` : 'Desmontado; vuelve al inventario' })
+        return responder(true, 240)
+      },
+
+      /** Corrige datos del equipo. El IMEI no se corrige. */
+      async set(id, { estado, fabricante, serie, metadatos = {} }) {
         const g = todosGps().find((x) => x.id === id)
         if (!g) return fallo('Ese GPS no está en el inventario.')
-        guardarParche('gps', id, { estado, fabricante, serie })
+        const limpio = Object.fromEntries(Object.entries({ estado, fabricante, serie }).filter(([, v]) => v !== undefined))
+        const extra = { ...metadatos }
+        if (Object.hasOwn(metadatos, 'simPhone')) extra.linea = metadatos.simPhone
+        guardarParche('gps', id, { ...limpio, ...extra })
         return responder(true, 220)
+      },
+
+      async telemetria(id, { limite = 50 } = {}) {
+        const g = inventarioGps().find((x) => x.id === id)
+        if (!g) return fallo('Ese GPS no está en el inventario.')
+        const ahora = Date.now()
+        const mensajes = tramasDemo(g, ahora, limite)
+        return responder({
+          conectado: Boolean(mensajes[0]?.fresco),
+          imei: g.imei,
+          ultimaRecepcion: mensajes[0]?.recibido ?? null,
+          frescuraS: 300,
+          mensajes,
+        }, 200)
+      },
+
+      async ultimaPosicion(id) {
+        const g = inventarioGps().find((x) => x.id === id)
+        if (!g) return fallo('Ese GPS no está en el inventario.')
+        return responder(posicionesDemo(g, tramasDemo(g, Date.now(), 10))[0] ?? null)
+      },
+
+      async posiciones(id, { limite = 50 } = {}) {
+        const g = inventarioGps().find((x) => x.id === id)
+        if (!g) return fallo('Ese GPS no está en el inventario.')
+        return responder(posicionesDemo(g, tramasDemo(g, Date.now(), limite)))
+      },
+
+      async capacidades(id) {
+        const g = inventarioGps().find((x) => x.id === id)
+        if (!g) return fallo('Ese GPS no está en el inventario.')
+        return responder({ panico: g.pinSupport ? true : null, pin: null, encendido: null, verificadasEn: null })
+      },
+
+      /** Abre la prueba de señal. Como el servidor: solo con el equipo instalado. */
+      async iniciarPrueba(id) {
+        const g = inventarioGps().find((x) => x.id === id)
+        if (!g) return fallo('Ese GPS no está en el inventario.')
+        if (!g.vehiculoId) return fallo('La prueba se registra con el equipo ya instalado en una unidad.')
+        const ahora = Date.now()
+        const sesionId = `ses-${id}-${ahora.toString(36)}`
+        const ultima = ultimaSenalDemo(g, ahora)
+        // Si está callado, la demostración «lo enciende»: la primera trama llega a los pocos segundos.
+        const callado = !ultima || ahora - ultima >= 5 * MIN
+        guardarParche('gps', id, { sesionPrueba: sesionId, ...(callado ? { pruebaDesde: new Date(ahora).toISOString() } : {}) })
+        return responder({ sesionId, existente: false }, 300)
+      },
+
+      async completarPrueba(sesionId, { aprobada, notas } = {}, actor) {
+        const g = inventarioGps().find((x) => x.sesionPrueba === sesionId)
+        if (!g) return fallo('Esa prueba ya no está abierta. Vuelve a empezarla.')
+        const ahora = Date.now()
+        if (aprobada) {
+          const [ultima] = tramasDemo(g, ahora, 1)
+          if (!ultima?.fresco) return fallo('Todavía no llega una trama de este IMEI en los últimos 5 minutos. Espera la señal y vuelve a activarlo.')
+          guardarParche('gps', g.id, { estado: 'active', verificado: true, ultimaConexion: ultima.recibido, sesionPrueba: null })
+          auditar('probar_gps', { actor, empresaId: g.empresaId, objetivo: `${g.modelo} · ${g.imei}`, detalle: 'Prueba de señal aprobada' })
+          return responder({ estado: 'passed', estadoEquipo: 'active', huella: ultima.huella, ultimaRecepcion: ultima.recibido }, 500)
+        }
+        const estadoEquipo = g.estado === 'active' ? 'inactive' : g.estado
+        guardarParche('gps', g.id, { estado: estadoEquipo, sesionPrueba: null, pruebaDesde: null })
+        auditar('probar_gps', { actor, empresaId: g.empresaId, objetivo: `${g.modelo} · ${g.imei}`, detalle: `Prueba de señal fallida${notas ? `: ${notas}` : ''}` })
+        return responder({ estado: 'failed', estadoEquipo, huella: null, ultimaRecepcion: null }, 400)
+      },
+
+      /** IMEI que llegan al receptor sin estar en ninguna empresa. */
+      async sinEmparejar() {
+        return responder(detectadosDemo(Date.now()), 200)
+      },
+
+      /** Estado del receptor FOM. Solo en la demostración: el servidor aún no lo publica. */
+      async receptor() {
+        return responder({ activo: true, tcp: true, udp: true, puerto: 5001, ultimoMensaje: new Date(Date.now() - 4000).toISOString(), mensajesRecientes: 1284, fallosAlGuardar: 0 })
+      },
+
+      /** Unidades de una empresa para instalar, con el GPS que ya llevan. */
+      async unidadesDe(empresaId) {
+        const perfiles = todosPerfiles()
+        return responder(todosVehiculos()
+          .filter((v) => (v.empresaId ?? EMPRESA.id) === empresaId)
+          .map((v) => ({
+            id: v.id, alias: v.alias, placa: v.placa, marca: v.marca, modelo: v.modelo, anio: v.anio,
+            conductorNombre: perfiles.find((p) => p.id === v.conductorPrincipalId)?.nombre ?? null,
+            gps: v.gps ? { id: v.gps.id, imei: v.gps.imei } : null,
+          })))
       },
 
       /** Prueba del botón de pánico (solo equipos verificados con soporte PIN). */

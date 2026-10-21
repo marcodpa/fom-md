@@ -1,7 +1,7 @@
 From 2581cf83b19ae476227262327ab72489b2526c13 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 14 Oct 2026 11:40:13 -0400
-Subject: [PATCH 01/23] Mapas con Mapbox, el mismo proveedor que el panel web
+Subject: [PATCH 01/25] Mapas con Mapbox, el mismo proveedor que el panel web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -3095,7 +3095,7 @@ index 0000000..269766b
 From de62044848b392b8caa43332444bea9c335718c8 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 09:05:25 -0400
-Subject: [PATCH 02/23] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
+Subject: [PATCH 02/25] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
  =?UTF-8?q?=20panel=20web:=20encabezado=20redondo=20en=20todas=20las=20pes?=
  =?UTF-8?q?ta=C3=B1as?=
 MIME-Version: 1.0
@@ -5530,7 +5530,7 @@ index 2ab97e8..1921048 100644
 From c000b636fd810bcce2f3a312f10fed67ade6af1c Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:14:53 -0400
-Subject: [PATCH 03/23] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
+Subject: [PATCH 03/25] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
  =?UTF-8?q?(tambi=C3=A9n=20en=20Expo=20Go),=20recorrido=20y=20entrada=20nu?=
  =?UTF-8?q?eva=20con=20el=20logo=20FOM?=
 MIME-Version: 1.0
@@ -26153,7 +26153,7 @@ index 5119764..7db24d0 100644
 From 50a59f9d818534889d46e3a94168948db6d9afa9 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:32:24 -0400
-Subject: [PATCH 04/23] Pantalla de carga FOM (motion) al arrancar y dentro de
+Subject: [PATCH 04/25] Pantalla de carga FOM (motion) al arrancar y dentro de
  la app, igual que la web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -27297,7 +27297,7 @@ index 9c82d64..8328c9a 100644
 From 1056c6b78ec4ebc10b57f795e36b0e6a5699274d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:04:43 -0400
-Subject: [PATCH 05/23] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
+Subject: [PATCH 05/25] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
  =?UTF-8?q?tas,=20mapa=20completo=20de=20la=20flota=20y=20arreglo=20del=20?=
  =?UTF-8?q?mapa=20en=20el=20tel=C3=A9fono?=
 MIME-Version: 1.0
@@ -29762,7 +29762,7 @@ index 0d9b55d..39566b2 100644
 From 3e5342f146d3967ea90b01f55ab4c251a554cc74 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:48:17 -0400
-Subject: [PATCH 06/23] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
+Subject: [PATCH 06/25] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
  =?UTF-8?q?,=20recorrido=20en=20el=20mapa=20completo,=20=C3=ADcono=20de=20?=
  =?UTF-8?q?veh=C3=ADculo=20de=20la=20web=20y=20espera=20nueva?=
 MIME-Version: 1.0
@@ -31408,7 +31408,7 @@ index 4fb8a10..ef7b519 100644
 From 6ec07ef815bd8196b71c53b9772e567d5931bf30 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 14:14:13 -0400
-Subject: [PATCH 07/23] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
+Subject: [PATCH 07/25] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
  =?UTF-8?q?=20el=20error=20=C2=ABStyle=20is=20not=20done=20loading=C2=BB?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32480,7 +32480,7 @@ index f6b5a22..e116c51 100644
 From 5f38ad38cd96d2426b421be91809e3017cbe4954 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 16:18:12 -0400
-Subject: [PATCH 08/23] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
+Subject: [PATCH 08/25] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
  =?UTF-8?q?=20200=20(el=20servidor=20de=20la=20app=20no=20acepta=20m=C3=A1?=
  =?UTF-8?q?s=20por=20pedido)?=
 MIME-Version: 1.0
@@ -32569,7 +32569,7 @@ index 8836fdd..2804942 100644
 From d8db74159e7bf9e52efb1c6faa6ee0abf78ee2ff Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:29:50 -0400
-Subject: [PATCH 09/23] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
+Subject: [PATCH 09/25] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
  =?UTF-8?q?=20tel=C3=A9fono=20sin=20Expo=20Go?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32732,7 +32732,7 @@ index 0086b83..f9ddcca 100644
 From 95b304af6cf2094fdef87a3885ce76ac6a994e5e Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:54:24 -0400
-Subject: [PATCH 10/23] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
+Subject: [PATCH 10/25] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
  =?UTF-8?q?nativo=20completo,=20animaciones=20y=20proyecto=20de=20Expo=20p?=
  =?UTF-8?q?ara=20la=20APK?=
 MIME-Version: 1.0
@@ -36626,7 +36626,7 @@ index 7e0fe42..23cabaa 100644
 From 2e0a3b7e59cee9887a7171b60f89f64efcde644f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:55:54 -0400
-Subject: [PATCH 11/23] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
+Subject: [PATCH 11/25] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
  =?UTF-8?q?o=20la=20compilaci=C3=B3n=20en=20Expo=20falla=20por=20mapbox-gl?=
  =?UTF-8?q?=203=20vs=20@rnmapbox/maps?=
 MIME-Version: 1.0
@@ -36656,7 +36656,7 @@ index 0000000..7c5134a
 From 8f73cfc0c36be11e3414c10a41964cce6e5b8cd2 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:20:22 -0400
-Subject: [PATCH 12/23] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
+Subject: [PATCH 12/25] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
  =?UTF-8?q?=20pedidos=20al=20servidor;=20teclado=20en=20la=20entrada=20(T-?=
  =?UTF-8?q?06=20a=20T-09,=20T-15)?=
 MIME-Version: 1.0
@@ -42315,7 +42315,7 @@ index 47f45a4..bd41d06 100644
 From f6b767485f055b63843290b9d57751bba10f5f60 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:42:17 -0400
-Subject: [PATCH 13/23] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
+Subject: [PATCH 13/25] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
  =?UTF-8?q?6,=20T-17):=20tarjetas=20del=20mapa=20en=20iOS,=20memorias=20po?=
  =?UTF-8?q?r=20generaci=C3=B3n,=20flota=20sin=20red?=
 MIME-Version: 1.0
@@ -42752,7 +42752,7 @@ index b1893fe..11e8247 100644
 From a72f6240bc42f357d00cc22fc14132a23dadc999 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 10:22:30 -0400
-Subject: [PATCH 14/23] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
+Subject: [PATCH 14/25] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
  =?UTF-8?q?=20app=20(T-19=20a=20T-23):=20SOS,=20sesi=C3=B3n,=20red,=20pant?=
  =?UTF-8?q?allas,=20mapas=20y=20limpieza?=
 MIME-Version: 1.0
@@ -48916,7 +48916,7 @@ index 479ba30..63d5a63 100644
 From d5515163a0aaed218e618724c348a98585f81a5b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Mon, 19 Oct 2026 15:15:53 -0400
-Subject: [PATCH 15/23] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
+Subject: [PATCH 15/25] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
  =?UTF-8?q?=20app=20(T-33=20a=20T-41)=20y=20trabajo=20pendiente=20de=20otr?=
  =?UTF-8?q?a=20sesi=C3=B3n?=
 MIME-Version: 1.0
@@ -57967,7 +57967,7 @@ index 0000000..287208e
 From 792b0cbbe44bdd70d321c2fa9e504dd306d27d9f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 09:56:46 -0400
-Subject: [PATCH 16/23] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
+Subject: [PATCH 16/25] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
  =?UTF-8?q?inspecciones=20programadas=20y=20carga=20en=20c=C3=ADrculo=20(T?=
  =?UTF-8?q?-47=20a=20T-53)?=
 MIME-Version: 1.0
@@ -66593,7 +66593,7 @@ index 9c4c0ac..548f103 100644
 From 2fb6ae2ec8e7be32857eceac6d91afcee458c710 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 11:15:45 -0400
-Subject: [PATCH 17/23] Inspecciones simples, calendario por persona, ODT
+Subject: [PATCH 17/25] Inspecciones simples, calendario por persona, ODT
  asignadas, fotos y teclado (T-60 a T-65)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -70046,7 +70046,7 @@ index 2147bee..3650649 100644
 From 31237d42b58cf5b50abb359a3f6f92a2dc2d966b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 09:02:22 -0400
-Subject: [PATCH 18/23] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
+Subject: [PATCH 18/25] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
  =?UTF-8?q?ue=20suben,=20una=20inspecci=C3=B3n=20por=20d=C3=ADa=20y=20fine?=
  =?UTF-8?q?s=20de=20semana=20(T-67=20a=20T-75)?=
 MIME-Version: 1.0
@@ -73909,7 +73909,7 @@ index 08bddf9..16d9fef 100644
 From 9e668a4055466a8d1a72a98677a27bdf462839fe Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 10:04:55 -0400
-Subject: [PATCH 19/23] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
+Subject: [PATCH 19/25] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
  =?UTF-8?q?=C3=A1fico,=20y=20mantenimiento=20con=20la=20misma=20tarjeta=20?=
  =?UTF-8?q?(T-77,=20T-78)?=
 MIME-Version: 1.0
@@ -77071,7 +77071,7 @@ index 3b8c1a3..2b0d3a6 100644
 From 178d9a3cc8da965ee79a1bc11dd166d3ad458859 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 10:19:38 -0400
-Subject: [PATCH 20/23] Mantenimiento: borde normal en la tarjeta; el color
+Subject: [PATCH 20/25] Mantenimiento: borde normal en la tarjeta; el color
  solo en el degradado izquierdo
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
@@ -77099,7 +77099,7 @@ index c4e8b85..4a664f1 100644
 From 4f5b2dcc7c5bfd01841529370065bb4dba3dde65 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 11:07:44 -0400
-Subject: [PATCH 21/23] =?UTF-8?q?Empresas=20grandes:=20todas=20las=20unida?=
+Subject: [PATCH 21/25] =?UTF-8?q?Empresas=20grandes:=20todas=20las=20unida?=
  =?UTF-8?q?des,=20listas=20r=C3=A1pidas=20y=20=C2=ABFaltan=20hoy=C2=BB=20c?=
  =?UTF-8?q?ompleto=20(T-84,=20T-85)?=
 MIME-Version: 1.0
@@ -79641,7 +79641,7 @@ index 308c4c0..a74a9b9 100644
 From dbb7ea9ed377a8216a11468d50182c78b29ac57f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 14:14:50 -0400
-Subject: [PATCH 22/23] =?UTF-8?q?Sin=20se=C3=B1al=20con=20tiempo,=20Report?=
+Subject: [PATCH 22/25] =?UTF-8?q?Sin=20se=C3=B1al=20con=20tiempo,=20Report?=
  =?UTF-8?q?es=20con=20tablero,=20manejo=20del=20conductor=20en=20todas=20p?=
  =?UTF-8?q?artes=20y=20Mantenimiento=20sin=20=C2=ABTodas=20las=20=C3=B3rde?=
  =?UTF-8?q?nes=C2=BB=20(T-87,=20T-89,=20T-90,=20T-92)?=
@@ -83966,7 +83966,7 @@ index b5779b0..6f8105e 100644
 From 218652185d63b5858d91eaec56913f6443a9403b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 14:31:19 -0400
-Subject: [PATCH 23/23] =?UTF-8?q?Lo=20m=C3=A1s=20nuevo=20primero=20en=20to?=
+Subject: [PATCH 23/25] =?UTF-8?q?Lo=20m=C3=A1s=20nuevo=20primero=20en=20to?=
  =?UTF-8?q?das=20las=20listas=20con=20fecha;=20la=20tabla=20de=20manejo=20?=
  =?UTF-8?q?abre=20el=20perfil=20(T-93)?=
 MIME-Version: 1.0
@@ -84347,6 +84347,3453 @@ index 4a6ebbf..be169d7 100644
    }
    return 0;
  }
+-- 
+2.55.0.windows.3
+
+
+From d9eb99b35db6ce7e48276cf302b2d23684c53009 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 14:54:34 -0400
+Subject: [PATCH 24/25] =?UTF-8?q?Manejo:=20vuelve=20el=20anillo=20de=20sie?=
+ =?UTF-8?q?mpre=20en=20la=20app,=20con=20el=20per=C3=ADodo=207/28=20(T-97)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/index.tsx          |   2 +-
+ src/app/(driver)/mas.tsx            |   2 +-
+ src/app/mi-perfil.tsx               |   2 +-
+ src/app/ver-perfil.tsx              |   2 +-
+ src/components/manejo-conductor.tsx | 248 +++++++++++++++-------------
+ 5 files changed, 140 insertions(+), 116 deletions(-)
+
+diff --git a/src/app/(driver)/index.tsx b/src/app/(driver)/index.tsx
+index b646442..1d54c65 100644
+--- a/src/app/(driver)/index.tsx
++++ b/src/app/(driver)/index.tsx
+@@ -650,7 +650,7 @@ export default function InicioScreen() {
+           </View>
+         </Card>
+ 
+-        {/* TU MANEJO: la misma pieza que «Mi perfil» (y que la web), debajo de la unidad. */}
++        {/* TU MANEJO: el mismo índice que «Perfil», debajo de la unidad. */}
+         {user.drives ? <ManejoConductor propio /> : null}
+       </BottomSheet>
+     </ThemedView>
+diff --git a/src/app/(driver)/mas.tsx b/src/app/(driver)/mas.tsx
+index d32881f..ac5e111 100644
+--- a/src/app/(driver)/mas.tsx
++++ b/src/app/(driver)/mas.tsx
+@@ -249,7 +249,7 @@ export default function PerfilScreen() {
+               />
+             </Appear>
+ 
+-            {/* Manejo: la misma pieza que «Mi perfil» de la web (score, 6 cifras, 7 / 28 días). */}
++            {/* Índice de manejo: el anillo de siempre, con el selector 7 / 28 días. */}
+             {user.drives ? (
+               <Appear delay={40} distance={12}>
+                 <ManejoConductor propio />
+diff --git a/src/app/mi-perfil.tsx b/src/app/mi-perfil.tsx
+index 7473264..1e06b2d 100644
+--- a/src/app/mi-perfil.tsx
++++ b/src/app/mi-perfil.tsx
+@@ -155,7 +155,7 @@ export default function MiPerfilScreen() {
+                 </View>
+               </View>
+ 
+-              {/* Manejo (solo si conduces): la misma pieza que la web. */}
++              {/* Índice de manejo seguro (solo si conduces), con el selector 7 / 28 días. */}
+               {user.drives ? <ManejoConductor propio /> : null}
+ 
+               {/* Mis datos. */}
+diff --git a/src/app/ver-perfil.tsx b/src/app/ver-perfil.tsx
+index 2820dac..fbd4672 100644
+--- a/src/app/ver-perfil.tsx
++++ b/src/app/ver-perfil.tsx
+@@ -152,7 +152,7 @@ export default function VerPerfilScreen() {
+               ))}
+             </Card>
+ 
+-            {/* Manejo (solo conductores): la misma pieza que la ficha de la web. */}
++            {/* Índice de manejo seguro (solo conductores), con el selector 7 / 28 días. */}
+             {conduce ? (
+               <ManejoConductor userId={userId} nombre={perfil.nombre} empresaId={params.companyId} />
+             ) : null}
+diff --git a/src/components/manejo-conductor.tsx b/src/components/manejo-conductor.tsx
+index e402be5..a0655eb 100644
+--- a/src/components/manejo-conductor.tsx
++++ b/src/components/manejo-conductor.tsx
+@@ -7,12 +7,14 @@ import { Card } from '@/components/card';
+ import { EtiquetaSeccion } from '@/components/etiqueta-seccion';
+ import { Pastilla } from '@/components/pastilla';
+ import { PastillaFiltro } from '@/components/pastilla-filtro';
++import { TarjetaIndice } from '@/components/perfil-piezas';
+ import { PressableScale } from '@/components/pressable-scale';
++import { ScoreRing } from '@/components/score-ring';
+ import { TabIcon } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+ import { useAsyncData } from '@/hooks/use-async-data';
++import { rangoDeIndice } from '@/lib/indice';
+ import {
+-  cifrasManejo,
+   calificacionManejo,
+   DIAS_MANEJO,
+   etiquetaManejo,
+@@ -29,16 +31,18 @@ import {
+   getMiManejoFom,
+ } from '@/services/fomMetricasConductor';
+ import { enteActivoFom } from '@/services/fomSesion';
+-import { useTheme } from '@/theme';
++import { useTheme, type ColorTokens } from '@/theme';
++import type { DriverScore } from '@/types';
++import { miles } from '@/utils/numero';
+ 
+ /*
+- * «MANEJO» — la misma pieza que la web (src/panel/comp/ManejoConductor.jsx y
+- * ScoreManejo.jsx): pastilla «49 · Atención», las 6 cifras del período con el
+- * selector 7 / 28 días, y la tabla del Resumen. Tonos y textos salen de
+- * `@/lib/manejo`, que es copia de `src/panel/datos/manejo.js`.
++ * «MANEJO» — el ÍNDICE de siempre de la app (el anillo de antes de T-92), con
++ * el único añadido del selector 7 / 28 días; la pastilla «49 · Atención» de las
++ * listas y la tabla del Resumen, como en la web. Tonos y textos de la pastilla
++ * salen de `@/lib/manejo`, que es copia de `src/panel/datos/manejo.js`.
+  *
+- * Sin «Ver eventos →»: la app no tiene una pantalla de eventos por conductor
+- * (la superficie móvil no publica `driving-events`).
++ * El anillo usa la misma escala que la pastilla (85 / 70, `@/lib/indice`), así
++ * que los dos nunca dicen colores distintos de la misma nota.
+  */
+ 
+ /** Pastilla «49 · Atención» / «Sin km», con el mismo tono que la tabla del Resumen. */
+@@ -47,123 +51,124 @@ export function PastillaManejo({ score, cargando }: { score: ScoreManejo | null
+ }
+ 
+ /**
+- * La tarjeta «Manejo»: solo presentación. Los datos los trae `ManejoConductor`
+- * (o quien ya los tenga); aquí no se calcula nada.
++ * El manejo del período en la forma del índice de antes (`DriverScore`).
++ *
++ * FOM manda CONTEOS del período; el anillo de siempre enseña eventos por cada
++ * 100 km, así que se pasan a esa escala con los km del mismo período. Sin nota
++ * (sin km) va con 0 km: la tarjeta lo pinta en gris y «Sin actividad», nunca
++ * un 0 rojo.
+  */
+-export function TarjetaManejo({
+-  titulo = 'Manejo',
+-  score,
+-  dias,
+-  onCambiarDias,
+-  cargando = false,
+-  error,
+-  nota,
+-}: {
+-  titulo?: string;
+-  score: ScoreManejo | null | undefined;
+-  dias: number;
+-  onCambiarDias?: (d: number) => void;
+-  cargando?: boolean;
+-  /** Frase del fallo; con ella la tarjeta lo dice en vez de enseñar ceros. */
+-  error?: string;
+-  nota?: string;
+-}) {
+-  const { colors, spacing, radii } = useTheme();
+-  const tono = tonoManejo(score);
+-  const sinDato = calificacionManejo(score) === 'unavailable';
+-  // Los mismos textos de ayuda que la web.
+-  const ayuda = cargando
+-    ? 'Consultando el período…'
+-    : error
+-      ? error
+-      : sinDato
+-        ? 'Sin kilómetros recorridos en este período: el servidor no califica el manejo.'
+-        : nota || 'Frenadas, aceleraciones y excesos de velocidad por cada 100 km recorridos.';
+-  const cifras = cifrasManejo(cargando || error ? null : score);
+-
+-  return (
+-    <Card style={{ gap: spacing.md }} accessibilityState={{ busy: cargando }}>
+-      <View style={[styles.fila, { gap: spacing.sm }]}>
+-        <ThemedText variant="subtitle" style={styles.flex1} numberOfLines={1}>
+-          {titulo}
+-        </ThemedText>
+-        {onCambiarDias ? (
+-          <View style={[styles.fila, { gap: spacing.xs + 2 }]} accessibilityLabel="Período del manejo">
+-            {DIAS_MANEJO.map((d) => (
+-              <PastillaFiltro key={d} label={`${d} días`} activo={d === dias} onPress={() => onCambiarDias(d)} />
+-            ))}
+-          </View>
+-        ) : null}
+-      </View>
++function indiceDeManejo(s: ScoreManejo): Omit<DriverScore, 'userId'> {
++  const conNota = calificacionManejo(s) !== 'unavailable';
++  const km = Number.isFinite(s.km) && s.km > 0 ? s.km : 0;
++  const por100 = (n: number | null) => (km > 0 && typeof n === 'number' && Number.isFinite(n) ? (n / km) * 100 : 0);
++  const scoreTotal = conNota ? (s.indice ?? 0) : 0;
++  return {
++    scoreTotal,
++    rango: rangoDeIndice(scoreTotal),
++    km: conNota ? km : 0,
++    excesosVelocidad100km: por100(s.excesos),
++    frenadasBruscas100km: por100(s.frenadas),
++    aceleracionesBruscas100km: por100(s.aceleraciones),
++  };
++}
+ 
+-      <View style={[styles.fila, { gap: spacing.sm, alignItems: 'flex-start' }]}>
+-        {error ? null : <PastillaManejo score={score} cargando={cargando} />}
+-        <ThemedText
+-          variant="caption"
+-          color={error ? 'danger' : 'textMuted'}
+-          style={styles.flex1}
+-          accessibilityRole={error ? 'alert' : undefined}>
+-          {ayuda}
+-        </ThemedText>
+-      </View>
++/** El color de la nota, DEL NÚMERO (como la ficha de antes). Sin km: gris. */
++function colorDeIndice(score: Omit<DriverScore, 'userId'>): keyof ColorTokens {
++  if ((score.km ?? 0) === 0) return 'textMuted';
++  const rango = rangoDeIndice(score.scoreTotal);
++  if (rango === 'rojo') return 'danger';
++  if (rango === 'amarillo') return 'warning';
++  return 'success';
++}
+ 
+-      {/* La escala 0–100, del color de la nota. Sin nota no hay escala que llenar. */}
+-      {!sinDato && !cargando && !error && score?.indice != null ? (
+-        <View style={[styles.escala, { backgroundColor: colors.surfaceSunken, borderRadius: radii.pill }]}>
+-          <View
+-            style={[
+-              styles.escalaRelleno,
+-              { width: `${Math.max(0, Math.min(100, score.indice))}%`, backgroundColor: colors[tono], borderRadius: radii.pill },
+-            ]}
+-          />
+-        </View>
+-      ) : null}
++/** El veredicto, o el hecho de que no hubo nada que juzgar. */
++function veredictoDe(score: Omit<DriverScore, 'userId'>): string {
++  if ((score.km ?? 0) === 0) return 'Sin actividad';
++  const rango = rangoDeIndice(score.scoreTotal);
++  if (rango === 'verde') return 'Manejo seguro';
++  return rango === 'amarillo' ? 'Puede mejorar' : 'Requiere atención';
++}
+ 
+-      {/* Las 6 cifras, en el orden de la tabla del Resumen. */}
+-      <View style={[styles.cifras, { rowGap: spacing.md }]}>
+-        {cifras.map((c) => (
+-          <View key={c.clave} style={styles.cifra} accessible accessibilityLabel={`${c.etiqueta}: ${c.valor}`}>
+-            <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
+-              {c.etiqueta}
+-            </ThemedText>
+-            <ThemedText
+-              variant="subtitle"
+-              tabular
+-              color={c.clave === 'score' && !sinDato && !cargando && !error ? tono : 'text'}>
+-              {c.valor}
+-            </ThemedText>
+-          </View>
+-        ))}
+-      </View>
++/** El selector 7 / 28 días, encima de la tarjeta: lo único nuevo sobre el índice de siempre. */
++function SelectorDias({ dias, onCambiar }: { dias: number; onCambiar: (d: number) => void }) {
++  const { spacing } = useTheme();
++  return (
++    <View style={[styles.selector, { gap: spacing.xs + 2 }]} accessibilityLabel="Período del manejo">
++      {DIAS_MANEJO.map((d) => (
++        <PastillaFiltro key={d} label={`${d} días`} activo={d === dias} onPress={() => onCambiar(d)} />
++      ))}
++    </View>
++  );
++}
+ 
+-      <View style={[styles.pie, { borderTopColor: colors.border, paddingTop: spacing.sm }]}>
++/**
++ * La tarjeta de la FICHA de otra persona (`ver-perfil`), tal como era: el
++ * anillo, «Índice de manejo seguro», el veredicto, sobre cuántos km y los tres
++ * eventos por cada 100 km.
++ */
++function FichaIndice({ score, dias }: { score: Omit<DriverScore, 'userId'>; dias: number }) {
++  const { spacing } = useTheme();
++  const color = colorDeIndice(score);
++  return (
++    <Card style={[styles.fichaCard, { gap: spacing.lg }]}>
++      <ScoreRing value={score.scoreTotal} color={color} size={112} />
++      <View style={[styles.flex1, { gap: spacing.xs }]}>
++        <ThemedText variant="overline" color="textMuted">
++          Índice de manejo seguro
++        </ThemedText>
++        <ThemedText variant="subtitle" color={color}>
++          {veredictoDe(score)}
++        </ThemedText>
++        {/* Sobre cuánto se midió: es el dato que hace legible el número de al
++            lado, y el que explica un cero sin acusar a nadie. */}
+         <ThemedText variant="caption" color="textMuted">
+-          {`Últimos ${dias} días`}
++          {`${miles(Math.round(score.km ?? 0))} km, ${periodoManejo(dias)} · eventos por cada 100 km`}
+         </ThemedText>
++        <View style={{ gap: 2 }}>
++          <EventoRow label="Excesos de velocidad" valor={score.excesosVelocidad100km} />
++          <EventoRow label="Frenadas bruscas" valor={score.frenadasBruscas100km} />
++          <EventoRow label="Aceleraciones bruscas" valor={score.aceleracionesBruscas100km} />
++        </View>
+       </View>
+     </Card>
+   );
+ }
+ 
++function EventoRow({ label, valor }: { label: string; valor: number }) {
++  return (
++    <View style={styles.eventoRow}>
++      <ThemedText variant="caption" color="textSecondary">
++        {label}
++      </ThemedText>
++      <ThemedText variant="caption">{valor.toFixed(1)}</ThemedText>
++    </View>
++  );
++}
++
+ /**
+- * La tarjeta «Manejo» de una persona, con el selector 7 / 28 días.
+- * - `propio`: el de la sesión (`/driver-metrics/me`).
+- * - si no, el de `userId` en la empresa `empresaId` (o la de la sesión).
++ * El índice de manejo de una persona, con el selector 7 / 28 días.
++ * - `propio`: el de la sesión (`/driver-metrics/me`), con la tarjeta del perfil
++ *   (`TarjetaIndice`), la misma de antes en «Perfil» y «Mi perfil».
++ * - si no, el de `userId` en la empresa `empresaId` (o la de la sesión), con
++ *   la tarjeta de la ficha de antes.
++ *
++ * Como antes, sin dato no hay tarjeta: un índice que no se pudo leer no se
++ * pinta como un cero.
+  */
+ export function ManejoConductor({
+   propio = false,
+   userId,
+   nombre = '',
+   empresaId,
+-  titulo,
+ }: {
+   propio?: boolean;
+   userId?: string;
+   nombre?: string;
+   empresaId?: string | null;
+-  titulo?: string;
+ }) {
+   const { user } = useAuth();
++  const { spacing } = useTheme();
+   const [dias, setDias] = useState<number>(DIAS_MANEJO[0]);
+   const ente = empresaId || enteActivoFom() || '';
+   const { data, estado } = useAsyncData(
+@@ -174,15 +179,34 @@ export function ManejoConductor({
+     },
+     [propio, user?.id, userId, ente, dias],
+   );
++  /*
++   * Lo último que se enseñó: al cambiar de 7 a 28 días la lectura empieza de
++   * cero, y sin esto la tarjeta (y su selector) desaparecería mientras carga.
++   */
++  const [ultimo, setUltimo] = useState<ScoreManejo | null>(null);
++  if (data && data !== ultimo) setUltimo(data);
++  const visible = data ?? (estado === 'cargando' ? ultimo : null);
++
++  if (!visible) {
++    // Sin nada que enseñar nunca: nada, como antes. Si falló tras haber
++    // enseñado otro período, el selector se queda para poder volver.
++    if (estado !== 'error' || !ultimo) return null;
++    return (
++      <View style={{ gap: spacing.sm }}>
++        <SelectorDias dias={dias} onCambiar={setDias} />
++        <ThemedText variant="caption" color="danger" accessibilityRole="alert">
++          No pudimos consultar el manejo de este período.
++        </ThemedText>
++      </View>
++    );
++  }
++
++  const score = indiceDeManejo(visible);
+   return (
+-    <TarjetaManejo
+-      titulo={titulo}
+-      score={data}
+-      dias={dias}
+-      onCambiarDias={setDias}
+-      cargando={estado === 'cargando'}
+-      error={estado === 'error' ? 'No pudimos consultar el manejo de este período.' : undefined}
+-    />
++    <View style={[{ gap: spacing.sm }, estado === 'cargando' ? styles.cargando : null]} accessibilityState={{ busy: estado === 'cargando' }}>
++      <SelectorDias dias={dias} onCambiar={setDias} />
++      {propio ? <TarjetaIndice score={score} periodo={periodoManejo(dias)} /> : <FichaIndice score={score} dias={dias} />}
++    </View>
+   );
+ }
+ 
+@@ -419,11 +443,11 @@ export function FilaManejo({
+ const styles = StyleSheet.create({
+   fila: { flexDirection: 'row', alignItems: 'center' },
+   flex1: { flex: 1, minWidth: 0 },
+-  escala: { height: 6, overflow: 'hidden' },
+-  escalaRelleno: { height: 6 },
+-  cifras: { flexDirection: 'row', flexWrap: 'wrap' },
+-  cifra: { width: '33.33%', gap: 2, paddingRight: 8 },
+-  pie: { borderTopWidth: StyleSheet.hairlineWidth },
++  selector: { flexDirection: 'row', justifyContent: 'flex-end' },
++  // Mientras llega el otro período se ve el anterior, apagado.
++  cargando: { opacity: 0.6 },
++  fichaCard: { flexDirection: 'row', alignItems: 'center' },
++  eventoRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+   tablaCard: { padding: 0, overflow: 'hidden' },
+   num: { textAlign: 'right', paddingRight: 4 },
+   verTodos: { alignItems: 'center' },
+-- 
+2.55.0.windows.3
+
+
+From 44a81662499f1c1802ccb9c618ea47cbe61d7c7d Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 15:09:40 -0400
+Subject: [PATCH 25/25] =?UTF-8?q?Panel=20de=20GPS=20en=20la=20app:=20inven?=
+ =?UTF-8?q?tario,=20nuevo=20GPS,=20instalar=20y=20diagn=C3=B3stico=20(T-96?=
+ =?UTF-8?q?)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/gps-detalle.tsx              | 598 +++++++++++++++++++++++
+ src/app/gps-instalar.tsx             |  92 ++++
+ src/app/gps-inventario.tsx           | 462 ++++++++----------
+ src/app/gps-nuevo.tsx                | 694 +++++++++++++++++++++++++++
+ src/components/gps-instalar-form.tsx | 299 ++++++++++++
+ src/components/gps-piezas.tsx        | 242 ++++++++++
+ src/lib/gps-alta.ts                  | 240 +++++++++
+ src/services/fomGps.ts               | 261 +++++++++-
+ 8 files changed, 2631 insertions(+), 257 deletions(-)
+ create mode 100644 src/app/gps-detalle.tsx
+ create mode 100644 src/app/gps-instalar.tsx
+ create mode 100644 src/app/gps-nuevo.tsx
+ create mode 100644 src/components/gps-instalar-form.tsx
+ create mode 100644 src/components/gps-piezas.tsx
+ create mode 100644 src/lib/gps-alta.ts
+
+diff --git a/src/app/gps-detalle.tsx b/src/app/gps-detalle.tsx
+new file mode 100644
+index 0000000..39145a1
+--- /dev/null
++++ b/src/app/gps-detalle.tsx
+@@ -0,0 +1,598 @@
++import { Redirect, useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
++import { useCallback, useRef, useState } from 'react';
++import { StyleSheet, View } from 'react-native';
++import { SafeAreaView } from 'react-native-safe-area-context';
++
++import { esMultiempresa, useAuth } from '@/auth';
++import { Button } from '@/components/button';
++import { Card } from '@/components/card';
++import { ErrorState } from '@/components/error-state';
++import { AvisoServidor, DatoGps, IconoGps, PastillaSenalGps } from '@/components/gps-piezas';
++import { Pastilla } from '@/components/pastilla';
++import { PastillaFiltro } from '@/components/pastilla-filtro';
++import { ScreenHeader } from '@/components/screen-header';
++import { ScrollVisible } from '@/components/scroll-visible';
++import { SegmentedControl } from '@/components/segmented-control';
++import { Skeleton } from '@/components/skeleton';
++import { TextField } from '@/components/text-field';
++import { useSegundero } from '@/components/texto-vivo';
++import { ThemedText } from '@/components/themed-text';
++import { ThemedView } from '@/components/themed-view';
++import { useDatosFom } from '@/hooks/use-datos-fom';
++import { tinte } from '@/lib/color';
++import {
++  abrirSms,
++  calidadRecepcion,
++  CLAVE_FABRICA,
++  conSenal,
++  estadoEquipoEnLlano,
++  horaSegundos,
++  textoSenalGps,
++  tramaEnLlano,
++} from '@/lib/gps-alta';
++import { fechaHoraReporte } from '@/lib/sin-senal';
++import { validarIccid } from '@/lib/validate';
++import { identidadDeUnidad } from '@/lib/vehiculos';
++import { LARGO_MAX } from '@/services';
++import {
++  abrirPruebaGpsFom,
++  actualizarGpsFom,
++  cerrarPruebaGpsFom,
++  getEquipoGpsFom,
++  getTelemetriaGpsFom,
++  type TelemetriaGps,
++} from '@/services/fomGps';
++import { useTheme } from '@/theme';
++
++type Pestana = 'diag' | 'datos' | 'historial';
++
++/** Cada cuánto se vuelven a pedir las tramas mientras se mira (como la consola). */
++const CADA_MS = 10_000;
++
++const AVISO_ALTA: Record<string, { tono: 'success' | 'warning'; texto: string }> = {
++  activo: { tono: 'success', texto: 'Quedó instalado y activo: FOM recibió su señal.' },
++  'sin-senal': {
++    tono: 'warning',
++    texto: 'Quedó instalado, pero FOM no recibió su señal en los últimos 5 minutos. Repite la prueba cuando transmita.',
++  },
++  pendiente: { tono: 'warning', texto: 'Quedó instalado. La prueba no se pudo abrir: repítela desde aquí.' },
++};
++
++/**
++ * DETALLE Y DIAGNÓSTICO de un equipo GPS (diseño GA5).
++ *
++ * Lo primero es lo que se viene a buscar: si tiene señal y, si no, las tres
++ * cosas que revisar. Debajo, la calidad de recepción —con la fórmula de la
++ * consola de fom-core— y las últimas tramas tal como llegaron. Las tramas se
++ * vuelven a pedir cada 10 s mientras la pantalla está a la vista.
++ */
++export default function GpsDetalleScreen() {
++  const { spacing, colors, radii } = useTheme();
++  const { user, status } = useAuth();
++  const router = useRouter();
++  const params = useLocalSearchParams<{ id?: string; empresa?: string; prueba?: string }>();
++  const id = typeof params.id === 'string' ? params.id : '';
++  const empresa = typeof params.empresa === 'string' ? params.empresa : null;
++  const avisoAlta = typeof params.prueba === 'string' ? AVISO_ALTA[params.prueba] : undefined;
++
++  const [pestana, setPestana] = useState<Pestana>('diag');
++  const { estado, datos: equipo, motivo, recargar } = useDatosFom(
++    useCallback(() => getEquipoGpsFom(id, empresa), [id, empresa]),
++  );
++
++  // Las tramas, al día cada 10 s con la pantalla a la vista.
++  const [tele, setTele] = useState<TelemetriaGps | null>(null);
++  const [teleError, setTeleError] = useState(false);
++  const enFoco = useRef(false);
++  const pedirTele = useCallback(async () => {
++    if (!id) return;
++    try {
++      setTele(await getTelemetriaGpsFom(id, empresa));
++      setTeleError(false);
++    } catch {
++      setTeleError(true);
++    }
++  }, [id, empresa]);
++  useFocusEffect(
++    useCallback(() => {
++      enFoco.current = true;
++      void pedirTele();
++      const reloj = setInterval(() => {
++        if (enFoco.current) void pedirTele();
++      }, CADA_MS);
++      return () => {
++        enFoco.current = false;
++        clearInterval(reloj);
++      };
++    }, [pedirTele]),
++  );
++
++  // La prueba: se abre, se espera la señal y se cierra aprobada o fallida.
++  const [sesionPrueba, setSesionPrueba] = useState<string | null>(null);
++  const [probando, setProbando] = useState(false);
++  const [resultado, setResultado] = useState<{ ok: boolean; texto: string } | null>(null);
++
++  // Corregir datos.
++  const [editando, setEditando] = useState(false);
++  const [linea, setLinea] = useState('');
++  const [iccid, setIccid] = useState('');
++  const [operadora, setOperadora] = useState('');
++  const [apn, setApn] = useState('');
++  const [transporte, setTransporte] = useState<'tcp' | 'udp'>('tcp');
++  const [errores, setErrores] = useState<Record<string, string | null>>({});
++  const [guardando, setGuardando] = useState(false);
++  const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
++  const [avisoSms, setAvisoSms] = useState<string | null>(null);
++
++  const ahora = useSegundero();
++  // La última señal: la de las tramas si ya llegaron (más fresca), si no la del equipo.
++  const ultima = tele?.ultimaTrama ?? equipo?.ultimaConexion ?? null;
++  const vivo = conSenal(ultima, ahora);
++  // Cincuenta tramas como mucho: se recalcula con el segundero sin costo.
++  const calidad = calidadRecepcion(tele?.tramas ?? [], ahora, !vivo);
++
++  if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
++  if (!esMultiempresa(user)) return <Redirect href="/" />;
++
++  const instalado = !!equipo?.vehicleId;
++  const unidad = equipo?.vehicleId
++    ? identidadDeUnidad({ numero: equipo.vehicleCode, placa: equipo.vehiclePlate }) || 'Unidad'
++    : 'En inventario';
++
++  async function probar() {
++    setResultado(null);
++    setProbando(true);
++    try {
++      setSesionPrueba(await abrirPruebaGpsFom(id, empresa));
++      void pedirTele();
++    } catch (e) {
++      setResultado({ ok: false, texto: e instanceof Error ? e.message : 'No se pudo abrir la prueba.' });
++    } finally {
++      setProbando(false);
++    }
++  }
++
++  async function cerrar(r: 'passed' | 'failed') {
++    if (!sesionPrueba) return;
++    setProbando(true);
++    try {
++      const v = await cerrarPruebaGpsFom(sesionPrueba, empresa, r);
++      setResultado({ ok: v.ok, texto: v.detalle });
++      // Aprobada o fallida, la prueba se cerró; sin telemetría sigue abierta para reintentar.
++      if (v.codigoFallo !== 'sin_telemetria') setSesionPrueba(null);
++      recargar();
++    } catch (e) {
++      setResultado({ ok: false, texto: e instanceof Error ? e.message : 'No se pudo cerrar la prueba.' });
++    } finally {
++      setProbando(false);
++    }
++  }
++
++  async function enviarCheck() {
++    setAvisoSms(null);
++    if (!equipo?.linea) {
++      setAvisoSms('Este equipo no tiene línea registrada.');
++      return;
++    }
++    if (!(await abrirSms(equipo.linea, `check${CLAVE_FABRICA}`))) setAvisoSms('No pudimos abrir Mensajes en este teléfono.');
++  }
++
++  /** Abre la corrección con lo que el equipo tiene hoy. */
++  function corregir() {
++    if (!equipo) return;
++    setLinea(equipo.linea);
++    setIccid(equipo.iccid);
++    setOperadora(equipo.operadora);
++    setApn(equipo.apn);
++    setTransporte(equipo.transporte);
++    setErrores({});
++    setErrorGuardar(null);
++    setPestana('datos');
++    setEditando(true);
++  }
++
++  async function guardar() {
++    const e: Record<string, string | null> = {
++      gLinea: !linea.trim() ? 'Pon el número de la línea.' : null,
++      gIccid: validarIccid(iccid),
++      gOperadora: !operadora.trim() ? 'Pon la operadora.' : null,
++      gApn: !apn.trim() ? 'Pon el APN.' : null,
++    };
++    setErrores(e);
++    if (Object.values(e).some(Boolean) || !equipo) return;
++    setErrorGuardar(null);
++    setGuardando(true);
++    try {
++      // Solo lo que cambió: el servidor rechaza un cambio vacío.
++      const cambios = {
++        linea: linea.trim() !== equipo.linea ? linea : undefined,
++        iccid: iccid.replace(/\D/gu, '') !== equipo.iccid ? iccid : undefined,
++        operadora: operadora.trim() !== equipo.operadora ? operadora : undefined,
++        apn: apn.trim() !== equipo.apn ? apn : undefined,
++        transporte: transporte !== equipo.transporte ? transporte : undefined,
++      };
++      if (Object.values(cambios).some((v) => v !== undefined)) {
++        await actualizarGpsFom(id, empresa, cambios);
++        recargar();
++      }
++      setEditando(false);
++    } catch (err) {
++      setErrorGuardar(err instanceof Error ? err.message : 'No se pudo guardar.');
++    } finally {
++      setGuardando(false);
++    }
++  }
++
++  const estadoEq = equipo ? estadoEquipoEnLlano(equipo.estado, instalado) : null;
++  const ultimaTexto = fechaHoraReporte(ultima);
++
++  return (
++    <ThemedView style={styles.root} ambient>
++      <SafeAreaView style={styles.root} edges={['top']}>
++        <ScreenHeader title="GPS" cargando={estado === 'cargando' && !!equipo} />
++
++        <ScrollVisible
++          style={styles.root}
++          contentContainerStyle={[styles.content, { padding: spacing.lg, gap: spacing.lg }]}>
++          {estado === 'cargando' && !equipo ? (
++            <View style={{ gap: spacing.md }}>
++              <Skeleton height={96} radius={16} />
++              <Skeleton height={180} radius={24} />
++              <Skeleton height={140} radius={24} />
++            </View>
++          ) : estado === 'sin-sesion' ? (
++            <Card style={{ gap: spacing.sm }}>
++              <Pastilla tono="textSecondary" label="Sin sesión de FOM" />
++              <Button label="Entrar a FOM" variant="secondary" onPress={() => router.navigate('/fom-conexion')} />
++            </Card>
++          ) : estado === 'sin-permiso' ? (
++            <Card style={{ gap: spacing.sm }}>
++              <Pastilla tono="warning" label="Sin permiso" />
++              {motivo ? (
++                <ThemedText variant="caption" color="textSecondary">
++                  {motivo}
++                </ThemedText>
++              ) : null}
++            </Card>
++          ) : estado === 'error' || !equipo ? (
++            <ErrorState description={motivo ?? 'FOM no responde.'} onRetry={recargar} />
++          ) : (
++            <>
++              {/* ── QUIÉN ES ── */}
++              <View style={[styles.fila, { gap: spacing.md }]}>
++                <IconoGps tamano={56} />
++                <View style={[styles.flex, { gap: 2 }]}>
++                  <ThemedText style={styles.nombre} numberOfLines={1}>
++                    {equipo.equipo || 'Equipo GPS'}
++                  </ThemedText>
++                  <ThemedText color="textSecondary" numberOfLines={1}>
++                    {unidad}
++                  </ThemedText>
++                  <ThemedText variant="mono" color="textSecondary" selectable>{`IMEI ${equipo.imei}`}</ThemedText>
++                </View>
++              </View>
++              <View style={[styles.filaSuelta, { gap: spacing.xs }]}>
++                {estadoEq ? <Pastilla tono={estadoEq.tono} label={estadoEq.label} /> : null}
++                <PastillaSenalGps ultima={ultima} instalado={instalado} />
++              </View>
++
++              {avisoAlta ? (
++                <Card style={{ borderColor: tinte(colors[avisoAlta.tono], 0.45) }}>
++                  <ThemedText variant="caption" color={avisoAlta.tono}>
++                    {avisoAlta.texto}
++                  </ThemedText>
++                </Card>
++              ) : null}
++
++              <View style={[styles.filaSuelta, { gap: spacing.sm }]}>
++                <PastillaFiltro label="Diagnóstico" activo={pestana === 'diag'} onPress={() => setPestana('diag')} />
++                <PastillaFiltro label="Datos del equipo" activo={pestana === 'datos'} onPress={() => setPestana('datos')} />
++                <PastillaFiltro label="Historial" activo={pestana === 'historial'} onPress={() => setPestana('historial')} />
++              </View>
++
++              {/* ── DIAGNÓSTICO ── */}
++              {pestana === 'diag' ? (
++                <>
++                  {!instalado ? (
++                    <Card style={{ gap: spacing.md }}>
++                      <ThemedText style={styles.cardTitulo}>En inventario</ThemedText>
++                      <ThemedText variant="caption" color="textSecondary">
++                        No está en ninguna unidad: no se espera que transmita. Se prueba al instalarlo.
++                      </ThemedText>
++                      <Button
++                        label="Instalar en una unidad"
++                        onPress={() => router.push(`/gps-instalar?id=${encodeURIComponent(id)}&empresa=${encodeURIComponent(empresa ?? '')}` as Href)}
++                      />
++                    </Card>
++                  ) : (
++                    <Card
++                      style={[
++                        { gap: spacing.md },
++                        !vivo && { borderColor: tinte(colors.danger, 0.45), backgroundColor: tinte(colors.danger, 0.06) },
++                      ]}>
++                      <View style={[styles.fila, { gap: spacing.md }]}>
++                        <IconoGps icono="gps" tono={vivo ? 'success' : 'danger'} tamano={44} />
++                        <View style={[styles.flex, { gap: 2 }]}>
++                          <ThemedText style={styles.cardTitulo}>{textoSenalGps(ultima, ahora)}</ThemedText>
++                          <ThemedText variant="caption" color="textSecondary">
++                            {ultimaTexto ? `Última trama: ${ultimaTexto}` : 'Todavía no ha enviado ninguna trama.'}
++                          </ThemedText>
++                        </View>
++                      </View>
++                      {!vivo ? (
++                        <>
++                          <ThemedText>1. ¿La unidad está apagada o sin batería?</ThemedText>
++                          <ThemedText>
++                            {`2. Revisa saldo y datos de la línea${equipo.linea ? ` ${equipo.linea}` : ''}.`}
++                          </ThemedText>
++                          <ThemedText>3. Envía «check» por SMS: debe decir GPRS ON.</ThemedText>
++                          <Button label="Enviar «check» por SMS" icon="mensaje" onPress={() => void enviarCheck()} />
++                          <ThemedText variant="caption" color="textMuted">
++                            {`Va con la clave de fábrica (${CLAVE_FABRICA}); si el equipo tiene otra, cámbiala antes de enviar.`}
++                          </ThemedText>
++                          {avisoSms ? (
++                            <ThemedText variant="caption" color="danger">
++                              {avisoSms}
++                            </ThemedText>
++                          ) : null}
++                        </>
++                      ) : null}
++                    </Card>
++                  )}
++
++                  {/* La prueba de señal, otra vez: solo con el equipo en una unidad. */}
++                  {instalado ? (
++                    <Card style={{ gap: spacing.md }}>
++                      <ThemedText style={styles.cardTitulo}>Prueba de señal</ThemedText>
++                      {sesionPrueba ? (
++                        <>
++                          <ThemedText variant="caption" color="textSecondary">
++                            {tele?.conectado
++                              ? 'Llegó una trama de este IMEI en los últimos 5 minutos: ya se puede activar.'
++                              : 'Esperando una trama de este IMEI. Miramos cada 10 s.'}
++                          </ThemedText>
++                          <Button
++                            label="Activar GPS"
++                            icon="check"
++                            onPress={() => void cerrar('passed')}
++                            loading={probando}
++                            disabled={probando || !tele?.conectado}
++                          />
++                          <Button
++                            label="Marcar prueba fallida"
++                            variant="danger"
++                            onPress={() => void cerrar('failed')}
++                            disabled={probando}
++                          />
++                        </>
++                      ) : (
++                        <Button
++                          label="Repetir la prueba"
++                          icon="sync"
++                          variant="secondary"
++                          onPress={() => void probar()}
++                          loading={probando}
++                          disabled={probando}
++                        />
++                      )}
++                      {resultado ? (
++                        <ThemedText variant="caption" color={resultado.ok ? 'success' : 'danger'}>
++                          {resultado.texto}
++                        </ThemedText>
++                      ) : null}
++                    </Card>
++                  ) : null}
++
++                  {/* Cómo recibía: con señal, ahora; sin ella, antes del corte. */}
++                  {calidad.muestras > 0 ? (
++                    <Card style={{ gap: spacing.md }}>
++                      <View style={[styles.fila, { gap: spacing.sm }]}>
++                        <ThemedText style={[styles.flex, styles.cardTitulo]}>
++                          {vivo ? 'Calidad de recepción' : 'Recepción antes del corte'}
++                        </ThemedText>
++                        <Pastilla tono={calidad.tono} label={`${calidad.nivel} · ${calidad.puntaje}%`} />
++                      </View>
++                      <View style={[styles.barra, { borderRadius: radii.pill, backgroundColor: colors.surfaceSunken }]}>
++                        <View
++                          style={[
++                            styles.barraLlena,
++                            { width: `${calidad.puntaje}%`, borderRadius: radii.pill, backgroundColor: colors[calidad.tono] },
++                          ]}
++                        />
++                      </View>
++                      <View style={styles.rejilla}>
++                        <Cifra label="Mensajes por hora" valor={String(calidad.mensajesHora)} />
++                        <Cifra label="Cada cuánto" valor={calidad.cadaSeg ? `${Math.round(calidad.cadaSeg)} s` : '—'} />
++                        <Cifra label="Muestras" valor={String(calidad.muestras)} />
++                        <Cifra label="IMEI coincide" valor={`${calidad.imeiCoincide}%`} />
++                      </View>
++                    </Card>
++                  ) : null}
++
++                  <Card style={{ gap: spacing.xs }}>
++                    <View style={[styles.fila, { gap: spacing.sm }]}>
++                      <ThemedText style={[styles.flex, styles.cardTitulo]}>Últimas tramas</ThemedText>
++                      <ThemedText variant="caption" color="textSecondary">
++                        Guardadas tal cual
++                      </ThemedText>
++                    </View>
++                    {teleError && !tele ? (
++                      <ThemedText variant="caption" color="danger">
++                        No pudimos leer sus tramas.
++                      </ThemedText>
++                    ) : !tele ? (
++                      <Skeleton height={60} radius={12} />
++                    ) : tele.tramas.length === 0 ? (
++                      <ThemedText variant="caption" color="textMuted">
++                        FOM no ha guardado tramas de este equipo en los últimos 30 días.
++                      </ThemedText>
++                    ) : (
++                      tele.tramas.slice(0, 5).map((t) => (
++                        <View key={t.id} style={[styles.trama, { borderTopColor: colors.border }]}>
++                          <View style={[styles.fila, { gap: spacing.sm }]}>
++                            <ThemedText variant="mono" style={[styles.flex, styles.negrita]}>
++                              {horaSegundos(t.recibidaEn)}
++                            </ThemedText>
++                            <ThemedText variant="caption" color="textSecondary">
++                              {`${t.transporte.toUpperCase()} · ${t.bytes} B`}
++                            </ThemedText>
++                          </View>
++                          <ThemedText variant="caption" color="textSecondary">
++                            {tramaEnLlano(t.diagnostico)}
++                          </ThemedText>
++                        </View>
++                      ))
++                    )}
++                  </Card>
++
++                  <Card style={{ paddingVertical: spacing.sm }}>
++                    <ThemedText style={[styles.cardTitulo, { paddingVertical: spacing.xs }]}>Línea SIM</ThemedText>
++                    <DatoGps label="Número" valor={[equipo.linea, equipo.operadora].filter(Boolean).join(' · ')} />
++                    <DatoGps label="APN" valor={equipo.apn} />
++                  </Card>
++
++                  <View style={[styles.fila, { gap: spacing.sm }]}>
++                    <Button
++                      label="Editar"
++                      icon="editar"
++                      variant="secondary"
++                      style={styles.flex}
++                      onPress={corregir}
++                    />
++                    <Button label="Desmontar" variant="secondary" style={styles.flex} disabled onPress={() => {}} />
++                  </View>
++                  {instalado ? <AvisoServidor titulo="Desmontar desde la app" /> : null}
++                </>
++              ) : null}
++
++              {/* ── DATOS DEL EQUIPO ── */}
++              {pestana === 'datos' ? (
++                editando ? (
++                  <Card style={{ gap: spacing.md }}>
++                    <ThemedText style={styles.cardTitulo}>Corregir datos</ThemedText>
++                    <ThemedText variant="caption" color="textSecondary">
++                      El IMEI no se corrige: es la identidad del equipo.
++                    </ThemedText>
++                    <TextField
++                      label="Teléfono de la línea"
++                      value={linea}
++                      onChangeText={setLinea}
++                      keyboardType="phone-pad"
++                      maxLength={LARGO_MAX.linea}
++                      error={errores.gLinea ?? undefined}
++                    />
++                    <TextField
++                      label="ICCID"
++                      value={iccid}
++                      onChangeText={setIccid}
++                      keyboardType="number-pad"
++                      inputMode="numeric"
++                      maxLength={22}
++                      error={errores.gIccid ?? undefined}
++                    />
++                    <TextField
++                      label="Operadora"
++                      value={operadora}
++                      onChangeText={setOperadora}
++                      maxLength={LARGO_MAX.operadora}
++                      error={errores.gOperadora ?? undefined}
++                    />
++                    <TextField
++                      label="APN"
++                      value={apn}
++                      onChangeText={setApn}
++                      autoCapitalize="none"
++                      maxLength={LARGO_MAX.apn}
++                      error={errores.gApn ?? undefined}
++                    />
++                    <View style={{ gap: spacing.xs }}>
++                      <ThemedText variant="overline" color="textMuted">
++                        Transporte
++                      </ThemedText>
++                      <SegmentedControl
++                        options={[
++                          { value: 'tcp', label: 'TCP' },
++                          { value: 'udp', label: 'UDP' },
++                        ]}
++                        value={transporte}
++                        onChange={setTransporte}
++                      />
++                    </View>
++                    {errorGuardar ? (
++                      <ThemedText variant="caption" color="danger">
++                        {errorGuardar}
++                      </ThemedText>
++                    ) : null}
++                    <Button label="Guardar" icon="guardar" onPress={() => void guardar()} loading={guardando} disabled={guardando} />
++                    <Button
++                      label="Cancelar"
++                      variant="secondary"
++                      onPress={() => {
++                        setEditando(false);
++                        setErrores({});
++                        setErrorGuardar(null);
++                      }}
++                      disabled={guardando}
++                    />
++                  </Card>
++                ) : (
++                  <>
++                    <Card style={{ paddingVertical: spacing.sm }}>
++                      <DatoGps primera label="Marca y modelo" valor={equipo.equipo} />
++                      <DatoGps label="IMEI" valor={equipo.imei} mono />
++                      <DatoGps label="Protocolo" valor={equipo.protocolo} />
++                      <DatoGps label="Transporte" valor={equipo.transporte.toUpperCase()} />
++                      <DatoGps label="Unidad" valor={unidad} />
++                      {equipo.deposito ? <DatoGps label="Depósito" valor={equipo.deposito} /> : null}
++                    </Card>
++                    <Card style={{ paddingVertical: spacing.sm }}>
++                      <DatoGps primera label="Línea" valor={equipo.linea} />
++                      <DatoGps label="Operadora" valor={equipo.operadora} />
++                      <DatoGps label="APN" valor={equipo.apn} />
++                      <DatoGps label="ICCID" valor={equipo.iccid} mono />
++                    </Card>
++                    <Button label="Corregir datos" icon="editar" variant="secondary" onPress={corregir} />
++                  </>
++                )
++              ) : null}
++
++              {/* ── HISTORIAL ── */}
++              {pestana === 'historial' ? <AvisoServidor titulo="Historial de instalaciones" /> : null}
++            </>
++          )}
++        </ScrollVisible>
++      </SafeAreaView>
++    </ThemedView>
++  );
++}
++
++/** Una cifra de la recepción: etiqueta chica y número grande. */
++function Cifra({ label, valor }: { label: string; valor: string }) {
++  return (
++    <View style={styles.cifra}>
++      <ThemedText variant="caption" color="textSecondary">
++        {label}
++      </ThemedText>
++      <ThemedText style={styles.cifraValor} tabular>
++        {valor}
++      </ThemedText>
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  root: { flex: 1 },
++  flex: { flex: 1, minWidth: 0 },
++  content: { width: '100%', maxWidth: 640, alignSelf: 'center', paddingBottom: 48 },
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  filaSuelta: { flexDirection: 'row', flexWrap: 'wrap' },
++  nombre: { fontSize: 24, lineHeight: 30, fontWeight: '700', letterSpacing: -0.4 },
++  cardTitulo: { fontSize: 16, lineHeight: 22, fontWeight: '700' },
++  negrita: { fontWeight: '700' },
++  barra: { height: 8, overflow: 'hidden' },
++  barraLlena: { height: 8 },
++  rejilla: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 12 },
++  cifra: { width: '50%', gap: 2 },
++  cifraValor: { fontSize: 20, lineHeight: 26, fontWeight: '700' },
++  trama: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 10, gap: 2 },
++});
+diff --git a/src/app/gps-instalar.tsx b/src/app/gps-instalar.tsx
+new file mode 100644
+index 0000000..6235d9f
+--- /dev/null
++++ b/src/app/gps-instalar.tsx
+@@ -0,0 +1,92 @@
++import { Redirect, useLocalSearchParams } from 'expo-router';
++import { useCallback } from 'react';
++import { StyleSheet, View } from 'react-native';
++import { SafeAreaView } from 'react-native-safe-area-context';
++
++import { esMultiempresa, useAuth } from '@/auth';
++import { Card } from '@/components/card';
++import { ErrorState } from '@/components/error-state';
++import { InstalarEnUnidadForm } from '@/components/gps-instalar-form';
++import { IconoGps, PastillaSenalGps, TituloGps } from '@/components/gps-piezas';
++import { ScreenHeader } from '@/components/screen-header';
++import { ScrollVisible } from '@/components/scroll-visible';
++import { Skeleton } from '@/components/skeleton';
++import { ThemedText } from '@/components/themed-text';
++import { ThemedView } from '@/components/themed-view';
++import { useDatosFom } from '@/hooks/use-datos-fom';
++import { identidadDeUnidad } from '@/lib/vehiculos';
++import { getEquipoGpsFom } from '@/services/fomGps';
++import { useTheme } from '@/theme';
++
++/**
++ * INSTALAR EN UNA UNIDAD un equipo que ya está en el inventario (diseño GA4).
++ *
++ * La consola web lo hace con `POST /console/gps-devices/:id/installation`, que
++ * la app no puede usar (solo acepta la cookie del navegador), y mobile todavía
++ * no publica su equivalente. La pantalla se ve completa —empresa, unidades sin
++ * GPS, datos de la instalación— y el botón dice que espera al servidor. Un
++ * equipo NUEVO sí se instala desde la app: en el alta («Nuevo GPS»).
++ */
++export default function GpsInstalarScreen() {
++  const { spacing } = useTheme();
++  const { user, status } = useAuth();
++  const params = useLocalSearchParams<{ id?: string; empresa?: string }>();
++  const id = typeof params.id === 'string' ? params.id : '';
++  const empresa = typeof params.empresa === 'string' && params.empresa ? params.empresa : null;
++
++  const { estado, datos: equipo, motivo, recargar } = useDatosFom(
++    useCallback(() => getEquipoGpsFom(id, empresa), [id, empresa]),
++  );
++
++  if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
++  if (!esMultiempresa(user)) return <Redirect href="/" />;
++
++  return (
++    <ThemedView style={styles.root} ambient>
++      <SafeAreaView style={styles.root} edges={['top']}>
++        <ScreenHeader title="Instalar GPS" />
++        <ScrollVisible
++          style={styles.root}
++          contentContainerStyle={[styles.content, { padding: spacing.lg, gap: spacing.lg }]}>
++          <TituloGps titulo="Instalar en una unidad" bajada="Cada unidad lleva un solo GPS." />
++          {estado === 'cargando' ? (
++            <Skeleton height={96} radius={24} />
++          ) : estado !== 'listo' || !equipo ? (
++            <ErrorState compacto description={motivo ?? 'No pudimos leer el equipo.'} onRetry={recargar} />
++          ) : (
++            <InstalarEnUnidadForm
++              empresaInicial={empresa}
++              onInstalar={null}
++              equipo={
++                <Card style={[styles.fila, { gap: spacing.md }]}>
++                  <IconoGps />
++                  <View style={[styles.flex, { gap: 3 }]}>
++                    <ThemedText style={styles.titulo}>{equipo.equipo || 'Equipo GPS'}</ThemedText>
++                    <ThemedText variant="mono" color="textSecondary">{`IMEI ${equipo.imei}`}</ThemedText>
++                    <View style={styles.filaSuelta}>
++                      <PastillaSenalGps ultima={equipo.ultimaConexion} instalado={!!equipo.vehicleId} />
++                    </View>
++                    {equipo.vehicleId ? (
++                      <ThemedText variant="caption" color="warning">
++                        {`Ya está en ${identidadDeUnidad({ numero: equipo.vehicleCode, placa: equipo.vehiclePlate }) || 'una unidad'}: hay que desmontarlo primero.`}
++                      </ThemedText>
++                    ) : null}
++                  </View>
++                </Card>
++              }
++            />
++          )}
++        </ScrollVisible>
++      </SafeAreaView>
++    </ThemedView>
++  );
++}
++
++const styles = StyleSheet.create({
++  root: { flex: 1 },
++  flex: { flex: 1, minWidth: 0 },
++  content: { width: '100%', maxWidth: 640, alignSelf: 'center', paddingBottom: 48 },
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  filaSuelta: { flexDirection: 'row', flexWrap: 'wrap' },
++  titulo: { fontSize: 16, lineHeight: 22, fontWeight: '700' },
++});
+diff --git a/src/app/gps-inventario.tsx b/src/app/gps-inventario.tsx
+index 74cae47..9339823 100644
+--- a/src/app/gps-inventario.tsx
++++ b/src/app/gps-inventario.tsx
+@@ -1,293 +1,239 @@
+-import { Redirect, useRouter } from 'expo-router';
+-import { useCallback, useState } from 'react';
+-import { StyleSheet, View } from 'react-native';
++import { Redirect, useFocusEffect, useRouter, type Href } from 'expo-router';
++import { useCallback, useMemo, useRef, useState } from 'react';
++import { ScrollView, StyleSheet, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { esMultiempresa, useAuth } from '@/auth';
+-import { BotonNuevo } from '@/components/boton-nuevo';
+ import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
+-import { FormularioGps } from '@/components/formulario-gps';
+-import { OptionPickerModal, PickerField } from '@/components/option-picker';
++import { ErrorState } from '@/components/error-state';
++import { AvisoServidor, FilaGps, IconoGps, PastillaSenalGps, TituloGps } from '@/components/gps-piezas';
++import { MetricCard } from '@/components/metric-card';
+ import { Pastilla } from '@/components/pastilla';
+-import { PillButton } from '@/components/pill-button';
++import { PastillaFiltro } from '@/components/pastilla-filtro';
++import { PressableScale } from '@/components/pressable-scale';
+ import { ScreenHeader } from '@/components/screen-header';
+-import { Skeleton } from '@/components/skeleton';
+ import { ScrollVisible } from '@/components/scroll-visible';
++import { normalizar, SearchBar } from '@/components/search-bar';
++import { Skeleton } from '@/components/skeleton';
++import { TabIcon } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { useAsyncData } from '@/hooks/use-async-data';
+ import { useDatosFom } from '@/hooks/use-datos-fom';
+-import {
+-  enteActivoFom,
+-  getEmpresasActivas,
+-  getEquiposGpsFom,
+-  getGpsDetectados,
+-  getUnidadesFlota,
+-} from '@/services';
++import { finImei } from '@/lib/gps-alta';
++import { identidadDeUnidad } from '@/lib/vehiculos';
++import { getEmpresasActivas } from '@/services';
++import { getGpsSinRegistrarFom, getInventarioGpsFom, type EquipoGpsEnEmpresa } from '@/services/fomGps';
+ import { useTheme } from '@/theme';
+-import type { UnidadFlota } from '@/types';
+-import { haceCuanto } from '@/utils/date';
+-import { TIPO_LABEL } from '@/utils/ente';
++
++type Filtro = 'todos' | 'con' | 'sin' | 'libres';
++
++/* Las rutas nuevas del panel entran en los tipos de expo-router cuando el
++   servidor de Expo los regenera; hasta entonces, se nombran como `Href`. */
++const RUTA_NUEVO = '/gps-nuevo' as Href;
++const rutaDetalle = (id: string, empresa: string) =>
++  `/gps-detalle?id=${encodeURIComponent(id)}&empresa=${encodeURIComponent(empresa)}` as Href;
+ 
+ /**
+- * INVENTARIO DE EQUIPOS GPS, de FOM.
+- *
+- * Un equipo GPS tiene vida propia: se instala en un vehículo, se retira, se
+- * repara y se vuelve a instalar en otro. Aquí se ven los equipos de UNA empresa
+- * —los instalados y los que esperan en depósito—, los que ya emiten sin estar
+- * registrados, y aquí se da de alta uno nuevo.
++ * INVENTARIO GPS, del admin FOM (diseño GA1).
+  *
+- * El alta vivía solo dentro del alta de una unidad, porque en FOM un equipo se
+- * registra YA instalado en una: el código de la unidad es obligatorio. Eso
+- * sigue siendo verdad —por eso lo primero que se elige es la unidad—, pero no
+- * obliga a crear un vehículo para registrar un equipo que ya se compró.
++ * Todos los equipos del sistema —de todas las empresas—, en qué unidad están y
++ * si envían señal, con la misma regla que el resto de la app (300 s,
++ * `lib/sin-senal`). Arriba, los que ya le hablan al receptor sin estar
++ * registrados: de ahí sale el IMEI de un equipo nuevo sin teclearlo.
+  */
+ export default function GpsInventarioScreen() {
+-  const { spacing } = useTheme();
++  const { spacing, colors } = useTheme();
+   const { user, status } = useAuth();
+   const router = useRouter();
+ 
+-  /* La empresa que se mira. Manda sobre la lista Y sobre el alta —un equipo se
+-     registra donde está su unidad—. Sin elegir, la de la sesión, y se lee en
+-     cada pintada y no una vez: al arrancar en frío todavía no se sabe cuál es
+-     —llega con el `/me`—, y congelarla dejaría la pantalla en ninguna. */
+-  const [empresaElegida, setEmpresaElegida] = useState<string | null>(null);
+-  const companyId = empresaElegida ?? enteActivoFom();
+-  const [anadiendo, setAnadiendo] = useState(false);
+-  const [unidadId, setUnidadId] = useState<string | null>(null);
+-  const [empresaPicker, setEmpresaPicker] = useState(false);
+-  const [unidadPicker, setUnidadPicker] = useState(false);
++  const [filtro, setFiltro] = useState<Filtro>('todos');
++  const [q, setQ] = useState('');
+ 
+   const {
+-    estado: estadoFom,
+-    datos: reales,
+-    motivo: motivoFom,
+-    recargar: recargarFom,
+-  } = useDatosFom(useCallback(() => getEquiposGpsFom(companyId), [companyId]));
+-  // Los que ya hablan con el receptor y nadie ha registrado.
+-  const { data: detectados } = useAsyncData(getGpsDetectados, []);
+-  const { data: empresas, estado: estadoEmpresas } = useAsyncData(getEmpresasActivas, []);
+-  // Las unidades de esa empresa: en una de ellas queda instalado el equipo.
+-  const { data: unidades, estado: estadoUnidades } = useAsyncData(
+-    () => (companyId ? getUnidadesFlota(companyId) : Promise.resolve([] as UnidadFlota[])),
+-    [companyId],
++    estado,
++    datos,
++    motivo,
++    recargar,
++  } = useDatosFom(useCallback(async () => getInventarioGpsFom(await getEmpresasActivas()), []));
++  // Global y solo del admin FOM: si el servidor dice que no, la pieza no sale.
++  const { data: detectados, estado: estadoDetectados } = useAsyncData(getGpsSinRegistrarFom, [], { onFocus: true });
++
++  // Al volver de dar de alta o de instalar, la lista se pone al día.
++  const visto = useRef(false);
++  useFocusEffect(
++    useCallback(() => {
++      if (visto.current) recargar();
++      visto.current = true;
++    }, [recargar]),
+   );
+ 
++  const equipos = useMemo(() => {
++    // Lo más nuevo primero: el que habló hace menos, arriba; los sin instalar, al final.
++    const t = (g: EquipoGpsEnEmpresa) => (g.ultimaConexion ? Date.parse(g.ultimaConexion) : 0);
++    return [...(datos ?? [])].sort((a, b) => Number(!a.vehicleId) - Number(!b.vehicleId) || t(b) - t(a));
++  }, [datos]);
++
++  const cuentas = useMemo(() => {
++    const con = equipos.filter((g) => g.conectado).length;
++    const libres = equipos.filter((g) => !g.vehicleId).length;
++    const sin = equipos.filter((g) => g.vehicleId && !g.conectado).length;
++    return { todos: equipos.length, con, sin, libres };
++  }, [equipos]);
++
++  const varias = useMemo(() => new Set(equipos.map((g) => g.companyId)).size > 1, [equipos]);
++
++  const lista = useMemo(() => {
++    const n = normalizar(q.trim());
++    return equipos.filter((g) => {
++      if (filtro === 'con' && !g.conectado) return false;
++      if (filtro === 'sin' && !(g.vehicleId && !g.conectado)) return false;
++      if (filtro === 'libres' && g.vehicleId) return false;
++      if (!n) return true;
++      return normalizar(
++        [g.imei, g.linea, g.vehicleCode, g.vehiclePlate, g.equipo, g.empresa].filter(Boolean).join(' '),
++      ).includes(n);
++    });
++  }, [equipos, filtro, q]);
++
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+-  // Mismo alcance que el alta de vehículos: el inventario es de la
+-  // administración de FOM, no de cada ente.
++  // El inventario es de la administración de FOM, no de cada ente.
+   if (!esMultiempresa(user)) return <Redirect href="/" />;
+ 
+   const sinRegistrar = detectados ?? [];
+-  const deLaSesion = companyId === enteActivoFom();
+-
+-  const empresa = (empresas ?? []).find((e) => e.id === companyId) ?? null;
+-  const nombreEmpresa =
+-    empresa?.name ??
+-    (estadoEmpresas === 'cargando'
+-      ? 'Cargando empresas…'
+-      : estadoEmpresas === 'error'
+-        ? 'No pudimos cargar las empresas'
+-        : 'Elegir empresa…');
+-
+-  /* La unidad donde se instala, con lo que FOM le comprueba: si ya existe allá,
+-     placa, marca, modelo y año tienen que coincidir con los que tiene. */
+-  const elegida = (unidades ?? []).find((u) => u.vehicle.id === unidadId) ?? null;
+-  const unidadParaGps =
+-    elegida && companyId
+-      ? {
+-          companyId,
+-          codigo: elegida.vehicle.numero,
+-          placa: elegida.vehicle.placa,
+-          marca: elegida.vehicle.marca,
+-          modelo: elegida.vehicle.modelo,
+-          anio: elegida.vehicle.anio,
+-        }
+-      : null;
+-  const nombreUnidad =
+-    elegida?.vehicle.numero.toUpperCase() ??
+-    (!companyId
+-      ? 'Elige la empresa primero'
+-      : estadoUnidades === 'cargando'
+-        ? 'Cargando unidades…'
+-        : estadoUnidades === 'error'
+-          ? 'No pudimos cargar las unidades'
+-          : (unidades ?? []).length === 0
+-            ? 'Esta empresa no tiene unidades'
+-            : 'Elegir unidad…');
+-
+-  function cerrarAlta() {
+-    setAnadiendo(false);
+-    setUnidadId(null);
+-  }
++  const listo = estado === 'listo';
++  const cifra = (n: number) => (listo ? String(n) : '—');
+ 
+   return (
+     <ThemedView style={styles.root} ambient>
+-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+-        <ScreenHeader
+-          title="Inventario GPS"
+-          right={
+-            anadiendo ? (
+-              <PillButton label="Cancelar" onPress={cerrarAlta} />
+-            ) : (
+-              <BotonNuevo label="Añadir" etiqueta="Añadir un equipo GPS" onPress={() => setAnadiendo(true)} />
+-            )
+-          }
+-        />
+-
+-        <View style={styles.flex}>
+-          <ScrollVisible
+-            style={styles.flex}
+-            contentContainerStyle={[styles.content, { padding: spacing.lg, gap: spacing.lg }]}>
+-            {/* De qué empresa: manda sobre lo que se ve y sobre dónde se registra. */}
+-            <PickerField
+-              label="Empresa"
+-              value={nombreEmpresa}
+-              disabled={(empresas ?? []).length === 0}
+-              onPress={() => setEmpresaPicker(true)}
++      <SafeAreaView style={styles.root} edges={['top']}>
++        <ScreenHeader title="Inventario GPS" />
++
++        <ScrollVisible
++          style={styles.root}
++          contentContainerStyle={[styles.content, { padding: spacing.lg, gap: spacing.lg }]}>
++          <TituloGps titulo="Inventario GPS" bajada="Equipos, en qué unidad están y si envían señal." />
++
++          <Button label="Nuevo GPS" icon="anadir" onPress={() => router.push(RUTA_NUEVO)} />
++
++          {/* Las cuatro cifras, en dos filas como el diseño. */}
++          <View style={{ gap: spacing.sm }}>
++            <View style={[styles.par, { gap: spacing.sm }]}>
++              <MetricCard style={styles.mitad} label="Equipos" value={cifra(cuentas.todos)} helper="En el inventario" />
++              <MetricCard
++                style={styles.mitad}
++                label="Con señal"
++                value={cifra(cuentas.con)}
++                valueColor="success"
++                helper="Últimos 5 min"
++              />
++            </View>
++            <View style={[styles.par, { gap: spacing.sm }]}>
++              <MetricCard
++                style={styles.mitad}
++                label="Sin señal"
++                value={cifra(cuentas.sin)}
++                valueColor="danger"
++                helper="Instalados"
++              />
++              <MetricCard style={styles.mitad} label="Sin instalar" value={cifra(cuentas.libres)} helper="Esperan unidad" />
++            </View>
++          </View>
++
++          {/* Los que ya transmiten y nadie registró: tocarlos lleva al alta. */}
++          {estadoDetectados === 'ok' && sinRegistrar.length > 0 ? (
++            <PressableScale
++              onPress={() => router.push(RUTA_NUEVO)}
++              accessibilityRole="button"
++              accessibilityLabel={`${sinRegistrar.length} detectados sin registrar. Registrar uno`}>
++              <Card style={[styles.filaDetectados, { gap: spacing.md }]}>
++                <IconoGps icono="gps" />
++                <View style={styles.flex}>
++                  <ThemedText style={styles.detectadosTitulo}>
++                    {sinRegistrar.length === 1 ? '1 detectado sin registrar' : `${sinRegistrar.length} detectados sin registrar`}
++                  </ThemedText>
++                  <ThemedText variant="caption" color="textSecondary">
++                    Ya transmiten y no están en ninguna empresa
++                  </ThemedText>
++                </View>
++                <TabIcon name="chevron" color={colors.textMuted} size={18} />
++              </Card>
++            </PressableScale>
++          ) : null}
++
++          {/* El receptor: la app todavía no tiene cómo preguntarle. */}
++          <AvisoServidor titulo="Estado del receptor" />
++
++          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
++            <PastillaFiltro label="Todos" cuenta={cuentas.todos} activo={filtro === 'todos'} onPress={() => setFiltro('todos')} />
++            <PastillaFiltro label="Con señal" cuenta={cuentas.con} activo={filtro === 'con'} onPress={() => setFiltro('con')} />
++            <PastillaFiltro label="Sin señal" cuenta={cuentas.sin} activo={filtro === 'sin'} onPress={() => setFiltro('sin')} />
++            <PastillaFiltro
++              label="Sin instalar"
++              cuenta={cuentas.libres}
++              activo={filtro === 'libres'}
++              onPress={() => setFiltro('libres')}
+             />
++          </ScrollView>
+ 
+-            {anadiendo ? (
+-              <View style={{ gap: spacing.md }}>
+-                <PickerField
+-                  label="Unidad donde se instala"
+-                  value={nombreUnidad}
+-                  disabled={(unidades ?? []).length === 0}
+-                  onPress={() => setUnidadPicker(true)}
+-                />
+-                {unidadParaGps ? (
+-                  <FormularioGps
+-                    unidad={unidadParaGps}
+-                    etiquetaBoton="Registrar equipo"
+-                    onRegistrado={() => {
+-                      cerrarAlta();
+-                      recargarFom();
+-                    }}
+-                  />
+-                ) : null}
+-              </View>
+-            ) : null}
++          <SearchBar value={q} onChangeText={setQ} placeholder="Buscar IMEI, línea o unidad…" />
+ 
++          {estado === 'cargando' ? (
+             <View style={{ gap: spacing.sm }}>
+-              <ThemedText variant="overline" color="textMuted">
+-                {estadoFom === 'listo' ? `Equipos (${(reales ?? []).length})` : 'Equipos'}
+-              </ThemedText>
+-
+-              {estadoFom === 'cargando' ? (
+-                <>
+-                  <Skeleton height={72} radius={16} />
+-                  <Skeleton height={72} radius={16} />
+-                </>
+-              ) : estadoFom === 'sin-sesion' ? (
+-                <Card style={{ gap: spacing.sm }}>
+-                  <Pastilla tono="textSecondary" label="Sin sesión de FOM" />
+-                  <Button label="Entrar a FOM" variant="secondary" onPress={() => router.navigate('/fom-conexion')} />
+-                </Card>
+-              ) : estadoFom === 'sin-permiso' ? (
+-                /* El servidor contestó, y contestó que no. Sin "Reintentar":
+-                   repetir la misma petición con el mismo rol da lo mismo. */
+-                <Card style={{ gap: spacing.sm }}>
+-                  <Pastilla tono="warning" label="Sin permiso" />
+-                  {motivoFom ? (
+-                    <ThemedText variant="caption" color="textSecondary">
+-                      {motivoFom}
+-                    </ThemedText>
+-                  ) : null}
+-                </Card>
+-              ) : estadoFom === 'error' ? (
+-                <Card style={{ gap: spacing.sm }}>
+-                  <Pastilla tono="danger" label="FOM no responde" conPunto />
+-                  {motivoFom ? (
+-                    <ThemedText variant="caption" color="textSecondary">
+-                      {motivoFom}
+-                    </ThemedText>
+-                  ) : null}
+-                  <Button label="Reintentar" variant="secondary" onPress={recargarFom} />
+-                </Card>
+-              ) : (
+-                (reales ?? []).map((g) => (
+-                  <Card key={g.id} style={{ gap: spacing.xs }}>
+-                    <ThemedText variant="body">{g.equipo || g.imei}</ThemedText>
+-                    <ThemedText variant="caption" color="textSecondary">
+-                      {[`IMEI ${g.imei}`, g.operadora, g.protocolo].filter(Boolean).join(' · ')}
+-                    </ThemedText>
+-                    <View style={[styles.fila, { gap: spacing.xs }]}>
+-                      {/* El enlace responde por qué un equipo está callado:
+-                          uno desconectado es normal en un carro apagado. */}
+-                      <Pastilla
+-                        tono={g.conectado ? 'success' : 'textSecondary'}
+-                        label={
+-                          g.conectado
+-                            ? 'Conectado'
+-                            : g.ultimaConexion
+-                              ? `Sin enlace · ${haceCuanto(g.ultimaConexion)}`
+-                              : 'Sin enlace'
+-                        }
+-                        conPunto={g.conectado}
+-                      />
+-                      {/* Dónde está: instalado en una unidad, o en depósito. */}
+-                      <Pastilla tono="textSecondary" label={g.vehiclePlate || g.vehicleCode || 'En depósito'} />
+-                    </View>
+-                  </Card>
+-                ))
+-              )}
++              <Skeleton height={84} radius={16} />
++              <Skeleton height={84} radius={16} />
++              <Skeleton height={84} radius={16} />
+             </View>
+-
+-            {/* Los que ya emiten y nadie ha registrado: los oye el receptor. Es una
+-                lectura de la SESIÓN, así que solo sale mirando su empresa: bajo el
+-                nombre de otra serían equipos que no son suyos. */}
+-            {deLaSesion ? (
+-              <View style={{ gap: spacing.sm }}>
+-                <ThemedText variant="overline" color="textMuted">
+-                  {`Emitiendo sin registrar (${sinRegistrar.length})`}
++          ) : estado === 'sin-sesion' ? (
++            <Card style={{ gap: spacing.sm }}>
++              <Pastilla tono="textSecondary" label="Sin sesión de FOM" />
++              <Button label="Entrar a FOM" variant="secondary" onPress={() => router.navigate('/fom-conexion')} />
++            </Card>
++          ) : estado === 'sin-permiso' ? (
++            /* El servidor contestó que no: repetir con el mismo rol da lo mismo. */
++            <Card style={{ gap: spacing.sm }}>
++              <Pastilla tono="warning" label="Sin permiso" />
++              {motivo ? (
++                <ThemedText variant="caption" color="textSecondary">
++                  {motivo}
+                 </ThemedText>
+-                {sinRegistrar.map((d) => (
+-                  <Card key={d.imei} style={{ gap: spacing.xs }}>
+-                    <ThemedText variant="body">{`IMEI ${d.imei}`}</ThemedText>
+-                    <View style={[styles.fila, { gap: spacing.xs }]}>
+-                      <Pastilla tono="textSecondary" label={d.transporte.toUpperCase()} />
+-                      <Pastilla tono="textSecondary" label={`Visto ${haceCuanto(d.vistoEn)}`} />
+-                    </View>
+-                  </Card>
+-                ))}
+-              </View>
+-            ) : null}
+-          </ScrollVisible>
+-        </View>
+-
+-        <OptionPickerModal
+-          visible={empresaPicker}
+-          title="¿De qué empresa?"
+-          options={(empresas ?? []).map((e) => ({
+-            id: e.id,
+-            label: e.name,
+-            helper: TIPO_LABEL[e.tipo ?? 'estandar'],
+-          }))}
+-          selectedIds={companyId ? [companyId] : []}
+-          onChange={(ids) => {
+-            const id = ids[0];
+-            if (!id) return;
+-            setEmpresaElegida(id);
+-            // La unidad elegida era de la otra empresa.
+-            setUnidadId(null);
+-          }}
+-          onClose={() => setEmpresaPicker(false)}
+-        />
+-
+-        <OptionPickerModal
+-          visible={unidadPicker}
+-          title="¿En qué unidad se instala?"
+-          searchable
+-          options={(unidades ?? []).map((u) => ({
+-            id: u.vehicle.id,
+-            label: u.vehicle.numero.toUpperCase(),
+-            helper: [u.vehicle.placa, u.vehicle.marca, u.vehicle.modelo].filter(Boolean).join(' · '),
+-          }))}
+-          selectedIds={unidadId ? [unidadId] : []}
+-          onChange={(ids) => setUnidadId(ids[0] ?? null)}
+-          onClose={() => setUnidadPicker(false)}
+-        />
++              ) : null}
++            </Card>
++          ) : estado === 'error' ? (
++            <ErrorState compacto description={motivo ?? 'FOM no responde.'} onRetry={recargar} />
++          ) : lista.length === 0 ? (
++            <Card>
++              <ThemedText variant="caption" color="textSecondary" style={styles.centro}>
++                {equipos.length === 0 ? 'Todavía no hay equipos. Registra el primero con «Nuevo GPS».' : 'Ningún equipo coincide.'}
++              </ThemedText>
++            </Card>
++          ) : (
++            <Card style={styles.lista}>
++              {lista.map((g, i) => {
++                const unidad = g.vehicleId
++                  ? identidadDeUnidad({ numero: g.vehicleCode, placa: g.vehiclePlate }) || 'Unidad'
++                  : 'En inventario';
++                return (
++                  <FilaGps
++                    key={`${g.companyId}:${g.id}`}
++                    primera={i === 0}
++                    titulo={unidad}
++                    sub={[g.equipo, finImei(g.imei)].filter(Boolean).join(' · ')}
++                    etiqueta={`${unidad}, ${g.equipo}. Ver detalle`}
++                    pie={
++                      <>
++                        <PastillaSenalGps ultima={g.ultimaConexion} instalado={!!g.vehicleId} />
++                        {varias ? <Pastilla tono="textSecondary" label={g.empresa} /> : null}
++                      </>
++                    }
++                    onPress={() => router.push(rutaDetalle(g.id, g.companyId))}
++                  />
++                );
++              })}
++            </Card>
++          )}
++        </ScrollVisible>
+       </SafeAreaView>
+     </ThemedView>
+   );
+@@ -295,8 +241,12 @@ export default function GpsInventarioScreen() {
+ 
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+-  safeArea: { flex: 1 },
+-  flex: { flex: 1 },
+-  content: { width: '100%', maxWidth: 640, alignSelf: 'center', paddingBottom: 32 },
+-  fila: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' },
++  flex: { flex: 1, minWidth: 0, gap: 2 },
++  content: { width: '100%', maxWidth: 640, alignSelf: 'center', paddingBottom: 48 },
++  par: { flexDirection: 'row' },
++  mitad: { flex: 1, minWidth: 0 },
++  filaDetectados: { flexDirection: 'row', alignItems: 'center' },
++  detectadosTitulo: { fontSize: 15, lineHeight: 20, fontWeight: '700' },
++  lista: { paddingVertical: 4 },
++  centro: { textAlign: 'center' },
+ });
+diff --git a/src/app/gps-nuevo.tsx b/src/app/gps-nuevo.tsx
+new file mode 100644
+index 0000000..9b29992
+--- /dev/null
++++ b/src/app/gps-nuevo.tsx
+@@ -0,0 +1,694 @@
++import { Redirect, useFocusEffect, useRouter, type Href } from 'expo-router';
++import { useCallback, useEffect, useRef, useState } from 'react';
++import { StyleSheet, View } from 'react-native';
++import { SafeAreaView } from 'react-native-safe-area-context';
++
++import { esMultiempresa, useAuth } from '@/auth';
++import { Button } from '@/components/button';
++import { Card } from '@/components/card';
++import { BotonRedondoGps, IconoGps, PasosGps, PastillaSenalGps, TituloGps } from '@/components/gps-piezas';
++import { InstalarEnUnidadForm, type DatosInstalacion } from '@/components/gps-instalar-form';
++import { OptionPickerModal, PickerField } from '@/components/option-picker';
++import { Pastilla } from '@/components/pastilla';
++import { ScreenHeader } from '@/components/screen-header';
++import { ScrollVisible, type ScrollVisibleHandle } from '@/components/scroll-visible';
++import { SegmentedControl } from '@/components/segmented-control';
++import { TabIcon } from '@/components/tab-icon';
++import { TextField } from '@/components/text-field';
++import { useSegundero } from '@/components/texto-vivo';
++import { ThemedText } from '@/components/themed-text';
++import { ThemedView } from '@/components/themed-view';
++import { useAsyncData } from '@/hooks/use-async-data';
++import {
++  abrirSms,
++  CLAVE_FABRICA,
++  comandosSms,
++  conSenal,
++  ESTADOS_SIM,
++  finImei,
++  haceSenal,
++  horaSegundos,
++  MARCAS_GPS,
++  modelosDe,
++  OPERADORAS,
++  protocoloDe,
++  type EstadoSim,
++} from '@/lib/gps-alta';
++import { confirmar } from '@/lib/confirmar';
++import { validarIccid, validarImei } from '@/lib/validate';
++import { IMEI_LARGO, LARGO_MAX } from '@/services';
++import {
++  abrirPruebaGpsFom,
++  cerrarPruebaGpsFom,
++  getGpsSinRegistrarFom,
++  registrarGpsEnUnidadFom,
++  type GpsSinRegistrar,
++} from '@/services/fomGps';
++import { useTheme } from '@/theme';
++
++const PASOS = ['Equipo', 'Línea SIM', 'Configurar y probar'];
++
++/** Cada cuánto se vuelve a mirar si llegó la señal del equipo (como la consola). */
++const CADA_MS = 10_000;
++
++/**
++ * NUEVO GPS en tres pasos (diseños GA2 y GA3): Equipo · Línea SIM · Configurar
++ * y probar.
++ *
++ * En la app hay una diferencia con la web, y es del servidor: la ruta de la
++ * app (`POST /mobile/gps-devices`) registra el equipo YA instalado en una
++ * unidad —no sabe guardarlo suelto en el inventario—. Por eso aquí no se
++ * escribe nada hasta el final: los tres pasos arman el alta y la prueba de
++ * señal mira la bandeja de «detectados» buscando este IMEI; al instalarlo se
++ * registra, se abre la prueba y, si la señal sigue llegando, queda activo.
++ */
++export default function GpsNuevoScreen() {
++  const { spacing, colors, radii, borderWidths } = useTheme();
++  const { user, status } = useAuth();
++  const router = useRouter();
++  const scroll = useRef<ScrollVisibleHandle>(null);
++  // Lo de arriba de la pantalla: al cambiar de paso, la vista vuelve ahí.
++  const tope = useRef<View>(null);
++
++  // 0-2 = los tres pasos; 3 = instalar en una unidad.
++  const [paso, setPaso] = useState(0);
++
++  // Paso 1 · Equipo.
++  const [marca, setMarca] = useState(MARCAS_GPS[0] ?? '');
++  const [modelo, setModelo] = useState(modelosDe(MARCAS_GPS[0] ?? '')[0] ?? '');
++  const [transporte, setTransporte] = useState<'tcp' | 'udp'>('tcp');
++  const [imei, setImei] = useState('');
++  const [imeiDeSenal, setImeiDeSenal] = useState(false);
++  const [serie, setSerie] = useState('');
++  const [firmware, setFirmware] = useState('');
++  // Solo arma los comandos: ni se guarda ni viaja al servidor.
++  const [clave, setClave] = useState(CLAVE_FABRICA);
++  const [picker, setPicker] = useState<'marca' | 'modelo' | null>(null);
++
++  // Paso 2 · Línea SIM.
++  const [linea, setLinea] = useState('');
++  const [iccid, setIccid] = useState('');
++  const [operadora, setOperadora] = useState('');
++  const [apn, setApn] = useState('');
++  const [estadoSim, setEstadoSim] = useState<EstadoSim>('active');
++  const [plan, setPlan] = useState('');
++
++  const [errores, setErrores] = useState<Record<string, string | null>>({});
++  const [ocupado, setOcupado] = useState(false);
++  const [errorAlta, setErrorAlta] = useState<string | null>(null);
++  const [avisoSms, setAvisoSms] = useState<string | null>(null);
++
++  const protocolo = protocoloDe(marca, modelo);
++  const imeiLimpio = imei.replace(/\D/gu, '');
++
++  // La bandeja de detectados: la del paso 1, y la que vigila la señal en el 3.
++  const { data: detectados, estado: estadoDetectados, recargar: recargarDetectados } = useAsyncData(
++    getGpsSinRegistrarFom,
++    [],
++  );
++  const [vigilado, setVigilado] = useState<GpsSinRegistrar | null>(null);
++
++  /* Prueba de señal: cada 10 s, ¿el receptor oyó a este IMEI? Solo con la
++     pantalla a la vista y en el paso 3: nadie la está mirando en otro. */
++  const enFoco = useRef(false);
++  useFocusEffect(
++    useCallback(() => {
++      enFoco.current = true;
++      return () => {
++        enFoco.current = false;
++      };
++    }, []),
++  );
++  useEffect(() => {
++    if (paso !== 2 || !imeiLimpio) return;
++    let vivo = true;
++    const mirar = async () => {
++      if (!enFoco.current) return;
++      try {
++        const lista = await getGpsSinRegistrarFom();
++        if (vivo) setVigilado(lista.find((d) => d.imei === imeiLimpio) ?? null);
++      } catch {
++        // Sin bandeja (red o permiso) no hay prueba que enseñar: se reintenta en 10 s.
++      }
++    };
++    void mirar();
++    const reloj = setInterval(() => void mirar(), CADA_MS);
++    return () => {
++      vivo = false;
++      clearInterval(reloj);
++    };
++  }, [paso, imeiLimpio]);
++
++  const ahora = useSegundero(paso === 2);
++
++  if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
++  if (!esMultiempresa(user)) return <Redirect href="/" />;
++
++  function arriba() {
++    // Centrar lo primero de la pantalla es, en la práctica, subir del todo.
++    scroll.current?.centrarCampo(tope);
++  }
++
++  function irA(n: number) {
++    setErrores({});
++    setPaso(n);
++    arriba();
++  }
++
++  function largo(valor: string, max: number, vacio: string): string | null {
++    const t = valor.trim();
++    if (!t) return vacio;
++    return t.length > max ? `Máximo ${max} caracteres.` : null;
++  }
++
++  function validarEquipo(): boolean {
++    const e: Record<string, string | null> = {
++      gpsMarca: marca ? null : 'Elige la marca.',
++      gpsModelo: modelo ? null : 'Elige el modelo.',
++      gpsImei: validarImei(imei),
++    };
++    setErrores(e);
++    const hay = Object.values(e).some(Boolean);
++    if (hay) scroll.current?.irAlPrimerError(e);
++    return !hay;
++  }
++
++  function validarSim(): boolean {
++    const e: Record<string, string | null> = {
++      simLinea: largo(linea, LARGO_MAX.linea, 'Pon el número de la línea.'),
++      simIccid: validarIccid(iccid),
++      simOperadora: largo(operadora, LARGO_MAX.operadora, 'Pon la operadora.'),
++      simApn: largo(apn, LARGO_MAX.apn, 'Pon el APN de la operadora.'),
++    };
++    setErrores(e);
++    const hay = Object.values(e).some(Boolean);
++    if (hay) scroll.current?.irAlPrimerError(e);
++    return !hay;
++  }
++
++  function usarDetectado(d: GpsSinRegistrar) {
++    setImei(d.imei);
++    setImeiDeSenal(true);
++    setVigilado(null);
++    setTransporte(d.transporte);
++    setErrores((e) => ({ ...e, gpsImei: null }));
++  }
++
++  function descartar() {
++    confirmar({
++      titulo: 'Descartar el alta',
++      mensaje: 'Se pierden los datos que llevas escritos.',
++      accion: 'Descartar',
++      onConfirmar: () => (router.canGoBack() ? router.back() : router.replace('/gps-inventario')),
++    });
++  }
++
++  async function enviarSms(texto: string) {
++    setAvisoSms(null);
++    if (!linea.trim()) {
++      setAvisoSms('Falta el número de la línea del equipo (paso 2).');
++      return;
++    }
++    if (!(await abrirSms(linea, texto))) setAvisoSms('No pudimos abrir Mensajes en este teléfono.');
++  }
++
++  /** Registra el equipo instalado en la unidad, abre la prueba y, si hay señal, lo activa. */
++  async function instalar(d: DatosInstalacion) {
++    setErrorAlta(null);
++    setOcupado(true);
++    try {
++      const gps = await registrarGpsEnUnidadFom(
++        {
++          fabricante: marca,
++          modelo,
++          imei: imeiLimpio,
++          linea,
++          iccid: iccid.replace(/\D/gu, ''),
++          operadora,
++          apn,
++          protocolo,
++          transporte,
++        },
++        d.unidad,
++        {
++          serie,
++          firmware,
++          estadoSim,
++          planSim: plan,
++          instaladoEn: d.instaladoEn,
++          tecnico: d.tecnico,
++          ubicacion: d.ubicacion,
++          notas: d.notas,
++        },
++      );
++      // Ya está registrado: la prueba es aparte y, si falla, se repite desde el detalle.
++      let prueba = 'pendiente';
++      try {
++        const sesion = await abrirPruebaGpsFom(gps.id, d.unidad.companyId);
++        const r = await cerrarPruebaGpsFom(sesion, d.unidad.companyId, 'passed');
++        prueba = r.ok ? 'activo' : 'sin-senal';
++      } catch {
++        prueba = 'pendiente';
++      }
++      router.replace(
++        `/gps-detalle?id=${encodeURIComponent(gps.id)}&empresa=${encodeURIComponent(d.unidad.companyId)}&prueba=${prueba}` as Href,
++      );
++    } catch (e) {
++      setErrorAlta(e instanceof Error ? e.message : 'No se pudo registrar el equipo.');
++    } finally {
++      setOcupado(false);
++    }
++  }
++
++  const titulo = paso === 3 ? 'Instalar GPS' : 'Nuevo GPS';
++  const senal = vigilado && conSenal(vigilado.vistoEn, ahora);
++  const comandos = comandosSms(clave, apn, transporte);
++
++  return (
++    <ThemedView style={styles.root} ambient>
++      <SafeAreaView style={styles.root} edges={['top']}>
++        <ScreenHeader title={titulo} />
++
++        <ScrollVisible
++          ref={scroll}
++          style={styles.root}
++          contentContainerStyle={[styles.content, { padding: spacing.lg, gap: spacing.lg }]}>
++          <View ref={tope} collapsable={false}>
++            {paso < 3 ? <PasosGps paso={paso} nombres={PASOS} /> : null}
++          </View>
++
++          {/* ── PASO 1 · EQUIPO ── */}
++          {paso === 0 ? (
++            <>
++              <TituloGps titulo="Datos del equipo" bajada="Instalarlo en una unidad es un paso aparte." />
++
++              {estadoDetectados !== 'error' ? (
++                <Card style={{ gap: spacing.md }}>
++                  <View style={styles.filaCentro}>
++                    <ThemedText style={[styles.flex, styles.cardTitulo]}>Detectados sin registrar</ThemedText>
++                    <BotonRedondoGps icono="sync" etiqueta="Buscar otra vez" onPress={recargarDetectados} />
++                  </View>
++                  <ThemedText variant="caption" color="textSecondary">
++                    Elige el que ya envía datos y te ahorras escribir el IMEI.
++                  </ThemedText>
++                  {estadoDetectados === 'cargando' ? (
++                    <ThemedText variant="caption" color="textMuted">
++                      Buscando…
++                    </ThemedText>
++                  ) : (detectados ?? []).length === 0 ? (
++                    <ThemedText variant="caption" color="textMuted">
++                      Ningún equipo nuevo le está hablando al receptor ahora.
++                    </ThemedText>
++                  ) : (
++                    (detectados ?? []).slice(0, 6).map((d) => {
++                      const enUso = imeiLimpio === d.imei;
++                      return (
++                        <View
++                          key={d.imei}
++                          style={[
++                            styles.detectado,
++                            {
++                              borderRadius: radii.md,
++                              borderWidth: borderWidths.thin,
++                              borderColor: enUso ? colors.activeBorder : colors.border,
++                              backgroundColor: enUso ? colors.activeSurface : colors.surfaceSunken,
++                            },
++                          ]}>
++                          <View style={[styles.flex, { gap: 4 }]}>
++                            <View style={styles.filaSuelta}>
++                              {d.reportando ? (
++                                <Pastilla tono="success" label="Reportando ahora" conPunto />
++                              ) : (
++                                <Pastilla tono="textSecondary" label={`Visto ${haceSenal(d.vistoEn)}`} conPunto />
++                              )}
++                            </View>
++                            <ThemedText variant="mono" style={styles.imeiGrande} selectable>
++                              {d.imei}
++                            </ThemedText>
++                            <ThemedText variant="caption" color="textSecondary" numberOfLines={1}>
++                              {[
++                                d.transporte.toUpperCase(),
++                                `${d.mensajes} ${d.mensajes === 1 ? 'mensaje' : 'mensajes'}`,
++                                d.reportando ? `última ${haceSenal(d.vistoEn)}` : null,
++                              ]
++                                .filter(Boolean)
++                                .join(' · ')}
++                            </ThemedText>
++                          </View>
++                          {enUso ? (
++                            <View style={styles.filaCentro}>
++                              <TabIcon name="check" color={colors.onActive} size={16} />
++                              <ThemedText variant="caption" style={[styles.negrita, { color: colors.onActive }]}>
++                                En uso
++                              </ThemedText>
++                            </View>
++                          ) : (
++                            <Button label="Usar" variant="secondary" onPress={() => usarDetectado(d)} style={styles.usar} />
++                          )}
++                        </View>
++                      );
++                    })
++                  )}
++                </Card>
++              ) : null}
++
++              <Card style={{ gap: spacing.md }}>
++                <PickerField label="Marca *" value={marca || 'Elegir…'} onPress={() => setPicker('marca')} />
++                <PickerField label="Modelo *" value={modelo || 'Elegir…'} onPress={() => setPicker('modelo')} />
++                <View style={{ gap: spacing.xs }}>
++                  <ThemedText variant="overline" color="textMuted">
++                    Protocolo
++                  </ThemedText>
++                  <View
++                    style={[
++                      styles.protocolo,
++                      { borderRadius: radii.md, borderColor: colors.border, borderWidth: borderWidths.thin },
++                    ]}>
++                    <ThemedText style={styles.negrita}>{protocolo || '—'}</ThemedText>
++                  </View>
++                  <ThemedText variant="caption" color="textMuted">
++                    Se pone solo según el modelo.
++                  </ThemedText>
++                </View>
++                <View style={{ gap: spacing.xs }}>
++                  <ThemedText variant="overline" color="textMuted">
++                    Transporte
++                  </ThemedText>
++                  <SegmentedControl
++                    options={[
++                      { value: 'tcp', label: 'TCP' },
++                      { value: 'udp', label: 'UDP' },
++                    ]}
++                    value={transporte}
++                    onChange={setTransporte}
++                  />
++                </View>
++                <View style={{ gap: spacing.xs }}>
++                  <TextField
++                    label="IMEI *"
++                    nombre="gpsImei"
++                    value={imei}
++                    onChangeText={(t) => {
++                      setImei(t);
++                      setImeiDeSenal(false);
++                      // La prueba de señal era de otro IMEI.
++                      setVigilado(null);
++                    }}
++                    placeholder="15 dígitos"
++                    keyboardType="number-pad"
++                    inputMode="numeric"
++                    maxLength={IMEI_LARGO}
++                    error={errores.gpsImei ?? undefined}
++                  />
++                  {imeiDeSenal && !errores.gpsImei ? (
++                    <ThemedText variant="caption" color="success">
++                      Tomado de la señal · 15 dígitos
++                    </ThemedText>
++                  ) : null}
++                </View>
++                <TextField label="Número de serie" value={serie} onChangeText={setSerie} placeholder="Opcional" maxLength={100} />
++                <TextField label="Firmware" value={firmware} onChangeText={setFirmware} placeholder="Opcional" maxLength={100} />
++                <View style={{ gap: spacing.xs }}>
++                  <TextField
++                    label="Clave SMS del equipo"
++                    value={clave}
++                    onChangeText={setClave}
++                    secureTextEntry
++                    autoComplete="off"
++                    maxLength={20}
++                  />
++                  <ThemedText variant="caption" color="textMuted">
++                    Solo arma los comandos del paso 3. No se guarda.
++                  </ThemedText>
++                </View>
++              </Card>
++
++              <Button label="Siguiente: Línea SIM" icon="chevron" onPress={() => validarEquipo() && irA(1)} />
++              <Button label="Descartar" variant="secondary" onPress={descartar} />
++            </>
++          ) : null}
++
++          {/* ── PASO 2 · LÍNEA SIM ── */}
++          {paso === 1 ? (
++            <>
++              <TituloGps titulo="Línea SIM" bajada="La tarjeta con la que el equipo manda sus datos." />
++              <Card style={{ gap: spacing.md }}>
++                <TextField
++                  label="Teléfono de la línea *"
++                  nombre="simLinea"
++                  value={linea}
++                  onChangeText={setLinea}
++                  placeholder="0414-5523187"
++                  keyboardType="phone-pad"
++                  maxLength={LARGO_MAX.linea}
++                  error={errores.simLinea ?? undefined}
++                />
++                <TextField
++                  label="ICCID *"
++                  nombre="simIccid"
++                  value={iccid}
++                  onChangeText={setIccid}
++                  placeholder="18 a 22 dígitos, impreso en la SIM"
++                  keyboardType="number-pad"
++                  inputMode="numeric"
++                  maxLength={22}
++                  error={errores.simIccid ?? undefined}
++                />
++                <View style={{ gap: spacing.xs }}>
++                  <TextField
++                    label="Operadora *"
++                    nombre="simOperadora"
++                    value={operadora}
++                    onChangeText={setOperadora}
++                    placeholder="Movistar, Digitel, Movilnet…"
++                    maxLength={LARGO_MAX.operadora}
++                    error={errores.simOperadora ?? undefined}
++                  />
++                  {/* Atajo: la operadora trae su APN; solo llena el APN si está vacío. */}
++                  <View style={[styles.filaSuelta, { gap: spacing.xs }]}>
++                    {OPERADORAS.map((o) => (
++                      <Button
++                        key={o.nombre}
++                        label={o.nombre}
++                        variant="secondary"
++                        style={styles.chipOperadora}
++                        onPress={() => {
++                          setOperadora(o.nombre);
++                          if (!apn.trim()) setApn(o.apn);
++                        }}
++                      />
++                    ))}
++                  </View>
++                </View>
++                <TextField
++                  label="APN *"
++                  nombre="simApn"
++                  value={apn}
++                  onChangeText={setApn}
++                  placeholder="internet.movistar.ve"
++                  autoCapitalize="none"
++                  maxLength={LARGO_MAX.apn}
++                  error={errores.simApn ?? undefined}
++                />
++                <View style={{ gap: spacing.xs }}>
++                  <ThemedText variant="overline" color="textMuted">
++                    Estado de la SIM
++                  </ThemedText>
++                  <SegmentedControl options={ESTADOS_SIM} value={estadoSim} onChange={setEstadoSim} />
++                </View>
++                <TextField label="Plan de datos" value={plan} onChangeText={setPlan} placeholder="Opcional" maxLength={120} />
++              </Card>
++
++              <Button label="Siguiente: Configurar y probar" icon="chevron" onPress={() => validarSim() && irA(2)} />
++              <Button label="Anterior" variant="secondary" onPress={() => irA(0)} />
++            </>
++          ) : null}
++
++          {/* ── PASO 3 · CONFIGURAR Y PROBAR ── */}
++          {paso === 2 ? (
++            <>
++              <TituloGps titulo="Configurar y probar" bajada="Manda los comandos a la línea del equipo y espera su señal." />
++
++              <Card style={{ gap: spacing.md }}>
++                <View style={[styles.filaCentro, { gap: spacing.md }]}>
++                  <IconoGps icono="gps" tono={senal ? 'success' : 'textSecondary'} tamano={56} />
++                  <View style={[styles.flex, { gap: 6 }]}>
++                    <View style={styles.filaSuelta}>
++                      {senal && vigilado ? (
++                        <Pastilla tono="success" label={`Señal recibida · ${haceSenal(vigilado.vistoEn, ahora)}`} conPunto />
++                      ) : vigilado ? (
++                        <PastillaSenalGps ultima={vigilado.vistoEn} />
++                      ) : (
++                        <Pastilla tono="textSecondary" label="Esperando señal…" conPunto />
++                      )}
++                    </View>
++                    <ThemedText style={styles.cardTitulo}>Prueba de señal</ThemedText>
++                  </View>
++                </View>
++
++                <Chequeo listo={!!senal} texto="Señal en los últimos 5 minutos" />
++                <Chequeo listo={!!vigilado} texto="El IMEI coincide" />
++                <Chequeo listo={!!vigilado && vigilado.mensajes > 0} texto="Trama guardada tal como llegó" />
++
++                {vigilado ? (
++                  <View style={[styles.evidencia, { borderRadius: radii.md, backgroundColor: colors.surfaceSunken }]}>
++                    <ThemedText style={styles.negrita}>
++                      {`${horaSegundos(vigilado.vistoEn)} · ${vigilado.transporte.toUpperCase()} · ${vigilado.bytesUltimo} bytes`}
++                    </ThemedText>
++                    <ThemedText variant="caption" color="textSecondary">
++                      {`${vigilado.mensajes} ${vigilado.mensajes === 1 ? 'mensaje' : 'mensajes'} desde las ${horaSegundos(vigilado.primeraVez)}`}
++                    </ThemedText>
++                  </View>
++                ) : (
++                  <ThemedText variant="caption" color="textMuted">
++                    {`Miramos cada 10 s si el receptor oye al IMEI ${finImei(imeiLimpio)}.`}
++                  </ThemedText>
++                )}
++
++                <ThemedText variant="caption" color="textSecondary">
++                  Se activa al instalarlo en su unidad, si la señal sigue llegando.
++                </ThemedText>
++              </Card>
++
++              <Card style={{ gap: spacing.md }}>
++                <View style={styles.filaCentro}>
++                  <ThemedText style={[styles.flex, styles.cardTitulo]}>Comandos SMS</ThemedText>
++                  <ThemedText variant="caption" color="textSecondary">
++                    {linea ? `a ${linea}` : ''}
++                  </ThemedText>
++                </View>
++                <ThemedText variant="caption" color="textSecondary">
++                  El botón abre Mensajes con el texto listo. La clave no se guarda.
++                </ThemedText>
++                {comandos.map((c, i) => (
++                  <View
++                    key={c.titulo}
++                    style={[styles.comando, { borderTopWidth: borderWidths.hairline, borderTopColor: colors.border }]}>
++                    <View style={[styles.numero, { borderRadius: radii.sm, backgroundColor: colors.surfaceSunken }]}>
++                      <ThemedText variant="mono" style={styles.negrita}>
++                        {String(i + 1).padStart(2, '0')}
++                      </ThemedText>
++                    </View>
++                    <View style={[styles.flex, { gap: 6 }]}>
++                      <ThemedText style={styles.negrita}>{c.titulo}</ThemedText>
++                      <View
++                        style={[
++                          styles.codigo,
++                          { borderRadius: radii.sm, borderColor: colors.border, borderWidth: borderWidths.thin, backgroundColor: colors.surfaceSunken },
++                        ]}>
++                        <ThemedText variant="mono" numberOfLines={1}>
++                          {c.visible}
++                        </ThemedText>
++                      </View>
++                      <ThemedText variant="caption" color="textSecondary">
++                        {c.respuesta}
++                      </ThemedText>
++                    </View>
++                    <BotonRedondoGps icono="mensaje" etiqueta={`Abrir Mensajes con «${c.titulo}»`} onPress={() => void enviarSms(c.texto)} />
++                  </View>
++                ))}
++                {avisoSms ? (
++                  <ThemedText variant="caption" color="danger">
++                    {avisoSms}
++                  </ThemedText>
++                ) : null}
++              </Card>
++
++              <Button label="Siguiente: instalar en una unidad" icon="chevron" onPress={() => irA(3)} />
++              <Button label="Anterior" variant="secondary" onPress={() => irA(1)} />
++            </>
++          ) : null}
++
++          {/* ── INSTALAR EN UNA UNIDAD ── */}
++          {paso === 3 ? (
++            <>
++              <TituloGps titulo="Instalar en una unidad" bajada="Cada unidad lleva un solo GPS." />
++              <InstalarEnUnidadForm
++                equipo={
++                  <Card style={[styles.filaCentro, { gap: spacing.md }]}>
++                    <IconoGps />
++                    <View style={[styles.flex, { gap: 3 }]}>
++                      <ThemedText style={styles.cardTitulo}>{`${marca} ${modelo}`.trim()}</ThemedText>
++                      <ThemedText variant="mono" color="textSecondary">{`IMEI ${imeiLimpio}`}</ThemedText>
++                      <View style={styles.filaSuelta}>
++                        {vigilado ? (
++                          <PastillaSenalGps ultima={vigilado.vistoEn} />
++                        ) : (
++                          <Pastilla tono="textSecondary" label="Sin señal todavía" />
++                        )}
++                      </View>
++                    </View>
++                  </Card>
++                }
++                onInstalar={(d) => void instalar(d)}
++                ocupado={ocupado}
++                error={errorAlta}
++              />
++              <Button label="Anterior" variant="secondary" onPress={() => irA(2)} disabled={ocupado} />
++            </>
++          ) : null}
++        </ScrollVisible>
++
++        <OptionPickerModal
++          visible={picker === 'marca'}
++          title="Marca del equipo"
++          options={MARCAS_GPS.map((m) => ({ id: m, label: m }))}
++          selectedIds={marca ? [marca] : []}
++          onChange={(ids) => {
++            const m = ids[0];
++            if (!m) return;
++            setMarca(m);
++            setModelo(modelosDe(m)[0] ?? '');
++          }}
++          onClose={() => setPicker(null)}
++        />
++        <OptionPickerModal
++          visible={picker === 'modelo'}
++          title="Modelo"
++          options={modelosDe(marca).map((m) => ({ id: m, label: m, helper: protocoloDe(marca, m) }))}
++          selectedIds={modelo ? [modelo] : []}
++          onChange={(ids) => ids[0] && setModelo(ids[0])}
++          onClose={() => setPicker(null)}
++        />
++      </SafeAreaView>
++    </ThemedView>
++  );
++}
++
++/** Una comprobación de la prueba: palomita verde si se cumple, círculo vacío si no. */
++function Chequeo({ listo, texto }: { listo: boolean; texto: string }) {
++  const { colors } = useTheme();
++  return (
++    <View style={styles.chequeo}>
++      <View
++        style={[
++          styles.marca,
++          { borderColor: listo ? colors.success : colors.borderStrong, backgroundColor: listo ? colors.success : 'transparent' },
++        ]}>
++        {listo ? <TabIcon name="check" color={colors.onSuccess} size={12} /> : null}
++      </View>
++      <ThemedText color={listo ? 'text' : 'textSecondary'}>{texto}</ThemedText>
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  root: { flex: 1 },
++  flex: { flex: 1, minWidth: 0 },
++  content: { width: '100%', maxWidth: 640, alignSelf: 'center', paddingBottom: 48 },
++  filaCentro: { flexDirection: 'row', alignItems: 'center', gap: 6 },
++  filaSuelta: { flexDirection: 'row', flexWrap: 'wrap' },
++  cardTitulo: { fontSize: 16, lineHeight: 22, fontWeight: '700' },
++  negrita: { fontWeight: '700' },
++  detectado: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
++  imeiGrande: { fontSize: 16, lineHeight: 22, fontWeight: '700' },
++  usar: { minHeight: 40, paddingVertical: 8, paddingHorizontal: 18 },
++  protocolo: { minHeight: 46, justifyContent: 'center', paddingHorizontal: 16, borderStyle: 'dashed' },
++  chipOperadora: { minHeight: 34, paddingVertical: 6, paddingHorizontal: 14 },
++  evidencia: { padding: 12, gap: 2 },
++  comando: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 12 },
++  numero: { width: 34, height: 30, alignItems: 'center', justifyContent: 'center' },
++  codigo: { paddingVertical: 8, paddingHorizontal: 10 },
++  chequeo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
++  marca: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
++});
+diff --git a/src/components/gps-instalar-form.tsx b/src/components/gps-instalar-form.tsx
+new file mode 100644
+index 0000000..576a93a
+--- /dev/null
++++ b/src/components/gps-instalar-form.tsx
+@@ -0,0 +1,299 @@
++import { useMemo, useState, type ReactNode } from 'react';
++import { StyleSheet, View } from 'react-native';
++
++import { Button } from '@/components/button';
++import { CampoFecha } from '@/components/campo-fecha';
++import { Card } from '@/components/card';
++import { AvisoServidor } from '@/components/gps-piezas';
++import { OptionPickerModal, PickerField } from '@/components/option-picker';
++import { PastillaFiltro } from '@/components/pastilla-filtro';
++import { PressableScale } from '@/components/pressable-scale';
++import { normalizar, SearchBar } from '@/components/search-bar';
++import { Skeleton } from '@/components/skeleton';
++import { TextField } from '@/components/text-field';
++import { ThemedText } from '@/components/themed-text';
++import { useAsyncData } from '@/hooks/use-async-data';
++import { finImei } from '@/lib/gps-alta';
++import { etiquetaCortaDeUnidad, identidadDeUnidad } from '@/lib/vehiculos';
++import { enteActivoFom, getEmpresasActivas, getUnidadesFlota } from '@/services';
++import { getEquiposGpsFom, type EquipoGps, type UnidadParaGps } from '@/services/fomGps';
++import { useTheme } from '@/theme';
++import type { UnidadFlota } from '@/types';
++import { TIPO_LABEL } from '@/utils/ente';
++
++/** Lo que se manda al instalar: la unidad y los datos de la instalación. */
++export interface DatosInstalacion {
++  unidad: UnidadParaGps;
++  /** Cómo se llama la unidad en pantalla («U-12»). */
++  nombreUnidad: string;
++  /** ISO 8601. */
++  instaladoEn: string;
++  tecnico: string;
++  ubicacion: string;
++  notas: string;
++}
++
++function hoyIso(): string {
++  const d = new Date();
++  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
++}
++
++/** La fecha elegida, como instante: hoy es «ahora»; otro día, su mediodía local. */
++function instante(fecha: string): string {
++  if (fecha === hoyIso()) return new Date().toISOString();
++  const [a, m, d] = fecha.split('-').map(Number);
++  return new Date(a, (m ?? 1) - 1, d ?? 1, 12, 0, 0).toISOString();
++}
++
++/**
++ * INSTALAR EN UNA UNIDAD (diseño GA4): empresa → unidad sin GPS → fecha,
++ * técnico y dónde va. Cada unidad lleva un solo GPS: las que ya tienen uno se
++ * ven, apagadas, para que nadie piense que faltan.
++ *
++ * `onInstalar` nulo = la app todavía no puede instalar ESTE equipo (el
++ * servidor no publica la ruta para la app): el formulario se ve igual y el
++ * botón dice por qué no.
++ */
++export function InstalarEnUnidadForm({
++  equipo,
++  empresaInicial,
++  onInstalar,
++  ocupado,
++  error,
++}: {
++  equipo: ReactNode;
++  empresaInicial?: string | null;
++  onInstalar: ((d: DatosInstalacion) => void) | null;
++  ocupado?: boolean;
++  error?: string | null;
++}) {
++  const { spacing, colors, radii, borderWidths } = useTheme();
++
++  const [empresaId, setEmpresaId] = useState<string | null>(empresaInicial ?? null);
++  const companyId = empresaId ?? enteActivoFom();
++  const [pickerEmpresa, setPickerEmpresa] = useState(false);
++  const [soloLibres, setSoloLibres] = useState(true);
++  const [q, setQ] = useState('');
++  const [unidadId, setUnidadId] = useState<string | null>(null);
++  const [fecha, setFecha] = useState(hoyIso());
++  const [tecnico, setTecnico] = useState('');
++  const [ubicacion, setUbicacion] = useState('');
++  const [notas, setNotas] = useState('');
++  const [aviso, setAviso] = useState<string | null>(null);
++
++  const { data: empresas, estado: estadoEmpresas } = useAsyncData(getEmpresasActivas, []);
++  // Las unidades de la empresa y qué GPS lleva cada una.
++  const { data, estado } = useAsyncData(
++    () =>
++      companyId
++        ? Promise.all([getUnidadesFlota(companyId), getEquiposGpsFom(companyId).catch(() => [] as EquipoGps[])])
++        : Promise.resolve([[], []] as [UnidadFlota[], EquipoGps[]]),
++    [companyId],
++  );
++  const [unidades, equipos] = data ?? [[], []];
++
++  const gpsDe = useMemo(() => {
++    const m = new Map<string, EquipoGps>();
++    for (const g of equipos) if (g.vehicleId) m.set(g.vehicleId, g);
++    return m;
++  }, [equipos]);
++
++  const libres = unidades.filter((u) => !gpsDe.has(u.vehicle.id));
++  const visibles = useMemo(() => {
++    const n = normalizar(q.trim());
++    return (soloLibres ? unidades.filter((u) => !gpsDe.has(u.vehicle.id)) : unidades).filter(
++      (u) =>
++        !n ||
++        normalizar(
++          [u.vehicle.numero, u.vehicle.placa, u.vehicle.marca, u.vehicle.modelo, u.conductorActual].filter(Boolean).join(' '),
++        ).includes(n),
++    );
++  }, [unidades, gpsDe, soloLibres, q]);
++
++  const empresa = (empresas ?? []).find((e) => e.id === companyId) ?? null;
++  const elegida = unidades.find((u) => u.vehicle.id === unidadId) ?? null;
++  const nombreElegida = elegida ? etiquetaCortaDeUnidad(elegida.vehicle) || 'la unidad' : null;
++
++  function instalar() {
++    setAviso(null);
++    if (!onInstalar) return;
++    if (!elegida || !companyId) {
++      setAviso('Elige la unidad donde va el equipo.');
++      return;
++    }
++    if (!fecha) {
++      setAviso('Pon la fecha de instalación.');
++      return;
++    }
++    onInstalar({
++      unidad: {
++        companyId,
++        codigo: elegida.vehicle.numero,
++        placa: elegida.vehicle.placa,
++        marca: elegida.vehicle.marca,
++        modelo: elegida.vehicle.modelo,
++        anio: elegida.vehicle.anio,
++      },
++      nombreUnidad: nombreElegida ?? 'la unidad',
++      instaladoEn: instante(fecha),
++      tecnico,
++      ubicacion,
++      notas,
++    });
++  }
++
++  return (
++    <View style={{ gap: spacing.lg }}>
++      {equipo}
++
++      <PickerField
++        label="Empresa"
++        value={
++          empresa?.name ??
++          (estadoEmpresas === 'cargando'
++            ? 'Cargando empresas…'
++            : estadoEmpresas === 'error'
++              ? 'No pudimos cargar las empresas'
++              : 'Elegir empresa…')
++        }
++        disabled={(empresas ?? []).length === 0}
++        onPress={() => setPickerEmpresa(true)}
++      />
++
++      <SearchBar value={q} onChangeText={setQ} placeholder="Número, placa o conductor…" />
++
++      <View style={[styles.fila, { gap: spacing.sm }]}>
++        <PastillaFiltro label="Sin GPS" cuenta={libres.length} activo={soloLibres} onPress={() => setSoloLibres(true)} />
++        <PastillaFiltro label="Todas" cuenta={unidades.length} activo={!soloLibres} onPress={() => setSoloLibres(false)} />
++      </View>
++
++      {estado === 'cargando' ? (
++        <View style={{ gap: spacing.sm }}>
++          <Skeleton height={60} radius={16} />
++          <Skeleton height={60} radius={16} />
++        </View>
++      ) : estado === 'error' ? (
++        <ThemedText variant="caption" color="danger">
++          No pudimos cargar las unidades de esta empresa.
++        </ThemedText>
++      ) : visibles.length === 0 ? (
++        <ThemedText variant="caption" color="textSecondary">
++          {unidades.length === 0 ? 'Esta empresa no tiene unidades.' : 'Ninguna unidad sin GPS coincide.'}
++        </ThemedText>
++      ) : (
++        <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
++          {visibles.map((u) => {
++            const lleva = gpsDe.get(u.vehicle.id);
++            const activa = u.vehicle.id === unidadId;
++            const ficha = [`${u.vehicle.marca} ${u.vehicle.modelo}`.trim(), u.vehicle.anio || null]
++              .filter(Boolean)
++              .join(' ');
++            const sub = lleva
++              ? `${ficha} · ya lleva el GPS ${finImei(lleva.imei)}`
++              : [ficha, u.conductorActual].filter(Boolean).join(' · ');
++            const titulo = identidadDeUnidad(u.vehicle) || 'Unidad';
++            return (
++              <PressableScale
++                key={u.vehicle.id}
++                disabled={!!lleva}
++                onPress={() => setUnidadId(u.vehicle.id)}
++                accessibilityRole="radio"
++                accessibilityState={{ checked: activa, disabled: !!lleva }}
++                accessibilityLabel={`${titulo}. ${sub}`}>
++                <View
++                  style={[
++                    styles.unidad,
++                    {
++                      borderRadius: radii.md,
++                      borderWidth: borderWidths.thin,
++                      borderColor: activa ? colors.activeBorder : colors.border,
++                      backgroundColor: activa ? colors.activeSurface : colors.surface,
++                      opacity: lleva ? 0.45 : 1,
++                    },
++                  ]}>
++                  <View
++                    style={[
++                      styles.radio,
++                      {
++                        borderColor: activa ? colors.primary : colors.borderStrong,
++                        backgroundColor: lleva ? colors.textMuted : colors.surfaceSunken,
++                      },
++                    ]}>
++                    {activa ? <View style={[styles.radioPunto, { backgroundColor: colors.primary }]} /> : null}
++                  </View>
++                  <View style={styles.flex}>
++                    <ThemedText style={styles.unidadTitulo} numberOfLines={1}>
++                      {titulo}
++                    </ThemedText>
++                    <ThemedText variant="caption" color="textSecondary" numberOfLines={1}>
++                      {sub}
++                    </ThemedText>
++                  </View>
++                </View>
++              </PressableScale>
++            );
++          })}
++        </View>
++      )}
++
++      <Card style={{ gap: spacing.md }}>
++        <ThemedText style={styles.cardTitulo}>Datos de la instalación</ThemedText>
++        <CampoFecha label="Fecha de instalación *" value={fecha} onChange={setFecha} soloPasado />
++        <TextField label="Técnico" value={tecnico} onChangeText={setTecnico} placeholder="Quién lo montó" maxLength={120} />
++        <TextField
++          label="Ubicación en la unidad"
++          value={ubicacion}
++          onChangeText={setUbicacion}
++          placeholder="Bajo el tablero, lado del copiloto"
++          maxLength={255}
++        />
++        <TextField label="Notas" value={notas} onChangeText={setNotas} placeholder="Opcional" maxLength={1000} multiline />
++      </Card>
++
++      {onInstalar ? null : <AvisoServidor titulo="Instalar un equipo del inventario desde la app" />}
++      {aviso || error ? (
++        <ThemedText variant="caption" color="danger" style={styles.centro}>
++          {aviso ?? error}
++        </ThemedText>
++      ) : null}
++
++      <Button
++        label={nombreElegida ? `Instalar en ${nombreElegida}` : 'Instalar en una unidad'}
++        icon="check"
++        onPress={instalar}
++        loading={ocupado}
++        disabled={!onInstalar || ocupado}
++      />
++      <ThemedText variant="caption" color="textMuted" style={styles.centro}>
++        Al desmontarlo, vuelve al inventario con su historial.
++      </ThemedText>
++
++      <OptionPickerModal
++        visible={pickerEmpresa}
++        title="¿De qué empresa?"
++        searchable
++        options={(empresas ?? []).map((e) => ({ id: e.id, label: e.name, helper: TIPO_LABEL[e.tipo ?? 'estandar'] }))}
++        selectedIds={companyId ? [companyId] : []}
++        onChange={(ids) => {
++          const id = ids[0];
++          if (!id) return;
++          setEmpresaId(id);
++          // La unidad elegida era de la otra empresa.
++          setUnidadId(null);
++        }}
++        onClose={() => setPickerEmpresa(false)}
++      />
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  flex: { flex: 1, minWidth: 0, gap: 2 },
++  fila: { flexDirection: 'row', flexWrap: 'wrap' },
++  unidad: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14 },
++  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
++  radioPunto: { width: 10, height: 10, borderRadius: 5 },
++  unidadTitulo: { fontSize: 15, lineHeight: 20, fontWeight: '700' },
++  cardTitulo: { fontSize: 16, lineHeight: 22, fontWeight: '700' },
++  centro: { textAlign: 'center' },
++});
+diff --git a/src/components/gps-piezas.tsx b/src/components/gps-piezas.tsx
+new file mode 100644
+index 0000000..e8a11d1
+--- /dev/null
++++ b/src/components/gps-piezas.tsx
+@@ -0,0 +1,242 @@
++import type { ReactNode } from 'react';
++import { StyleSheet, View } from 'react-native';
++
++import { Pastilla } from '@/components/pastilla';
++import { PressableScale } from '@/components/pressable-scale';
++import { TabIcon, type TabIconName } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import { useSegundero } from '@/components/texto-vivo';
++import { conSenal, textoSenalGps } from '@/lib/gps-alta';
++import { tinte } from '@/lib/color';
++import type { MomentoReporte } from '@/lib/sin-senal';
++import { useTheme, type ColorTokens } from '@/theme';
++
++/**
++ * PIEZAS DEL PANEL DE GPS (Inventario, Nuevo GPS, Instalar y Detalle).
++ *
++ * Viven juntas porque las cuatro pantallas las repiten: el cuadro con el
++ * ícono, la pastilla de señal que corre sola, el título grande y el aviso de
++ * lo que espera al servidor. Una copia por pantalla acaba diciendo la señal de
++ * cuatro maneras.
++ */
++
++/** El cuadro teñido con el glifo del equipo, a la izquierda de cada fila. */
++export function IconoGps({ tono = 'primary', icono = 'mira', tamano = 44 }: { tono?: keyof ColorTokens; icono?: TabIconName; tamano?: number }) {
++  const { colors, radii } = useTheme();
++  return (
++    <View
++      style={[
++        styles.icono,
++        { width: tamano, height: tamano, borderRadius: radii.md - 2, backgroundColor: tinte(colors[tono], 0.12) },
++      ]}>
++      <TabIcon name={icono} color={colors[tono]} size={Math.round(tamano * 0.45)} />
++    </View>
++  );
++}
++
++/**
++ * «Con señal · hace 40 s» / «Sin señal · hace 3 h», corriendo de segundo en
++ * segundo. Un equipo que no está instalado no tiene por qué transmitir: si
++ * calla, dice «En inventario» y no se pinta de rojo.
++ */
++export function PastillaSenalGps({ ultima, instalado = true }: { ultima: MomentoReporte; instalado?: boolean }) {
++  const ahora = useSegundero();
++  const vivo = conSenal(ultima, ahora);
++  if (!instalado && !vivo) return <Pastilla tono="info" label="En inventario" />;
++  return <Pastilla tono={vivo ? 'success' : 'danger'} label={textoSenalGps(ultima, ahora)} conPunto />;
++}
++
++/** El título grande de la pantalla y su bajada, dentro del scroll. */
++export function TituloGps({ titulo, bajada }: { titulo: string; bajada?: string }) {
++  return (
++    <View style={styles.cabecera}>
++      <ThemedText accessibilityRole="header" style={styles.titulo}>
++        {titulo}
++      </ThemedText>
++      {bajada ? (
++        <ThemedText color="textSecondary" style={styles.bajada}>
++          {bajada}
++        </ThemedText>
++      ) : null}
++    </View>
++  );
++}
++
++/**
++ * Una pieza que el servidor todavía no publica para la app. Se enseña dónde
++ * irá —sin datos inventados— para que nadie la busque en otra parte.
++ */
++export function AvisoServidor({ titulo, texto = 'Disponible cuando el servidor lo publique' }: { titulo?: string; texto?: string }) {
++  const { colors, radii, borderWidths } = useTheme();
++  return (
++    <View
++      style={[
++        styles.aviso,
++        { borderRadius: radii.md, borderWidth: borderWidths.thin, borderColor: colors.border, borderStyle: 'dashed' },
++      ]}>
++      <View style={[styles.puntoAviso, { backgroundColor: colors.textMuted }]} />
++      <View style={styles.flex}>
++        {titulo ? (
++          <ThemedText style={styles.avisoTitulo} numberOfLines={2}>
++            {titulo}
++          </ThemedText>
++        ) : null}
++        <ThemedText variant="caption" color="textSecondary">
++          {texto}
++        </ThemedText>
++      </View>
++    </View>
++  );
++}
++
++/** «PASO 1 DE 3» y las tres rayas: hecho en verde, el actual en azul. */
++export function PasosGps({ paso, nombres }: { paso: number; nombres: string[] }) {
++  const { colors } = useTheme();
++  // En el primero se ven los tres nombres —es el mapa del camino—; después, el de ahora.
++  const derecha = paso === 0 ? nombres.join(' · ') : nombres[paso];
++  return (
++    <View style={styles.pasos}>
++      <View style={styles.pasosFila}>
++        <ThemedText style={[styles.pasoCeja, { color: colors.textSecondary }]}>
++          {`PASO ${paso + 1} DE ${nombres.length}`}
++        </ThemedText>
++        <ThemedText variant="caption" color="textSecondary" numberOfLines={1} style={styles.pasoNombre}>
++          {derecha}
++        </ThemedText>
++      </View>
++      <View style={styles.rayas}>
++        {nombres.map((n, i) => (
++          <View
++            key={n}
++            style={[
++              styles.raya,
++              { backgroundColor: i < paso ? colors.success : i === paso ? colors.primary : colors.border },
++            ]}
++          />
++        ))}
++      </View>
++    </View>
++  );
++}
++
++/** Fila de lista con el cuadro, dos líneas, algo debajo y el chevron. */
++export function FilaGps({
++  titulo,
++  sub,
++  pie,
++  icono,
++  onPress,
++  etiqueta,
++  primera,
++}: {
++  titulo: string;
++  sub?: string;
++  pie?: ReactNode;
++  icono?: ReactNode;
++  onPress?: () => void;
++  etiqueta?: string;
++  primera?: boolean;
++}) {
++  const { colors, borderWidths } = useTheme();
++  const cuerpo = (
++    <View
++      style={[
++        styles.fila,
++        !primera && { borderTopWidth: borderWidths.hairline, borderTopColor: colors.border },
++      ]}>
++      {icono ?? <IconoGps />}
++      <View style={[styles.flex, styles.filaTextos]}>
++        <ThemedText style={styles.filaTitulo} numberOfLines={1}>
++          {titulo}
++        </ThemedText>
++        {sub ? (
++          <ThemedText variant="mono" color="textSecondary" style={styles.filaSub} numberOfLines={1}>
++            {sub}
++          </ThemedText>
++        ) : null}
++        {pie ? <View style={styles.filaPie}>{pie}</View> : null}
++      </View>
++      {onPress ? <TabIcon name="chevron" color={colors.textMuted} size={18} /> : null}
++    </View>
++  );
++  if (!onPress) return cuerpo;
++  return (
++    <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={etiqueta ?? titulo}>
++      {cuerpo}
++    </PressableScale>
++  );
++}
++
++/** Fila «etiqueta ……… valor» de una ficha. */
++export function DatoGps({ label, valor, mono, primera }: { label: string; valor: string; mono?: boolean; primera?: boolean }) {
++  const { colors, borderWidths } = useTheme();
++  return (
++    <View
++      style={[
++        styles.dato,
++        !primera && { borderTopWidth: borderWidths.hairline, borderTopColor: colors.border },
++      ]}>
++      <ThemedText variant="caption" color="textSecondary">
++        {label}
++      </ThemedText>
++      <ThemedText
++        variant={mono ? 'mono' : 'caption'}
++        style={[styles.datoValor, !mono && styles.negrita]}
++        numberOfLines={2}
++        selectable>
++        {valor || '—'}
++      </ThemedText>
++    </View>
++  );
++}
++
++/** Botón redondo de un ícono (abrir Mensajes, refrescar). */
++export function BotonRedondoGps({ icono, etiqueta, onPress, disabled }: { icono: TabIconName; etiqueta: string; onPress: () => void; disabled?: boolean }) {
++  const { colors, radii, borderWidths } = useTheme();
++  return (
++    <PressableScale
++      onPress={onPress}
++      disabled={disabled}
++      hitSlop={6}
++      accessibilityRole="button"
++      accessibilityLabel={etiqueta}
++      style={[
++        styles.redondo,
++        {
++          borderRadius: radii.pill,
++          backgroundColor: colors.surfaceElevated,
++          borderColor: colors.border,
++          borderWidth: borderWidths.thin,
++          opacity: disabled ? 0.5 : 1,
++        },
++      ]}>
++      <TabIcon name={icono} color={colors.text} size={18} />
++    </PressableScale>
++  );
++}
++
++const styles = StyleSheet.create({
++  flex: { flex: 1, minWidth: 0 },
++  icono: { alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
++  cabecera: { gap: 6 },
++  titulo: { fontSize: 28, lineHeight: 32, fontWeight: '700', letterSpacing: -0.8 },
++  bajada: { fontSize: 14, lineHeight: 20 },
++  aviso: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 14 },
++  puntoAviso: { width: 8, height: 8, borderRadius: 4 },
++  avisoTitulo: { fontSize: 14, lineHeight: 19, fontWeight: '600' },
++  pasos: { gap: 8 },
++  pasosFila: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
++  pasoCeja: { fontSize: 10, lineHeight: 13, fontWeight: '600', letterSpacing: 1.4 },
++  pasoNombre: { flexShrink: 1, textAlign: 'right' },
++  rayas: { flexDirection: 'row', gap: 6 },
++  raya: { flex: 1, height: 3, borderRadius: 2 },
++  fila: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
++  filaTextos: { gap: 3 },
++  filaTitulo: { fontSize: 15, lineHeight: 20, fontWeight: '700' },
++  filaSub: { fontSize: 12, lineHeight: 16 },
++  filaPie: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 3 },
++  dato: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingVertical: 11 },
++  datoValor: { flexShrink: 1, textAlign: 'right' },
++  negrita: { fontWeight: '600' },
++  redondo: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
++});
+diff --git a/src/lib/gps-alta.ts b/src/lib/gps-alta.ts
+new file mode 100644
+index 0000000..e68ad84
+--- /dev/null
++++ b/src/lib/gps-alta.ts
+@@ -0,0 +1,240 @@
++/**
++ * GPS — lo que el panel de equipos calcula sin preguntarle a nadie.
++ *
++ * El catálogo de modelos, los comandos SMS que dejan un equipo apuntando al
++ * receptor de FOM, cómo se dice la señal de un equipo y cuánto vale su
++ * recepción. Copia de lo que hace la consola GPS de fom-core
++ * (`apps/gps-web`), con los mismos números: el admin que mira la web y el que
++ * mira la app tienen que leer lo mismo del mismo equipo.
++ *
++ * Funciones puras salvo `abrirSms`, que abre la app de Mensajes.
++ */
++
++import { Linking, Platform } from 'react-native';
++
++import { msSinReportar, textoSinSenal, tiempoSinSenal, type MomentoReporte } from '@/lib/sin-senal';
++
++/** Un equipo transmite si su última trama llegó en los últimos 300 s (la regla de fom-core). */
++export const SENAL_VIGENTE_MS = 300_000;
++
++/**
++ * Marca → modelo → protocolo. Hoy FOM solo decodifica el Coban GPS-403; el
++ * protocolo lo pone el modelo, nunca se escribe a mano.
++ */
++export const CATALOGO_GPS: Record<string, Record<string, { protocolo: string }>> = {
++  Coban: { 'GPS-403': { protocolo: 'Coban GPS103' } },
++};
++
++export const MARCAS_GPS = Object.keys(CATALOGO_GPS);
++
++export function modelosDe(marca: string): string[] {
++  return Object.keys(CATALOGO_GPS[marca] ?? {});
++}
++
++export function protocoloDe(marca: string, modelo: string): string {
++  return CATALOGO_GPS[marca]?.[modelo]?.protocolo ?? '';
++}
++
++/**
++ * Dónde escucha el receptor de FOM. Es la misma dirección que fom-core escribe
++ * en cada equipo al darlo de alta (`server_host`, `server_port`); se puede
++ * cambiar sin tocar código con `EXPO_PUBLIC_GPS_RECEPTOR` («host puerto»).
++ */
++const RECEPTOR = (process.env.EXPO_PUBLIC_GPS_RECEPTOR ?? '51.81.195.12 5001').trim().split(/\s+/u);
++export const RECEPTOR_HOST = RECEPTOR[0] ?? '';
++export const RECEPTOR_PUERTO = RECEPTOR[1] ?? '5001';
++
++/** La clave de fábrica de los Coban; la usa la consola de fom-core si no se escribe otra. */
++export const CLAVE_FABRICA = '123456';
++
++/** Operadoras de Venezuela y su APN de datos: elegir una llena el APN si está vacío. */
++export const OPERADORAS: { nombre: string; apn: string }[] = [
++  { nombre: 'Movistar', apn: 'internet.movistar.ve' },
++  { nombre: 'Digitel', apn: 'gprsweb.digitel.ve' },
++  { nombre: 'Movilnet', apn: 'int.movilnet.com.ve' },
++];
++
++export type EstadoSim = 'active' | 'inactive' | 'suspended' | 'unknown';
++
++export const ESTADOS_SIM: { value: EstadoSim; label: string }[] = [
++  { value: 'active', label: 'Activa' },
++  { value: 'inactive', label: 'Inactiva' },
++  { value: 'suspended', label: 'Suspendida' },
++  { value: 'unknown', label: 'No sé' },
++];
++
++export interface ComandoSms {
++  titulo: string;
++  /** Lo que se manda de verdad, con la clave. */
++  texto: string;
++  /** Lo que se enseña: la clave tapada con puntos. */
++  visible: string;
++  /** Qué debe contestar el equipo. */
++  respuesta: string;
++}
++
++/**
++ * Los cinco comandos de la consola de fom-core, en su orden. La clave solo
++ * vive aquí, en memoria, para armarlos: no se guarda ni viaja al servidor.
++ */
++export function comandosSms(clave: string, apn: string, transporte: 'tcp' | 'udp'): ComandoSms[] {
++  const c = clave.trim() || CLAVE_FABRICA;
++  const tapada = '·'.repeat(c.length);
++  const udp = transporte === 'udp';
++  const armar = (titulo: string, cuerpo: (k: string) => string, respuesta: string): ComandoSms => ({
++    titulo,
++    texto: cuerpo(c),
++    visible: cuerpo(tapada),
++    respuesta,
++  });
++  return [
++    armar('Poner el APN', (k) => `APN${k} ${apn.trim()}`, 'Responde: APN OK'),
++    armar(
++      'Apuntar al receptor FOM',
++      (k) => `adminip${k} ${RECEPTOR_HOST} ${RECEPTOR_PUERTO}`,
++      'Guarda la dirección y el puerto',
++    ),
++    armar(udp ? 'Encender datos por UDP' : 'Encender datos por TCP', (k) => `GPRS${k},${udp ? '1,1' : '0,0'}`, 'Responde: GPRS OK'),
++    armar('Comprobar', (k) => `check${k}`, `Debe decir GPRS ON y PORT ${RECEPTOR_PUERTO}`),
++    armar('Pedir el IMEI (opcional)', (k) => `imei${k}`, 'Si no responde, FOM lo toma de la señal'),
++  ];
++}
++
++/**
++ * Abre Mensajes con el número y el texto puestos; el envío lo decide quien
++ * toca «Enviar». iOS separa el cuerpo con `&` y Android con `?`.
++ */
++export async function abrirSms(telefono: string, texto: string): Promise<boolean> {
++  const numero = telefono.replace(/[^\d+]/gu, '');
++  const sep = Platform.OS === 'ios' ? '&' : '?';
++  try {
++    await Linking.openURL(`sms:${numero}${sep}body=${encodeURIComponent(texto)}`);
++    return true;
++  } catch {
++    return false;
++  }
++}
++
++/** ¿La última trama es de los últimos 5 minutos? */
++export function conSenal(ultima: MomentoReporte, ahora: number = Date.now()): boolean {
++  return msSinReportar(ultima, ahora) <= SENAL_VIGENTE_MS;
++}
++
++/**
++ * «hace 40 s» por debajo del minuto —en una prueba de señal cuentan los
++ * segundos—; de ahí en adelante, lo mismo que dice el resto de la app.
++ */
++export function haceSenal(ultima: MomentoReporte, ahora: number = Date.now()): string {
++  const ms = msSinReportar(ultima, ahora);
++  if (ms < 60_000) return `hace ${Math.max(0, Math.floor(ms / 1000))} s`;
++  return tiempoSinSenal(ultima, ahora);
++}
++
++/** «Con señal · hace 40 s» / «Sin señal · hace 3 h» / «Sin señal · nunca reportó». */
++export function textoSenalGps(ultima: MomentoReporte, ahora: number = Date.now()): string {
++  return conSenal(ultima, ahora) ? `Con señal · ${haceSenal(ultima, ahora)}` : textoSinSenal(ultima, ahora);
++}
++
++/** «…7290»: los cuatro últimos del IMEI, lo que se lee en una lista. */
++export function finImei(imei: string): string {
++  return imei ? `…${imei.slice(-4)}` : '';
++}
++
++/** «10:42:18» */
++export function horaSegundos(iso: string): string {
++  const d = new Date(iso);
++  if (!Number.isFinite(d.getTime())) return '—';
++  return [d.getHours(), d.getMinutes(), d.getSeconds()].map((n) => String(n).padStart(2, '0')).join(':');
++}
++
++/**
++ * Qué fue una trama, en llano. El servidor la describe como
++ * «protocolo · resultado · error»; aquí manda el resultado.
++ */
++export function tramaEnLlano(diagnostico: string): string {
++  const d = diagnostico.toLowerCase();
++  if (d.includes('position_valid')) return 'Posición válida';
++  if (d.includes('position_invalid')) return 'Posición sin fijar';
++  if (d.includes('heartbeat')) return 'Latido del equipo';
++  if (d.includes('unknown_device')) return 'Equipo no registrado';
++  if (d.includes('malformed') || d.includes('unsupported')) return 'Trama que FOM no entiende';
++  return diagnostico || 'Trama recibida';
++}
++
++export interface CalidadRecepcion {
++  /** 0–100. */
++  puntaje: number;
++  nivel: 'Muy buena' | 'Aceptable' | 'Deficiente';
++  tono: 'success' | 'warning' | 'danger';
++  mensajesHora: number;
++  /** Segundos promedio entre tramas; 0 si hay menos de dos. */
++  cadaSeg: number;
++  muestras: number;
++  /** % de tramas con el IMEI del equipo. */
++  imeiCoincide: number;
++}
++
++/**
++ * La calidad de recepción con la fórmula de la consola de fom-core: frescura
++ * (45), identidad (35) y regularidad (20). Se mide sobre las tramas que haya;
++ * sin señal ahora, la de la consola da 0 — aquí se mide igual para enseñar
++ * cómo recibía «antes del corte».
++ *
++ * La telemetría de la app solo trae tramas que ya coinciden con el IMEI del
++ * equipo (así las busca el servidor), de ahí el 100 % de identidad.
++ */
++export function calidadRecepcion(
++  tramas: { recibidaEn: string }[],
++  ahora: number = Date.now(),
++  antesDelCorte = false,
++): CalidadRecepcion {
++  const tiempos = tramas
++    .map((t) => new Date(t.recibidaEn).getTime())
++    .filter(Number.isFinite)
++    .sort((a, b) => b - a);
++  const intervalos = tiempos
++    .slice(0, -1)
++    .map((t, i) => Math.abs(t - tiempos[i + 1]) / 1000)
++    .filter((v) => v > 0);
++  const cadaSeg = intervalos.length ? intervalos.reduce((s, v) => s + v, 0) / intervalos.length : 0;
++  const referencia = antesDelCorte ? (tiempos[0] ?? ahora) : ahora;
++  const edadSeg = tiempos.length ? Math.max(0, (referencia - tiempos[0]) / 1000) : Infinity;
++  const coincide = tiempos.length ? 1 : 0;
++  const lapsoH = tiempos.length > 1 ? Math.max((tiempos[0] - tiempos[tiempos.length - 1]) / 3_600_000, 1 / 60) : 0;
++  const mensajesHora = lapsoH ? Math.round(tiempos.length / lapsoH) : tiempos.length;
++  const frescura = edadSeg <= 90 ? 45 : edadSeg <= SENAL_VIGENTE_MS / 1000 ? 25 : 0;
++  const identidad = Math.round(coincide * 35);
++  const regularidad = cadaSeg > 0 && cadaSeg <= 120 ? 20 : cadaSeg <= 300 ? 10 : 0;
++  const puntaje = tiempos.length ? Math.min(100, frescura + identidad + regularidad) : 0;
++  return {
++    puntaje,
++    nivel: puntaje >= 80 ? 'Muy buena' : puntaje >= 55 ? 'Aceptable' : 'Deficiente',
++    tono: puntaje >= 80 ? 'success' : puntaje >= 55 ? 'warning' : 'danger',
++    mensajesHora,
++    cadaSeg,
++    muestras: tiempos.length,
++    imeiCoincide: Math.round(coincide * 100),
++  };
++}
++
++/** Lo que el servidor llama `status` del equipo, en llano. */
++export function estadoEquipoEnLlano(
++  estado: string,
++  instalado: boolean,
++): { label: string; tono: 'success' | 'info' | 'warning' | 'danger' | 'textSecondary' } {
++  switch (estado) {
++    case 'active':
++      return { label: 'Activo', tono: 'success' };
++    case 'inventory':
++      // Instalado y sin la prueba aprobada, el servidor lo sigue llamando inventario.
++      return instalado ? { label: 'Por activar', tono: 'warning' } : { label: 'En inventario', tono: 'info' };
++    case 'maintenance':
++      return { label: 'En reparación', tono: 'warning' };
++    case 'lost':
++      return { label: 'Perdido', tono: 'danger' };
++    case 'inactive':
++      return { label: 'Inactivo', tono: 'textSecondary' };
++    default:
++      return { label: estado || 'Sin estado', tono: 'textSecondary' };
++  }
++}
+diff --git a/src/services/fomGps.ts b/src/services/fomGps.ts
+index 3aafe1b..45c958b 100644
+--- a/src/services/fomGps.ts
++++ b/src/services/fomGps.ts
+@@ -31,6 +31,7 @@ interface FomGpsDevice {
+   protocolFamily: string;
+   transport: string;
+   status: string;
++  storageLocation?: string | null;
+   lastConnectionAt: string | null;
+   connected: boolean;
+   vehicleId: string | null;
+@@ -53,6 +54,8 @@ export interface EquipoGps {
+   protocolo: string;
+   transporte: 'tcp' | 'udp';
+   estado: string;
++  /** Dónde se guarda mientras no está instalado. */
++  deposito: string | null;
+   conectado: boolean;
+   ultimaConexion: string | null;
+   /** A qué unidad está instalado; `null` si está en depósito. */
+@@ -76,6 +79,7 @@ function aEquipo(d: FomGpsDevice): EquipoGps {
+     protocolo: d.protocolFamily ?? '',
+     transporte: d.transport === 'udp' ? 'udp' : 'tcp',
+     estado: d.status,
++    deposito: d.storageLocation ?? null,
+     conectado: d.connected,
+     ultimaConexion: d.lastConnectionAt,
+     vehicleId: d.vehicleId,
+@@ -140,8 +144,23 @@ export interface UnidadParaGps {
+  * se negaba a salir del ente de la sesión; ya no hace falta: fom-core publica
+  * `POST /tenants/{id}/gps-devices`, que es esta misma alta en su sitio.
+  */
+-export async function registrarGpsEnUnidadFom(input: RegistrarGpsInput, unidad: UnidadParaGps): Promise<Gps> {
++export async function registrarGpsEnUnidadFom(
++  input: RegistrarGpsInput,
++  unidad: UnidadParaGps,
++  extra: ExtraAltaGps = {},
++): Promise<Gps> {
+   const cuerpo = {
++    // Lo opcional solo viaja si se escribió: el servidor guardaría el vacío como dato.
++    ...soloConValor({
++      serialNumber: extra.serie,
++      firmwareVersion: extra.firmware,
++      simPlan: extra.planSim,
++      installedAt: extra.instaladoEn,
++      technician: extra.tecnico,
++      installationLocation: extra.ubicacion,
++      notes: extra.notas,
++    }),
++    ...(extra.estadoSim ? { simStatus: extra.estadoSim } : {}),
+     imei: input.imei.trim(),
+     simPhone: input.linea.trim(),
+     iccid: input.iccid.trim(),
+@@ -196,6 +215,28 @@ export async function registrarGpsEnUnidadFom(input: RegistrarGpsInput, unidad:
+   }
+ }
+ 
++/** Lo opcional del alta: equipo, SIM y la instalación (fecha, técnico, dónde). */
++export interface ExtraAltaGps {
++  serie?: string;
++  firmware?: string;
++  estadoSim?: 'active' | 'inactive' | 'suspended' | 'unknown';
++  planSim?: string;
++  /** ISO 8601 (fecha, o fecha y hora). */
++  instaladoEn?: string;
++  tecnico?: string;
++  ubicacion?: string;
++  notas?: string;
++}
++
++function soloConValor(campos: Record<string, string | undefined>): Record<string, string> {
++  const salida: Record<string, string> = {};
++  for (const [k, v] of Object.entries(campos)) {
++    const t = v?.trim();
++    if (t) salida[k] = t;
++  }
++  return salida;
++}
++
+ /** Lo que dijo FOM al verificar un equipo. */
+ export interface VerificacionGps {
+   ok: boolean;
+@@ -240,3 +281,221 @@ export async function verificarGpsFom(deviceId: string, companyId?: string | nul
+     throw new Error(mensajeDe(e));
+   }
+ }
++
++// ─────────────────────────── Panel de GPS (T-96) ───────────────────────────
++/*
++ * La consola web habla con `/api/v1/console/gps-*`, que solo acepta la cookie
++ * de sesión del navegador (`ConsoleSessionGuard`): la app no puede usarla. Aquí
++ * van las equivalentes de `/api/v1/mobile`, que aceptan el token de la app.
++ * Lo que mobile todavía NO publica está en `GPS_SIN_RUTA_EN_APP`, y su pieza
++ * se enseña con «Disponible cuando el servidor lo publique».
++ */
++
++/** Piezas del panel que esperan una ruta de mobile en fom-core. */
++export const GPS_SIN_RUTA_EN_APP = {
++  altaSinUnidad: 'POST /api/v1/mobile/gps-devices sin unidad (hoy exige vehicleCode e instala de una vez)',
++  instalar: 'POST /api/v1/mobile/gps-devices/:id/installation',
++  desmontar: 'PATCH /api/v1/mobile/gps-installations/:id/remove',
++  receptor: 'Estado del receptor (receiver-status)',
++  historial: 'Historial de instalaciones de un equipo',
++  huella: 'sha256 de cada trama en GET /api/v1/mobile/gps-devices/:id/telemetry',
++} as const;
++
++/** Un equipo del inventario con la empresa donde está. */
++export interface EquipoGpsEnEmpresa extends EquipoGps {
++  companyId: string;
++  empresa: string;
++}
++
++/**
++ * Los equipos de VARIAS empresas, juntos: el inventario del admin FOM es de
++ * todo el sistema. Una empresa que no responde no tumba la lista; si no
++ * responde ninguna, se lanza el primer error para que la pantalla lo cuente.
++ */
++export async function getInventarioGpsFom(empresas: { id: string; name: string }[]): Promise<EquipoGpsEnEmpresa[]> {
++  const resultados = await Promise.allSettled(
++    empresas.map(async (e) => (await getEquiposGpsFom(e.id)).map((g) => ({ ...g, companyId: e.id, empresa: e.name }))),
++  );
++  const buenos: EquipoGpsEnEmpresa[][] = [];
++  let primerError: unknown = null;
++  for (const r of resultados) {
++    if (r.status === 'fulfilled') buenos.push(r.value);
++    else primerError ??= r.reason;
++  }
++  if (empresas.length > 0 && buenos.length === 0) throw primerError;
++  return buenos.flat();
++}
++
++/** Un equipo, por su id, en su empresa. */
++export async function getEquipoGpsFom(deviceId: string, companyId?: string | null): Promise<EquipoGps> {
++  const datos = (await pedir(rutaDeEnte(`/gps-devices/${deviceId}`, companyId), { fresco: true })) as {
++    device: FomGpsDevice;
++  };
++  return aEquipo(datos.device);
++}
++
++/** Una trama guardada tal cual llegó. */
++export interface TramaGps {
++  id: number;
++  recibidaEn: string;
++  transporte: string;
++  bytes: number;
++  diagnostico: string;
++  fresca: boolean;
++}
++
++export interface TelemetriaGps {
++  conectado: boolean;
++  imei: string;
++  ultimaTrama: string | null;
++  /** Cuántos segundos cuenta FOM como «señal reciente» (hoy, 300). */
++  frescuraSeg: number;
++  tramas: TramaGps[];
++}
++
++/** Las últimas tramas del equipo. Siempre fresca: durante la prueba se pide cada 10 s. */
++export async function getTelemetriaGpsFom(deviceId: string, companyId?: string | null, limite = 50): Promise<TelemetriaGps> {
++  const d = (await pedir(rutaDeEnte(`/gps-devices/${deviceId}/telemetry?limit=${limite}`, companyId), {
++    fresco: true,
++    fondo: true,
++  })) as {
++    connected: boolean;
++    imei: string;
++    lastReceivedAt: string | null;
++    freshnessSeconds: number;
++    messages?: { id: number; receivedAt: string; transport: string; bytes: number; diagnostic: string; isFresh: boolean }[];
++  };
++  return {
++    conectado: d.connected,
++    imei: d.imei,
++    ultimaTrama: d.lastReceivedAt,
++    frescuraSeg: d.freshnessSeconds ?? 300,
++    tramas: (d.messages ?? []).map((m) => ({
++      id: m.id,
++      recibidaEn: m.receivedAt,
++      transporte: m.transport,
++      bytes: m.bytes,
++      diagnostico: m.diagnostic ?? '',
++      fresca: m.isFresh,
++    })),
++  };
++}
++
++/** Un IMEI que ya le habla al receptor y no está en ninguna empresa. */
++export interface GpsSinRegistrar {
++  imei: string;
++  transporte: 'tcp' | 'udp';
++  primeraVez: string;
++  vistoEn: string;
++  mensajes: number;
++  bytesUltimo: number;
++  reportando: boolean;
++}
++
++/**
++ * La bandeja global de «detectados sin registrar». Solo la abre el admin FOM:
++ * a los demás el servidor les dice 403, y eso se deja subir para que la
++ * pantalla esconda la pieza en vez de enseñarla vacía.
++ */
++export async function getGpsSinRegistrarFom(): Promise<GpsSinRegistrar[]> {
++  const d = (await pedir(`${RUTA}/unpaired`, { fresco: true, fondo: true })) as {
++    devices?: {
++      observedImei: string;
++      firstSeenAt: string;
++      lastSeenAt: string;
++      messageCount: number;
++      transport: string;
++      lastMessageBytes: number;
++      isReporting: boolean;
++    }[];
++  };
++  return (d.devices ?? [])
++    .map(
++      (x): GpsSinRegistrar => ({
++        imei: x.observedImei,
++        transporte: x.transport === 'udp' ? 'udp' : 'tcp',
++        primeraVez: x.firstSeenAt,
++        vistoEn: x.lastSeenAt,
++        mensajes: Number(x.messageCount) || 0,
++        bytesUltimo: Number(x.lastMessageBytes) || 0,
++        reportando: !!x.isReporting,
++      }),
++    )
++    .sort((a, b) => Date.parse(b.vistoEn) - Date.parse(a.vistoEn));
++}
++
++/** Lo que se puede corregir de un equipo. El IMEI no: es su identidad. */
++export interface CambiosGps {
++  linea?: string;
++  iccid?: string;
++  operadora?: string;
++  apn?: string;
++  transporte?: 'tcp' | 'udp';
++}
++
++export async function actualizarGpsFom(deviceId: string, companyId: string | null | undefined, c: CambiosGps): Promise<void> {
++  const cuerpo = {
++    ...soloConValor({ simPhone: c.linea, carrier: c.operadora, apn: c.apn }),
++    ...(c.iccid?.trim() ? { iccid: c.iccid.replace(/\D/gu, '') } : {}),
++    ...(c.transporte ? { transport: c.transporte } : {}),
++  };
++  try {
++    await pedir(rutaDeEnte(`/gps-devices/${deviceId}`, companyId), { metodo: 'PATCH', cuerpo });
++  } catch (e) {
++    if (e instanceof ErrorFom && e.statusCode === 409) throw new Error('Ese ICCID ya lo tiene otro equipo.');
++    if (e instanceof ErrorFom && e.statusCode === 400) throw new Error('Revisa los datos: alguno no tiene el formato correcto.');
++    throw new Error(mensajeDe(e));
++  }
++}
++
++/**
++ * Abre (o retoma) la prueba de un equipo INSTALADO y devuelve el id de esa
++ * prueba, que se cierra con `cerrarPruebaGpsFom`.
++ */
++export async function abrirPruebaGpsFom(deviceId: string, companyId?: string | null): Promise<string> {
++  try {
++    const sesion = (await pedir(rutaDeEnte(`/gps-devices/${deviceId}/commissioning`, companyId), {
++      metodo: 'POST',
++    })) as { id: string };
++    return sesion.id;
++  } catch (e) {
++    if (e instanceof ErrorFom && e.statusCode === 404) {
++      throw new Error('Para probarlo, el equipo tiene que estar instalado en una unidad.');
++    }
++    throw new Error(mensajeDe(e));
++  }
++}
++
++/**
++ * Cierra la prueba: aprobada (FOM solo la acepta si le llegó una trama de ese
++ * IMEI en los últimos 300 s) o fallida.
++ */
++export async function cerrarPruebaGpsFom(
++  sessionId: string,
++  companyId: string | null | undefined,
++  resultado: 'passed' | 'failed',
++): Promise<VerificacionGps> {
++  // La de otro ente cuelga de él y allá se llama `gps-commissioning`.
++  const ajeno = !!companyId && companyId !== enteActivoFom();
++  const ruta = ajeno
++    ? `/api/v1/mobile/tenants/${companyId}/gps-commissioning/${sessionId}/complete`
++    : `/api/v1/mobile/commissioning/${sessionId}/complete`;
++  try {
++    await pedir(ruta, {
++      metodo: 'POST',
++      cuerpo: resultado === 'passed' ? { status: 'passed' } : { status: 'failed', failureCode: 'prueba_fallida' },
++    });
++    return resultado === 'passed'
++      ? { ok: true, detalle: 'El equipo transmite y quedó activo.' }
++      : { ok: false, detalle: 'La prueba quedó marcada como fallida.', codigoFallo: 'prueba_fallida' };
++  } catch (e) {
++    if (e instanceof ErrorFom && e.statusCode === 409 && /telemetry/i.test(e.message)) {
++      return {
++        ok: false,
++        detalle: 'FOM no ha recibido una trama de este equipo en los últimos 5 minutos.',
++        codigoFallo: 'sin_telemetria',
++      };
++    }
++    throw new Error(mensajeDe(e));
++  }
++}
 -- 
 2.55.0.windows.3
 
