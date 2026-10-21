@@ -74,6 +74,8 @@ export function leerEstres() {
 
 /** La semilla que usa el panel: la de siempre, o la flota de estrés si está encendida. */
 export function semillaActiva(base) {
+  // Conectado a un servidor real (la web publicada) nunca se enciende, ni con `?estres=1`.
+  if (import.meta.env?.VITE_FOM_API) return base
   const n = leerEstres()
   return n ? crearSemillaEstres(base, { vehiculos: n }) : base
 }
