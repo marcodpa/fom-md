@@ -128,3 +128,41 @@ test('demo: el conductor de prueba tiene órdenes asignadas y las puede trabajar
   // El supervisor de prueba no tiene ninguna: la sección no aparece.
   assert.deepEqual(await m.listarAsignadas({odts:[], perfil:{id:'usr-001',rol:'supervisor'}}), [])
 })
+
+// T-78: en Mantenimiento las órdenes van siempre de la más nueva a la más vieja (por cuándo se reportaron).
+test('masNuevasPrimero: de la más nueva a la más vieja, sin fecha al final y sin tocar la lista original', async () => {
+  const m = await cargar(false)
+  const lista = [
+    {id:'vieja',creadaEn:'2026-10-01T08:00:00Z'},
+    {id:'sin-fecha'},
+    {id:'nueva',creadaEn:'2026-10-20T08:00:00Z'},
+    {id:'mala',creadaEn:'no es fecha'},
+    {id:'media',creadaEn:'2026-10-10T08:00:00Z'},
+  ]
+  assert.deepEqual(m.masNuevasPrimero(lista).map(o=>o.id), ['nueva','media','vieja','sin-fecha','mala'])
+  assert.equal(lista[0].id, 'vieja')
+  assert.deepEqual(m.masNuevasPrimero(null), [])
+})
+
+test('«Asignadas a ti» también sale de la más nueva a la más vieja', async () => {
+  const m = await cargar(true)
+  const original = globalThis.fetch
+  globalThis.fetch = async () => {
+    return respuesta(200, {workOrder:{status:'asignada'},assignments:[{userId:'u-1',displayName:'Aliri Alira',endedAt:null}],events:[],totals:{productiveSeconds:0}})
+  }
+  try {
+    const odts = [
+      {id:'a',estado:'asignada',descripcion:'Vieja',creadaEn:'2026-10-02T10:00:00Z'},
+      {id:'b',estado:'pausada',descripcion:'Nueva',creadaEn:'2026-10-19T10:00:00Z'},
+      {id:'c',estado:'en_ejecucion',descripcion:'Media',creadaEn:'2026-10-10T10:00:00Z'},
+    ]
+    const lista = await m.listarAsignadas({odts, perfil:{rol:'conductor',nombre:'Aliri Alira'}})
+    assert.deepEqual(lista.map(o=>o.id), ['b','c','a'])
+    assert.equal(lista[0].creadaEn, '2026-10-19T10:00:00Z')
+  } finally { globalThis.fetch = original }
+
+  const demo = await cargar(false)
+  const delConductor = await demo.listarAsignadas({odts:[], perfil:{id:'usr-002',rol:'conductor',nombre:'Carlos Méndez'}})
+  const fechas = delConductor.map(o=>Date.parse(o.creadaEn))
+  assert.deepEqual(fechas, [...fechas].sort((a,b)=>b-a))
+})

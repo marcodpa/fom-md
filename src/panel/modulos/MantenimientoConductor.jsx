@@ -5,14 +5,15 @@ import { useSesion } from '../useSesion'
 import { Cargando, ErrorCarga, Modal, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
-import { estadoVisible, presentarHistorial } from '../datos/historial-odt'
+import { ESTADOS_VISIBLES, estadoVisible, presentarHistorial } from '../datos/historial-odt'
 import { Icono } from '../Iconos'
 import { miAsignacion } from './MiUnidad'
-import { NuevaOdt } from './Mantenimiento'
+import { FiltroEstado, FiltroTipo, NuevaOdt, Tarjetas } from './Mantenimiento'
+import { GrupoTarjetas } from '../comp/TarjetaMantenimiento'
 import './mantenimiento.css'
 import { GaleriaArchivos } from '../comp/Archivos'
 import OdtAsignadas from '../comp/OdtAsignadas'
-import { ESTADOS_DE_TALLER } from '../datos/odtAsignadas'
+import { ESTADOS_DE_TALLER, masNuevasPrimero } from '../datos/odtAsignadas'
 
 // ============================================================
 // MANTENIMIENTO DEL CONDUCTOR
@@ -59,11 +60,16 @@ export default function MantenimientoConductor() {
 
   const cargando = asignaciones.estado === 'cargando' || unidad.estado === 'cargando' || ordenes.estado === 'cargando'
   // Solo las órdenes de SU unidad. Se filtra aquí además de lo que ya limite el servidor.
+  // De la más nueva a la más vieja, igual que el supervisor y la app.
   const lista = useMemo(
-    () => (asignacion ? (ordenes.datos ?? []).filter((o) => o.vehiculoId === asignacion.vehiculoId) : [])
-      .sort((a, b) => Date.parse(b.creadaEn) - Date.parse(a.creadaEn)),
+    () => masNuevasPrimero(asignacion ? (ordenes.datos ?? []).filter((o) => o.vehiculoId === asignacion.vehiculoId) : []),
     [ordenes.datos, asignacion],
   )
+  // Los filtros de arriba de la lista: tipo ('' = todos) y estado ('' = todos).
+  const [tipo, setTipo] = useState('')
+  const [grupo, setGrupo] = useState('')
+  const delTipo = lista.filter((o) => !tipo || o.tipo === tipo)
+  const filtradas = delTipo.filter((o) => !grupo || estadoVisible(o.estado).clave === grupo)
   const enCurso = lista.filter((o) => estadoVisible(o.estado).clave !== 'resuelta')
   const cerradas = lista.filter((o) => estadoVisible(o.estado).clave === 'resuelta')
   const abiertas = enCurso.filter((o) => estadoVisible(o.estado).clave === 'abierta')
@@ -126,20 +132,31 @@ export default function MantenimientoConductor() {
               ))}
             </div>
 
-            <Tarjeta titulo="Por resolver" sinCuerpo>
-              {enCurso.length === 0 ? (
-                <div className="pnl-card-cuerpo"><Vacio icono="check" titulo="Sin órdenes abiertas" texto="Si algo falla en tu unidad, repórtalo con «Reportar una falla»." /></div>
-              ) : (
-                <Filas ordenes={enCurso} alAbrir={setAbierta} />
-              )}
-            </Tarjeta>
-
-            <Tarjeta titulo="Historial de mantenimiento de mi unidad" sinCuerpo>
-              {cerradas.length === 0 ? (
-                <div className="pnl-card-cuerpo"><Vacio icono="reloj" titulo="Todavía no hay órdenes resueltas" texto="Aquí quedará lo que se arregló en tu unidad, con su fecha." /></div>
-              ) : (
-                <Filas ordenes={cerradas} alAbrir={setAbierta} />
-              )}
+            {/* Arriba de la lista, como el supervisor y la app: el estado y el tipo de orden. */}
+            <Tarjeta titulo="Órdenes de mi unidad" sinCuerpo>
+              <div className="mnt-filtrar">
+                <FiltroEstado odts={delTipo} valor={grupo} alCambiar={setGrupo} />
+                <FiltroTipo odts={lista} valor={tipo} alCambiar={setTipo} />
+              </div>
+              <div className="mnt-lista-cuerpo">
+                {lista.length === 0 ? (
+                  <Vacio icono="check" titulo="Sin órdenes todavía" texto="Si algo falla en tu unidad, repórtalo con «Reportar una falla»." />
+                ) : filtradas.length === 0 ? (
+                  <Vacio icono="llave" titulo="Nada con estos filtros" texto="Prueba con otro estado u otro tipo de orden." />
+                ) : (
+                  // Agrupadas por estado y, dentro de cada grupo, la más nueva primero.
+                  <div className="mnt-grupos">
+                    {ESTADOS_VISIBLES.map((g) => {
+                      const delGrupo = filtradas.filter((o) => g.estados.includes(o.estado))
+                      return delGrupo.length > 0 && (
+                        <GrupoTarjetas key={g.clave} titulo={g.clave === 'resuelta' ? 'Historial de mi unidad' : g.plural} cuenta={delGrupo.length} color={g.clave === 'abierta' ? 'ambar' : ''}>
+                          <Tarjetas odts={delGrupo} alAbrir={setAbierta} unidad={false} tanda={g.clave === 'resuelta' ? 6 : 12} />
+                        </GrupoTarjetas>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </Tarjeta>
           </>
         )}
@@ -161,27 +178,6 @@ export default function MantenimientoConductor() {
       <Modal titulo="Qué pasó con esta orden" abierto={Boolean(detalle)} alCerrar={() => setAbierta(null)} ancho={640}>
         {detalle && <Historia odt={detalle} perfil={perfil} />}
       </Modal>
-    </div>
-  )
-}
-
-function Filas({ ordenes, alAbrir }) {
-  return (
-    <div className="mnt-orders">
-      {ordenes.map((o) => (
-        <article key={o.id} className="mnt-order">
-          <div className="mnt-thumb"><Icono nombre="llave" tam={26} /></div>
-          <div className="mnt-order-copy">
-            <span>{etiqueta('tipo_falla', o.tipoFalla)}</span>
-            <h3>{o.descripcion}</h3>
-            <div>
-              <EstadoOdt estado={o.estado} />
-              <small>{f.fechaCorta(o.creadaEn)} · {f.desde(o.creadaEn)}</small>
-            </div>
-          </div>
-          <button type="button" className="pnl-btn" onClick={() => alAbrir(o.id)}>Ver qué pasó →</button>
-        </article>
-      ))}
     </div>
   )
 }

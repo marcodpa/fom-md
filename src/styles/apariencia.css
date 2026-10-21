@@ -128,19 +128,19 @@
     color: var(--e-texto);
   }
   .pnl.fom-dark[data-diseno] .fleet-card { --fleet-ink: var(--e-texto); --fleet-muted: var(--e-texto-2); --fleet-line: var(--e-borde); }
-  .pnl.fom-dark[data-diseno] :is(.fleet-metrics > div, .ruta-item, .ruta-rangos button, .control-panel-heading button, .mapa-herr-botones button, .mapa-capas-chips button, .mapa-capas-reset, .mapa-herr-eta, .control-filters .pnl-chip) {
+  .pnl.fom-dark[data-diseno] :is(.fleet-metrics > div, .ruta-item, .ruta-rangos button, .control-panel-heading button, .mapa-capas-chips button, .mapa-capas-reset, .control-filters .pnl-chip) {
     background: var(--e-sup-baja);
     border-color: var(--e-borde);
     color: var(--e-texto);
   }
-  .pnl.fom-dark[data-diseno] :is(.mapa-herr-botones button.on, .mapa-capas-chips button.on, .ruta-rangos button.on, .ruta-item.activo, .control-filters .pnl-chip.activo) {
+  .pnl.fom-dark[data-diseno] :is(.mapa-capas-chips button.on, .ruta-rangos button.on, .ruta-item.activo, .control-filters .pnl-chip.activo) {
     background: color-mix(in srgb, var(--e-primario) 24%, transparent);
     border-color: var(--e-primario);
     color: #e4f2ff;
   }
   .pnl.fom-dark[data-diseno] .control-filters select.pnl-input { background-color: var(--e-sup); border-color: var(--e-borde); color: var(--e-texto); }
   .pnl.fom-dark[data-diseno] .control-filters select.pnl-input option { background: var(--e-sup); color: var(--e-texto); }
-  .pnl.fom-dark[data-diseno] :is(.mapa-herr-cab span, .mapa-herr-nota, .mapa-herr-eta span, .mapa-capas-grupo > span, .mapa-capas-switch small, .mapa-herr-alcance, .control-live) { color: var(--e-texto-2); }
+  .pnl.fom-dark[data-diseno] :is(.mapa-herr-cab span, .mapa-capas-grupo > span, .mapa-capas-switch small, .control-live) { color: var(--e-texto-2); }
   .pnl.fom-dark[data-diseno] :is(.mapa-capas-boton:hover, .mapa-capas.abierto .mapa-capas-boton) { background: var(--e-sup-baja); }
   .pnl.fom-dark[data-diseno] .fleet-vehicle-image { background: transparent; }
   .pnl.fom-dark[data-diseno] .mapboxgl-ctrl-group { background: var(--e-sup); border-color: var(--e-borde); }
@@ -171,11 +171,12 @@
     backdrop-filter: var(--apariencia-blur);
     color: var(--e-texto);
   }
-  .pnl.fom-dark[data-diseno] :is(.mapa-herr, .mapa-capas-panel) { border-radius: 20px; }
+  .pnl.fom-dark[data-diseno] .mapa-capas-panel { border-radius: 20px; }
+  .pnl.fom-dark[data-diseno] .mapa-herr { border-radius: 24px; }
   .pnl.fom-dark[data-diseno] .mapa-capas-boton { border-radius: 999px; }
-  .pnl.fom-dark[data-diseno="glass"] :is(.mapa-herr-cab span, .mapa-herr-nota, .mapa-herr-eta span, .mapa-capas-grupo > span, .mapa-capas-switch small, .mapa-herr-alcance) { color: var(--e-texto-2); }
-  .pnl.fom-dark[data-diseno="glass"] :is(.mapa-herr-botones button, .mapa-capas-chips button, .mapa-capas-reset, .mapa-herr-eta) { background: var(--e-sup-baja); border-color: var(--e-borde); color: var(--e-texto); }
-  .pnl.fom-dark[data-diseno="glass"] :is(.mapa-herr-botones button.on, .mapa-capas-chips button.on) { background: var(--e-activo-sup); border-color: var(--e-activo-borde); color: var(--e-activo-texto); }
+  .pnl.fom-dark[data-diseno="glass"] :is(.mapa-herr-cab span, .mapa-capas-grupo > span, .mapa-capas-switch small) { color: var(--e-texto-2); }
+  .pnl.fom-dark[data-diseno="glass"] :is(.mapa-capas-chips button, .mapa-capas-reset) { background: var(--e-sup-baja); border-color: var(--e-borde); color: var(--e-texto); }
+  .pnl.fom-dark[data-diseno="glass"] .mapa-capas-chips button.on { background: var(--e-activo-sup); border-color: var(--e-activo-borde); color: var(--e-activo-texto); }
   .pnl.fom-dark[data-diseno="glass"] .mapa-capas-boton:hover, .pnl.fom-dark[data-diseno="glass"] .mapa-capas.abierto .mapa-capas-boton { background: var(--e-sup-baja); }
   .pnl.fom-dark[data-diseno="glass"] .mapa-capas-switch i { background: var(--e-borde-fuerte, #555b64); }
   .pnl.fom-dark[data-diseno="glass"] .mapa-capas-switch input:checked + i { background: var(--e-primario); }

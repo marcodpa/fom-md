@@ -61,6 +61,29 @@ export function accionesDe(estado) {
   return ACCIONES[estado] ?? []
 }
 
+/** Cuándo se reportó una orden, en milisegundos; sin fecha válida, null. */
+function reportadaEn(o) {
+  const t = Date.parse(o?.creadaEn ?? '')
+  return Number.isFinite(t) ? t : null
+}
+
+/**
+ * Las órdenes de la MÁS NUEVA a la más vieja, por cuándo se reportaron: el
+ * mismo orden en todas las listas de Mantenimiento (supervisor, conductor y
+ * «Asignadas a ti»), igual que la app. Las que no traen fecha van al final y,
+ * entre iguales, se respeta el orden en que llegaron. Devuelve una copia.
+ */
+export function masNuevasPrimero(odts) {
+  return [...(odts ?? [])].sort((a, b) => {
+    const ta = reportadaEn(a)
+    const tb = reportadaEn(b)
+    if (ta === tb) return 0
+    if (ta === null) return 1
+    if (tb === null) return -1
+    return tb - ta
+  })
+}
+
 /**
  * Segundos de trabajo efectivo: de cada inicio o reanudación hasta el evento
  * siguiente (o hasta `hasta` si sigue corriendo). La misma cuenta que el
@@ -124,6 +147,8 @@ function armar(odt, ejecucion, medidoEn = Date.now()) {
     titulo: odt.descripcion ?? '',
     tipoFalla: odt.tipoFalla ?? null,
     prioridad: odt.prioridad ?? null,
+    // Para ordenarlas de la más nueva a la más vieja, como el resto del módulo.
+    creadaEn: odt.creadaEn ?? null,
     responsable: ejecucion.responsable,
     segundos: ejecucion.segundos,
     // Para que «Tiempo trabajado» siga contando en pantalla mientras corre.
@@ -178,7 +203,7 @@ export async function listarAsignadas({ odts = [], perfil = null } = {}) {
       mias.push(armar(candidatas[i], ejecucion, medidoEn))
     }
   })
-  if (mias.length) return mias
+  if (mias.length) return masNuevasPrimero(mias)
   const otro = fallos.find((e) => !NO_ES_PARA_TI.includes(e?.estado))
   if (otro) throw otro
   return fallos.some((e) => e?.estado === 403 || e?.estado === 501) ? null : []
@@ -214,8 +239,8 @@ function semillaDemo(perfil) {
   const unidad = v ? `${v.alias} · ${v.placa}` : 'Unidad 01'
   const responsable = { id: perfil?.id ?? 'demo', nombre: perfil?.nombre ?? 'Conductor de prueba', desde: hace(180) }
   return [
-    { id: 'odt-asig-demo-1', estado: 'asignada', vehiculoId: v?.id ?? null, vehiculoNombre: unidad, titulo: 'Cambiar las pastillas de freno delanteras: chillan al frenar.', tipoFalla: 'frenos', prioridad: 'alta', responsable, eventos: [] },
-    { id: 'odt-asig-demo-2', estado: 'pausada', vehiculoId: v?.id ?? null, vehiculoNombre: unidad, titulo: 'Revisar la luz de cruce derecha, se apaga sola.', tipoFalla: 'electrico', prioridad: 'media', responsable,
+    { id: 'odt-asig-demo-1', estado: 'asignada', vehiculoId: v?.id ?? null, vehiculoNombre: unidad, titulo: 'Cambiar las pastillas de freno delanteras: chillan al frenar.', tipoFalla: 'frenos', prioridad: 'alta', creadaEn: hace(240), responsable, eventos: [] },
+    { id: 'odt-asig-demo-2', estado: 'pausada', vehiculoId: v?.id ?? null, vehiculoNombre: unidad, titulo: 'Revisar la luz de cruce derecha, se apaga sola.', tipoFalla: 'electrico', prioridad: 'media', creadaEn: hace(1440), responsable,
       eventos: [{ tipo: 'inicio', en: hace(170), nota: '' }, { tipo: 'pausa', en: hace(90), nota: 'Falta el repuesto' }] },
   ]
 }
@@ -229,9 +254,9 @@ const demo = {
   },
   async listar(perfil) {
     const ahora = Date.now()
-    return this.de(perfil)
+    return masNuevasPrimero(this.de(perfil)
       .filter((o) => ESTADOS_DE_TALLER.includes(o.estado))
-      .map(({ eventos, ...o }) => ({ ...o, segundos: segundosTrabajados(eventos, new Date(ahora)), medidoEn: ahora }))
+      .map(({ eventos, ...o }) => ({ ...o, segundos: segundosTrabajados(eventos, new Date(ahora)), medidoEn: ahora })))
   },
   async evento(id, accion, nota) {
     for (const lista of this.porPersona.values()) {

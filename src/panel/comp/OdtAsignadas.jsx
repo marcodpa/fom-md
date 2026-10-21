@@ -3,7 +3,7 @@ import { useDatos } from '../useDatos'
 import { Campo, ErrorCarga, Tag, Tarjeta } from './ui'
 import { Icono } from '../Iconos'
 import { etiqueta } from '../datos/catalogos'
-import { estadoVisible } from '../datos/historial-odt'
+import TarjetaMantenimiento from './TarjetaMantenimiento'
 import { ESTADOS_DE_TALLER, MOMENTOS, accionesDe, listarAsignadas, registrarEvento, textoTiempo } from '../datos/odtAsignadas'
 
 // ============================================================
@@ -27,7 +27,7 @@ export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir }) {
   const [ahora, setAhora] = useState(() => Date.now())
   const [aviso, setAviso] = useState('')
   const items = lectura.datos ?? []
-  // «Ver orden» solo para las que están en la lista de la pantalla (el detalle se abre desde ahí).
+  // La tarjeta se abre solo si la orden está en la lista de la pantalla (el detalle se abre desde ahí).
   const conocidas = useMemo(() => new Set((odts ?? []).map((o) => o.id)), [odts])
   const corriendo = items.some((o) => o.estado === 'en_ejecucion')
 
@@ -61,7 +61,7 @@ export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir }) {
         <span className="mnt-asig-cuenta">{items.length} {items.length === 1 ? 'orden a tu cargo' : 'órdenes a tu cargo'}</span>
       </div>
       {aviso && <div className="mnt-success mnt-asig-aviso" role="status"><Icono nombre="check" tam={20} />{aviso}</div>}
-      <div className="mnt-asig-lista">
+      <div className="mnt-asig-lista mnt-tarjetas">
         {items.map((o) => <Asignada key={o.id} item={o} ahora={ahora} alHacer={despues} alAbrir={alAbrir && conocidas.has(o.id) ? alAbrir : null} />)}
       </div>
     </section>
@@ -76,7 +76,6 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
   const [guardando, setGuardando] = useState(false)
   const notaRef = useRef(null)
   const momento = MOMENTOS[item.estado] ?? { t: etiqueta('odt_estado', item.estado), ayuda: '' }
-  const visible = estadoVisible(item.estado)
   const acciones = accionesDe(item.estado)
   // Lo que el servidor midió, más lo que pasó desde entonces si el reloj sigue corriendo.
   const segundos = item.segundos + (item.estado === 'en_ejecucion' ? Math.max(0, (ahora - item.medidoEn) / 1000) : 0)
@@ -115,15 +114,13 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
     }
   }
 
+  // La misma tarjeta de todo Mantenimiento; debajo, en qué va el trabajo, el tiempo y los botones.
+  const odt = { id: item.id, estado: item.estado, descripcion: item.titulo, tipoFalla: item.tipoFalla, prioridad: item.prioridad, creadaEn: item.creadaEn, vehiculoNombre: item.vehiculoNombre }
   return (
-    <article className="mnt-asig-item">
+    <TarjetaMantenimiento odt={odt} alAbrir={alAbrir}>
       <div className="mnt-asig-fila">
-        <div className="mnt-thumb"><Icono nombre="llave" tam={24} /></div>
         <div className="mnt-asig-copia">
-          <span>{item.vehiculoNombre}{item.tipoFalla ? ` · ${etiqueta('tipo_falla', item.tipoFalla)}` : ''}</span>
-          <h3>{item.titulo}</h3>
           <div className="mnt-asig-tags">
-            <Tag color={visible.color}>{visible.etiqueta}</Tag>
             <Tag color={COLOR_MOMENTO[item.estado] ?? 'gris'} plano>{momento.t}</Tag>
           </div>
           {momento.ayuda && <p>{momento.ayuda}</p>}
@@ -134,14 +131,13 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
         </dl>
       </div>
 
-      {!pidiendo && (acciones.length > 0 || alAbrir) && (
+      {!pidiendo && acciones.length > 0 && (
         <div className="mnt-asig-acciones" role="group" aria-label={`Acciones de la orden ${item.titulo}`}>
           {acciones.map((p) => (
             <button key={p.accion} type="button" className={`pnl-btn${p.sutil ? '' : ' primario'}`} onClick={() => hacer(p)} disabled={guardando}>
               {guardando && !p.sutil ? 'Guardando…' : p.t}
             </button>
           ))}
-          {alAbrir && <button type="button" className="pnl-btn sutil" onClick={() => alAbrir(item.id)}>Ver orden →</button>}
         </div>
       )}
 
@@ -170,6 +166,6 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
         </div>
       )}
       {error && !pidiendo && <p className="pnl-campo-error" role="alert">{error}</p>}
-    </article>
+    </TarjetaMantenimiento>
   )
 }

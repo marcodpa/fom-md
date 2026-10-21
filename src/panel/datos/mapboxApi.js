@@ -1,11 +1,11 @@
 // ============================================================
 // SERVICIOS DE MAPBOX QUE USA EL MAPA (decisión de Marco, 13 oct 2026)
 // ------------------------------------------------------------
-// Tres llamadas, todas con el token público del navegador:
+// Dos llamadas, las dos con el token público del navegador:
 //   - Map Matching: pega un recorrido GPS a las calles (quita el «garabato»).
 //   - Directions (driving-traffic): cuánto tarda una unidad en llegar a un
-//     punto con el tráfico de ahora, y por dónde.
-//   - Isochrone: hasta dónde llega una unidad en 10, 20 o 30 minutos.
+//     punto con el tráfico de ahora, y por dónde («Llegada»).
+// El «alcance en minutos» (Isochrone) se quitó el 21 oct 2026 (pedido de Marco).
 // Cada una tiene 100.000 peticiones gratis al mes. Los resultados se
 // guardan en memoria (las últimas 50) para no repetir la misma pregunta en cada refresco.
 // ============================================================
@@ -209,26 +209,5 @@ export function rutaConTrafico(origen, destino, { señal } = {}) {
       trazo: coords,
       tramos: tramosDeRuta(coords, congestion),
     }
-  })
-}
-
-// --- Isochrone: alcance en minutos ---------------------------------------
-
-/** Hasta dónde llega una unidad desde `origen` en cada uno de los `minutos` dados (polígonos). */
-export function alcanceDesde(origen, minutos = [10, 20, 30], { señal } = {}) {
-  if (!TOKEN) return Promise.reject(new Error('Sin token de Mapbox.'))
-  const lista = [...new Set(minutos.map((m) => Math.min(60, Math.max(1, Math.round(m)))))].sort((a, b) => a - b)
-  return recordar(`iso:${coord(origen)}:${lista.join(',')}:${Math.floor(Date.now() / 300000)}`, async () => {
-    const pedir = (perfil) => pedirJson(`${BASE}/isochrone/v1/mapbox/${perfil}/${coord(origen)}?contours_minutes=${lista.join(',')}&polygons=true&denoise=1&access_token=${encodeURIComponent(TOKEN)}`, señal)
-    let r
-    try {
-      r = await pedir('driving-traffic')
-    } catch (e) {
-      if (e?.name === 'AbortError') throw e
-      r = await pedir('driving')
-    }
-    const features = (r?.features ?? []).slice().sort((a, b) => (b.properties?.contour ?? 0) - (a.properties?.contour ?? 0))
-    if (!features.length) throw new Error('Mapbox no devolvió zonas de alcance.')
-    return { type: 'FeatureCollection', features }
   })
 }

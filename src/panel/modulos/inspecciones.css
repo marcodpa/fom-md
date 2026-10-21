@@ -168,12 +168,15 @@
 .insp-ficha-insp h3 small { font-size:12px; font-weight:600; color:var(--e-texto-2); padding:2px 8px; border-radius:10px; background:var(--e-sup-baja); border:1px solid var(--e-borde); }
 .insp-ficha-insp ul { list-style:none; margin:0; padding:0; border:1px solid var(--e-borde); border-radius:16px; overflow:hidden; }
 .insp-ficha-insp li+li { border-top:1px solid var(--e-borde); }
-.insp-ficha-insp button { width:100%; display:flex; align-items:center; gap:12px; padding:12px 14px; border:0; background:none; color:var(--e-texto); font:inherit; text-align:left; cursor:pointer; }
-.insp-ficha-insp button:hover { background:var(--e-sup-alta); }
+/* Cada fila: abrir (la fila entera) y, al lado, imprimir esa sola. */
+.insp-ficha-insp li { display:flex; align-items:center; gap:4px; padding-right:10px; }
+.insp-ficha-insp li>button:first-child { flex:1; min-width:0; display:flex; align-items:center; gap:12px; padding:12px 14px; border:0; background:none; color:var(--e-texto); font:inherit; text-align:left; cursor:pointer; }
+.insp-ficha-insp li>button:first-child:hover { background:var(--e-sup-alta); }
+.insp-ficha-insp-cab { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 .insp-ficha-insp-dato { flex:1; min-width:0; display:grid; gap:2px; }
 .insp-ficha-insp-dato b { font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; }
 .insp-ficha-insp-dato small { font-size:12px; color:var(--e-texto-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.insp-ficha-insp button>svg { transform:rotate(180deg); color:var(--e-texto-2); flex:none; }
+.insp-ficha-insp li>button:first-child>svg { transform:rotate(180deg); color:var(--e-texto-2); flex:none; }
 .insp-root .insp-ficha-nada { font-size:13px; }
 .insp-root .insp-ficha-aviso { padding:12px 14px; border-radius:10px; background:var(--e-aviso-sup); color:var(--e-aviso); font-size:13px; }
 
@@ -217,17 +220,40 @@ button.insp-cal-dia:hover { filter:brightness(1.2); }
   .insp-ficha { gap:16px; }
   .insp-cal-grid { gap:4px; }
   .insp-hist-cab { margin-bottom:16px; }
-  .insp-imprimir { display:none; }
   .insp-hist-cab .insp-pp-mes { flex-basis:100%; justify-content:space-between; }
   .insp-hist-cab .insp-pp-mes>span { min-width:0; flex:1; }
   .insp-ficha-totales { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 
-/* «Generar PDF» en Historial › Todas: solo la tabla del mes, sin navegación ni controles. */
-@media print {
-  .insp-nav, .insp-hist-cab, .insp-filters, .insp-filter-chips, .insp-imprimir, .insp-heading p { display:none !important; }
-  .insp-root { padding:0; max-width:none; }
-  .insp-root .pnl-tabla-wrap { overflow:visible; }
-  .insp-table th:last-child, .insp-table td:last-child { display:none; }
-  .insp-root h1, .insp-root .pnl-card-cab h2 { color:#111418; }
+/* ---------- Imprimir la planilla (T-79), como la app ----------
+   La hoja se arma aparte (datos/planillaInspeccion.js) y se imprime desde un
+   marco invisible: aquí solo van los botones y los avisos. */
+.insp-cab-acciones { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.insp-cab-acciones .pnl-btn, .insp-imp-barra .pnl-btn, .insp-sel-barra .pnl-btn, .insp-ficha-insp-cab .pnl-btn { border-radius:999px; white-space:nowrap; }
+.insp-fila-acciones { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
+/* El botón redondo de cada tarjeta de la app: imprimir esa sola. */
+.insp-imp-una { width:40px; height:40px; flex:none; display:grid; place-items:center; border-radius:999px; border:1px solid var(--e-borde-fuerte); background:var(--e-sup-alta); color:var(--e-texto); cursor:pointer; padding:0; }
+.insp-imp-una:hover { color:var(--e-primario); }
+.insp-imp-una:disabled { opacity:.45; cursor:default; }
+.insp-task>.insp-imp-una { margin-left:auto; }
+.insp-root .insp-imp-aviso { margin:0 0 16px; padding:12px 14px; border-radius:10px; font-size:13px; background:var(--e-info-sup); color:var(--e-texto-2); }
+.insp-root .insp-imp-aviso.malo { background:var(--e-peligro-sup); color:var(--e-peligro); }
+/* Hallazgos: la impresión va arriba de la lista de puntos. */
+.insp-imp-barra { display:flex; align-items:center; gap:12px 16px; flex-wrap:wrap; margin-bottom:20px; padding:16px 20px; border:1px solid var(--e-borde); border-radius:24px; background:var(--e-sup); }
+.insp-imp-barra>p { flex:1; min-width:240px; display:flex; align-items:center; gap:10px; margin:0; font-size:14px; color:var(--e-texto-2); }
+.insp-imp-barra>p>svg { color:var(--e-info); flex:none; }
+.insp-imp-barra>p b { color:var(--e-texto); }
+.insp-imp-barra>.insp-imp-aviso { flex-basis:100%; margin:0; }
+/* Selección múltiple: casillas en la tabla y la barra de abajo («N seleccionadas · Cancelar · Imprimir»). */
+.insp-table .insp-sel-celda { width:44px; text-align:center; }
+.insp-table .insp-sel-celda input { width:18px; height:18px; accent-color:var(--e-primario-base); cursor:pointer; }
+.insp-sel-barra { position:sticky; bottom:16px; z-index:2; display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:16px 22px 22px; padding:12px 12px 12px 20px; border:1px solid var(--e-borde-fuerte); border-radius:999px; background:var(--e-sup-alta); box-shadow:0 6px 18px rgba(0,0,0,.5); }
+.insp-sel-barra>span { flex:1; min-width:140px; font-size:14px; font-weight:600; }
+.insp-sr { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+@media(max-width:767px) {
+  /* En el teléfono la tabla es una lista: la casilla se queda visible a la izquierda. */
+  .pnl.fom-dark[data-diseno] table.mv-lista > tbody > tr > td.insp-sel-celda { display:block; order:0; width:auto; margin-right:6px; }
+  .insp-sel-barra { margin:12px 16px 16px; border-radius:24px; }
+  .insp-imp-barra { padding:16px; }
+  .insp-imp-barra>.pnl-btn { flex:1; justify-content:center; }
 }

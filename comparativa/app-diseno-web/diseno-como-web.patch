@@ -1,7 +1,7 @@
 From 2581cf83b19ae476227262327ab72489b2526c13 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 14 Oct 2026 11:40:13 -0400
-Subject: [PATCH 01/18] Mapas con Mapbox, el mismo proveedor que el panel web
+Subject: [PATCH 01/19] Mapas con Mapbox, el mismo proveedor que el panel web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -3095,7 +3095,7 @@ index 0000000..269766b
 From de62044848b392b8caa43332444bea9c335718c8 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 09:05:25 -0400
-Subject: [PATCH 02/18] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
+Subject: [PATCH 02/19] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
  =?UTF-8?q?=20panel=20web:=20encabezado=20redondo=20en=20todas=20las=20pes?=
  =?UTF-8?q?ta=C3=B1as?=
 MIME-Version: 1.0
@@ -5530,7 +5530,7 @@ index 2ab97e8..1921048 100644
 From c000b636fd810bcce2f3a312f10fed67ade6af1c Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:14:53 -0400
-Subject: [PATCH 03/18] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
+Subject: [PATCH 03/19] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
  =?UTF-8?q?(tambi=C3=A9n=20en=20Expo=20Go),=20recorrido=20y=20entrada=20nu?=
  =?UTF-8?q?eva=20con=20el=20logo=20FOM?=
 MIME-Version: 1.0
@@ -26153,7 +26153,7 @@ index 5119764..7db24d0 100644
 From 50a59f9d818534889d46e3a94168948db6d9afa9 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:32:24 -0400
-Subject: [PATCH 04/18] Pantalla de carga FOM (motion) al arrancar y dentro de
+Subject: [PATCH 04/19] Pantalla de carga FOM (motion) al arrancar y dentro de
  la app, igual que la web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -27297,7 +27297,7 @@ index 9c82d64..8328c9a 100644
 From 1056c6b78ec4ebc10b57f795e36b0e6a5699274d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:04:43 -0400
-Subject: [PATCH 05/18] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
+Subject: [PATCH 05/19] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
  =?UTF-8?q?tas,=20mapa=20completo=20de=20la=20flota=20y=20arreglo=20del=20?=
  =?UTF-8?q?mapa=20en=20el=20tel=C3=A9fono?=
 MIME-Version: 1.0
@@ -29762,7 +29762,7 @@ index 0d9b55d..39566b2 100644
 From 3e5342f146d3967ea90b01f55ab4c251a554cc74 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:48:17 -0400
-Subject: [PATCH 06/18] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
+Subject: [PATCH 06/19] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
  =?UTF-8?q?,=20recorrido=20en=20el=20mapa=20completo,=20=C3=ADcono=20de=20?=
  =?UTF-8?q?veh=C3=ADculo=20de=20la=20web=20y=20espera=20nueva?=
 MIME-Version: 1.0
@@ -31408,7 +31408,7 @@ index 4fb8a10..ef7b519 100644
 From 6ec07ef815bd8196b71c53b9772e567d5931bf30 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 14:14:13 -0400
-Subject: [PATCH 07/18] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
+Subject: [PATCH 07/19] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
  =?UTF-8?q?=20el=20error=20=C2=ABStyle=20is=20not=20done=20loading=C2=BB?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32480,7 +32480,7 @@ index f6b5a22..e116c51 100644
 From 5f38ad38cd96d2426b421be91809e3017cbe4954 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 16:18:12 -0400
-Subject: [PATCH 08/18] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
+Subject: [PATCH 08/19] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
  =?UTF-8?q?=20200=20(el=20servidor=20de=20la=20app=20no=20acepta=20m=C3=A1?=
  =?UTF-8?q?s=20por=20pedido)?=
 MIME-Version: 1.0
@@ -32569,7 +32569,7 @@ index 8836fdd..2804942 100644
 From d8db74159e7bf9e52efb1c6faa6ee0abf78ee2ff Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:29:50 -0400
-Subject: [PATCH 09/18] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
+Subject: [PATCH 09/19] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
  =?UTF-8?q?=20tel=C3=A9fono=20sin=20Expo=20Go?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32732,7 +32732,7 @@ index 0086b83..f9ddcca 100644
 From 95b304af6cf2094fdef87a3885ce76ac6a994e5e Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:54:24 -0400
-Subject: [PATCH 10/18] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
+Subject: [PATCH 10/19] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
  =?UTF-8?q?nativo=20completo,=20animaciones=20y=20proyecto=20de=20Expo=20p?=
  =?UTF-8?q?ara=20la=20APK?=
 MIME-Version: 1.0
@@ -36626,7 +36626,7 @@ index 7e0fe42..23cabaa 100644
 From 2e0a3b7e59cee9887a7171b60f89f64efcde644f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:55:54 -0400
-Subject: [PATCH 11/18] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
+Subject: [PATCH 11/19] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
  =?UTF-8?q?o=20la=20compilaci=C3=B3n=20en=20Expo=20falla=20por=20mapbox-gl?=
  =?UTF-8?q?=203=20vs=20@rnmapbox/maps?=
 MIME-Version: 1.0
@@ -36656,7 +36656,7 @@ index 0000000..7c5134a
 From 8f73cfc0c36be11e3414c10a41964cce6e5b8cd2 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:20:22 -0400
-Subject: [PATCH 12/18] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
+Subject: [PATCH 12/19] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
  =?UTF-8?q?=20pedidos=20al=20servidor;=20teclado=20en=20la=20entrada=20(T-?=
  =?UTF-8?q?06=20a=20T-09,=20T-15)?=
 MIME-Version: 1.0
@@ -42315,7 +42315,7 @@ index 47f45a4..bd41d06 100644
 From f6b767485f055b63843290b9d57751bba10f5f60 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:42:17 -0400
-Subject: [PATCH 13/18] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
+Subject: [PATCH 13/19] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
  =?UTF-8?q?6,=20T-17):=20tarjetas=20del=20mapa=20en=20iOS,=20memorias=20po?=
  =?UTF-8?q?r=20generaci=C3=B3n,=20flota=20sin=20red?=
 MIME-Version: 1.0
@@ -42752,7 +42752,7 @@ index b1893fe..11e8247 100644
 From a72f6240bc42f357d00cc22fc14132a23dadc999 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 10:22:30 -0400
-Subject: [PATCH 14/18] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
+Subject: [PATCH 14/19] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
  =?UTF-8?q?=20app=20(T-19=20a=20T-23):=20SOS,=20sesi=C3=B3n,=20red,=20pant?=
  =?UTF-8?q?allas,=20mapas=20y=20limpieza?=
 MIME-Version: 1.0
@@ -48916,7 +48916,7 @@ index 479ba30..63d5a63 100644
 From d5515163a0aaed218e618724c348a98585f81a5b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Mon, 19 Oct 2026 15:15:53 -0400
-Subject: [PATCH 15/18] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
+Subject: [PATCH 15/19] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
  =?UTF-8?q?=20app=20(T-33=20a=20T-41)=20y=20trabajo=20pendiente=20de=20otr?=
  =?UTF-8?q?a=20sesi=C3=B3n?=
 MIME-Version: 1.0
@@ -57967,7 +57967,7 @@ index 0000000..287208e
 From 792b0cbbe44bdd70d321c2fa9e504dd306d27d9f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 09:56:46 -0400
-Subject: [PATCH 16/18] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
+Subject: [PATCH 16/19] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
  =?UTF-8?q?inspecciones=20programadas=20y=20carga=20en=20c=C3=ADrculo=20(T?=
  =?UTF-8?q?-47=20a=20T-53)?=
 MIME-Version: 1.0
@@ -66593,7 +66593,7 @@ index 9c4c0ac..548f103 100644
 From 2fb6ae2ec8e7be32857eceac6d91afcee458c710 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 11:15:45 -0400
-Subject: [PATCH 17/18] Inspecciones simples, calendario por persona, ODT
+Subject: [PATCH 17/19] Inspecciones simples, calendario por persona, ODT
  asignadas, fotos y teclado (T-60 a T-65)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -70046,7 +70046,7 @@ index 2147bee..3650649 100644
 From 31237d42b58cf5b50abb359a3f6f92a2dc2d966b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 09:02:22 -0400
-Subject: [PATCH 18/18] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
+Subject: [PATCH 18/19] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
  =?UTF-8?q?ue=20suben,=20una=20inspecci=C3=B3n=20por=20d=C3=ADa=20y=20fine?=
  =?UTF-8?q?s=20de=20semana=20(T-67=20a=20T-75)?=
 MIME-Version: 1.0
@@ -73902,6 +73902,3168 @@ index 08bddf9..16d9fef 100644
 +  }
 +  return hitos.sort((x, y) => (instante(x.en) || 0) - (instante(y.en) || 0));
 +}
+-- 
+2.55.0.windows.3
+
+
+From 9e668a4055466a8d1a72a98677a27bdf462839fe Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 10:04:55 -0400
+Subject: [PATCH 19/19] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
+ =?UTF-8?q?=C3=A1fico,=20y=20mantenimiento=20con=20la=20misma=20tarjeta=20?=
+ =?UTF-8?q?(T-77,=20T-78)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Mapa: fuera la capa y el botón de tráfico; «Llegada» con tarjeta, ruta azul FOM y pin,
+  desde el reloj del mapa o el botón «Llegada» de la ficha de la unidad.
+- Mantenimiento: la más nueva primero en todas las listas, filtros de estado y «Tipo»
+  arriba, y la misma tarjeta para conductor, supervisor y «Asignadas a ti».
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/mantenimiento.tsx            | 409 +++--------------
+ src/app/mapa-flota.tsx                        |  20 +-
+ src/app/panel/mantenimiento.tsx               | 245 ++++++----
+ .../filtro-estado-mantenimiento.tsx           | 174 +++++++
+ src/components/llegada-tarjeta.tsx            | 431 ++++++++++++++++++
+ src/components/map-vehiculo-clasico.tsx       |   6 +
+ src/components/map-vehiculo-dom.tsx           |  55 ++-
+ src/components/map-vehiculo-mapbox.tsx        | 116 +++--
+ src/components/mapa-fom-dom.tsx               | 212 ++++++---
+ src/components/mapbox-nativo-ruta.tsx         |  66 ++-
+ src/components/odt-asignada-seccion.tsx       |  69 +--
+ src/components/tarjeta-mantenimiento.tsx      | 378 +++++++++++++++
+ src/lib/llegada.ts                            | 140 ++++++
+ src/lib/map-prefs.ts                          |   7 +-
+ src/services/fomOrdenes.ts                    |   4 +
+ 15 files changed, 1722 insertions(+), 610 deletions(-)
+ create mode 100644 src/components/filtro-estado-mantenimiento.tsx
+ create mode 100644 src/components/llegada-tarjeta.tsx
+ create mode 100644 src/components/tarjeta-mantenimiento.tsx
+ create mode 100644 src/lib/llegada.ts
+
+diff --git a/src/app/(driver)/mantenimiento.tsx b/src/app/(driver)/mantenimiento.tsx
+index 2a84e2e..7fd3891 100644
+--- a/src/app/(driver)/mantenimiento.tsx
++++ b/src/app/(driver)/mantenimiento.tsx
+@@ -1,11 +1,9 @@
+-import { LinearGradient } from 'expo-linear-gradient';
+ import { Redirect, useFocusEffect, useRouter } from 'expo-router';
+-import { useCallback, useEffect, useMemo, useState } from 'react';
+-import { Animated, Easing, StyleSheet, View } from 'react-native';
++import { useCallback, useMemo, useState } from 'react';
++import { StyleSheet, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { useAuth } from '@/auth';
+-import { OpcionRiel, RielOpciones } from '@/components/riel-opciones';
+ import { ScrollVisible } from '@/components/scroll-visible';
+ import { BotonDestacado } from '@/components/boton-destacado';
+ import { Card } from '@/components/card';
+@@ -14,13 +12,14 @@ import { ErrorState } from '@/components/error-state';
+ import { Escalonado } from '@/components/escalonado';
+ import { EncabezadoFom, TituloPantalla } from '@/components/encabezado-fom';
+ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
++import { FiltroEstadoMantenimiento, type GrupoEstado } from '@/components/filtro-estado-mantenimiento';
+ import { KpiFila } from '@/components/kpi-fila';
+ import { SeccionOdtAsignadas } from '@/components/odt-asignada-seccion';
+-import { PressableScale } from '@/components/pressable-scale';
+ import { PulseDot } from '@/components/pulse-dot';
+ import { SearchBar } from '@/components/search-bar';
+ import { Skeleton } from '@/components/skeleton';
+-import { TabIcon, type TabIconName } from '@/components/tab-icon';
++import { TabIcon } from '@/components/tab-icon';
++import { masNuevasPrimero, TarjetaAccion } from '@/components/tarjeta-mantenimiento';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import {
+@@ -28,15 +27,12 @@ import {
+   type MotivoSinOrdenes,
+   getResumenUnidad,
+   type AccionMantenimiento,
+-  type AccionRelevancia,
+   type MantenimientoTipo,
+   type ResumenUnidad,
+ } from '@/services';
+-import { tinte } from '@/lib/color';
+ import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
+ import { useDriving } from '@/session';
+-import { useReducedMotion, useTheme, type ColorTokens } from '@/theme';
+-import { formatFecha } from '@/utils/date';
++import { useTheme, type ColorTokens } from '@/theme';
+ import { miles } from '@/utils/numero';
+ 
+ /**
+@@ -51,9 +47,6 @@ const TIPO_OPCIONES: { value: MantenimientoTipo; label: string; tone: keyof Colo
+   { value: 'predictivo', label: 'Predictivo', tone: 'accent' },
+ ];
+ 
+-/** Ninguno puesto = se ve TODO junto. */
+-type FiltroTipo = 'todas' | MantenimientoTipo;
+-
+ /** Sin tildes ni mayúsculas: buscar "bujia" tiene que encontrar "bujía". */
+ function plano(t: string): string {
+   return t
+@@ -62,273 +55,11 @@ function plano(t: string): string {
+     .toLowerCase();
+ }
+ 
+-/**
+- * Pastilla del filtro. Misma cápsula del selector de siempre —misma altura,
+- * mismo radio, mismo tinte por tipo—; lo único que cambia es que ahora se puede
+- * NO tener ninguno puesto.
+- */
+-function ChipTipo({
+-  label,
+-  tono,
+-  activo,
+-  cuenta,
+-  onPress,
+-}: {
+-  label: string;
+-  tono: keyof ColorTokens;
+-  activo: boolean;
+-  cuenta: number;
+-  onPress: () => void;
+-}) {
+-  const { colors, radii, spacing } = useTheme();
+-  const color = colors[tono];
+-  return (
+-    <PressableScale
+-      onPress={onPress}
+-      accessibilityRole="button"
+-      accessibilityState={{ selected: activo }}
+-      accessibilityLabel={`${label}, ${cuenta}`}>
+-      <View
+-        style={[
+-          styles.chip,
+-          {
+-            // Teñido con SU color, no con un gris: la pastilla puesta dice de
+-            // qué tipo estás mirando sin tener que leer la etiqueta.
+-            backgroundColor: activo ? tinte(color, 0.14) : colors.surfaceSunken,
+-            borderColor: activo ? tinte(color, 0.4) : colors.border,
+-            borderRadius: radii.pill,
+-            paddingHorizontal: spacing.md,
+-            gap: spacing.xs,
+-          },
+-        ]}>
+-        <ThemedText variant="caption" style={{ color: activo ? color : colors.textSecondary }}>
+-          {label}
+-        </ThemedText>
+-        {cuenta > 0 ? (
+-          <ThemedText variant="caption" tabular style={{ color: activo ? color : colors.textMuted }}>
+-            {cuenta}
+-          </ThemedText>
+-        ) : null}
+-      </View>
+-    </PressableScale>
+-  );
+-}
+-
+-/**
+- * Ícono por servicio, deducido del título de la acción. El servicio no viene
+- * tipado (los títulos los arma el motor de mantenimiento), así que se busca por
+- * palabra clave y lo que no encaje cae en la llave inglesa.
+- */
+-function iconoServicio(titulo: string): TabIconName {
+-  const t = titulo.toLowerCase();
+-  if (t.includes('freno')) return 'frenos';
+-  if (t.includes('aceite') || t.includes('filtro')) return 'aceite';
+-  if (t.includes('neumátic') || t.includes('neumatic') || t.includes('llanta') || t.includes('rueda')) {
+-    return 'neumatico';
+-  }
+-  if (t.includes('batería') || t.includes('bateria') || t.includes('eléctric') || t.includes('electric')) {
+-    return 'electrico';
+-  }
+-  if (t.includes('motor') || t.includes('correa') || t.includes('bujía') || t.includes('bujia')) return 'motor';
+-  if (t.includes('suspensión') || t.includes('suspension') || t.includes('carroc')) return 'carroceria';
+-  return 'ot';
+-}
+-
+-const RELEVANCIA_LABEL: Record<AccionRelevancia, string> = {
+-  alta: 'Alta',
+-  media: 'Media',
+-  baja: 'Baja',
+-};
+-
+-function toneRelevancia(r: AccionRelevancia): keyof ColorTokens {
+-  if (r === 'alta') return 'danger';
+-  if (r === 'media') return 'warning';
+-  return 'info';
+-}
+-
+-/**
+- * En qué anda la acción, DICHO como se lee.
+- *
+- * `estado` y `vencida` son dos datos distintos, y la tarjeta enseñaba solo el
+- * primero: una acción que se pasó de fecha aparecía bajo VENCIDAS diciendo
+- * "Pendiente", contradiciendo al encabezado que tenía encima. Vencida manda
+- * sobre pendiente — es la misma cosa, un escalón más tarde.
+- */
+-function estadoDe(a: AccionMantenimiento): { label: string; tono: keyof ColorTokens } {
+-  if (a.estado === 'realizada') return { label: 'Realizada', tono: 'success' };
+-  if (a.estado === 'en_proceso') return { label: 'En proceso', tono: 'info' };
+-  if (a.vencida) return { label: 'Vencida', tono: 'danger' };
+-  return { label: 'Pendiente', tono: 'warning' };
+-}
+-
+-/**
+- * Color de la acción: lo realizado se apaga, lo que está en taller es
+- * informativo, y lo demás habla por su urgencia real — una vencida es urgente
+- * aunque la hayan reportado como relevancia baja.
+- */
+-function toneAccion(a: AccionMantenimiento): keyof ColorTokens {
+-  if (a.estado === 'realizada') return 'success';
+-  if (a.estado === 'en_proceso') return 'info';
+-  if (a.vencida) return 'danger';
+-  return toneRelevancia(a.relevancia);
+-}
+-
+-/**
+- * El intervalo se dibuja hasta 1.33 para que lo VENCIDO se vea pasando la marca
+- * de "toca ahora" (que queda al 75% de la barra) en vez de toparse al final.
+- */
+-const ESCALA_PROGRESO = 1.33;
+-const MARCA_SERVICIO = 1 / ESCALA_PROGRESO;
+-
+-/** Barra del intervalo de servicio: se llena al entrar y marca el punto de servicio. */
+-function BarraIntervalo({ progreso, tone }: { progreso: number; tone: keyof ColorTokens }) {
+-  const { colors, radii } = useTheme();
+-  const reduced = useReducedMotion();
+-  const destino = Math.max(0.02, Math.min(1, progreso / ESCALA_PROGRESO));
+-  // En el estado, no en una ref: leer `.current` al pintar lo prohíbe el React Compiler.
+-  const [t] = useState(() => new Animated.Value(reduced ? destino : 0));
+-
+-  useEffect(() => {
+-    if (reduced) {
+-      t.setValue(destino);
+-      return;
+-    }
+-    const anim = Animated.timing(t, {
+-      toValue: destino,
+-      duration: 620,
+-      delay: 120,
+-      easing: Easing.out(Easing.cubic),
+-      useNativeDriver: true,
+-    });
+-    anim.start();
+-    return () => anim.stop();
+-  }, [t, destino, reduced]);
+-
+-  return (
+-    <View style={[styles.pista, { backgroundColor: colors.surfaceSunken, borderRadius: radii.pill }]}>
+-      <Animated.View
+-        style={[
+-          styles.relleno,
+-          {
+-            backgroundColor: colors[tone],
+-            borderRadius: radii.pill,
+-            // Crece desde la izquierda por el hilo nativo (sin animar layout).
+-            transformOrigin: 'left',
+-            transform: [{ scaleX: t }],
+-          },
+-        ]}
+-      />
+-      {/* Marca del servicio: cruzarla es ir vencido. */}
+-      <View style={[styles.marca, { left: `${MARCA_SERVICIO * 100}%`, backgroundColor: colors.borderStrong }]} />
+-    </View>
+-  );
+-}
+-
+-/** Pastilla de estado o relevancia: punto opcional + palabra, teñidos. */
+-function Pastilla({ tono, label, conPunto }: { tono: keyof ColorTokens; label: string; conPunto?: boolean }) {
+-  const { colors, radii } = useTheme();
+-  const color = colors[tono];
+-  return (
+-    <View style={[styles.pastilla, { borderRadius: radii.pill }]}>
+-      <View style={[StyleSheet.absoluteFill, { backgroundColor: color, opacity: 0.12, borderRadius: radii.pill }]} />
+-      {conPunto ? <View style={[styles.punto, { backgroundColor: color }]} /> : null}
+-      <ThemedText variant="caption" style={[styles.chipTexto, { color }]}>
+-        {label}
+-      </ThemedText>
+-    </View>
+-  );
+-}
+-
+-/**
+- * Tarjeta de una acción.
+- *
+- * El tono no se grita: entra por el borde, por un halo que nace en el canto
+- * izquierdo y por el anillo del ícono. El riel macizo de antes pintaba una raya
+- * de color por tarjeta y, con la lista entera a la vista, la pantalla se leía
+- * como un semáforo averiado.
+- */
+-function TarjetaAccion({ accion, onPress }: { accion: AccionMantenimiento; onPress: () => void }) {
+-  const { colors, spacing, radii } = useTheme();
+-  const tone = toneAccion(accion);
+-  const color = colors[tone];
+-  const estado = estadoDe(accion);
+-  const hecha = accion.estado === 'realizada';
+-
+-  return (
+-    <PressableScale
+-      onPress={onPress}
+-      accessibilityRole="button"
+-      accessibilityLabel={`${accion.titulo}, ${estado.label}`}>
+-      <Card
+-        style={[
+-          styles.tarjeta,
+-          { borderColor: tinte(color, 0.2), borderRadius: radii.lg, opacity: hecha ? 0.66 : 1 },
+-        ]}>
+-        {/* Halo del tono, naciendo en el canto izquierdo. */}
+-        <LinearGradient
+-          colors={[tinte(color, 0.08), 'transparent']}
+-          start={{ x: 0, y: 0.5 }}
+-          end={{ x: 1, y: 0.5 }}
+-          style={styles.halo}
+-        />
+-
+-        <View style={[styles.cuerpo, { padding: spacing.md, gap: spacing.sm }]}>
+-          <View style={[styles.filaTitulo, { gap: spacing.sm }]}>
+-            {/* Ícono del servicio: capa del tono y su anillo. */}
+-            <View style={[styles.iconoServicio, { borderRadius: radii.md }]}>
+-              <View
+-                style={[StyleSheet.absoluteFill, { backgroundColor: color, opacity: 0.14, borderRadius: radii.md }]}
+-              />
+-              <View
+-                style={[
+-                  StyleSheet.absoluteFill,
+-                  { borderColor: color, opacity: 0.22, borderWidth: 1, borderRadius: radii.md },
+-                ]}
+-              />
+-              <TabIcon name={iconoServicio(accion.titulo)} color={color} size={19} />
+-            </View>
+-            <ThemedText variant="subtitle" style={styles.flex1} numberOfLines={2}>
+-              {accion.titulo}
+-            </ThemedText>
+-            {/* Vencida: late. Lo demás: la flecha de que se abre. */}
+-            <View style={styles.chevron}>
+-              {accion.vencida ? (
+-                <PulseDot color={color} size={8} />
+-              ) : (
+-                <TabIcon name="chevron" color={colors.textMuted} size={19} />
+-              )}
+-            </View>
+-          </View>
+-
+-          {/* El dato técnico manda: km del intervalo, con su barra. */}
+-          {accion.progreso != null ? (
+-            <View style={{ gap: 6 }}>
+-              <BarraIntervalo progreso={accion.progreso} tone={tone} />
+-              <ThemedText variant="caption" color={accion.vencida ? tone : 'textSecondary'} tabular numberOfLines={1}>
+-                {accion.detalle}
+-              </ThemedText>
+-            </View>
+-          ) : (
+-            <ThemedText variant="caption" color="textSecondary" numberOfLines={2}>
+-              {accion.detalle}
+-            </ThemedText>
+-          )}
+-
+-          <View style={[styles.fila, { gap: spacing.sm }]}>
+-            <Pastilla tono={estado.tono} label={estado.label} conPunto />
+-            {/* Una vez hecha, su urgencia ya no dice nada. */}
+-            {!hecha ? (
+-              <Pastilla tono={toneRelevancia(accion.relevancia)} label={RELEVANCIA_LABEL[accion.relevancia]} />
+-            ) : null}
+-            <View style={styles.flex1} />
+-            <ThemedText variant="caption" color="textMuted" tabular>
+-              {formatFecha(accion.creadaEn)}
+-            </ThemedText>
+-          </View>
+-        </View>
+-      </Card>
+-    </PressableScale>
+-  );
++/** El estado de una acción en los 3 de la ODT (Abierta / En revisión / Resuelta), como sus cifras. */
++function grupoDe(a: AccionMantenimiento): GrupoEstado {
++  if (a.estado === 'realizada') return 'resuelta';
++  if (a.estado === 'en_proceso') return 'revision';
++  return 'abierta';
+ }
+ 
+ /**
+@@ -350,7 +81,9 @@ export default function MantenimientoScreen() {
+   const [cargando, setCargando] = useState(true);
+   /** Por qué no se pudieron leer las órdenes; `null` si se leyeron. */
+   const [odtSinLeer, setOdtSinLeer] = useState<MotivoSinOrdenes>(null);
+-  const [tipo, setTipo] = useState<FiltroTipo>('todas');
++  /** '' = todos los tipos. */
++  const [tipo, setTipo] = useState<'' | MantenimientoTipo>('');
++  const [grupo, setGrupo] = useState<GrupoEstado>('todas');
+   const [busqueda, setBusqueda] = useState('');
+ 
+   const cargar = useCallback(async () => {
+@@ -375,27 +108,25 @@ export default function MantenimientoScreen() {
+   );
+ 
+   /**
+-   * TODAS juntas por defecto.
+-   *
+-   * Con el selector de siempre solo se veía un tipo a la vez, así que para
+-   * saber qué esperaba la unidad había que pasar por tres pestañas. El tipo
+-   * pasa a ser un filtro OPCIONAL, y lo urgente sube: primero lo vencido y
+-   * dentro, lo de más relevancia.
++   * TODAS juntas por defecto. El tipo y el estado ACOTAN (los dos arriba, como
++   * en la web) y la lista va siempre de la más nueva a la más vieja, también
++   * dentro de cada tramo.
+    */
+-  const cuentaDe = (t: MantenimientoTipo) => acciones.filter((a) => a.tipo === t && a.estado !== 'realizada').length;
+-  const visibles = useMemo(() => {
++  const buscadas = useMemo(() => {
+     const q = plano(busqueda.trim());
+-    const orden: Record<string, number> = { alta: 0, media: 1, baja: 2 };
+-    return acciones
+-      .filter((a) => tipo === 'todas' || a.tipo === tipo)
+-      .filter((a) => !q || plano(`${a.titulo} ${a.detalle} ${a.generadoPor}`).includes(q))
+-      .sort(
+-        (a, b) =>
+-          Number(b.vencida) - Number(a.vencida) ||
+-          Number(a.estado === 'realizada') - Number(b.estado === 'realizada') ||
+-          (orden[a.relevancia] ?? 3) - (orden[b.relevancia] ?? 3),
+-      );
+-  }, [acciones, tipo, busqueda]);
++    return acciones.filter((a) => !q || plano(`${a.titulo} ${a.detalle} ${a.generadoPor}`).includes(q));
++  }, [acciones, busqueda]);
++  const delTipo = buscadas.filter((a) => !tipo || a.tipo === tipo);
++  const visibles = useMemo(
++    () =>
++      masNuevasPrimero(
++        buscadas.filter((a) => (!tipo || a.tipo === tipo) && (grupo === 'todas' || grupoDe(a) === grupo)),
++        (a) => a.creadaEn,
++      ),
++    [buscadas, tipo, grupo],
++  );
++  const cuentaEstado = (g: GrupoEstado) => delTipo.filter((a) => g === 'todas' || grupoDe(a) === g).length;
++  const delEstado = buscadas.filter((a) => grupo === 'todas' || grupoDe(a) === grupo);
+ 
+   /**
+    * Tres tramos, no una lista corrida: lo VENCIDO, lo PENDIENTE y lo HECHO.
+@@ -561,30 +292,25 @@ export default function MantenimientoScreen() {
+               </View>
+ 
+               {/* Los filtros siguen aquí aunque no haya nada que mostrar: si
+-                  no, filtrar a un tipo vacío te dejaría sin manera de volver. */}
++                  no, filtrar a un estado vacío te dejaría sin manera de volver. */}
+               <Escalonado indice={4}>
+-              <RielOpciones seleccion={tipo} contentContainerStyle={[styles.filtros, { gap: spacing.sm }]}>
+-                <OpcionRiel id="todas">
+-                  <ChipTipo
+-                    label="Todas"
+-                    tono="primary"
+-                    activo={tipo === 'todas'}
+-                    cuenta={acciones.filter((a) => a.estado !== 'realizada').length}
+-                    onPress={() => setTipo('todas')}
+-                  />
+-                </OpcionRiel>
+-                {TIPO_OPCIONES.map((t) => (
+-                  <OpcionRiel key={t.value} id={t.value}>
+-                    <ChipTipo
+-                      label={t.label}
+-                      tono={t.tone}
+-                      activo={tipo === t.value}
+-                      cuenta={cuentaDe(t.value)}
+-                      onPress={() => setTipo(t.value)}
+-                    />
+-                  </OpcionRiel>
+-                ))}
+-              </RielOpciones>
++                <FiltroEstadoMantenimiento
++                  valor={grupo}
++                  onCambiar={setGrupo}
++                  cuentas={{
++                    todas: cuentaEstado('todas'),
++                    abierta: cuentaEstado('abierta'),
++                    revision: cuentaEstado('revision'),
++                    resuelta: cuentaEstado('resuelta'),
++                  }}
++                  tipos={TIPO_OPCIONES.map((t) => ({
++                    id: t.value,
++                    label: t.label,
++                    cuenta: delEstado.filter((a) => a.tipo === t.value).length,
++                  }))}
++                  tipo={tipo}
++                  onTipo={(id) => setTipo(id as '' | MantenimientoTipo)}
++                />
+               </Escalonado>
+ 
+               {cargando ? (
+@@ -607,22 +333,24 @@ export default function MantenimientoScreen() {
+                   title={
+                     busqueda.trim()
+                       ? 'Nada con esa búsqueda'
+-                      : tipo === 'todas'
+-                        ? 'Tu unidad está al día'
+-                        : `Sin mantenimiento ${TIPO_OPCIONES.find((t) => t.value === tipo)?.label.toLowerCase()}`
++                      : tipo
++                        ? `Sin mantenimiento ${TIPO_OPCIONES.find((t) => t.value === tipo)?.label.toLowerCase()}`
++                        : grupo === 'todas'
++                          ? 'Tu unidad está al día'
++                          : 'Nada en este estado'
+                   }
+                 />
+               ) : (
+                 // `key` por tipo: la primera vez que se abre cada filtro la lista
+                 // entra escalonada; un refresco ya no la repite.
+-                <View key={tipo} style={{ gap: spacing.lg }}>
++                <View key={`${tipo}-${grupo}`} style={{ gap: spacing.lg }}>
+                   {grupos.map((g) => (
+                     <View key={g.label} style={{ gap: spacing.sm }}>
+                       <EncabezadoGrupo label={g.label} cuenta={g.items.length} tono={g.tono} />
+                       {g.items.map((a) => (
+                         // El escalonado solo en las primeras de la lista entera:
+                         // esperar por cada tarjeta convertía la entrada en cola.
+-                        <Escalonado key={a.id} grupo={`lista-${tipo}`} indice={2 + visibles.indexOf(a)}>
++                        <Escalonado key={a.id} grupo={`lista-${tipo}-${grupo}`} indice={2 + visibles.indexOf(a)}>
+                           <TarjetaAccion accion={a} onPress={() => abrir(a)} />
+                         </Escalonado>
+                       ))}
+@@ -655,8 +383,6 @@ const styles = StyleSheet.create({
+   root: { flex: 1 },
+   safeArea: { flex: 1 },
+   flex1: { flex: 1, minWidth: 0 },
+-  filtros: { flexDirection: 'row', alignItems: 'center', paddingRight: 4 },
+-  chip: { height: 34, flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth },
+   // Deja aire abajo para que el botón flotante no tape la última tarjeta; arriba
+   // poco, que el título ya trae el suyo.
+   content: { width: '100%', maxWidth: 640, alignSelf: 'center', paddingTop: 8, paddingBottom: 96 },
+@@ -666,30 +392,7 @@ const styles = StyleSheet.create({
+   lead: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
+   estadoChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5 },
+ 
+-  // Tarjeta de acción.
+-  tarjeta: { padding: 0, overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth },
+-  halo: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 90 },
+-  cuerpo: { flex: 1 },
+-  fila: { flexDirection: 'row', alignItems: 'center' },
+-  // El título puede ir a dos líneas: el ícono y el chevron se alinean arriba.
+-  filaTitulo: { flexDirection: 'row', alignItems: 'flex-start' },
+-  iconoServicio: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+-  chevron: { paddingTop: 8 },
+-  punto: { width: 6, height: 6, borderRadius: 3 },
+   chipTexto: { fontWeight: '600' },
+-  pastilla: {
+-    flexDirection: 'row',
+-    alignItems: 'center',
+-    gap: 5,
+-    height: 22,
+-    paddingHorizontal: 9,
+-    overflow: 'hidden',
+-  },
+-
+-  // Barra del intervalo de servicio.
+-  pista: { height: 5, width: '100%', overflow: 'hidden', justifyContent: 'center' },
+-  relleno: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, width: '100%' },
+-  marca: { position: 'absolute', width: 2, height: 9, borderRadius: 1, opacity: 0.9 },
+ 
+   // Barra de la acción principal, apoyada en el borde inferior.
+   barraAccion: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 36, justifyContent: 'flex-end' },
+diff --git a/src/app/mapa-flota.tsx b/src/app/mapa-flota.tsx
+index 5df022a..ca27e43 100644
+--- a/src/app/mapa-flota.tsx
++++ b/src/app/mapa-flota.tsx
+@@ -12,6 +12,7 @@ import { TextoVivo } from '@/components/texto-vivo';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { detalleDeUnidad, estadoDeUnidad, useFlotaFom } from '@/hooks/use-flota-fom';
++import { HAY_MAPBOX } from '@/lib/mapbox';
+ import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
+ import { enteActivoFom } from '@/services';
+ import { useTheme } from '@/theme';
+@@ -51,6 +52,8 @@ export default function MapaFlotaScreen() {
+   const [horas, setHoras] = useState<Rango>(24);
+   const [viajeActivo, setViajeActivo] = useState<number | null>(null);
+   const [foco, setFoco] = useState<Foco | null>(null);
++  /** Pedido de abrir «Llegada» de la unidad tocada (cambia en cada toque del botón). */
++  const [pedidoLlegada, setPedidoLlegada] = useState(0);
+   const recorrido = useRecorrido(enRuta?.id ?? null, horas, enRuta?.companyId);
+ 
+   const todos: MapMarker[] = useMemo(
+@@ -109,6 +112,7 @@ export default function MapaFlotaScreen() {
+         viajeActivo={viajeActivo}
+         onElegirViaje={setViajeActivo}
+         foco={foco}
++        llegadaClave={pedidoLlegada}
+         margenArriba={insets.top + 64}
+         margenAbajo={abajo + insets.bottom}
+         style={styles.mapa}
+@@ -184,8 +188,22 @@ export default function MapaFlotaScreen() {
+               }
+               accessibilityRole="button"
+               style={[styles.boton, { backgroundColor: colors.primary }]}>
+-              <ThemedText style={[styles.botonTexto, { color: colors.onPrimary }]}>Ver recorrido</ThemedText>
++              <ThemedText style={[styles.botonTexto, { color: colors.onPrimary }]} numberOfLines={1}>
++                Ver recorrido
++              </ThemedText>
+             </PressableScale>
++            {/* Cuánto tarda en llegar a un destino: abre la tarjeta «Llegada» del mapa (solo con Mapbox). */}
++            {HAY_MAPBOX ? (
++              <PressableScale
++                onPress={() => setPedidoLlegada((n) => n + 1)}
++                accessibilityRole="button"
++                accessibilityHint="Cuánto tarda en llegar a un destino"
++                style={[styles.boton, { backgroundColor: colors.surfaceSunken }]}>
++                <ThemedText style={styles.botonTexto} numberOfLines={1}>
++                  Llegada
++                </ThemedText>
++              </PressableScale>
++            ) : null}
+             <PressableScale
+               onPress={() =>
+                 router.navigate({ pathname: '/unidad', params: { vehicleId: unidad.vehicle.id, companyId: unidad.vehicle.companyId ?? '' } })
+diff --git a/src/app/panel/mantenimiento.tsx b/src/app/panel/mantenimiento.tsx
+index 904fe1b..1874153 100644
+--- a/src/app/panel/mantenimiento.tsx
++++ b/src/app/panel/mantenimiento.tsx
+@@ -10,6 +10,7 @@ import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
+ import { TituloPantalla } from '@/components/encabezado-fom';
+ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
++import { FiltroEstadoMantenimiento, type GrupoEstado } from '@/components/filtro-estado-mantenimiento';
+ import { ErrorState } from '@/components/error-state';
+ import { Escalonado } from '@/components/escalonado';
+ import { Insignia } from '@/components/insignia';
+@@ -17,7 +18,6 @@ import { SeccionOdtAsignadas } from '@/components/odt-asignada-seccion';
+ import {
+   CifrasMantenimiento,
+   ComoAvanzaOdt,
+-  FilaOrden,
+   PestanasMantenimiento,
+   type PestanaMantenimiento,
+ } from '@/components/mantenimiento-piezas';
+@@ -28,6 +28,7 @@ import { ScrollVisible } from '@/components/scroll-visible';
+ import { SearchBar, normalizar } from '@/components/search-bar';
+ import { Skeleton } from '@/components/skeleton';
+ import { TabIcon } from '@/components/tab-icon';
++import { masNuevasPrimero, TarjetaAccion, TarjetaOdt } from '@/components/tarjeta-mantenimiento';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { useAsyncData } from '@/hooks/use-async-data';
+@@ -43,32 +44,28 @@ import {
+ } from '@/services';
+ import { useAdmin } from '@/session';
+ import { useTheme } from '@/theme';
+-import type { OdtTipo, WorkOrderListItem } from '@/types';
++import type { WorkOrderListItem } from '@/types';
+ import { identidadDeUnidad } from '@/lib/vehiculos';
+-import { haceDias } from '@/utils/date';
+ import { aplicarFiltros, type Filtro } from '@/utils/filtros';
+ import { colorDeEnte } from '@/utils/paleta-flota';
+-import {
+-  COLAS,
+-  porOrden,
+-  porUrgencia,
+-  tareasDe,
+-  unidadesPorAtender,
+-  type Tarea,
+-  type TipoTarea,
+-} from '@/utils/tareas-mantto';
++import { COLAS, tareasDe, unidadesPorAtender, type Tarea, type TipoTarea } from '@/utils/tareas-mantto';
+ 
+ /** De cuántas en cuántas se enseña «Todas las órdenes». */
+ const TANDA_TODAS = 30;
+ 
+-/** Cómo se dice el tipo de una ODT en su fila, como en la web. */
+-const TIPO_ODT: Record<OdtTipo, string> = { correctiva: 'Correctiva', preventiva: 'Preventiva' };
+-/** Y el de una alerta del sistema, que no es una ODT. */
+-const TIPO_ALERTA: Record<TipoTarea, string> = {
+-  correctivo: 'Correctivo',
+-  preventivo: 'Preventivo',
+-  predictivo: 'Predictivo',
+-};
++/** Las opciones del botón «Tipo», como el filtro de tipo de la web. */
++const TIPOS: { id: TipoTarea; label: string }[] = [
++  { id: 'correctivo', label: 'Correctivo' },
++  { id: 'preventivo', label: 'Preventivo' },
++  { id: 'predictivo', label: 'Predictivo' },
++];
++
++/** El tipo de una ODT del historial, en los de las tareas. */
++const tipoDeOdt = (o: WorkOrderListItem): TipoTarea => (o.tipo === 'preventiva' ? 'preventivo' : 'correctivo');
++
++/** El estado de una ODT en los 3 visibles. */
++const grupoDeOdt = (o: WorkOrderListItem): GrupoEstado =>
++  o.estado === 'abierta' ? 'abierta' : o.estado === 'cerrada' ? 'resuelta' : 'revision';
+ 
+ /**
+  * MANTENIMIENTO (Tablero 2 · Módulo 5): QUÉ trabajo hay que hacer y CUÁNDO.
+@@ -102,6 +99,9 @@ export default function AdminMantenimientoScreen() {
+   const [vista, setVista] = useState<'prioridades' | 'lista'>('prioridades');
+   const [q, setQ] = useState('');
+   const [filtro, setFiltro] = useState<string[]>([]);
++  /** Los filtros de arriba de la lista: el estado (los 3 de la ODT) y el tipo ('' = todos). */
++  const [grupo, setGrupo] = useState<GrupoEstado>('todas');
++  const [tipo, setTipo] = useState<'' | TipoTarea>('');
+   /** Cuántas filas de «Todas las órdenes» se pintan: el historial entero son cientos. */
+   const [topeTodas, setTopeTodas] = useState(TANDA_TODAS);
+   // Al cambiar de empresa (la pantalla se reutiliza) se limpia lo que se
+@@ -111,6 +111,8 @@ export default function AdminMantenimientoScreen() {
+     setEmpresaPrevia(empresaId);
+     setQ('');
+     setFiltro([]);
++    setGrupo('todas');
++    setTipo('');
+     setTopeTodas(TANDA_TODAS);
+   }
+ 
+@@ -136,10 +138,12 @@ export default function AdminMantenimientoScreen() {
+   // volver a la pestaña lo pinte al instante, y se refresca al volver a la
+   // pantalla: una ODT resuelta en su detalle tiene que verse resuelta aquí.
+   const verTodas = pestana === 'todas';
++  // «Resueltas» en Órdenes también sale del historial: las abiertas no las traen.
++  const pideHistorial = verTodas || grupo === 'resuelta';
+   const historial = useAsyncData(
+-    () => (verTodas ? getOrdenesDeTrabajo(cid) : Promise.resolve(null)),
+-    [cid, verTodas],
+-    { onFocus: true, ...(verTodas && cid ? { clave: `odt-historial:${cid}` } : {}) },
++    () => (pideHistorial ? getOrdenesDeTrabajo(cid) : Promise.resolve(null)),
++    [cid, pideHistorial],
++    { onFocus: true, ...(pideHistorial && cid ? { clave: `odt-historial:${cid}` } : {}) },
+   );
+ 
+   const tareas = useMemo(() => (data ? tareasDe(data.ordenes, data.acciones) : []), [data]);
+@@ -177,21 +181,19 @@ export default function AdminMantenimientoScreen() {
+   // total del servidor, no la del mes: por eso no dice «este mes».
+   const nResueltas = data?.resumen ? data.resumen.odtCerradas : '—';
+ 
+-  // ── Buscar y filtrar: por tipo, y por el área de la unidad en su color ──
+-  const filtros: Filtro<Tarea>[] = [
+-    { id: 'tipo:correctivo', label: 'Correctivo · ODT', cumple: (t) => t.tipo === 'correctivo' },
+-    { id: 'tipo:preventivo', label: 'Preventivo', cumple: (t) => t.tipo === 'preventivo' },
+-    { id: 'tipo:predictivo', label: 'Predictivo', cumple: (t) => t.tipo === 'predictivo' },
++  // ── Buscar y filtrar: por el área de la unidad en su color (el tipo y el
++  //    estado van en los filtros de arriba de la lista, como en la web) ──
++  const accionDe = new Map([...(data?.acciones.values() ?? [])].flat().map((a) => [a.id, a]));
++  const filtrosDe = <T,>(unidad: (x: T) => string): Filtro<T>[] => [
+     ...areas.map((a) => ({
+       id: `area:${a.id}`,
+       label: a.nombre,
+       color: colorDeEnte(a),
+-      cumple: (t: Tarea) => areaDe(t.vehicleId) === a.id,
++      cumple: (x: T) => areaDe(unidad(x)) === a.id,
+     })),
+-    ...(areas.length > 0
+-      ? [{ id: 'area:ninguna', label: 'Sin área', cumple: (t: Tarea) => !areaDe(t.vehicleId) }]
+-      : []),
++    ...(areas.length > 0 ? [{ id: 'area:ninguna', label: 'Sin área', cumple: (x: T) => !areaDe(unidad(x)) }] : []),
+   ];
++  const filtros = filtrosDe<Tarea>((t) => t.vehicleId);
+   const nq = normalizar(q);
+   /** ¿El texto, o el id o la placa de su unidad, tienen lo que se busca? */
+   const coincide = (texto: string, vehicleId: string) => {
+@@ -200,7 +202,7 @@ export default function AdminMantenimientoScreen() {
+     return normalizar(`${texto} ${f?.vehicle.numero ?? ''} ${f?.vehicle.placa ?? ''}`).includes(nq);
+   };
+   const buscadas = tareas.filter((t) => coincide(`${t.titulo} ${t.reporta ?? ''}`, t.vehicleId));
+-  const visibles = aplicarFiltros(buscadas, filtros, filtro);
++  const filtradas = aplicarFiltros(buscadas, filtros, filtro);
+   // La cuenta de cada opción, sobre lo que la búsqueda ya dejó pasar.
+   const opciones = filtros.map((f) => ({
+     id: f.id,
+@@ -209,7 +211,34 @@ export default function AdminMantenimientoScreen() {
+     ...(f.color ? { color: f.color } : {}),
+   }));
+ 
+-  const colas = COLAS.map((c) => ({ ...c, items: visibles.filter((t) => t.cola === c.id).sort(porOrden) }));
++  /** Cuándo se reportó (ODT) o se generó (alerta) una tarea. */
++  const fechaDe = (t: Tarea) =>
++    t.destino.pathname === '/orden' ? ordenDe.get(t.destino.id)?.creadaEn : accionDe.get(t.destino.id)?.creadaEn;
++  /** Una tarea en los 3 estados: la ODT por el suyo; la alerta, en revisión si ya está en proceso. */
++  const grupoDe = (t: Tarea): GrupoEstado => {
++    const o = t.destino.pathname === '/orden' ? ordenDe.get(t.destino.id) : undefined;
++    if (o) return grupoDeOdt(o);
++    return t.cola === 'revision' ? 'revision' : 'abierta';
++  };
++  const delTipo = filtradas.filter((t) => !tipo || t.tipo === tipo);
++  // Siempre de la más nueva a la más vieja: en la lista y dentro de cada cola.
++  const visibles = masNuevasPrimero(
++    delTipo.filter((t) => grupo === 'todas' || grupoDe(t) === grupo),
++    fechaDe,
++  );
++  const colas = COLAS.map((c) => ({ ...c, items: visibles.filter((t) => t.cola === c.id) }));
++
++  // Las resueltas (del historial), con la misma búsqueda, área y tipo.
++  const historialFiltrado = masNuevasPrimero(
++    aplicarFiltros(
++      (historial.data ?? []).filter((o) => coincide(`${o.descripcion} ${o.driverName}`, o.vehicleId)),
++      filtrosDe<WorkOrderListItem>((o) => o.vehicleId),
++      filtro,
++    ),
++    (o) => o.creadaEn,
++  );
++  const historialDelTipo = historialFiltrado.filter((o) => !tipo || tipoDeOdt(o) === tipo);
++  const resueltas = historialDelTipo.filter((o) => o.estado === 'cerrada');
+ 
+   const abrir = (destino: Tarea['destino']) =>
+     router.navigate({ pathname: destino.pathname, params: { id: destino.id, companyId: cid } });
+@@ -222,39 +251,25 @@ export default function AdminMantenimientoScreen() {
+     else setPestana(p);
+   };
+ 
+-  /** Una tarea en su fila: si es una ODT, con su estado y su tipo. */
+-  const filaDeTarea = (t: Tarea, i: number) => {
++  /** Una tarea en su tarjeta: la misma que ve el conductor, con la unidad delante. */
++  const tarjetaDeTarea = (t: Tarea) => {
+     const o = t.destino.pathname === '/orden' ? ordenDe.get(t.destino.id) : undefined;
++    const a = o ? undefined : accionDe.get(t.destino.id);
++    if (a) return <TarjetaAccion key={t.id} accion={a} antes={unidadTexto(t.vehicleId)} onPress={() => abrir(t.destino)} />;
+     return (
+-      <FilaOrden
++      <TarjetaOdt
+         key={t.id}
++        orden={o ?? { descripcion: t.titulo, estado: t.cola === 'revision' ? 'en_revision' : 'abierta' }}
+         unidad={unidadTexto(t.vehicleId)}
+-        titulo={t.titulo}
+-        estado={o?.estado}
+-        etiqueta={o ? undefined : TIPO_ALERTA[t.tipo]}
+-        detalle={o ? `${t.cuando} · ${TIPO_ODT[o.tipo ?? 'correctiva']}` : t.cuando}
+-        primera={i === 0}
+         onPress={() => abrir(t.destino)}
+       />
+     );
+   };
+ 
+-  /** Una orden del historial: resueltas incluidas, con cuándo se resolvió. */
+-  const filaDeOrden = (o: WorkOrderListItem, i: number) => {
+-    const cuando =
+-      o.estado === 'cerrada' && o.resueltaEn ? `resuelta ${haceDias(o.resueltaEn)}` : `creada ${haceDias(o.creadaEn)}`;
+-    return (
+-      <FilaOrden
+-        key={o.id}
+-        unidad={unidadTexto(o.vehicleId)}
+-        titulo={o.descripcion}
+-        estado={o.estado}
+-        detalle={`${cuando} · ${TIPO_ODT[o.tipo ?? 'correctiva']}`}
+-        primera={i === 0}
+-        onPress={() => abrir({ pathname: '/orden', id: o.id })}
+-      />
+-    );
+-  };
++  /** Una orden del historial (resueltas incluidas), en la misma tarjeta. */
++  const tarjetaDeOrden = (o: WorkOrderListItem) => (
++    <TarjetaOdt key={o.id} orden={o} unidad={unidadTexto(o.vehicleId)} onPress={() => abrir({ pathname: '/orden', id: o.id })} />
++  );
+ 
+   // La acción principal ya no va al lado del título: va debajo, a lo ancho,
+   // como en la web. Control de la flota pasó a la pestaña Planes.
+@@ -262,26 +277,77 @@ export default function AdminMantenimientoScreen() {
+   const botonNueva = <Button label="Nueva ODT" icon="anadir" onPress={nuevaOdt} />;
+   const pestanas = <PestanasMantenimiento activa={pestana} onCambiar={cambiarPestana} />;
+ 
+-  // ── «Necesita tu atención»: Prioridades (por colas) o Lista (seguida) ──
+-  const atencion = (
+-    <Card style={{ gap: spacing.md, paddingBottom: spacing.xs }}>
+-      <ThemedText style={styles.tituloTarjeta}>Necesita tu atención</ThemedText>
+-      <View style={[styles.fila, { gap: spacing.sm }]} accessibilityRole="radiogroup">
+-        <ChipVista label="Prioridades" on={vista === 'prioridades'} onPress={() => setVista('prioridades')} />
+-        <ChipVista label="Lista" on={vista === 'lista'} onPress={() => setVista('lista')} />
+-      </View>
++  /** El buscador: con el embudo de áreas si la empresa las tiene. */
++  const buscador =
++    areas.length > 0 ? (
+       <BuscadorFiltros
+         q={q}
+         onChangeQ={setQ}
+         placeholder="Buscar orden o unidad…"
+-        titulo="Filtrar tareas"
++        titulo="Filtrar por área"
+         opciones={opciones}
+         seleccion={filtro}
+         onChange={setFiltro}
+       />
+-      {vista === 'prioridades' ? (
++    ) : (
++      <SearchBar value={q} onChangeText={setQ} placeholder="Buscar orden o unidad…" />
++    );
++
++  /** Arriba de la lista, justo debajo del buscador: el estado y el tipo. */
++  const filtrosArriba = (cuentas: Record<GrupoEstado, number | string>, cuentaTipo: (t: TipoTarea) => number) => (
++    <FiltroEstadoMantenimiento
++      valor={grupo}
++      onCambiar={setGrupo}
++      cuentas={cuentas}
++      tipos={TIPOS.map((t) => ({ ...t, cuenta: cuentaTipo(t.id) }))}
++      tipo={tipo}
++      onTipo={(id) => setTipo(id as '' | TipoTarea)}
++    />
++  );
++
++  /** Mientras llega el historial. */
++  const esperando = (
++    <View style={{ gap: spacing.sm }}>
++      {[0, 1, 2].map((i) => (
++        <Skeleton key={i} height={92} radius={radii.lg} />
++      ))}
++    </View>
++  );
++
++  // ── «Necesita tu atención»: Prioridades (por colas) o Lista (seguida). La
++  //    misma tarjeta en las dos: solo cambia el agrupado. ──
++  const listaResueltas =
++    historial.estado === 'error' ? (
++      <ErrorState compacto description="No pudimos cargar las resueltas." onRetry={historial.recargar} />
++    ) : !historial.data ? (
++      esperando
++    ) : resueltas.length > 0 ? (
++      <View style={{ gap: spacing.sm }}>{resueltas.slice(0, topeTodas).map(tarjetaDeOrden)}</View>
++    ) : (
++      <Vacio texto="Todavía no hay órdenes resueltas con estos filtros." />
++    );
++  const atencion = (
++    <View style={{ gap: spacing.md }}>
++      <ThemedText style={styles.tituloTarjeta}>Necesita tu atención</ThemedText>
++      <View style={[styles.fila, { gap: spacing.sm }]} accessibilityRole="radiogroup">
++        <ChipVista label="Prioridades" on={vista === 'prioridades'} onPress={() => setVista('prioridades')} />
++        <ChipVista label="Lista" on={vista === 'lista'} onPress={() => setVista('lista')} />
++      </View>
++      {buscador}
++      {filtrosArriba(
++        {
++          todas: delTipo.length,
++          abierta: delTipo.filter((t) => grupoDe(t) === 'abierta').length,
++          revision: delTipo.filter((t) => grupoDe(t) === 'revision').length,
++          resuelta: historial.data ? resueltas.length : nResueltas,
++        },
++        (tp) => filtradas.filter((t) => t.tipo === tp && (grupo === 'todas' || grupoDe(t) === grupo)).length,
++      )}
++      {grupo === 'resuelta' ? (
++        listaResueltas
++      ) : vista === 'prioridades' ? (
+         colas.map((c) => (
+-          <View key={c.id} style={{ gap: spacing.xs }}>
++          <View key={c.id} style={{ gap: spacing.sm }}>
+             {/* Siempre, con su cuenta: en cero el rótulo se apaga, pero la
+                 cola sigue ahí. */}
+             <EncabezadoGrupo
+@@ -289,41 +355,44 @@ export default function AdminMantenimientoScreen() {
+               cuenta={c.items.length}
+               tono={c.items.length > 0 ? c.tono : 'textMuted'}
+             />
+-            {c.items.length > 0 ? <View>{c.items.map(filaDeTarea)}</View> : null}
++            {c.items.length > 0 ? <View style={{ gap: spacing.sm }}>{c.items.map(tarjetaDeTarea)}</View> : null}
+           </View>
+         ))
+       ) : visibles.length > 0 ? (
+-        <View>{porUrgencia(visibles).map(filaDeTarea)}</View>
++        <View style={{ gap: spacing.sm }}>{visibles.map(tarjetaDeTarea)}</View>
+       ) : (
+-        <Vacio texto={nq || filtro.length > 0 ? 'Nada coincide con la búsqueda.' : 'Nada pendiente por ahora.'} />
++        <Vacio texto={nq || filtro.length > 0 || tipo || grupo !== 'todas' ? 'Nada coincide con los filtros.' : 'Nada pendiente por ahora.'} />
+       )}
+-    </Card>
++    </View>
+   );
+ 
+-  // ── «Todas las órdenes»: el historial, con su buscador ──
+-  const todasVisibles = (historial.data ?? []).filter((o) =>
+-    coincide(`${o.descripcion} ${o.driverName}`, o.vehicleId),
+-  );
++  // ── «Todas las órdenes»: el historial, con su buscador y los mismos filtros ──
++  const todasVisibles = historialDelTipo.filter((o) => grupo === 'todas' || grupoDeOdt(o) === grupo);
+   const listaTodas = (
+-    <Card style={{ gap: spacing.md, paddingBottom: spacing.xs }}>
++    <View style={{ gap: spacing.md }}>
+       <View style={{ gap: 2 }}>
+         <ThemedText style={styles.tituloTarjeta}>Todas las órdenes</ThemedText>
+         <ThemedText variant="caption" color="textSecondary">
+           Abiertas, en revisión y resueltas de esta empresa.
+         </ThemedText>
+       </View>
+-      <SearchBar value={q} onChangeText={setQ} placeholder="Buscar orden o unidad…" />
++      {buscador}
++      {filtrosArriba(
++        {
++          todas: historialDelTipo.length,
++          abierta: historialDelTipo.filter((o) => grupoDeOdt(o) === 'abierta').length,
++          revision: historialDelTipo.filter((o) => grupoDeOdt(o) === 'revision').length,
++          resuelta: historialDelTipo.filter((o) => grupoDeOdt(o) === 'resuelta').length,
++        },
++        (tp) => historialFiltrado.filter((o) => tipoDeOdt(o) === tp && (grupo === 'todas' || grupoDeOdt(o) === grupo)).length,
++      )}
+       {historial.estado === 'error' ? (
+         <ErrorState compacto description="No pudimos cargar las órdenes." onRetry={historial.recargar} />
+       ) : !historial.data ? (
+-        <View style={{ gap: spacing.sm, paddingBottom: spacing.md }}>
+-          {[0, 1, 2].map((i) => (
+-            <Skeleton key={i} height={64} radius={radii.sm} />
+-          ))}
+-        </View>
++        esperando
+       ) : todasVisibles.length > 0 ? (
+-        <View>
+-          {todasVisibles.slice(0, topeTodas).map(filaDeOrden)}
++        <View style={{ gap: spacing.sm }}>
++          {todasVisibles.slice(0, topeTodas).map(tarjetaDeOrden)}
+           {todasVisibles.length > topeTodas ? (
+             <Button
+               label="Ver más"
+@@ -334,9 +403,9 @@ export default function AdminMantenimientoScreen() {
+           ) : null}
+         </View>
+       ) : (
+-        <Vacio texto={nq ? 'Nada coincide con la búsqueda.' : 'Todavía no hay órdenes.'} />
++        <Vacio texto={nq || tipo || grupo !== 'todas' ? 'Nada coincide con los filtros.' : 'Todavía no hay órdenes.'} />
+       )}
+-    </Card>
++    </View>
+   );
+ 
+   return (
+diff --git a/src/components/filtro-estado-mantenimiento.tsx b/src/components/filtro-estado-mantenimiento.tsx
+new file mode 100644
+index 0000000..e15f3e4
+--- /dev/null
++++ b/src/components/filtro-estado-mantenimiento.tsx
+@@ -0,0 +1,174 @@
++import { useState } from 'react';
++import { Pressable, StyleSheet, View } from 'react-native';
++
++import { OptionPickerModal } from '@/components/option-picker';
++import { OpcionRiel, RielOpciones } from '@/components/riel-opciones';
++import { PressableScale } from '@/components/pressable-scale';
++import { TabIcon } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import { useTheme, type ColorTokens } from '@/theme';
++
++/**
++ * LOS FILTROS DE MANTENIMIENTO, arriba de la lista y como en la web: el estado
++ * en un control de píldora (cada opción con su punto de color y su cuenta; la
++ * elegida rellena en el azul FOM) y, al lado, el botón «Tipo» que abre las
++ * opciones. El control se desliza de lado si no cabe: nunca corta el texto.
++ */
++
++/** El azul FOM es fijo en web y app, con su texto oscuro encima (nunca blanco). */
++const AZUL_FOM = '#3D9BF5';
++const SOBRE_AZUL = '#08121C';
++
++/** Los 3 estados visibles de una ODT, y «Todas». */
++export type GrupoEstado = 'todas' | 'abierta' | 'revision' | 'resuelta';
++
++const GRUPOS: { id: GrupoEstado; label: string; tono?: keyof ColorTokens }[] = [
++  { id: 'todas', label: 'Todas' },
++  { id: 'abierta', label: 'Abiertas', tono: 'warning' },
++  { id: 'revision', label: 'En revisión', tono: 'info' },
++  { id: 'resuelta', label: 'Resueltas', tono: 'success' },
++];
++
++export type OpcionTipo = { id: string; label: string; cuenta: number };
++
++export function FiltroEstadoMantenimiento({
++  valor,
++  onCambiar,
++  cuentas,
++  tipos,
++  tipo,
++  onTipo,
++}: {
++  valor: GrupoEstado;
++  onCambiar: (g: GrupoEstado) => void;
++  /** Cuántas hay en cada estado. Un texto («—») cuando no se sabe. */
++  cuentas: Record<GrupoEstado, number | string>;
++  /** Las opciones del botón «Tipo» (sin «Todos los tipos», que se añade solo). */
++  tipos: OpcionTipo[];
++  /** El tipo elegido; '' = todos. */
++  tipo: string;
++  onTipo: (id: string) => void;
++}) {
++  const { colors, spacing, borderWidths, radii } = useTheme();
++  const [abierto, setAbierto] = useState(false);
++  const elegido = tipos.find((t) => t.id === tipo);
++  const total = tipos.reduce((a, t) => a + t.cuenta, 0);
++
++  return (
++    <View style={[styles.fila, { gap: spacing.sm }]}>
++      <View
++        style={[
++          styles.riel,
++          { backgroundColor: colors.surfaceSunken, borderColor: colors.border, borderWidth: borderWidths.hairline },
++        ]}>
++        <RielOpciones seleccion={valor} contentContainerStyle={styles.rielContenido}>
++          {GRUPOS.map((g) => {
++            const on = g.id === valor;
++            const cuenta = cuentas[g.id];
++            return (
++              <OpcionRiel key={g.id} id={g.id}>
++                <Pressable
++                  onPress={() => onCambiar(g.id)}
++                  accessibilityRole="button"
++                  accessibilityState={{ selected: on }}
++                  accessibilityLabel={`${g.label}, ${cuenta}`}
++                  style={[styles.opcion, { backgroundColor: on ? AZUL_FOM : 'transparent' }]}>
++                  {g.tono ? (
++                    <View
++                      style={[
++                        styles.punto,
++                        { backgroundColor: colors[g.tono] },
++                        // Sobre el azul, un aro oscuro: así el azul de «En revisión» no se pierde.
++                        on ? { borderWidth: 1.5, borderColor: SOBRE_AZUL } : null,
++                      ]}
++                    />
++                  ) : null}
++                  <ThemedText
++                    style={[styles.texto, { color: on ? SOBRE_AZUL : colors.textSecondary, fontWeight: on ? '600' : '500' }]}
++                    numberOfLines={1}>
++                    {g.label}
++                  </ThemedText>
++                  <View
++                    style={[
++                      styles.cuenta,
++                      on
++                        ? { backgroundColor: 'rgba(8,18,28,0.16)', borderColor: 'transparent' }
++                        : { backgroundColor: colors.surfaceElevated, borderColor: colors.border },
++                    ]}>
++                    <ThemedText style={[styles.cuentaTexto, { color: on ? SOBRE_AZUL : colors.text }]} tabular>
++                      {String(cuenta)}
++                    </ThemedText>
++                  </View>
++                </Pressable>
++              </OpcionRiel>
++            );
++          })}
++        </RielOpciones>
++      </View>
++
++      {/* «Tipo»: un botón que abre las opciones, no un triángulo de texto. */}
++      <PressableScale
++        onPress={() => setAbierto(true)}
++        accessibilityRole="button"
++        accessibilityLabel={elegido ? `Tipo de orden: ${elegido.label}` : 'Tipo de orden'}>
++        <View
++          style={[
++            styles.tipo,
++            {
++              borderRadius: radii.pill,
++              borderWidth: borderWidths.hairline,
++              borderColor: elegido ? AZUL_FOM : colors.borderStrong,
++              backgroundColor: elegido ? AZUL_FOM : colors.surfaceElevated,
++            },
++          ]}>
++          <TabIcon name="filtro" color={elegido ? SOBRE_AZUL : colors.text} size={16} />
++          <ThemedText style={[styles.texto, { color: elegido ? SOBRE_AZUL : colors.text, fontWeight: '600' }]}>
++            Tipo
++          </ThemedText>
++        </View>
++      </PressableScale>
++
++      <OptionPickerModal
++        visible={abierto}
++        title="Tipo de orden"
++        options={[{ id: '', label: 'Todos los tipos', cuenta: total }, ...tipos].map((t) => ({
++          id: t.id,
++          label: t.label,
++          helper: t.cuenta === 0 ? 'Ninguna' : String(t.cuenta),
++        }))}
++        selectedIds={[tipo]}
++        onChange={(ids) => onTipo(ids[0] ?? '')}
++        onClose={() => setAbierto(false)}
++      />
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  // El riel ocupa lo que queda; lo que no cabe se desliza.
++  riel: { flex: 1, minWidth: 0, borderRadius: 999, overflow: 'hidden' },
++  rielContenido: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 4 },
++  opcion: {
++    flexDirection: 'row',
++    alignItems: 'center',
++    gap: 8,
++    height: 36,
++    paddingLeft: 14,
++    paddingRight: 6,
++    borderRadius: 999,
++  },
++  punto: { width: 8, height: 8, borderRadius: 4 },
++  texto: { fontSize: 13, lineHeight: 18 },
++  cuenta: {
++    minWidth: 26,
++    height: 24,
++    paddingHorizontal: 8,
++    borderRadius: 999,
++    borderWidth: StyleSheet.hairlineWidth,
++    alignItems: 'center',
++    justifyContent: 'center',
++  },
++  cuentaTexto: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
++  tipo: { height: 44, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14 },
++});
+diff --git a/src/components/llegada-tarjeta.tsx b/src/components/llegada-tarjeta.tsx
+new file mode 100644
+index 0000000..98033fd
+--- /dev/null
++++ b/src/components/llegada-tarjeta.tsx
+@@ -0,0 +1,431 @@
++import { useCallback, useEffect, useMemo, useState } from 'react';
++import { StyleSheet, View } from 'react-native';
++import Svg, { Circle, Path } from 'react-native-svg';
++
++import { Flotante } from '@/components/escalonado';
++import { PressableScale } from '@/components/pressable-scale';
++import { Skeleton } from '@/components/skeleton';
++import { ThemedText } from '@/components/themed-text';
++import {
++  distanciaLlegada,
++  extraPorTrafico,
++  horaLlegada,
++  mensajeLlegada,
++  pedirLlegada,
++  tiempoLlegada,
++  type PuntoLlegada,
++  type RutaLlegada,
++} from '@/lib/llegada';
++import { useTheme } from '@/theme';
++
++// ============================================================
++// «LLEGADA» EN EL MAPA DE LA FLOTA (la unidad elegida)
++// ------------------------------------------------------------
++// La tarjeta que flota abajo sobre el mapa y su estado. La usan los dos
++// mapas de Mapbox de la app (el nativo y el de la vista web): ellos dibujan
++// la ruta y el pin, esta tarjeta dice cuánto tarda, a qué hora llega y a qué
++// distancia. Mismo diseño que la tarjeta del panel web.
++// ============================================================
++
++/** Una unidad que puede ser origen o destino. */
++export type UnidadLlegada = { id: string; lat: number; lng: number; placa: string };
++
++type Destino = PuntoLlegada & { nombre: string; unidadId?: string };
++
++/** Lo abierto, de qué unidad (`para`) y cuál elección de destino va (`eleccion`). */
++type Abierta = { para: string; eligiendo: boolean; destino: Destino | null; eleccion: number };
++
++type Resultado = { para: string; eleccion: number; clave: string; ruta: RutaLlegada | null; error: string | null; en: number };
++
++export type FaseLlegada = 'cerrada' | 'inicio' | 'eligiendo' | 'cargando' | 'lista' | 'error';
++
++/**
++ * Lado de la rejilla (en grados, ~330 m) con que se vuelve a pedir la ruta
++ * cuando la unidad (o la unidad destino) se mueve: la flota se relee cada
++ * 20 s y no hace falta una pregunta nueva por cada metro.
++ */
++const REJILLA = 0.003;
++/** Cada cuánto se refresca una llegada a la vista (como la caché de 2 min de la web). */
++const REFRESCO_MS = 120000;
++const celda = (p: PuntoLlegada) => `${Math.round(p.lat / REJILLA)},${Math.round(p.lng / REJILLA)}`;
++
++/**
++ * El estado de «Llegada» para la unidad elegida. Se reinicia solo al elegir
++ * otra unidad (el estado recuerda para cuál era) o cuando deja de estar
++ * disponible (un recorrido en pantalla, sin unidad elegida…).
++ */
++export function useLlegada({
++  disponible,
++  unidadId,
++  unidades,
++}: {
++  disponible: boolean;
++  unidadId: string | null;
++  unidades: UnidadLlegada[];
++}) {
++  const [abierta, setAbierta] = useState<Abierta | null>(null);
++  const [res, setRes] = useState<Resultado | null>(null);
++  // Cada 2 min se vuelve a preguntar (el tráfico cambia aunque la unidad esté quieta).
++  const [vuelta, setVuelta] = useState(0);
++
++  const origenU = unidadId ? unidades.find((u) => u.id === unidadId) : undefined;
++  const vigente = disponible && origenU && abierta && abierta.para === unidadId ? abierta : null;
++  const origen: PuntoLlegada | null = origenU ? { lat: origenU.lat, lng: origenU.lng } : null;
++  // Si el destino es otra unidad, va donde esté ahora.
++  const destinoU = vigente?.destino?.unidadId ? unidades.find((u) => u.id === vigente.destino!.unidadId) : undefined;
++  const destino: Destino | null = vigente?.destino
++    ? destinoU
++      ? { ...vigente.destino, lat: destinoU.lat, lng: destinoU.lng }
++      : vigente.destino
++    : null;
++  const clave = origen && destino ? `${celda(origen)}>${celda(destino)}:${vuelta}` : null;
++
++  const conDestino = !!vigente?.destino;
++  useEffect(() => {
++    if (!conDestino) return;
++    const t = setInterval(() => setVuelta((v) => v + 1), REFRESCO_MS);
++    return () => clearInterval(t);
++  }, [conDestino]);
++
++  useEffect(() => {
++    if (!vigente || !clave || !origen || !destino) return;
++    if (res && res.para === vigente.para && res.eleccion === vigente.eleccion && res.clave === clave) return;
++    // Sin abortar la petición: va a una caché compartida y abortarla le
++    // dejaría un error a quien la pida igual justo después. Una respuesta
++    // que llega tarde (otra elección, otra celda) simplemente se ignora.
++    let vigenteAun = true;
++    const para = vigente.para;
++    const eleccion = vigente.eleccion;
++    pedirLlegada(origen, destino).then(
++      (ruta) => {
++        if (vigenteAun) setRes({ para, eleccion, clave, ruta, error: null, en: Date.now() });
++      },
++      (e: unknown) => {
++        if (vigenteAun) setRes({ para, eleccion, clave, ruta: null, error: mensajeLlegada(e), en: Date.now() });
++      },
++    );
++    return () => {
++      vigenteAun = false;
++    };
++    // Solo cuando cambia la elección o la celda de origen o destino (no en cada relectura de la flota).
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, [vigente?.para, vigente?.eleccion, clave]);
++
++  // El resultado de ESTA elección (aunque sea de una celda anterior: mientras
++  // se recalcula por el movimiento, la tarjeta no vuelve al esqueleto).
++  const suyo = vigente && res && res.para === vigente.para && res.eleccion === vigente.eleccion ? res : null;
++  const fase: FaseLlegada = !vigente
++    ? 'cerrada'
++    : vigente.eligiendo
++      ? 'eligiendo'
++      : !destino
++        ? 'inicio'
++        : !suyo
++          ? 'cargando'
++          : suyo.error
++            ? 'error'
++            : 'lista';
++
++  const abrir = useCallback(() => {
++    if (unidadId) setAbierta({ para: unidadId, eligiendo: false, destino: null, eleccion: 0 });
++  }, [unidadId]);
++  const cerrar = useCallback(() => setAbierta(null), []);
++  const elegir = useCallback(() => setAbierta((a) => (a ? { ...a, eligiendo: true } : a)), []);
++  // Cancelar vuelve a lo de antes (el destino que había, si había).
++  const cancelar = useCallback(() => setAbierta((a) => (a ? { ...a, eligiendo: false } : a)), []);
++  // Quitar borra el destino y la ruta; la tarjeta vuelve a «Elegir destino».
++  const quitar = useCallback(() => setAbierta((a) => (a ? { ...a, eligiendo: false, destino: null, eleccion: a.eleccion + 1 } : a)), []);
++
++  /**
++   * Un toque en el mapa. Eligiendo, ese punto es el destino. Con la tarjeta
++   * abierta el toque se queda aquí (no suelta la unidad): se cierra con la X.
++   * Devuelve si lo usó.
++   */
++  const tocarPunto = useCallback(
++    (p: PuntoLlegada): boolean => {
++      if (!vigente) return false;
++      if (vigente.eligiendo && Number.isFinite(p.lat) && Number.isFinite(p.lng)) {
++        setAbierta({ ...vigente, eligiendo: false, destino: { lat: p.lat, lng: p.lng, nombre: 'Punto elegido' }, eleccion: vigente.eleccion + 1 });
++      }
++      return true;
++    },
++    [vigente],
++  );
++
++  /** Un toque en una unidad. Eligiendo, esa unidad es el destino. Devuelve si lo usó. */
++  const tocarUnidad = useCallback(
++    (id: string): boolean => {
++      if (!vigente?.eligiendo) return false;
++      const u = unidades.find((x) => x.id === id);
++      // La propia unidad no puede ser su destino: el toque se ignora.
++      if (!u || id === vigente.para) return true;
++      setAbierta({
++        ...vigente,
++        eligiendo: false,
++        destino: { lat: u.lat, lng: u.lng, nombre: u.placa, unidadId: u.id },
++        eleccion: vigente.eleccion + 1,
++      });
++      return true;
++    },
++    [vigente, unidades],
++  );
++
++  const ruta = fase === 'lista' || fase === 'eligiendo' ? (suyo?.ruta ?? null) : null;
++  return {
++    fase,
++    placa: origenU?.placa ?? 'Unidad',
++    origen,
++    destino,
++    ruta,
++    error: suyo?.error ?? null,
++    /** Cuándo llegó la respuesta: «llega a las…» cuenta desde ahí (se refresca cada 2 min). */
++    calculadaEn: suyo?.en ?? null,
++    /** Cambia con cada ruta nueva que llega: el mapa la encuadra una vez. */
++    encuadreClave: ruta && vigente ? `${vigente.para}:${vigente.eleccion}` : null,
++    abrir,
++    cerrar,
++    elegir,
++    cancelar,
++    quitar,
++    tocarPunto,
++    tocarUnidad,
++  };
++}
++
++export type Llegada = ReturnType<typeof useLlegada>;
++
++/** Los puntos que debe abarcar la cámara: la unidad, el destino y el camino. */
++export function puntosLlegada(l: Llegada): [number, number][] {
++  const p: [number, number][] = [...(l.ruta?.trazo ?? [])];
++  if (l.origen) p.push([l.origen.lng, l.origen.lat]);
++  if (l.destino) p.push([l.destino.lng, l.destino.lat]);
++  return p;
++}
++
++// ── Iconos ──────────────────────────────────────────────────────────────────
++
++/** El reloj de «Llegada»: en la tarjeta y en el botón de los controles del mapa. */
++export function IconoLlegada({ color, size = 18 }: { color: string; size?: number }) {
++  return (
++    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
++      <Circle cx={12} cy={12} r={8.5} stroke={color} strokeWidth={1.8} />
++      <Path d="M12 7.5V12l3 2" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
++    </Svg>
++  );
++}
++
++function IconoDestino({ color }: { color: string }) {
++  return (
++    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
++      <Circle cx={12} cy={12} r={7} stroke={color} strokeWidth={1.8} />
++      <Path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
++    </Svg>
++  );
++}
++
++function IconoCerrar({ color }: { color: string }) {
++  return (
++    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
++      <Path d="M18 6L6 18M6 6l12 12" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
++    </Svg>
++  );
++}
++
++// ── La tarjeta ──────────────────────────────────────────────────────────────
++
++/**
++ * La tarjeta de «Llegada»: abajo, a lo ancho con 16 px de margen, encima de
++ * lo que tape el mapa (`abajo`). `onAlto` avisa de su alto para que el mapa
++ * suba sus controles y encuadre la ruta sin quedar debajo.
++ */
++export function LlegadaTarjeta({ llegada, abajo, onAlto }: { llegada: Llegada; abajo: number; onAlto?: (alto: number) => void }) {
++  const { colors, radii, spacing, shadows } = useTheme();
++  const { fase, placa } = llegada;
++  const extra = llegada.ruta ? extraPorTrafico(llegada.ruta.minutos, llegada.ruta.minutosNormales) : null;
++  const destinoNombre = llegada.destino?.nombre || 'Punto elegido';
++
++  const boton = useMemo(
++    () => ({
++      primario: [estilos.boton, { backgroundColor: colors.primary }],
++      secundario: [estilos.boton, { backgroundColor: colors.surfaceElevated, borderColor: colors.borderStrong, borderWidth: 1 }],
++    }),
++    [colors],
++  );
++
++  if (fase === 'cerrada') return null;
++
++  return (
++    <Flotante
++      onLayout={(e) => onAlto?.(Math.round(e.nativeEvent.layout.height))}
++      accessibilityLabel={`Llegada de ${placa}`}
++      style={[
++        estilos.tarjeta,
++        shadows.floating,
++        {
++          bottom: 12 + abajo,
++          backgroundColor: colors.surface,
++          borderColor: colors.border,
++          borderRadius: radii.lg,
++          gap: spacing.md,
++        },
++      ]}>
++      {/* Encabezado: la unidad y la pregunta. */}
++      <View style={estilos.fila}>
++        <View style={[estilos.ibox, { backgroundColor: colors.infoSurface, borderRadius: radii.sm }]}>
++          <IconoLlegada color={colors.primary} />
++        </View>
++        <View style={estilos.cabTexto}>
++          <ThemedText style={estilos.placa} numberOfLines={1}>
++            {placa}
++          </ThemedText>
++          <ThemedText style={estilos.bajada} color="textSecondary" numberOfLines={1}>
++            {fase === 'lista' ? 'Llegada con el tráfico de ahora' : '¿Cuánto tarda en llegar?'}
++          </ThemedText>
++        </View>
++        <PressableScale
++          onPress={llegada.cerrar}
++          accessibilityRole="button"
++          accessibilityLabel="Cerrar llegada"
++          hitSlop={6}
++          style={[estilos.cerrar, { backgroundColor: colors.surfaceSunken }]}>
++          <IconoCerrar color={colors.textSecondary} />
++        </PressableScale>
++      </View>
++
++      {fase === 'eligiendo' ? (
++        <>
++          <View style={[estilos.fila, estilos.eligiendo]} accessibilityLiveRegion="polite">
++            <IconoDestino color={colors.primary} />
++            <ThemedText style={estilos.texto14} numberOfLines={2}>
++              Toca un punto del mapa o una unidad
++            </ThemedText>
++          </View>
++          <PressableScale onPress={llegada.cancelar} accessibilityRole="button" style={boton.secundario}>
++            <ThemedText style={estilos.botonTexto}>Cancelar</ThemedText>
++          </PressableScale>
++        </>
++      ) : null}
++
++      {/* Mismo alto que el resultado: al llegar la ruta la tarjeta no salta. */}
++      {fase === 'cargando' ? (
++        <>
++          <View style={estilos.cuerpo} accessibilityLabel="Calculando la llegada" accessibilityLiveRegion="polite">
++            <Skeleton width={150} height={30} radius={radii.sm} />
++            <Skeleton height={22} radius={radii.sm} />
++            <Skeleton width="60%" height={14} radius={radii.sm} />
++          </View>
++          <Skeleton height={48} radius={radii.pill} />
++        </>
++      ) : null}
++
++      {fase === 'lista' && llegada.ruta ? (
++        <>
++          <View style={estilos.cuerpo} accessibilityLiveRegion="polite">
++            <View style={estilos.tiempoFila}>
++              <ThemedText style={estilos.tiempo} tabular>
++                {tiempoLlegada(llegada.ruta.minutos)}
++              </ThemedText>
++              <ThemedText style={estilos.bajada} color="textSecondary" numberOfLines={1}>
++                llega a las {horaLlegada(llegada.ruta.minutos, llegada.calculadaEn ?? undefined)}
++              </ThemedText>
++            </View>
++            {/* La mini línea del viaje: ● unidad ─── distancia ─── ◆ destino. */}
++            <View
++              accessible
++              accessibilityLabel={`${distanciaLlegada(llegada.ruta.km)} desde ${placa} hasta ${destinoNombre}`}>
++              <View style={estilos.fila}>
++                <View style={[estilos.origen, { backgroundColor: colors.text, borderColor: colors.surface }]} />
++                <View style={[estilos.trazo, { backgroundColor: colors.borderStrong }]} />
++                <View style={[estilos.distancia, { backgroundColor: colors.surfaceSunken, borderRadius: radii.sm }]}>
++                  <ThemedText style={estilos.distanciaTexto} tabular>
++                    {distanciaLlegada(llegada.ruta.km)}
++                  </ThemedText>
++                </View>
++                <View style={[estilos.trazo, { backgroundColor: colors.borderStrong }]} />
++                <View style={[estilos.rombo, { backgroundColor: colors.primary }]} />
++              </View>
++              <View style={[estilos.fila, estilos.puntos]}>
++                <ThemedText style={estilos.punto} color="textMuted" numberOfLines={1}>
++                  {placa}
++                </ThemedText>
++                <ThemedText style={[estilos.punto, estilos.derecha]} color="textMuted" numberOfLines={1}>
++                  {destinoNombre}
++                </ThemedText>
++              </View>
++            </View>
++            {extra ? (
++              <View style={[estilos.chip, { backgroundColor: colors.warningSurface, borderRadius: radii.sm }]}>
++                <ThemedText style={estilos.chipTexto} color="warning">
++                  +{tiempoLlegada(extra)} por tráfico
++                </ThemedText>
++              </View>
++            ) : null}
++          </View>
++          <View style={estilos.fila}>
++            <PressableScale onPress={llegada.elegir} accessibilityRole="button" style={[boton.secundario, estilos.flex]}>
++              <ThemedText style={estilos.botonTexto}>Cambiar destino</ThemedText>
++            </PressableScale>
++            <PressableScale onPress={llegada.quitar} accessibilityRole="button" style={estilos.textoBoton}>
++              <ThemedText style={estilos.botonTexto} color="textSecondary">
++                Quitar
++              </ThemedText>
++            </PressableScale>
++          </View>
++        </>
++      ) : null}
++
++      {fase === 'inicio' || fase === 'error' ? (
++        <>
++          {fase === 'error' && llegada.error ? (
++            <ThemedText style={estilos.texto14} color="danger" accessibilityRole="alert">
++              {llegada.error}
++            </ThemedText>
++          ) : null}
++          <View style={estilos.fila}>
++            <PressableScale onPress={llegada.elegir} accessibilityRole="button" style={[boton.primario, estilos.flex]}>
++              <ThemedText style={[estilos.botonTexto, { color: colors.onPrimary }]}>
++                {fase === 'error' ? 'Elegir otro destino' : 'Elegir destino'}
++              </ThemedText>
++            </PressableScale>
++            {fase === 'error' && llegada.destino ? (
++              <PressableScale onPress={llegada.quitar} accessibilityRole="button" style={estilos.textoBoton}>
++                <ThemedText style={estilos.botonTexto} color="textSecondary">
++                  Quitar
++                </ThemedText>
++              </PressableScale>
++            ) : null}
++          </View>
++        </>
++      ) : null}
++    </Flotante>
++  );
++}
++
++const estilos = StyleSheet.create({
++  tarjeta: { position: 'absolute', left: 16, right: 16, padding: 16, borderWidth: 1 },
++  fila: { flexDirection: 'row', alignItems: 'center', gap: 12 },
++  flex: { flex: 1 },
++  ibox: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
++  cabTexto: { flex: 1, minWidth: 0 },
++  placa: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
++  bajada: { fontSize: 13, lineHeight: 18 },
++  cerrar: { width: 36, height: 36, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
++  eligiendo: { minHeight: 48, gap: 10 },
++  texto14: { flexShrink: 1, fontSize: 14, lineHeight: 20 },
++  cuerpo: { gap: 10, minHeight: 92 },
++  tiempoFila: { flexDirection: 'row', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' },
++  tiempo: { fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.5 },
++  origen: { width: 12, height: 12, borderRadius: 6, borderWidth: 2 },
++  trazo: { flex: 1, height: 2, borderRadius: 1 },
++  distancia: { height: 22, paddingHorizontal: 8, justifyContent: 'center', marginHorizontal: -4 },
++  distanciaTexto: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
++  rombo: { width: 10, height: 10, borderRadius: 2, transform: [{ rotate: '45deg' }], marginRight: 1 },
++  puntos: { justifyContent: 'space-between', marginTop: 4 },
++  punto: { flexShrink: 1, fontSize: 12, lineHeight: 16, fontWeight: '500' },
++  derecha: { textAlign: 'right' },
++  chip: { alignSelf: 'flex-start', height: 24, paddingHorizontal: 10, justifyContent: 'center' },
++  chipTexto: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
++  boton: { height: 48, borderRadius: 999, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
++  textoBoton: { height: 48, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
++  botonTexto: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
++});
+diff --git a/src/components/map-vehiculo-clasico.tsx b/src/components/map-vehiculo-clasico.tsx
+index f6fe08f..dd7d6b2 100644
+--- a/src/components/map-vehiculo-clasico.tsx
++++ b/src/components/map-vehiculo-clasico.tsx
+@@ -101,6 +101,12 @@ export type MapaVehiculoProps = {
+    * la cámara va sola a ella. Por defecto, interactivo.
+    */
+   interactivo?: boolean;
++  /**
++   * Abre «Llegada» de la unidad destacada cada vez que cambia (p. ej. el botón
++   * «Llegada» de su ficha). Si ya está abierta, no la toca. Solo los mapas de
++   * Mapbox; el mapa clásico lo ignora.
++   */
++  llegadaClave?: number;
+ };
+ 
+ type Coords = { latitude: number; longitude: number };
+diff --git a/src/components/map-vehiculo-dom.tsx b/src/components/map-vehiculo-dom.tsx
+index ec61eea..ecf6023 100644
+--- a/src/components/map-vehiculo-dom.tsx
++++ b/src/components/map-vehiculo-dom.tsx
+@@ -2,10 +2,11 @@ import * as Location from 'expo-location';
+ import { useEffect, useMemo, useState } from 'react';
+ import { StyleSheet, View } from 'react-native';
+ 
++import { LlegadaTarjeta, puntosLlegada, useLlegada, type UnidadLlegada } from '@/components/llegada-tarjeta';
+ import type { MapaVehiculoProps } from '@/components/map-vehiculo-clasico';
+ import MapaFomDom, { type MarcadorDom, type RutaDom } from '@/components/mapa-fom-dom';
+ import { useMapaPrefs } from '@/hooks/use-map-prefs';
+-import { configStandard, ESTILO_MAPBOX, MAPBOX_TOKEN } from '@/lib/mapbox';
++import { configStandard, ESTILO_MAPBOX, HAY_MAPBOX, MAPBOX_TOKEN } from '@/lib/mapbox';
+ import { useTheme } from '@/theme';
+ import type { MapMarker } from '@/types';
+ import { colorApagado } from '@/utils/paleta-flota';
+@@ -14,7 +15,8 @@ import { colorApagado } from '@/utils/paleta-flota';
+  * El mapa de Mapbox de la web, para la app en el teléfono cuando no hay Mapbox
+  * nativo (Expo Go). Resuelve aquí todo lo que el mapa no puede saber por sí
+  * solo —el tema, las preferencias, tu ubicación, el color de cada unidad— y se
+- * lo pasa ya hecho a `mapa-fom-dom.tsx`, que corre en una vista web.
++ * lo pasa ya hecho a `mapa-fom-dom.tsx`, que corre en una vista web. La
++ * tarjeta de «Llegada» va aquí, en la app, encima de la vista web.
+  */
+ export function MapaVehiculoDom({
+   vehicleName,
+@@ -38,11 +40,33 @@ export function MapaVehiculoDom({
+   onElegirViaje,
+   foco = null,
+   interactivo = true,
++  llegadaClave: pedidoLlegada,
+ }: MapaVehiculoProps) {
+   const { colors, colorScheme } = useTheme();
+   const { prefs, actualizar } = useMapaPrefs();
+   const esMulti = Array.isArray(markers);
+ 
++  // «LLEGADA» de la unidad elegida: solo en el mapa de la flota que se mueve
++  // (el Mapa de la flota del supervisor) y sin un recorrido en pantalla.
++  const unidadesLlegada = useMemo<UnidadLlegada[]>(
++    () =>
++      (markers ?? []).map((m) => ({ id: m.id, lat: m.coords.lat, lng: m.coords.lng, placa: m.placa || m.label || 'Sin placa' })),
++    [markers],
++  );
++  const conLlegada = esMulti && interactivo && !ruta && !!resaltadoId && HAY_MAPBOX;
++  const llegada = useLlegada({ disponible: conLlegada, unidadId: resaltadoId, unidades: unidadesLlegada });
++  const [altoTarjeta, setAltoTarjeta] = useState(0);
++  const conTarjeta = llegada.fase !== 'cerrada';
++  const abajo = Math.max(margenAbajo, insetBottom);
++  // «Llegada» pedida desde fuera (el botón de la ficha): se abre si estaba cerrada.
++  useEffect(() => {
++    if (pedidoLlegada && llegada.fase === 'cerrada') llegada.abrir();
++    // Solo al llegar un pedido nuevo.
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, [pedidoLlegada]);
++  // Con la tarjeta abierta, lo tapado por abajo llega hasta encima de ella.
++  const abajoMapa = conTarjeta ? abajo + altoTarjeta + 12 : abajo;
++
+   // TU ubicación: solo donde importa (el conductor). En la flota estorba.
+   const conUsuario = !sinUsuario && (soloUsuario || !esMulti);
+   const [usuario, setUsuario] = useState<{ lat: number; lng: number } | null>(null);
+@@ -139,6 +163,16 @@ export function MapaVehiculoDom({
+   const enMarcha = esMulti ? markers!.filter((p) => (p.estado ? p.estado === 'marcha' : p.live)).length : 0;
+   const pildora = hideOverlays ? null : esMulti ? `${markers!.length} vehículos · ${enMarcha} en marcha` : (vehicleName ?? null);
+ 
++  const llegadaDom =
++    conTarjeta && llegada.destino
++      ? {
++          trazo: llegada.ruta?.trazo ?? [],
++          destino: { lat: llegada.destino.lat, lng: llegada.destino.lng },
++          claro: colorScheme === 'light' && prefs.tipo === 'standard',
++        }
++      : null;
++  const encuadreLlegada = llegada.encuadreClave ? { limites: puntosLlegada(llegada), clave: llegada.encuadreClave } : null;
++
+   return (
+     <View style={[styles.caja, { backgroundColor: colors.background }, style]}>
+       <MapaFomDom
+@@ -153,18 +187,27 @@ export function MapaVehiculoDom({
+         viajeActivo={viajeActivo}
+         foco={foco}
+         tipo={prefs.tipo}
+-        trafico={prefs.trafico}
++        llegada={llegadaDom}
++        encuadreLlegada={encuadreLlegada}
++        llegadaBoton={conLlegada ? conTarjeta : null}
++        onLlegada={async () => (conTarjeta ? llegada.cerrar() : llegada.abrir())}
+         margenArriba={margenArriba}
+-        margenAbajo={Math.max(margenAbajo, insetBottom)}
++        margenAbajo={abajoMapa}
+         encuadreClave={encuadreClave}
+         pildora={pildora}
+-        onMarcador={async (id) => onMarkerPress?.(id)}
+-        onMapa={async () => onMapaPress?.()}
++        // Eligiendo el destino de «Llegada», la unidad o el punto tocado es el destino.
++        onMarcador={async (id) => {
++          if (!llegada.tocarUnidad(id)) onMarkerPress?.(id);
++        }}
++        onMapa={async (punto) => {
++          if (!(punto && llegada.tocarPunto(punto))) onMapaPress?.();
++        }}
+         onPrefs={async (cambio) => actualizar(cambio)}
+         onViaje={async (n) => onElegirViaje?.(n)}
+         interactivo={interactivo}
+         dom={{ style: styles.web, scrollEnabled: false, containerStyle: styles.web } as never}
+       />
++      <LlegadaTarjeta llegada={llegada} abajo={abajo} onAlto={setAltoTarjeta} />
+     </View>
+   );
+ }
+diff --git a/src/components/map-vehiculo-mapbox.tsx b/src/components/map-vehiculo-mapbox.tsx
+index bba7a79..2136a43 100644
+--- a/src/components/map-vehiculo-mapbox.tsx
++++ b/src/components/map-vehiculo-mapbox.tsx
+@@ -2,15 +2,15 @@ import Mapbox, { Camera, LocationPuck, MapView, MarkerView, StyleImport, type Ma
+ import * as Location from 'expo-location';
+ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+ import { ActivityIndicator, StyleSheet, View } from 'react-native';
+-import Svg, { Circle, Rect } from 'react-native-svg';
+ 
++import { IconoLlegada, LlegadaTarjeta, puntosLlegada, useLlegada, type UnidadLlegada } from '@/components/llegada-tarjeta';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { PulseDot } from '@/components/pulse-dot';
+ import { TabIcon } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+ import { useMapaPrefs } from '@/hooks/use-map-prefs';
+ import { opcionesMapa, type MapaPrefs } from '@/lib/map-prefs';
+-import { configStandard, ESTILO_MAPBOX, MAPBOX_TOKEN } from '@/lib/mapbox';
++import { configStandard, ESTILO_MAPBOX, HAY_MAPBOX, MAPBOX_TOKEN } from '@/lib/mapbox';
+ import { useTheme } from '@/theme';
+ import type { MapMarker } from '@/types';
+ import { colorApagado } from '@/utils/paleta-flota';
+@@ -20,9 +20,9 @@ import { UnidadesNativas, type UnidadMapa } from './mapbox-nativo-marcador';
+ import {
+   EstelasNativas,
+   limitesDe,
++  LlegadaNativa,
+   puntosDeRuta,
+   RutaNativa,
+-  TraficoNativo,
+   type ColoresCapas,
+   type Posicion,
+ } from './mapbox-nativo-ruta';
+@@ -32,8 +32,8 @@ import {
+ // ------------------------------------------------------------
+ // Mismas props y lo mismo que el mapa de la vista web (`mapa-fom-dom.tsx`),
+ // pero nativo, mucho más ligero: el marcador del panel web (carro + tarjeta),
+-// estelas punteadas, el recorrido con sus viajes y paradas, el tráfico en
+-// vivo, capa estándar/satélite, encuadre y foco. Estilo Standard con luz de
++// estelas punteadas, el recorrido con sus viajes y paradas, «Llegada» de la
++// unidad elegida, capa estándar/satélite, encuadre y foco. Estilo Standard con luz de
+ // día o de noche según el tema, y los colores de noche de la web.
+ // Siempre plano (sin 3D ni inclinación): decisión del dueño, el teléfono va
+ // más ligero y la flota se lee mejor.
+@@ -81,6 +81,7 @@ export function MapaVehiculoMapbox({
+   onElegirViaje,
+   foco = null,
+   interactivo = true,
++  llegadaClave: pedidoLlegada,
+ }: MapaVehiculoProps) {
+   const { colors, radii, spacing, colorScheme } = useTheme();
+   // Solo lo dibujable: un NaN en `centerCoordinate` o en una estela tumba el
+@@ -108,6 +109,21 @@ export function MapaVehiculoMapbox({
+   const abajo = Math.max(margenAbajo, insetBottom);
+   const rutaVisible = ruta ?? null;
+ 
++  // «LLEGADA» de la unidad elegida: solo en el mapa de la flota que se mueve
++  // (el Mapa de la flota del supervisor) y sin un recorrido en pantalla.
++  const unidadesLlegada = useMemo<UnidadLlegada[]>(
++    () =>
++      (markers ?? []).map((m) => ({ id: m.id, lat: m.coords.lat, lng: m.coords.lng, placa: m.placa || m.label || 'Sin placa' })),
++    [markers],
++  );
++  const conLlegada = esMulti && interactivo && !rutaVisible && !!resaltadoId && HAY_MAPBOX;
++  const llegada = useLlegada({ disponible: conLlegada, unidadId: resaltadoId, unidades: unidadesLlegada });
++  const [altoTarjeta, setAltoTarjeta] = useState(0);
++  const conTarjeta = llegada.fase !== 'cerrada';
++  // Con la tarjeta abierta, lo tapado por abajo llega hasta encima de ella:
++  // los controles, el logo de Mapbox y el encuadre suben con ella.
++  const abajoMapa = conTarjeta ? abajo + altoTarjeta + 12 : abajo;
++
+   // Zoom: se lee al parar el mapa (como `zoomend` en la web) y solo re-dibuja al cruzar un umbral.
+   const zoomRef = useRef(esMulti ? 11 : 15);
+   const [nivel, setNivel] = useState<Nivel>(() => nivelDe(esMulti ? 11 : 15));
+@@ -121,13 +137,15 @@ export function MapaVehiculoMapbox({
+   // Lo último de cada prop que leen las acciones de la cámara (sin re-crearlas en cada render).
+   const marcadoresRef = useRef<MapMarker[] | undefined>(markers);
+   const rutaRef = useRef(rutaVisible);
+-  const margenesRef = useRef({ arriba: margenArriba, abajo });
++  const margenesRef = useRef({ arriba: margenArriba, abajo: abajoMapa });
+   const onMarkerPressRef = useRef(onMarkerPress);
++  const llegadaRef = useRef(llegada);
+   useEffect(() => {
+     marcadoresRef.current = markers;
+     rutaRef.current = rutaVisible;
+-    margenesRef.current = { arriba: margenArriba, abajo };
++    margenesRef.current = { arriba: margenArriba, abajo: abajoMapa };
+     onMarkerPressRef.current = onMarkerPress;
++    llegadaRef.current = llegada;
+   });
+   const listo = useRef(false);
+ 
+@@ -232,6 +250,19 @@ export function MapaVehiculoMapbox({
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [focoClave]);
+ 
++  // «Llegada» pedida desde fuera (el botón de la ficha): se abre si estaba cerrada.
++  useEffect(() => {
++    if (pedidoLlegada && llegadaRef.current.fase === 'cerrada') llegadaRef.current.abrir();
++  }, [pedidoLlegada]);
++
++  // Al llegar una ruta de «Llegada» nueva, la cámara encuadra unidad, camino y
++  // destino por encima de la tarjeta (una vez por destino elegido).
++  const llegadaClave = llegada.encuadreClave;
++  useEffect(() => {
++    if (!llegadaClave) return;
++    encuadrarPuntos(puntosLlegada(llegadaRef.current), { lados: 48, derecha: 70 }, 0.004, 700);
++  }, [llegadaClave, encuadrarPuntos]);
++
+   const alCargar = useCallback(() => {
+     // El encuadre inicial, una sola vez: al cambiar de capa el mapa vuelve a cargar y no debe saltar.
+     if (listo.current) return;
+@@ -331,7 +362,11 @@ export function MapaVehiculoMapbox({
+     [colors],
+   );
+ 
+-  const tocarMarcador = useCallback((id: string) => onMarkerPressRef.current?.(id), []);
++  // Eligiendo el destino de «Llegada», tocar una unidad la elige como destino.
++  const tocarMarcador = useCallback((id: string) => {
++    if (llegadaRef.current.tocarUnidad(id)) return;
++    onMarkerPressRef.current?.(id);
++  }, []);
+   const muchas = lista.length > MUCHAS_UNIDADES;
+   const tarjetasVisibles = nivel !== 'lejos' && (!muchas || nivel === 'cerca');
+ 
+@@ -347,10 +382,18 @@ export function MapaVehiculoMapbox({
+       />
+     ) : null;
+ 
+-  /** Las capas propias, comunes a los dos modos: tráfico, recorrido y estelas. */
++  const destinoLlegada: Posicion | null = conTarjeta && llegada.destino ? [llegada.destino.lng, llegada.destino.lat] : null;
++
++  /** Las capas propias, comunes a los dos modos: recorrido, llegada y estelas. */
+   const capas = (
+     <>
+-      {prefs.trafico ? <TraficoNativo /> : null}
++      {destinoLlegada ? (
++        <LlegadaNativa
++          trazo={llegada.ruta?.trazo ?? null}
++          destino={destinoLlegada}
++          claro={colorScheme === 'light' && prefs.tipo === 'standard'}
++        />
++      ) : null}
+       {rutaVisible ? (
+         <RutaNativa ruta={rutaVisible} viajeActivo={viajeActivo} onElegirViaje={onElegirViaje} colores={coloresCapas} />
+       ) : null}
+@@ -360,7 +403,7 @@ export function MapaVehiculoMapbox({
+ 
+   const avisoSinPermiso =
+     permiso === 'denegado' ? (
+-      <View style={[styles.overlay, styles.bottomLeft, { bottom: 12 + abajo, right: 60 }]}>
++      <View style={[styles.overlay, styles.bottomLeft, { bottom: 12 + abajoMapa, right: 60 }]}>
+         <View style={[styles.pill, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
+           <ThemedText variant="caption" color="textMuted" numberOfLines={2}>
+             Activa la ubicación para verte en el mapa
+@@ -371,8 +414,8 @@ export function MapaVehiculoMapbox({
+ 
+   // El logo y la atribución de Mapbox son obligatorios: abajo a la izquierda, sobre lo que tape el mapa.
+   const ornamentos = {
+-    logoPosition: { bottom: 8 + abajo, left: 8 },
+-    attributionPosition: { bottom: 8 + abajo, left: 92 },
++    logoPosition: { bottom: 8 + abajoMapa, left: 8 },
++    attributionPosition: { bottom: 8 + abajoMapa, left: 92 },
+     // La brújula baja con lo que tape el mapa por arriba (el encabezado flotante).
+     ...(margenArriba > 0 ? { compassPosition: { top: 8 + margenArriba, right: 8 } } : {}),
+   };
+@@ -393,7 +436,12 @@ export function MapaVehiculoMapbox({
+     scaleBarEnabled: false,
+     compassEnabled: true,
+     ...ornamentos,
+-    onPress: () => onMapaPress?.(),
++    onPress: (f: GeoJSON.Feature<GeoJSON.Point>) => {
++      // Eligiendo el destino, el punto tocado es el destino (y con la tarjeta abierta no se suelta la unidad).
++      const c = f?.geometry?.coordinates;
++      if (c && llegadaRef.current.tocarPunto({ lng: c[0], lat: c[1] })) return;
++      onMapaPress?.();
++    },
+     onMapIdle: alParar,
+     onDidFinishLoadingMap: alCargar,
+   };
+@@ -404,12 +452,13 @@ export function MapaVehiculoMapbox({
+     <ControlesNativos
+       prefs={prefs}
+       actualizar={actualizar}
+-      abajo={abajo}
++      abajo={abajoMapa}
+       arriba={controlesArriba}
+       margenArriba={margenArriba}
+       // Con un recorrido en pantalla, «encuadrar» encuadra el recorrido.
+       onEncuadrar={esMulti ? () => (rutaRef.current ? encuadrarRuta() : encuadrar()) : undefined}
+       onRecentrar={esMulti && resaltadoId ? recentrar : undefined}
++      llegada={conLlegada ? { abierta: conTarjeta, alternar: conTarjeta ? llegada.cerrar : llegada.abrir } : undefined}
+     />
+   );
+ 
+@@ -446,6 +495,7 @@ export function MapaVehiculoMapbox({
+         ) : null}
+         {avisoSinPermiso}
+         {controles}
++        <LlegadaTarjeta llegada={llegada} abajo={abajo} onAlto={setAltoTarjeta} />
+       </View>
+     );
+   }
+@@ -528,9 +578,9 @@ export function MapaVehiculoMapbox({
+ /**
+  * Los controles del mapa nativo: los de siempre (`ControlesMapa` del mapa
+  * clásico: ir a la destacada, encuadrar y capa; sin 2D/3D, el mapa va siempre
+- * plano) más el TRÁFICO, como
+- * en la web. Abajo suben sobre lo que tape el mapa; arriba bajan bajo el
+- * encabezado.
++ * plano) más «Llegada» cuando hay una unidad elegida. Sin tráfico en vivo
++ * (pedido de Marco, 21 oct 2026). Abajo suben sobre lo que tape el mapa;
++ * arriba bajan bajo el encabezado.
+  */
+ function ControlesNativos({
+   prefs,
+@@ -540,6 +590,7 @@ function ControlesNativos({
+   margenArriba,
+   onEncuadrar,
+   onRecentrar,
++  llegada,
+ }: {
+   prefs: MapaPrefs;
+   actualizar: (cambio: Partial<MapaPrefs>) => void;
+@@ -548,6 +599,8 @@ function ControlesNativos({
+   margenArriba: number;
+   onEncuadrar?: () => void;
+   onRecentrar?: () => void;
++  /** «Llegada» de la unidad elegida: abrir o cerrar su tarjeta. */
++  llegada?: { abierta: boolean; alternar: () => void };
+ }) {
+   const { colors, radii } = useTheme();
+   const opciones = opcionesMapa();
+@@ -555,7 +608,6 @@ function ControlesNativos({
+   const actual = opciones.findIndex((o) => o.id === prefs.tipo);
+   const siguiente = opciones[(Math.max(0, actual) + 1) % opciones.length];
+   const fondo = { backgroundColor: colors.surfaceElevated, borderColor: colors.border, borderRadius: radii.md };
+-  const colorTrafico = prefs.trafico ? colors.primary : colors.textSecondary;
+ 
+   return (
+     <View
+@@ -590,21 +642,17 @@ function ControlesNativos({
+         style={[styles.ctrl, fondo]}>
+         <TabIcon name="capas" color={prefs.tipo === 'standard' ? colors.text : colors.primary} size={18} />
+       </PressableScale>
+-      <PressableScale
+-        onPress={() => actualizar({ trafico: !prefs.trafico })}
+-        accessibilityRole="switch"
+-        accessibilityLabel="Tráfico"
+-        accessibilityHint="Muestra u oculta el tráfico en vivo"
+-        accessibilityState={{ checked: prefs.trafico }}
+-        style={[styles.ctrl, fondo]}>
+-        {/* El semáforo de la web: teñido cuando el tráfico está a la vista. */}
+-        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+-          <Rect x={7} y={2} width={10} height={20} rx={3} stroke={colorTrafico} strokeWidth={2} />
+-          <Circle cx={12} cy={7} r={1.5} stroke={colorTrafico} strokeWidth={2} />
+-          <Circle cx={12} cy={12} r={1.5} stroke={colorTrafico} strokeWidth={2} />
+-          <Circle cx={12} cy={17} r={1.5} stroke={colorTrafico} strokeWidth={2} />
+-        </Svg>
+-      </PressableScale>
++      {llegada ? (
++        <PressableScale
++          onPress={llegada.alternar}
++          accessibilityRole="button"
++          accessibilityLabel={llegada.abierta ? 'Cerrar llegada' : 'Llegada'}
++          accessibilityHint="Cuánto tarda la unidad elegida en llegar a un destino"
++          accessibilityState={{ expanded: llegada.abierta }}
++          style={[styles.ctrl, fondo, llegada.abierta ? { backgroundColor: colors.activeSurface, borderColor: colors.activeBorder } : null]}>
++          <IconoLlegada color={llegada.abierta ? colors.onActive : colors.text} />
++        </PressableScale>
++      ) : null}
+     </View>
+   );
+ }
+diff --git a/src/components/mapa-fom-dom.tsx b/src/components/mapa-fom-dom.tsx
+index 7243441..0d75bfc 100644
+--- a/src/components/mapa-fom-dom.tsx
++++ b/src/components/mapa-fom-dom.tsx
+@@ -7,7 +7,7 @@
+  * mismo estilo que el panel web— dentro de una vista web de la app. Así el
+  * mapa funciona también en Expo Go, que no trae el Mapbox nativo, y el
+  * teléfono ve exactamente lo que ve la web: luz de noche FOM, satélite,
+- * tráfico y el recorrido de una unidad con sus viajes y paradas. Siempre
++ * el recorrido de una unidad con sus viajes y paradas y «Llegada». Siempre
+  * plano (sin 3D ni inclinación), por decisión del dueño.
+  *
+  * Aquí no hay tema ni contexto de la app (esto vive en otra página): todo
+@@ -17,6 +17,7 @@
+ import { IS_DOM, type DOMProps } from "expo/dom";
+ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+ 
++import { AZUL_LLEGADA, bordeLlegada, PIN_DESTINO_SVG } from "@/lib/llegada";
+ import { duracion, horaCorta } from "@/lib/recorrido";
+ 
+ type Coord = [number, number];
+@@ -81,7 +82,20 @@ type Props = {
+   /** Lleva la cámara a un sitio (o a unos límites). `clave` cambia en cada pedido. */
+   foco?: { lat: number; lng: number; limites?: Coord[]; clave: number } | null;
+   tipo: "standard" | "satellite";
+-  trafico: boolean;
++  /**
++   * «LLEGADA» de la unidad elegida: el camino (de UN color, azul FOM) y el pin
++   * del destino. `claro`: el mapa se ve claro (el borde de la ruta va blanco).
++   */
++  llegada?: {
++    trazo: Coord[];
++    destino: { lat: number; lng: number } | null;
++    claro: boolean;
++  } | null;
++  /** Encuadra unidad, camino y destino una vez por `clave` (una ruta nueva). */
++  encuadreLlegada?: { limites: Coord[]; clave: string } | null;
++  /** Botón de «Llegada» en los controles: null sin botón; true con la tarjeta abierta. */
++  llegadaBoton?: boolean | null;
++  onLlegada?: () => Promise<void>;
+   /** Lo que tapa el mapa por arriba y por abajo: los controles y el encuadre lo respetan. */
+   margenArriba: number;
+   margenAbajo: number;
+@@ -89,11 +103,9 @@ type Props = {
+   /** Texto de la píldora de arriba a la izquierda (null: sin píldora). */
+   pildora?: string | null;
+   onMarcador?: (id: string) => Promise<void>;
+-  onMapa?: () => Promise<void>;
+-  onPrefs?: (cambio: {
+-    tipo?: "standard" | "satellite";
+-    trafico?: boolean;
+-  }) => Promise<void>;
++  /** Se tocó el mapa fuera de un marcador, en ese punto. */
++  onMapa?: (punto: { lat: number; lng: number }) => Promise<void>;
++  onPrefs?: (cambio: { tipo?: "standard" | "satellite" }) => Promise<void>;
+   onViaje?: (numero: number | null) => Promise<void>;
+   /**
+    * `false`: el mapa no se mueve con el dedo (ni arrastrar, ni pellizcar, ni
+@@ -188,7 +200,6 @@ export default function MapaFomDom(props: Props) {
+     ruta: rutaCruda,
+     viajeActivo,
+     foco,
+-    trafico,
+     tipo,
+     margenArriba,
+     margenAbajo,
+@@ -223,6 +234,7 @@ export default function MapaFomDom(props: Props) {
+   const marcas = useRef(new Map<string, Marca>());
+   const marcasRuta = useRef<Marca[]>([]);
+   const marcaUsuario = useRef<Marca | null>(null);
++  const marcaDestino = useRef<Marca | null>(null);
+   // Las funciones de la app cambian en cada render: el mapa llama siempre a la última.
+   // Se actualiza en un efecto (no durante el render), el primero de todos:
+   // los efectos de abajo ya leen las props nuevas.
+@@ -297,7 +309,11 @@ export default function MapaFomDom(props: Props) {
+         new mapboxgl.AttributionControl({ compact: true }),
+         "bottom-left",
+       );
+-      m.on("click", () => void ultimas.current.onMapa?.());
++      m.on(
++        "click",
++        (e) =>
++          void ultimas.current.onMapa?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }),
++      );
+       // Tocar un viaje: registrado UNA vez aquí (no cada vez que se recrea la
+       // fuente). Con la capa en una lista, Mapbox lo ignora mientras no exista.
+       m.on("click", ["fom-ruta-toque"], (e) => {
+@@ -395,50 +411,116 @@ export default function MapaFomDom(props: Props) {
+     }
+   }, [firmaConfig]);
+ 
+-  // TRÁFICO en vivo, como en la web: el color de la vía dice cómo está.
++  // «LLEGADA»: el camino hasta el destino, de un color (azul FOM ~5 px) con
++  // borde, y la gota del destino. Sin tráfico pintado (pedido de Marco).
++  // Las props cruzan el puente como objetos nuevos: se compara por contenido.
++  const llegada = props.llegada;
++  const firmaLlegada = llegada
++    ? `${firmaRuta(llegada.trazo)}|${llegada.destino?.lat},${llegada.destino?.lng}|${llegada.claro}`
++    : "";
+   useEffect(() => {
+     const m = mapa.current;
+-    if (!m || !estiloListo || estiloCargando.current) return;
++    const mapboxgl = gl.current;
++    if (!m || !mapboxgl || !estiloListo || estiloCargando.current) return;
++    const l = ultimas.current.llegada;
+     try {
+-      if (trafico && !m.getSource("fom-trafico")) {
+-        m.addSource("fom-trafico", {
+-          type: "vector",
+-          url: "mapbox://mapbox.mapbox-traffic-v1",
+-        });
++      const trazo = (l?.trazo ?? []).filter(coordValida);
++      const datos = {
++        type: "FeatureCollection" as const,
++        features:
++          trazo.length > 1
++            ? [
++                {
++                  type: "Feature" as const,
++                  properties: {},
++                  geometry: { type: "LineString" as const, coordinates: trazo },
++                },
++              ]
++            : [],
++      };
++      const fuente = m.getSource("fom-llegada") as
++        import("mapbox-gl").GeoJSONSource | undefined;
++      if (fuente) fuente.setData(datos);
++      else {
++        m.addSource("fom-llegada", { type: "geojson", data: datos });
++        m.addLayer({
++          id: "fom-llegada-borde",
++          type: "line",
++          source: "fom-llegada",
++          slot: "top",
++          layout: { "line-join": "round", "line-cap": "round" },
++          paint: { "line-width": 9, "line-emissive-strength": 1 },
++        } as never);
+         m.addLayer({
+-          id: "fom-trafico",
++          id: "fom-llegada",
+           type: "line",
+-          source: "fom-trafico",
+-          "source-layer": "traffic",
+-          slot: "middle",
++          source: "fom-llegada",
++          slot: "top",
+           layout: { "line-join": "round", "line-cap": "round" },
+           paint: {
+-            "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1.5, 16, 5],
++            "line-color": AZUL_LLEGADA,
++            "line-width": 5,
+             "line-emissive-strength": 1,
+-            "line-color": [
+-              "match",
+-              ["get", "congestion"],
+-              "low",
+-              "#3dd68c",
+-              "moderate",
+-              "#f5c242",
+-              "heavy",
+-              "#ff8a3d",
+-              "severe",
+-              "#ff6369",
+-              "#3dd68c",
+-            ],
+           },
+         } as never);
+-      } else if (!trafico && m.getSource("fom-trafico")) {
+-        if (m.getLayer("fom-trafico")) m.removeLayer("fom-trafico");
+-        m.removeSource("fom-trafico");
++      }
++      m.setPaintProperty(
++        "fom-llegada-borde",
++        "line-color",
++        bordeLlegada(!!l?.claro),
++      );
++      const d = l?.destino;
++      if (d && puntoValido(d.lat, d.lng)) {
++        if (!marcaDestino.current) {
++          const el = document.createElement("div");
++          el.className = "fom-destino";
++          el.innerHTML = PIN_DESTINO_SVG;
++          marcaDestino.current = new mapboxgl.Marker({
++            element: el,
++            anchor: "bottom",
++          })
++            .setLngLat([d.lng, d.lat])
++            .addTo(m);
++        } else marcaDestino.current.setLngLat([d.lng, d.lat]);
++      } else {
++        marcaDestino.current?.remove();
++        marcaDestino.current = null;
+       }
+     } catch (e) {
+       // El estilo se cambió a mitad: `style.load` vuelve a correr esto.
+       console.warn("[mapa]", e);
+     }
+-  }, [trafico, estiloListo]);
++  }, [firmaLlegada, estiloListo]);
++
++  // Al llegar una ruta de «Llegada» nueva, la cámara encuadra unidad, camino
++  // y destino por encima de la tarjeta (una vez por clave, no al cambiar de capa).
++  const llegadaEncuadrada = useRef<string | null>(null);
++  const claveLlegada = props.encuadreLlegada?.clave ?? null;
++  useEffect(() => {
++    const m = mapa.current;
++    const mapboxgl = gl.current;
++    const e = ultimas.current.encuadreLlegada;
++    if (!m || !mapboxgl || !estiloListo || !e) return;
++    if (llegadaEncuadrada.current === e.clave) return;
++    llegadaEncuadrada.current = e.clave;
++    const limites = e.limites.filter(coordValida);
++    if (limites.length < 2) return;
++    const b = limites.reduce(
++      (acc, c) => acc.extend(c),
++      new mapboxgl.LngLatBounds(limites[0], limites[0]),
++    );
++    m.fitBounds(b, {
++      padding: {
++        top: margenArriba + 48,
++        bottom: margenAbajo + 48,
++        left: 48,
++        right: 70,
++      },
++      maxZoom: 16,
++      duration: 700,
++    });
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, [claveLlegada, estiloListo]);
+ 
+   // Marcadores de las unidades: EL MISMO DIBUJO DEL PANEL WEB (vehicleMarker.js):
+   // el carro visto desde arriba, girado hacia donde va, y su tarjeta con la
+@@ -923,7 +1005,12 @@ export default function MapaFomDom(props: Props) {
+       {/* Lo global (html/body sin selección ni rebote) solo dentro de la vista
+           web del teléfono: en la app web este componente se pinta en la
+           página misma y esas reglas se comían la selección de toda la app. */}
+-      <style>{(IS_DOM ? CSS_GLOBAL(colores) : "") + CSS(colores)}</style>
++      <style>
++        {(IS_DOM ? CSS_GLOBAL(colores) : "") +
++          CSS(colores) +
++          // El logo y la atribución de Mapbox (obligatorios) suben sobre lo que tape el mapa por abajo.
++          `.mapboxgl-ctrl-bottom-left{margin-bottom:${margenAbajo}px}`}
++      </style>
+       <div ref={caja} style={{ position: "absolute", inset: 0 }} />
+       {!estiloListo || fallo ? (
+         <div
+@@ -960,29 +1047,30 @@ export default function MapaFomDom(props: Props) {
+         >
+           {tipo === "standard" ? "MAPA" : "SAT"}
+         </button>
+-        <button
+-          type="button"
+-          aria-label={trafico ? "Quitar tráfico" : "Ver tráfico"}
+-          style={boton(trafico)}
+-          onClick={() => void props.onPrefs?.({ trafico: !trafico })}
+-        >
+-          <svg
+-            width="18"
+-            height="18"
+-            viewBox="0 0 24 24"
+-            fill="none"
+-            stroke="currentColor"
+-            strokeWidth="2"
+-            strokeLinecap="round"
+-            strokeLinejoin="round"
+-            aria-hidden="true"
++        {props.llegadaBoton != null ? (
++          <button
++            type="button"
++            aria-label={props.llegadaBoton ? "Cerrar llegada" : "Llegada"}
++            aria-pressed={props.llegadaBoton}
++            style={boton(props.llegadaBoton)}
++            onClick={() => void props.onLlegada?.()}
+           >
+-            <rect x="7" y="2" width="10" height="20" rx="3" />
+-            <circle cx="12" cy="7" r="1.5" />
+-            <circle cx="12" cy="12" r="1.5" />
+-            <circle cx="12" cy="17" r="1.5" />
+-          </svg>
+-        </button>
++            <svg
++              width="18"
++              height="18"
++              viewBox="0 0 24 24"
++              fill="none"
++              stroke="currentColor"
++              strokeWidth="1.8"
++              strokeLinecap="round"
++              strokeLinejoin="round"
++              aria-hidden="true"
++            >
++              <circle cx="12" cy="12" r="8.5" />
++              <path d="M12 7.5V12l3 2" />
++            </svg>
++          </button>
++        ) : null}
+       </div>
+       <button
+         type="button"
+@@ -1079,6 +1167,8 @@ const CSS = (c: ColoresDom) => `
+ .fleet-marker{cursor:pointer;line-height:0}
+ .fleet-marker>svg{overflow:visible}
+ [data-zoom="lejos"] .fleet-marker:not(.selected) .fleet-marker-label{visibility:hidden}
++.fom-destino{line-height:0;pointer-events:none}
++.fom-destino svg{overflow:visible;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+ .fom-yo{width:16px;height:16px;border-radius:50%;background:#3d9bf5;border:3px solid #fff;box-shadow:0 0 0 6px rgba(61,155,245,.25)}
+ .fom-aviso{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:8px 14px;border-radius:999px;background:rgba(20,26,34,.94);font:600 13px/18px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;text-align:center;max-width:80%}
+ .fom-pildora{position:absolute;left:12px;padding:6px 12px;border-radius:999px;background:rgba(20,26,34,.94);color:${c.texto};font:600 12px/16px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+diff --git a/src/components/mapbox-nativo-ruta.tsx b/src/components/mapbox-nativo-ruta.tsx
+index 9a0de12..860aae4 100644
+--- a/src/components/mapbox-nativo-ruta.tsx
++++ b/src/components/mapbox-nativo-ruta.tsx
+@@ -4,14 +4,15 @@ import {
+   MarkerView,
+   ShapeSource,
+   SymbolLayer,
+-  VectorSource,
+   type CircleLayerStyle,
+   type LineLayerStyle,
+   type SymbolLayerStyle,
+ } from '@rnmapbox/maps';
+ import { memo, useCallback, useMemo, useState } from 'react';
+ import { Pressable, StyleSheet, Text, View } from 'react-native';
++import Svg, { Circle, Path } from 'react-native-svg';
+ 
++import { AZUL_LLEGADA, bordeLlegada, PIN_DESTINO_D } from '@/lib/llegada';
+ import { duracion, horaCorta, type Analisis } from '@/lib/recorrido';
+ 
+ import { coordsValidas } from './map-vehiculo-clasico';
+@@ -27,7 +28,7 @@ const posicionValida = ([lng, lat]: Posicion): boolean => coordsValidas({ lat, l
+ // ------------------------------------------------------------
+ // Lo mismo que dibuja `mapa-fom-dom.tsx` en la vista web, pero con las capas
+ // nativas de @rnmapbox/maps: el recorrido (viajes, inicio A, fin B y paradas
+-// P), el tráfico en vivo y las estelas de la flota. Todo son capas que pinta
++// P), la ruta de «Llegada» y las estelas de la flota. Todo son capas que pinta
+ // Mapbox (nada de una vista por pin), salvo el globo del pin abierto.
+ // ============================================================
+ 
+@@ -86,25 +87,60 @@ export function puntosDeRuta(ruta: Analisis): Posicion[] {
+   ];
+ }
+ 
+-// ── Tráfico ─────────────────────────────────────────────────────────────────
++// ── Llegada ─────────────────────────────────────────────────────────────────
+ 
+-const ESTILO_TRAFICO: LineLayerStyle = {
++/**
++ * «LLEGADA»: el camino hasta el destino, de UN color (azul FOM, ~5 px) con
++ * borde (blanco en el mapa claro, oscuro en el oscuro o el satélite), y el pin
++ * propio del destino: la gota azul con punto blanco, el mismo dibujo que la web.
++ */
++export const LlegadaNativa = memo(function LlegadaNativa({
++  trazo,
++  destino,
++  claro,
++}: {
++  trazo: Posicion[] | null;
++  destino: Posicion | null;
++  claro: boolean;
++}) {
++  const datos = useMemo<GeoJSON.Feature<GeoJSON.LineString> | null>(() => {
++    const puntos = (trazo ?? []).filter(posicionValida);
++    return puntos.length > 1 ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: puntos } } : null;
++  }, [trazo]);
++  const estiloBorde: LineLayerStyle = useMemo(
++    () => ({ lineJoin: 'round', lineCap: 'round', lineColor: bordeLlegada(claro), lineWidth: 9, lineEmissiveStrength: 1 }),
++    [claro],
++  );
++  return (
++    <>
++      {datos ? (
++        <ShapeSource id="fom-llegada" shape={datos}>
++          <LineLayer id="fom-llegada-borde" slot="top" style={estiloBorde} />
++          <LineLayer id="fom-llegada" slot="top" style={ESTILO_LLEGADA} />
++        </ShapeSource>
++      ) : null}
++      {destino && posicionValida(destino) ? (
++        <MarkerView coordinate={destino} anchor={{ x: 0.5, y: 1 }} allowOverlap>
++          <View accessibilityLabel="Destino de la llegada" pointerEvents="none">
++            <Svg width={30} height={40} viewBox="0 0 30 40">
++              <Path d={PIN_DESTINO_D} fill={AZUL_LLEGADA} stroke="#FFFFFF" strokeWidth={2} strokeLinejoin="round" />
++              <Circle cx={15} cy={15.5} r={4.6} fill="#FFFFFF" />
++            </Svg>
++          </View>
++        </MarkerView>
++      ) : null}
++    </>
++  );
++});
++
++const ESTILO_LLEGADA: LineLayerStyle = {
+   lineJoin: 'round',
+   lineCap: 'round',
+-  lineWidth: ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 5],
++  lineColor: AZUL_LLEGADA,
++  lineWidth: 5,
+   lineEmissiveStrength: 1,
+-  lineColor: ['match', ['get', 'congestion'], 'low', '#3dd68c', 'moderate', '#f5c242', 'heavy', '#ff8a3d', 'severe', '#ff6369', '#3dd68c'],
+ };
+ 
+-/** TRÁFICO en vivo, como en la web: el color de la vía dice cómo está. */
+-export function TraficoNativo() {
+-  return (
+-    <VectorSource id="fom-trafico" url="mapbox://mapbox.mapbox-traffic-v1">
+-      <LineLayer id="fom-trafico" sourceLayerID="traffic" slot="middle" style={ESTILO_TRAFICO} />
+-    </VectorSource>
+-  );
+-}
+-
+ // ── Estelas ─────────────────────────────────────────────────────────────────
+ 
+ const ESTILO_ESTELA: LineLayerStyle = {
+diff --git a/src/components/odt-asignada-seccion.tsx b/src/components/odt-asignada-seccion.tsx
+index f3f8c66..003c48d 100644
+--- a/src/components/odt-asignada-seccion.tsx
++++ b/src/components/odt-asignada-seccion.tsx
+@@ -1,11 +1,7 @@
+ import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+ 
+-import { Card } from '@/components/card';
+-import { Chip } from '@/components/chip';
+ import { AccionesOdtAsignada, MOMENTO_TALLER, RelojOdt } from '@/components/odt-asignada-acciones';
+-import { otStatusColor, ODT_ESTADO_LABEL } from '@/components/ot-status-badge';
+-import { PressableScale } from '@/components/pressable-scale';
+-import { TabIcon } from '@/components/tab-icon';
++import { masNuevasPrimero, TarjetaOdt } from '@/components/tarjeta-mantenimiento';
+ import { ThemedText } from '@/components/themed-text';
+ import { useAsyncData } from '@/hooks/use-async-data';
+ import { getEjecucionOdt, getOdtAsignadas, type EjecucionOdt, type OdtAsignada } from '@/services/fomOrdenes';
+@@ -29,8 +25,10 @@ export function SeccionOdtAsignadas({
+   const { spacing } = useTheme();
+   const { data, recargar } = useAsyncData(
+     async () => {
+-      const lista = await getOdtAsignadas();
+-      if (!lista || lista.length === 0) return null;
++      const asignadas = await getOdtAsignadas();
++      if (!asignadas || asignadas.length === 0) return null;
++      // De la más nueva a la más vieja, como el resto de Mantenimiento.
++      const lista = masNuevasPrimero(asignadas, (o) => o.creadaEn);
+       // El reloj vive en el detalle de cada una. Si uno falla, esa ODT sale
+       // igual, sin reloj: sus botones siguen sirviendo.
+       const ejecuciones = await Promise.all(lista.map((o) => getEjecucionOdt(o.id).catch(() => null)));
+@@ -43,85 +41,60 @@ export function SeccionOdtAsignadas({
+   if (!data) return null;
+ 
+   return (
+-    <Card style={[{ gap: spacing.md, paddingBottom: spacing.xs }, style]}>
++    <View style={[{ gap: spacing.md }, style]}>
+       <View style={{ gap: 2 }}>
+         <ThemedText style={styles.titulo}>Asignadas a ti</ThemedText>
+         <ThemedText variant="caption" color="textSecondary">
+           El supervisor te asignó estas ODT. Inicia, pausa y entrega desde aquí.
+         </ThemedText>
+       </View>
+-      <View>
+-        {data.map(({ orden, ejecucion }, i) => (
++      <View style={{ gap: spacing.sm }}>
++        {data.map(({ orden, ejecucion }) => (
+           <FilaAsignada
+             key={orden.id}
+             orden={orden}
+             ejecucion={ejecucion}
+-            primera={i === 0}
+             onAbrir={() => onAbrir(orden.id)}
+             onHecho={recargar}
+           />
+         ))}
+       </View>
+-    </Card>
++    </View>
+   );
+ }
+ 
+-/** Una ODT asignada: unidad, título (abre el detalle), estado, reloj y botones. */
++/**
++ * Una ODT asignada en la tarjeta de mantenimiento de siempre (la misma del
++ * conductor y del supervisor); debajo, en qué va el trabajo, el reloj y los
++ * botones que le tocan.
++ */
+ function FilaAsignada({
+   orden,
+   ejecucion,
+-  primera,
+   onAbrir,
+   onHecho,
+ }: {
+   orden: OdtAsignada;
+   ejecucion: EjecucionOdt | null;
+-  primera: boolean;
+   onAbrir: () => void;
+   onHecho: () => void;
+ }) {
+-  const { colors, spacing, borderWidths } = useTheme();
+   // Manda el estado más reciente: el del detalle, si llegó.
+   const estadoFom = ejecucion?.estadoFom ?? orden.estadoFom;
++  const momento = MOMENTO_TALLER[estadoFom];
+   return (
+-    <View
+-      style={{
+-        gap: spacing.sm,
+-        paddingVertical: spacing.md,
+-        borderTopWidth: primera ? 0 : borderWidths.hairline,
+-        borderTopColor: colors.border,
+-      }}>
+-      <PressableScale
+-        onPress={onAbrir}
+-        accessibilityRole="button"
+-        accessibilityLabel={`Ver la ODT: ${orden.descripcion}, ${orden.vehicleLabel}`}>
+-        <View style={[styles.fila, { gap: spacing.sm }]}>
+-          <View style={[styles.flex1, { gap: 2 }]}>
+-            <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
+-              {orden.vehicleLabel || 'Unidad'}
+-            </ThemedText>
+-            <ThemedText style={styles.ordenTitulo} numberOfLines={2}>
+-              {orden.descripcion}
+-            </ThemedText>
+-          </View>
+-          <TabIcon name="chevron" color={colors.textMuted} size={16} />
+-        </View>
+-      </PressableScale>
+-      <View style={[styles.fila, { gap: spacing.sm }]}>
+-        <Chip tone={otStatusColor(orden.estado)} label={ODT_ESTADO_LABEL[orden.estado]} dot />
+-        <ThemedText variant="caption" color="textSecondary" style={styles.flex1} numberOfLines={1}>
+-          {MOMENTO_TALLER[estadoFom] ?? ''}
++    <TarjetaOdt orden={orden} unidad={orden.vehicleLabel || 'Unidad'} onPress={onAbrir}>
++      {momento ? (
++        <ThemedText variant="caption" color="textSecondary" numberOfLines={2}>
++          {momento}
+         </ThemedText>
+-      </View>
++      ) : null}
+       {ejecucion ? <RelojOdt ejecucion={ejecucion} /> : null}
+       <AccionesOdtAsignada id={orden.id} estadoFom={estadoFom} onHecho={onHecho} />
+-    </View>
++    </TarjetaOdt>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+-  fila: { flexDirection: 'row', alignItems: 'center' },
+-  flex1: { flex: 1, minWidth: 0 },
+   titulo: { fontSize: 17, lineHeight: 22, fontWeight: '600' },
+-  ordenTitulo: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
+ });
+diff --git a/src/components/tarjeta-mantenimiento.tsx b/src/components/tarjeta-mantenimiento.tsx
+new file mode 100644
+index 0000000..c4e8b85
+--- /dev/null
++++ b/src/components/tarjeta-mantenimiento.tsx
+@@ -0,0 +1,378 @@
++import { LinearGradient } from 'expo-linear-gradient';
++import { useEffect, useState, type ReactNode } from 'react';
++import { Animated, Easing, StyleSheet, View } from 'react-native';
++
++import { Card } from '@/components/card';
++import { ODT_ESTADO_LABEL, otStatusColor } from '@/components/ot-status-badge';
++import { PressableScale } from '@/components/pressable-scale';
++import { PulseDot } from '@/components/pulse-dot';
++import { TabIcon, type TabIconName } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import type { AccionMantenimiento, AccionRelevancia } from '@/services';
++import { tinte } from '@/lib/color';
++import { useReducedMotion, useTheme, type ColorTokens } from '@/theme';
++import type { FaultType, OdtEstado, OdtGravedad, OdtTipo } from '@/types';
++import { formatFecha } from '@/utils/date';
++import { etiquetaFalla } from '@/utils/odt';
++
++/** De la más nueva a la más vieja, por cuándo se reportó; lo que no trae fecha, al final. */
++export function masNuevasPrimero<T>(lista: T[], fecha: (x: T) => string | null | undefined): T[] {
++  const ms = (x: T) => {
++    const t = Date.parse(fecha(x) ?? '');
++    return Number.isFinite(t) ? t : -Infinity;
++  };
++  return [...lista].sort((a, b) => {
++    const ta = ms(a);
++    const tb = ms(b);
++    return ta === tb ? 0 : tb - ta;
++  });
++}
++
++/**
++ * LA TARJETA DE MANTENIMIENTO: la misma en todas las listas (conductor,
++ * supervisor y «Asignadas a ti»), con la vista por grupos o en lista. Marco la
++ * eligió de la pestaña del conductor: ícono del servicio en su cuadro teñido,
++ * título grande, punto que late si está vencida (o la flecha si no), la
++ * descripción en gris y abajo el estado, la prioridad y la fecha.
++ *
++ * El tono no se grita: entra por el borde, por un halo que nace en el canto
++ * izquierdo y por el anillo del ícono.
++ */
++
++/**
++ * Ícono por servicio, deducido del título. El servicio no viene tipado (los
++ * títulos los arma el motor de mantenimiento), así que se busca por palabra
++ * clave y lo que no encaje cae en la llave inglesa.
++ */
++export function iconoServicio(titulo: string): TabIconName {
++  const t = titulo.toLowerCase();
++  if (t.includes('freno')) return 'frenos';
++  if (t.includes('aceite') || t.includes('filtro')) return 'aceite';
++  if (t.includes('neumátic') || t.includes('neumatic') || t.includes('llanta') || t.includes('rueda')) {
++    return 'neumatico';
++  }
++  if (t.includes('batería') || t.includes('bateria') || t.includes('eléctric') || t.includes('electric')) {
++    return 'electrico';
++  }
++  if (t.includes('motor') || t.includes('correa') || t.includes('bujía') || t.includes('bujia')) return 'motor';
++  if (t.includes('suspensión') || t.includes('suspension') || t.includes('carroc')) return 'carroceria';
++  return 'ot';
++}
++
++const PRIORIDAD_LABEL: Record<AccionRelevancia | OdtGravedad, string> = { alta: 'Alta', media: 'Media', baja: 'Baja' };
++
++/** La prioridad en su píldora: Alta roja, Media amarilla, Baja azul. */
++export function pastillaPrioridad(p: AccionRelevancia | OdtGravedad): PastillaTarjeta {
++  return { label: PRIORIDAD_LABEL[p], tono: p === 'alta' ? 'danger' : p === 'media' ? 'warning' : 'info' };
++}
++
++/**
++ * En qué anda una acción, DICHO como se lee. Vencida manda sobre pendiente:
++ * es la misma cosa, un escalón más tarde (y debajo de VENCIDAS no puede decir
++ * «Pendiente»).
++ */
++function estadoDeAccion(a: AccionMantenimiento): PastillaTarjeta {
++  if (a.estado === 'realizada') return { label: 'Realizada', tono: 'success', conPunto: true };
++  if (a.estado === 'en_proceso') return { label: 'En proceso', tono: 'info', conPunto: true };
++  if (a.vencida) return { label: 'Vencida', tono: 'danger', conPunto: true };
++  return { label: 'Pendiente', tono: 'warning', conPunto: true };
++}
++
++/**
++ * Color de la acción: lo realizado se apaga, lo que está en taller es
++ * informativo, y lo demás habla por su urgencia real — una vencida es urgente
++ * aunque la hayan reportado como relevancia baja.
++ */
++function tonoDeAccion(a: AccionMantenimiento): keyof ColorTokens {
++  if (a.estado === 'realizada') return 'success';
++  if (a.estado === 'en_proceso') return 'info';
++  if (a.vencida) return 'danger';
++  return pastillaPrioridad(a.relevancia).tono;
++}
++
++/**
++ * Una acción de mantenimiento (preventivo, predictivo o la ODT de una falla)
++ * en su tarjeta. `antes` va delante de la descripción: la unidad, en las
++ * listas del supervisor, que mira toda la flota.
++ */
++export function TarjetaAccion({
++  accion,
++  antes,
++  onPress,
++}: {
++  accion: AccionMantenimiento;
++  antes?: string;
++  onPress: () => void;
++}) {
++  const hecha = accion.estado === 'realizada';
++  const estado = estadoDeAccion(accion);
++  return (
++    <TarjetaMantenimiento
++      icono={iconoServicio(accion.titulo)}
++      tono={tonoDeAccion(accion)}
++      titulo={accion.titulo}
++      descripcion={[antes, accion.detalle].filter(Boolean).join(' · ')}
++      progreso={accion.progreso}
++      descripcionUrgente={accion.vencida}
++      estado={estado}
++      // Una vez hecha, su urgencia ya no dice nada.
++      prioridad={hecha ? undefined : pastillaPrioridad(accion.relevancia)}
++      fecha={accion.creadaEn}
++      urgente={accion.vencida && !hecha}
++      apagada={hecha}
++      onPress={onPress}
++      accessibilityLabel={`${accion.titulo}${antes ? `, ${antes}` : ''}, ${estado.label}`}
++    />
++  );
++}
++
++/** Lo que hace falta de una ODT para su tarjeta (sirve la del listado y la asignada). */
++export type OdtParaTarjeta = {
++  descripcion: string;
++  estado: OdtEstado;
++  tipo?: OdtTipo;
++  tipoFalla?: FaultType;
++  parteFalla?: string;
++  gravedad?: OdtGravedad;
++  creadaEn?: string | null;
++};
++
++/**
++ * Una ODT en la misma tarjeta: «Falla: Eléctrico» de título si se sabe qué
++ * falló (como la ve el conductor), la unidad y lo reportado debajo, su estado
++ * en las tres palabras, la prioridad y la fecha. Sin atender (abierta), late.
++ */
++export function TarjetaOdt({
++  orden,
++  unidad,
++  onPress,
++  children,
++}: {
++  orden: OdtParaTarjeta;
++  unidad?: string;
++  onPress: () => void;
++  children?: ReactNode;
++}) {
++  const falla = etiquetaFalla(orden.tipoFalla, orden.parteFalla);
++  const titulo = falla ? `Falla: ${falla}` : orden.descripcion;
++  const resuelta = orden.estado === 'cerrada';
++  const estado: PastillaTarjeta = { label: ODT_ESTADO_LABEL[orden.estado], tono: otStatusColor(orden.estado), conPunto: true };
++  return (
++    <TarjetaMantenimiento
++      icono={falla ? iconoServicio(falla) : orden.tipo === 'preventiva' ? 'aceite' : 'ot'}
++      tono={otStatusColor(orden.estado)}
++      titulo={titulo}
++      descripcion={[unidad, falla ? orden.descripcion : orden.tipo === 'preventiva' ? 'Preventiva' : 'Correctiva']
++        .filter(Boolean)
++        .join(' · ')}
++      estado={estado}
++      prioridad={!resuelta && orden.gravedad ? pastillaPrioridad(orden.gravedad) : undefined}
++      fecha={orden.creadaEn}
++      urgente={orden.estado === 'abierta'}
++      apagada={resuelta}
++      onPress={onPress}
++      accessibilityLabel={`${titulo}${unidad ? `, ${unidad}` : ''}, ${estado.label}`}>
++      {children}
++    </TarjetaMantenimiento>
++  );
++}
++
++export type PastillaTarjeta = { label: string; tono: keyof ColorTokens; conPunto?: boolean };
++
++type Props = {
++  icono: TabIconName;
++  /** El color de la tarjeta: borde, halo y cuadro del ícono. */
++  tono: keyof ColorTokens;
++  titulo: string;
++  descripcion?: string;
++  /** Consumo del intervalo de servicio (solo preventivos): pinta la barra. */
++  progreso?: number;
++  /** La descripción en el color de la tarjeta (lo vencido de km). */
++  descripcionUrgente?: boolean;
++  estado: PastillaTarjeta;
++  prioridad?: PastillaTarjeta;
++  /** ISO: la fecha en que se reportó o se generó. */
++  fecha?: string | null;
++  /** Vencida o sin atender: el punto late en vez de la flecha. */
++  urgente?: boolean;
++  /** Lo ya resuelto se atenúa. */
++  apagada?: boolean;
++  onPress: () => void;
++  accessibilityLabel: string;
++  /** Lo que va debajo, fuera del toque de la tarjeta (el reloj y los botones de una ODT asignada). */
++  children?: ReactNode;
++};
++
++export function TarjetaMantenimiento({
++  icono,
++  tono,
++  titulo,
++  descripcion,
++  progreso,
++  descripcionUrgente,
++  estado,
++  prioridad,
++  fecha,
++  urgente,
++  apagada,
++  onPress,
++  accessibilityLabel,
++  children,
++}: Props) {
++  const { colors, spacing, radii } = useTheme();
++  const color = colors[tono];
++
++  return (
++    <Card
++      style={[
++        styles.tarjeta,
++        { borderColor: tinte(color, 0.2), borderRadius: radii.lg, opacity: apagada ? 0.66 : 1 },
++      ]}>
++      {/* Halo del tono, naciendo en el canto izquierdo. */}
++      <LinearGradient
++        colors={[tinte(color, 0.08), 'transparent']}
++        start={{ x: 0, y: 0.5 }}
++        end={{ x: 1, y: 0.5 }}
++        style={styles.halo}
++        pointerEvents="none"
++      />
++
++      <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel}>
++        <View style={{ padding: spacing.md, gap: spacing.sm }}>
++          <View style={[styles.filaTitulo, { gap: spacing.sm }]}>
++            {/* Ícono del servicio: capa del tono y su anillo. */}
++            <View style={[styles.icono, { borderRadius: radii.md }]}>
++              <View style={[StyleSheet.absoluteFill, { backgroundColor: color, opacity: 0.14, borderRadius: radii.md }]} />
++              <View
++                style={[
++                  StyleSheet.absoluteFill,
++                  { borderColor: color, opacity: 0.22, borderWidth: 1, borderRadius: radii.md },
++                ]}
++              />
++              <TabIcon name={icono} color={color} size={19} />
++            </View>
++            <ThemedText variant="subtitle" style={styles.flex1} numberOfLines={2}>
++              {titulo}
++            </ThemedText>
++            {/* Vencida: late. Lo demás: la flecha de que se abre. */}
++            <View style={styles.marcaDerecha}>
++              {urgente ? <PulseDot color={color} size={8} /> : <TabIcon name="chevron" color={colors.textMuted} size={19} />}
++            </View>
++          </View>
++
++          {/* El dato técnico manda: km del intervalo, con su barra. */}
++          {progreso != null ? (
++            <View style={{ gap: 6 }}>
++              <BarraIntervalo progreso={progreso} tone={tono} />
++              {descripcion ? (
++                <ThemedText variant="caption" color={descripcionUrgente ? tono : 'textSecondary'} tabular numberOfLines={1}>
++                  {descripcion}
++                </ThemedText>
++              ) : null}
++            </View>
++          ) : descripcion ? (
++            <ThemedText variant="caption" color="textSecondary" numberOfLines={2}>
++              {descripcion}
++            </ThemedText>
++          ) : null}
++
++          <View style={[styles.fila, { gap: spacing.sm }]}>
++            <Pildora {...estado} />
++            {prioridad ? <Pildora {...prioridad} /> : null}
++            <View style={styles.flex1} />
++            {fecha ? (
++              <ThemedText variant="caption" color="textMuted" tabular numberOfLines={1}>
++                {formatFecha(fecha)}
++              </ThemedText>
++            ) : null}
++          </View>
++        </View>
++      </PressableScale>
++
++      {children ? <View style={{ paddingHorizontal: spacing.md, paddingBottom: spacing.md, gap: spacing.sm }}>{children}</View> : null}
++    </Card>
++  );
++}
++
++/** Píldora de estado o prioridad: punto opcional + palabra, teñidos. */
++function Pildora({ tono, label, conPunto }: PastillaTarjeta) {
++  const { colors, radii } = useTheme();
++  const color = colors[tono];
++  return (
++    <View style={[styles.pildora, { borderRadius: radii.pill }]}>
++      <View style={[StyleSheet.absoluteFill, { backgroundColor: color, opacity: 0.12, borderRadius: radii.pill }]} />
++      {conPunto ? <View style={[styles.punto, { backgroundColor: color }]} /> : null}
++      <ThemedText variant="caption" style={[styles.pildoraTexto, { color }]} numberOfLines={1}>
++        {label}
++      </ThemedText>
++    </View>
++  );
++}
++
++/**
++ * El intervalo se dibuja hasta 1.33 para que lo VENCIDO se vea pasando la marca
++ * de "toca ahora" (que queda al 75% de la barra) en vez de toparse al final.
++ */
++const ESCALA_PROGRESO = 1.33;
++const MARCA_SERVICIO = 1 / ESCALA_PROGRESO;
++
++/** Barra del intervalo de servicio: se llena al entrar y marca el punto de servicio. */
++function BarraIntervalo({ progreso, tone }: { progreso: number; tone: keyof ColorTokens }) {
++  const { colors, radii } = useTheme();
++  const reduced = useReducedMotion();
++  const destino = Math.max(0.02, Math.min(1, progreso / ESCALA_PROGRESO));
++  // En el estado, no en una ref: leer `.current` al pintar lo prohíbe el React Compiler.
++  const [t] = useState(() => new Animated.Value(reduced ? destino : 0));
++
++  useEffect(() => {
++    if (reduced) {
++      t.setValue(destino);
++      return;
++    }
++    const anim = Animated.timing(t, {
++      toValue: destino,
++      duration: 620,
++      delay: 120,
++      easing: Easing.out(Easing.cubic),
++      useNativeDriver: true,
++    });
++    anim.start();
++    return () => anim.stop();
++  }, [t, destino, reduced]);
++
++  return (
++    <View style={[styles.pista, { backgroundColor: colors.surfaceSunken, borderRadius: radii.pill }]}>
++      <Animated.View
++        style={[
++          styles.relleno,
++          {
++            backgroundColor: colors[tone],
++            borderRadius: radii.pill,
++            // Crece desde la izquierda por el hilo nativo (sin animar layout).
++            transformOrigin: 'left',
++            transform: [{ scaleX: t }],
++          },
++        ]}
++      />
++      {/* Marca del servicio: cruzarla es ir vencido. */}
++      <View style={[styles.marca, { left: `${MARCA_SERVICIO * 100}%`, backgroundColor: colors.borderStrong }]} />
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  tarjeta: { padding: 0, overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth },
++  halo: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 90 },
++  flex1: { flex: 1, minWidth: 0 },
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  // El título puede ir a dos líneas: el ícono y la marca se alinean arriba.
++  filaTitulo: { flexDirection: 'row', alignItems: 'flex-start' },
++  icono: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
++  marcaDerecha: { paddingTop: 8 },
++  punto: { width: 6, height: 6, borderRadius: 3 },
++  pildora: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 22, paddingHorizontal: 9, overflow: 'hidden' },
++  pildoraTexto: { fontWeight: '600' },
++  pista: { height: 5, width: '100%', overflow: 'hidden', justifyContent: 'center' },
++  relleno: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, width: '100%' },
++  marca: { position: 'absolute', width: 2, height: 9, borderRadius: 1, opacity: 0.9 },
++});
+diff --git a/src/lib/llegada.ts b/src/lib/llegada.ts
+new file mode 100644
+index 0000000..ab51e88
+--- /dev/null
++++ b/src/lib/llegada.ts
+@@ -0,0 +1,140 @@
++/**
++ * «LLEGADA»: cuánto tarda la unidad elegida en llegar a un destino (un punto
++ * del mapa u otra unidad) con el tráfico de ahora, a qué hora llega y por
++ * dónde. La misma cuenta y los mismos textos que el panel web
++ * (`herramientasMapbox.js` y `rutaConTrafico` en `mapboxApi.js`).
++ *
++ * La ruta se pide a Mapbox Directions con el perfil `driving-traffic` (el que
++ * sabe del tráfico de ahora) y se dibuja de UN color, azul FOM: el tráfico da
++ * el tiempo, no se pinta (pedido de Marco, 21 oct 2026).
++ */
++import { MAPBOX_TOKEN } from '@/lib/mapbox';
++
++export type PuntoLlegada = { lat: number; lng: number };
++
++export type RutaLlegada = {
++  /** Minutos con el tráfico de ahora (al menos 1). */
++  minutos: number;
++  /** Minutos en un día normal a esta hora; null si Mapbox no lo da. */
++  minutosNormales: number | null;
++  km: number;
++  /** El camino, [lng, lat]. */
++  trazo: [number, number][];
++};
++
++/** Azul FOM fijo: la ruta y el pin del destino. */
++export const AZUL_LLEGADA = '#3D9BF5';
++/** Borde de la ruta: blanco sobre el mapa claro, casi negro sobre el oscuro o el satélite. */
++export const bordeLlegada = (mapaClaro: boolean) => (mapaClaro ? '#FFFFFF' : '#08121C');
++
++/**
++ * La gota del destino (30 × 40, la punta abajo al centro): el mismo dibujo
++ * que la web. El SVG en texto lo usa el mapa web; el nativo dibuja lo mismo.
++ */
++export const PIN_DESTINO_D = 'M15 38.5S27 25.4 27 15.5a12 12 0 0 0-24 0C3 25.4 15 38.5 15 38.5Z';
++export const PIN_DESTINO_SVG = `<svg width="30" height="40" viewBox="0 0 30 40" aria-hidden="true"><path d="${PIN_DESTINO_D}" fill="${AZUL_LLEGADA}" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"/><circle cx="15" cy="15.5" r="4.6" fill="#FFFFFF"/></svg>`;
++
++const BASE = 'https://api.mapbox.com/directions/v5/mapbox/driving-traffic';
++
++// Las últimas respuestas, por origen, destino y tramo de 2 minutos (como la
++// web): la flota se relee cada 20 s y no hace falta volver a preguntar lo mismo.
++const TOPE_CACHE = 20;
++const cache = new Map<string, Promise<RutaLlegada>>();
++
++const coord = (p: PuntoLlegada) => `${p.lng.toFixed(6)},${p.lat.toFixed(6)}`;
++
++/** Error con un texto ya en lenguaje llano para la tarjeta. */
++export class ErrorLlegada extends Error {}
++
++/**
++ * Pide la ruta a Mapbox. El token va solo en la URL de la petición: nunca en
++ * un log ni en un mensaje de error.
++ */
++export function pedirLlegada(origen: PuntoLlegada, destino: PuntoLlegada): Promise<RutaLlegada> {
++  if (!MAPBOX_TOKEN) return Promise.reject(new ErrorLlegada('La llegada no está disponible en este momento.'));
++  const clave = `${coord(origen)}>${coord(destino)}:${Math.floor(Date.now() / 120000)}`;
++  const guardada = cache.get(clave);
++  if (guardada) return guardada;
++  const p = (async (): Promise<RutaLlegada> => {
++    const url =
++      `${BASE}/${coord(origen)};${coord(destino)}` +
++      `?geometries=geojson&overview=full&annotations=duration&language=es&access_token=${encodeURIComponent(MAPBOX_TOKEN)}`;
++    let r: Response;
++    try {
++      r = await fetch(url);
++    } catch {
++      throw new ErrorLlegada('No pudimos calcular la llegada. Revisa la conexión y prueba otra vez.');
++    }
++    if (r.status === 401 || r.status === 403) throw new ErrorLlegada('La llegada no está disponible en este momento.');
++    const cuerpo = (await r.json().catch(() => null)) as {
++      code?: string;
++      routes?: { duration: number; duration_typical?: number; distance: number; geometry?: { coordinates?: [number, number][] } }[];
++    } | null;
++    const ruta = cuerpo?.routes?.[0];
++    if (!r.ok || cuerpo?.code !== 'Ok' || !ruta) {
++      // 422 / NoRoute / NoSegment: el punto no está cerca de ninguna carretera.
++      if (r.status === 422 || r.ok || /NoRoute|NoSegment/u.test(cuerpo?.code ?? '')) {
++        throw new ErrorLlegada('No encontramos un camino por carretera hasta ese punto. Prueba con otro destino.');
++      }
++      throw new ErrorLlegada('No pudimos calcular la llegada. Revisa la conexión y prueba otra vez.');
++    }
++    const trazo = (ruta.geometry?.coordinates ?? []).filter(
++      (c) => Array.isArray(c) && Number.isFinite(c[0]) && Number.isFinite(c[1]),
++    );
++    return {
++      minutos: Math.max(1, Math.round(ruta.duration / 60)),
++      minutosNormales:
++        typeof ruta.duration_typical === 'number' && ruta.duration_typical > 0
++          ? Math.max(1, Math.round(ruta.duration_typical / 60))
++          : null,
++      km: ruta.distance / 1000,
++      trazo,
++    };
++  })();
++  // Lo que falla no se recuerda: la próxima vez se vuelve a pedir.
++  const recordada = p.catch((e) => {
++    if (cache.get(clave) === recordada) cache.delete(clave);
++    throw e;
++  });
++  cache.set(clave, recordada);
++  while (cache.size > TOPE_CACHE) cache.delete(cache.keys().next().value as string);
++  return recordada;
++}
++
++/** El texto llano de un error (el detalle técnico no llega a la pantalla). */
++export function mensajeLlegada(e: unknown): string {
++  return e instanceof ErrorLlegada ? e.message : 'No pudimos calcular la llegada. Revisa la conexión y prueba otra vez.';
++}
++
++// ── Textos de la tarjeta (los mismos de la web) ─────────────────────────────
++
++/** «18 min», «1 h», «1 h 05 min». */
++export function tiempoLlegada(minutos: number): string {
++  const m = Math.max(0, Math.round(Number(minutos) || 0));
++  if (m < 60) return `${m} min`;
++  const h = Math.floor(m / 60);
++  const r = m % 60;
++  return r ? `${h} h ${String(r).padStart(2, '0')} min` : `${h} h`;
++}
++
++/** «12,4 km» con coma decimal; desde 10 km, sin decimales. A mano: el Intl del teléfono no siempre trae es-VE. */
++export function distanciaLlegada(km: number): string {
++  const n = Math.max(0, Number(km) || 0);
++  if (n < 10) return `${n.toFixed(1).replace('.', ',')} km`;
++  return `${String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/gu, '.')} km`;
++}
++
++/** «3:42 p. m.»: la hora en que llega si sale ahora (hora del teléfono). */
++export function horaLlegada(minutos: number, desde = Date.now()): string {
++  const d = new Date(desde + Math.max(0, Number(minutos) || 0) * 60000);
++  const h = d.getHours();
++  const h12 = h % 12 === 0 ? 12 : h % 12;
++  return `${h12}:${String(d.getMinutes()).padStart(2, '0')} ${h < 12 ? 'a. m.' : 'p. m.'}`;
++}
++
++/** Minutos que suma el tráfico de ahora sobre lo normal; null si no llega a 2 min y al 10 %. */
++export function extraPorTrafico(minutos: number, minutosNormales: number | null): number | null {
++  if (!Number.isFinite(minutos) || minutosNormales == null || !Number.isFinite(minutosNormales) || minutosNormales <= 0) return null;
++  const extra = Math.round(minutos - minutosNormales);
++  return extra >= 2 && extra >= minutosNormales * 0.1 ? extra : null;
++}
+diff --git a/src/lib/map-prefs.ts b/src/lib/map-prefs.ts
+index 0b63223..9a61397 100644
+--- a/src/lib/map-prefs.ts
++++ b/src/lib/map-prefs.ts
+@@ -14,11 +14,9 @@ export interface MapaPrefs {
+   tipo: MapaTipo;
+   /** Cámara inclinada (vista 3D, como el botón 3D de Apple Maps). */
+   tresD: boolean;
+-  /** Capa de tráfico en vivo (solo en el mapa de Mapbox, como en la web). */
+-  trafico: boolean;
+ }
+ 
+-export const MAPA_PREFS_DEFECTO: MapaPrefs = { tipo: 'standard', tresD: false, trafico: false };
++export const MAPA_PREFS_DEFECTO: MapaPrefs = { tipo: 'standard', tresD: false };
+ 
+ /** Inclinación de la cámara en vista 3D (grados). */
+ export const PITCH_3D = 55;
+@@ -44,11 +42,12 @@ export async function cargarMapaPrefs(): Promise<MapaPrefs> {
+     const crudo = await AsyncStorage.getItem(CLAVE);
+     if (!crudo) return MAPA_PREFS_DEFECTO;
+     const p = JSON.parse(crudo) as Partial<MapaPrefs>;
++    // Solo lo que existe hoy: un `trafico` o `lluvia` guardado de antes se
++    // descarta aquí (el tráfico en vivo se quitó del mapa el 21 oct 2026).
+     return {
+       tipo: typeof p.tipo === 'string' && tipoValido(p.tipo) ? p.tipo : MAPA_PREFS_DEFECTO.tipo,
+       // El mapa de flota va siempre plano: un 3D guardado de antes ya no se aplica.
+       tresD: false,
+-      trafico: p.trafico === true,
+     };
+   } catch {
+     return MAPA_PREFS_DEFECTO;
+diff --git a/src/services/fomOrdenes.ts b/src/services/fomOrdenes.ts
+index 3b8c1a3..2b0d3a6 100644
+--- a/src/services/fomOrdenes.ts
++++ b/src/services/fomOrdenes.ts
+@@ -506,6 +506,8 @@ export interface OdtAsignada {
+   /** «08 · V88AS5T». */
+   vehicleLabel: string;
+   asignadaEn: string;
++  /** Cuándo se reportó; si FOM no lo manda, cuándo se asignó. Ordena la lista (la más nueva primero). */
++  creadaEn: string;
+ }
+ 
+ /** Responsable, eventos y reloj de una ODT. */
+@@ -538,6 +540,7 @@ interface AsignadaFom {
+   vehicleCode: string;
+   vehiclePlate: string | null;
+   assignedAt: string;
++  createdAt?: string;
+ }
+ 
+ interface EjecucionFom {
+@@ -584,6 +587,7 @@ export async function getOdtAsignadas(): Promise<OdtAsignada[] | null> {
+             vehicleId: o.vehicleId,
+             vehicleLabel: [o.vehicleCode?.toUpperCase(), o.vehiclePlate].filter(Boolean).join(' · '),
+             asignadaEn: o.assignedAt,
++            creadaEn: o.createdAt ?? o.assignedAt,
+           },
+         ]
+       : [],
 -- 
 2.55.0.windows.3
 

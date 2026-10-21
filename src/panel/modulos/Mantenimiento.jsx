@@ -12,7 +12,6 @@ import {
   Buscador,
   Campo,
   Cargando,
-  Chips,
   Datos,
   ErrorCarga,
   Modal,
@@ -27,6 +26,8 @@ import { GaleriaArchivos, SelectorArchivos } from '../comp/Archivos'
 import { puedeSubirArchivos, subirArchivo, subirVarios } from '../datos/archivos'
 import { Icono } from '../Iconos'
 import OdtAsignadas from '../comp/OdtAsignadas'
+import TarjetaMantenimiento, { GrupoTarjetas } from '../comp/TarjetaMantenimiento'
+import { masNuevasPrimero } from '../datos/odtAsignadas'
 import { esGestor } from '../roles'
 
 // ============================================================
@@ -184,7 +185,6 @@ function Ordenes({ listaCompleta = false }) {
   const [tipo, setTipo] = useState('')
   const [vista, setVista] = useState(listaCompleta ? 'lista' : 'atencion')
   const [unidadFiltro, setUnidadFiltro] = useState('')
-  const [estadoFiltro, setEstadoFiltro] = useState('')
   const [grupo, setGrupo] = useState('')
   const [params] = useSearchParams()
   const [detalleId, setDetalleId] = useState(() => params.get('orden'))
@@ -192,15 +192,18 @@ function Ordenes({ listaCompleta = false }) {
   const [aviso, setAviso] = useState('')
   const odts = datos?.odts ?? []
   const vehiculos = datos?.vehiculos ?? []
-  const visibles = useMemo(() => odts.filter(o => {
+  // Lo que deja pasar la búsqueda, el tipo y la unidad, sin mirar el estado: de aquí salen las
+  // cuentas del control de estado. Siempre de la más nueva a la más vieja, como la app.
+  const sinEstado = useMemo(() => masNuevasPrimero(odts.filter(o => {
     if (tipo && o.tipo !== tipo) return false
     if (unidadFiltro && o.vehiculoId !== unidadFiltro) return false
-    if (estadoFiltro && estadoVisible(o.estado).clave !== estadoFiltro) return false
-    if (grupo && estadoVisible(o.estado).clave !== grupo) return false
     return [o.id, o.descripcion, o.vehiculoNombre, o.creadorNombre, etiqueta('tipo_falla', o.tipoFalla)].join(' ').toLowerCase().includes(q.trim().toLowerCase())
-  }), [odts, q, tipo, grupo, unidadFiltro, estadoFiltro])
+  })), [odts, q, tipo, unidadFiltro])
+  const visibles = useMemo(() => (grupo ? sinEstado.filter(o => estadoVisible(o.estado).clave === grupo) : sinEstado), [sinEstado, grupo])
   const detalle = detalleId ? odts.find(o => o.id === detalleId) : null
-  const filtrosEtapa = <div className="mnt-states" role="group" aria-label="Filtrar por etapa"><button type="button" aria-pressed={!grupo} onClick={() => setGrupo('')}>Todas <b>{odts.length}</b></button>{ESTADOS_VISIBLES.map(g => <button type="button" key={g.clave} aria-pressed={grupo === g.clave} onClick={() => setGrupo(grupo === g.clave ? '' : g.clave)}><i className={g.color}/>{g.plural}<b>{odts.filter(o => g.estados.includes(o.estado)).length}</b></button>)}</div>
+  // Arriba de la lista, justo debajo del título y el buscador: el estado y el tipo de orden.
+  const filtrosArriba = <div className="mnt-filtrar"><FiltroEstado odts={sinEstado} valor={grupo} alCambiar={setGrupo}/><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/></div>
+  const cambioVista = <div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Prioridades</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div>
   return <div className="mnt-content">
     <div className="mnt-toolbar"><div><h2>{listaCompleta ? 'Todas las órdenes de mantenimiento' : 'Órdenes de trabajo'}</h2><p>{listaCompleta ? 'Consulta abiertas, en revisión y resueltas de esta empresa.' : 'De la falla reportada a la unidad lista para volver.'}</p></div><button className="pnl-btn primario" type="button" onClick={() => setCreando(true)}><Icono nombre="mas" tam={18}/>Nueva ODT</button></div>
     {aviso && <div className="mnt-success" role="status"><Icono nombre="check" tam={20}/>{aviso}</div>}
@@ -210,15 +213,16 @@ function Ordenes({ listaCompleta = false }) {
       {/* Arriba de todo, lo que le toca hacer a quien tiene la sesión (solo si es responsable de alguna). */}
       {!listaCompleta && <OdtAsignadas odts={odts} perfil={sesion?.perfil ?? null} alCambiar={recargar} alAbrir={setDetalleId}/>}
       <Indicadores odts={odts}/>
-      {vista === 'lista' && <div className="mnt-filters"><Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/>{!listaCompleta && <div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Prioridades</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div>}</div>}
-      {vista === 'lista' && (listaCompleta ? <div className="mnt-all-filters">
+      {listaCompleta && <div className="mnt-filters"><Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>}
+      {listaCompleta && filtrosArriba}
+      {listaCompleta && <div className="mnt-all-filters">
         <Campo etiqueta="Vehículo"><select aria-label="Vehículo" className="pnl-input" value={unidadFiltro} onChange={e => setUnidadFiltro(e.target.value)}><option value="">Todos los vehículos</option>{[...new Map(odts.map(o => [o.vehiculoId, o.vehiculoNombre])).entries()].filter(([id]) => id).map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></Campo>
-        <Campo etiqueta="Estado"><select aria-label="Estado" className="pnl-input" value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)}><option value="">Todos los estados</option>{ESTADOS_VISIBLES.map(g => <option key={g.clave} value={g.clave}>{g.etiqueta}</option>)}</select></Campo>
         <p role="status">{visibles.length} de {odts.length} órdenes</p>
-        {(q || tipo || unidadFiltro || estadoFiltro) && <button type="button" className="pnl-btn sutil" onClick={() => { setQ(''); setTipo(''); setUnidadFiltro(''); setEstadoFiltro('') }}>Limpiar filtros</button>}
-      </div> : filtrosEtapa)}
-      {vista === 'lista' ? <Tarjeta titulo="Todas las órdenes" sinCuerpo><Lista odts={visibles} alAbrir={setDetalleId}/></Tarjeta> : <div className="mnt-overview"><div><Tarjeta titulo="Necesita tu atención" accion={<div className="mnt-attention-tools"><div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Prioridades</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div><Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>} sinCuerpo><Atencion odts={visibles.filter(o => !['cerrada', 'cancelada'].includes(o.estado))} vehiculos={vehiculos} alAbrir={setDetalleId} alCrear={() => setCreando(true)}/><details className="mnt-type-filter"><summary>Filtrar por tipo de orden</summary><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/></details>{filtrosEtapa}</Tarjeta></div><aside className="mnt-guide"><h3>Cómo avanza una ODT</h3><p className="mnt-guide-intro">Del reporte al cierre, en tres pasos.</p>{ESTADOS_VISIBLES.map((g,i) => <div className="mnt-guide-step" key={g.clave}><b>{i+1}</b><div><Tag color={g.color}>{g.etiqueta}</Tag><p>{PASOS_GUIA[g.clave]}</p></div></div>)}<Link to="/panel/mantenimiento?vista=planes" className="pnl-link">Prepara tus servicios con un plan →</Link></aside></div>}
-      {vista === 'atencion' && <Tarjeta titulo="Órdenes resueltas · toca una para ver qué pasó" sinCuerpo><Cierres odts={visibles.filter(o => estadoVisible(o.estado).clave === 'resuelta').sort((a,b) => new Date(b.resueltaEn || b.creadaEn) - new Date(a.resueltaEn || a.creadaEn))} alAbrir={setDetalleId}/></Tarjeta>}
+        {(q || tipo || unidadFiltro || grupo) && <button type="button" className="pnl-btn sutil" onClick={() => { setQ(''); setTipo(''); setUnidadFiltro(''); setGrupo('') }}>Limpiar filtros</button>}
+      </div>}
+      {listaCompleta
+        ? <Tarjeta titulo="Todas las órdenes" sinCuerpo><div className="mnt-lista-cuerpo"><Tarjetas odts={visibles} alAbrir={setDetalleId} tanda={30}/></div></Tarjeta>
+        : <div className="mnt-overview"><div><Tarjeta titulo="Órdenes de trabajo" accion={<div className="mnt-attention-tools">{cambioVista}<Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>} sinCuerpo>{filtrosArriba}<div className="mnt-lista-cuerpo">{vista === 'atencion' ? <PorEstado odts={visibles} alAbrir={setDetalleId} alCrear={() => setCreando(true)}/> : <Tarjetas odts={visibles} alAbrir={setDetalleId} tanda={30}/>}</div></Tarjeta></div><aside className="mnt-guide"><h3>Cómo avanza una ODT</h3><p className="mnt-guide-intro">Del reporte al cierre, en tres pasos.</p>{ESTADOS_VISIBLES.map((g,i) => <div className="mnt-guide-step" key={g.clave}><b>{i+1}</b><div><Tag color={g.color}>{g.etiqueta}</Tag><p>{PASOS_GUIA[g.clave]}</p></div></div>)}<Link to="/panel/mantenimiento?vista=planes" className="pnl-link">Prepara tus servicios con un plan →</Link></aside></div>}
       <details className="mnt-legacy"><summary>Consultar reglas heredadas</summary><ReglasHeredadas/></details>
     </>}
     <Modal titulo="Detalle de la orden" abierto={Boolean(detalle)} alCerrar={() => setDetalleId(null)} ancho={1080}>{detalle && <Detalle key={detalle.id} odt={detalle} perfil={sesion?.perfil ?? null} vehiculo={vehiculos.find(v => v.id === detalle.vehiculoId)} recargar={recargar} alCerrar={() => setDetalleId(null)}/>}</Modal>
@@ -226,10 +230,25 @@ function Ordenes({ listaCompleta = false }) {
   </div>
 }
 
-function Atencion({ odts, vehiculos, alAbrir, alCrear }) {
-  if (!odts.length) return <Vacio icono="check" titulo="No hay órdenes pendientes con estos filtros" texto="Cuando se reporte una falla aparecerá aquí con su siguiente paso." accion={<button type="button" className="pnl-btn" onClick={alCrear}>Nueva ODT</button>}/>
-  const prioridad = { critica: 0, alta: 1, media: 2, baja: 3 }
-  return <div className="mnt-orders">{[...odts].sort((a,b) => (prioridad[a.prioridad] ?? 2) - (prioridad[b.prioridad] ?? 2) || new Date(a.creadaEn) - new Date(b.creadaEn)).map(o => <article key={o.id} className="mnt-order"><div className="mnt-thumb"><VehicleVisual modelo={vehiculos.find(v => v.id === o.vehiculoId)?.modelo ?? ''} compacta/></div><div className="mnt-order-copy"><span>{o.vehiculoNombre}</span><h3>{o.descripcion}</h3><div><EstadoOdt estado={o.estado}/><small>{f.desde(o.creadaEn)} · {etiqueta('odt_tipo', o.tipo)}</small></div></div><button type="button" className="pnl-btn" onClick={() => alAbrir(o.id)}>{o.estado === 'abierta' ? 'Revisar' : o.estado === 'aprobada' ? 'Asignar' : o.estado === 'en_calidad' ? 'Revisar cierre' : 'Ver orden'} →</button></article>)}</div>
+// Las órdenes llegan ya de la más nueva a la más vieja (masNuevasPrimero): aquí no se reordenan.
+
+/** Las tarjetas seguidas, de a `tanda` con «Ver más» (el historial entero pueden ser cientos). */
+export function Tarjetas({ odts, alAbrir, tanda = 12, unidad = true, vacio = 'No hay órdenes con estos filtros' }) {
+  const [tope, setTope] = useState(tanda)
+  if (!odts.length) return <Vacio icono="llave" titulo={vacio} texto="Prueba con otra búsqueda, otro estado u otro tipo de orden."/>
+  return <>
+    <div className="mnt-tarjetas">{odts.slice(0, tope).map(o => <TarjetaMantenimiento key={o.id} odt={o} alAbrir={alAbrir} unidad={unidad}/>)}</div>
+    {odts.length > tope && <button type="button" className="pnl-btn sutil mnt-ver-mas" onClick={() => setTope(tope + tanda)}>Ver más ({odts.length - tope})</button>}
+  </>
+}
+
+/** Prioridades: las mismas tarjetas, agrupadas por estado (Abiertas, En revisión, Resueltas). */
+function PorEstado({ odts, alAbrir, alCrear }) {
+  if (!odts.length) return <Vacio icono="check" titulo="No hay órdenes con estos filtros" texto="Cuando se reporte una falla aparecerá aquí con su siguiente paso." accion={<button type="button" className="pnl-btn" onClick={alCrear}>Nueva ODT</button>}/>
+  return <div className="mnt-grupos">{ESTADOS_VISIBLES.map(g => {
+    const delGrupo = odts.filter(o => g.estados.includes(o.estado))
+    return delGrupo.length > 0 && <GrupoTarjetas key={g.clave} titulo={g.plural} cuenta={delGrupo.length} color={g.clave === 'abierta' ? 'ambar' : ''}><Tarjetas odts={delGrupo} alAbrir={alAbrir} tanda={g.clave === 'resuelta' ? 6 : 12}/></GrupoTarjetas>
+  })}</div>
 }
 
 // ---------------- Indicadores ----------------
@@ -255,83 +274,34 @@ function Indicadores({ odts }) {
   return <div className="mnt-summary">{[['Abiertas', abiertas.length, 'Reportadas, falta revisarlas', 'ambar'], ['En revisión', enRevision.length, 'En evaluación o en taller', 'azul'], ['Resueltas este mes', resueltasMes.length, mes.charAt(0).toUpperCase() + mes.slice(1), 'verde'], ['Costo del mes', f.moneda(gasto), `${conCosto} ${conCosto === 1 ? 'cierre' : 'cierres'} con costo`, 'gris']].map(([t,v,d,c]) => <div key={t}><span><i className={c}/>{t}</span><b>{v}</b><small>{d}</small></div>)}</div>
 }
 
-function FiltroTipo({ odts, valor, alCambiar }) {
- return <Chips opciones={[{v:'',t:'Todas',n:odts.length},{v:'correctiva',t:'Correctivas',n:odts.filter(o=>o.tipo==='correctiva').length},{v:'preventiva',t:'Preventivas',n:odts.filter(o=>o.tipo==='preventiva').length}]} valor={valor} alCambiar={alCambiar}/>
+/**
+ * Los 3 estados visibles en un control de píldora: cada uno con su punto de color y cuántas
+ * órdenes hay. La elegida va rellena en azul FOM. En el teléfono se desliza de lado.
+ */
+export function FiltroEstado({ odts, valor, alCambiar }) {
+  const opciones = [{ clave: '', plural: 'Todas', n: odts.length }, ...ESTADOS_VISIBLES.map(g => ({ ...g, n: odts.filter(o => g.estados.includes(o.estado)).length }))]
+  return <div className="mnt-seg" role="group" aria-label="Filtrar por estado">{opciones.map(o => <button type="button" key={o.clave || 'todas'} aria-pressed={valor === o.clave} onClick={() => alCambiar(o.clave)}>{o.color && <i className={o.color} aria-hidden="true"/>}{o.plural}<b>{o.n}</b></button>)}</div>
 }
 
-// ---------------- Vista lista ----------------
-
-function Lista({ odts, alAbrir }) {
-  if (odts.length === 0) {
-    return (
-      <div className="pnl-card-cuerpo">
-        <Vacio
-          icono="llave"
-          titulo="No hay órdenes con estos filtros"
-          texto="Prueba con otra búsqueda o muestra todos los tipos de orden."
-        />
-      </div>
-    )
-  }
-
-  return (
-    <div className="pnl-tabla-wrap">
-      <table className="pnl-tabla mv-lista">
-        <thead>
-          <tr>
-            <th>Descripción</th>
-            <th>Unidad</th>
-            <th>Tipo</th>
-            <th>Falla</th>
-            <th>Generó</th>
-            <th>Creada</th>
-            <th>Estado</th>
-            <th className="num">Costo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {odts.map((o) => (
-            <tr
-              key={o.id}
-              className={`pnl-tabla-fila-link${estadoVisible(o.estado).clave === 'abierta' ? ' mv-u1' : estadoVisible(o.estado).clave === 'revision' ? ' mv-u2' : ''}`}
-              onClick={() => alAbrir(o.id)}
-              tabIndex={0}
-              role="button"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  alAbrir(o.id)
-                }
-              }}
-            >
-              <td className="mv-t">
-                <div className="pnl-doble">
-                  <button type="button" className="mnt-table-link" onClick={e => { e.stopPropagation(); alAbrir(o.id) }}>{o.descripcion}</button>
-                  <span>{o.ubicacion || 'Sin ubicación'}</span>
-                </div>
-              </td>
-              <td className="mv-d">{o.vehiculoNombre}</td>
-              <td>
-                <Tag color={colorTipo(o.tipo)}>{etiqueta('odt_tipo', o.tipo)}</Tag>
-              </td>
-              <td>{o.tipoFalla ? etiqueta('tipo_falla', o.tipoFalla) : 'No especificado'}</td>
-              <td>{o.creadorNombre}</td>
-              <td className="mv-d">{f.fechaCorta(o.creadaEn)}</td>
-              <td className="mv-e">
-                <EstadoOdt estado={o.estado}/>
-              </td>
-              <td className="num">{o.costo != null ? f.moneda(o.costo) : '·'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-function Cierres({ odts, alAbrir }) {
- if (!odts.length) return <Vacio icono="check" titulo="Aún no hay cierres con estos filtros" texto="Aquí aparecerán las órdenes resueltas y su costo registrado."/>
- return <div className="pnl-tabla-wrap"><table className="pnl-tabla mv-lista"><thead><tr><th>Cierre</th><th>Unidad</th><th>Trabajo realizado</th><th>Tipo</th><th className="num">Costo</th></tr></thead><tbody>{odts.map(o => <tr key={o.id} className="pnl-tabla-fila-link" onClick={() => alAbrir(o.id)}><td className="mv-d">{o.resueltaEn ? f.fechaCorta(o.resueltaEn) : 'Sin fecha'}</td><td className="mv-d">{o.vehiculoNombre}</td><td className="mv-t"><button type="button" className="mnt-table-link" onClick={() => alAbrir(o.id)}>{o.descripcion}</button></td><td>{etiqueta('odt_tipo',o.tipo)}</td><td className="num mv-e">{o.costo != null ? f.moneda(o.costo) : o.estado === 'cancelada' ? 'Cancelada' : 'Sin registrar'}</td></tr>)}</tbody></table></div>
+/** «Tipo»: un botón que abre las opciones (todos, correctivas o preventivas) con su cuenta. */
+export function FiltroTipo({ odts, valor, alCambiar }) {
+  const [abierto, setAbierto] = useState(false)
+  const caja = useRef(null)
+  // Se cierra al tocar fuera o con Escape (y el foco vuelve al botón).
+  useEffect(() => {
+    if (!abierto) return undefined
+    const fuera = (e) => { if (!caja.current?.contains(e.target)) setAbierto(false) }
+    const tecla = (e) => { if (e.key === 'Escape') { setAbierto(false); caja.current?.querySelector('button')?.focus() } }
+    document.addEventListener('pointerdown', fuera)
+    document.addEventListener('keydown', tecla)
+    return () => { document.removeEventListener('pointerdown', fuera); document.removeEventListener('keydown', tecla) }
+  }, [abierto])
+  const opciones = [{ v: '', t: 'Todos los tipos', n: odts.length }, { v: 'correctiva', t: 'Correctivas', n: odts.filter(o => o.tipo === 'correctiva').length }, { v: 'preventiva', t: 'Preventivas', n: odts.filter(o => o.tipo === 'preventiva').length }]
+  const elegida = opciones.find(o => o.v === valor)
+  return <div className="mnt-tipo" ref={caja}>
+    <button type="button" className={`mnt-tipo-boton${valor ? ' activo' : ''}`} aria-haspopup="true" aria-expanded={abierto} aria-label={valor ? `Tipo de orden: ${elegida?.t}` : 'Tipo de orden'} onClick={() => setAbierto(!abierto)}><Icono nombre="filtro" tam={16}/>Tipo{valor && <em>{elegida?.t}</em>}<svg className="mnt-flecha" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    {abierto && <div className="mnt-tipo-menu" role="group" aria-label="Tipo de orden">{opciones.map(o => <button type="button" key={o.v || 'todos'} aria-pressed={valor === o.v} onClick={() => { alCambiar(o.v); setAbierto(false) }}><span>{o.t}</span><b>{o.n}</b><i aria-hidden="true">{valor === o.v ? <Icono nombre="check" tam={16}/> : null}</i></button>)}</div>}
+  </div>
 }
 
 // ---------------- Detalle de una ODT ----------------

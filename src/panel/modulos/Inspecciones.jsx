@@ -9,6 +9,8 @@ import { Icono } from '../Iconos'
 import ProgramaInspecciones from './ProgramaInspecciones'
 import InspeccionesPorPersona from './InspeccionesPorPersona'
 import { diaDe, limitesDelMes, mesDe, moverMes, nombreDelMes } from '../comp/CalendarioInspecciones'
+import { AVISO_LOTE, armarPlanillas, imprimirHtml } from '../datos/planillaInspeccion'
+import { leerAyudasDelFormato } from '../datos/ayudasFormato'
 import './inspecciones.css'
 import '../../styles/movil-modulos.css'
 
@@ -85,6 +87,49 @@ function cuandoSeHizo(insp) {
 
 const momento = i => new Date(i.creadaEn || i.fecha || 0).getTime() || 0
 
+/** Lo que se respondió en cada ítem: el detalle real conectado; en demostración, el checklist de siempre. */
+const leerRespuestas = i => CONECTADO ? repo.inspecciones.obtener(i.id) : Promise.resolve(checklistDe(i))
+
+/**
+ * Imprimir la planilla, como la app (T-79): una hoja A4 por inspección, con lo
+ * respondido y las viñetas del formato. Los detalles se piden en tandas y, si
+ * son muchas hojas, se avisa antes de que tarde. `leidas` (id → respuestas)
+ * evita volver a pedir un detalle que ya está en pantalla.
+ */
+function useImpresion() {
+  const [ocupado, setOcupado] = useState(false)
+  const [aviso, setAviso] = useState(null)
+  async function imprimir(lista, leidas) {
+    if (ocupado || !lista?.length) return false
+    setOcupado(true)
+    setAviso(lista.length > AVISO_LOTE ? { texto: `Son ${f.numero(lista.length)} hojas: puede tardar un poco.`, tono: 'info' } : null)
+    try {
+      await imprimirHtml(await armarPlanillas(lista, { leerRespuestas, leerAyudas: leerAyudasDelFormato, leidas }))
+      setAviso(null)
+      return true
+    } catch (e) {
+      setAviso({ texto: e?.message || 'No pudimos armar la planilla.', tono: 'malo' })
+      return false
+    } finally {
+      setOcupado(false)
+    }
+  }
+  return { imprimir, ocupado, aviso }
+}
+
+function AvisoImpresion({ aviso }) {
+  if (!aviso) return null
+  return <p className={`insp-imp-aviso ${aviso.tono}`} role={aviso.tono === 'malo' ? 'alert' : 'status'}>{aviso.texto}</p>
+}
+
+/** El botón redondo de imprimir una sola, el de cada tarjeta de la app. */
+function BotonImprimirUna({ insp, imp }) {
+  return <button type="button" className="insp-imp-una" disabled={imp.ocupado} aria-label={`Imprimir la inspección de ${insp.vehiculoNombre}`} title="Imprimir la planilla" onClick={() => imp.imprimir([insp])}><Icono nombre="reporte" tam={18}/></button>
+}
+
+/** Las que piden que alguien las mire: igual que la app. */
+const esGrave = i => i.resultado === 'bloqueada' || i.resultado === 'aprobada_con_observaciones'
+
 /// Plantillas va al final: se prepara con ratón y solo existe en la web.
 const VISTAS = ['resumen', 'historial', 'hallazgos', 'plantillas']
 const NOMBRE_VISTA = { resumen: 'Resumen', historial: 'Historial', hallazgos: 'Hallazgos', plantillas: 'Plantillas' }
@@ -104,8 +149,26 @@ export default function Inspecciones() {
     <nav className="insp-nav" aria-label="Secciones de inspecciones">{VISTAS.map(v => <button type="button" key={v} aria-current={vista === v ? 'page' : undefined} onClick={() => cambiar(v)}>{NOMBRE_VISTA[v]}</button>)}</nav>
     {vista === 'resumen' ? <Resumen cambiarVista={cambiar}/>
       : vista === 'historial' ? <Historial modo={modo} cambiarModo={m => cambiar('historial', m === 'todas' ? { modo: m } : {})} cambiarVista={cambiar} inspeccionId={inspeccionId}/>
-      : <ProgramaInspecciones key={vista} vista={vista}/>}
+      : <>{vista === 'hallazgos' && <ImprimirHallazgos/>}<ProgramaInspecciones key={vista} vista={vista}/></>}
   </section>
+}
+
+/**
+ * Hallazgos: en la app son las inspecciones bloqueadas o con observaciones de
+ * la lectura de siempre, y desde ahí se imprimen todas. Aquí la lista es de
+ * puntos con seguimiento, así que la impresión va aparte, arriba, con las
+ * mismas inspecciones que imprimiría la app (de las últimas 100).
+ */
+function ImprimirHallazgos() {
+  const imp = useImpresion()
+  const lectura = useDatos(() => repo.inspecciones.listar({}), [])
+  const graves = useMemo(() => [...(lectura.datos ?? [])].sort((a, b) => momento(b) - momento(a)).slice(0, 100).filter(esGrave), [lectura.datos])
+  if (lectura.estado !== 'ok' || !graves.length) return null
+  return <div className="insp-imp-barra">
+    <p><Icono nombre="reporte" tam={18}/><span><b>{f.numero(graves.length)}</b> {graves.length === 1 ? 'inspección bloqueada o con observaciones' : 'inspecciones bloqueadas o con observaciones'} entre las últimas registradas.</span></p>
+    <button className="pnl-btn primario" type="button" disabled={imp.ocupado} onClick={() => imp.imprimir(graves)}><Icono nombre="reporte" tam={18}/>{imp.ocupado ? 'Armando…' : `Imprimir las ${f.numero(graves.length)}`}</button>
+    <AvisoImpresion aviso={imp.aviso}/>
+  </div>
 }
 
 /** Solo la diaria cuenta para «Diarias hechas hoy»; las demás se ven como una inspección más. */
@@ -123,7 +186,9 @@ function Resumen({ cambiarVista }) {
   const atencion = base.filter(i => i.resultado !== 'aprobada').sort((a, b) => momento(b) - momento(a))
   const faltan = pendientes.datos ?? []
   const verTodas = () => cambiarVista('historial', { modo: 'todas' })
+  const imp = useImpresion()
   return <>
+    <AvisoImpresion aviso={imp.aviso}/>
     {hoy.estado === 'error' ? <ErrorCarga error={hoy.error} onReintentar={hoy.recargar}/> : hoy.estado !== 'ok' || vehiculos.estado !== 'ok' ? <Cargando filas={1}/> : <div className="insp-summary">
       {[['Diarias hechas hoy', new Set(base.filter(esDiaria).map(i => i.vehiculoId)).size,'check','info',vehiculos.datos.length],['Aprobadas',base.filter(i => i.resultado === 'aprobada').length,'escudo','ok'],['Con observaciones',base.filter(i => i.resultado === 'aprobada_con_observaciones').length,'editar','aviso'],['Bloqueadas',base.filter(i => i.resultado === 'bloqueada').length,'alerta','malo']].map(([t,n,icono,tono,de]) => <div key={t}><span className={`insp-ibox ${tono}`}><Icono nombre={icono}/></span><span>{t}<b>{n}{de != null && <small> de {de}</small>}</b></span></div>)}
     </div>}
@@ -131,7 +196,7 @@ function Resumen({ cambiarVista }) {
     <div className="insp-overview"><Tarjeta titulo="Requiere tu atención" sinCuerpo accion={<button className="pnl-link" type="button" onClick={verTodas}>Ver historial →</button>}>
       {hoy.estado === 'cargando' && <Cargando filas={2}/>}
       <p className="insp-card-hint">Bloqueadas y con observaciones, de la más reciente a la más antigua.</p>
-      {hoy.estado === 'ok' && atencion.map(i => { const cuando = cuandoSeHizo(i); return <article className="insp-task" key={i.id}><span className={`insp-ibox ${i.resultado === 'bloqueada' ? 'malo' : 'aviso'}`}><Icono nombre={i.resultado === 'bloqueada' ? 'alerta' : 'inspeccion'}/></span><div><h3>{i.vehiculoNombre}</h3><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag><p>{conConteo(i) ? `${f.numero(i.fallasCriticas)} fallas críticas · ${f.numero(i.observaciones)} observaciones` : `${i.plantilla ? i.plantilla + ' · ' : ''}abre el resultado para ver fallas y observaciones`}{cuando && ` · ${cuando}`}</p></div><span className="insp-task-person">{i.conductorNombre}</span><button className="pnl-btn primario" type="button" onClick={() => abrir(i)}>Ver resultado →</button></article> })}
+      {hoy.estado === 'ok' && atencion.map(i => { const cuando = cuandoSeHizo(i); return <article className="insp-task" key={i.id}><span className={`insp-ibox ${i.resultado === 'bloqueada' ? 'malo' : 'aviso'}`}><Icono nombre={i.resultado === 'bloqueada' ? 'alerta' : 'inspeccion'}/></span><div><h3>{i.vehiculoNombre}</h3><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag><p>{conConteo(i) ? `${f.numero(i.fallasCriticas)} fallas críticas · ${f.numero(i.observaciones)} observaciones` : `${i.plantilla ? i.plantilla + ' · ' : ''}abre el resultado para ver fallas y observaciones`}{cuando && ` · ${cuando}`}</p></div><span className="insp-task-person">{i.conductorNombre}</span><BotonImprimirUna insp={i} imp={imp}/><button className="pnl-btn primario" type="button" onClick={() => abrir(i)}>Ver resultado →</button></article> })}
       {hoy.estado === 'ok' && !atencion.length && <Vacio icono="check" titulo="Nada requiere tu atención" texto="Hoy no hay inspecciones bloqueadas ni con observaciones."/>}
     </Tarjeta><div className="insp-side-col">
     <Tarjeta titulo="Faltan hoy" sinCuerpo accion={pendientes.estado === 'ok' && faltan.length > 4 ? <button className="pnl-link" type="button" aria-expanded={faltanTodas} onClick={() => setFaltanTodas(v => !v)}>{faltanTodas ? 'Ver menos' : `Ver las ${f.numero(faltan.length)} →`}</button> : null}>
@@ -145,8 +210,9 @@ function Resumen({ cambiarVista }) {
       </div>
     </Tarjeta>
     <aside className="insp-guide"><h2>Cómo funciona</h2>{[['Diaria', 'Cada conductor llena una cada día, desde la app, antes de salir. Aquí ves quién ya la hizo y quién falta; en Historial, el mes de cada persona.'],['Hallazgos', 'Lo que sale mal en una inspección se convierte en un hallazgo con seguimiento.']].map(([t,p],i) => <div key={t}><b>{i+1}</b><span><strong>{t}</strong><p>{p}</p></span></div>)}</aside></div></div>
-    <Tarjeta titulo="Últimos resultados de hoy" sinCuerpo accion={<button className="pnl-link" type="button" onClick={verTodas}>Ver todos →</button>}>{hoy.estado === 'ok' && (base.length ? <TablaResultados lista={base.slice(0,5)} abrir={abrir}/> : <Vacio icono="inspeccion" titulo="Sin resultados hoy" texto="Los resultados aparecerán cuando se registren desde la app."/>)}</Tarjeta>
-    {detalle && <DetalleInspeccion key={detalle.id} inspeccion={detalle} alCerrar={() => setDetalle(null)} alHallazgos={() => {setDetalle(null);cambiarVista('hallazgos')}}/>}
+    {/* «Imprimir el día»: todas las de hoy, una hoja cada una (en la app, «Día»). */}
+    <Tarjeta titulo="Últimos resultados de hoy" sinCuerpo accion={<div className="insp-cab-acciones">{hoy.estado === 'ok' && base.length > 0 && <button className="pnl-btn sutil" type="button" disabled={imp.ocupado} onClick={() => imp.imprimir(base)}><Icono nombre="reporte" tam={18}/>{imp.ocupado ? 'Armando…' : 'Imprimir el día'}</button>}<button className="pnl-link" type="button" onClick={verTodas}>Ver todos →</button></div>}>{hoy.estado === 'ok' && (base.length ? <TablaResultados lista={base.slice(0,5)} abrir={abrir} imp={imp}/> : <Vacio icono="inspeccion" titulo="Sin resultados hoy" texto="Los resultados aparecerán cuando se registren desde la app."/>)}</Tarjeta>
+    {detalle && <DetalleInspeccion key={detalle.id} inspeccion={detalle} imp={imp} alCerrar={() => setDetalle(null)} alHallazgos={() => {setDetalle(null);cambiarVista('hallazgos')}}/>}
   </>
 }
 
@@ -171,41 +237,63 @@ function Historial({ modo, cambiarModo, cambiarVista, inspeccionId }) {
   const enlazada = useDatos(() => inspeccionId ? repo.inspecciones.listar({}) : Promise.resolve(null), [inspeccionId])
   const encontrada = inspeccionId && enlazada.estado === 'ok' ? (enlazada.datos ?? []).find(i => i.id === inspeccionId) ?? null : null
   useEffect(() => { if (encontrada) { setDetalle(encontrada); cambiarMes(diaDe(encontrada.fecha || encontrada.creadaEn).slice(0, 7) || mesActual) } }, [encontrada?.id])
+  // Una sola impresión para los dos modos y el detalle: no se arman dos a la vez.
+  const imp = useImpresion()
   return <>
     <div className="insp-hist-cab">
       <Chips etiqueta="Cómo ver el historial" opciones={MODOS} valor={modo} alCambiar={cambiarModo}/>
       <NavMes mes={mes} alCambiar={cambiarMes} puedeAvanzar={mes < mesActual}/>
     </div>
+    <AvisoImpresion aviso={imp.aviso}/>
     {inspeccionId && enlazada.estado === 'ok' && !encontrada && <p className="insp-feedback" role="status">Esta inspección no está disponible en el listado autorizado.</p>}
     {modo === 'todas'
-      ? <TodasDelMes mes={mes} abrir={setDetalle}/>
-      : <InspeccionesPorPersona mes={mes} alCambiarMes={cambiarMes} puedeAvanzar={mes < mesActual} abrirInspeccion={setDetalle} ocultarFicha={Boolean(detalle)}/>}
-    {detalle && <DetalleInspeccion key={detalle.id} inspeccion={detalle} alCerrar={() => setDetalle(null)} alHallazgos={() => {setDetalle(null);cambiarVista('hallazgos')}}/>}
+      ? <TodasDelMes mes={mes} abrir={setDetalle} imp={imp}/>
+      : <InspeccionesPorPersona mes={mes} alCambiarMes={cambiarMes} puedeAvanzar={mes < mesActual} abrirInspeccion={setDetalle} ocultarFicha={Boolean(detalle)} imprimir={imp.imprimir} imprimiendo={imp.ocupado}/>}
+    {detalle && <DetalleInspeccion key={detalle.id} inspeccion={detalle} imp={imp} alCerrar={() => setDetalle(null)} alHallazgos={() => {setDetalle(null);cambiarVista('hallazgos')}}/>}
   </>
 }
 
 /** «Todas»: las del mes, con buscador y filtro por resultado. Una lectura por mes; buscar y filtrar se hace aquí. */
-function TodasDelMes({ mes, abrir }) {
+function TodasDelMes({ mes, abrir, imp }) {
   const [resultado, setResultado] = useState('')
   const [q, setQ] = useState('')
+  // Selección múltiple como la app: «Seleccionar» → casillas → «Imprimir». null = apagada.
+  const [marcadas, setMarcadas] = useState(null)
   const registros = useDatos(() => repo.inspecciones.listar(limitesDelMes(mes)), [mes])
+  // Otro mes, otra lista: lo marcado era de la de antes.
+  useEffect(() => { setMarcadas(null) }, [mes])
   const t = q.trim().toLowerCase()
   const base = (registros.datos ?? []).filter(i => !t || `${i.vehiculoNombre} ${i.vehiculo?.placa ?? ''} ${i.conductorNombre}`.toLowerCase().includes(t))
   const lista = resultado ? base.filter(i => i.resultado === resultado) : base
-  return <Tarjeta titulo={`Inspecciones de ${nombreDelMes(mes)}`} sinCuerpo accion={<button className="pnl-btn sutil insp-imprimir" type="button" disabled={registros.estado !== 'ok' || !lista.length} onClick={() => window.print()}><Icono nombre="documento" tam={18}/>Generar PDF</button>}>
+  const alternar = id => setMarcadas(m => { const n = new Set(m); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  const elegidas = marcadas ? (registros.datos ?? []).filter(i => marcadas.has(i.id)) : []
+  const imprimirMarcadas = async () => { if (await imp.imprimir(elegidas)) setMarcadas(null) }
+  const acciones = registros.estado === 'ok' && lista.length > 0 && !marcadas
+    ? <div className="insp-cab-acciones">
+        <button className="pnl-btn sutil" type="button" onClick={() => setMarcadas(new Set())}><Icono nombre="check" tam={18}/>Seleccionar</button>
+        <button className="pnl-btn primario" type="button" disabled={imp.ocupado} onClick={() => imp.imprimir(lista)}><Icono nombre="reporte" tam={18}/>{imp.ocupado ? 'Armando…' : 'Imprimir todas'}</button>
+      </div>
+    : null
+  return <Tarjeta titulo={`Inspecciones de ${nombreDelMes(mes)}`} sinCuerpo accion={acciones}>
     <div className="insp-filters"><Buscador valor={q} alCambiar={setQ} placeholder="Buscar unidad o conductor…"/></div>
     <div className="insp-filter-chips"><Chips etiqueta="Filtrar por resultado" opciones={[{v:'',t:'Todas',n:base.length},{v:'aprobada',t:'Aprobadas',n:base.filter(i=>i.resultado==='aprobada').length},{v:'aprobada_con_observaciones',t:'Con observaciones',n:base.filter(i=>i.resultado==='aprobada_con_observaciones').length},{v:'bloqueada',t:'Bloqueadas',n:base.filter(i=>i.resultado==='bloqueada').length}]} valor={resultado} alCambiar={setResultado}/></div>
     {registros.estado === 'cargando' && <Cargando filas={5}/>}
     {registros.estado === 'error' && <ErrorCarga error={registros.error} onReintentar={registros.recargar}/>}
     {registros.estado === 'ok' && registros.datos?.incompleta && <p className="insp-ficha-aviso insp-todas-aviso" role="status">El servidor no devolvió todo el mes: algunas inspecciones pueden faltar.</p>}
-    {registros.estado === 'ok' && (lista.length ? <TablaResultados lista={lista} abrir={abrir}/> : <Vacio icono="buscar" titulo={registros.datos?.length ? 'No hay resultados con estos filtros' : 'Sin inspecciones este mes'} texto={registros.datos?.length ? 'Prueba otro resultado o búsqueda.' : 'Elige otro mes o espera a que se registren desde la app.'}/>)}
+    {registros.estado === 'ok' && (lista.length ? <TablaResultados lista={lista} abrir={abrir} imp={imp} seleccion={marcadas && { marcadas, alternar }}/> : <Vacio icono="buscar" titulo={registros.datos?.length ? 'No hay resultados con estos filtros' : 'Sin inspecciones este mes'} texto={registros.datos?.length ? 'Prueba otro resultado o búsqueda.' : 'Elige otro mes o espera a que se registren desde la app.'}/>)}
+    {marcadas && <div className="insp-sel-barra" role="region" aria-label="Inspecciones seleccionadas">
+      <span aria-live="polite">{marcadas.size ? `${f.numero(marcadas.size)} ${marcadas.size === 1 ? 'seleccionada' : 'seleccionadas'}` : 'Marca las que quieres imprimir'}</span>
+      <button className="pnl-btn sutil" type="button" disabled={imp.ocupado} onClick={() => setMarcadas(null)}>Cancelar</button>
+      <button className="pnl-btn primario" type="button" disabled={imp.ocupado || !marcadas.size} onClick={imprimirMarcadas}><Icono nombre="reporte" tam={18}/>{imp.ocupado ? 'Armando…' : 'Imprimir'}</button>
+    </div>}
   </Tarjeta>
 }
 
-function TablaResultados({ lista, abrir }) {
-  return <div className="pnl-tabla-wrap"><table className="pnl-tabla insp-table mv-lista"><thead><tr>{['Fecha y hora','Unidad','Conductor','Resultado','Observaciones','Fallas críticas','Ubicación','Detalle'].map(t=><th key={t}>{t}</th>)}</tr></thead><tbody>{lista.map(i=><tr key={i.id} className={i.resultado === 'bloqueada' ? 'mv-ir mv-u1' : i.resultado === 'aprobada_con_observaciones' ? 'mv-ir mv-u2' : 'mv-ir'}><td className="mv-d">{f.fechaHora(i.creadaEn || i.fecha)}</td><td className="mv-t"><b>{i.vehiculo?.alias || i.vehiculoNombre}</b><small>{i.vehiculo?.placa || etiqueta('vehiculo_tipo',i.tipoVehiculo)}</small></td><td className="mv-d">{i.conductorNombre}</td><td className="mv-e"><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag></td><td>{f.numero(i.observaciones)}</td><td>{f.numero(i.fallasCriticas)}</td><td>{i.ubicacion || 'Sin ubicación'}</td><td className="mv-a"><button className="pnl-table-action mv-estira" type="button" aria-label={'Ver resultado de '+i.vehiculoNombre} onClick={()=>abrir(i)}>Ver resultado →</button></td></tr>)}</tbody></table></div>
+/** `imp` pone el botón de imprimir en cada fila; `seleccion` ({ marcadas, alternar }) pone las casillas. */
+function TablaResultados({ lista, abrir, imp, seleccion }) {
+  return <div className="pnl-tabla-wrap"><table className="pnl-tabla insp-table mv-lista"><thead><tr>{seleccion && <th className="insp-sel-celda"><span className="insp-sr">Seleccionar</span></th>}{['Fecha y hora','Unidad','Conductor','Resultado','Observaciones','Fallas críticas','Ubicación','Detalle'].map(t=><th key={t}>{t}</th>)}</tr></thead><tbody>{lista.map(i=><tr key={i.id} className={i.resultado === 'bloqueada' ? 'mv-ir mv-u1' : i.resultado === 'aprobada_con_observaciones' ? 'mv-ir mv-u2' : 'mv-ir'}>{seleccion && <td className="insp-sel-celda"><input type="checkbox" checked={seleccion.marcadas.has(i.id)} onChange={() => seleccion.alternar(i.id)} aria-label={`Seleccionar la inspección de ${i.vehiculoNombre}`}/></td>}<td className="mv-d">{f.fechaHora(i.creadaEn || i.fecha)}</td><td className="mv-t"><b>{i.vehiculo?.alias || i.vehiculoNombre}</b><small>{i.vehiculo?.placa || etiqueta('vehiculo_tipo',i.tipoVehiculo)}</small></td><td className="mv-d">{i.conductorNombre}</td><td className="mv-e"><Tag color={color('inspeccion_resultado',i.resultado)}>{etiqueta('inspeccion_resultado',i.resultado)}</Tag></td><td>{f.numero(i.observaciones)}</td><td>{f.numero(i.fallasCriticas)}</td><td>{i.ubicacion || 'Sin ubicación'}</td><td className="mv-a"><div className="insp-fila-acciones">{seleccion ? <button className="pnl-table-action mv-estira" type="button" aria-label={'Seleccionar la inspección de '+i.vehiculoNombre} onClick={()=>seleccion.alternar(i.id)}>{seleccion.marcadas.has(i.id) ? 'Quitar' : 'Marcar'}</button> : <button className="pnl-table-action mv-estira" type="button" aria-label={'Ver resultado de '+i.vehiculoNombre} onClick={()=>abrir(i)}>Ver resultado →</button>}{imp && !seleccion && <BotonImprimirUna insp={i} imp={imp}/>}</div></td></tr>)}</tbody></table></div>
 }
-function DetalleInspeccion({ inspeccion, alCerrar, alHallazgos }) {
+function DetalleInspeccion({ inspeccion, imp, alCerrar, alHallazgos }) {
   const detalle = useDatos(() => CONECTADO ? repo.inspecciones.obtener(inspeccion.id) : Promise.resolve(checklistDe(inspeccion)), [inspeccion.id])
   const grupos = useMemo(() => porCategoria(detalle.datos ?? []), [detalle.datos])
   // Si la lista no trajo conteos, se cuentan de las respuestas; sin respuestas, no hay dato.
@@ -215,5 +303,8 @@ function DetalleInspeccion({ inspeccion, alCerrar, alHallazgos }) {
     {detalle.estado === 'error' && <ErrorCarga error={detalle.error} onReintentar={detalle.recargar}/>}
     {detalle.estado === 'ok' && !grupos.length && <Vacio icono="documento" titulo="Sin respuestas disponibles" texto="No se completa el checklist con datos supuestos."/>}
     {grupos.map(g=><Fragment key={g.categoria}><h3 className="insp-category">{g.categoria || 'General'}</h3>{g.items.map(it=><div className="insp-check" key={it.id}><Icono nombre={it.estadoItem==='falla'?'alerta':it.estadoItem==='observacion'?'editar':'check'}/><div><b>{it.nombre}</b>{it.critico && <small>Punto crítico</small>}{it.nota && <p>{it.nota}</p>}</div><Tag color={color('inspeccion_item_estado',it.estadoItem)}>{etiqueta('inspeccion_item_estado',it.estadoItem)}</Tag></div>)}</Fragment>)}
-    <p className="insp-info">Respuestas registradas desde la app. El supervisor no modifica el resultado.</p></div></div><div className="insp-actions"><button className="pnl-btn sutil" type="button" onClick={alCerrar}>Cerrar</button><button className="pnl-btn primario" type="button" onClick={alHallazgos}>Ver hallazgos →</button></div></Modal>
+    <p className="insp-info">Respuestas registradas desde la app. El supervisor no modifica el resultado.</p></div></div>
+    {imp && <AvisoImpresion aviso={imp.aviso}/>}
+    {/* Imprimir reusa las respuestas que ya están en pantalla: no se vuelven a pedir. */}
+    <div className="insp-actions"><button className="pnl-btn sutil" type="button" onClick={alCerrar}>Cerrar</button>{imp && <button className="pnl-btn sutil" type="button" disabled={imp.ocupado || detalle.estado === 'cargando'} onClick={() => imp.imprimir([inspeccion], detalle.estado === 'ok' ? new Map([[inspeccion.id, detalle.datos ?? []]]) : undefined)}><Icono nombre="reporte" tam={18}/>{imp.ocupado ? 'Armando…' : 'Imprimir'}</button>}<button className="pnl-btn primario" type="button" onClick={alHallazgos}>Ver hallazgos →</button></div></Modal>
 }

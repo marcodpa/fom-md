@@ -137,6 +137,15 @@
       "port": 8081
     },
     {
+      "name": "fom-app-telefono-wifi",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d C:/Users/home/Downloads/fom-driver-juan && set CI=1&& set REACT_NATIVE_PACKAGER_HOSTNAME=192.168.100.45&& npx expo start --lan --port 8081 --minify"
+      ],
+      "port": 8081
+    },
+    {
       "name": "fom-app-demo",
       "runtimeExecutable": "node",
       "runtimeArgs": [

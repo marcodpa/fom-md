@@ -92,8 +92,11 @@ function BarraPersona({ totales }) {
   return <div className={`insp-pp-barra ${tono}`}><Barra valor={totales.pct / 100} tono={tono === 'malo' ? 'malo' : tono === 'aviso' ? 'aviso' : ''} /></div>
 }
 
-/** El mes (`mes`, «YYYY-MM») y su cambio llegan del Historial: el mismo selector sirve para «Por persona» y «Todas». */
-export default function InspeccionesPorPersona({ mes, alCambiarMes, puedeAvanzar, abrirInspeccion, ocultarFicha = false }) {
+/**
+ * El mes (`mes`, «YYYY-MM») y su cambio llegan del Historial: el mismo selector sirve para «Por persona» y «Todas».
+ * `imprimir(lista)` imprime la planilla (T-79): «Imprimir las N» del mes de la persona y una por una, como la app.
+ */
+export default function InspeccionesPorPersona({ mes, alCambiarMes, puedeAvanzar, abrirInspeccion, ocultarFicha = false, imprimir, imprimiendo = false }) {
   const hoy = f.hoyISO()
   const [q, setQ] = useState('')
   const [elegidoId, setElegidoId] = useState(null)
@@ -106,7 +109,8 @@ export default function InspeccionesPorPersona({ mes, alCambiarMes, puedeAvanzar
   const elegido = filas.find((r) => r.id === elegidoId) ?? null
 
   const ficha = elegido && <FichaPersona fila={elegido} mes={datos.datos?.mes ?? mes} hoy={hoy} cargando={datos.estado === 'cargando'} incompleta={datos.datos?.incompleta}
-    alCambiarMes={alCambiarMes} puedeAvanzar={puedeAvanzar} alAbrir={abrirInspeccion} alCerrar={() => setElegidoId(null)} telefono={telefono} />
+    alCambiarMes={alCambiarMes} puedeAvanzar={puedeAvanzar} alAbrir={abrirInspeccion} alCerrar={() => setElegidoId(null)} telefono={telefono}
+    alImprimir={imprimir} imprimiendo={imprimiendo} />
 
   return <div className={`insp-pp${elegido && !telefono ? ' con-ficha' : ''}`}>
     <Tarjeta titulo={`Cumplimiento de ${nombreDelMes(mes)}`} sinCuerpo>
@@ -134,7 +138,7 @@ export default function InspeccionesPorPersona({ mes, alCambiarMes, puedeAvanzar
   </div>
 }
 
-function FichaPersona({ fila, mes, hoy, cargando, incompleta, alCambiarMes, puedeAvanzar, alAbrir, alCerrar, telefono }) {
+function FichaPersona({ fila, mes, hoy, cargando, incompleta, alCambiarMes, puedeAvanzar, alAbrir, alCerrar, telefono, alImprimir, imprimiendo }) {
   const { totales, dias, nombre, unidad, desde, conUnidad, inspecciones } = fila
   // Desde cuándo tiene la unidad: el inicio (validFrom) de su asignación vigente. La consola no da las
   // asignaciones anteriores, así que los días con una unidad previa en el mismo mes no se cuentan como debidos.
@@ -166,7 +170,10 @@ function FichaPersona({ fila, mes, hoy, cargando, incompleta, alCambiarMes, pued
       ))}
     </dl>
     {!cargando && <section className="insp-ficha-insp" aria-label={`Inspecciones de ${nombre} en ${nombreDelMes(mes)}`}>
-      <h3>Inspecciones del mes <small>{f.numero(inspecciones.length)}</small></h3>
+      <div className="insp-ficha-insp-cab">
+        <h3>Inspecciones del mes <small>{f.numero(inspecciones.length)}</small></h3>
+        {alImprimir && inspecciones.length > 0 && <button type="button" className="pnl-btn primario" disabled={imprimiendo} onClick={() => alImprimir(inspecciones)}><Icono nombre="reporte" tam={18} />{imprimiendo ? 'Armando…' : `Imprimir las ${f.numero(inspecciones.length)}`}</button>}
+      </div>
       {inspecciones.length
         ? <ul>{inspecciones.map((i) => <li key={i.id}>
           <button type="button" onClick={() => alAbrir(i)} aria-label={`Ver resultado del ${f.fechaHora(i.creadaEn || i.fecha)}`}>
@@ -174,6 +181,7 @@ function FichaPersona({ fila, mes, hoy, cargando, incompleta, alCambiarMes, pued
             <Tag color={color('inspeccion_resultado', i.resultado)}>{etiqueta('inspeccion_resultado', i.resultado)}</Tag>
             <Icono nombre="volver" tam={16} />
           </button>
+          {alImprimir && <button type="button" className="insp-imp-una" disabled={imprimiendo} aria-label={`Imprimir la inspección del ${f.fechaHora(i.creadaEn || i.fecha)}`} title="Imprimir la planilla" onClick={() => alImprimir([i])}><Icono nombre="reporte" tam={18} /></button>}
         </li>)}</ul>
         : <p className="insp-ficha-nada">No registró inspecciones este mes.</p>}
     </section>}

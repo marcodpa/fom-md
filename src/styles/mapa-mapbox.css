@@ -1,4 +1,4 @@
-/* Mapa sobre Mapbox GL: controles, popups y el panel de capas vestidos con el tema del panel. */
+/* Mapa sobre Mapbox GL: controles, popups, el panel de capas y «Llegada» vestidos con el tema del panel. */
 .pnl-mapa .mapboxgl-map { width: 100%; height: 100%; font-family: var(--e-fuente, 'Spline Sans', sans-serif); }
 .pnl-mapa .mapboxgl-canvas { outline: none; }
 .pnl-mapa .mapboxgl-canvas-container.mapboxgl-interactive { cursor: grab; }
@@ -75,36 +75,62 @@
 .mapa-capas-reset { min-height: 36px; border: 1px solid #263b4d; border-radius: 10px; background: transparent; color: #b7c7d9; font: 500 12px/1 inherit; cursor: pointer; }
 .mapa-capas-reset:hover { background: #173147; color: #fff; }
 
-/* Llegada y alcance de la unidad elegida */
-.mapa-herr { position: absolute; z-index: 455; right: 18px; top: 64px; width: min(300px, calc(100vw - 48px)); padding: 12px 14px; border: 1px solid #263b4d; border-radius: 14px; background: #0b1927f2; color: #f3f7fc; box-shadow: 0 10px 30px #0008; font-family: var(--e-fuente, 'Spline Sans', sans-serif); display: grid; gap: 10px; }
+/* Llegada de la unidad elegida (mismo diseño que en la app). Azul FOM #3D9BF5 con texto #08121C. */
+.mapa-herr { position: absolute; z-index: 455; right: 18px; top: 64px; width: min(320px, calc(100vw - 48px)); padding: 16px; border: 1px solid var(--e-borde, #262e39); border-radius: 24px; background: var(--e-sup, #141a22); color: var(--e-texto, #f3f5f8); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5); font-family: var(--e-fuente, 'Spline Sans', sans-serif); display: grid; gap: 14px; }
 .control-map .mapa-herr { top: 84px; }
-.mapa-herr-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.mapa-herr-cab b { font-size: 14px; }
-.mapa-herr-cab span { font-size: 11px; color: #9fb4c9; }
-.mapa-herr-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.mapa-herr-botones button { min-height: 36px; padding: 0 8px; border: 1px solid #263b4d; border-radius: 10px; background: #0e1c29; color: #c6d4e3; font: 500 12px/1.2 inherit; cursor: pointer; }
-.mapa-herr-botones button:hover { border-color: #349bfa88; }
-.mapa-herr-botones button.on { background: #198bfa22; border-color: #349bfa; color: #cfe8ff; }
-.mapa-herr-botones button:disabled { opacity: 0.6; cursor: wait; }
-.mapa-herr-botones button:focus-visible { outline: 3px solid #85c9ff; outline-offset: 2px; }
-.mapa-herr-nota { margin: 0; font-size: 12px; color: #b7c7d9; }
-.mapa-herr-nota.error { color: #ffb4b4; }
-.mapa-herr-eta { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid #263b4d; border-radius: 10px; background: #10202f; }
-.mapa-herr-eta strong { font-size: 18px; }
-.mapa-herr-eta span { font-size: 12px; color: #b7c7d9; }
-.mapa-herr-semaforo { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; margin-top: 4px; font-size: 11px; }
-.mapa-herr-semaforo i, .mapa-herr-alcance i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
-.mapa-herr-semaforo i.low, .mapa-herr-alcance i.a10 { background: #35e888; }
-.mapa-herr-semaforo i.moderate, .mapa-herr-alcance i.a20 { background: #ffbf43; }
-.mapa-herr-semaforo i.heavy { background: #ff7a45; }
-.mapa-herr-semaforo i.severe, .mapa-herr-alcance i.a30 { background: #f43f5e; }
-.mapa-herr-alcance { display: flex; gap: 12px; font-size: 12px; color: #c6d4e3; }
+.mapa-herr-cab { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.mapa-herr-cab > div { display: grid; gap: 2px; min-width: 0; }
+.mapa-herr-cab b { font-size: 15px; line-height: 20px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mapa-herr-cab span { font-size: 13px; line-height: 18px; color: var(--e-texto-2, #abb3bf); }
+.mapa-herr-ico { flex: none; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--e-info-sup, #10202e); color: #3d9bf5; }
+.mapa-herr-svg { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.mapa-herr-acciones { display: flex; align-items: center; gap: 8px; }
+.mapa-herr-btn, .mapa-herr-btn2, .mapa-herr-texto { height: 44px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 600 14px/1 inherit; cursor: pointer; }
+.mapa-herr-btn { flex: 1; border: 0; background: #3d9bf5; color: #08121c; }
+.mapa-herr-btn:hover { background: #5aabf7; }
+.mapa-herr-btn2 { flex: 1; border: 1px solid var(--e-borde-fuerte, #39424f); background: var(--e-sup-alta, #1d2530); color: var(--e-texto, #f3f5f8); }
+.mapa-herr-btn2:hover { border-color: #3d9bf5; }
+.mapa-herr-texto { padding: 0 16px; border: 0; background: transparent; color: var(--e-texto-2, #abb3bf); }
+.mapa-herr-texto:hover { background: var(--e-sup-baja, #0f141b); color: var(--e-texto, #f3f5f8); }
+:is(.mapa-herr-btn, .mapa-herr-btn2, .mapa-herr-texto):focus-visible { outline: 2px solid #75b9fa; outline-offset: 3px; }
+
+/* Eligiendo destino */
+.mapa-herr-eligiendo { margin: 0; min-height: 52px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; border: 1px dashed var(--e-activo-borde, #2d5d88); border-radius: 16px; background: var(--e-activo-sup, #173553); color: var(--e-activo-texto, #8bc6ff); font-size: 14px; line-height: 20px; font-weight: 500; }
+.mapa-herr-error { margin: 0; padding: 12px 14px; border-radius: 16px; background: var(--e-peligro-sup, #2a1416); color: var(--e-peligro, #ff6369); font-size: 14px; line-height: 20px; }
+
+/* Con destino: tiempo, mini línea de viaje y aviso de tráfico. El esqueleto ocupa el mismo alto. */
+.mapa-herr-cuerpo { display: grid; gap: 12px; align-content: start; min-height: 86px; }
+.mapa-herr-tiempo { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.mapa-herr-tiempo strong { font-size: 30px; line-height: 32px; font-weight: 700; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+.mapa-herr-tiempo span { font-size: 13px; color: var(--e-texto-2, #abb3bf); }
+.mapa-herr-viaje { display: grid; gap: 6px; }
+.mapa-herr-trazo { height: 20px; display: flex; align-items: center; }
+.mapa-herr-trazo i.o { flex: none; width: 12px; height: 12px; border-radius: 50%; background: #3d9bf5; box-shadow: 0 0 0 3px rgba(61, 155, 245, 0.25); }
+.mapa-herr-trazo i.d { flex: none; width: 11px; height: 11px; margin-right: 1px; border-radius: 2px; background: #3d9bf5; transform: rotate(45deg); }
+.mapa-herr-trazo span { flex: 1; min-width: 0; margin: 0 8px; display: flex; align-items: center; gap: 8px; }
+.mapa-herr-trazo span::before, .mapa-herr-trazo span::after { content: ''; flex: 1; height: 2px; border-radius: 1px; background: rgba(61, 155, 245, 0.55); }
+.mapa-herr-trazo em { flex: none; font-style: normal; font-size: 12px; font-weight: 600; color: var(--e-texto, #f3f5f8); font-variant-numeric: tabular-nums; }
+.mapa-herr-puntos { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; line-height: 16px; color: var(--e-texto-2, #abb3bf); }
+.mapa-herr-puntos span { max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mapa-herr-puntos span + span { text-align: right; }
+.mapa-herr-chip { justify-self: start; height: 26px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: 10px; background: var(--e-aviso-sup, #2a2410); color: var(--e-aviso, #f5c242); font-size: 12px; font-weight: 600; white-space: nowrap; }
+
+.mapa-herr-skel i { display: block; border-radius: 10px; background: linear-gradient(90deg, var(--e-sup-baja, #0f141b) 0%, var(--e-sup-alta, #1d2530) 50%, var(--e-sup-baja, #0f141b) 100%); background-size: 200% 100%; animation: mapa-herr-brillo 1.4s ease-in-out infinite; }
+.mapa-herr-skel .s-tiempo { width: 62%; height: 32px; }
+.mapa-herr-skel .s-linea { height: 20px; }
+.mapa-herr-skel .s-pie { width: 80%; height: 14px; margin-top: -6px; }
+.mapa-herr-skel .s-boton { flex: 1; height: 44px; border-radius: 999px; }
+@keyframes mapa-herr-brillo { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
 .pnl-mapa.eligiendo-destino .mapboxgl-canvas-container.mapboxgl-interactive { cursor: crosshair; }
-.mapa-destino { width: 22px; height: 30px; position: relative; }
-.mapa-destino i { position: absolute; left: 50%; bottom: 0; width: 18px; height: 18px; margin-left: -9px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: #f3f7fc; border: 3px solid #168fff; box-shadow: 0 3px 8px #0009; }
+/* Pin de destino: gota azul FOM con punto blanco (el SVG lo pone herramientasMapbox.js). */
+.mapa-destino { width: 30px; height: 40px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45)); }
+.mapa-destino svg { display: block; }
 
 @media (max-width: 800px) {
-  .mapa-herr { right: 12px; left: 12px; width: auto; top: auto; bottom: 62px; }
+  /* En teléfono la tarjeta va abajo, a lo ancho, con 16 px a cada lado. */
+  .mapa-herr { right: 16px; left: 16px; width: auto; top: auto; bottom: 62px; }
   .control-map .mapa-herr { top: auto; bottom: 62px; }
   .control-map .mapa-capas { bottom: auto; top: 200px; right: 12px; }
   .control-map .mapa-capas-panel { top: calc(100% + 8px); bottom: auto; }
@@ -114,4 +140,5 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .mapa-capas-switch i, .mapa-capas-switch i::after { transition: none; }
+  .mapa-herr-skel i { animation: none; }
 }

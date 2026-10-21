@@ -4,8 +4,8 @@ import { vehicleMarkerSvg, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './v
 import { pintarCola, pintarRuta } from './rutaMapbox'
 import CapasMapa from './CapasMapa'
 import HerramientasRuta from './HerramientasRuta'
-import { limitesDe, pintarAlcance, pintarLlegada } from './herramientasMapbox'
-import { alcanceDesde, emparejarPuntos, emparejarViajes, rutaConTrafico } from '../datos/mapboxApi'
+import { limitesDe, mensajeLlegada, pintarLlegada } from './herramientasMapbox'
+import { emparejarPuntos, emparejarViajes, rutaConTrafico } from '../datos/mapboxApi'
 import { CLAVES_COLOR, coloresDe, configDe, estiloDe, guardarPrefs, leerPrefs, luzEfectiva, sin3d } from './mapaPrefs'
 import '../../styles/fleet-map.css'
 import '../../styles/mapa-mapbox.css'
@@ -15,7 +15,7 @@ import '../../styles/mapa-mapbox.css'
 // ------------------------------------------------------------
 // El mismo mapa que `MapaLibre.jsx` (mismas props, mismos marcadores,
 // recorrido, cola y fichas) dibujado directo con Mapbox: estilo Standard
-// con luz del día real, satélite y tráfico en vivo. Sin 3D (pedido del
+// con luz del día real y satélite. Sin 3D (pedido del
 // dueño, 16 oct 2026): ni edificios, ni relieve, ni cámara inclinada, ni
 // niebla; es lo que más pesaba. Se cobra por «carga de mapa»: una por cada
 // vez que esta pantalla se abre (50.000 gratis al mes).
@@ -30,8 +30,6 @@ export const HAY_MAPBOX = /^pk\./u.test(MAPBOX_TOKEN)
 
 // Costa Oriental del Lago
 const CENTRO = [-71.42, 10.32]
-const TRAFICO_FUENTE = 'fom-trafico'
-const TRAFICO_CAPA = 'fom-trafico-linea'
 
 function leerTokens() {
   const raiz = document.querySelector('.pnl') || document.documentElement
@@ -39,7 +37,10 @@ function leerTokens() {
   return { primario: cs.getPropertyValue('--e-primario').trim() || '#208AEF' }
 }
 
-const HERR_VACIO = Object.freeze({ eligiendo: false, llegada: null, cargandoLlegada: false, errorLlegada: null, alcance: null, cargandoAlcance: false, errorAlcance: null })
+const HERR_VACIO = Object.freeze({ eligiendo: false, llegada: null, cargandoLlegada: false, errorLlegada: null })
+
+/** El mapa se ve claro (calles de día o al amanecer): la ruta de llegada lleva borde blanco; si no, oscuro. */
+const mapaClaro = (prefs) => prefs.vista !== 'satelite' && ['day', 'dawn'].includes(luzEfectiva(prefs))
 
 const sinMovimiento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 // Un punto de la cola reconocible entre refrescos (la cola se corre: entran puntos y salen otros).
@@ -195,45 +196,14 @@ function aplicarConfig(mapa, prefs) {
   configAplicada.set(mapa, nueva)
 }
 
-/** Lo que no va en `config`: tráfico y lluvia. Sin 3D: se quitan niebla y relieve por si el estilo los trae. */
-function aplicarEfectos(mapa, prefs) {
+/**
+ * Lo que no va en `config`. Sin 3D: se quitan niebla y relieve por si el estilo los trae.
+ * Sin tráfico en vivo ni lluvia (pedido de Marco, 21 oct 2026): aunque quede guardado
+ * `trafico: true` o `lluvia: true` de antes, aquí ya no se lee.
+ */
+function aplicarEfectos(mapa) {
   try { mapa.setFog(null) } catch { /* sin niebla */ }
   try { if (mapa.getTerrain()) mapa.setTerrain(null) } catch { /* sin relieve */ }
-
-  // Tráfico en vivo: la capa de tráfico de Mapbox, coloreada por congestión.
-  try {
-    if (prefs.trafico) {
-      if (!mapa.getSource(TRAFICO_FUENTE)) mapa.addSource(TRAFICO_FUENTE, { type: 'vector', url: 'mapbox://mapbox.mapbox-traffic-v1' })
-      if (!mapa.getLayer(TRAFICO_CAPA)) {
-        mapa.addLayer({
-          id: TRAFICO_CAPA,
-          type: 'line',
-          source: TRAFICO_FUENTE,
-          'source-layer': 'traffic',
-          slot: 'middle',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 14, 3, 18, 7],
-            'line-color': ['match', ['get', 'congestion'], 'low', '#35e888', 'moderate', '#ffbf43', 'heavy', '#ff7a45', 'severe', '#f43f5e', '#8a919e'],
-            'line-opacity': 0.9,
-            'line-emissive-strength': 1,
-          },
-        })
-      }
-    } else if (mapa.getLayer(TRAFICO_CAPA)) {
-      mapa.removeLayer(TRAFICO_CAPA)
-    }
-  } catch { /* sin tráfico */ }
-
-  // Lluvia: puro ambiente, se desvanece al alejar el mapa.
-  try {
-    if (prefs.lluvia) {
-      const revelar = (v) => ['interpolate', ['linear'], ['zoom'], 10, 0, 12, v]
-      mapa.setRain({ density: revelar(0.5), intensity: 1, color: '#a8adbc', opacity: 0.6, vignette: revelar(0.8), 'vignette-color': '#2b3340', direction: [0, 80], 'droplet-size': [2.6, 18.2], 'distortion-strength': 0.6, 'center-thinning': 0 })
-    } else {
-      mapa.setRain(null)
-    }
-  } catch { /* versión sin lluvia */ }
 }
 
 export default function MapaMapbox({
@@ -251,8 +221,8 @@ export default function MapaMapbox({
   alVerRecorrido,
   espacioFicha = false,
   alto = 'clamp(320px, 52vh, 560px)',
-  // «Llegada y alcance» solo donde se opera la flota (Centro de control); en
-  // el Resumen o Mi unidad el mapa es de consulta y no las muestra.
+  // «Llegada» solo donde se opera la flota (Centro de control); en el
+  // Resumen o Mi unidad el mapa es de consulta y no la muestra.
   herramientas = false,
   alFallar,
 }) {
@@ -289,7 +259,7 @@ export default function MapaMapbox({
   const colaPegada = useRef(null)
   const ordenCuadro = useRef(0)
   // `isStyleLoaded()` de Mapbox se pone en falso un instante cada vez que se toca el estilo
-  // (añadir tráfico, lluvia…), así que no sirve para saber si ya se puede dibujar. Esto sí:
+  // (añadir una capa…), así que no sirve para saber si ya se puede dibujar. Esto sí:
   // verdadero desde `style.load` hasta el siguiente `setStyle`.
   const estiloListo = useRef(false)
   const [listo, setListo] = useState(0)
@@ -300,27 +270,46 @@ export default function MapaMapbox({
   const seleccionadoRef = useRef(seleccionado)
   seleccionadoRef.current = seleccionado
 
-  // Llegada y alcance de la unidad elegida (Directions e Isochrone de Mapbox)
+  // Llegada de la unidad elegida (Directions de Mapbox, con el tráfico de ahora)
   const [herr, setHerr] = useState(HERR_VACIO)
   const modoDestino = useRef(false)
   const llegadaCapa = useRef(null)
-  const alcanceCapa = useRef(null)
   const elegirDestinoRef = useRef(null)
 
   const limpiarHerramientas = () => {
     modoDestino.current = false
     llegadaCapa.current?.quitar?.()
     llegadaCapa.current = null
-    alcanceCapa.current?.quitar?.()
-    alcanceCapa.current = null
     setHerr(HERR_VACIO)
   }
 
+  /**
+   * Margen para encuadrar unidad y destino dejando sitio a la ficha (izquierda) y a la
+   * tarjeta de llegada (a la derecha en escritorio, abajo a lo ancho en el teléfono).
+   */
   const encuadre = (m) => {
-    const ancho = m.getContainer().getBoundingClientRect().width
-    return { top: 110, left: ancho > 600 && (ficha || espacioFicha) ? 420 : 40, right: ancho > 600 ? 340 : 40, bottom: 90 }
+    const lienzo = m.getContainer().getBoundingClientRect()
+    const p = { top: 110, left: lienzo.width > 600 && (ficha || espacioFicha) ? 420 : 40, right: 40, bottom: 90 }
+    const tarjeta = contenedor.current?.parentElement?.querySelector('.mapa-herr')?.getBoundingClientRect()
+    if (tarjeta?.width) {
+      if (tarjeta.width < lienzo.width * 0.6) p.right = Math.max(p.right, lienzo.right - tarjeta.left + 24)
+      else p.bottom = Math.max(p.bottom, lienzo.bottom - tarjeta.top + 24)
+    }
+    // Con márgenes más grandes que el mapa, Mapbox no encuadra: se dejan al menos 120 px libres.
+    const ajustar = (a, b, total) => {
+      const libre = total - 120
+      if (p[a] + p[b] > libre) {
+        const k = Math.max(0, libre / (p[a] + p[b]))
+        p[a] = Math.floor(p[a] * k)
+        p[b] = Math.floor(p[b] * k)
+      }
+    }
+    ajustar('left', 'right', lienzo.width)
+    ajustar('top', 'bottom', lienzo.height)
+    return p
   }
 
+  /** `destino`: { lat, lng, nombre? } — el nombre es la placa si se tocó otra unidad. */
   const elegirDestino = async (destino) => {
     const m = mapa.current
     const mapboxgl = gl.current
@@ -333,48 +322,32 @@ export default function MapaMapbox({
     try {
       const r = await rutaConTrafico({ lat: u.lat, lng: u.lng }, destino)
       if (!mapa.current || seleccionadoRef.current !== u.id || !estiloListo.current) return
-      llegadaCapa.current = pintarLlegada(mapboxgl, m, { tramos: r.tramos, destino })
-      const limites = limitesDe(mapboxgl, r.trazo)
+      llegadaCapa.current = pintarLlegada(mapboxgl, m, { trazo: r.trazo, destino, mapaClaro: mapaClaro(prefsRef.current) })
+      const limites = limitesDe(mapboxgl, [r.trazo, [u.lng, u.lat], [destino.lng, destino.lat]])
       if (limites) m.fitBounds(limites, { padding: encuadre(m), maxZoom: 15, duration: sinMovimiento() ? 0 : 800 })
-      setHerr((h) => ({ ...h, cargandoLlegada: false, llegada: r }))
+      setHerr((h) => ({ ...h, cargandoLlegada: false, llegada: { ...r, destino, calculadaEn: Date.now() } }))
     } catch (e) {
-      setHerr((h) => ({ ...h, cargandoLlegada: false, errorLlegada: `No se pudo calcular la llegada. ${e?.message || ''}`.trim() }))
+      console.warn('[mapa] No se pudo calcular la llegada:', e?.message || e)
+      if (seleccionadoRef.current !== u.id) return
+      setHerr((h) => ({ ...h, cargandoLlegada: false, errorLlegada: mensajeLlegada(e) }))
     }
   }
   elegirDestinoRef.current = elegirDestino
 
+  // «Elegir destino» o «Cambiar destino»: la ruta de antes se queda hasta que se elija otro.
   const empezarDestino = () => {
     modoDestino.current = true
     setHerr((h) => ({ ...h, eligiendo: true, errorLlegada: null }))
+  }
+  const cancelarDestino = () => {
+    modoDestino.current = false
+    setHerr((h) => ({ ...h, eligiendo: false }))
   }
   const quitarLlegada = () => {
     modoDestino.current = false
     llegadaCapa.current?.quitar?.()
     llegadaCapa.current = null
     setHerr((h) => ({ ...h, eligiendo: false, llegada: null, errorLlegada: null }))
-  }
-  const alternarAlcance = async () => {
-    const m = mapa.current
-    const mapboxgl = gl.current
-    if (alcanceCapa.current) {
-      alcanceCapa.current.quitar()
-      alcanceCapa.current = null
-      setHerr((h) => ({ ...h, alcance: null, errorAlcance: null }))
-      return
-    }
-    const u = vehiculosRef.current.find((x) => x.id === seleccionadoRef.current)
-    if (!m || !mapboxgl || !validPosition(u)) return
-    setHerr((h) => ({ ...h, cargandoAlcance: true, errorAlcance: null }))
-    try {
-      const zonas = await alcanceDesde({ lat: u.lat, lng: u.lng }, [10, 20, 30])
-      if (!mapa.current || seleccionadoRef.current !== u.id || !estiloListo.current) return
-      alcanceCapa.current = pintarAlcance(m, zonas)
-      const limites = limitesDe(mapboxgl, zonas.features.map((z) => z.geometry?.coordinates))
-      if (limites) m.fitBounds(limites, { padding: encuadre(m), duration: sinMovimiento() ? 0 : 800 })
-      setHerr((h) => ({ ...h, cargandoAlcance: false, alcance: zonas }))
-    } catch (e) {
-      setHerr((h) => ({ ...h, cargandoAlcance: false, errorAlcance: `No se pudo calcular el alcance. ${e?.message || ''}`.trim() }))
-    }
   }
 
   // Crear el mapa una sola vez
@@ -453,12 +426,12 @@ export default function MapaMapbox({
         })
         m.on('load', () => { respondio = true; window.clearTimeout(vigilante) })
         // Cada vez que entra un estilo (al crear el mapa y al cambiar entre calles y satélite)
-        // se ponen tráfico y lluvia y se avisa para repintar recorrido y cola. El config ya
+        // se quitan niebla y relieve y se avisa para repintar recorrido y cola. El config ya
         // vino con el estilo: `aplicarConfig` solo toca lo que se haya cambiado mientras cargaba.
         m.on('style.load', () => {
           estiloListo.current = true
           aplicarConfig(m, prefsRef.current)
-          aplicarEfectos(m, prefsRef.current)
+          aplicarEfectos(m)
           setListo((n) => n + 1)
         })
 
@@ -513,10 +486,9 @@ export default function MapaMapbox({
     return () => document.removeEventListener('keydown', tecla)
   }, [])
 
-  // Al desmontar se quitan las capas de llegada y alcance.
+  // Al desmontar se quita la ruta de llegada.
   useEffect(() => () => {
     llegadaCapa.current?.quitar?.()
-    alcanceCapa.current?.quitar?.()
   }, [])
 
   // La luz automática cambia con la hora: se revisa cada cinco minutos. Solo cambia
@@ -527,6 +499,7 @@ export default function MapaMapbox({
       setLuzActual((actual) => {
         if (actual === luz) return actual
         if (mapa.current && estiloListo.current) aplicarConfig(mapa.current, prefsRef.current)
+        llegadaCapa.current?.tema?.(mapaClaro(prefsRef.current))
         return luz
       })
     }, 5 * 60 * 1000)
@@ -556,7 +529,8 @@ export default function MapaMapbox({
       m.setStyle(estiloDe(nuevas), { config: { basemap: config } })
     } else if (estiloListo.current) {
       aplicarConfig(m, nuevas)
-      aplicarEfectos(m, nuevas)
+      aplicarEfectos(m)
+      llegadaCapa.current?.tema?.(mapaClaro(nuevas))
     }
   }
 
@@ -583,7 +557,7 @@ export default function MapaMapbox({
     const pulsar = (id, conDestino) => {
       if (conDestino && modoDestino.current && id !== seleccionadoRef.current) {
         const u = vehiculosRef.current.find((x) => x.id === id)
-        if (validPosition(u)) elegirDestinoRef.current?.({ lat: u.lat, lng: u.lng })
+        if (validPosition(u)) elegirDestinoRef.current?.({ lat: u.lat, lng: u.lng, nombre: u.placa || u.alias || 'Otra unidad' })
         return
       }
       alSeleccionarRef.current?.(seleccionadoRef.current === id ? null : id)
@@ -823,7 +797,7 @@ export default function MapaMapbox({
       <CapasMapa prefs={prefs} alCambiar={cambiarPrefs} luzActual={luzActual} />
 
       {herramientas && v && validPosition(v) && (
-        <HerramientasRuta unidad={v} estado={herr} alElegirDestino={empezarDestino} alQuitarLlegada={quitarLlegada} alAlternarAlcance={alternarAlcance} />
+        <HerramientasRuta unidad={v} estado={herr} alElegirDestino={empezarDestino} alCancelar={cancelarDestino} alQuitarLlegada={quitarLlegada} />
       )}
 
       {leyenda && estados.length > 0 && <div className="fleet-map-legend" aria-label="Estados de los vehículos">{estados.map((e) => <span className={e.color} key={e.clave}><i />{e.texto}</span>)}</div>}
