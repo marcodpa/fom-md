@@ -85,6 +85,11 @@ export function claveIdempotente() {
 }
 
 const lecturasEnCurso = new Map()
+// Cuántas escrituras salieron desde que se abrió la página. Lo que se guarda un
+// rato en memoria (las asignaciones de conductores) se da por viejo en cuanto
+// cambia: tras asignar o quitar a alguien, la siguiente lectura sale de verdad.
+let escrituras = 0
+export function escriturasHechas() { return escrituras }
 let empresaGestionId = null
 export function empresaGestionActualId() { return empresaGestionId }
 export function fijarEmpresaGestion(id) {
@@ -138,7 +143,9 @@ async function pedirUnaVez(rutaPedida, { metodo = 'GET', cuerpo, señal, idempot
       // En desarrollo la guarda el proxy; publicada, la cookie HttpOnly viaja
       // solo al mismo origen. Nunca se habilitan credenciales cross-origin.
       credentials: 'same-origin',
-    })
+      // Se cuenta al terminar (bien o mal): una lectura que salió durante la
+      // escritura no debe quedar guardada como si ya la reflejara.
+    }).finally(() => { if (mutacionTope) escrituras += 1 })
   } catch (error) {
     clearTimeout(tope)
     if (control.signal.reason === 'tope') {
@@ -398,7 +405,7 @@ export const api = {
   // equipo instalado no aparecía, y el identificador que manejaba el panel era
   // el del aparato y no el de la unidad.
 
-  /** Vehículos de la empresa, con su estado en vivo. */
+  /** Vehículos de la empresa, con su estado en vivo. Máximo 200 por página: la flota entera se lee en `repoApi`. */
   vehiculos: ({ limite = 200, desplazamiento = 0, q = '', enteId = '' } = {}) => {
     const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
     if (q) p.set('q', q)
@@ -421,7 +428,7 @@ export const api = {
   areas: () => pedir(`${CONSOLA}/areas?limit=200`),
 
   /** Conductores con asignación vigente. Sin datos personales. */
-  conductores: ({ desplazamiento = 0 } = {}) => pedir(`${CONSOLA}/drivers?limit=200&offset=${desplazamiento}`),
+  conductores: ({ desplazamiento = 0, limite = 200 } = {}) => pedir(`${CONSOLA}/drivers?limit=${limite}&offset=${desplazamiento}`),
 
   // --- Operación y cumplimiento (tablas de #170 y #171) --------------------
 

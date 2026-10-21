@@ -52,13 +52,19 @@ export default function MantenimientoConductor() {
     () => (asignacion ? repo.vehiculos.obtener(asignacion.vehiculoId) : Promise.resolve(null)),
     [asignacion?.vehiculoId],
   )
-  // Todas las que el servidor le deja ver: de ahí salen las de SU unidad y las «Asignadas a ti».
-  const ordenes = useDatos(() => repo.odts.listar({}), [], CADA_MINUTO)
+  // Las de SU unidad, filtradas por el servidor: de ahí salen también las «Asignadas a ti».
+  // Se espera a saber su unidad (null mientras tanto); sin unidad, lo que el servidor le deje ver.
+  const asignacionesListas = asignaciones.estado !== 'cargando'
+  const ordenes = useDatos(
+    () => (asignacionesListas ? repo.odts.listar(asignacion ? { vehiculoId: asignacion.vehiculoId } : {}) : Promise.resolve(null)),
+    [asignacionesListas, asignacion?.vehiculoId],
+    CADA_MINUTO,
+  )
   const [creando, setCreando] = useState(false)
   const [abierta, setAbierta] = useState(null)
   const [aviso, setAviso] = useState('')
 
-  const cargando = asignaciones.estado === 'cargando' || unidad.estado === 'cargando' || ordenes.estado === 'cargando'
+  const cargando = asignaciones.estado === 'cargando' || unidad.estado === 'cargando' || ordenes.estado === 'cargando' || (ordenes.estado === 'ok' && ordenes.datos == null)
   // Solo las órdenes de SU unidad. Se filtra aquí además de lo que ya limite el servidor.
   // De la más nueva a la más vieja, igual que el supervisor y la app.
   const lista = useMemo(

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import {
@@ -29,7 +29,14 @@ function useEstable(valor, firma) {
   if (f !== guardado.current.f) guardado.current = { f, v: valor }
   return guardado.current.v
 }
-const firmaFlota = (lista) => lista.map((v) => `${v.id}:${v.lat}:${v.lng}:${v.estadoMarcha}:${v.velocidadKmh}:${v.ultimoReporte}:${v.conectado}`).join('|')
+/** ¿La unidad coincide con lo escrito en el buscador? Placa, alias, número, marca, modelo o conductor. */
+function coincide(v, texto) {
+  if (!texto) return true
+  return [v.placa, v.alias, v.numero, v.marca, v.modelo, v.conductorNombre].join(' ').toLowerCase().includes(texto)
+}
+
+// El conductor entra en la firma: el buscador también filtra por su nombre.
+const firmaFlota = (lista) => lista.map((v) => `${v.id}:${v.lat}:${v.lng}:${v.estadoMarcha}:${v.velocidadKmh}:${v.ultimoReporte}:${v.conectado}:${v.conductorNombre}`).join('|') + (lista.incompleta ? '|incompleta' : '')
 const firmaPuntos = (p) => `${p.length}|${p[0]?.hora}|${p.at(-1)?.hora}|${p.at(-1)?.lat}|${p.at(-1)?.lng}`
 const firmaAnalisis = (a) => `${firmaPuntos(a.puntos)}|${a.viajes.length}|${a.paradas.length}`
 
@@ -50,11 +57,9 @@ export default function CentroControl() {
   // Los equipos reportan cada 1–5 minutos, así que consultar más seguido no
   // adelanta nada; con este ritmo una posición nueva aparece sola en menos de
   // 15 s desde que llega a la base, sin que nadie recargue.
-  const flota = useDatos(
-    () => repo.vehiculos.listar({ q, areaId, estado: estadoMarcha }),
-    [q, areaId, estadoMarcha],
-    15000
-  )
+  // Se pide la flota entera y el buscador, el área y el estado filtran aquí lo
+  // ya cargado: antes cada letra escrita era un pedido al servidor.
+  const flota = useDatos(() => repo.vehiculos.listar({}), [], 15000)
   // La ficha solo necesita de más el IMEI del equipo, que la flota no trae: se saca del inventario
   // de equipos GPS (un solo pedido) al elegir la unidad. Antes se pedía el expediente entero (~8
   // pedidos, todas las páginas de ODT). Lo vivo (posición, velocidad, señal) ya llega con la
@@ -88,7 +93,13 @@ export default function CentroControl() {
   const analisis = useEstable(useMemo(() => (viendoRecorrido && dia.datos ? analizar(dia.datos.puntos) : null), [viendoRecorrido, dia.datos]), firmaAnalisis)
 
   const datosFlota = useEstable(flota.datos, firmaFlota)
-  const lista = useMemo(() => datosFlota ?? [], [datosFlota])
+  // Diferido: el campo responde al instante y el mapa se filtra cuando React tiene un respiro.
+  const texto = useDeferredValue(q.trim().toLowerCase())
+  const lista = useMemo(
+    () => (datosFlota ?? []).filter((v) =>
+      (!areaId || v.areaId === areaId) && (!estadoMarcha || v.estadoMarcha === estadoMarcha) && coincide(v, texto)),
+    [datosFlota, areaId, estadoMarcha, texto]
+  )
   const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
 
   // Si un filtro deja fuera la unidad abierta, se cierra el detalle.
@@ -116,6 +127,8 @@ export default function CentroControl() {
       ? `${f.numero(lista.length)} ${lista.length === 1 ? 'unidad' : 'unidades'} · ` +
         (sabeMarcha ? `${enMarcha} en marcha` : `${reportando} reportando`)
       : 'Dónde está cada unidad, en tiempo real.'
+  // La flota pasó del tope de lectura: se dice, para que nadie cuente de menos sin saberlo.
+  const incompleta = flota.estado === 'ok' && Boolean(datosFlota?.incompleta)
 
   const unidadLista = lista.find(v => v.id === seleccionado)
   const unidadDetalle = detalle.datos?.id === seleccionado ? detalle.datos : null
@@ -131,7 +144,7 @@ export default function CentroControl() {
           alto="100%" ficha={false} leyenda={false} espacioFicha herramientas />
       </div>
       <div className="control-search">
-        <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}</p></div>
+        <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}</p>{incompleta && <p role="status">Lista incompleta: la flota es más grande de lo que se pudo leer.</p>}</div>
           <button className="pnl-btn" type="button" aria-expanded={listaAbierta} aria-controls="control-unidades" onClick={() => { setListaAbierta(v => !v); setSeleccionado(null) }}><Icono nombre="camion" tam={18} />Unidades</button>
         </div>
         <Buscador valor={q} alCambiar={setQ} placeholder="Placa, alias o conductor…" />

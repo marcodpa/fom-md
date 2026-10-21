@@ -9,6 +9,7 @@
 // ============================================================
 import { HAY_API, api, pedir } from './api'
 import repo from './repo'
+import { leerTodasLasPaginas } from './listar-odts'
 
 const CONSOLA = '/api/v1/console'
 
@@ -37,20 +38,18 @@ function comoFila(v, empresa) {
 }
 
 async function vehiculosDeEmpresa(empresa) {
-  const lista = []
-  let desplazamiento = 0
-  for (let vuelta = 0; vuelta < 50; vuelta += 1) {
-    const r = await api.vehiculos({ enteId: empresa.id, limite: 200, desplazamiento })
-    const items = r?.items ?? []
-    lista.push(...items.map((v) => comoFila(v, empresa)))
-    desplazamiento += items.length
-    if (!items.length || desplazamiento >= (r?.page?.total ?? desplazamiento)) break
-  }
+  // Todas las páginas: la primera dice el total y las demás se piden a la vez.
+  const r = await leerTodasLasPaginas((desplazamiento, limite) => api.vehiculos({ enteId: empresa.id, limite, desplazamiento }))
+  const lista = r.items.map((v) => comoFila(v, empresa))
   // El conductor principal no es imprescindible: si su lectura falla, la unidad sale igual.
+  // También todas las páginas: con más de 200 asignaciones, las últimas unidades salían sin conductor.
   try {
-    const r = await pedir(`${CONSOLA}/tenants/${empresa.id}/drivers?limit=200`)
+    const asignaciones = await leerTodasLasPaginas(
+      (desplazamiento, limite) => pedir(`${CONSOLA}/tenants/${empresa.id}/drivers?limit=${limite}&offset=${desplazamiento}`),
+      { clave: (c) => c?.assignmentId },
+    )
     const porVehiculo = new Map()
-    for (const c of r?.items ?? []) {
+    for (const c of asignaciones.items) {
       if (!c.vehicleId) continue
       if (c.role === 'principal' || !porVehiculo.has(c.vehicleId)) porVehiculo.set(c.vehicleId, c.displayName)
     }

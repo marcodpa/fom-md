@@ -177,7 +177,8 @@ const esDiaria = i => i.clase !== 'scheduled'
 function Resumen({ cambiarVista }) {
   const [detalle, setDetalle] = useState(null)
   const [faltanTodas, setFaltanTodas] = useState(false)
-  const hoy = useDatos(() => repo.inspecciones.listar({ fecha: f.hoyISO() }), [])
+  // El día completo, desde las 00:00: antes eran las últimas 100 filtradas a hoy, y con una flota grande faltaban las de la mañana.
+  const hoy = useDatos(() => repo.inspecciones.listar({ desde: f.hoyISO(), hasta: f.hoyISO() }), [])
   const pendientes = useDatos(() => repo.inspecciones.pendientesHoy(), [])
   const vehiculos = useDatos(() => repo.vehiculos.listar({}), [])
   const base = hoy.datos ?? []
@@ -203,6 +204,7 @@ function Resumen({ cambiarVista }) {
       <div className="insp-faltan">
         {pendientes.estado === 'cargando' && <Cargando filas={1}/>}
         {pendientes.estado === 'error' && <ErrorCarga error={pendientes.error} onReintentar={pendientes.recargar}/>}
+        {pendientes.estado === 'ok' && faltan.incompleta && <p className="insp-ficha-aviso" role="status">No se pudo leer todo lo de hoy: la lista puede no estar completa.</p>}
         {pendientes.estado === 'ok' && (faltan.length ? <>
           <p className="insp-faltan-cifra"><b>{f.numero(faltan.length)}</b> {faltan.length === 1 ? 'unidad sin la diaria' : 'unidades sin la diaria'}</p>
           <ul className="insp-faltan-lista" aria-label="Unidades sin la inspección diaria">{(faltanTodas ? faltan : faltan.slice(0, 4)).map(v => <li key={v.id} title={[v.alias, v.placa, v.conductorNombre || 'Sin conductor'].filter(Boolean).join(' · ')}>{v.placa || v.alias}</li>)}</ul>

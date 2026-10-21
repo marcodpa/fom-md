@@ -1,7 +1,7 @@
 From 2581cf83b19ae476227262327ab72489b2526c13 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 14 Oct 2026 11:40:13 -0400
-Subject: [PATCH 01/20] Mapas con Mapbox, el mismo proveedor que el panel web
+Subject: [PATCH 01/21] Mapas con Mapbox, el mismo proveedor que el panel web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -3095,7 +3095,7 @@ index 0000000..269766b
 From de62044848b392b8caa43332444bea9c335718c8 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 09:05:25 -0400
-Subject: [PATCH 02/20] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
+Subject: [PATCH 02/21] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
  =?UTF-8?q?=20panel=20web:=20encabezado=20redondo=20en=20todas=20las=20pes?=
  =?UTF-8?q?ta=C3=B1as?=
 MIME-Version: 1.0
@@ -5530,7 +5530,7 @@ index 2ab97e8..1921048 100644
 From c000b636fd810bcce2f3a312f10fed67ade6af1c Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:14:53 -0400
-Subject: [PATCH 03/20] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
+Subject: [PATCH 03/21] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
  =?UTF-8?q?(tambi=C3=A9n=20en=20Expo=20Go),=20recorrido=20y=20entrada=20nu?=
  =?UTF-8?q?eva=20con=20el=20logo=20FOM?=
 MIME-Version: 1.0
@@ -26153,7 +26153,7 @@ index 5119764..7db24d0 100644
 From 50a59f9d818534889d46e3a94168948db6d9afa9 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:32:24 -0400
-Subject: [PATCH 04/20] Pantalla de carga FOM (motion) al arrancar y dentro de
+Subject: [PATCH 04/21] Pantalla de carga FOM (motion) al arrancar y dentro de
  la app, igual que la web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -27297,7 +27297,7 @@ index 9c82d64..8328c9a 100644
 From 1056c6b78ec4ebc10b57f795e36b0e6a5699274d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:04:43 -0400
-Subject: [PATCH 05/20] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
+Subject: [PATCH 05/21] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
  =?UTF-8?q?tas,=20mapa=20completo=20de=20la=20flota=20y=20arreglo=20del=20?=
  =?UTF-8?q?mapa=20en=20el=20tel=C3=A9fono?=
 MIME-Version: 1.0
@@ -29762,7 +29762,7 @@ index 0d9b55d..39566b2 100644
 From 3e5342f146d3967ea90b01f55ab4c251a554cc74 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:48:17 -0400
-Subject: [PATCH 06/20] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
+Subject: [PATCH 06/21] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
  =?UTF-8?q?,=20recorrido=20en=20el=20mapa=20completo,=20=C3=ADcono=20de=20?=
  =?UTF-8?q?veh=C3=ADculo=20de=20la=20web=20y=20espera=20nueva?=
 MIME-Version: 1.0
@@ -31408,7 +31408,7 @@ index 4fb8a10..ef7b519 100644
 From 6ec07ef815bd8196b71c53b9772e567d5931bf30 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 14:14:13 -0400
-Subject: [PATCH 07/20] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
+Subject: [PATCH 07/21] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
  =?UTF-8?q?=20el=20error=20=C2=ABStyle=20is=20not=20done=20loading=C2=BB?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32480,7 +32480,7 @@ index f6b5a22..e116c51 100644
 From 5f38ad38cd96d2426b421be91809e3017cbe4954 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 16:18:12 -0400
-Subject: [PATCH 08/20] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
+Subject: [PATCH 08/21] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
  =?UTF-8?q?=20200=20(el=20servidor=20de=20la=20app=20no=20acepta=20m=C3=A1?=
  =?UTF-8?q?s=20por=20pedido)?=
 MIME-Version: 1.0
@@ -32569,7 +32569,7 @@ index 8836fdd..2804942 100644
 From d8db74159e7bf9e52efb1c6faa6ee0abf78ee2ff Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:29:50 -0400
-Subject: [PATCH 09/20] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
+Subject: [PATCH 09/21] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
  =?UTF-8?q?=20tel=C3=A9fono=20sin=20Expo=20Go?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32732,7 +32732,7 @@ index 0086b83..f9ddcca 100644
 From 95b304af6cf2094fdef87a3885ce76ac6a994e5e Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:54:24 -0400
-Subject: [PATCH 10/20] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
+Subject: [PATCH 10/21] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
  =?UTF-8?q?nativo=20completo,=20animaciones=20y=20proyecto=20de=20Expo=20p?=
  =?UTF-8?q?ara=20la=20APK?=
 MIME-Version: 1.0
@@ -36626,7 +36626,7 @@ index 7e0fe42..23cabaa 100644
 From 2e0a3b7e59cee9887a7171b60f89f64efcde644f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:55:54 -0400
-Subject: [PATCH 11/20] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
+Subject: [PATCH 11/21] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
  =?UTF-8?q?o=20la=20compilaci=C3=B3n=20en=20Expo=20falla=20por=20mapbox-gl?=
  =?UTF-8?q?=203=20vs=20@rnmapbox/maps?=
 MIME-Version: 1.0
@@ -36656,7 +36656,7 @@ index 0000000..7c5134a
 From 8f73cfc0c36be11e3414c10a41964cce6e5b8cd2 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:20:22 -0400
-Subject: [PATCH 12/20] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
+Subject: [PATCH 12/21] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
  =?UTF-8?q?=20pedidos=20al=20servidor;=20teclado=20en=20la=20entrada=20(T-?=
  =?UTF-8?q?06=20a=20T-09,=20T-15)?=
 MIME-Version: 1.0
@@ -42315,7 +42315,7 @@ index 47f45a4..bd41d06 100644
 From f6b767485f055b63843290b9d57751bba10f5f60 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:42:17 -0400
-Subject: [PATCH 13/20] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
+Subject: [PATCH 13/21] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
  =?UTF-8?q?6,=20T-17):=20tarjetas=20del=20mapa=20en=20iOS,=20memorias=20po?=
  =?UTF-8?q?r=20generaci=C3=B3n,=20flota=20sin=20red?=
 MIME-Version: 1.0
@@ -42752,7 +42752,7 @@ index b1893fe..11e8247 100644
 From a72f6240bc42f357d00cc22fc14132a23dadc999 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 10:22:30 -0400
-Subject: [PATCH 14/20] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
+Subject: [PATCH 14/21] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
  =?UTF-8?q?=20app=20(T-19=20a=20T-23):=20SOS,=20sesi=C3=B3n,=20red,=20pant?=
  =?UTF-8?q?allas,=20mapas=20y=20limpieza?=
 MIME-Version: 1.0
@@ -48916,7 +48916,7 @@ index 479ba30..63d5a63 100644
 From d5515163a0aaed218e618724c348a98585f81a5b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Mon, 19 Oct 2026 15:15:53 -0400
-Subject: [PATCH 15/20] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
+Subject: [PATCH 15/21] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
  =?UTF-8?q?=20app=20(T-33=20a=20T-41)=20y=20trabajo=20pendiente=20de=20otr?=
  =?UTF-8?q?a=20sesi=C3=B3n?=
 MIME-Version: 1.0
@@ -57967,7 +57967,7 @@ index 0000000..287208e
 From 792b0cbbe44bdd70d321c2fa9e504dd306d27d9f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 09:56:46 -0400
-Subject: [PATCH 16/20] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
+Subject: [PATCH 16/21] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
  =?UTF-8?q?inspecciones=20programadas=20y=20carga=20en=20c=C3=ADrculo=20(T?=
  =?UTF-8?q?-47=20a=20T-53)?=
 MIME-Version: 1.0
@@ -66593,7 +66593,7 @@ index 9c4c0ac..548f103 100644
 From 2fb6ae2ec8e7be32857eceac6d91afcee458c710 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 11:15:45 -0400
-Subject: [PATCH 17/20] Inspecciones simples, calendario por persona, ODT
+Subject: [PATCH 17/21] Inspecciones simples, calendario por persona, ODT
  asignadas, fotos y teclado (T-60 a T-65)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -70046,7 +70046,7 @@ index 2147bee..3650649 100644
 From 31237d42b58cf5b50abb359a3f6f92a2dc2d966b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 09:02:22 -0400
-Subject: [PATCH 18/20] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
+Subject: [PATCH 18/21] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
  =?UTF-8?q?ue=20suben,=20una=20inspecci=C3=B3n=20por=20d=C3=ADa=20y=20fine?=
  =?UTF-8?q?s=20de=20semana=20(T-67=20a=20T-75)?=
 MIME-Version: 1.0
@@ -73909,7 +73909,7 @@ index 08bddf9..16d9fef 100644
 From 9e668a4055466a8d1a72a98677a27bdf462839fe Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 10:04:55 -0400
-Subject: [PATCH 19/20] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
+Subject: [PATCH 19/21] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
  =?UTF-8?q?=C3=A1fico,=20y=20mantenimiento=20con=20la=20misma=20tarjeta=20?=
  =?UTF-8?q?(T-77,=20T-78)?=
 MIME-Version: 1.0
@@ -77071,7 +77071,7 @@ index 3b8c1a3..2b0d3a6 100644
 From 178d9a3cc8da965ee79a1bc11dd166d3ad458859 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 10:19:38 -0400
-Subject: [PATCH 20/20] Mantenimiento: borde normal en la tarjeta; el color
+Subject: [PATCH 20/21] Mantenimiento: borde normal en la tarjeta; el color
  solo en el degradado izquierdo
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
@@ -77092,6 +77092,2548 @@ index c4e8b85..4a664f1 100644
        ]}>
        {/* Halo del tono, naciendo en el canto izquierdo. */}
        <LinearGradient
+-- 
+2.55.0.windows.3
+
+
+From 4f5b2dcc7c5bfd01841529370065bb4dba3dde65 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 11:07:44 -0400
+Subject: [PATCH 21/21] =?UTF-8?q?Empresas=20grandes:=20todas=20las=20unida?=
+ =?UTF-8?q?des,=20listas=20r=C3=A1pidas=20y=20=C2=ABFaltan=20hoy=C2=BB=20c?=
+ =?UTF-8?q?ompleto=20(T-84,=20T-85)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Flota y directorio en páginas de 200 hasta el total; conductores guardados 5 min.
+- El conductor pide solo las órdenes de su unidad; listas en paralelo cuando se conoce el total.
+- Vehículos, Usuarios e Inspecciones con listas que solo pintan lo visible, filas memo.
+- Inspecciones de hoy leídas completas; aviso «Lista incompleta» si se llega a un tope.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/mas.tsx          |   7 +-
+ src/app/inspecciones.tsx          | 359 ++++++++++++++++++++--------
+ src/app/panel/flota.tsx           | 382 ++++++++++++++++++++----------
+ src/app/panel/personal.tsx        | 249 ++++++++++++-------
+ src/components/celda-tarjeta.tsx  |  84 +++++++
+ src/components/lista-visible.tsx  | 162 +++++++++++++
+ src/components/scroll-visible.tsx |   8 +-
+ src/hooks/use-flota-fom.ts        |  19 +-
+ src/services/companyService.ts    |  19 +-
+ src/services/fomDirectorio.ts     |  41 ++++
+ src/services/fomListas.ts         |  89 +++++--
+ src/services/fomVehiculos.ts      | 194 +++++++++++++--
+ src/services/inspeccionService.ts |  43 ++++
+ 13 files changed, 1290 insertions(+), 366 deletions(-)
+ create mode 100644 src/components/celda-tarjeta.tsx
+ create mode 100644 src/components/lista-visible.tsx
+
+diff --git a/src/app/(driver)/mas.tsx b/src/app/(driver)/mas.tsx
+index c1ef43e..f8e1d47 100644
+--- a/src/app/(driver)/mas.tsx
++++ b/src/app/(driver)/mas.tsx
+@@ -27,7 +27,7 @@ import {
+   getDocumentosVehiculo,
+   getMiPerfil,
+   getMiScore,
+-  getOrdenesDeTrabajo,
++  getOrdenesDeUnidad,
+   getTelemetria,
+   type MiPerfil,
+ } from '@/services';
+@@ -90,7 +90,10 @@ export default function PerfilScreen() {
+         vehicle ? getTelemetria(vehicle.id) : Promise.resolve(null),
+         // El ENTE donde trabaja: su nombre real, no el identificador interno.
+         user.companyId ? getCompanyBrandById(user.companyId) : Promise.resolve(undefined),
+-        user.companyId ? getOrdenesDeTrabajo(user.companyId) : Promise.resolve([]),
++        // Solo las de SU unidad (filtradas en el servidor): bajarse las de toda
++        // la empresa —miles en una flota grande— para contar unas pocas era
++        // gastar el cupo y la memoria del teléfono.
++        vehicle ? getOrdenesDeUnidad(vehicle.id) : Promise.resolve([]),
+       ]);
+       // Las que reportó ÉL, no las de su unidad: es su hoja, no la del carro.
+       const reportadas = odts.filter((o) => o.driverId === user.id).length;
+diff --git a/src/app/inspecciones.tsx b/src/app/inspecciones.tsx
+index b90559e..cbbc976 100644
+--- a/src/app/inspecciones.tsx
++++ b/src/app/inspecciones.tsx
+@@ -1,12 +1,13 @@
+ import { Redirect, useLocalSearchParams } from 'expo-router';
+-import { useMemo, useState } from 'react';
+-import { ScrollView, StyleSheet, View } from 'react-native';
++import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
++import { ScrollView, StyleSheet, View, type SectionListRenderItem } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { esAdmin, useAuth } from '@/auth';
+ import { BarraSeleccion } from '@/components/barra-seleccion';
+ import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
++import { CeldaTarjeta } from '@/components/celda-tarjeta';
+ import { Checkbox } from '@/components/checkbox';
+ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
+ import { ErrorState } from '@/components/error-state';
+@@ -19,13 +20,13 @@ import {
+   VISTA_INSPECCION,
+   type CuentaFallas,
+ } from '@/components/inspecciones-resultado';
++import { ListaVisible } from '@/components/lista-visible';
+ import { Pastilla } from '@/components/pastilla';
+ import { PillButton } from '@/components/pill-button';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { OpcionRiel, RielOpciones } from '@/components/riel-opciones';
+ import { PastillaFiltro } from '@/components/pastilla-filtro';
+ import { ScreenHeader } from '@/components/screen-header';
+-import { ScrollVisible } from '@/components/scroll-visible';
+ import { SearchBar, normalizar } from '@/components/search-bar';
+ import { Skeleton } from '@/components/skeleton';
+ import { TabIcon, type TabIconName } from '@/components/tab-icon';
+@@ -46,6 +47,7 @@ import {
+   type InspeccionDetalle,
+   type InspeccionResumen,
+ } from '@/services';
++import { unidadesIncompletas } from '@/services/fomVehiculos';
+ import { useAdmin } from '@/session';
+ import { useTheme } from '@/theme';
+ import type { InspeccionEstado } from '@/types';
+@@ -84,6 +86,14 @@ const TANDA = 5;
+ /** Cuántas unidades sin la diaria caben en la cinta antes de «Ver las N». */
+ const FALTAN_EN_CINTA = 6;
+ 
++/**
++ * Los TOPES de lectura del servicio (`getInspeccionesFom`): 200 sin rango de
++ * fechas, 3000 con rango. Llegar a uno es la señal de que la lista quedó corta
++ * y hay que decirlo en pantalla, no enseñarla como si fuera todo.
++ */
++const TOPE_RECIENTES = 200;
++const TOPE_RANGO = 3000;
++
+ /** Lo más grave primero: una bloqueada no puede salir, una observada sí. */
+ const PESO: Record<InspeccionEstado, number> = {
+   bloqueada: 0,
+@@ -103,12 +113,42 @@ interface SinHacer {
+   titular: string | null;
+ }
+ 
+-/** Una inspección en la lista: unidad, quién la hizo y cómo quedó. */
+-function Fila({
++/** Las inspecciones de un día: una sección de la lista. */
++interface DiaInspecciones {
++  fecha: string;
++  data: InspeccionResumen[];
++}
++
++/**
++ * Reparte una lista por días, del más reciente al más viejo (es como se
++ * archivan). Con `push` sobre la lista de cada día: copiarla en cada vuelta
++ * eran miles de copias con un mes de una flota grande.
++ */
++function agruparPorDia(lista: InspeccionResumen[]): DiaInspecciones[] {
++  const dias = new Map<string, InspeccionResumen[]>();
++  for (const i of lista) {
++    const delDia = dias.get(i.fecha);
++    if (delDia) delDia.push(i);
++    else dias.set(i.fecha, [i]);
++  }
++  return [...dias.entries()]
++    .sort((a, b) => b[0].localeCompare(a[0]))
++    .map(([fecha, data]) => ({ fecha, data }));
++}
++
++/**
++ * Una inspección en la lista: unidad, quién la hizo y cómo quedó.
++ *
++ * Con `memo` y callbacks que reciben el id: tildar una fila repinta esa fila,
++ * no el mes entero.
++ */
++const Fila = memo(function Fila({
+   i,
+   primera,
+   fallos,
+-  seleccion,
++  selActivo,
++  marcado,
++  onAlternar,
+   onAbrir,
+   onImprimir,
+ }: {
+@@ -116,18 +156,21 @@ function Fila({
+   primera: boolean;
+   /** Lo que el conductor marcó mal, si ya se leyó. */
+   fallos?: string[];
+-  seleccion: { activo: boolean; marcado: boolean; alternar: () => void };
+-  onAbrir: () => void;
+-  onImprimir: () => void;
++  /** Está encendido el modo de elegir varias. */
++  selActivo: boolean;
++  marcado: boolean;
++  onAlternar: (id: string) => void;
++  onAbrir: (i: InspeccionResumen) => void;
++  onImprimir: (id: string) => void;
+ }) {
+   const { colors, spacing, borderWidths } = useTheme();
+   const v = VISTA_INSPECCION[i.resultado];
+   const contenido = (
+     <>
+-      {seleccion.activo ? (
++      {selActivo ? (
+         <Checkbox
+-          checked={seleccion.marcado}
+-          onPress={seleccion.alternar}
++          checked={marcado}
++          onPress={() => onAlternar(i.id)}
+           label={`Seleccionar la inspección de ${i.unidad}`}
+         />
+       ) : null}
+@@ -147,9 +190,9 @@ function Fila({
+         ) : null}
+       </View>
+       <Pastilla tono={v.tono} label={v.label} conPunto={i.resultado === 'bloqueada'} />
+-      {seleccion.activo ? null : (
++      {selActivo ? null : (
+         <PressableScale
+-          onPress={onImprimir}
++          onPress={() => onImprimir(i.id)}
+           hitSlop={8}
+           accessibilityRole="button"
+           accessibilityLabel={`Imprimir la inspección de ${i.unidad}`}
+@@ -171,15 +214,48 @@ function Fila({
+   // En selección, tocar la fila la tilda; si no, abre su resultado.
+   return (
+     <PressableScale
+-      onPress={seleccion.activo ? seleccion.alternar : onAbrir}
++      onPress={() => (selActivo ? onAlternar(i.id) : onAbrir(i))}
+       accessibilityRole="button"
+       accessibilityLabel={
+-        seleccion.activo ? `Seleccionar la inspección de ${i.unidad}` : `Ver el resultado de la inspección de ${i.unidad}`
++        selActivo ? `Seleccionar la inspección de ${i.unidad}` : `Ver el resultado de la inspección de ${i.unidad}`
+       }
+       style={estilo}>
+       {contenido}
+     </PressableScale>
+   );
++});
++
++/** Una unidad sin la diaria de hoy, con su titular: es a quien hay que preguntarle. */
++const FilaFalta = memo(function FilaFalta({ u, primera }: { u: SinHacer; primera: boolean }) {
++  const { colors, spacing, borderWidths } = useTheme();
++  return (
++    <View
++      style={[
++        styles.fila,
++        {
++          gap: spacing.sm,
++          paddingVertical: spacing.sm + 2,
++          borderTopWidth: primera ? 0 : borderWidths.hairline,
++          borderTopColor: colors.border,
++        },
++      ]}>
++      <ThemedText variant="button" style={styles.flex1} numberOfLines={1}>
++        {[u.unidad, u.placa].filter(Boolean).join(' · ')}
++      </ThemedText>
++      <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
++        {u.titular ?? 'Sin titular'}
++      </ThemedText>
++    </View>
++  );
++});
++
++/** El aviso de una lista que se quedó corta por un tope de lectura. */
++function AvisoIncompleta({ texto }: { texto: string }) {
++  return (
++    <ThemedText variant="caption" color="warning" accessibilityRole="alert">
++      {texto}
++    </ThemedText>
++  );
+ }
+ 
+ /**
+@@ -283,9 +359,22 @@ export default function InspeccionesScreen() {
+   // multiempresa y, solo si no hay otra, la propia.
+   const cid = params.companyId || empresaId || user?.companyId || '';
+ 
++  const hoy = dia(new Date());
++  const mesHoy = hoy.slice(0, 7);
++
++  /*
++   * Dos lecturas a la vez: las RECIENTES (con su tope, para los hallazgos) y
++   * el DÍA DE HOY ENTERO, de las 00:00 en adelante. Las cifras y «Faltan hoy»
++   * salían de las últimas 200: con una flota grande el día no cabía y unidades
++   * que sí inspeccionaron salían como pendientes.
++   */
+   const { data, estado, recargar } = useAsyncData(
+-    () => getInspeccionesFom({ vehicleId }),
+-    [vehicleId],
++    () =>
++      Promise.all([
++        getInspeccionesFom({ vehicleId }),
++        getInspeccionesFom({ vehicleId, desde: hoy, hasta: hoy }),
++      ]),
++    [vehicleId, hoy],
+     { onFocus: true },
+   );
+ 
+@@ -309,13 +398,16 @@ export default function InspeccionesScreen() {
+    * puede enseñar la que no se hizo, y esa es justamente la que manda a
+    * alguien a la vía sin revisar el carro.
+    */
+-  const { data: flota, estado: estadoFlota, recargar: recargarFlota } = useAsyncData(
+-    () => (cid ? getUnidadesFlota(cid) : Promise.resolve([])),
++  const { data: flotaLeida, estado: estadoFlota, recargar: recargarFlota } = useAsyncData(
++    async () => {
++      if (!cid) return { unidades: [], incompleta: false };
++      const unidades = await getUnidadesFlota(cid);
++      // Si la flota pasó del tope de lectura, «Faltan hoy» se queda corto: se dice.
++      return { unidades, incompleta: unidadesIncompletas(cid) };
++    },
+     [cid],
+   );
+-
+-  const hoy = dia(new Date());
+-  const mesHoy = hoy.slice(0, 7);
++  const flota = flotaLeida?.unidades;
+ 
+   /*
+    * Las del MES del Historial, de toda la empresa: UNA lectura que reparte
+@@ -330,7 +422,7 @@ export default function InspeccionesScreen() {
+     enHistorial ? { clave: `inspecciones-mes:${cid}:${mes}` } : {},
+   );
+ 
+-  const inspecciones = useMemo(() => data ?? [], [data]);
++  const inspecciones = useMemo(() => data?.[0] ?? [], [data]);
+   /** «Todas» del mes; si se entró desde una unidad, solo las suyas. */
+   const delMesVistas = useMemo(
+     () => (delMes.data ?? []).filter((i) => !vehicleId || i.vehicleId === vehicleId),
+@@ -346,6 +438,8 @@ export default function InspeccionesScreen() {
+       ),
+     [delMesVistas, filtro, nq],
+   );
++  /** Cuántas graves hay en todo lo leído: la cuenta de la pastilla «Hallazgos». */
++  const nGraves = useMemo(() => inspecciones.filter(esGrave).length, [inspecciones]);
+   /** Los hallazgos: las que salieron con fallas u observaciones, de todo el historial leído. */
+   const hallazgos = useMemo(
+     () =>
+@@ -355,8 +449,14 @@ export default function InspeccionesScreen() {
+     [inspecciones, nq],
+   );
+ 
+-  /** Las de HOY, todas: de aquí salen las cifras y lo que pide atención. */
+-  const deHoy = useMemo(() => inspecciones.filter((i) => i.fecha === hoy), [inspecciones, hoy]);
++  /** Las de HOY, todas —el día entero, sin tope—: de aquí salen las cifras y lo que pide atención. */
++  const deHoy = useMemo(() => data?.[1] ?? [], [data]);
++  /** Cuántas de hoy salieron de cada forma: una pasada, no un `filter` por cifra. */
++  const cuentaHoy = useMemo(() => {
++    const c: Record<InspeccionEstado, number> = { aprobada: 0, aprobada_con_observaciones: 0, bloqueada: 0, pendiente: 0 };
++    for (const i of deHoy) c[i.resultado] += 1;
++    return c;
++  }, [deHoy]);
+   /** Lo que pide atención hoy, lo más grave arriba. */
+   const atencion = useMemo(
+     () =>
+@@ -432,8 +532,50 @@ export default function InspeccionesScreen() {
+     return m;
+   }, [leidos]);
+ 
+-  if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+-  if (!esAdmin(user)) return <Redirect href="/" />;
++  /** Los días de la lista que se ve («Todas» del mes u «Hallazgos»): las secciones. */
++  const enTodas = vista === 'historial' && modo === 'todas' && !!delMes.data && delMes.estado !== 'error';
++  const listaVista = enTodas ? visibles : vista === 'hallazgos' ? hallazgos : null;
++  const dias = useMemo(() => (listaVista ? agruparPorDia(listaVista) : []), [listaVista]);
++
++  /** ¿Se quedó corta alguna lectura por su tope? Entonces se dice. */
++  const mesIncompleto = (delMes.data?.length ?? 0) >= TOPE_RANGO;
++  const recientesIncompletas = inspecciones.length >= TOPE_RECIENTES;
++  const hoyIncompleto = deHoy.length >= TOPE_RANGO;
++
++  /*
++   * Imprimir desde una fila, con un callback que NO cambia: la función de
++   * imprimir depende de la selección y de lo ya leído, y pasársela tal cual
++   * repintaba todas las filas al tildar una. Se guarda la última en una ref.
++   */
++  const imprimirRef = useRef<(ids: string[], aviso?: string) => Promise<void>>(async () => {});
++  const imprimirUna = useCallback((id: string) => void imprimirRef.current([id]), []);
++
++  const renderDia = useCallback(
++    ({ section }: { section: DiaInspecciones }) => (
++      <View style={{ marginTop: spacing.lg, marginBottom: spacing.sm }}>
++        <EncabezadoGrupo label={formatFecha(section.fecha)} cuenta={section.data.length} />
++      </View>
++    ),
++    [spacing.lg, spacing.sm],
++  );
++
++  const renderInspeccion = useCallback<SectionListRenderItem<InspeccionResumen, DiaInspecciones>>(
++    ({ item: i, index, section }) => (
++      <CeldaTarjeta primera={index === 0} ultima={index === section.data.length - 1} paddingHorizontal={14}>
++        <Fila
++          i={i}
++          primera={index === 0}
++          fallos={fallos.get(i.id)?.nombres}
++          selActivo={sel.activo}
++          marcado={sel.ids.has(i.id)}
++          onAlternar={sel.alternar}
++          onAbrir={setAbierta}
++          onImprimir={imprimirUna}
++        />
++      </CeldaTarjeta>
++    ),
++    [fallos, sel.activo, sel.ids, sel.alternar, imprimirUna],
++  );
+ 
+   /**
+    * Arma el PDF de las inspecciones pedidas y lo manda a imprimir.
+@@ -443,7 +585,7 @@ export default function InspeccionesScreen() {
+    * viñetas se piden UNA vez por unidad, no una por inspección: diez hojas de
+    * la misma unidad son un solo formato.
+    */
+-  async function imprimir(ids: string[], avisoInicial?: string) {
++  async function imprimir(ids: string[], avisoInicial?: string): Promise<void> {
+     if (ocupado || ids.length === 0) return;
+     setOcupado(true);
+     // El aviso de lote largo se pone AQUÍ: si lo pusiera quien llama, este
+@@ -472,6 +614,13 @@ export default function InspeccionesScreen() {
+     }
+   }
+ 
++  useEffect(() => {
++    imprimirRef.current = imprimir;
++  });
++
++  if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
++  if (!esAdmin(user)) return <Redirect href="/" />;
++
+   /**
+    * Lo que se imprimiría desde la cabecera: el día en el resumen, lo que se ve
+    * en las listas. «Por persona» imprime desde la lista de cada conductor.
+@@ -486,43 +635,44 @@ export default function InspeccionesScreen() {
+     sel.cancelar();
+   }
+ 
+-  /** Una lista por días —del más reciente al más viejo: es como se archivan—, con su fila de siempre. */
++  /** Lo que se ve cuando una lista por días viene vacía. */
++  function listaVacia(vacio: string) {
++    return (
++      <Card>
++        <ThemedText variant="caption" color="textMuted">
++          {vacio}
++        </ThemedText>
++      </Card>
++    );
++  }
++
++  /**
++   * Una lista por días —del más reciente al más viejo: es como se archivan—,
++   * con su fila de siempre. Solo para las inspecciones de UNA persona (un mes,
++   * a lo sumo una por día): «Todas» y «Hallazgos» van en la lista virtualizada.
++   */
+   function listaPorDia(lista: InspeccionResumen[], vacio: string) {
+-    if (lista.length === 0) {
+-      return (
+-        <Card>
+-          <ThemedText variant="caption" color="textMuted">
+-            {vacio}
+-          </ThemedText>
++    if (lista.length === 0) return listaVacia(vacio);
++    return agruparPorDia(lista).map(({ fecha, data: deEseDia }) => (
++      <View key={fecha} style={{ gap: spacing.sm }}>
++        <EncabezadoGrupo label={formatFecha(fecha)} cuenta={deEseDia.length} />
++        <Card style={styles.grupo}>
++          {deEseDia.map((i, n) => (
++            <Fila
++              key={i.id}
++              i={i}
++              primera={n === 0}
++              fallos={fallos.get(i.id)?.nombres}
++              selActivo={sel.activo}
++              marcado={sel.ids.has(i.id)}
++              onAlternar={sel.alternar}
++              onAbrir={setAbierta}
++              onImprimir={imprimirUna}
++            />
++          ))}
+         </Card>
+-      );
+-    }
+-    const dias = new Map<string, InspeccionResumen[]>();
+-    for (const i of lista) dias.set(i.fecha, [...(dias.get(i.fecha) ?? []), i]);
+-    return [...dias.entries()]
+-      .sort((a, b) => b[0].localeCompare(a[0]))
+-      .map(([d, deEseDia]) => (
+-        <View key={d} style={{ gap: spacing.sm }}>
+-          <EncabezadoGrupo label={formatFecha(d)} cuenta={deEseDia.length} />
+-          <Card style={styles.grupo}>
+-            {deEseDia.map((i, n) => (
+-              <Fila
+-                key={i.id}
+-                i={i}
+-                primera={n === 0}
+-                fallos={fallos?.get(i.id)?.nombres}
+-                seleccion={{
+-                  activo: sel.activo,
+-                  marcado: sel.esta(i.id),
+-                  alternar: () => sel.alternar(i.id),
+-                }}
+-                onAbrir={() => setAbierta(i)}
+-                onImprimir={() => void imprimir([i.id])}
+-              />
+-            ))}
+-          </Card>
+-        </View>
+-      ));
++      </View>
++    ));
+   }
+ 
+   return (
+@@ -560,11 +710,16 @@ export default function InspeccionesScreen() {
+             ))}
+           </View>
+         ) : (
+-          <ScrollVisible
+-            contentContainerStyle={[
+-              styles.content,
+-              { paddingHorizontal: spacing.lg, paddingTop: spacing.xs, gap: spacing.lg },
+-            ]}>
++          <ListaVisible<InspeccionResumen, DiaInspecciones>
++            sections={dias}
++            keyExtractor={claveDeInspeccion}
++            renderItem={renderInspeccion}
++            renderSectionHeader={renderDia}
++            // Tildar una fila cambia `sel`: que la lista lo sepa.
++            extraData={sel}
++            contentContainerStyle={[styles.content, { paddingHorizontal: spacing.lg, paddingTop: spacing.xs }]}
++            ListHeaderComponent={
++          <View style={{ gap: spacing.lg }}>
+             <View style={{ gap: spacing.xs + 2 }}>
+               <ThemedText variant="title" style={styles.titulo}>
+                 Inspecciones
+@@ -580,7 +735,7 @@ export default function InspeccionesScreen() {
+                   <PastillaFiltro
+                     label={v.label}
+                     activo={vista === v.id}
+-                    cuenta={v.id === 'hallazgos' ? inspecciones.filter(esGrave).length : undefined}
++                    cuenta={v.id === 'hallazgos' ? nGraves : undefined}
+                     onPress={() => irA(v.id)}
+                   />
+                 </OpcionRiel>
+@@ -598,15 +753,18 @@ export default function InspeccionesScreen() {
+                       valor={hechasHoy}
+                       de={flota && estadoFlota !== 'error' && unidades.length > 0 ? unidades.length : undefined}
+                     />
+-                    <Cifra icon="inspeccion" label="Aprobadas" valor={deHoy.filter((i) => i.resultado === 'aprobada').length} />
++                    <Cifra icon="inspeccion" label="Aprobadas" valor={cuentaHoy.aprobada} />
+                     <Cifra
+                       icon="editar"
+                       label="Con observaciones"
+-                      valor={deHoy.filter((i) => i.resultado === 'aprobada_con_observaciones').length}
++                      valor={cuentaHoy.aprobada_con_observaciones}
+                     />
+-                    <Cifra icon="aviso" label="Bloqueadas" valor={deHoy.filter((i) => i.resultado === 'bloqueada').length} />
++                    <Cifra icon="aviso" label="Bloqueadas" valor={cuentaHoy.bloqueada} />
+                   </View>
+                 </Card>
++                {hoyIncompleto ? (
++                  <AvisoIncompleta texto="No se pudo leer todo lo de hoy: la lista puede no estar completa." />
++                ) : null}
+ 
+                 <Card>
+                   <View style={[styles.fila, { gap: spacing.md, marginBottom: spacing.xs }]}>
+@@ -664,6 +822,9 @@ export default function InspeccionesScreen() {
+                         </PressableScale>
+                       ) : null}
+                     </View>
++                    {flotaLeida?.incompleta ? (
++                      <AvisoIncompleta texto="Lista incompleta: la flota es más grande de lo que se pudo leer." />
++                    ) : null}
+                     {sinHacer.length === 0 ? (
+                       <ThemedText variant="caption" color="textSecondary">
+                         Todas las unidades tienen su diaria de hoy.
+@@ -680,24 +841,7 @@ export default function InspeccionesScreen() {
+                           // Todas, con su titular: es a quien hay que preguntarle.
+                           <View>
+                             {sinHacer.map((u, n) => (
+-                              <View
+-                                key={u.vehicleId}
+-                                style={[
+-                                  styles.fila,
+-                                  {
+-                                    gap: spacing.sm,
+-                                    paddingVertical: spacing.sm + 2,
+-                                    borderTopWidth: n === 0 ? 0 : borderWidths.hairline,
+-                                    borderTopColor: colors.border,
+-                                  },
+-                                ]}>
+-                                <ThemedText variant="button" style={styles.flex1} numberOfLines={1}>
+-                                  {[u.unidad, u.placa].filter(Boolean).join(' · ')}
+-                                </ThemedText>
+-                                <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
+-                                  {u.titular ?? 'Sin titular'}
+-                                </ThemedText>
+-                              </View>
++                              <FilaFalta key={u.vehicleId} u={u} primera={n === 0} />
+                             ))}
+                           </View>
+                         ) : (
+@@ -775,6 +919,10 @@ export default function InspeccionesScreen() {
+                     haySiguiente={mes < mesHoy}
+                   />
+                 </Card>
++                {/* Un mes de una flota grande puede pasar el tope de lectura: se dice. */}
++                {delMes.data && mesIncompleto ? (
++                  <AvisoIncompleta texto="El servidor no devolvió todo el mes: algunas inspecciones pueden faltar." />
++                ) : null}
+ 
+                 {modo === 'persona' ? (
+                   // Quién hace la diaria y quién no; al tocar a alguien, su calendario y sus inspecciones.
+@@ -839,10 +987,12 @@ export default function InspeccionesScreen() {
+                         </OpcionRiel>
+                       ))}
+                     </RielOpciones>
+-                    {listaPorDia(
+-                      visibles,
+-                      delMesVistas.length === 0 ? 'No hay inspecciones enviadas en este mes.' : 'Ninguna coincide.',
+-                    )}
++                    {/* Los días van debajo, en la lista virtualizada. */}
++                    {visibles.length === 0
++                      ? listaVacia(
++                          delMesVistas.length === 0 ? 'No hay inspecciones enviadas en este mes.' : 'Ninguna coincide.',
++                        )
++                      : null}
+                   </>
+                 )}
+               </>
+@@ -851,14 +1001,21 @@ export default function InspeccionesScreen() {
+                 <ThemedText variant="caption" color="textSecondary">
+                   Las inspecciones que salieron bloqueadas o con observaciones. Abre cada una para ver qué se marcó.
+                 </ThemedText>
++                {recientesIncompletas ? (
++                  <AvisoIncompleta
++                    texto={`Solo se leyeron las últimas ${TOPE_RECIENTES} inspecciones: algunos hallazgos pueden faltar.`}
++                  />
++                ) : null}
+                 <SearchBar value={q} onChangeText={setQ} placeholder="Buscar por unidad o conductor…" />
+-                {listaPorDia(
+-                  hallazgos,
+-                  inspecciones.some(esGrave) ? 'Ninguna coincide.' : 'Sin hallazgos: todas salieron aprobadas.',
+-                )}
++                {/* Los días van debajo, en la lista virtualizada. */}
++                {hallazgos.length === 0
++                  ? listaVacia(nGraves > 0 ? 'Ninguna coincide.' : 'Sin hallazgos: todas salieron aprobadas.')
++                  : null}
+               </>
+             )}
+-          </ScrollVisible>
++          </View>
++            }
++          />
+         )}
+ 
+         {sel.activo ? (
+@@ -895,6 +1052,8 @@ export default function InspeccionesScreen() {
+   );
+ }
+ 
++const claveDeInspeccion = (i: InspeccionResumen) => i.id;
++
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+   safeArea: { flex: 1 },
+diff --git a/src/app/panel/flota.tsx b/src/app/panel/flota.tsx
+index 6ac76d0..c2377c5 100644
+--- a/src/app/panel/flota.tsx
++++ b/src/app/panel/flota.tsx
+@@ -1,21 +1,22 @@
+ import { Redirect, useRouter } from 'expo-router';
+-import { useEffect, useMemo, useState } from 'react';
+-import { ActivityIndicator, StyleSheet, useWindowDimensions, View } from 'react-native';
++import { memo, useCallback, useEffect, useMemo, useState } from 'react';
++import { ActivityIndicator, StyleSheet, useWindowDimensions, View, type SectionListRenderItem } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { esMultiempresa, useAuth } from '@/auth';
+ import { BotonNuevo } from '@/components/boton-nuevo';
+ import { BuscadorFiltros } from '@/components/buscador-filtros';
+ import { Card } from '@/components/card';
++import { CeldaTarjeta } from '@/components/celda-tarjeta';
+ import { EmptyState } from '@/components/empty-state';
+ import { EncabezadoFom, TituloPantalla } from '@/components/encabezado-fom';
+ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
+ import { ErrorState } from '@/components/error-state';
+ import { Escalonado, Flotante } from '@/components/escalonado';
++import { ListaVisible } from '@/components/lista-visible';
+ import { MapaVehiculo } from '@/components/map-vehiculo';
+ import { Pastilla } from '@/components/pastilla';
+ import { PressableScale } from '@/components/pressable-scale';
+-import { ScrollVisible } from '@/components/scroll-visible';
+ import { normalizar } from '@/components/search-bar';
+ import { Skeleton } from '@/components/skeleton';
+ import { TabIcon } from '@/components/tab-icon';
+@@ -38,9 +39,10 @@ import {
+   getVencimientosDeEmpresa,
+   type DocumentoVencimiento,
+ } from '@/services';
++import { unidadesIncompletas } from '@/services/fomVehiculos';
+ import { useAdmin } from '@/session';
+ import { useTheme, type ColorTokens } from '@/theme';
+-import type { Area, FleetVehicle, InspeccionEstado, LatLng, MapMarker, UnidadFlota } from '@/types';
++import type { Area, FleetVehicle, InspeccionEstado, LatLng, MapMarker, UnidadFlota, VehicleType } from '@/types';
+ import { formatVencimiento } from '@/utils/date';
+ import { aplicarFiltros, estadoDeFlota, filtrosDeFlotaEnVivo } from '@/utils/filtros';
+ import { colorDeEnte } from '@/utils/paleta-flota';
+@@ -133,6 +135,27 @@ function peorNovedad(
+   return candidatas.sort((a, b) => a.peso - b.peso)[0] ?? null;
+ }
+ 
++/** Una unidad de la lista, con su peor novedad y lo que se pinta ya resuelto. */
++type UnidadLista = {
++  f: FleetVehicle;
++  novedad: Novedad | null;
++  area: string;
++  /** El alias, calculado una vez: se ordena y se busca por él. */
++  alias: string;
++};
++
++/** Un tramo de la lista: una sección de la `SectionList`. */
++type Tramo = {
++  clave: string;
++  label: string;
++  tono: keyof ColorTokens;
++  /** Su lugar entre los tramos que se ven: decide su escalón al entrar. */
++  indice: number;
++  data: UnidadLista[];
++};
++
++const SIN_TRAMOS: Tramo[] = [];
++
+ type FlotaData = {
+   unidades: UnidadFlota[];
+   areas: Area[];
+@@ -141,6 +164,8 @@ type FlotaData = {
+   emergencias: string[];
+   /** El PEOR papel de cada unidad, entero: hace falta su tipo y su fecha. */
+   papeles: Map<string, DocumentoVencimiento>;
++  /** La lista de unidades se quedó corta por el tope de páginas. */
++  incompleta: boolean;
+ };
+ 
+ const UNIDADES_VACIAS: UnidadFlota[] = [];
+@@ -254,6 +279,7 @@ export default function AdminFlotaScreen() {
+         inspecciones,
+         emergencias: sos.map((e) => e.vehicleId).filter((id): id is string => !!id),
+         papeles: peorPapelPorDuenio(docs),
++        incompleta: unidadesIncompletas(empresaId ?? ''),
+       };
+     },
+     [empresaId],
+@@ -270,7 +296,7 @@ export default function AdminFlotaScreen() {
+    * sesión, que para un supervisor es la suya: el mismo hook sirve a todos los
+    * entes, cada uno con la suya.
+    */
+-  const { unidades: vivas, sello: selloFlota } = useFlotaFom();
++  const { unidades: vivas, sello: selloFlota, incompleta: vivasIncompletas } = useFlotaFom();
+   const vivaDe = useMemo(() => new Map(vivas.map((v) => [v.vehicle.id, v])), [vivas]);
+   /** La hora de la última lectura buena: con ella se juzga el silencio. */
+   // `sello`: la hora de la última pasada buena, o la del último intento fallido sin red.
+@@ -308,15 +334,19 @@ export default function AdminFlotaScreen() {
+     return (areaId: string | null | undefined) => (areaId ? m.get(areaId) : undefined);
+   }, [areas]);
+ 
++  /** El nombre de cada área por su id: buscarlo con `find` en cada fila eran 340 × áreas. */
++  const nombreDeArea = useMemo(() => new Map(areas.map((a) => [a.id, a.nombre])), [areas]);
++
+   /** Cada unidad con su peor novedad ya resuelta: se calcula UNA vez. */
+-  const conNovedad = useMemo(
++  const conNovedad = useMemo<UnidadLista[]>(
+     () =>
+       flota.map((f) => ({
+         f,
+         novedad: peorNovedad(f, enApuros, inspecciones[f.vehicle.id], papeles.get(f.vehicle.id)),
+-        area: areas.find((a) => a.id === f.vehicle.areaId)?.nombre ?? 'Sin área',
++        area: (f.vehicle.areaId ? nombreDeArea.get(f.vehicle.areaId) : undefined) ?? 'Sin área',
++        alias: etiquetaCortaDeUnidad(f.vehicle),
+       })),
+-    [flota, enApuros, inspecciones, papeles, areas],
++    [flota, enApuros, inspecciones, papeles, nombreDeArea],
+   );
+ 
+   const buscados = useMemo(() => {
+@@ -347,12 +377,18 @@ export default function AdminFlotaScreen() {
+       }),
+     [areas, colorDeArea, inspecciones, papeles],
+   );
+-  const visibles = useMemo(
+-    () => aplicarFiltros(buscados.map((u) => u.f), filtros, filtro)
+-      .map((f) => buscados.find((u) => u.f.vehicle.id === f.vehicle.id))
+-      .filter((u): u is (typeof buscados)[number] => u !== undefined),
+-    [buscados, filtros, filtro],
+-  );
++  const visibles = useMemo(() => {
++    if (filtro.length === 0) return buscados;
++    // Por id en un Map: un `find` dentro del `map` recorría la flota entera por cada unidad.
++    const porId = new Map(buscados.map((u) => [u.f.vehicle.id, u]));
++    return aplicarFiltros(
++      buscados.map((u) => u.f),
++      filtros,
++      filtro,
++    )
++      .map((f) => porId.get(f.vehicle.id))
++      .filter((u): u is UnidadLista => u !== undefined);
++  }, [buscados, filtros, filtro]);
+   // Cada opción dice a cuántas lleva, medido sobre lo que la búsqueda dejó pasar.
+   const opciones = useMemo(
+     () =>
+@@ -366,60 +402,69 @@ export default function AdminFlotaScreen() {
+   );
+ 
+   /** Los tres tramos, cada uno ordenado por gravedad y luego por nombre. */
+-  const tramos = useMemo(() => {
+-    const orden = (a: (typeof visibles)[number], b: (typeof visibles)[number]) =>
+-      (a.novedad?.peso ?? 99) - (b.novedad?.peso ?? 99) ||
+-      etiquetaCortaDeUnidad(a.f.vehicle).localeCompare(etiquetaCortaDeUnidad(b.f.vehicle));
++  const tramos = useMemo<Tramo[]>(() => {
++    const orden = (a: UnidadLista, b: UnidadLista) =>
++      (a.novedad?.peso ?? 99) - (b.novedad?.peso ?? 99) || a.alias.localeCompare(b.alias);
++    // Una sola pasada para repartir; antes eran tres `filter` sobre la flota.
++    const noSalen: UnidadLista[] = [];
++    const atencion: UnidadLista[] = [];
++    const sinNovedad: UnidadLista[] = [];
++    for (const u of visibles) {
++      if (!u.novedad) sinNovedad.push(u);
++      else if (u.novedad.grupo === 'no-salen') noSalen.push(u);
++      else atencion.push(u);
++    }
+     return [
+-      { clave: 'no-salen', label: 'No pueden salir', tono: 'danger' as const,
+-        items: visibles.filter((u) => u.novedad?.grupo === 'no-salen').sort(orden) },
+-      { clave: 'atencion', label: 'Atención', tono: 'warning' as const,
+-        items: visibles.filter((u) => u.novedad?.grupo === 'atencion').sort(orden) },
+-      { clave: 'sin-novedad', label: 'Sin novedad', tono: 'textMuted' as const,
+-        items: visibles.filter((u) => !u.novedad).sort(orden) },
+-    ].filter((t) => t.items.length > 0);
++      { clave: 'no-salen', label: 'No pueden salir', tono: 'danger' as const, data: noSalen.sort(orden) },
++      { clave: 'atencion', label: 'Atención', tono: 'warning' as const, data: atencion.sort(orden) },
++      { clave: 'sin-novedad', label: 'Sin novedad', tono: 'textMuted' as const, data: sinNovedad.sort(orden) },
++    ]
++      .filter((t) => t.data.length > 0)
++      .map((t, indice) => ({ ...t, indice }));
+   }, [visibles]);
+ 
+-  // Pantalla de vigilancia: se refresca sola mientras se mira. Las posiciones
+-  // llevan su propio ritmo.
+-  useRefrescoVivo(recargar);
+-  /** El esqueleto solo si la espera se hace notar; si no, entra directo. */
+-  const esperaLarga = useTardando(!data, GRACIA_ESQUELETO);
+-  if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+-
+-  const puedeCrear = esMultiempresa(user);
+-
+   // ── El mapa: solo lo VISIBLE, cada unidad en el color de su área ──
+-  const markers: MapMarker[] = visibles
+-    .filter((u) => u.f.coordsReales)
+-    .map((u) => {
+-      const color = colorDeArea(u.f.vehicle.areaId);
+-      return {
+-        id: u.f.vehicle.id,
+-        label: etiquetaCortaDeUnidad(u.f.vehicle),
+-        detalle: u.f.conductorActual ?? 'Sin conductor',
+-        coords: u.f.coords,
+-        live: estadoDeFlota(u.f) !== 'sin-senal',
+-        estado: estadoDeFlota(u.f),
+-        emergencia: enApuros.has(u.f.vehicle.id),
+-        // Con rumbo el punto se dibuja como flecha hacia donde va.
+-        rumbo: vivaDe.get(u.f.vehicle.id)?.pos?.rumbo ?? null,
+-        placa: u.f.vehicle.placa,
+-        // La traza es de UNA unidad a la vez: la que se está mirando.
+-        ...(traza && traza.id === u.f.vehicle.id && traza.puntos.length > 1
+-          ? { estela: traza.puntos }
+-          : {}),
+-        // Sin área no hay color propio: esa unidad usa el semáforo del mapa.
+-        ...(color ? { color } : {}),
+-      };
+-    });
++  // En un memo: con 340 unidades no se rehace en cada render, solo cuando
++  // cambia lo que se ve, una posición, la traza o un SOS.
++  const markers = useMemo<MapMarker[]>(
++    () =>
++      visibles
++        .filter((u) => u.f.coordsReales)
++        .map((u) => {
++          const color = colorDeArea(u.f.vehicle.areaId);
++          const estadoF = estadoDeFlota(u.f);
++          return {
++            id: u.f.vehicle.id,
++            label: u.alias,
++            detalle: u.f.conductorActual ?? 'Sin conductor',
++            coords: u.f.coords,
++            live: estadoF !== 'sin-senal',
++            estado: estadoF,
++            emergencia: enApuros.has(u.f.vehicle.id),
++            // Con rumbo el punto se dibuja como flecha hacia donde va.
++            rumbo: vivaDe.get(u.f.vehicle.id)?.pos?.rumbo ?? null,
++            placa: u.f.vehicle.placa,
++            // La traza es de UNA unidad a la vez: la que se está mirando.
++            ...(traza && traza.id === u.f.vehicle.id && traza.puntos.length > 1
++              ? { estela: traza.puntos }
++              : {}),
++            // Sin área no hay color propio: esa unidad usa el semáforo del mapa.
++            ...(color ? { color } : {}),
++          };
++        }),
++    [visibles, colorDeArea, enApuros, vivaDe, traza],
++  );
+   // Cambia solo cuando cambia el CONJUNTO de puntos (filtro, búsqueda, una
+   // unidad que empieza a reportar), no con cada refresco: es una cadena, y el
+   // mapa compara su valor, no su identidad.
+-  const encuadreClave = markers
+-    .map((m) => m.id)
+-    .sort()
+-    .join('|');
++  const encuadreClave = useMemo(
++    () =>
++      markers
++        .map((m) => m.id)
++        .sort()
++        .join('|'),
++    [markers],
++  );
+ 
+   /**
+    * Las cuatro cifras de la cabecera, sobre lo VISIBLE.
+@@ -431,15 +476,76 @@ export default function AdminFlotaScreen() {
+    * decir que está quieta ahí era afirmar lo único que no se sabe. Mientras
+    * llegan las posiciones, solo cuentan las que ya se saben.
+    */
+-  const conocidas = visibles.filter((u) => vivaDe.has(u.f.vehicle.id));
+-  const enMarcha = conocidas.filter((u) => estadoDeFlota(u.f) === 'marcha').length;
+-  const sinSenal = conocidas.filter((u) => estadoDeFlota(u.f) === 'sin-senal').length;
+-  const cifras: CifraEstado[] = [
+-    { valor: visibles.length, label: visibles.length === 1 ? 'unidad' : 'unidades' },
+-    { valor: enMarcha, label: 'en marcha', tono: 'success' },
+-    { valor: conocidas.length - sinSenal - enMarcha, label: 'detenidas', tono: 'warning' },
+-    { valor: sinSenal, label: 'sin señal', tono: 'textMuted' },
+-  ];
++  const cifras = useMemo<CifraEstado[]>(() => {
++    let conocidas = 0;
++    let enMarcha = 0;
++    let sinSenal = 0;
++    for (const u of visibles) {
++      if (!vivaDe.has(u.f.vehicle.id)) continue;
++      conocidas += 1;
++      const e = estadoDeFlota(u.f);
++      if (e === 'marcha') enMarcha += 1;
++      else if (e === 'sin-senal') sinSenal += 1;
++    }
++    return [
++      { valor: visibles.length, label: visibles.length === 1 ? 'unidad' : 'unidades' },
++      { valor: enMarcha, label: 'en marcha', tono: 'success' },
++      { valor: conocidas - sinSenal - enMarcha, label: 'detenidas', tono: 'warning' },
++      { valor: sinSenal, label: 'sin señal', tono: 'textMuted' },
++    ];
++  }, [visibles, vivaDe]);
++
++  /** Abrir la ficha de una unidad: estable, para que las filas no se repinten por él. */
++  const abrirUnidad = useCallback(
++    (id: string) => router.navigate({ pathname: '/unidad', params: { vehicleId: id, companyId: empresaId ?? '' } }),
++    [router, empresaId],
++  );
++
++  const renderTramo = useCallback(
++    ({ section }: { section: Tramo }) => (
++      // Solo los primeros tramos entran escalonados, y solo la primera vez.
++      // Sin cuenta: el tramo agrupa, no informa de cantidades.
++      <Escalonado
++        grupo="lista"
++        indice={4 + section.indice}
++        style={{ marginTop: spacing.md, marginBottom: spacing.sm }}>
++        <EncabezadoGrupo label={section.label} tono={section.tono} />
++      </Escalonado>
++    ),
++    [spacing.md, spacing.sm],
++  );
++
++  const renderUnidad = useCallback<SectionListRenderItem<UnidadLista, Tramo>>(
++    ({ item: u, index, section }) => (
++      <FilaUnidad
++        id={u.f.vehicle.id}
++        alias={u.alias}
++        placa={u.f.vehicle.placa}
++        tipo={u.f.vehicle.tipo}
++        conductor={u.f.conductorActual}
++        area={u.area}
++        color={colorDeArea(u.f.vehicle.areaId) ?? colors.textMuted}
++        novedadTono={u.novedad?.tono}
++        novedadLabel={u.novedad?.label}
++        novedadLatiendo={u.novedad?.latiendo}
++        primera={index === 0}
++        ultima={index === section.data.length - 1}
++        indiceTramo={section.indice}
++        resaltada={resaltada === u.f.vehicle.id}
++        onPress={abrirUnidad}
++      />
++    ),
++    [colorDeArea, colors.textMuted, resaltada, abrirUnidad],
++  );
++
++  // Pantalla de vigilancia: se refresca sola mientras se mira. Las posiciones
++  // llevan su propio ritmo.
++  useRefrescoVivo(recargar);
++  /** El esqueleto solo si la espera se hace notar; si no, entra directo. */
++  const esperaLarga = useTardando(!data, GRACIA_ESQUELETO);
++  if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
++
++  const puedeCrear = esMultiempresa(user);
+ 
+   // Medio alto de pantalla: el mapa es lo que se viene a ver (como en el
+   // Centro de control de la web); la lista sigue debajo, a un desplazamiento.
+@@ -447,14 +553,16 @@ export default function AdminFlotaScreen() {
+   /** La unidad tocada en el mapa, con lo que hace falta para su ficha flotante. */
+   const tocada = resaltada ? conNovedad.find((u) => u.f.vehicle.id === resaltada) : undefined;
+ 
+-  return (
+-    <ThemedView style={styles.root} ambient>
+-      <SafeAreaView style={styles.safeArea} edges={[]}>
+-        {/* La barra fija: el título, el pulso, el mapa y la lista se van con
+-            el scroll. */}
+-        <EncabezadoFom seccion="Vehículos" />
++  /** Las filas solo van en la lista cuando hay datos que enseñar; si no, manda la cabecera. */
++  const secciones = estado !== 'error' && !(!data && esperaLarga) && visibles.length > 0 ? tramos : SIN_TRAMOS;
+ 
+-        <ScrollVisible contentContainerStyle={[styles.content, { paddingHorizontal: 14, gap: spacing.md }]}>
++  /*
++   * LA CABECERA de la lista: el título, el pulso, el mapa y el buscador. Va
++   * dentro de la lista para irse con el scroll como antes; las filas, debajo,
++   * se pintan solo las que se ven.
++   */
++  const cabecera = (
++        <View style={{ gap: spacing.md }}>
+           <Escalonado indice={0}>
+             <TituloPantalla
+               titulo="Vehículos"
+@@ -613,48 +721,51 @@ export default function AdminFlotaScreen() {
+                 />
+               </Escalonado>
+ 
++              {/* Una flota más grande que el tope de lectura: se dice, no se
++                  enseña a medias como si fuera la entera. Mismo texto que la web. */}
++              {data?.incompleta || vivasIncompletas ? (
++                <ThemedText variant="caption" color="warning" accessibilityRole="alert">
++                  Lista incompleta: la flota es más grande de lo que se pudo leer.
++                </ThemedText>
++              ) : null}
++
+               {flota.length === 0 ? (
+                 <EmptyState title="Sin vehículos" />
+               ) : visibles.length === 0 ? (
+                 // La palabra buscada sigue escrita en el buscador de arriba: no
+                 // hace falta repetirla aquí.
+                 <EmptyState title="Sin resultados" />
+-              ) : (
+-                tramos.map((t, ti) => (
+-                  // Solo los primeros tramos entran escalonados, y solo la primera vez.
+-                  <Escalonado key={t.clave} grupo="lista" indice={4 + ti} style={{ gap: spacing.sm }}>
+-                    {/* Sin cuenta: el tramo agrupa, no informa de cantidades. */}
+-                    <EncabezadoGrupo label={t.label} tono={t.tono} />
+-                    <Card style={{ padding: 0, overflow: 'hidden' }}>
+-                      {t.items.map((u, i) => (
+-                        <FilaUnidad
+-                          key={u.f.vehicle.id}
+-                          f={u.f}
+-                          area={u.area}
+-                          color={colorDeArea(u.f.vehicle.areaId) ?? colors.textMuted}
+-                          novedad={u.novedad}
+-                          primera={i === 0}
+-                          resaltada={resaltada === u.f.vehicle.id}
+-                          onPress={() =>
+-                            router.navigate({
+-                              pathname: '/unidad',
+-                              params: { vehicleId: u.f.vehicle.id, companyId: empresaId ?? '' },
+-                            })
+-                          }
+-                        />
+-                      ))}
+-                    </Card>
+-                  </Escalonado>
+-                ))
+-              )}
++              ) : null}
+             </>
+           )}
+-        </ScrollVisible>
++        </View>
++  );
++
++  return (
++    <ThemedView style={styles.root} ambient>
++      <SafeAreaView style={styles.safeArea} edges={[]}>
++        {/* La barra fija: el título, el pulso, el mapa y la lista se van con
++            el scroll. */}
++        <EncabezadoFom seccion="Vehículos" />
++
++        {/* Los tres tramos, como secciones: con 340 unidades solo se pintan
++            las filas que se ven, no la flota entera en cada refresco. */}
++        <ListaVisible<UnidadLista, Tramo>
++          sections={secciones}
++          keyExtractor={claveDeUnidad}
++          renderItem={renderUnidad}
++          renderSectionHeader={renderTramo}
++          ListHeaderComponent={cabecera}
++          extraData={resaltada}
++          contentContainerStyle={[styles.content, { paddingHorizontal: 14 }]}
++        />
+       </SafeAreaView>
+     </ThemedView>
+   );
+ }
+ 
++const claveDeUnidad = (u: UnidadLista) => u.f.vehicle.id;
++
+ /**
+  * Una UNIDAD en la lista.
+  *
+@@ -665,40 +776,61 @@ export default function AdminFlotaScreen() {
+  * El alias nunca se corta porque comparte línea solo con la pastilla; cuando
+  * llevaba también la placa y el modelo, un nombre normal ya se quedaba en
+  * «Unida…».
++ *
++ * Con `memo` y solo valores sueltos: el refresco de posiciones rehace los
++ * objetos de toda la flota cada veinte segundos, y así solo se repinta la fila
++ * a la que de verdad le cambió algo.
+  */
+-function FilaUnidad({
+-  f,
++const FilaUnidad = memo(function FilaUnidad({
++  id,
++  alias,
++  placa,
++  tipo,
++  conductor,
+   area,
+   color,
+-  novedad,
++  novedadTono,
++  novedadLabel,
++  novedadLatiendo,
+   primera,
++  ultima,
++  indiceTramo,
+   resaltada,
+   onPress,
+ }: {
+-  f: FleetVehicle;
++  id: string;
++  alias: string;
++  placa: string;
++  tipo: VehicleType | undefined;
++  conductor: string | null | undefined;
+   area: string;
+   /** El color de su área: el mismo con el que se pinta su punto en el mapa. */
+   color: string;
+-  novedad: Novedad | null;
++  /** Su peor novedad, en piezas sueltas para que `memo` pueda compararlas. */
++  novedadTono: Novedad['tono'] | undefined;
++  novedadLabel: string | undefined;
++  novedadLatiendo: boolean | undefined;
+   primera: boolean;
++  ultima: boolean;
++  /** El tramo en el que va: entra con él, en su mismo escalón. */
++  indiceTramo: number;
+   /** Su punto está tocado en el mapa: se destaca. */
+   resaltada: boolean;
+-  onPress: () => void;
++  onPress: (id: string) => void;
+ }) {
+   const { colors, spacing, radii } = useTheme();
+-  const alias = etiquetaCortaDeUnidad(f.vehicle);
+-  const detalle = [f.vehicle.placa, area].filter(Boolean).join(' · ');
++  const detalle = [placa, area].filter(Boolean).join(' · ');
+ 
+   // Al tocar un punto, la fila solo se destaca: el mapa va en el mismo scroll,
+   // y bajar hasta ella escondería la ficha flotante que se acaba de abrir.
+ 
+   return (
++    <Escalonado grupo="lista" indice={4 + indiceTramo}>
++    <CeldaTarjeta primera={primera} ultima={ultima}>
+     <PressableScale
+-      onPress={onPress}
++      onPress={() => onPress(id)}
+       accessibilityRole="button"
+-      accessibilityLabel={
+-        novedad ? `${alias}, ${f.vehicle.placa}, ${novedad.label}` : `${alias}, ${f.vehicle.placa}`
+-      }>
++      accessibilityLabel={novedadLabel ? `${alias}, ${placa}, ${novedadLabel}` : `${alias}, ${placa}`}>
+       <View
+         style={[
+           styles.fila,
+@@ -715,7 +847,7 @@ function FilaUnidad({
+             no cómo está: el estado ya lo dicen el tramo y la pastilla, y
+             teñirlo también aquí sería la tercera vez que se cuenta lo mismo. */}
+         <View style={[styles.retrato, { backgroundColor: tinte(color, 0.12), borderRadius: radii.md }]}>
+-          <VehiculoIlustracion tipo={f.vehicle.tipo} color={colors.textMuted} ancho={52} />
++          <VehiculoIlustracion tipo={tipo} color={colors.textMuted} ancho={52} />
+         </View>
+ 
+         <View style={styles.flex1}>
+@@ -723,8 +855,8 @@ function FilaUnidad({
+             <ThemedText variant="button" numberOfLines={1} style={styles.flex1}>
+               {alias}
+             </ThemedText>
+-            {novedad ? (
+-              <Pastilla tono={novedad.tono} label={novedad.label} conPunto latiendo={novedad.latiendo} />
++            {novedadTono && novedadLabel ? (
++              <Pastilla tono={novedadTono} label={novedadLabel} conPunto latiendo={novedadLatiendo} />
+             ) : null}
+           </View>
+           {/* EL CONDUCTOR ASIGNADO, delante y con su ícono: es lo primero que
+@@ -734,17 +866,19 @@ function FilaUnidad({
+             <TabIcon name="personal" color={colors.textMuted} size={12} />
+             <ThemedText
+               variant="caption"
+-              color={f.conductorActual ? 'textSecondary' : 'textMuted'}
++              color={conductor ? 'textSecondary' : 'textMuted'}
+               numberOfLines={1}
+               style={styles.flex1}>
+-              {[f.conductorActual ?? 'Sin conductor', detalle].filter(Boolean).join(' · ')}
++              {[conductor ?? 'Sin conductor', detalle].filter(Boolean).join(' · ')}
+             </ThemedText>
+           </View>
+         </View>
+       </View>
+     </PressableScale>
++    </CeldaTarjeta>
++    </Escalonado>
+   );
+-}
++});
+ 
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+diff --git a/src/app/panel/personal.tsx b/src/app/panel/personal.tsx
+index ca5c95f..32f38f5 100644
+--- a/src/app/panel/personal.tsx
++++ b/src/app/panel/personal.tsx
+@@ -1,6 +1,6 @@
+ import { Redirect, useRouter } from 'expo-router';
+-import { useMemo, useState } from 'react';
+-import { StyleSheet, View } from 'react-native';
++import { memo, useCallback, useMemo, useState } from 'react';
++import { StyleSheet, View, type SectionListRenderItem } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { etiquetaRol, useAuth } from '@/auth';
+@@ -9,14 +9,15 @@ import { Avatar } from '@/components/avatar';
+ import { BotonNuevo } from '@/components/boton-nuevo';
+ import { BuscadorFiltros } from '@/components/buscador-filtros';
+ import { Card } from '@/components/card';
++import { CeldaTarjeta } from '@/components/celda-tarjeta';
+ import { EmptyState } from '@/components/empty-state';
+ import { TituloPantalla } from '@/components/encabezado-fom';
+ import { ErrorState } from '@/components/error-state';
+ import { Escalonado } from '@/components/escalonado';
+ import { Insignia } from '@/components/insignia';
++import { ListaVisible } from '@/components/lista-visible';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { Relevo } from '@/components/relevo';
+-import { ScrollVisible } from '@/components/scroll-visible';
+ import { normalizar } from '@/components/search-bar';
+ import { Skeleton } from '@/components/skeleton';
+ import { TabIcon } from '@/components/tab-icon';
+@@ -33,6 +34,7 @@ import {
+   getVencimientosDeEmpresa,
+   type DocumentoVencimiento,
+ } from '@/services';
++import { unidadesIncompletas } from '@/services/fomVehiculos';
+ import { useAdmin } from '@/session';
+ import { useTheme } from '@/theme';
+ import type { DriverProfile, UnidadFlota } from '@/types';
+@@ -42,6 +44,11 @@ import { leFalta, requisitosDe } from '@/utils/requisitos';
+ /** Alto mínimo de cada fila: un nombre largo envuelve y la fila crece, nunca se corta. */
+ const FILA_MIN = 64;
+ 
++/** La lista entera es una sola sección: la tarjeta de siempre, sin rótulo. */
++type SeccionPersonas = { clave: string; data: DriverProfile[] };
++const SIN_SECCIONES: SeccionPersonas[] = [];
++const SIN_DATOS: [DriverProfile[], UnidadFlota[], DocumentoVencimiento[]] = [[], [], []];
++
+ /**
+  * PERSONAL (Tablero 2 · Módulo 8): la gente de la empresa, y de cada persona
+  * solo tres cosas —su rol, si está conduciendo y si le falta algo—. Todo lo
+@@ -64,31 +71,34 @@ export default function AdminPersonalScreen() {
+   // Tres cargas en paralelo con estado combinado, cancelación y reintento en una
+   // sola línea. `data` es la tupla [usuarios, unidades, papeles]; refresca al foco.
+   const { data, estado, refrescando: pidiendo, recargar } = useAsyncData(
+-    () =>
+-      Promise.all([
++    async () => {
++      const r = await Promise.all([
+         getUsuariosDeEmpresa(empresaId ?? ''),
+         getUnidadesFlota(empresaId ?? ''),
+         getVencimientosDeEmpresa(empresaId ?? ''),
+-      ]),
++      ]);
++      // Si la flota se quedó corta por el tope, «conduciendo» y «con unidad» también.
++      return { listas: r, unidadesIncompletas: unidadesIncompletas(empresaId ?? '') };
++    },
+     [empresaId],
+     { onFocus: true },
+   );
+-  const [roster, unidades, papeles]: [DriverProfile[], UnidadFlota[], DocumentoVencimiento[]] =
+-    data ?? [[], [], []];
++  // Vacíos FIJOS mientras carga: un `[]` nuevo en cada render rehacía los memos de abajo.
++  const [roster, unidades, papeles] = data?.listas ?? SIN_DATOS;
+   // Solo se sigue a las unidades que llevan a alguien: las demás no dicen quién conduce.
+   /*
+    * Quién va rodando AHORA, del mismo hook que la flota y que la consola del
+    * admin FOM: sin su veredicto, "conduciendo" nunca se encendía, porque FOM
+    * devuelve la velocidad en null y toda la flota salía parada.
+    */
+-  const { unidades: vivas, sello: selloFlota } = useFlotaFom();
++  const { unidades: vivas, sello: selloFlota, incompleta: vivasIncompletas } = useFlotaFom();
+   const vivaDe = useMemo(() => new Map(vivas.map((v) => [v.vehicle.id, v])), [vivas]);
+   /** La hora de la última lectura buena: con ella se juzga el silencio. */
+   // `sello`: la hora de la última pasada buena, o la del último intento fallido sin red.
+   const sello = selloFlota ?? 0;
+   // Uno NO se administra a sí mismo: su ficha no aparece en el manejo de
+   // personal (sus datos propios los edita en "Mi perfil").
+-  const usuarios = roster.filter((u) => u.id !== user?.id);
++  const usuarios = useMemo(() => roster.filter((u) => u.id !== user?.id), [roster, user?.id]);
+   const [q, setQ] = useState('');
+   const [filtro, setFiltro] = useState<string[]>([]);
+   // Al cambiar de empresa (la pantalla se reutiliza), se limpia lo que se
+@@ -123,36 +133,92 @@ export default function AdminPersonalScreen() {
+     return ids;
+   }, [unidades, vivaDe, sello]);
+ 
+-  /** ¿Le falta algo? Un requisito sin registrar o vencido, o un papel suyo vencido. */
+-  const faltaA = (u: DriverProfile): boolean =>
+-    papelesVencidos.has(u.id) ||
+-    leFalta(
+-      requisitosDe({
+-        role: u.role,
+-        cedula: u.cedula,
+-        licenciaVence: u.licencia?.venceEn,
+-        cartaMedicaVence: u.cartaMedica?.venceEn,
+-      }),
+-    );
++  /**
++   * ¿Le falta algo? Un requisito sin registrar o vencido, o un papel suyo
++   * vencido. Se resuelve UNA vez por persona, no en cada fila y cada cuenta.
++   */
++  const conFaltas = useMemo(() => {
++    const ids = new Set<string>();
++    for (const u of usuarios) {
++      const falta =
++        papelesVencidos.has(u.id) ||
++        leFalta(
++          requisitosDe({
++            role: u.role,
++            cedula: u.cedula,
++            licenciaVence: u.licencia?.venceEn,
++            cartaMedicaVence: u.cartaMedica?.venceEn,
++          }),
++        );
++      if (falta) ids.add(u.id);
++    }
++    return ids;
++  }, [usuarios, papelesVencidos]);
+ 
+   // Los MISMOS filtros que cualquier otra lista de personas: el vocabulario
+   // vive en `@/utils/filtros` y aquí solo se dice qué se sabe de esta gente.
+-  const filtros = filtrosDePersonas({
+-    papelesVencidos,
+-    conUnidad: new Set(unidades.map((u) => u.conductorId).filter((id): id is string => !!id)),
+-  });
++  const filtros = useMemo(
++    () =>
++      filtrosDePersonas({
++        papelesVencidos,
++        conUnidad: new Set(unidades.map((u) => u.conductorId).filter((id): id is string => !!id)),
++      }),
++    [papelesVencidos, unidades],
++  );
+   const nq = normalizar(q);
+-  const buscados = nq
+-    ? usuarios.filter((u) => normalizar(`${u.nombre} ${etiquetaRol(u.role ?? 'conductor')}`).includes(nq))
+-    : usuarios;
+-  const visibles = aplicarFiltros(buscados, filtros, filtro);
++  const buscados = useMemo(
++    () =>
++      nq
++        ? usuarios.filter((u) => normalizar(`${u.nombre} ${etiquetaRol(u.role ?? 'conductor')}`).includes(nq))
++        : usuarios,
++    [usuarios, nq],
++  );
++  const visibles = useMemo(() => aplicarFiltros(buscados, filtros, filtro), [buscados, filtros, filtro]);
+   // La cuenta de cada opción se mide sobre lo que la BÚSQUEDA ya dejó pasar:
+   // es lo que verías al elegirla, no una promesa distinta.
+-  const opciones = filtros.map((f) => ({
+-    id: f.id,
+-    label: f.label,
+-    cuenta: buscados.filter(f.cumple).length,
+-  }));
++  const opciones = useMemo(
++    () =>
++      filtros.map((f) => ({
++        id: f.id,
++        label: f.label,
++        cuenta: buscados.filter(f.cumple).length,
++      })),
++    [filtros, buscados],
++  );
++  const secciones = useMemo<SeccionPersonas[]>(
++    () => (visibles.length > 0 ? [{ clave: 'personas', data: visibles }] : SIN_SECCIONES),
++    [visibles],
++  );
++
++  /** Abrir el perfil: estable, para que las filas no se repinten por él. */
++  const abrirPerfil = useCallback(
++    (u: DriverProfile) =>
++      router.navigate({
++        pathname: '/ver-perfil',
++        params: {
++          userId: u.id,
++          nombre: u.nombre,
++          role: u.role ?? 'conductor',
++          ...(u.email ? { email: u.email } : {}),
++        },
++      }),
++    [router],
++  );
++
++  const renderPersona = useCallback<SectionListRenderItem<DriverProfile, SeccionPersonas>>(
++    ({ item: u, index, section }) => (
++      <FilaPersona
++        u={u}
++        conduce={conduciendo.has(u.id)}
++        falta={conFaltas.has(u.id)}
++        primera={index === 0}
++        ultima={index === section.data.length - 1}
++        indice={index}
++        onPress={abrirPerfil}
++      />
++    ),
++    [conduciendo, conFaltas, abrirPerfil],
++  );
+ 
+   /** El esqueleto solo si la espera se hace notar; si no, entra directo. */
+   const esperaLarga = useTardando(!data, GRACIA_ESQUELETO);
+@@ -166,7 +232,7 @@ export default function AdminPersonalScreen() {
+   // El pulso del personal, sobre lo VISIBLE —como la tira de Flota—. Una cuenta
+   // en cero no es un estado, y va en neutro.
+   const nConduciendo = visibles.filter((u) => conduciendo.has(u.id)).length;
+-  const nFaltas = visibles.filter(faltaA).length;
++  const nFaltas = visibles.filter((u) => conFaltas.has(u.id)).length;
+   const cifras: CifraEstado[] = [
+     { valor: visibles.length, label: visibles.length === 1 ? 'persona' : 'personas' },
+     { valor: nConduciendo, label: 'conduciendo', tono: nConduciendo > 0 ? 'success' : 'textMuted' },
+@@ -225,58 +291,50 @@ export default function AdminPersonalScreen() {
+                 </Card>
+               </View>
+             }>
+-            <ScrollVisible contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: 0, gap: spacing.md }]}>
+-              <Escalonado indice={0}>{titulo}</Escalonado>
+-              <Escalonado indice={1}>
+-                <TiraEstado centrado cifras={cifras} />
+-              </Escalonado>
+-
+-              {/* Buscar y filtrar, con el mismo gesto que el resto de listas.
+-                  Siempre a la vista, aunque todavía no haya nadie. */}
+-              <Escalonado indice={2}>
+-                <BuscadorFiltros
+-                  q={q}
+-                  onChangeQ={setQ}
+-                  placeholder="Buscar por nombre o rol…"
+-                  titulo="Filtrar personas"
+-                  opciones={opciones}
+-                  seleccion={filtro}
+-                  onChange={setFiltro}
+-                />
+-              </Escalonado>
++            {/* Una sola tarjeta con las filas separadas por una línea, como la
++                lista de Flota: una tarjeta por persona era una pila de cajas
++                que había que recorrer de una en una. Virtualizada: con cientos
++                de conductores solo se pintan las filas que se ven. */}
++            <ListaVisible<DriverProfile, SeccionPersonas>
++              sections={secciones}
++              keyExtractor={claveDePersona}
++              renderItem={renderPersona}
++              contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: 0 }]}
++              ListHeaderComponent={
++                // El aire de abajo es el que había entre el buscador y la tarjeta.
++                <View style={{ gap: spacing.md, paddingBottom: visibles.length > 0 ? spacing.md : 0 }}>
++                  <Escalonado indice={0}>{titulo}</Escalonado>
++                  <Escalonado indice={1}>
++                    <TiraEstado centrado cifras={cifras} />
++                  </Escalonado>
+ 
+-              {visibles.length === 0 ? (
+-                <EmptyState title={usuarios.length === 0 ? 'Sin usuarios' : 'Sin resultados'} />
+-              ) : (
+-                // Una sola tarjeta con las filas separadas por una línea, como
+-                // la lista de Flota: una tarjeta por persona era una pila de
+-                // cajas que había que recorrer de una en una.
+-                <Card style={{ padding: 0, overflow: 'hidden' }}>
+-                  {visibles.map((u, i) => (
+-                    // Las primeras filas entran en cascada, solo la primera vez.
+-                    <Escalonado key={u.id} grupo="lista" indice={3 + i}>
+-                    <FilaPersona
+-                      u={u}
+-                      conduce={conduciendo.has(u.id)}
+-                      falta={faltaA(u)}
+-                      primera={i === 0}
+-                      onPress={() =>
+-                        router.navigate({
+-                          pathname: '/ver-perfil',
+-                          params: {
+-                            userId: u.id,
+-                            nombre: u.nombre,
+-                            role: u.role ?? 'conductor',
+-                            ...(u.email ? { email: u.email } : {}),
+-                          },
+-                        })
+-                      }
++                  {/* Buscar y filtrar, con el mismo gesto que el resto de listas.
++                      Siempre a la vista, aunque todavía no haya nadie. */}
++                  <Escalonado indice={2}>
++                    <BuscadorFiltros
++                      q={q}
++                      onChangeQ={setQ}
++                      placeholder="Buscar por nombre o rol…"
++                      titulo="Filtrar personas"
++                      opciones={opciones}
++                      seleccion={filtro}
++                      onChange={setFiltro}
+                     />
+-                    </Escalonado>
+-                  ))}
+-                </Card>
+-              )}
+-            </ScrollVisible>
++                  </Escalonado>
++
++                  {/* La flota pasó del tope de lectura: quién conduce puede quedarse corto. */}
++                  {data?.unidadesIncompletas || vivasIncompletas ? (
++                    <ThemedText variant="caption" color="warning" accessibilityRole="alert">
++                      Lista incompleta: la flota es más grande de lo que se pudo leer, y «conduciendo» puede no contar a todos.
++                    </ThemedText>
++                  ) : null}
++
++                  {visibles.length === 0 ? (
++                    <EmptyState title={usuarios.length === 0 ? 'Sin usuarios' : 'Sin resultados'} />
++                  ) : null}
++                </View>
++              }
++            />
+           </Relevo>
+         )}
+       </SafeAreaView>
+@@ -284,18 +342,24 @@ export default function AdminPersonalScreen() {
+   );
+ }
+ 
++const claveDePersona = (u: DriverProfile) => u.id;
++
+ /**
+  * Una PERSONA: quién es, su rol, si está conduciendo y —solo si le falta algo—
+  * el aviso rojo. Nada más: qué le falta se ve en su perfil.
+  *
+  * El aviso lleva forma además de color (el círculo con el signo), y quien no ve
+  * la pantalla lo oye en la etiqueta de la fila.
++ *
++ * Con `memo`: el refresco de posiciones no repinta a quien no cambió.
+  */
+-function FilaPersona({
++const FilaPersona = memo(function FilaPersona({
+   u,
+   conduce,
+   falta,
+   primera,
++  ultima,
++  indice,
+   onPress,
+ }: {
+   u: DriverProfile;
+@@ -303,7 +367,10 @@ function FilaPersona({
+   conduce: boolean;
+   falta: boolean;
+   primera: boolean;
+-  onPress: () => void;
++  ultima: boolean;
++  /** Su lugar en la lista: las primeras entran en cascada, solo la primera vez. */
++  indice: number;
++  onPress: (u: DriverProfile) => void;
+ }) {
+   const { colors, spacing, radii, borderWidths } = useTheme();
+   const rol = etiquetaRol(u.role ?? 'conductor');
+@@ -312,8 +379,10 @@ function FilaPersona({
+   const conduccion = conduce ? 'Conduciendo' : 'Detenido';
+ 
+   return (
++    <CeldaTarjeta primera={primera} ultima={ultima}>
++    <Escalonado grupo="lista" indice={3 + indice}>
+     <PressableScale
+-      onPress={onPress}
++      onPress={() => onPress(u)}
+       accessibilityRole="button"
+       accessibilityLabel={`${u.nombre}, ${rol}, ${conduccion.toLowerCase()}${falta ? ', le falta documentación' : ''}`}>
+       <View
+@@ -361,8 +430,10 @@ function FilaPersona({
+         <TabIcon name="chevron" color={colors.textMuted} size={16} />
+       </View>
+     </PressableScale>
++    </Escalonado>
++    </CeldaTarjeta>
+   );
+-}
++});
+ 
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+diff --git a/src/components/celda-tarjeta.tsx b/src/components/celda-tarjeta.tsx
+new file mode 100644
+index 0000000..3fab1bc
+--- /dev/null
++++ b/src/components/celda-tarjeta.tsx
+@@ -0,0 +1,84 @@
++import type { ReactNode } from 'react';
++import { View } from 'react-native';
++
++import { useTheme } from '@/theme';
++
++/** Lo que se deja ver la sombra de la tarjeta por los lados (px). */
++const SOMBRA = 24;
++
++type Props = {
++  /** La fila de arriba de la tarjeta: lleva el borde y las esquinas de arriba. */
++  primera: boolean;
++  /** La de abajo: lleva el borde y las esquinas de abajo. */
++  ultima: boolean;
++  /** Sin aire propio por defecto, como `<Card style={{ padding: 0 }}>`. */
++  paddingHorizontal?: number;
++  children: ReactNode;
++};
++
++/**
++ * UN TROZO de `Card`, para las listas virtualizadas.
++ *
++ * Antes cada tramo era una tarjeta con todas sus filas dentro; en una lista que
++ * solo pinta lo que se ve, cada fila es una celda suelta. Esta pieza le pone a
++ * cada fila su parte de la tarjeta —fondo, bordes de los lados, y arriba o
++ * abajo las esquinas— para que juntas se vean como la misma tarjeta de antes.
++ *
++ * La sombra es el truco: si cada trozo llevara la suya, la de una fila caería
++ * encima de la anterior y se vería una raya en cada unión. Por eso el trozo se
++ * recorta por arriba y por abajo (salvo en las puntas), y la caja de dentro
++ * sobresale de ese recorte: así por los lados solo se ve la parte pareja de la
++ * sombra, la que seguiría la tarjeta entera.
++ */
++export function CeldaTarjeta({ primera, ultima, paddingHorizontal = 0, children }: Props) {
++  const { colors, radii, shadows, borderWidths } = useTheme();
++  return (
++    <View
++      style={{
++        overflow: 'hidden',
++        marginHorizontal: -SOMBRA,
++        paddingHorizontal: SOMBRA,
++        // En las puntas el recorte se abre para que asome la sombra de arriba o de abajo.
++        marginTop: primera ? -SOMBRA : 0,
++        paddingTop: primera ? SOMBRA : 0,
++        marginBottom: ultima ? -SOMBRA : 0,
++        paddingBottom: ultima ? SOMBRA : 0,
++      }}>
++      <View
++        style={[
++          {
++            backgroundColor: colors.surface,
++            borderColor: colors.border,
++            borderLeftWidth: borderWidths.thin,
++            borderRightWidth: borderWidths.thin,
++            borderTopWidth: primera ? borderWidths.thin : 0,
++            borderBottomWidth: ultima ? borderWidths.thin : 0,
++            borderTopLeftRadius: primera ? radii.lg : 0,
++            borderTopRightRadius: primera ? radii.lg : 0,
++            borderBottomLeftRadius: ultima ? radii.lg : 0,
++            borderBottomRightRadius: ultima ? radii.lg : 0,
++            // Sobresale del recorte lo que mide la sombra: sus esquinas, que
++            // es donde la sombra se apaga, quedan fuera de la vista.
++            marginTop: primera ? 0 : -SOMBRA,
++            paddingTop: primera ? 0 : SOMBRA,
++            marginBottom: ultima ? 0 : -SOMBRA,
++            paddingBottom: ultima ? 0 : SOMBRA,
++          },
++          shadows.card,
++        ]}>
++        {/* Recorta el contenido a las esquinas, como el `overflow: hidden` de la tarjeta. */}
++        <View
++          style={{
++            overflow: 'hidden',
++            paddingHorizontal,
++            borderTopLeftRadius: primera ? radii.lg : 0,
++            borderTopRightRadius: primera ? radii.lg : 0,
++            borderBottomLeftRadius: ultima ? radii.lg : 0,
++            borderBottomRightRadius: ultima ? radii.lg : 0,
++          }}>
++          {children}
++        </View>
++      </View>
++    </View>
++  );
++}
+diff --git a/src/components/lista-visible.tsx b/src/components/lista-visible.tsx
+new file mode 100644
+index 0000000..f79c547
+--- /dev/null
++++ b/src/components/lista-visible.tsx
+@@ -0,0 +1,162 @@
++import { useCallback, useEffect, useMemo, useRef } from 'react';
++import {
++  Keyboard,
++  Platform,
++  SectionList,
++  StyleSheet,
++  useWindowDimensions,
++  View,
++  type DefaultSectionT,
++  type NativeScrollEvent,
++  type NativeSyntheticEvent,
++  type SectionListProps,
++} from 'react-native';
++
++import { ScrollVisibleContext, type ScrollVisibleCtx } from '@/components/scroll-visible';
++import { useReducedMotion } from '@/theme';
++
++type Ref = React.RefObject<View | null>;
++
++/** Por debajo de esto no se mueve nada: sin ella la lista tiembla con el teclado. */
++const ZONA_MUERTA = 24;
++
++type Props<ItemT, SectionT> = Omit<
++  SectionListProps<ItemT, SectionT>,
++  'onScroll' | 'onLayout' | 'onContentSizeChange'
++> & {
++  /** Aire mínimo alrededor del campo al colocarlo. */
++  margen?: number;
++};
++
++/**
++ * `ScrollVisible` para LISTAS LARGAS: una `SectionList` que solo pinta las filas
++ * que se ven, y que da a lo que lleva dentro —el buscador de la cabecera— el
++ * mismo gesto: al enfocarlo se coloca centrado en el hueco que deja el teclado.
++ *
++ * Con una empresa de 340 unidades, pintar todas las filas en un `ScrollView`
++ * eran 340 filas montadas a la vez y repintadas en cada refresco.
++ *
++ * No hay una caja de contenido contra la que medir (la lista arma la suya), así
++ * que se mide contra la ventana y se suma lo ya desplazado. Basta para un campo
++ * que está en la cabecera y se enfoca con la lista quieta.
++ */
++export function ListaVisible<ItemT, SectionT = DefaultSectionT>({
++  margen = 12,
++  style,
++  ...props
++}: Props<ItemT, SectionT>) {
++  const reducido = useReducedMotion();
++  const { height: altoVentana } = useWindowDimensions();
++  const listaRef = useRef<SectionList<ItemT, SectionT>>(null);
++  const cajaRef = useRef<View>(null);
++  const desplazamiento = useRef(0);
++  const altoCaja = useRef(0);
++  const altoContenido = useRef(0);
++  /** En ref y no en estado: abrir el teclado no debe repintar la lista. */
++  const kbAlto = useRef(0);
++  const ultimoFoco = useRef<Ref | null>(null);
++
++  const alDesplazar = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
++    desplazamiento.current = e.nativeEvent.contentOffset.y;
++  }, []);
++
++  const colocar = useCallback(
++    (ref0: Ref | null, modo: 'centrar' | 'entrar') => {
++      const nodo = ref0?.current;
++      const caja = cajaRef.current;
++      if (!nodo || !caja) return;
++      requestAnimationFrame(() => {
++        caja.measureInWindow((_cx, cy, _cw, ch) => {
++          nodo.measureInWindow((_x, ny, _w, alto) => {
++            // Dónde está el campo dentro del contenido.
++            const y = ny - cy + desplazamiento.current;
++            const ventana = altoCaja.current || ch;
++            const tapado = Math.max(0, cy + ventana - (altoVentana - kbAlto.current));
++            const visible = Math.max(120, ventana - tapado);
++            const cabe = alto + margen * 2 <= visible;
++            const destino = cabe ? y - (visible - alto) / 2 : y - margen;
++            const objetivo =
++              modo === 'centrar' ? destino : Math.max(desplazamiento.current, y + alto + margen - visible);
++            const tope = Math.max(0, altoContenido.current - ventana + kbAlto.current);
++            const final = Math.min(Math.max(0, objetivo), tope);
++            if (Math.abs(final - desplazamiento.current) < ZONA_MUERTA) return;
++            listaRef.current?.getScrollResponder()?.scrollTo({ y: final, animated: !reducido });
++          });
++        });
++      });
++    },
++    [altoVentana, margen, reducido],
++  );
++
++  const centrarCampo = useCallback(
++    (r: Ref) => {
++      ultimoFoco.current = r;
++      colocar(r, 'centrar');
++    },
++    [colocar],
++  );
++  const asegurarVisible = useCallback((r: Ref) => colocar(r, 'entrar'), [colocar]);
++
++  // El teclado, medido como en `ScrollVisible`: `Will` en iOS, `Did` en Android.
++  useEffect(() => {
++    kbAlto.current = Keyboard.isVisible() ? (Keyboard.metrics()?.height ?? 0) : 0;
++    const ios = Platform.OS === 'ios';
++    const abrir = Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', (e) => {
++      const alto = e.endCoordinates?.height ?? 0;
++      const cambio = Math.abs(alto - kbAlto.current);
++      kbAlto.current = alto;
++      if (cambio > 1 && ultimoFoco.current) colocar(ultimoFoco.current, 'centrar');
++    });
++    const cerrar = Keyboard.addListener(ios ? 'keyboardWillHide' : 'keyboardDidHide', () => {
++      kbAlto.current = 0;
++      ultimoFoco.current = null;
++    });
++    return () => {
++      abrir.remove();
++      cerrar.remove();
++    };
++  }, [colocar]);
++
++  // Las listas no tienen campos que validar: saltar a un error no aplica.
++  const valor = useMemo<ScrollVisibleCtx>(
++    () => ({
++      centrarCampo,
++      asegurarVisible,
++      traerAlaVista: centrarCampo,
++      registrarCampo: () => () => {},
++      irAlPrimerError: () => false,
++    }),
++    [centrarCampo, asegurarVisible],
++  );
++
++  return (
++    <ScrollVisibleContext.Provider value={valor}>
++      {/* La misma caja que `ScrollVisible`: se encoge hasta el techo del padre. */}
++      <View ref={cajaRef} collapsable={false} style={styles.caja}>
++        <SectionList<ItemT, SectionT>
++          ref={listaRef}
++          onScroll={alDesplazar}
++          scrollEventThrottle={16}
++          onLayout={(e) => {
++            altoCaja.current = e.nativeEvent.layout.height;
++          }}
++          onContentSizeChange={(_w, h) => {
++            altoContenido.current = h;
++          }}
++          keyboardShouldPersistTaps="handled"
++          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
++          automaticallyAdjustKeyboardInsets
++          showsVerticalScrollIndicator={false}
++          // Los rótulos de tramo se van con el scroll, como antes.
++          stickySectionHeadersEnabled={false}
++          style={style}
++          {...props}
++        />
++      </View>
++    </ScrollVisibleContext.Provider>
++  );
++}
++
++const styles = StyleSheet.create({
++  caja: { flexShrink: 1 },
++});
+diff --git a/src/components/scroll-visible.tsx b/src/components/scroll-visible.tsx
+index 9f6b794..d8555fa 100644
+--- a/src/components/scroll-visible.tsx
++++ b/src/components/scroll-visible.tsx
+@@ -41,6 +41,8 @@ type Modo =
+   /** Que entre entero, moviendo lo mínimo: para paneles altos. */
+   | 'entrar';
+ 
++export type ScrollVisibleCtx = Ctx;
++
+ type Ctx = {
+   /** Coloca el campo CENTRADO en lo que se ve (sube o baja lo que haga falta). */
+   centrarCampo: (ref: Ref) => void;
+@@ -60,7 +62,11 @@ type Ctx = {
+ /** Lo que se puede pedir desde fuera con una ref al propio `ScrollVisible`. */
+ export type ScrollVisibleHandle = Pick<Ctx, 'irAlPrimerError' | 'centrarCampo'>;
+ 
+-const ScrollVisibleContext = createContext<Ctx | null>(null);
++/**
++ * Exportado para que una lista virtualizada (`ListaVisible`) dé lo mismo a los
++ * campos que lleva dentro —el buscador— sin pasar por un `ScrollView`.
++ */
++export const ScrollVisibleContext = createContext<Ctx | null>(null);
+ 
+ const VACIO: Ctx = {
+   centrarCampo: () => {},
+diff --git a/src/hooks/use-flota-fom.ts b/src/hooks/use-flota-fom.ts
+index 671c1cb..5e73b27 100644
+--- a/src/hooks/use-flota-fom.ts
++++ b/src/hooks/use-flota-fom.ts
+@@ -474,6 +474,11 @@ export type FlotaFom = {
+    * a «sin señal»: el verde se quedaba fijo. `null` antes de la primera.
+    */
+   sello: number | null;
++  /**
++   * La flota pasa del tope de páginas (o el servidor no deja paginar): faltan
++   * unidades. Quien pinta debe decirlo en vez de enseñarla como la entera.
++   */
++  incompleta: boolean;
+   /** Vuelve a empezar de cero: sesión, vehículos y posiciones. */
+   recargar: () => void;
+ };
+@@ -491,6 +496,7 @@ export function useFlotaFom(): FlotaFom {
+   const [estado, setEstado] = useState<EstadoFlotaFom>('cargando');
+   const [unidades, setUnidades] = useState<UnidadFom[]>([]);
+   const [desactualizado, setDesactualizado] = useState(false);
++  const [incompleta, setIncompleta] = useState(false);
+   const [ultimaConsulta, setUltimaConsulta] = useState<number | null>(null);
+   /** Cuándo falló el último intento de recarga (ver `sello`). */
+   const [selloFallo, setSelloFallo] = useState<number | null>(null);
+@@ -562,7 +568,8 @@ export function useFlotaFom(): FlotaFom {
+     // al servidor antes de pintar nada—, y ninguna depende de otra.
+     //
+     // El inventario de equipos y el directorio son una consulta por pasada,
+-    // no una por unidad. Si fallan, la flota se enseña sin el dato del equipo o
++    // no una por unidad; quién lleva cada unidad, además, se guarda unos
++    // minutos en su servicio y no se pide en cada vuelta. Si fallan, la flota se enseña sin el dato del equipo o
+     // sin nombres: saber dónde está una unidad vale aunque no se sepa quién la
+     // maneja; al revés, no.
+     //
+@@ -575,7 +582,8 @@ export function useFlotaFom(): FlotaFom {
+     // Lo guardado en el teléfono de otra apertura se lee a la vez (solo la
+     // primera vez por persona y ente): así esta vuelta ya sabe qué unidades
+     // paradas no necesitan su recorrido.
+-    const [{ vehiculos, posiciones: lote, sinPosiciones, respaldo }, equipos, conductores] = await Promise.all([
++    const [{ vehiculos, posiciones: lote, sinPosiciones, respaldo, incompleta: corta, lecturas }, equipos, conductores] =
++      await Promise.all([
+       getFlotaPropiaFom({ fondo }),
+       getEquiposGpsPorVehiculo().catch(() => new Map<string, EquipoGps>()),
+       getConductoresPorVehiculo().catch(() => new Map<string, PersonaFom>()),
+@@ -646,6 +654,7 @@ export function useFlotaFom(): FlotaFom {
+       }),
+     );
+     setUnidades(conPos);
++    setIncompleta(corta);
+     if (respaldo) {
+       // Lo pintado no es la respuesta de ahora (la última lista reciente, o
+       // los vehículos sin posiciones): se dice «desactualizado» y el sello
+@@ -658,8 +667,8 @@ export function useFlotaFom(): FlotaFom {
+     }
+     setEstado('listo');
+     // El ritmo de la vuelta se mide por lo que cuesta: con la lista del ente es
+-    // una lectura aunque la flota tenga 80 unidades.
+-    ultima.current = { en: inicio, lecturas: (lote ? 1 : 0) + sueltas };
++    // una lectura por página de 200 unidades (dos con 340).
++    ultima.current = { en: inicio, lecturas: (lote ? lecturas : 0) + sueltas };
+     // A la cola, y de ella solo una tanda por vuelta (ver `colaHistorial`).
+     for (const n of nuevas) colaHistorial.set(n.id, n.pos);
+     const tanda = siguientesDeCola();
+@@ -745,5 +754,5 @@ export function useFlotaFom(): FlotaFom {
+   }, []);
+ 
+   const sello = desactualizado && selloFallo !== null ? selloFallo : ultimaConsulta;
+-  return { estado, unidades, ahora: sello ?? montadoEn, desactualizado, ultimaConsulta, sello, recargar };
++  return { estado, unidades, ahora: sello ?? montadoEn, desactualizado, ultimaConsulta, sello, incompleta, recargar };
+ }
+diff --git a/src/services/companyService.ts b/src/services/companyService.ts
+index 2bd6107..3ea1459 100644
+--- a/src/services/companyService.ts
++++ b/src/services/companyService.ts
+@@ -15,7 +15,7 @@ import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
+ import { estadoPorDuenio } from '@/utils/vigencia';
+ 
+ import { getVencimientosDeEmpresa } from './driverService';
+-import { getInspeccionesFom, type InspeccionResumen } from './inspeccionService';
++import { getInspeccionesFom, getUltimaInspeccionPorUnidad, type InspeccionResumen } from './inspeccionService';
+ import { esColorDeFlota } from '@/utils/paleta-flota';
+ import { DEFAULT_BRAND } from '@/theme';
+ import { encolar } from '@/sync/outbox';
+@@ -1306,9 +1306,20 @@ export async function getReporte(
+     getVencimientosDeEmpresa(scope.companyId).catch(() => []),
+     opciones.inspecciones === false
+       ? ([] as InspeccionResumen[])
+-      : getInspeccionesFom(unaUnidad ? { vehicleId: unaUnidad, tope: 20 } : { tope: 400 }).catch(
+-          () => [] as InspeccionResumen[],
+-        ),
++      : unaUnidad
++        ? getInspeccionesFom({ vehicleId: unaUnidad, tope: 20 }).catch(() => [] as InspeccionResumen[])
++        : // La última de cada unidad DEL PERÍODO, no «las últimas 400»: con 340
++          // unidades, 400 son un día y pico, y el resto salía «Sin inspección».
++          // Se para en cuanto cada unidad tiene la suya (las unidades salen de
++          // la memoria corta: es la misma lectura de `unidadesReporte`).
++          (async () => {
++            const ids = pedidas ?? (await vehiculosDb(scope.companyId))?.map((f) => f.id) ?? null;
++            const { porUnidad } = await getUltimaInspeccionPorUnidad(ids, {
++              desde: dia(scope.periodo.desde),
++              hasta: dia(scope.periodo.hasta),
++            });
++            return [...porUnidad.values()];
++          })().catch(() => [] as InspeccionResumen[]),
+   ]);
+   const papeles = estadoPorDuenio(vencimientos);
+   // La ÚLTIMA de cada unidad: llegan de la más nueva a la más vieja.
+diff --git a/src/services/fomDirectorio.ts b/src/services/fomDirectorio.ts
+index 5924d88..4a46383 100644
+--- a/src/services/fomDirectorio.ts
++++ b/src/services/fomDirectorio.ts
+@@ -1,10 +1,12 @@
+ import { cedulaDeFom, type IdentificacionFom } from '@/lib/cedula';
++import { generacionLecturas } from '@/lib/fom-api';
+ import { telefonoDeFom } from '@/lib/paises';
+ import type { Company, DriverProfile, PersonaFom, Role, User } from '@/types';
+ 
+ import { getEntesFom } from './fomEntes';
+ import { todoFom } from './fomListas';
+ import { rutaDeEnte } from './fomRutas';
++import { enteActivoFom, usuarioActivoFom } from './fomSesion';
+ 
+ /**
+  * EL DIRECTORIO DEL ENTE: las personas, con lo que hace falta saber de ellas.
+@@ -134,14 +136,53 @@ export async function getDirectorioDeEnteFom(companyId: string): Promise<Persona
+   return filas.filter(vigente).map(aPersona);
+ }
+ 
++/**
++ * Cuánto vale «quién maneja cada unidad». Quién lleva qué cambia poco, y la
++ * flota en vivo lo pedía en cada vuelta de 20 s: con 340 personas eran varias
++ * páginas del directorio por vuelta. Lo que se asigne desde ESTE teléfono se ve
++ * al momento (una escritura sube la generación de las lecturas).
++ */
++const CONDUCTORES_VIGENTE_MS = 5 * 60_000;
++
++/** La última lectura de conductores por unidad, de esta persona en este ente. */
++let conductores: {
++  clave: string;
++  generacion: number;
++  en: number;
++  datos: Promise<Map<string, PersonaFom>>;
++} | null = null;
++
+ /**
+  * Quién maneja cada unidad, indexado por vehículo.
+  *
+  * El directorio viene por PERSONA —cada una con la unidad que lleva—, así que
+  * se da la vuelta. Si dos comparten unidad, manda el principal: el secundario
+  * entra con PIN y es quien releva, no quien responde por ella.
++ *
++ * Se guarda `CONDUCTORES_VIGENTE_MS`, y la lectura en camino se comparte.
+  */
+ export async function getConductoresPorVehiculo(): Promise<Map<string, PersonaFom>> {
++  const clave = `${usuarioActivoFom() ?? ''}|${enteActivoFom() ?? ''}`;
++  const ahora = Date.now();
++  if (
++    conductores &&
++    conductores.clave === clave &&
++    conductores.generacion === generacionLecturas() &&
++    ahora - conductores.en < CONDUCTORES_VIGENTE_MS
++  ) {
++    return new Map(await conductores.datos);
++  }
++  const datos = leerConductoresPorVehiculo();
++  const entrada = { clave, generacion: generacionLecturas(), en: ahora, datos };
++  conductores = entrada;
++  // Un fallo no se guarda: la vuelta siguiente vuelve a preguntar.
++  datos.catch(() => {
++    if (conductores === entrada) conductores = null;
++  });
++  return new Map(await datos);
++}
++
++async function leerConductoresPorVehiculo(): Promise<Map<string, PersonaFom>> {
+   const porVehiculo = new Map<string, PersonaFom>();
+   for (const persona of await getDirectorioFom()) {
+     if (!persona.vehicleId) continue;
+diff --git a/src/services/fomListas.ts b/src/services/fomListas.ts
+index 78595fe..546d18b 100644
+--- a/src/services/fomListas.ts
++++ b/src/services/fomListas.ts
+@@ -16,7 +16,7 @@
+  * `/summary` es la excepción: ese sí devolvió sus ocho campos con nombre.
+  */
+ 
+-import { pedir } from '@/lib/fom-api';
++import { ErrorFom, pedir } from '@/lib/fom-api';
+ 
+ const BASE = '/api/v1/mobile';
+ 
+@@ -62,24 +62,37 @@ export async function paginaFom<T>(
+ /** Cuántos elementos se piden de una vez. El servidor reparte de 50 en 50. */
+ const POR_PAGINA = 50;
+ /**
+- * Tope de páginas por recorrido.
++ * Lo más que el servidor entrega por página (`@Max(200)` en sus listas). Se usa
++ * para el RESTO de una lista larga, cuando la primera página ya dijo el total:
++ * 3000 órdenes eran 60 lecturas de 50, con el cupo de 60 por minuto.
++ */
++const PAGINA_GRANDE = 200;
++/**
++ * Tope de elementos por recorrido.
+  *
+  * Un guardia contra un `total` que no baja: si el servidor devolviera siempre
+  * la misma página, el bucle no terminaría nunca. Cinco mil elementos es más de
+- * lo que ninguna pantalla de la app enseña.
++ * lo que ninguna pantalla de la app enseña; si se llega, la lista se marca
++ * `incompleta` en vez de cortarse en silencio.
+  */
+-const PAGINAS_MAX = 100;
++const ELEMENTOS_MAX = 5000;
++const PAGINAS_MAX = ELEMENTOS_MAX / POR_PAGINA;
+ 
+-/**
+- * Recorre TODAS las páginas de una lista y devuelve lo que haya.
+- *
+- * La app pinta listas completas —una flota, unas áreas—, no páginas, así que la
+- * paginación se resuelve aquí y no en cada pantalla. Para en cuanto una página
+- * viene incompleta: es la señal de que era la última.
+- */
+-export async function todoFom<T>(ruta: string): Promise<T[]> {
+-  const todo: T[] = [];
+-  for (let i = 0; i < PAGINAS_MAX; i++) {
++/** Una lista recorrida entera, o hasta el tope. */
++export interface RecorridoFom<T> {
++  items: T[];
++  /** Se llegó al tope (o el servidor no dejó seguir): hay más del otro lado. */
++  incompleta: boolean;
++}
++
++/** ¿El servidor rechazó la página por sus parámetros (un `limit` que no admite)? */
++function esPaginaRechazada(e: unknown): boolean {
++  return e instanceof ErrorFom && e.statusCode === 400 && e.code !== 'respuesta_no_json';
++}
++
++/** El recorrido de siempre: de 50 en 50 y en fila, mientras lleguen páginas llenas. */
++async function seguirDeAPoco<T>(ruta: string, todo: T[]): Promise<RecorridoFom<T>> {
++  for (let i = Math.ceil(todo.length / POR_PAGINA); i < PAGINAS_MAX; i++) {
+     const { items, page } = await paginaFom<T>(ruta, { limit: POR_PAGINA, offset: todo.length });
+     todo.push(...items);
+     // Una página incompleta es la última. El `total` solo se cree si es mayor
+@@ -87,10 +100,52 @@ export async function todoFom<T>(ruta: string): Promise<T[]> {
+     // elementos, fiarse de él cortaba la lista en la primera página. Sin un
+     // total útil se sigue mientras lleguen páginas llenas; `PAGINAS_MAX` evita
+     // el bucle infinito.
+-    if (items.length < POR_PAGINA) break;
+-    if (page.total > 0 && todo.length >= page.total) break;
++    if (items.length < POR_PAGINA) return { items: todo, incompleta: false };
++    if (page.total > 0 && todo.length >= page.total) return { items: todo, incompleta: false };
+   }
+-  return todo;
++  return { items: todo, incompleta: true };
++}
++
++/**
++ * Recorre TODAS las páginas de una lista y dice si quedó algo fuera.
++ *
++ * La primera página es la de siempre (50, la misma que `enUnaPaginaFom`, así
++ * la memoria corta la comparte). Si trae el `total`, el resto se pide de 200 en
++ * 200 y A LA VEZ: el cupo de `fom-api` ya las pone en fila. Sin total útil, de
++ * 50 en 50 como antes. Un servidor que no admita páginas de 200 (400) también
++ * sigue de 50 en 50.
++ */
++export async function todoFomConAviso<T>(ruta: string): Promise<RecorridoFom<T>> {
++  const primera = await paginaFom<T>(ruta, { limit: POR_PAGINA, offset: 0 });
++  const todo = [...primera.items];
++  const total = primera.page.total;
++  if (todo.length < POR_PAGINA || (total > 0 && todo.length >= total)) return { items: todo, incompleta: false };
++  if (!(total > 0)) return seguirDeAPoco(ruta, todo);
++  const hasta = Math.min(total, ELEMENTOS_MAX);
++  const desplazamientos: number[] = [];
++  for (let offset = todo.length; offset < hasta; offset += PAGINA_GRANDE) desplazamientos.push(offset);
++  let resto: ListaFom<T>[];
++  try {
++    resto = await Promise.all(
++      desplazamientos.map((offset) => paginaFom<T>(ruta, { limit: Math.min(PAGINA_GRANDE, hasta - offset), offset })),
++    );
++  } catch (e) {
++    if (!esPaginaRechazada(e)) throw e;
++    return seguirDeAPoco(ruta, todo);
++  }
++  for (const pagina of resto) todo.push(...pagina.items);
++  return { items: todo, incompleta: total > ELEMENTOS_MAX };
++}
++
++/**
++ * Recorre TODAS las páginas de una lista y devuelve lo que haya.
++ *
++ * La app pinta listas completas —una flota, unas áreas—, no páginas, así que la
++ * paginación se resuelve aquí y no en cada pantalla. Quien necesite saber si
++ * se llegó al tope usa `todoFomConAviso`.
++ */
++export async function todoFom<T>(ruta: string): Promise<T[]> {
++  return (await todoFomConAviso<T>(ruta)).items;
+ }
+ 
+ /**
+diff --git a/src/services/fomVehiculos.ts b/src/services/fomVehiculos.ts
+index f7a2ed2..6858c86 100644
+--- a/src/services/fomVehiculos.ts
++++ b/src/services/fomVehiculos.ts
+@@ -108,11 +108,110 @@ function aPosicion(p: FomPosition): PosicionVehiculo {
+ }
+ 
+ /**
+- * Lo más que FOM entrega de una vez. Si no se pide, entrega 50, y no pagina: una
+- * empresa con 80 unidades salía con 50.
++ * Lo más que FOM entrega de una vez. Si no se pide, entrega 50: una empresa con
++ * 80 unidades salía con 50. Más de 200 van por páginas (`leerTodasLasUnidades`).
+  */
+ const UNIDADES_MAX = 200;
+ 
++/**
++ * Tope de páginas por lectura de la flota: 2000 unidades. Es un guardia, no un
++ * límite de negocio; si se llega, la lista se marca incompleta.
++ */
++const PAGINAS_UNIDADES_MAX = 10;
++
++/** Una página de unidades. `page` llegó con la paginación: un despliegue anterior no lo trae. */
++interface PaginaUnidades<F> {
++  vehicles?: F[];
++  page?: { total?: number } | null;
++}
++
++/** Una lista de unidades recorrida entera, o hasta el tope. */
++interface UnidadesLeidas<F> {
++  filas: F[];
++  /** Cuántas lecturas costó: marca el ritmo de quien la repite sola. */
++  paginas: number;
++  /** Quedaron unidades fuera (tope, o un servidor que no pagina). */
++  incompleta: boolean;
++}
++
++/**
++ * TODAS las unidades de una ruta de lista, de 200 en 200.
++ *
++ * La primera página es la de siempre (`?limit=200`, misma clave en la memoria
++ * corta). Si viene llena y trae el `total`, las que faltan se piden A LA VEZ: el
++ * cupo de `fom-api` ya las pone en fila. Sin total, de una en una mientras
++ * lleguen llenas. Un servidor anterior no admite `offset` (400): se queda la
++ * primera página y la lista sale marcada incompleta, no rota.
++ */
++async function leerTodasLasUnidades<F extends { id: string }>(
++  ruta: string,
++  opciones: { fondo?: boolean },
++): Promise<UnidadesLeidas<F>> {
++  const pagina = (offset: number) =>
++    pedir(`${ruta}?limit=${UNIDADES_MAX}${offset ? `&offset=${offset}` : ''}`, {
++      fondo: opciones.fondo,
++    }) as Promise<PaginaUnidades<F>>;
++  const primera = await pagina(0);
++  const filas = [...(primera.vehicles ?? [])];
++  let paginas = 1;
++  let incompleta = false;
++  if (filas.length >= UNIDADES_MAX) {
++    const total = primera.page?.total ?? 0;
++    const tope = UNIDADES_MAX * PAGINAS_UNIDADES_MAX;
++    try {
++      if (total > 0) {
++        const desplazamientos: number[] = [];
++        for (let o = filas.length; o < Math.min(total, tope); o += UNIDADES_MAX) desplazamientos.push(o);
++        const resto = await Promise.all(desplazamientos.map(pagina));
++        paginas += resto.length;
++        for (const r of resto) filas.push(...(r.vehicles ?? []));
++        incompleta = total > tope;
++      } else {
++        for (let llena = true; llena; ) {
++          if (paginas >= PAGINAS_UNIDADES_MAX) {
++            incompleta = true;
++            break;
++          }
++          const nuevas = (await pagina(filas.length)).vehicles ?? [];
++          paginas += 1;
++          // Un servidor que no pagina repite la primera: seguir sería dar vueltas.
++          if (nuevas[0] && filas.some((f) => f.id === nuevas[0].id)) {
++            incompleta = true;
++            break;
++          }
++          filas.push(...nuevas);
++          llena = nuevas.length >= UNIDADES_MAX;
++        }
++      }
++    } catch (e) {
++      if (!(e instanceof ErrorFom && e.statusCode === 400 && e.code !== 'respuesta_no_json')) throw e;
++      incompleta = true;
++    }
++  }
++  // Una unidad repetida (la flota cambió entre dos páginas) se cuenta una vez.
++  const vistas = new Set<string>();
++  const unicas = filas.filter((f) => !vistas.has(f.id) && !!vistas.add(f.id));
++  return { filas: unicas, paginas, incompleta };
++}
++
++/**
++ * Las listas de unidades que quedaron incompletas (por persona y ente). Para
++ * que la pantalla avise «faltan unidades» en vez de enseñar una flota a medias
++ * como si fuera la entera.
++ */
++const incompletas = new Set<string>();
++
++function anotarIncompleta(companyId: string, incompleta: boolean): void {
++  const clave = claveDeLote(companyId);
++  if (incompleta) incompletas.add(clave);
++  else incompletas.delete(clave);
++}
++
++/** ¿La última lista de unidades de este ente se quedó corta por un tope? */
++export function unidadesIncompletas(companyId: string): boolean {
++  return incompletas.has(claveDeLote(companyId));
++}
++
+ /** Una unidad de otro ente, con lo último que reportó su GPS. */
+ export interface UnidadDeEnte {
+   vehicle: Vehicle;
+@@ -155,7 +254,10 @@ function claveDeLote(companyId: string): string {
+  * La última lista buena de cada ente (por persona y ente), con su hora. Sirve
+  * de respaldo cuando la lista falla por saturación o red: ver `listaOUltima`.
+  */
+-const ultimaLista = new Map<string, { filas: FilaUnidad[]; conPosicion: boolean; en: number }>();
++const ultimaLista = new Map<
++  string,
++  { filas: FilaUnidad[]; conPosicion: boolean; paginas: number; incompleta: boolean; en: number }
++>();
+ 
+ /**
+  * Cuánto vale la última lista como respaldo de las POSICIONES. Corto: una
+@@ -183,14 +285,20 @@ async function listaOUltima(
+   companyId: string,
+   opciones: { fondo?: boolean },
+   vigenciaMs: number,
+-): Promise<{ filas: FilaUnidad[]; conPosicion: boolean; respaldo: boolean } | null> {
++): Promise<{ filas: FilaUnidad[]; conPosicion: boolean; paginas: number; incompleta: boolean; respaldo: boolean } | null> {
+   try {
+     return { ...(await leerListaDeEnte(companyId, opciones)), respaldo: false };
+   } catch (e) {
+     if (esNegacion(e)) return null;
+     const ultima = ultimaLista.get(claveDeLote(companyId));
+     if (ultima && Date.now() - ultima.en < vigenciaMs) {
+-      return { filas: ultima.filas, conPosicion: ultima.conPosicion, respaldo: true };
++      return {
++        filas: ultima.filas,
++        conPosicion: ultima.conPosicion,
++        paginas: ultima.paginas,
++        incompleta: ultima.incompleta,
++        respaldo: true,
++      };
+     }
+     throw e;
+   }
+@@ -215,20 +323,19 @@ export async function getUnidadesDeEnteFom(
+ }
+ 
+ /**
+- * La lista de un ente tal cual, anotando en el lote la posición y el km de
+- * cada unidad. `conPosicion` dice si ESTA respuesta trajo las posiciones.
++ * La lista de un ente tal cual —TODAS sus páginas—, anotando en el lote la
++ * posición y el km de cada unidad. `conPosicion` dice si ESTA respuesta trajo
++ * las posiciones.
+  */
+ async function leerListaDeEnte(
+   companyId: string,
+   opciones: { fondo?: boolean },
+-): Promise<{ filas: FilaUnidad[]; conPosicion: boolean }> {
+-  const peticion = pedir(`/api/v1/mobile/tenants/${companyId}/vehicles?limit=${UNIDADES_MAX}`, {
+-    fondo: opciones.fondo,
+-  }) as Promise<{ vehicles: FilaUnidad[] }>;
++): Promise<{ filas: FilaUnidad[]; conPosicion: boolean; paginas: number; incompleta: boolean }> {
++  const peticion = leerTodasLasUnidades<FilaUnidad>(`/api/v1/mobile/tenants/${companyId}/vehicles`, opciones);
+   loteEnCamino = peticion;
+-  let datos: { vehicles: FilaUnidad[] };
++  let leidas: UnidadesLeidas<FilaUnidad>;
+   try {
+-    datos = await peticion;
++    leidas = await peticion;
+   } catch (e) {
+     if (esNegacion(e)) {
+       loteNegado.add(claveDeLote(companyId));
+@@ -237,13 +344,15 @@ async function leerListaDeEnte(
+   } finally {
+     if (loteEnCamino === peticion) loteEnCamino = null;
+   }
++  const { filas, paginas, incompleta } = leidas;
+   // Un despliegue que no manda la posición en la lista no dice nada de ella:
+   // solo se anota cuando el campo viene, aunque venga en null.
+-  const conPosicion = datos.vehicles.some((v) => 'latestPosition' in v);
++  const conPosicion = filas.some((v) => 'latestPosition' in v);
+   const ahora = Date.now();
+-  ultimaLista.set(claveDeLote(companyId), { filas: datos.vehicles, conPosicion, en: ahora });
++  ultimaLista.set(claveDeLote(companyId), { filas, conPosicion, paginas, incompleta, en: ahora });
++  anotarIncompleta(companyId, incompleta);
+   if (conPosicion) {
+-    for (const v of datos.vehicles) {
++    for (const v of filas) {
+       // El km va con la posición: así el odómetro de cada unidad sale de esta
+       // misma lectura y no de una petición por unidad.
+       lote.set(v.id, {
+@@ -253,7 +362,7 @@ async function leerListaDeEnte(
+       });
+     }
+   }
+-  return { filas: datos.vehicles, conPosicion };
++  return { filas, conPosicion, paginas, incompleta };
+ }
+ 
+ /** Las posiciones de una lista, por id de vehículo. */
+@@ -298,12 +407,17 @@ export async function getPosicionesDeEnteFom(
+  * - `respaldo`: lo que llega no es la respuesta de ahora (es la última lista
+  *   reciente, o `/vehicles` sin posiciones). Quien lo pinta debe decir
+  *   «desactualizado».
++ * - `incompleta`: la flota pasa del tope de páginas; quien la pinta debe
++ *   decir que faltan unidades.
++ * - `lecturas`: cuántas páginas costó la lista (para el ritmo del sondeo).
+  */
+ export async function getFlotaPropiaFom(opciones: { fondo?: boolean } = {}): Promise<{
+   vehiculos: Vehicle[];
+   posiciones: Map<string, PosicionVehiculo | null> | null;
+   sinPosiciones: boolean;
+   respaldo: boolean;
++  incompleta: boolean;
++  lecturas: number;
+ }> {
+   const ente = enteActivoFom();
+   if (ente && !loteNegado.has(claveDeLote(ente))) {
+@@ -316,10 +430,17 @@ export async function getFlotaPropiaFom(opciones: { fondo?: boolean } = {}): Pro
+       // Sin lista ni respaldo reciente: los vehículos de `/vehicles` (una
+       // sola petición), sin posiciones y sin pedirlas una por una. Si esa
+       // también falla, el error de la lista sigue hacia arriba.
+-      const vehiculos = await getVehiculosFom().catch(() => {
++      const propias = await leerVehiculosPropios({}).catch(() => {
+         throw e;
+       });
+-      return { vehiculos, posiciones: null, sinPosiciones: true, respaldo: true };
++      return {
++        vehiculos: propias.vehiculos,
++        posiciones: null,
++        sinPosiciones: true,
++        respaldo: true,
++        incompleta: propias.incompleta,
++        lecturas: propias.paginas,
++      };
+     }
+     if (lista) {
+       return {
+@@ -327,10 +448,20 @@ export async function getFlotaPropiaFom(opciones: { fondo?: boolean } = {}): Pro
+         posiciones: lista.conPosicion ? posicionesDe(lista.filas) : null,
+         sinPosiciones: false,
+         respaldo: lista.respaldo,
++        incompleta: lista.incompleta,
++        lecturas: lista.paginas,
+       };
+     }
+   }
+-  return { vehiculos: await getVehiculosFom(), posiciones: null, sinPosiciones: false, respaldo: false };
++  const propias = await leerVehiculosPropios({});
++  return {
++    vehiculos: propias.vehiculos,
++    posiciones: null,
++    sinPosiciones: false,
++    respaldo: false,
++    incompleta: propias.incompleta,
++    lecturas: propias.paginas,
++  };
+ }
+ 
+ /**
+@@ -359,10 +490,22 @@ export async function posicionDeLote(
+   return (await filaDeLote(vehicleId, vigenciaMs))?.pos;
+ }
+ 
+-/** Vehículos de la empresa en sesión, hasta 200. */
++/** Los vehículos de la empresa en sesión, todas las páginas, anotando si quedó corta. */
++async function leerVehiculosPropios(
++  opciones: { fondo?: boolean },
++): Promise<{ vehiculos: Vehicle[]; paginas: number; incompleta: boolean }> {
++  const { filas, paginas, incompleta } = await leerTodasLasUnidades<FomVehicle>(RUTA, opciones);
++  const ente = enteActivoFom();
++  if (ente) anotarIncompleta(ente, incompleta);
++  return { vehiculos: filas.map(aVehicle), paginas, incompleta };
++}
++
++/**
++ * Vehículos de la empresa en sesión: TODOS, de 200 en 200 (hasta el tope de
++ * `PAGINAS_UNIDADES_MAX`; ver `unidadesIncompletas`).
++ */
+ export async function getVehiculosFom(): Promise<Vehicle[]> {
+-  const datos = (await pedir(`${RUTA}?limit=${UNIDADES_MAX}`)) as { vehicles: FomVehicle[] };
+-  return datos.vehicles.map(aVehicle);
++  return (await leerVehiculosPropios({})).vehiculos;
+ }
+ 
+ /** Un vehículo por id. Lanza si FOM responde 404 (inexistente o de otra empresa). */
+@@ -605,8 +748,11 @@ export async function getUnidadesFom(companyId: string): Promise<UnidadFlota[]>
+     companyId === enteActivoFom() ? getFlotaPropiaFom().then((f) => f.vehiculos) : getVehiculosFom(),
+     getAsignacionesFom().catch(() => [] as AsignacionConductor[]),
+   ]);
++  // Por unidad de una vez: filtrar la lista entera por cada una eran 340 × 340 vueltas.
++  const porUnidad = new Map<string, AsignacionConductor[]>();
++  for (const a of asignaciones) porUnidad.set(a.vehicleId, [...(porUnidad.get(a.vehicleId) ?? []), a]);
+   return vehiculos.map((vehicle) => {
+-    const deLaUnidad = asignaciones.filter((a) => a.vehicleId === vehicle.id);
++    const deLaUnidad = porUnidad.get(vehicle.id) ?? [];
+     // Por la unidad responde su titular; sin titular, quien la tenga autorizada.
+     const principal = deLaUnidad.find((a) => a.rol === 'principal');
+     const conductor = principal ?? deLaUnidad[0];
+diff --git a/src/services/inspeccionService.ts b/src/services/inspeccionService.ts
+index 308c4c0..a74a9b9 100644
+--- a/src/services/inspeccionService.ts
++++ b/src/services/inspeccionService.ts
+@@ -333,6 +333,49 @@ export async function getInspeccionesFom(
+   return filas.map(aResumen);
+ }
+ 
++/**
++ * La ÚLTIMA inspección de cada unidad dentro de un rango de días (AAAA-MM-DD,
++ * ambos incluidos), para la columna «última inspección» de un reporte.
++ *
++ * FOM no filtra por fecha: se lee de la más nueva hacia atrás, de 200 en 200, y
++ * se para en cuanto cada unidad buscada tiene la suya, asoma una de antes de
++ * `desde` o se llega al `tope`. Leer «las últimas 400» dejaba sin inspección a
++ * media flota cuando la flota es grande. `incompleta` dice que se paró por el
++ * tope sin haber encontrado todas.
++ */
++export async function getUltimaInspeccionPorUnidad(
++  vehicleIds: string[] | null,
++  rango: { desde: string; hasta: string },
++  tope = 5000,
++): Promise<{ porUnidad: Map<string, InspeccionResumen>; incompleta: boolean }> {
++  const buscadas = vehicleIds ? new Set(vehicleIds) : null;
++  const porUnidad = new Map<string, InspeccionResumen>();
++  const completo = () => !!buscadas && buscadas.size > 0 && porUnidad.size >= buscadas.size;
++  let incompleta = false;
++  try {
++    for (let offset = 0; !completo(); ) {
++      if (offset >= tope) {
++        incompleta = true;
++        break;
++      }
++      const { items, page } = await paginaFom<FilaInspeccionFom>('/inspections', { limit: 200, offset });
++      for (const f of items) {
++        if (f.inspectionDate > rango.hasta || f.inspectionDate < rango.desde) continue;
++        if (buscadas && !buscadas.has(f.vehicleId)) continue;
++        const previa = porUnidad.get(f.vehicleId);
++        if (!previa || f.inspectionDate > previa.fecha) porUnidad.set(f.vehicleId, aResumen(f));
++      }
++      offset += items.length;
++      if (items.length === 0 || offset >= page.total) break;
++      // Vienen de la más nueva a la más vieja: pasada `desde`, lo que sigue es más viejo.
++      if (items.some((i) => i.inspectionDate < rango.desde)) break;
++    }
++  } catch (e) {
++    throw errorDeInspeccion(e);
++  }
++  return { porUnidad, incompleta };
++}
++
+ /** Una inspección con sus hallazgos, tal como la devuelve FOM. */
+ interface DetalleFom {
+   inspection: FilaInspeccionFom;
 -- 
 2.55.0.windows.3
 

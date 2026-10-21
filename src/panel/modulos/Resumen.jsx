@@ -42,10 +42,14 @@ function cargarContadores() {
   return HAY_API ? api.resumenOperacion().then((r) => r ?? {}) : repo.resumen()
 }
 
-/** Lo que alimenta «Hoy, en orden»: órdenes, avisos e inspecciones. */
+/**
+ * Lo que alimenta «Hoy, en orden»: órdenes, avisos e inspecciones. De las
+ * órdenes solo hacen falta las de hoy: se leen páginas hasta llegar a ayer, no
+ * las ~3.000 de la historia de la empresa.
+ */
 function cargarEventos() {
   return Promise.all([
-    repo.odts.listar(),
+    repo.odts.listar({ desde: f.hoyISO() }),
     repo.alertas.listar(),
     repo.inspecciones.listar(),
   ]).then(([odts, alertas, inspecciones]) => ({ odts, alertas, inspecciones }))

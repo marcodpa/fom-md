@@ -1,4 +1,4 @@
-import { listarTodasOdts } from './listar-odts'
+import { leerTodasLasPaginas, listarTodasOdts } from './listar-odts'
 // ============================================================
 // REPOSITORIO REAL — traduce la API de fom-core a las formas del panel
 // ------------------------------------------------------------
@@ -12,7 +12,7 @@ import { listarTodasOdts } from './listar-odts'
 // "0 km/h" cuando en realidad no sabe la velocidad miente, y nadie se entera.
 // ============================================================
 
-import { api, empresaGestionActualId, pedir } from './api'
+import { api, empresaGestionActualId, escriturasHechas, pedir } from './api'
 import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
@@ -85,9 +85,10 @@ function comoUnidad(v) {
 }
 
 /**
- * Flota completa. Una sola llamada: el estado en vivo viene ya unido en el
- * servidor, así que desaparece la ronda de una petición de posición por unidad
- * que antes hacía este archivo.
+ * Flota completa. El estado en vivo viene ya unido en el servidor; lo que no
+ * cabe es la flota entera en una página: el servidor entrega 200 como máximo,
+ * así que se leen todas las páginas (la primera dice el total y las demás se
+ * piden a la vez). Si se agota el tope de páginas, la lista sale `incompleta`.
  */
 const VENTANA_COMPARTIDA_MS = 3000
 let enVuelo = null
@@ -100,9 +101,12 @@ async function flota(q = '') {
   if (!q && enVuelo && enVueloEmpresa === empresaContexto && ahora - enVueloDesde < VENTANA_COMPARTIDA_MS) {
     return enVuelo
   }
-  const peticion = api.vehiculos({ q })
-    .then((r) => (r?.items ?? []).map(comoUnidad))
-    .then(conPosicionDirecta)
+  const peticion = leerTodasLasPaginas((desplazamiento, limite) => api.vehiculos({ q, limite, desplazamiento }))
+    .then(async (r) => {
+      const lista = await conPosicionDirecta(r.items.map(comoUnidad))
+      if (r.incompleta) lista.incompleta = true
+      return lista
+    })
   if (!q) {
     enVueloDesde = ahora
     enVueloEmpresa = empresaContexto
@@ -115,6 +119,12 @@ async function flota(q = '') {
   }
   return peticion
 }
+
+// Unidades que ya contestaron «sin posición» (o fallaron), y hasta cuándo no se
+// les vuelve a preguntar. Sin esto, cada refresco de 15 s repetía la misma
+// ronda de lecturas para unidades que nunca han reportado.
+const SIN_POSICION_MS = 5 * 60_000
+const sinPosicionHasta = new Map()
 
 /**
  * PUENTE mientras el estado vivo del servidor llega vacío (Issue #169,
@@ -133,8 +143,9 @@ async function conPosicionDirecta(lista) {
   // del servidor manda `lastReportAt` pero NO manda latitud ni longitud, asi
   // que mirar la fecha daba por resuelto lo que seguia sin resolverse: la
   // unidad contaba como «reportando» y el mapa se quedaba sin punto.
+  const ahora = Date.now()
   const sinVivo = lista.filter(
-    (v) => !Number.isFinite(v.lat) || !Number.isFinite(v.lng),
+    (v) => (!Number.isFinite(v.lat) || !Number.isFinite(v.lng)) && !((sinPosicionHasta.get(v.id) ?? 0) > ahora),
   )
   if (sinVivo.length === 0 || sinVivo.length > 25) return lista
   const posiciones = await Promise.all(
@@ -147,7 +158,11 @@ async function conPosicionDirecta(lista) {
     ),
   )
   const porId = new Map()
-  sinVivo.forEach((v, i) => porId.set(v.id, posiciones[i]))
+  sinVivo.forEach((v, i) => {
+    porId.set(v.id, posiciones[i])
+    if (!posiciones[i]) sinPosicionHasta.set(v.id, ahora + SIN_POSICION_MS)
+    else sinPosicionHasta.delete(v.id)
+  })
   return lista.map((v) => {
     const p = porId.get(v.id)
     if (!p) return v
@@ -235,6 +250,53 @@ export async function inspeccionesDelPeriodo({ vehiculoId = '', desde }, pedirPa
     if (items.size === antes) throw new Error('No se pudieron leer todas las inspecciones del mes: el servidor repitió una página. Vuelve a intentarlo.')
   }
   return { items: [...items.values()], incompleta: true }
+}
+
+/**
+ * Asignaciones vigentes de conductores, TODAS las páginas. Cambian poco y la
+ * flota se refresca cada 15–30 s: se guardan 5 minutos por empresa en vez de
+ * pedirlas en cada vuelta. Cualquier escritura del panel (asignar, quitar,
+ * transferir…) las da por viejas, y `fresco` obliga a leerlas de nuevo.
+ */
+const ASIGNACIONES_MS = 5 * 60_000
+let asignacionesGuardadas = null
+
+export function asignacionesVigentes({ fresco = false } = {}) {
+  const empresa = empresaGestionActualId()
+  const escrituras = escriturasHechas()
+  const g = asignacionesGuardadas
+  if (!fresco && g && g.empresa === empresa && g.escrituras === escrituras && Date.now() - g.desde < ASIGNACIONES_MS) {
+    return g.peticion
+  }
+  const peticion = leerTodasLasPaginas(
+    (desplazamiento, limite) => api.conductores({ desplazamiento, limite }),
+    { clave: (c) => c?.assignmentId, repetida: 'El servidor repitió una página de asignaciones. Vuelve a intentarlo.' },
+  ).then((r) => r.items)
+  const guardada = { empresa, escrituras, desde: Date.now(), peticion }
+  asignacionesGuardadas = guardada
+  // Un fallo no se guarda: el siguiente intento sale de verdad al servidor.
+  peticion.catch(() => { if (asignacionesGuardadas === guardada) asignacionesGuardadas = null })
+  return peticion
+}
+
+/**
+ * Para listas que llegan de la más nueva a la más vieja: corta cuando la última
+ * leída es anterior a `corte`. Solo si lo leído viene de verdad en orden de
+ * creación; si aparece una más nueva después de una más vieja (el servidor
+ * ordena por otra fecha), se sigue leyendo todo para no perder ninguna.
+ */
+function pararAntesDe(corte, fecha = (o) => o.createdAt) {
+  let enOrden = true
+  let previa = Infinity
+  return (pagina) => {
+    for (const o of pagina) {
+      const t = Date.parse(fecha(o) ?? '')
+      if (!Number.isFinite(t)) continue
+      if (t > previa) enOrden = false
+      previa = t
+    }
+    return enOrden && previa < corte
+  }
 }
 
 function conductoresPorVehiculo(lista) {
@@ -502,11 +564,11 @@ export const repoApi = {
         flota(q),
         // Los conductores no son imprescindibles para pintar el mapa: si esa
         // llamada falla, la flota se muestra igual y sin nombre en vez de no
-        // mostrarse.
-        api.conductores().then((r) => r?.items ?? []).catch(() => []),
+        // mostrarse. Salen de lo guardado (5 min), no de un pedido por refresco.
+        asignacionesVigentes().catch(() => []),
       ])
       const porVehiculo = conductoresPorVehiculo(conductores)
-      return lista
+      const salida = lista
         .filter(v => !areaId || v.areaId === areaId)
         .map((v) => {
           const c = porVehiculo.get(v.id)
@@ -515,28 +577,21 @@ export const repoApi = {
             : v
         })
         .sort((a, b) => a.alias.localeCompare(b.alias))
+      // La pantalla avisa si la flota no se pudo leer entera.
+      if (lista.incompleta) salida.incompleta = true
+      return salida
     },
 
-    /** Recorrer el directorio paginado: la unidad puede estar después de los primeros 200 registros. */
+    /** Todas las asignaciones (todas las páginas): la unidad puede estar después de los primeros 200 registros. */
     async usuariosAsignados(id) {
-      const asignaciones = []
-      const vistos = new Set()
-      let desplazamiento = 0
-      while (true) {
-        const r = await api.conductores({ desplazamiento })
-        const items = r?.items ?? []
-        if (!items.length) break
-        const nuevos = items.filter(c => !vistos.has(c.assignmentId))
-        if (!nuevos.length) throw new Error('El servidor repitió una página de asignaciones. Vuelve a intentarlo.')
-        nuevos.forEach(c => vistos.add(c.assignmentId))
-        asignaciones.push(...nuevos.filter(c => c.vehicleId === id).map(c => ({
+      const asignaciones = await asignacionesVigentes()
+      return asignaciones
+        .filter(c => c.vehicleId === id)
+        .map(c => ({
           id: c.userId, nombre: c.displayName, rol: c.role,
           asignacionId: c.assignmentId, desde: c.validFrom ?? null,
-        })))
-        desplazamiento += items.length
-        if (r?.page?.total != null ? desplazamiento >= r.page.total : items.length < 200) break
-      }
-      return asignaciones.sort((a, b) => (a.rol === 'principal' ? 0 : 1) - (b.rol === 'principal' ? 0 : 1))
+        }))
+        .sort((a, b) => (a.rol === 'principal' ? 0 : 1) - (b.rol === 'principal' ? 0 : 1))
     },
 
     async obtener(id) {
@@ -549,7 +604,8 @@ export const repoApi = {
       // sin mapa.
       const [documentos, odts, inspecciones] = await Promise.all([
         repoApi.documentos.listar({ vehiculoId: id }).catch(() => []),
-        repoApi.odts.listar().then((l) => l.filter((o) => o.vehiculoId === id)).catch(() => []),
+        // Solo las de esta unidad, filtradas por el servidor (`vehicleId`), no las ~3.000 de la empresa.
+        repoApi.odts.listar({ vehiculoId: id }).then((l) => l.filter((o) => o.vehiculoId === id)).catch(() => []),
         repoApi.inspecciones.listar({ vehiculoId: id }).catch(() => []),
       ])
       // La ficha del servidor no trae al conductor: vive en las asignaciones.
@@ -657,11 +713,11 @@ export const repoApi = {
       }
   },
 
-  /** Conductores con asignación vigente. Sin cédula ni teléfono: ver #168. */
+  /** Conductores con asignación vigente (todas las páginas, guardadas 5 min). Sin cédula ni teléfono: ver #168. */
   async conductores() {
     try {
-      const r = await api.conductores()
-      return (r?.items ?? []).map((c) => ({
+      const items = await asignacionesVigentes()
+      return items.map((c) => ({
         id: c.userId,
         nombre: c.displayName,
         rol: c.role,
@@ -705,7 +761,8 @@ export const repoApi = {
       if (!p) return null
       const [insp, odts, docs, manejo] = await Promise.allSettled([
         repoApi.inspecciones.listar({}),
-        repoApi.odts.listar({}),
+        // Un conductor con unidad: solo las órdenes de esa unidad (filtro del servidor). Sin unidad, todas.
+        repoApi.odts.listar(p.conduce && p.unidad ? { vehiculoId: p.unidad } : {}),
         repoApi.documentos.listar({ ambito: 'persona' }),
         p.conduce ? repoApi.manejo.ranking({ dias: 28 }) : Promise.resolve([]),
       ])
@@ -1176,7 +1233,8 @@ export const repoApi = {
       if (!userId) {
         // Quitar = REVOCAR la asignación vigente, con fecha y rastro, que es
         // el paso de la app. Se busca la asignación abierta de la unidad.
-        const vigentes = await api.conductores().then((r) => (r?.items ?? []).filter((c) => c.vehicleId === id))
+        // Antes de escribir, lo vigente de verdad: todas las páginas y sin lo guardado.
+        const vigentes = await asignacionesVigentes({ fresco: true }).then((l) => l.filter((c) => c.vehicleId === id))
         if (vigentes.length === 0) return true
         const principal = vigentes.find((c) => c.role === 'principal') ?? vigentes[0]
         await api.revocarAsignacion(principal.assignmentId, { reason: 'quitado-desde-consola' })
@@ -1289,9 +1347,15 @@ export const repoApi = {
       })
       return { estado: r?.workOrder?.status ?? null }
     },
-    async listar({ estado = '', q = '' } = {}) {
+    /**
+     * Con `vehiculoId`, solo las de esa unidad (lo filtra el servidor). Con
+     * `desde` (AAAA-MM-DD), solo las creadas desde ese día: se leen páginas
+     * mientras sigan siendo de ese día o posteriores.
+     */
+    async listar({ estado = '', q = '', vehiculoId = '', desde = '' } = {}) {
       try {
-        const r = { items: await listarTodasOdts(api, { estado }) }
+        const corte = desde ? new Date(`${desde}T00:00:00`).getTime() : null
+        const r = { items: await listarTodasOdts(api, { estado, vehiculoId }, { parar: corte == null ? null : pararAntesDe(corte) }) }
         let lista = (r?.items ?? []).map((o) => ({
           id: o.id,
           estado: o.status,
@@ -1314,11 +1378,13 @@ export const repoApi = {
           creadorNombre: o.createdByName || 'Sistema',
           creadorId: o.createdByUserId ?? null,
         }))
+        if (corte != null) lista = lista.filter((o) => Date.parse(o.creadaEn) >= corte)
         if (q) {
           const t = q.toLowerCase()
           lista = lista.filter((o) =>
             [o.descripcion, o.vehiculoNombre].join(' ').toLowerCase().includes(t))
         }
+        if (r.items.incompleta) lista.incompleta = true
         return lista
       } catch (error) {
         throw error
@@ -1417,10 +1483,14 @@ export const repoApi = {
       const hoy = hoyISO()
       const [flota, hechas] = await Promise.all([
         repoApi.vehiculos.listar(),
-        repoApi.inspecciones.listar({}),
+        // El día completo (desde las 00:00), no las últimas 100: con una flota
+        // grande, las de la mañana quedaban fuera y esas unidades salían «sin la diaria».
+        repoApi.inspecciones.listar({ desde: hoy, hasta: hoy }),
       ])
       const revisadas = new Set(hechas.filter((i) => String(i.fecha ?? '').slice(0, 10) === hoy).map((i) => i.vehiculoId))
-      return flota.filter((v) => !revisadas.has(v.id))
+      const faltan = flota.filter((v) => !revisadas.has(v.id))
+      if (hechas.incompleta || flota.incompleta) faltan.incompleta = true
+      return faltan
     },
     /**
      * Con `desde`/`hasta` (YYYY-MM-DD) se lee el periodo entero: el servidor no
