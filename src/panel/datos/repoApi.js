@@ -393,6 +393,59 @@ function puntosDe(filas) {
     .reverse())
 }
 
+/** Un equipo GPS del servidor dicho como lo usa el panel (inventario y detalle). */
+function comoEquipoGps(d) {
+  return {
+    id: d.id,
+    imei: d.imei,
+    modelo: d.model,
+    fabricante: d.manufacturer ?? null,
+    protocolo: d.protocolFamily,
+    linea: d.simPhone ?? null,
+    simPhone: d.simPhone ?? null,
+    iccid: d.iccid ?? null,
+    carrier: d.carrier ?? null,
+    apn: d.apn ?? null,
+    simStatus: d.simStatus ?? null,
+    simPlan: d.simPlan ?? null,
+    firmwareVersion: d.firmwareVersion ?? null,
+    transport: d.transport ?? null,
+    estado: d.status,
+    // «Verificado» = el receptor ya lo oyó alguna vez. Es informativo: el servidor deja instalar
+    // cualquier equipo en inventario, haya reportado o no.
+    verificado: Boolean(d.connected || d.lastConnectionAt),
+    conectado: Boolean(d.connected),
+    ultimaConexion: d.lastConnectionAt ?? null,
+    panicoProbado: false,
+    empresaNombre: '—',
+    vehiculoId: d.vehicleId ?? null,
+    vehiculoNombre: d.vehicleId ? [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') : null,
+    vehiculoPlaca: d.vehiclePlate ?? null,
+    ubicacion: d.storageLocation ?? null,
+    serie: d.serialNumber ?? null,
+    pinSupport: Boolean(d.panicSupported ?? d.pinSupport),
+    instalacionId: d.installationId ?? d.activeInstallationId ?? d.installation?.id ?? null,
+    instaladoEn: d.installedAt ?? null,
+    tecnico: d.technician ?? null,
+    ubicacionInstalacion: d.installationLocation ?? null,
+  }
+}
+
+/** Una posición de un equipo (`position/latest` y `positions`). */
+function comoPosicionGps(p) {
+  return {
+    id: p.id,
+    recibido: p.receivedAt,
+    hora: p.eventTime || p.receivedAt,
+    lat: Number(p.latitude),
+    lng: Number(p.longitude),
+    valida: Boolean(p.quality?.positionValid),
+    velocidad: p.telemetry?.speedKph ?? null,
+    rumbo: p.telemetry?.headingDeg ?? null,
+    encendido: p.telemetry?.ignition ?? null,
+  }
+}
+
 export const repoApi = {
   /**
    * Score de manejo del conductor en sesión. El servidor aún no lo entrega (pendiente en #631/Issue de manejo):
@@ -786,7 +839,11 @@ export const repoApi = {
         p.conduce ? repoApi.manejo.ranking({ dias: 7 }) : Promise.resolve([]),
       ])
       const inspecciones = coleccionDePersona(insp, p.userId, ['conductorId'])
-      const ordenes = coleccionDePersona(odts, p.userId, ['creadorId'])
+      // Las preventivas las abre el sistema por km o fecha: no tienen quien las reporte y no son de nadie,
+      // así que no impiden contar las que sí abrió esta persona.
+      const sinAutomaticas = odts.status === 'fulfilled' && Array.isArray(odts.value)
+        ? { ...odts, value: odts.value.filter(o => o.creadorId || o.tipo !== 'preventiva') } : odts
+      const ordenes = coleccionDePersona(sinAutomaticas, p.userId, ['creadorId'])
       const documentos = coleccionDePersona(docs, p.userId, ['personaId', 'titularId'])
       const score = manejo.status === 'fulfilled' ? manejo.value.find(s => s.id === p.userId) : null
       const credenciales = credencialesVigentes(p.credenciales)
@@ -1021,37 +1078,110 @@ export const repoApi = {
       const r = await api.equiposGps()
       const t = q.trim().toLowerCase()
       return (r?.devices ?? [])
-        .map((d) => ({
-          id: d.id,
-          imei: d.imei,
-          modelo: d.model,
-          fabricante: d.manufacturer ?? null,
-          protocolo: d.protocolFamily,
-          linea: d.simPhone ?? null,
-          simPhone: d.simPhone ?? null,
-          iccid: d.iccid ?? null,
-          carrier: d.carrier ?? null,
-          apn: d.apn ?? null,
-          simStatus: d.simStatus ?? null,
-          simPlan: d.simPlan ?? null,
-          firmwareVersion: d.firmwareVersion ?? null,
-          transport: d.transport ?? null,
-          estado: d.status,
-          // «Verificado» = el receptor ya lo oyó alguna vez. Es informativo: el servidor deja instalar
-          // cualquier equipo en inventario, haya reportado o no.
-          verificado: Boolean(d.connected || d.lastConnectionAt),
-          conectado: Boolean(d.connected),
-          ultimaConexion: d.lastConnectionAt ?? null,
-          panicoProbado: false,
-          empresaNombre: '—',
-          vehiculoId: d.vehicleId ?? null,
-          vehiculoNombre: d.vehicleId ? [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') : null,
-          ubicacion: d.storageLocation ?? null,
-          serie: d.serialNumber ?? null,
-          pinSupport: Boolean(d.panicSupported ?? d.pinSupport),
-          instalacionId: d.installationId ?? d.activeInstallationId ?? d.installation?.id ?? null,
-        }))
+        .map(comoEquipoGps)
         .filter((g) => !t || [g.imei, g.modelo, g.linea, g.vehiculoNombre].some((v) => String(v ?? '').toLowerCase().includes(t)))
+    },
+    /** Un equipo, con su instalación vigente (`GET gps-devices/:id`). */
+    async obtener(equipoId) {
+      const r = await api.equipoGps(equipoId)
+      return r?.device ? comoEquipoGps(r.device) : null
+    },
+    /**
+     * Las últimas tramas del equipo, ya saneadas por el servidor: hora, vía,
+     * tamaño y lectura. La huella SHA-256 solo llega si el servidor la manda.
+     */
+    async telemetria(equipoId, { limite = 50 } = {}) {
+      const r = await api.telemetriaGps(equipoId, limite)
+      return {
+        conectado: Boolean(r?.connected),
+        imei: r?.imei ?? null,
+        ultimaRecepcion: r?.lastReceivedAt ?? null,
+        frescuraS: Number(r?.freshnessSeconds) || 300,
+        mensajes: (r?.messages ?? []).map((m) => ({
+          id: m.id,
+          recibido: m.receivedAt,
+          via: String(m.transport ?? '').toUpperCase(),
+          bytes: m.bytes ?? null,
+          diagnostico: m.diagnostic ?? '',
+          fresco: Boolean(m.isFresh),
+          imeiCoincide: m.imeiMatches ?? true,
+          huella: m.sha256 ?? null,
+        })),
+      }
+    },
+    async ultimaPosicion(equipoId) {
+      const r = await api.ultimaPosicionGps(equipoId)
+      return r?.position ? comoPosicionGps(r.position) : null
+    },
+    async posiciones(equipoId, { limite = 50 } = {}) {
+      const r = await api.posicionesGps(equipoId, limite)
+      return (r?.positions ?? []).map(comoPosicionGps)
+    },
+    /** Qué sabe hacer el equipo (pánico, PIN, encendido); `null` = sin confirmar. */
+    async capacidades(equipoId) {
+      const r = await api.capacidadesGps(equipoId)
+      const c = r?.capabilities ?? {}
+      return {
+        panico: c.supportsPanicButton ?? null,
+        pin: c.supportsDriverPin ?? null,
+        encendido: c.supportsIgnitionSense ?? null,
+        verificadasEn: c.verifiedAt ?? null,
+      }
+    },
+    /** Abre (o retoma) la prueba de señal. El servidor la abre solo con el equipo instalado. */
+    async iniciarPrueba(equipoId) {
+      const r = await api.iniciarPruebaGps(equipoId)
+      return { sesionId: r?.id ?? null, existente: Boolean(r?.existing) }
+    },
+    /** Cierra la prueba: aprobada activa el equipo; fallida lo deja en el inventario con su historial. */
+    async completarPrueba(sesionId, { aprobada, motivo, notas } = {}) {
+      const r = await api.completarPruebaGps(sesionId, {
+        status: aprobada ? 'passed' : 'failed',
+        ...(aprobada ? {} : { failureCode: motivo || 'manual_failure' }),
+        ...(notas?.trim() ? { notes: notas.trim() } : {}),
+      })
+      return {
+        estado: r?.status ?? null,
+        estadoEquipo: r?.deviceStatus ?? null,
+        huella: r?.sha256 ?? null,
+        ultimaRecepcion: r?.lastReceivedAt ?? null,
+      }
+    },
+    /** Unidades de una empresa para instalar, marcando las que ya llevan un equipo de este inventario. */
+    async unidadesDe(empresaId) {
+      const [paginas, equipos] = await Promise.all([
+        leerTodasLasPaginas((desplazamiento, limite) => api.vehiculos({ enteId: empresaId, limite, desplazamiento })),
+        api.equiposGps().then((r) => r?.devices ?? []).catch(() => []),
+      ])
+      const porUnidad = new Map(equipos.filter((d) => d.vehicleId).map((d) => [d.vehicleId, d]))
+      return paginas.items.map((v) => {
+        const d = porUnidad.get(v.id)
+        return {
+          id: v.id,
+          alias: v.alias || v.fleetNumber || v.code || 'Sin nombre',
+          placa: v.plate || '',
+          marca: v.make || '',
+          modelo: v.model || '',
+          anio: v.modelYear ?? null,
+          conductorNombre: null,
+          gps: d ? { id: d.id, imei: d.imei } : null,
+        }
+      })
+    },
+    /** Instala el equipo en la unidad elegida, por la ruta de su empresa si no es la propia. */
+    async instalar(equipoId, { vehiculoId, empresaId = null, tecnico, ubicacion, notas } = {}) {
+      try {
+        await api.instalarEquipoGps(equipoId, {
+          vehicleId: vehiculoId,
+          technician: tecnico?.trim() || undefined,
+          installationLocation: ubicacion?.trim() || undefined,
+          notes: notas?.trim() || undefined,
+        }, empresaId)
+      } catch (e) {
+        if (e.estado === 409) throw new Error('Esa unidad ya lleva un GPS, o este equipo ya está instalado en otra.')
+        throw e
+      }
+      return true
     },
     async registrar({ imei, modelo, protocolo, fabricante, serie, linea, ...metadata }) {
       const r = await api.registrarEquipoGps({
@@ -1062,7 +1192,7 @@ export const repoApi = {
         serialNumber: serie || undefined,
         ...cambiosGps({ ...metadata, simPhone: linea || metadata.simPhone }),
       })
-      return { id: r?.gpsDevice?.id ?? null }
+      return { id: r?.gpsDevice?.id ?? r?.device?.id ?? r?.id ?? null }
     },
     async asociar(equipoId, vehiculoId, notas, { tecnico, ubicacion } = {}) {
       await api.instalarEquipoGps(equipoId, {
@@ -2238,6 +2368,7 @@ repoApi.gpsEscritura.sinEmparejar = async function sinEmparejar() {
     mensajes: d.messageCount,
     transporte: d.transport,
     reportando: Boolean(d.isReporting),
+    bytesUltimo: d.lastMessageBytes ?? null,
   }))
 }
 
