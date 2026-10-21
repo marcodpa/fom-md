@@ -170,7 +170,7 @@
 .mnt-grupo-cab.ambar>span{color:var(--e-aviso)}
 .mnt-grupo-cab>i{flex:1;height:1px;background:linear-gradient(90deg,var(--e-borde),transparent)}
 .mnt-grupo-cab>b{font-size:12px;letter-spacing:0;font-variant-numeric:tabular-nums;color:var(--e-texto-2)}
-.mnt-tarjeta{--tono:var(--e-texto-2);min-width:0;overflow:hidden;border-radius:24px;border:1px solid color-mix(in srgb,var(--tono) 24%,var(--e-borde));background:linear-gradient(90deg,color-mix(in srgb,var(--tono) 9%,transparent),transparent 110px),var(--e-sup)}
+.mnt-tarjeta{--tono:var(--e-texto-2);min-width:0;overflow:hidden;border-radius:24px;border:1px solid color-mix(in srgb,var(--tono) 24%,var(--e-borde));background:linear-gradient(90deg,color-mix(in srgb,var(--tono) 12%,transparent),transparent 85%),var(--e-sup)}
 .mnt-tarjeta.ambar{--tono:var(--e-aviso)}.mnt-tarjeta.azul{--tono:var(--e-info)}.mnt-tarjeta.verde{--tono:var(--e-exito)}.mnt-tarjeta.rojo{--tono:var(--e-peligro)}
 .mnt-tarjeta.apagada>.mnt-tarjeta-toque{opacity:.75}
 .mnt-root .mnt-tarjeta-toque{display:grid;gap:10px;width:100%;padding:16px;border:0;border-radius:24px;background:none;color:inherit;font:inherit;text-align:left}
