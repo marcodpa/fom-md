@@ -1,0 +1,93 @@
+/* Funciones v8 (T-106): solo lo propio de esta página; lo común vive en components/v8/v8-base.css. */
+
+/* Hero: la nota de vidrio va un poco más arriba que en Inicio (18 % en el tablero). */
+.funciones-hero .v8-hero-medio .v8-nota-vidrio { bottom: 18%; padding: 12px 22px; }
+.funciones-hero .v8-nota-vidrio b { font-size: 14px; }
+
+/* GPS: texto a la izquierda, foto de la operadora a la derecha. */
+.v8-sec.funciones-gps { padding-top: 120px; }
+.funciones-gps-rejilla {
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 56px;
+  grid-template-areas: 'cab foto' 'lista foto'; align-items: center;
+}
+.funciones-gps-cab { grid-area: cab; align-self: end; }
+.funciones-gps-cab .v8-lead { margin-top: 20px; }
+.funciones-gps-foto { grid-area: foto; }
+.funciones-gps-lista { grid-area: lista; align-self: start; display: grid; gap: 14px; margin-top: 28px; }
+.funciones-gps-lista-movil { display: none; }
+
+/* Telemática */
+.funciones-telematica-foto { width: 82%; margin: 24px auto 0; }
+.funciones-telematica-cajas.is-escritorio { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 8px; }
+.funciones-telematica-cajas.is-movil { display: none; }
+.funciones-telematica-cajas .v8-h4 { margin-bottom: 8px; }
+
+/* Del aviso a la decisión: pasos a la izquierda, captura real en vidrio a la derecha. */
+.funciones-aviso-escena {
+  display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; align-items: center; margin-top: 56px;
+}
+.funciones-ancla { position: absolute; top: 0; left: 0; width: 1px; height: 1px; pointer-events: none; }
+.funciones-aviso-pestanas { margin-bottom: 16px; }
+.funciones-aviso-pila { display: grid; }
+.funciones-aviso-cap { grid-area: 1 / 1; opacity: 0; pointer-events: none; transition: opacity .5s var(--v8-ease); }
+.funciones-aviso-cap.is-activa { opacity: 1; pointer-events: auto; }
+.funciones-aviso-cap .v8-captura-figura { width: 100%; }
+.funciones-aviso-movil { display: none; }
+
+/* Reportes */
+.funciones-reportes-lead { margin-top: 20px; }
+.funciones-reportes-cifra { margin-top: 28px; }
+
+/* Cierre */
+.v8-sec.funciones-cierre { padding-top: 20px; }
+
+/* Tableta: composiciones apiladas. */
+@media (max-width: 1023px) {
+  .funciones-telematica-cajas.is-escritorio { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 899px) {
+  .v8-sec.funciones-gps { padding-top: 72px; }
+  .funciones-gps-rejilla { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'cab' 'foto' 'lista'; }
+  .funciones-gps-foto { margin-top: 24px; }
+  .funciones-telematica-foto { width: 100%; }
+  .funciones-aviso-escena { grid-template-columns: minmax(0, 1fr); gap: 32px; margin-top: 40px; }
+}
+
+/* Teléfono: lo del tablero móvil, sin escenas fijas y con los teléfonos apilados. */
+@media (max-width: 599px) {
+  .funciones-hero .v8-hero-medio .v8-nota-vidrio { display: none; }
+  .funciones-hero .v8-hero-medio .v8-foto { height: 440px; }
+
+  .v8-sec.funciones-gps { padding-top: 24px; }
+  .funciones-gps-rejilla { padding: 0; }
+  .funciones-gps-cab { padding: 0 var(--v8-margen); }
+  .funciones-gps-foto { margin-top: 16px; height: 380px; object-fit: cover; object-position: 30% 50%;
+    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent); }
+  .funciones-gps-lista { display: none; }
+  .funciones-gps-lista-movil { grid-area: lista; display: grid; gap: 22px; margin-top: 8px; padding: 0 var(--v8-margen); }
+  .funciones-gps-lista-movil .v8-h4 { margin-bottom: 2px; }
+
+  .funciones-telematica-cab.is-centro { text-align: left; }
+  .funciones-telematica-foto { margin-top: 16px; }
+  .funciones-telematica-cajas.is-escritorio { display: none; }
+  .funciones-telematica-cajas.is-movil { display: grid; gap: 12px; }
+  .funciones-telematica-cajas .v8-h4 { margin-bottom: 2px; }
+
+  .funciones-aviso-cab.is-centro { text-align: left; }
+  .funciones-aviso-escena { display: none; }
+  .funciones-aviso-movil { display: block; }
+  .funciones-saltos { display: flex; gap: 8px; margin-top: 20px; padding: 0 var(--v8-margen); overflow-x: auto; scrollbar-width: none; }
+  .funciones-saltos::-webkit-scrollbar { display: none; }
+  .v8-site .funciones-saltos .v8-pestana { color: var(--v8-texto-2); padding: 0 14px; }
+  .v8-site .funciones-saltos .v8-pestana:hover { color: var(--v8-texto); }
+  .funciones-movil-item { margin-top: 24px; }
+  .funciones-movil-item + .funciones-movil-item { margin-top: 36px; }
+  .funciones-movil-item .v8-c { margin-top: 24px; }
+  .funciones-movil-item .v8-h4 { margin-bottom: 4px; }
+
+  .funciones-reportes .v8-escena-texto { margin-top: -30px; }
+  .funciones-reportes-cifra { margin-top: 20px; }
+
+  .funciones-boton-movil { margin-top: 32px; }
+}

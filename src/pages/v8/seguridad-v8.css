@@ -1,0 +1,136 @@
+/* Seguridad v8 (T-106): solo lo propio de esta página; lo común vive en components/v8/v8-base.css. */
+
+/* Hero: foto de la cabina a sangre y el texto encima, a la izquierda. */
+.seguridad-hero { position: relative; }
+.seguridad-hero-foto .v8-foto { min-height: 640px; object-fit: cover; object-position: 50% 50%; }
+.v8-c.seguridad-hero-texto { position: absolute; inset: 0; display: flex; align-items: center; }
+.seguridad-hero-caja { max-width: 600px; }
+.seguridad-hero .v8-lead { margin-top: 20px; }
+.seguridad-hero .v8-acciones { margin-top: 32px; }
+
+/* Detección de eventos */
+.v8-sec.seguridad-eventos { padding-top: 120px; }
+.seguridad-eventos-captura { margin-top: 56px; }
+.seguridad-eventos-captura .is-telefono-movil { display: none; }
+.seguridad-eventos-cajas.is-escritorio { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; margin-top: 48px; }
+.seguridad-eventos-cajas.is-movil { display: none; }
+.seguridad-eventos-cajas .v8-h4 { margin-bottom: 8px; }
+.seguridad-eventos-cifra { margin-top: 48px; text-align: center; }
+
+/* Cifras con etiqueta larga (escritorio) y corta (teléfono). */
+.v8-cifra span.seguridad-cifra-larga { display: inline; margin: 0; font-size: inherit; color: inherit; }
+.v8-cifra span.seguridad-cifra-corta { display: none; }
+@media (max-width: 599px) {
+  .v8-cifra span.seguridad-cifra-larga { display: none; }
+  .v8-cifra span.seguridad-cifra-corta { display: inline; margin: 0; font-size: inherit; color: inherit; }
+}
+
+/* Listas con el <b> blanco del tablero */
+.seguridad-lista { display: grid; gap: 12px; margin-top: 28px; }
+
+/* Video */
+.seguridad-video-lead { margin-top: 20px; }
+
+/* Puntaje y coaching: foto a la izquierda (7), texto a la derecha (5). */
+.seguridad-puntaje-rejilla { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: center; }
+.seguridad-puntaje-lead { margin-top: 20px; }
+.seguridad-cifras { display: grid; grid-template-columns: repeat(2, max-content); gap: 28px 40px; margin-top: 32px; }
+.seguridad-cifras .v8-cifra span { max-width: 210px; }
+.seguridad-puntaje-lista { gap: 10px; }
+
+/* SOS */
+.v8-sec.seguridad-sos { padding-top: 40px; }
+.v8-site .seguridad-sos-kick { color: #ff8a8f; }
+.seguridad-sos-lead { margin-top: 20px; }
+.seguridad-sos-cifra { margin-top: 28px; }
+.seguridad-sos-aviso {
+  position: absolute; z-index: 1; right: var(--v8-margen); top: 22%; width: 340px;
+  display: flex; gap: 14px; align-items: center; padding: 18px 20px; border-radius: var(--v8-r-tarjeta);
+}
+.seguridad-sos-sello {
+  flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+  background: #2a1416; color: var(--v8-peligro); font-size: 12px; font-weight: 700; letter-spacing: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 99, 105, .5);
+}
+.seguridad-sos-aviso b { display: block; font-size: 15px; font-weight: 600; }
+.seguridad-sos-aviso p { margin-top: 2px; font-size: 15px; line-height: 1.4; color: var(--v8-texto-2); }
+.seguridad-sos-lista-movil { display: none; }
+.v8-c.seguridad-privacidad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 24px; }
+.seguridad-privacidad .v8-h4 { margin-bottom: 6px; }
+
+/* Preguntas: en escritorio van en banda (el teléfono la pone en el SOS). */
+.seguridad-preguntas, .seguridad-sos { --seguridad-entrada: clamp(120px, 14vw, 200px); }
+.seguridad-preguntas {
+  background: linear-gradient(180deg,
+    rgba(15, 20, 27, 0) 0, rgba(15, 20, 27, .2) calc(var(--seguridad-entrada) * .25), rgba(15, 20, 27, .55) calc(var(--seguridad-entrada) * .5),
+    rgba(15, 20, 27, .85) calc(var(--seguridad-entrada) * .75), var(--v8-banda) var(--seguridad-entrada),
+    var(--v8-banda) calc(100% - var(--seguridad-entrada)),
+    rgba(15, 20, 27, .85) calc(100% - var(--seguridad-entrada) * .75), rgba(15, 20, 27, .55) calc(100% - var(--seguridad-entrada) * .5),
+    rgba(15, 20, 27, .2) calc(100% - var(--seguridad-entrada) * .25), rgba(15, 20, 27, 0) 100%);
+}
+
+/* Tableta */
+@media (max-width: 1023px) {
+  .seguridad-eventos-cajas.is-escritorio { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .seguridad-sos-aviso { top: 8%; width: 300px; }
+}
+@media (max-width: 899px) {
+  .seguridad-hero-foto .v8-foto { min-height: 0; height: 520px; object-position: 70% 50%; }
+  .v8-c.seguridad-hero-texto { position: relative; inset: auto; display: block; margin-top: -90px; }
+  .v8-sec.seguridad-eventos { padding-top: 72px; }
+  .seguridad-puntaje-rejilla { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .seguridad-sos-aviso { position: relative; right: auto; top: auto; width: auto; margin-bottom: 28px; }
+  .v8-c.seguridad-privacidad { grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 32px; }
+}
+
+/* Teléfono: lo del tablero móvil, sin escena fija. */
+@media (max-width: 599px) {
+  .seguridad-hero-foto .v8-foto { height: 420px; }
+  .v8-c.seguridad-hero-texto { margin-top: -60px; }
+  .seguridad-hero .v8-lead { margin-top: 14px; }
+  .seguridad-hero .v8-acciones { margin-top: 24px; }
+
+  .v8-sec.seguridad-eventos { padding-top: 56px; }
+  .seguridad-eventos-cab.is-centro { text-align: left; }
+  .seguridad-eventos-captura { margin-top: 24px; }
+  .seguridad-eventos-captura .is-panel-escritorio { display: none; }
+  .seguridad-eventos-captura .is-telefono-movil { display: block; }
+  .seguridad-eventos-cajas.is-escritorio { display: none; }
+  .seguridad-eventos-cajas.is-movil { display: grid; gap: 12px; margin-top: 28px; }
+  .seguridad-eventos-cajas .v8-h4 { margin-bottom: 2px; }
+  .seguridad-eventos-cifra { margin-top: 28px; text-align: left; }
+
+  .seguridad-video .v8-escena-texto { margin-top: -30px; }
+  .seguridad-video-lead { margin-top: 12px; }
+  .seguridad-video .seguridad-lista { display: none; }
+
+  .seguridad-puntaje-rejilla { gap: 20px; padding: 0; }
+  .seguridad-puntaje-texto { padding: 0 var(--v8-margen); }
+  .seguridad-puntaje-foto { order: 2; height: 400px; object-fit: cover; object-position: 30% 50%;
+    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent); }
+  .seguridad-puntaje-lead, .seguridad-puntaje-lista { display: none; }
+  .seguridad-cifras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+
+  /* En el teléfono la banda pasa del bloque de preguntas al SOS, como en el tablero. */
+  .seguridad-preguntas { background: none; }
+  .seguridad-sos {
+    background: linear-gradient(180deg,
+      rgba(15, 20, 27, 0) 0, rgba(15, 20, 27, .2) calc(var(--seguridad-entrada) * .25), rgba(15, 20, 27, .55) calc(var(--seguridad-entrada) * .5),
+      rgba(15, 20, 27, .85) calc(var(--seguridad-entrada) * .75), var(--v8-banda) var(--seguridad-entrada),
+      var(--v8-banda) calc(100% - var(--seguridad-entrada)),
+      rgba(15, 20, 27, .85) calc(100% - var(--seguridad-entrada) * .75), rgba(15, 20, 27, .55) calc(100% - var(--seguridad-entrada) * .5),
+      rgba(15, 20, 27, .2) calc(100% - var(--seguridad-entrada) * .25), rgba(15, 20, 27, 0) 100%);
+  }
+  .v8-sec.seguridad-sos { padding-top: 64px; }
+  .seguridad-sos .v8-escena-texto { margin-top: -80px; }
+  .seguridad-sos-aviso { padding: 16px; gap: 12px; margin-bottom: 28px; }
+  .seguridad-sos-sello { width: 44px; height: 44px; }
+  .seguridad-sos-aviso p { font-size: 12px; letter-spacing: -0.12px; }
+  .seguridad-sos-lead { display: none; }
+  .seguridad-sos-cifra { margin-top: 20px; }
+  .seguridad-sos-lista-movil { display: grid; gap: 22px; margin-top: 24px; }
+  .v8-c.seguridad-privacidad { display: none; }
+
+  .seguridad-boton-movil { margin-top: 32px; }
+}
