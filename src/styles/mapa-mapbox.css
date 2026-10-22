@@ -24,7 +24,7 @@
 .pnl-mapa .mapboxgl-ctrl-logo { opacity: 0.85; }
 /* En el teléfono la hoja de la unidad (o la lista) tapa el pie del mapa: el logo sube encima de
    ella. `--hoja-alto` lo mide el Centro de control (0 en escritorio, donde la ficha va a un lado). */
-.control-map .pnl-mapa .mapboxgl-ctrl-bottom-left { bottom: max(64px, calc(var(--hoja-alto, 0px) + 8px)); }
+.control-map .pnl-mapa .mapboxgl-ctrl-bottom-left { bottom: max(64px, calc(var(--hoja-alto, 0px) + 8px)); left: var(--hoja-izq, 0px); }
 .control-map .pnl-mapa .mapboxgl-ctrl-bottom-right { margin: 0 18px 32px 0; }
 
 /* Marcadores: Mapbox pone el contenedor; el SVG de dentro ya trae el carro y la etiqueta. */

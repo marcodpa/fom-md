@@ -30,8 +30,11 @@
 
 /* Índice de manejo */
 .v8-site .app-indice-cifras { margin-top: 32px; gap: 28px; }
-.v8-site .app-indice-medio { position: relative; }
-.v8-site .v8-vidrio.app-indice-caja { position: absolute; right: 6%; bottom: 8%; width: 300px; }
+/* La foto nueva es más apaisada (1882 × 1018) y no se recorta: sus bordes ya vienen fundidos. La
+   caja baja al pie de la foto, sobre la carretera, para no tapar las camionetas; el relleno de
+   abajo le guarda su sitio y la columna sigue a la altura del texto. */
+.v8-site .app-indice-medio { position: relative; padding-bottom: 80px; }
+.v8-site .v8-vidrio.app-indice-caja { position: absolute; right: 0; bottom: 0; width: 300px; }
 .v8-site .app-indice-caja .v8-sm { margin-top: 6px; }
 .v8-site .app-indice-telefono { display: none; }
 
@@ -75,6 +78,7 @@
   .v8-site .app-unidad-telefono { position: relative; left: auto; bottom: auto; width: 240px !important; }
   .v8-site .app-indice-cifras { margin-top: 24px; gap: 26px 16px; }
   .v8-site .app-indice-foto, .v8-site .v8-vidrio.app-indice-caja { display: none; }
+  .v8-site .app-indice-medio { padding-bottom: 0; }
   .v8-site .app-indice-telefono { display: block; width: 240px !important; }
   .v8-site .v8-pill.app-cta-boton { width: 100%; }
   .v8-site .app-cta .v8-acciones { align-items: stretch; margin-top: 24px; }

@@ -183,12 +183,16 @@ export default function CentroControl() {
     const medir = () => {
       const caja = seccion.getBoundingClientRect()
       let alto = 0
+      let izquierda = 0
       hojas().forEach((el) => {
         const r = el.getBoundingClientRect()
-        // Solo las de abajo a lo ancho: en escritorio la ficha va a un lado y no tapa el logo.
+        // Las de abajo a lo ancho (teléfono) empujan el logo hacia arriba.
         if (r.width >= caja.width * 0.6 && caja.bottom - r.bottom < 120) alto = Math.max(alto, caja.bottom - r.top)
+        // La ficha lateral de escritorio que llega al pie empuja el logo a su derecha.
+        else if (r.left - caja.left < 80 && caja.bottom - r.bottom < 120) izquierda = Math.max(izquierda, r.right - caja.left)
       })
       seccion.style.setProperty('--hoja-alto', `${Math.round(alto)}px`)
+      seccion.style.setProperty('--hoja-izq', `${Math.round(izquierda)}px`)
     }
     const observador = new ResizeObserver(medir)
     observador.observe(seccion)

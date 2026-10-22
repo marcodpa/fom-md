@@ -776,6 +776,10 @@ export const repo = {
           .filter((d) => d.ambito === 'persona' && d.userId === id)
           .map((d) => ({ ...d, estado: estadoDocumento(d.venceEn) })),
         indiceSeguro: unidad?.indiceSeguro ?? null,
+        // El mismo score de 7 días que el ranking y «Mi perfil» (como `repoApi.personal.obtener`):
+        // sin él, la ficha que mira el supervisor dejaba frenadas, excesos y km en «—».
+        manejo: unidad ? scoreDemo(unidad, p, 7) : null,
+        indiceFuente: 'conductor',
       })
     },
 

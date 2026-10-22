@@ -786,7 +786,15 @@ export default function MapaMapbox({
     }
     if (seleccionado && colaEncuadrada.current !== seleccionado) {
       const lienzo = m.getContainer().getBoundingClientRect()
-      const limites = util.reduce((b, p) => b.extend([p.lng, p.lat]), new mapboxgl.LngLatBounds([util[0].lng, util[0].lat], [util[0].lng, util[0].lat]))
+      // La unidad va al centro de lo que se ve libre y su cola alrededor: se encuadra la cola junto
+      // con su reflejo respecto a la unidad. Encuadrando solo la cola, la unidad (un extremo) caía en
+      // una esquina: en el teléfono, pegada al borde, sobre el logo de Mapbox o bajo la hoja.
+      const v = vehiculosRef.current.find((x) => x.id === seleccionado)
+      const [cx, cy] = validPosition(v) ? [v.lng, v.lat] : [util.at(-1).lng, util.at(-1).lat]
+      const limites = util.reduce(
+        (b, p) => b.extend([p.lng, p.lat]).extend([2 * cx - p.lng, 2 * cy - p.lat]),
+        new mapboxgl.LngLatBounds([cx, cy], [cx, cy]),
+      )
       const ancho = lienzo.width > 600
       m.fitBounds(limites, {
         padding: margenes(m, { top: 150, left: (ficha || espacioFicha) && ancho ? 410 : 40, right: 80, bottom: (ficha || espacioFicha) && !ancho ? Math.min(lienzo.height * 0.45, 350) : 80 }),
