@@ -178,8 +178,8 @@ está en
 
 ### Listas y datos
 - **`RasgosV8`** `{ items: [{icono?, titulo, texto}], columnas=4 }` — icono + título + texto.
-- **`BloqueCifrasV8`** `{ cifras: [{valor, etiqueta}], columnas=4, centro? }` — cifras grandes y
-  QUIETAS (sin contadores). Para `pages.js`: `{ valor: s.stat.value, etiqueta: s.stat.label }`.
+- **`BloqueCifrasV8`** `{ cifras: [{valor, etiqueta}], columnas=4, centro? }` — cifras grandes (sin
+  contadores) que entran girando como una paleta (`data-v8-3d="cifra"`). Para `pages.js`: `{ valor: s.stat.value, etiqueta: s.stat.label }`.
 - **`ListaPasosV8`** `{ pasos: [{titulo, texto}], activo?, alCambiar?, variante?: 'linea',
   numerar=true }` — pasos 01, 02… con los no activos tenues (recorridos fijos de Funciones y
   Beneficios: maneja `activo` desde tu momento de scroll). `variante="linea"` = fila «1. Contacto
@@ -194,6 +194,18 @@ está en
   correo hacia contacto@fom.app y abre la aplicación de correo. No llama a ningún servidor.
 
 ### Movimiento
+
+**3D en la base (T-121).** Las piezas ya traen `data-v8-3d` y `useMomentoV8` lo anima solo, en
+todas las páginas: `hero` (HeroV8: kicker y titular girando desde abajo, la foto entra con
+profundidad y se asienta, luego bajada, botones y nota SOLOS; al bajar, texto y resplandor en capas),
+`tarjeta` (TarjetaVidrioV8, TarjetaCarruselV8: entran una tras otra con giro 3D; con ratón,
+inclinación + brillo que sigue al cursor), `captura` (CapturaFlotanteV8: gira a su sitio con el
+scroll), `cifra` (BloqueCifrasV8) y `seccion` (SeccionV8: sus bloques «se acercan» desde atrás).
+Teléfono = versión más suave y sin inclinación; «reducir movimiento» = todo quieto. Lo que está
+dentro de una escena fija (pin) no hace su entrada propia. Las piezas que aparecen al cargar esperan
+al hero (encadenado). Para apagar el 3D de una pieza: `data-v8-3d=""`. Todo giro lleva un
+translateZ negativo: ninguna foto ni captura se ve más grande que su tamaño real.
+
 - **`useMomentoV8(raiz, momentos?)`** — GSAP + ScrollTrigger dentro de `gsap.matchMedia`;
   limpieza automática al desmontar; con «reducir movimiento» no corre nada. Hace solo:
   `data-v8-entra` (entrada escalonada del hero), `data-v8-crece` (foto del hero 92 % → 100 %) y
