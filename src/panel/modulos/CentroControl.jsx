@@ -55,6 +55,11 @@ export default function CentroControl() {
   const [foco, setFoco] = useState(null)
   const [viajeActivo, setViajeActivo] = useState(null)
   useEffect(() => { setViendoRecorrido(false); setFoco(null); setViajeActivo(null) }, [seleccionado])
+  // Modo «manejo brusco»: se guarda la unidad para la que se abrió, así al cambiar de unidad se
+  // apaga solo y un enlace puede abrirlo junto con la unidad que elige (sin que el reinicio de
+  // arriba, que corre después, lo vuelva a cerrar).
+  const [manejoDe, setManejoDe] = useState(null)
+  const viendoManejo = Boolean(seleccionado) && manejoDe === seleccionado
 
   const areas = useDatos(() => repo.areas(), [])
   // Seguimiento en vivo: se vuelve a preguntar por la flota cada 15 segundos.
@@ -119,6 +124,7 @@ export default function CentroControl() {
     if ((datosFlota ?? []).some((v) => v.id === enlace.unidad)) {
       setListaAbierta(false)
       setSeleccionado(enlace.unidad)
+      setManejoDe(enlace.unidad)
       setPedidoEvento({ ...enlace, clave: Date.now() })
     }
     setParametros({}, { replace: true })
@@ -127,12 +133,12 @@ export default function CentroControl() {
 
   // Manejo brusco de la unidad elegida. El servidor no los da por unidad, solo por conductor: se
   // piden los del conductor asignado (o el que dice el enlace) y se dejan los de esta unidad.
-  // Los de otro conductor en la misma unidad no llegan.
+  // Los de otro conductor en la misma unidad no llegan. Solo se piden con el modo abierto.
   const conductorEnlace = pedidoEvento?.unidad === seleccionado ? pedidoEvento.conductor : null
   const conductorId = conductorEnlace ?? lista.find((v) => v.id === seleccionado)?.conductorPrincipalId ?? null
   const manejo = useManejoBrusco({
     vehiculoId: seleccionado,
-    userId: seleccionado ? conductorId : null,
+    userId: viendoManejo ? conductorId : null,
     pedido: pedidoEvento,
     // Se vuela al evento del enlace después de que el mapa encuadre la cola de la unidad.
     listoParaVolar: colaActual || cola.estado === 'error',
@@ -199,14 +205,21 @@ export default function CentroControl() {
     hojas().forEach((el) => observador.observe(el))
     medir()
     return () => observador.disconnect()
-  }, [seleccionado, listaAbierta, viendoRecorrido, flota.estado, hayLista])
+  }, [seleccionado, listaAbierta, viendoRecorrido, viendoManejo, flota.estado, hayLista])
+
+  // Recorrido y manejo brusco no se mezclan: abrir uno cierra el otro. Las dos capas juntas
+  // (viajes, paradas y eventos) se tapan entre sí y la hoja tendría dos listas largas.
+  const alternarRecorrido = () => { setManejoDe(null); setViendoRecorrido((v) => !v) }
+  const alternarManejo = () => { setViendoRecorrido(false); setManejoDe((u) => (u === seleccionado ? null : seleccionado)) }
+  // Con cualquiera de los dos modos la hoja se compacta (sin foto ni datos extra) y crece.
+  const enModo = viendoRecorrido || viendoManejo
 
   return (
     <section className="control-map" aria-label="Centro de control" ref={raiz}>
       <div className="control-map-canvas">
         <Mapa vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado}
           cola={seleccionado && !viendoRecorrido ? colaPuntos : null} viajes={analisis?.viajes} paradas={analisis?.paradas} foco={foco} viajeActivo={viajeActivo} alElegirViaje={(n) => setViajeActivo((a) => (a === n ? null : n))}
-          eventosManejo={seleccionado ? manejo.visibles : null} eventoActivo={manejo.elegido} alElegirEvento={manejo.elegir} encuadrarEventos={false}
+          eventosManejo={viendoManejo ? manejo.visibles : null} eventoActivo={manejo.elegido} alElegirEvento={manejo.elegir} encuadrarEventos={false}
           alto="100%" ficha={false} leyenda={false} espacioFicha herramientas />
       </div>
       <div className="control-search">
@@ -239,14 +252,14 @@ export default function CentroControl() {
         <div className="control-panel-heading"><h2>Unidades <span>{lista.length}</span></h2><button type="button" aria-label="Cerrar lista de unidades" onClick={() => setListaAbierta(false)}><Icono nombre="cerrar" /></button></div>
         <ListaUnidades vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado} />
       </aside>}
-      {seleccionado && <aside className={`control-panel control-unit${viendoRecorrido ? ' con-ruta' : ''}`} aria-label="Detalle de la unidad">
-        <FichaUnidad unidad={unidad} alCerrar={() => setSeleccionado(null)} alVerRecorrido={() => setViendoRecorrido(v => !v)} viendoRecorrido={viendoRecorrido}>
-          <BloqueManejoBrusco m={manejo} />
-        </FichaUnidad>
-        {!viendoRecorrido && colaPuntos.length > 1 && <p className="control-detail-note ruta-cola-nota" role="status">{colaInfo?.ampliada ? 'Línea punteada: su último trayecto (ahora está detenida).' : `Línea punteada: los últimos ${COLA_MIN} min de camino.`} Pulsa «Ver recorrido» para el día completo.</p>}
-        {!viendoRecorrido && cola.estado === 'error' && <p className="control-detail-note" role="status">No se pudieron cargar los últimos 5 minutos. <button type="button" onClick={cola.recargar}>Reintentar</button></p>}
-        {!viendoRecorrido && cola.estado !== 'error' && (!colaActual || cola.estado === 'cargando') && <p className="control-detail-note" role="status">Cargando los últimos 5 minutos…</p>}
-        {!viendoRecorrido && colaActual && cola.estado === 'ok' && colaPuntos.length < 2 && <p className="control-detail-note" role="status">{cola.datos.puntos.length > 1 ? 'Sin movimiento registrado en el tramo reciente.' : 'No hay suficientes posiciones para dibujar el recorrido reciente.'} Puedes consultar el día completo en «Ver recorrido».</p>}
+      {seleccionado && <aside className={`control-panel control-unit${enModo ? ' con-ruta' : ''}`} aria-label="Detalle de la unidad">
+        <FichaUnidad unidad={unidad} alCerrar={() => setSeleccionado(null)} alVerRecorrido={alternarRecorrido} viendoRecorrido={viendoRecorrido}
+          alVerManejo={alternarManejo} viendoManejo={viendoManejo} />
+        {viendoManejo && <BloqueManejoBrusco m={manejo} />}
+        {!enModo && colaPuntos.length > 1 && <p className="control-detail-note ruta-cola-nota" role="status">{colaInfo?.ampliada ? 'Línea punteada: su último trayecto (ahora está detenida).' : `Línea punteada: los últimos ${COLA_MIN} min de camino.`} Pulsa «Ver recorrido» para el día completo.</p>}
+        {!enModo && cola.estado === 'error' && <p className="control-detail-note" role="status">No se pudieron cargar los últimos 5 minutos. <button type="button" onClick={cola.recargar}>Reintentar</button></p>}
+        {!enModo && cola.estado !== 'error' && (!colaActual || cola.estado === 'cargando') && <p className="control-detail-note" role="status">Cargando los últimos 5 minutos…</p>}
+        {!enModo && colaActual && cola.estado === 'ok' && colaPuntos.length < 2 && <p className="control-detail-note" role="status">{cola.datos.puntos.length > 1 ? 'Sin movimiento registrado en el tramo reciente.' : 'No hay suficientes posiciones para dibujar el recorrido reciente.'} Puedes consultar el día completo en «Ver recorrido».</p>}
         {viendoRecorrido && <PanelRecorrido analisis={analisis} horas={horas} alCambiarHoras={setHoras} cargando={dia.estado === 'cargando'} truncado={dia.datos?.truncado} alEnfocar={(p) => setFoco({ ...p, clave: Date.now() })} viajeActivo={viajeActivo} alElegirViaje={setViajeActivo} />}
         {viendoRecorrido && dia.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={dia.recargar}>Reintentar</button></p>}
         {detalle.estado === 'error' && <p className="control-detail-note">No se pudo cargar la ficha de la unidad. <button onClick={detalle.recargar}>Reintentar</button></p>}

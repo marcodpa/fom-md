@@ -16,8 +16,9 @@ import './eventos-manejo.css'
 // ============================================================
 // MANEJO BRUSCO — frenadas, aceleraciones y excesos de más de 120 km/h.
 // ------------------------------------------------------------
-// En el Centro de control (y en «Mi mapa» del conductor) van sobre el mapa al elegir la unidad,
-// con un bloque compacto en su ficha para filtrar. En la pestaña Conducción del perfil solo hay
+// En el Centro de control van sobre el mapa al pulsar «Ver manejo brusco» en la ficha de la
+// unidad (o al llegar por un enlace a un evento); en «Mi mapa» del conductor, al abrir su ficha.
+// En los dos, con un bloque compacto para filtrar. En la pestaña Conducción del perfil solo hay
 // lista, y cada evento lleva al mapa. Las reglas de filtro son de datos/eventosManejo.js.
 // ============================================================
 

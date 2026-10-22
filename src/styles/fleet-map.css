@@ -43,6 +43,14 @@
 .fleet-card .fleet-action.primary { background:#0075e6; border-color:#0075e6; }
 .fleet-card .fleet-action:hover { background:#173957; }
 .fleet-card .fleet-action.primary:hover { background:#0065cb; }
+/* Las capas del mapa (recorrido y manejo brusco): dos botones iguales lado a lado. El texto
+   largo («Ocultar manejo brusco») baja a dos líneas en vez de salirse. */
+.fleet-actions-capas { display:grid; gap:8px; }
+.fleet-actions-capas.par { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.fleet-card .fleet-actions-capas.par .fleet-action { gap:8px; padding:8px 10px; font-size:13px; line-height:1.25; text-align:center; }
+.fleet-card .fleet-actions-capas .fleet-action svg { flex:none; }
+/* La capa abierta se nota: fondo azul tenue mientras está encendida. */
+.fleet-card .fleet-action[aria-pressed="true"] { background:#173957; }
 .fleet-card :is(button,a,summary):focus-visible,.fleet-marker:focus-visible { outline:3px solid #85c9ff; outline-offset:3px; }
 .fleet-card ::selection { background:#24619a; color:#fff; }
 .fleet-card.flotante { position:absolute; z-index:500; left:16px; top:16px; width:min(340px,calc(100% - 32px)); max-height:calc(100% - 50px); overflow:auto; overscroll-behavior:contain; padding:18px; border:1px solid #263b4d; border-radius:14px; background:#0b1927f5; scrollbar-width:thin; scrollbar-color:#39566e #0b1927; }

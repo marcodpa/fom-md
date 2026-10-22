@@ -36,7 +36,7 @@ function datosDe(v) {
   return filas.filter(([, valor]) => valor != null && valor !== '')
 }
 
-export default function FichaUnidad({ unidad, variante = 'panel', conCabecera = true, alCerrar, conEnlace = true, alVerRecorrido, viendoRecorrido = false, children }) {
+export default function FichaUnidad({ unidad, variante = 'panel', conCabecera = true, alCerrar, conEnlace = true, alVerRecorrido, viendoRecorrido = false, alVerManejo, viendoManejo = false, children }) {
   const puedeEditar = esGestor(useSesion()?.perfil)
   // Con la ficha abierta, «hace 12 min» avanza solo cada minuto y la unidad pasa sola a
   // «Sin señal» a los 5 min sin reportar, sin esperar otra lectura del servidor.
@@ -71,12 +71,16 @@ export default function FichaUnidad({ unidad, variante = 'panel', conCabecera = 
     <dl className="fleet-facts">{filas.map(([icono, etiqueta, valor]) => <div key={etiqueta}><Icono nombre={icono} tam={19} /><div><dt>{etiqueta}</dt><dd>{valor}</dd></div></div>)}</dl>
     <dl className="fleet-metrics"><div><Icono nombre="mapa" tam={22} /><div><dt>Odómetro</dt><dd>{v.km == null ? 'Sin dato' : f.km(v.km)}</dd></div></div><div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg><div><dt>GPS</dt><dd>{v.conectado === true ? 'Conectado' : v.conectado === false ? textoSinSenal(v.ultimoReporte, ahora) : 'Sin dato'}</dd></div></div></dl>
     {extras.length > 0 && <details className="fleet-extra"><summary>Más información</summary><dl>{extras.map(([k, val]) => <div key={k}><dt>{k}</dt><dd>{val}</dd></div>)}</dl></details>}
-    {/* Lo que el módulo agrega dentro de la parte que se desplaza (el Centro de control: «Manejo brusco»). */}
+    {/* Lo que el módulo agrega dentro de la parte que se desplaza (Mi mapa: «Manejo brusco»). */}
     {children}
     </div>
-    {(conEnlace || alVerRecorrido) && <div className="fleet-actions">
+    {(conEnlace || alVerRecorrido || alVerManejo) && <div className="fleet-actions">
       {conEnlace && <Link className="fleet-action primary" to={`/panel/flota/${encodeURIComponent(v.id)}`}><Icono nombre="documento" tam={18} />Ver expediente</Link>}
-      {alVerRecorrido && <button type="button" className="fleet-action" onClick={alVerRecorrido} aria-pressed={viendoRecorrido}><Icono nombre="mapa" tam={18} />{viendoRecorrido ? 'Ocultar recorrido' : 'Ver recorrido'}</button>}
+      {/* Las capas del mapa (recorrido y manejo brusco) van juntas, iguales y lado a lado. */}
+      {(alVerRecorrido || alVerManejo) && <div className={`fleet-actions-capas${alVerRecorrido && alVerManejo ? ' par' : ''}`}>
+        {alVerRecorrido && <button type="button" className="fleet-action" onClick={alVerRecorrido} aria-pressed={viendoRecorrido}><Icono nombre="mapa" tam={18} /><span>{viendoRecorrido ? 'Ocultar recorrido' : 'Ver recorrido'}</span></button>}
+        {alVerManejo && <button type="button" className="fleet-action" onClick={alVerManejo} aria-pressed={viendoManejo}><Icono nombre="velocidad" tam={18} /><span>{viendoManejo ? 'Ocultar manejo brusco' : 'Ver manejo brusco'}</span></button>}
+      </div>}
     </div>}
   </article>
 }
