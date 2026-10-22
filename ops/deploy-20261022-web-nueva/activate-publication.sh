@@ -9,8 +9,8 @@ test "$(id -u)" = 0 || fail 'Ejecutar con sudo dentro de fom-app-01.'
 test "$(hostname -s)" = fom-app-01 || fail 'Servidor incorrecto.'
 stage=$(cd -- "$(dirname -- "$0")" && pwd)
 config=/etc/nginx/sites-available/fom-mobile.conf
-release=/var/www/fom-web/releases/20261022-web-nueva
-backup=/var/backups/fom-web/20261022-web-nueva-$(date +%Y%m%dT%H%M%S)-$$
+release=/var/www/fom-web/releases/20261022-web-nueva-r2
+backup=/var/backups/fom-web/20261022-web-nueva-r2-$(date +%Y%m%dT%H%M%S)-$$
 test ! -L "$config" || fail 'La configuración cambió de tipo.'
 # Debe haber exactamente una raíz apuntando a una carpeta de releases.
 test "$(grep -cE '^\s*root\s+/var/www/fom-web/releases/[A-Za-z0-9._-]+;\s*$' "$config")" = 1 || fail 'No encuentro una sola raíz de releases en Nginx; revisar antes de publicar.'
@@ -25,7 +25,7 @@ cp -a dist/. "$release/"
 chown -R root:root "$release"
 find "$release" -type d -exec chmod 0755 {} +
 find "$release" -type f -exec chmod 0644 {} +
-(cd "$release"; sed -n 's|  dist/|  |p' "$stage/SHA256SUMS" | sha256sum --quiet -c -)
+(cd "$release"; sed -nE 's@^([0-9a-f]{64}) [ *]dist/@\1  @p' "$stage/SHA256SUMS" | sha256sum --quiet -c -) || fail 'La copia instalada no coincide con SHA256SUMS.'
 install -d -m 0700 "$backup"
 cp -a "$config" "$backup/fom-mobile.conf"
 printf '%s\n' "$oldroot" > "$backup/raiz-anterior.txt"
