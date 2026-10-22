@@ -20,8 +20,10 @@ import {
 } from './catalogos'
 import { hoyISO } from './formato'
 import { comoEventoManejo } from './eventosManejo'
+import { calificacionManejo } from './manejo'
 import { empresaGestionActualId } from './api'
 import { argumentosDeFormato, cuerpoPlantilla, publicarSiHaceFalta } from './repoApi'
+import { perfilActual } from '../auth'
 
 // Flota de estrés (T-80): solo con `?estres=…` o `fom.demo.estres` guardado.
 // Sin eso, `semillaActiva` devuelve la semilla de siempre, tal cual.
@@ -32,11 +34,34 @@ const {
 } = SEMILLA
 
 const CLAVE_CAMBIOS = SEMILLA.claveCambios ?? 'fom.panel.cambios'
+// La flota de siempre (no la de estrés, que ya mueve sus horas con el reloj).
+const ES_BASE = SEMILLA === semillaBase
+const DIA_MS = 86_400_000
+// Cinco minutos sin reportar = «Sin señal»: la misma regla de sinSenal.js (SIN_SENAL_MS).
+const SIN_SENAL_DEMO_MS = 5 * 60_000
+
+/**
+ * La última señal de una unidad de la semilla, corrida con el reloj: la semilla fija sus horas al
+ * cargar y, sin esto, a los 5 minutos toda la flota pasaba a «Sin señal». Cada lectura la deja
+ * igual de reciente que al abrir, como una flota que sigue reportando.
+ */
+function reporteAlDia(v, ahora = Date.now()) {
+  const t = Date.parse(v.ultimoReporte)
+  if (!ES_BASE || !Number.isFinite(t)) return v
+  return { ...v, ultimoReporte: new Date(t + (ahora - semillaBase.AHORA_SEMILLA)).toISOString() }
+}
+/** `conexion` como la trae el servidor: Mi unidad decide «Reportando» o «Sin señal» con ella. */
+function conConexion(v, ahora = Date.now()) {
+  const t = Date.parse(v.ultimoReporte)
+  return { ...v, conexion: Number.isFinite(t) && ahora - t < SIN_SENAL_DEMO_MS ? 'reportando' : 'sin_senal' }
+}
 
 /**
  * Eventos de manejo de ejemplo de una unidad (forma del servidor, pasada por `comoEventoManejo`).
  * Caen sobre puntos de su recorrido: los primeros hoy, el resto en días anteriores por el mismo
  * camino. Algunos excesos quedan en 120 km/h o menos a propósito: el mapa no los muestra.
+ * Los 16 primeros caen en los últimos 28 días; los 24 siguientes, entre 28 y 90 días atrás, para
+ * que Reportes tenga con qué comparar el período anterior.
  */
 function eventosManejoDemo(v) {
   let semilla = v.id.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 17)
@@ -48,10 +73,10 @@ function eventosManejoDemo(v) {
   if (!rodando.length) return []
   const tipos = ['harsh_braking', 'speeding', 'harsh_acceleration', 'harsh_braking', 'speeding', 'harsh_acceleration']
   const salida = []
-  for (let i = 0; i < 16; i += 1) {
+  for (let i = 0; i < 40; i += 1) {
     const p = rodando[Math.floor(azar() * rodando.length)]
     const type = tipos[i % tipos.length]
-    const dia = i < 5 ? 0 : 1 + Math.floor(azar() * 27)
+    const dia = i < 5 ? 0 : i < 16 ? 1 + Math.floor(azar() * 27) : 28 + Math.floor(azar() * 62)
     const antes = type === 'speeding' ? 108 + Math.round(azar() * 40)
       : type === 'harsh_braking' ? 62 + Math.round(azar() * 34) : 8 + Math.round(azar() * 22)
     const despues = type === 'speeding' ? null
@@ -69,6 +94,65 @@ function eventosManejoDemo(v) {
     }))
   }
   return salida.sort((a, b) => Date.parse(b.hora) - Date.parse(a.hora))
+}
+
+// Los eventos de una unidad salen de su recorrido del día: se arman una vez y se reusan
+// (el ranking los cuenta para toda la flota y Reportes lo pide por cada corte).
+const eventosGuardados = new Map()
+function eventosDeUnidad(v) {
+  const clave = `${v.id}:${v.alias}`
+  if (!eventosGuardados.has(clave)) eventosGuardados.set(clave, eventosManejoDemo(v))
+  return eventosGuardados.get(clave)
+}
+
+/**
+ * Km diarios de ejemplo de una unidad. La media sale de su índice: con los eventos de su última
+ * semana, a peor índice menos km (más eventos por cada 100 km), así índice, tasa y semáforo
+ * cuentan lo mismo. Cada día varía un poco, siempre igual para la misma unidad y el mismo día.
+ */
+function kmDiarioBase(v, eventos) {
+  if (!eventos.length) return 0
+  const ultimo = Math.max(...eventos.map((e) => Date.parse(e.hora)))
+  const semana = eventos.filter((e) => Date.parse(e.hora) > ultimo - 7 * DIA_MS).length
+  const indice = Number.isFinite(v.indiceSeguro) ? v.indiceSeguro : 80
+  const tasa = 0.4 + (100 - indice) * 0.08 // eventos por 100 km que «merece» ese índice
+  return Math.min(320, Math.max(25, ((Math.max(1, semana) / tasa) * 100) / 7))
+}
+function kmDeLosDias(v, eventos, dias) {
+  const base = kmDiarioBase(v, eventos)
+  let km = 0
+  for (let d = 0; d < Math.ceil(dias); d += 1) km += base * (0.7 + 0.6 * hashSemilla(`${v.id}:km:${d}`))
+  return Math.round(km * 10) / 10
+}
+
+/**
+ * El score de manejo de ejemplo de quien maneja la unidad, en la forma de `repoApi.manejo`
+ * ({ id, nombre, indice, eventosPor100, km, dias, frenadas, aceleraciones, excesos, rating }).
+ * Frenadas, aceleraciones y excesos son los MISMOS eventos que devuelve `manejo.eventos` en
+ * esos días: la tarjeta, la tabla y el mapa cuentan lo mismo.
+ */
+function scoreDemo(v, persona, dias, ahora = Date.now()) {
+  const eventos = eventosDeUnidad(v)
+  const corte = ahora - dias * DIA_MS
+  const delPeriodo = eventos.filter((e) => Date.parse(e.hora) >= corte)
+  const cuenta = (tipo) => delPeriodo.filter((e) => e.tipo === tipo).length
+  const frenadas = cuenta('frenada')
+  const aceleraciones = cuenta('aceleracion')
+  const excesos = cuenta('exceso')
+  const km = kmDeLosDias(v, eventos, dias)
+  const indice = km > 0 && Number.isFinite(v.indiceSeguro) ? v.indiceSeguro : null
+  return {
+    id: persona.id,
+    nombre: persona.nombre,
+    indice,
+    eventosPor100: km > 0 ? Math.round(((frenadas + aceleraciones + excesos) / km) * 10000) / 100 : null,
+    km,
+    dias,
+    frenadas,
+    aceleraciones,
+    excesos,
+    rating: calificacionManejo({ indice }),
+  }
 }
 
 // --- Capa de cambios locales ----------------------------------------------
@@ -135,7 +219,10 @@ const responder = (valor, ms = 120) =>
 
 // --- Colecciones resueltas -------------------------------------------------
 function todosVehiculos() {
-  return conGpsAlDia([...VEHICULOS, ...agregados('vehiculos')].map((v) => aplicar('vehiculos', v)))
+  const ahora = Date.now()
+  const lista = [...VEHICULOS.map((v) => reporteAlDia(v, ahora)), ...agregados('vehiculos')].map((v) => aplicar('vehiculos', v))
+  // La de estrés se deja tal cual: sus unidades en marcha leen la hora en cada acceso.
+  return conGpsAlDia(ES_BASE ? lista.map((v) => conConexion(v, ahora)) : lista)
 }
 function todosPerfiles() {
   // Los eliminados definitivamente no existen para nadie.
@@ -320,7 +407,8 @@ function inventarioGps() {
       vehiculoNombre: `${v.alias} · ${v.placa}`,
       empresaId: v.empresaId ?? EMPRESA.id,
       estado: 'active',
-      ultimaConexion: v.ultimoReporte ?? null,
+      // La misma última señal que la ficha de la unidad: el inventario y la flota no se contradicen.
+      ultimaConexion: reporteAlDia(v).ultimoReporte ?? null,
       instalacionId: `ins-${v.gps.id}`,
       instaladoEn: v.creadoEn ?? null,
       ubicacionInstalacion: 'Bajo el tablero',
@@ -968,10 +1056,28 @@ export const repo = {
 
   /** Serie de posiciones del día para dibujar el recorrido. */
   recorrido: (vehiculoId) => responder(recorridoDe(vehiculoId), 80),
-  /** El score de manejo lo calcula el servidor: sin él no se inventa ningún número, tampoco en demo. */
+  /**
+   * Score de manejo de ejemplo, con la misma forma de `repoApi.manejo` (en la base real lo calcula
+   * el servidor). Sale de los eventos de ejemplo de cada unidad y de sus km del período.
+   */
   manejo: {
-    miScore: () => responder(null, 60),
-    ranking: () => responder([], 60),
+    /** El de la persona en sesión (o `userId`); `null` si no tiene unidad, como el servidor sin recorridos. */
+    miScore: ({ dias = 7, userId } = {}) => responder(() => {
+      const id = userId ?? perfilActual()?.id
+      const v = id ? todosVehiculos().find((x) => x.conductorPrincipalId === id) : null
+      const persona = v ? todosPerfiles().find((p) => p.id === id) : null
+      return persona ? scoreDemo(v, persona, dias) : null
+    }, 60),
+    /** Los conductores con unidad, del mejor índice al peor. */
+    ranking: ({ dias = 7 } = {}) => responder(() => {
+      const perfiles = perfilesDeLaEmpresa()
+      return todosVehiculos()
+        .map((v) => [v, perfiles.find((p) => p.id === v.conductorPrincipalId)])
+        // Una fila por persona aunque un cambio local le haya dejado dos unidades.
+        .filter(([, p], i, filas) => p && filas.findIndex(([, q]) => q?.id === p.id) === i)
+        .map(([v, p]) => scoreDemo(v, p, dias))
+        .sort((a, b) => (b.indice ?? -1) - (a.indice ?? -1) || (a.eventosPor100 ?? 0) - (b.eventosPor100 ?? 0))
+    }, 60),
     /**
      * Eventos de ejemplo para ver el mapa de frenadas, aceleraciones y excesos en demo: los de la
      * unidad de la persona, sobre su recorrido. Misma forma que `repoApi.manejo.eventos`.
@@ -979,7 +1085,7 @@ export const repo = {
     eventos: ({ userId, dias = 7 } = {}) => {
       const v = todosVehiculos().find((x) => x.conductorPrincipalId === userId)
       const corte = Date.now() - dias * 86400000
-      return responder(v ? eventosManejoDemo(v).filter((e) => Date.parse(e.hora) >= corte) : [], 120)
+      return responder(v ? eventosDeUnidad(v).filter((e) => Date.parse(e.hora) >= corte) : [], 120)
     },
   },
 

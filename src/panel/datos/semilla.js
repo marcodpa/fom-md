@@ -29,6 +29,8 @@ const entero = (a, b) => Math.floor(entre(a, b + 1))
 const elegir = (arr) => arr[Math.floor(R() * arr.length)]
 
 const AHORA = Date.now()
+/** Hora a la que se armó la semilla: el repositorio corre las señales desde aquí para que no envejezcan. */
+export const AHORA_SEMILLA = AHORA
 const DIA = 86400000
 const haceMin = (m) => new Date(AHORA - m * 60000).toISOString()
 const haceDias = (d) => new Date(AHORA - d * DIA).toISOString()
@@ -157,8 +159,12 @@ const REPARTO = [
 // Vía y kilómetro de cada unidad: de ahí salen su recorrido y su rastro (ver geoZulia.js).
 const sitioPorId = new Map()
 
+// La foto de referencia del panel es una Hilux: la Unidad 18, que sale en las capturas de la
+// web, va como Hilux para que foto y modelo digan lo mismo. No consume azar: el resto no cambia.
+const MODELO_FIJO = { 17: ['Toyota', 'Hilux', 'camioneta'] }
+
 export const VEHICULOS = REPARTO.map((areaId, i) => {
-  const [marca, modelo, tipo] = FLOTA[i % FLOTA.length]
+  const [marca, modelo, tipo] = MODELO_FIJO[i] ?? FLOTA[i % FLOTA.length]
   const enMarcha = R() > 0.32
   const conductor = PERFILES[i + 1] // usr-002 en adelante
   const km = entero(18000, 240000)
@@ -195,7 +201,9 @@ export const VEHICULOS = REPARTO.map((areaId, i) => {
     aceitePct: entero(28, 96),
     tempMotorC: entero(76, 103),
     ubicacionTexto: `${elegir(VIAS)}, ${elegir(CIUDADES[areaId])}`,
-    ultimoReporte: haceMin(entero(0, enMarcha ? 3 : 240)),
+    // Detenida también late: el GPS manda su latido con el motor apagado, así que toda la flota
+    // reporta en los últimos minutos (antes las detenidas salían «Sin señal» de hasta 4 h).
+    ultimoReporte: haceMin(entero(0, 3)),
     creadoEn: haceDias(entero(90, 1200)),
   }
   const sitio = sitioEnZona(areaId, fila.lat, fila.lng, { detenida: !enMarcha })
