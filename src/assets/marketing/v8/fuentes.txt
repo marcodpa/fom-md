@@ -159,3 +159,17 @@ cap-movil-cond-inicio            telefono  comparativa/web-v8-fotos/capturas-pan
 cap-movil-cond-mantenimiento     telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-mantenimiento.png
 cap-movil-cond-mapa              telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-mapa.png
 cap-movil-cond-perfil            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-perfil.png
+
+# Mantenimiento en Plataforma (T-123): demo en modo «reducir movimiento», 3x. Fotos de la ODT de
+# demostración (odt-009) servidas en local al capturar (scratchpad/t123/cap3x.py); no se subió nada.
+cap-mnt-lista                    panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-lista.png
+cap-mnt-revision                 panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-revision.png
+cap-mnt-resuelta                 panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-resuelta.png
+cap-mnt-fotos                    panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-fotos.png
+cap-mnt-plan                     panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-plan.png
+cap-movil-mnt-reportar           telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-reportar.png
+cap-movil-mnt-reportar-fotos     telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-reportar-fotos.png
+cap-movil-mnt-asignadas          telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-asignadas.png
+cap-movil-mnt-resuelta           telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-sup-resuelta.png
+cap-movil-mnt-fotos              telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-sup-fotos.png
+cap-movil-mnt-plan               telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-sup-plan.png
