@@ -24,12 +24,14 @@ export default function NavV8() {
   const grupoActual = GRUPOS_V8.find(g => g.claves.some(c => rutaV8(c) === actual))?.id
 
   useEffect(() => { cerrar() }, [pathname])
-  // Con el menú del teléfono abierto, la página de fondo no se desplaza.
+  // Con el menú del teléfono abierto, la página de fondo no se desplaza. Se bloquea en <body> y no
+  // en <html>: con <html> oculto, el overflow-x de <body> deja de pasar a la ventana, <body> se
+  // vuelve contenedor de desplazamiento y la barra sticky se va con la página (quedaba en -7000 px).
   useEffect(() => {
     if (!menu) return
-    const antes = document.documentElement.style.overflow
-    document.documentElement.style.overflow = 'hidden'
-    return () => { document.documentElement.style.overflow = antes }
+    const antes = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = antes }
   }, [menu])
   useEffect(() => {
     const fuera = e => { if (!barra.current?.contains(e.target)) setGrupo(null) }

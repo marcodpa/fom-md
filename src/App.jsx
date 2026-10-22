@@ -1,6 +1,6 @@
 import { lazy, Suspense, useLayoutEffect } from 'react'
 import CargaFom from './components/CargaFom'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import MarketingHeader from './components/marketing/MarketingChrome'
 import './styles/marketing.css'
 import './styles/marketing-backgrounds.css'
@@ -28,7 +28,7 @@ const Consola = lazy(() => import('./panel/Consola'))
 const MotionPage = lazy(() => import('./motion/MotionPage'))
 // T-104: web nueva (v8), aparte en /nuevo/* hasta que Marco la apruebe. Sus rutas salen de UNA
 // tabla (src/pages/v8/rutasV8.js); cada página se registra sola por nombre de archivo.
-import { RUTAS_V8, esRutaV8 } from './pages/v8/rutasV8'
+import { RUTAS_V8, PAGINAS_V8, PUBLICADA, esRutaV8 } from './pages/v8/rutasV8'
 if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
 
 function ScrollTop() {
@@ -64,11 +64,14 @@ export default function App() {
     <ScrollTop />
     <Suspense fallback={<CargaFom />}>
       <Routes>
-        <Route path="/" element={<Inicio />} />
-        {['plataforma','funciones','seguridad','areas','contacto','preguntas-frecuentes','app','beneficios','quienes-somos','que-ofrecemos'].map(path => {
+        {/* Con la web nueva publicada, las rutas reales son de v8 y las de v7 se retiran. */}
+        {!PUBLICADA && <Route path="/" element={<Inicio />} />}
+        {!PUBLICADA && ['plataforma','funciones','seguridad','areas','contacto','preguntas-frecuentes','app','beneficios','quienes-somos','que-ofrecemos'].map(path => {
           const Page = V7_PAGES[path] || Marketing
           return <Route key={path} path={'/' + path} element={<Page />} />
         })}
+        {/* Los enlaces viejos a /nuevo/* llevan a la página publicada. */}
+        {PUBLICADA && PAGINAS_V8.map(p => <Route key={'nuevo-' + p.clave} path={p.nueva} element={<Navigate to={p.real} replace />} />)}
         <Route path="/motion" element={<MotionPage />} />
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cambiar-clave-inicial" element={<CambiarClaveInicial />} />

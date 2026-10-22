@@ -10,7 +10,8 @@
 // nueva NO toca este archivo ni App.jsx.
 import { lazy } from 'react'
 
-export const PUBLICADA = false
+// Publicada el 22 oct 2026 (Marco: «aplica la nueva web a la web»).
+export const PUBLICADA = true
 export const BASE_V8 = '/nuevo'
 
 export const PAGINAS_V8 = [
