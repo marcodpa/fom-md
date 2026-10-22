@@ -26,8 +26,9 @@ const Entrar = lazy(() => import('./pages/Entrar'))
 const CambiarClaveInicial = lazy(() => import('./pages/CambiarClaveInicial'))
 const Consola = lazy(() => import('./panel/Consola'))
 const MotionPage = lazy(() => import('./motion/MotionPage'))
-// T-99: Inicio rediseñado (v8), aparte en /nuevo hasta que Marco lo apruebe.
-const InicioV8 = lazy(() => import('./pages/v8/InicioV8'))
+// T-104: web nueva (v8), aparte en /nuevo/* hasta que Marco la apruebe. Sus rutas salen de UNA
+// tabla (src/pages/v8/rutasV8.js); cada página se registra sola por nombre de archivo.
+import { RUTAS_V8, esRutaV8 } from './pages/v8/rutasV8'
 if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
 
 function ScrollTop() {
@@ -55,10 +56,11 @@ function ScrollTop() {
 export default function App() {
   const { pathname } = useLocation()
   const esConsola = pathname === '/motion' || pathname === '/entrar' || pathname === '/cambiar-clave-inicial' || pathname.startsWith('/panel')
-  const v7 = pathname === '/' || Boolean(V7_PAGES[pathname.slice(1)])
-  return <div id="top" className={esConsola ? undefined : `marketing-v2${v7 ? ' v7-shell' : ''}`}>
+  const v8 = esRutaV8(pathname)
+  const v7 = !v8 && (pathname === '/' || Boolean(V7_PAGES[pathname.slice(1)]))
+  return <div id="top" className={esConsola || v8 ? undefined : `marketing-v2${v7 ? ' v7-shell' : ''}`}>
     <a className="skip-link" href="#contenido">Saltar al contenido</a>
-    {!esConsola && <MarketingHeader />}
+    {!esConsola && !v8 && <MarketingHeader />}
     <ScrollTop />
     <Suspense fallback={<CargaFom />}>
       <Routes>
@@ -71,7 +73,7 @@ export default function App() {
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cambiar-clave-inicial" element={<CambiarClaveInicial />} />
         <Route path="/panel/*" element={<Consola />} />
-        <Route path="/nuevo" element={<InicioV8 />} />
+        {RUTAS_V8.map(({ clave, ruta, Componente }) => <Route key={clave} path={ruta} element={<Componente />} />)}
         <Route path="*" element={<Marketing />} />
       </Routes>
     </Suspense>

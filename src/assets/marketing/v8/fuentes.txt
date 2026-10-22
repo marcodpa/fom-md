@@ -1,0 +1,60 @@
+# Fotos y capturas de la web v8: nombre estable, tipo y fuente (rutas desde la raíz del repo).
+# Para cambiar una foto: cambia la ruta aquí (o usa el comando de una sola foto) y vuelve a correr
+#   python src/assets/marketing/v8/preparar_fotos.py --lista src/assets/marketing/v8/fuentes.txt
+# Las fotos nuevas de alta resolución llegarán a comparativa/web-v8-fotos/ (ver su INDICE.md).
+
+# Fotos con la pantalla actual integrada (paquete T-99)
+hero-monitor-carretera   foto  comparativa/web-v8-diseno/fotos-integradas/hero-monitor-carretera.jpg
+oficina-monitor-resumen  foto  comparativa/web-v8-diseno/fotos-integradas/oficina-monitor-resumen.jpg
+patio-monitor-mapa       foto  comparativa/web-v8-diseno/fotos-integradas/patio-monitor-mapa.jpg
+operadora-mapa           foto  comparativa/web-v8-diseno/fotos-integradas/operadora-mapa.jpg
+oficina-reportes         foto  comparativa/web-v8-diseno/fotos-integradas/oficina-reportes.jpg
+laptop-vehiculos         foto  comparativa/web-v8-diseno/fotos-integradas/laptop-vehiculos.jpg
+mano-app-perfil          foto  comparativa/web-v8-diseno/fotos-integradas/mano-app-perfil.jpg
+tecnico-app-unidad       foto  comparativa/web-v8-diseno/fotos-integradas/tecnico-app-unidad.jpg
+
+# Fotos de escena (de src/assets/marketing)
+telematica               foto  src/assets/marketing/v7/04-funciones/telematica.webp
+conductor-sos            foto  src/assets/marketing/generated-v6/driver-sos.png
+furgoneta-fom            foto  src/assets/marketing/v7/11-contacto/06.webp
+camion-marca             foto  src/assets/marketing/generated-v6/truck-brand.png
+fila-flota               foto  src/assets/marketing/generated-v6/fleet-lineup.png
+autopista-atardecer      foto  src/assets/marketing/v7/07-quienes-somos/05.webp
+reunion                  foto  src/assets/marketing/v7/11-contacto/reunion.webp
+camioneta-noche          foto  src/assets/marketing/v7/09-beneficios/01.webp
+camion-lateral-fom       foto  src/assets/marketing/v7/03-app/01.webp
+carretera-curvas         foto  src/assets/marketing/generated-v6/winding-road.png
+costa-ruta               foto  src/assets/marketing/v7/04-funciones/ruta.webp
+instalacion-gps          foto  src/assets/marketing/v7/11-contacto/05.webp
+camion-autopista         foto  src/assets/marketing/generated-v6/truck-highway.png
+aerea-terminal           foto  src/assets/marketing/generated-v6/aerial-terminal.png
+supervisor-fila          foto  src/assets/marketing/v7/06-areas/01.webp
+aerea-taller             foto  src/assets/marketing/generated-v6/aerial-workshop.png
+camioneta-ciudad         foto  src/assets/marketing/v7/03-app/03.webp
+camion-noche             foto  src/assets/marketing/v7/02-plataforma/10.webp
+furgoneta-ruta           foto  src/assets/marketing/v7/11-contacto/08.webp
+servidores               foto  src/assets/marketing/v7/02-plataforma/07.webp
+camara-tablero           foto  src/assets/marketing/generated-v6/dash-camera.png
+equipo-roles             foto  src/assets/marketing/v7/02-plataforma/roles.webp
+cabina-carretera         foto  src/assets/marketing/v7/05-seguridad/00.webp
+
+# Capturas reales del panel (planas, sin pérdida)
+cap-panel-resumen        panel  comparativa/web-v8-diseno/capturas-actuales/panel-resumen.png
+cap-panel-mapa           panel  comparativa/web-v8-diseno/capturas-actuales/panel-mapa.png
+cap-panel-alertas        panel  comparativa/web-v8-diseno/capturas-actuales/panel-alertas.png
+cap-panel-mantenimiento  panel  comparativa/web-v8-diseno/capturas-actuales/panel-mantenimiento.png
+cap-panel-reportes       panel  comparativa/web-v8-diseno/capturas-actuales/panel-reportes.png
+cap-panel-flota          panel  comparativa/web-v8-diseno/capturas-actuales/panel-flota.png
+cap-panel-inspecciones   panel  comparativa/web-v8-diseno/capturas-actuales/panel-inspecciones.png
+cap-panel-documentos     panel  comparativa/web-v8-diseno/capturas-actuales/panel-documentos.png
+cap-panel-personal       panel  comparativa/web-v8-diseno/capturas-actuales/panel-personal.png
+
+# Capturas reales de la app (planas, sin pérdida)
+cap-movil-cond-inicio          telefono  comparativa/web-v8-diseno/capturas-actuales/movil-cond-inicio.png
+cap-movil-cond-mantenimiento   telefono  comparativa/web-v8-diseno/capturas-actuales/movil-cond-mantenimiento.png
+cap-movil-cond-mapa            telefono  comparativa/web-v8-diseno/capturas-actuales/movil-cond-mapa.png
+cap-movil-cond-perfil          telefono  comparativa/web-v8-diseno/capturas-actuales/movil-cond-perfil.png
+cap-movil-sup-resumen          telefono  comparativa/web-v8-diseno/capturas-actuales/movil-sup-resumen.png
+cap-movil-sup-alertas          telefono  comparativa/web-v8-diseno/capturas-actuales/movil-sup-alertas.png
+cap-movil-sup-mantenimiento    telefono  comparativa/web-v8-diseno/capturas-actuales/movil-sup-mantenimiento.png
+cap-movil-sup-mapa             telefono  comparativa/web-v8-diseno/capturas-actuales/movil-sup-mapa.png

@@ -1,8 +1,6 @@
-import { Fragment } from 'react'
-
-// Logo FOM en vector (mismos trazos que public/brand/fom-logo.svg). Las flechas son siempre
-// azul FOM; las letras toman el color del texto que las rodea, para que el logo se lea igual
-// sobre la galería blanca (letras tinta) y sobre las bandas noche (letras blancas).
+// Logo FOM ORIGINAL en vector: mismos trazos que public/brand/fom-logo.svg (tres flechas azul
+// #349BFA + «FOM»). Las letras toman currentColor; en la web v8 (.v8-logo) son #f7f8fa, el
+// mismo blanco del archivo original.
 export function LogoV8({ className = '', titulo = 'FOM' }) {
   return <svg className={`v8-logo ${className}`} viewBox="0 0 280 84" role="img" aria-label={titulo}>
     <g fill="#349BFA" transform="translate(0 1)">
@@ -41,32 +39,18 @@ const PATHS = {
   arrow: <path d="M4 12h15m-6-6 6 6-6 6" />,
   chevron: <path d="m9 5 7 7-7 7" />,
   plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
+  grid: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>,
+  lock: <><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></>,
+  truck: <><path d="M2.5 6.5h11v10h-11Z" /><path d="M13.5 10h4l3 3.5v3h-7" /><circle cx="6.5" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></>,
+  camera: <><rect x="2.5" y="7" width="13" height="10" rx="2" /><path d="m15.5 11 6-3.5v9l-6-3.5" /></>,
+  chat: <path d="M4.5 18.5 3.5 21l3.4-1.3A8.5 8.5 0 1 0 3.5 12a8.4 8.4 0 0 0 1 4Z" />,
   login: <><path d="M14 4h3.5A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5H14" /><path d="M3.5 12h11m-4-4 4 4-4 4" /></>,
 }
 
+// <IconoV8 nombre="pin" />: decorativo (aria-hidden). Lista de nombres: claves de PATHS.
+export const ICONOS_V8 = Object.keys(PATHS)
+
 export function IconoV8({ nombre, className = '' }) {
   return <svg className={`v8-ico ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{PATHS[nombre]}</svg>
-}
-
-// Teléfono dibujado en CSS con una captura real de la app dentro.
-export function TelefonoV8({ src, alt, className = '', eager = false }) {
-  return <div className={`v8-phone ${className}`}>
-    <img src={src} alt={alt} width="390" height="844" loading={eager ? 'eager' : 'lazy'} decoding="async" />
-    <span className="v8-phone-island" aria-hidden="true" />
-  </div>
-}
-
-// Pantalla del panel web: marco fino oscuro con la captura real dentro.
-export function PantallaV8({ src, alt, className = '' }) {
-  return <div className={`v8-screen ${className}`}>
-    <img src={src} alt={alt} width="1430" height="953" loading="lazy" decoding="async" />
-  </div>
-}
-
-// Titulares que aparecen palabra por palabra. Cada línea es un bloque; cada palabra va en una
-// máscara para subir desde abajo. Sin animación, se lee como texto normal.
-export function Palabras({ lineas }) {
-  return lineas.map((linea, i) => <span className="v8-line" key={i}>
-    {linea.split(' ').map((palabra, j, todas) => <Fragment key={j}><span className="v8-w"><span className="v8-wi">{palabra}</span></span>{j < todas.length - 1 ? ' ' : ''}</Fragment>)}
-  </span>)
 }
