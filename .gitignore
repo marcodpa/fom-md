@@ -56,3 +56,7 @@ output/mantenimiento-supervisor/render.log
 output/mantenimiento-supervisor/web-build.log
 
 .impeccable/review/historial/
+
+# Archivos de subida grandes (se rehacen desde la carpeta del paquete)
+ops/deploy-*.tar
+ops/deploy-*.tar.sha256

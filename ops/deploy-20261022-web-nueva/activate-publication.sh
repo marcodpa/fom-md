@@ -17,7 +17,7 @@ test "$(grep -cE '^\s*root\s+/var/www/fom-web/releases/[A-Za-z0-9._-]+;\s*$' "$c
 oldroot=$(sed -nE 's|^\s*root\s+(/var/www/fom-web/releases/[A-Za-z0-9._-]+);\s*$|\1|p' "$config")
 test "$oldroot" != "$release" || fail 'Esta publicación ya está activa.'
 cd "$stage"
-sha256sum --quiet -c SHA256SUMS
+sha256sum --quiet -c SHA256SUMS || fail "El paquete subido está incompleto o dañado (no coincide con SHA256SUMS). No se cambió nada: volver a subirlo."
 nginx -t
 test ! -e "$release" || fail 'La carpeta de esta publicación ya existe; revisar el intento anterior.'
 install -d -m 0755 "$release"
