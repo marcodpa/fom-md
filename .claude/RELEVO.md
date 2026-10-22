@@ -66,4 +66,21 @@ turnos a menudo: continuarlos con SendMessage.
    fecha en órdenes). Informe: https://claude.ai/artifact/BrP3b7cdSLKRBqc2JQSgBf. Web y app ya
    arregladas (T-83 a T-85). Prueba local: `npx vite --mode demo` y `/panel?estres=1`.
 8. Web del 21 oct lista para publicar: ops/deploy-20261021-escala (comandos en su README; sirve
-   aunque la activa sea la del 6 o la del 20 oct).
+   aunque la activa sea la del 6 o la del 20 oct). Ya quedó viejo: hay que rearmar el paquete con
+   todo lo posterior cuando Marco lo pida (no armarlo con trabajo a medias en el árbol).
+9. En fom-core#713 (comentario) quedó lo que la app necesita: driving-scores/eventos para mobile,
+   rutas GPS de mobile (alta sin unidad, instalar, desmontar, receptor) y si la prueba de señal
+   puede ir antes de instalar.
+
+## En curso (22 oct, madrugada; Marco durmiendo)
+
+- Web pública nueva (estilo Apple, fondo azul noche del panel, vidrio): diseño APROBADO en
+  https://claude.ai/artifact/VtEqMcBgtdXFNSXS5ypJEf (11 páginas, escritorio y teléfono; fuentes en
+  scratchpad t99/canvas/project). Código en src/pages/v8 y src/components/v8 bajo rutas /nuevo/*
+  (T-104: base + Inicio; luego las otras 10 páginas en paralelo). Brief: scratchpad diseno/T104-WEB-CODIGO.md.
+  Animación con medida (1–2 momentos por página, como Apple).
+- Fotos (T-102): Marco aprobó tope de 50 créditos Higgsfield (además de 13,75 ya gastados sin
+  permiso). Nada mal montado: homografía, luz y color iguales; si no queda natural, otra foto o
+  captura plana. Livianas (AVIF/WebP por tamaños). Después: revisión independiente de cada imagen.
+- T-103: datos de demo con unidades en el agua → todas sobre calles del Zulia + prueba.
+- Regla nueva de Marco: lista con fecha = lo más nuevo primero (memoria lo-mas-nuevo-primero).
