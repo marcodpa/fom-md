@@ -84,3 +84,9 @@ turnos a menudo: continuarlos con SendMessage.
   captura plana. Livianas (AVIF/WebP por tamaños). Después: revisión independiente de cada imagen.
 - T-103: datos de demo con unidades en el agua → todas sobre calles del Zulia + prueba.
 - Regla nueva de Marco: lista con fecha = lo más nuevo primero (memoria lo-mas-nuevo-primero).
+
+## 22 oct tarde — web nueva publicada
+- Marco activó r3: FOM_WEB_PUBLISHED. Activa: /var/www/fom-web/releases/20261022-web-nueva-r2 (antes 20261006-apariencia-ordenes-v2).
+- Respaldo: /var/backups/fom-web/20261022-web-nueva-r2-20261022T144007-3531984.
+- Comprobado desde la PC: /, /plataforma, /funciones, /contacto, /panel/mapa = 200 y sirven index-C80onGmk.js (el del paquete).
+- Sobrantes por limpiar SOLO con OK de Marco: releases/20261022-web-nueva (parcial, root), /home/fomadmin/deploy-20261022-web-nueva, subida-20261022-r2, subida-20261022-r3.
