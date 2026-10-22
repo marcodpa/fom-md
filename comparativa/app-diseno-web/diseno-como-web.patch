@@ -1,7 +1,7 @@
 From 2581cf83b19ae476227262327ab72489b2526c13 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 14 Oct 2026 11:40:13 -0400
-Subject: [PATCH 01/25] Mapas con Mapbox, el mismo proveedor que el panel web
+Subject: [PATCH 01/26] Mapas con Mapbox, el mismo proveedor que el panel web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -3095,7 +3095,7 @@ index 0000000..269766b
 From de62044848b392b8caa43332444bea9c335718c8 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 09:05:25 -0400
-Subject: [PATCH 02/25] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
+Subject: [PATCH 02/26] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
  =?UTF-8?q?=20panel=20web:=20encabezado=20redondo=20en=20todas=20las=20pes?=
  =?UTF-8?q?ta=C3=B1as?=
 MIME-Version: 1.0
@@ -5530,7 +5530,7 @@ index 2ab97e8..1921048 100644
 From c000b636fd810bcce2f3a312f10fed67ade6af1c Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:14:53 -0400
-Subject: [PATCH 03/25] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
+Subject: [PATCH 03/26] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
  =?UTF-8?q?(tambi=C3=A9n=20en=20Expo=20Go),=20recorrido=20y=20entrada=20nu?=
  =?UTF-8?q?eva=20con=20el=20logo=20FOM?=
 MIME-Version: 1.0
@@ -26153,7 +26153,7 @@ index 5119764..7db24d0 100644
 From 50a59f9d818534889d46e3a94168948db6d9afa9 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:32:24 -0400
-Subject: [PATCH 04/25] Pantalla de carga FOM (motion) al arrancar y dentro de
+Subject: [PATCH 04/26] Pantalla de carga FOM (motion) al arrancar y dentro de
  la app, igual que la web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -27297,7 +27297,7 @@ index 9c82d64..8328c9a 100644
 From 1056c6b78ec4ebc10b57f795e36b0e6a5699274d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:04:43 -0400
-Subject: [PATCH 05/25] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
+Subject: [PATCH 05/26] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
  =?UTF-8?q?tas,=20mapa=20completo=20de=20la=20flota=20y=20arreglo=20del=20?=
  =?UTF-8?q?mapa=20en=20el=20tel=C3=A9fono?=
 MIME-Version: 1.0
@@ -29762,7 +29762,7 @@ index 0d9b55d..39566b2 100644
 From 3e5342f146d3967ea90b01f55ab4c251a554cc74 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:48:17 -0400
-Subject: [PATCH 06/25] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
+Subject: [PATCH 06/26] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
  =?UTF-8?q?,=20recorrido=20en=20el=20mapa=20completo,=20=C3=ADcono=20de=20?=
  =?UTF-8?q?veh=C3=ADculo=20de=20la=20web=20y=20espera=20nueva?=
 MIME-Version: 1.0
@@ -31408,7 +31408,7 @@ index 4fb8a10..ef7b519 100644
 From 6ec07ef815bd8196b71c53b9772e567d5931bf30 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 14:14:13 -0400
-Subject: [PATCH 07/25] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
+Subject: [PATCH 07/26] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
  =?UTF-8?q?=20el=20error=20=C2=ABStyle=20is=20not=20done=20loading=C2=BB?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32480,7 +32480,7 @@ index f6b5a22..e116c51 100644
 From 5f38ad38cd96d2426b421be91809e3017cbe4954 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 16:18:12 -0400
-Subject: [PATCH 08/25] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
+Subject: [PATCH 08/26] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
  =?UTF-8?q?=20200=20(el=20servidor=20de=20la=20app=20no=20acepta=20m=C3=A1?=
  =?UTF-8?q?s=20por=20pedido)?=
 MIME-Version: 1.0
@@ -32569,7 +32569,7 @@ index 8836fdd..2804942 100644
 From d8db74159e7bf9e52efb1c6faa6ee0abf78ee2ff Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:29:50 -0400
-Subject: [PATCH 09/25] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
+Subject: [PATCH 09/26] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
  =?UTF-8?q?=20tel=C3=A9fono=20sin=20Expo=20Go?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32732,7 +32732,7 @@ index 0086b83..f9ddcca 100644
 From 95b304af6cf2094fdef87a3885ce76ac6a994e5e Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:54:24 -0400
-Subject: [PATCH 10/25] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
+Subject: [PATCH 10/26] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
  =?UTF-8?q?nativo=20completo,=20animaciones=20y=20proyecto=20de=20Expo=20p?=
  =?UTF-8?q?ara=20la=20APK?=
 MIME-Version: 1.0
@@ -36626,7 +36626,7 @@ index 7e0fe42..23cabaa 100644
 From 2e0a3b7e59cee9887a7171b60f89f64efcde644f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:55:54 -0400
-Subject: [PATCH 11/25] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
+Subject: [PATCH 11/26] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
  =?UTF-8?q?o=20la=20compilaci=C3=B3n=20en=20Expo=20falla=20por=20mapbox-gl?=
  =?UTF-8?q?=203=20vs=20@rnmapbox/maps?=
 MIME-Version: 1.0
@@ -36656,7 +36656,7 @@ index 0000000..7c5134a
 From 8f73cfc0c36be11e3414c10a41964cce6e5b8cd2 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:20:22 -0400
-Subject: [PATCH 12/25] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
+Subject: [PATCH 12/26] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
  =?UTF-8?q?=20pedidos=20al=20servidor;=20teclado=20en=20la=20entrada=20(T-?=
  =?UTF-8?q?06=20a=20T-09,=20T-15)?=
 MIME-Version: 1.0
@@ -42315,7 +42315,7 @@ index 47f45a4..bd41d06 100644
 From f6b767485f055b63843290b9d57751bba10f5f60 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:42:17 -0400
-Subject: [PATCH 13/25] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
+Subject: [PATCH 13/26] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
  =?UTF-8?q?6,=20T-17):=20tarjetas=20del=20mapa=20en=20iOS,=20memorias=20po?=
  =?UTF-8?q?r=20generaci=C3=B3n,=20flota=20sin=20red?=
 MIME-Version: 1.0
@@ -42752,7 +42752,7 @@ index b1893fe..11e8247 100644
 From a72f6240bc42f357d00cc22fc14132a23dadc999 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 10:22:30 -0400
-Subject: [PATCH 14/25] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
+Subject: [PATCH 14/26] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
  =?UTF-8?q?=20app=20(T-19=20a=20T-23):=20SOS,=20sesi=C3=B3n,=20red,=20pant?=
  =?UTF-8?q?allas,=20mapas=20y=20limpieza?=
 MIME-Version: 1.0
@@ -48916,7 +48916,7 @@ index 479ba30..63d5a63 100644
 From d5515163a0aaed218e618724c348a98585f81a5b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Mon, 19 Oct 2026 15:15:53 -0400
-Subject: [PATCH 15/25] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
+Subject: [PATCH 15/26] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
  =?UTF-8?q?=20app=20(T-33=20a=20T-41)=20y=20trabajo=20pendiente=20de=20otr?=
  =?UTF-8?q?a=20sesi=C3=B3n?=
 MIME-Version: 1.0
@@ -57967,7 +57967,7 @@ index 0000000..287208e
 From 792b0cbbe44bdd70d321c2fa9e504dd306d27d9f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 09:56:46 -0400
-Subject: [PATCH 16/25] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
+Subject: [PATCH 16/26] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
  =?UTF-8?q?inspecciones=20programadas=20y=20carga=20en=20c=C3=ADrculo=20(T?=
  =?UTF-8?q?-47=20a=20T-53)?=
 MIME-Version: 1.0
@@ -66593,7 +66593,7 @@ index 9c4c0ac..548f103 100644
 From 2fb6ae2ec8e7be32857eceac6d91afcee458c710 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 11:15:45 -0400
-Subject: [PATCH 17/25] Inspecciones simples, calendario por persona, ODT
+Subject: [PATCH 17/26] Inspecciones simples, calendario por persona, ODT
  asignadas, fotos y teclado (T-60 a T-65)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -70046,7 +70046,7 @@ index 2147bee..3650649 100644
 From 31237d42b58cf5b50abb359a3f6f92a2dc2d966b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 09:02:22 -0400
-Subject: [PATCH 18/25] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
+Subject: [PATCH 18/26] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
  =?UTF-8?q?ue=20suben,=20una=20inspecci=C3=B3n=20por=20d=C3=ADa=20y=20fine?=
  =?UTF-8?q?s=20de=20semana=20(T-67=20a=20T-75)?=
 MIME-Version: 1.0
@@ -73909,7 +73909,7 @@ index 08bddf9..16d9fef 100644
 From 9e668a4055466a8d1a72a98677a27bdf462839fe Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 10:04:55 -0400
-Subject: [PATCH 19/25] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
+Subject: [PATCH 19/26] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
  =?UTF-8?q?=C3=A1fico,=20y=20mantenimiento=20con=20la=20misma=20tarjeta=20?=
  =?UTF-8?q?(T-77,=20T-78)?=
 MIME-Version: 1.0
@@ -77071,7 +77071,7 @@ index 3b8c1a3..2b0d3a6 100644
 From 178d9a3cc8da965ee79a1bc11dd166d3ad458859 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 10:19:38 -0400
-Subject: [PATCH 20/25] Mantenimiento: borde normal en la tarjeta; el color
+Subject: [PATCH 20/26] Mantenimiento: borde normal en la tarjeta; el color
  solo en el degradado izquierdo
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
@@ -77099,7 +77099,7 @@ index c4e8b85..4a664f1 100644
 From 4f5b2dcc7c5bfd01841529370065bb4dba3dde65 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 11:07:44 -0400
-Subject: [PATCH 21/25] =?UTF-8?q?Empresas=20grandes:=20todas=20las=20unida?=
+Subject: [PATCH 21/26] =?UTF-8?q?Empresas=20grandes:=20todas=20las=20unida?=
  =?UTF-8?q?des,=20listas=20r=C3=A1pidas=20y=20=C2=ABFaltan=20hoy=C2=BB=20c?=
  =?UTF-8?q?ompleto=20(T-84,=20T-85)?=
 MIME-Version: 1.0
@@ -79641,7 +79641,7 @@ index 308c4c0..a74a9b9 100644
 From dbb7ea9ed377a8216a11468d50182c78b29ac57f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 14:14:50 -0400
-Subject: [PATCH 22/25] =?UTF-8?q?Sin=20se=C3=B1al=20con=20tiempo,=20Report?=
+Subject: [PATCH 22/26] =?UTF-8?q?Sin=20se=C3=B1al=20con=20tiempo,=20Report?=
  =?UTF-8?q?es=20con=20tablero,=20manejo=20del=20conductor=20en=20todas=20p?=
  =?UTF-8?q?artes=20y=20Mantenimiento=20sin=20=C2=ABTodas=20las=20=C3=B3rde?=
  =?UTF-8?q?nes=C2=BB=20(T-87,=20T-89,=20T-90,=20T-92)?=
@@ -83966,7 +83966,7 @@ index b5779b0..6f8105e 100644
 From 218652185d63b5858d91eaec56913f6443a9403b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 14:31:19 -0400
-Subject: [PATCH 23/25] =?UTF-8?q?Lo=20m=C3=A1s=20nuevo=20primero=20en=20to?=
+Subject: [PATCH 23/26] =?UTF-8?q?Lo=20m=C3=A1s=20nuevo=20primero=20en=20to?=
  =?UTF-8?q?das=20las=20listas=20con=20fecha;=20la=20tabla=20de=20manejo=20?=
  =?UTF-8?q?abre=20el=20perfil=20(T-93)?=
 MIME-Version: 1.0
@@ -84354,7 +84354,7 @@ index 4a6ebbf..be169d7 100644
 From d9eb99b35db6ce7e48276cf302b2d23684c53009 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 14:54:34 -0400
-Subject: [PATCH 24/25] =?UTF-8?q?Manejo:=20vuelve=20el=20anillo=20de=20sie?=
+Subject: [PATCH 24/26] =?UTF-8?q?Manejo:=20vuelve=20el=20anillo=20de=20sie?=
  =?UTF-8?q?mpre=20en=20la=20app,=20con=20el=20per=C3=ADodo=207/28=20(T-97)?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -84750,7 +84750,7 @@ index e402be5..a0655eb 100644
 From 44a81662499f1c1802ccb9c618ea47cbe61d7c7d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 15:09:40 -0400
-Subject: [PATCH 25/25] =?UTF-8?q?Panel=20de=20GPS=20en=20la=20app:=20inven?=
+Subject: [PATCH 25/26] =?UTF-8?q?Panel=20de=20GPS=20en=20la=20app:=20inven?=
  =?UTF-8?q?tario,=20nuevo=20GPS,=20instalar=20y=20diagn=C3=B3stico=20(T-96?=
  =?UTF-8?q?)?=
 MIME-Version: 1.0
@@ -87794,6 +87794,111 @@ index 3aafe1b..45c958b 100644
 +    throw new Error(mensajeDe(e));
 +  }
 +}
+-- 
+2.55.0.windows.3
+
+
+From 125f209f0aee1d43d37d32682294b496ece09c1d Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 20:15:42 -0400
+Subject: [PATCH 26/26] =?UTF-8?q?Manejo:=20per=C3=ADodo=207/30=20d=C3=ADas?=
+ =?UTF-8?q?=20como=20la=20web=20(el=20servidor=20no=20acepta=2028)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/mas.tsx            | 2 +-
+ src/app/mi-perfil.tsx               | 2 +-
+ src/app/ver-perfil.tsx              | 2 +-
+ src/components/manejo-conductor.tsx | 6 +++---
+ src/lib/manejo.ts                   | 2 +-
+ 5 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/src/app/(driver)/mas.tsx b/src/app/(driver)/mas.tsx
+index ac5e111..8658da3 100644
+--- a/src/app/(driver)/mas.tsx
++++ b/src/app/(driver)/mas.tsx
+@@ -249,7 +249,7 @@ export default function PerfilScreen() {
+               />
+             </Appear>
+ 
+-            {/* Índice de manejo: el anillo de siempre, con el selector 7 / 28 días. */}
++            {/* Índice de manejo: el anillo de siempre, con el selector 7 / 30 días. */}
+             {user.drives ? (
+               <Appear delay={40} distance={12}>
+                 <ManejoConductor propio />
+diff --git a/src/app/mi-perfil.tsx b/src/app/mi-perfil.tsx
+index 1e06b2d..b7e0cca 100644
+--- a/src/app/mi-perfil.tsx
++++ b/src/app/mi-perfil.tsx
+@@ -155,7 +155,7 @@ export default function MiPerfilScreen() {
+                 </View>
+               </View>
+ 
+-              {/* Índice de manejo seguro (solo si conduces), con el selector 7 / 28 días. */}
++              {/* Índice de manejo seguro (solo si conduces), con el selector 7 / 30 días. */}
+               {user.drives ? <ManejoConductor propio /> : null}
+ 
+               {/* Mis datos. */}
+diff --git a/src/app/ver-perfil.tsx b/src/app/ver-perfil.tsx
+index fbd4672..d135acf 100644
+--- a/src/app/ver-perfil.tsx
++++ b/src/app/ver-perfil.tsx
+@@ -152,7 +152,7 @@ export default function VerPerfilScreen() {
+               ))}
+             </Card>
+ 
+-            {/* Índice de manejo seguro (solo conductores), con el selector 7 / 28 días. */}
++            {/* Índice de manejo seguro (solo conductores), con el selector 7 / 30 días. */}
+             {conduce ? (
+               <ManejoConductor userId={userId} nombre={perfil.nombre} empresaId={params.companyId} />
+             ) : null}
+diff --git a/src/components/manejo-conductor.tsx b/src/components/manejo-conductor.tsx
+index a0655eb..f9acd36 100644
+--- a/src/components/manejo-conductor.tsx
++++ b/src/components/manejo-conductor.tsx
+@@ -37,7 +37,7 @@ import { miles } from '@/utils/numero';
+ 
+ /*
+  * «MANEJO» — el ÍNDICE de siempre de la app (el anillo de antes de T-92), con
+- * el único añadido del selector 7 / 28 días; la pastilla «49 · Atención» de las
++ * el único añadido del selector 7 / 30 días; la pastilla «49 · Atención» de las
+  * listas y la tabla del Resumen, como en la web. Tonos y textos de la pastilla
+  * salen de `@/lib/manejo`, que es copia de `src/panel/datos/manejo.js`.
+  *
+@@ -90,7 +90,7 @@ function veredictoDe(score: Omit<DriverScore, 'userId'>): string {
+   return rango === 'amarillo' ? 'Puede mejorar' : 'Requiere atención';
+ }
+ 
+-/** El selector 7 / 28 días, encima de la tarjeta: lo único nuevo sobre el índice de siempre. */
++/** El selector 7 / 30 días, encima de la tarjeta: lo único nuevo sobre el índice de siempre. */
+ function SelectorDias({ dias, onCambiar }: { dias: number; onCambiar: (d: number) => void }) {
+   const { spacing } = useTheme();
+   return (
+@@ -147,7 +147,7 @@ function EventoRow({ label, valor }: { label: string; valor: number }) {
+ }
+ 
+ /**
+- * El índice de manejo de una persona, con el selector 7 / 28 días.
++ * El índice de manejo de una persona, con el selector 7 / 30 días.
+  * - `propio`: el de la sesión (`/driver-metrics/me`), con la tarjeta del perfil
+  *   (`TarjetaIndice`), la misma de antes en «Perfil» y «Mi perfil».
+  * - si no, el de `userId` en la empresa `empresaId` (o la de la sesión), con
+diff --git a/src/lib/manejo.ts b/src/lib/manejo.ts
+index 7ccf32c..e98571b 100644
+--- a/src/lib/manejo.ts
++++ b/src/lib/manejo.ts
+@@ -14,7 +14,7 @@ import type { ColorTokens } from '@/theme';
+ import { miles } from '@/utils/numero';
+ 
+ /** Períodos que se pueden elegir (días hacia atrás desde hoy). */
+-export const DIAS_MANEJO = [7, 28] as const;
++export const DIAS_MANEJO = [7, 30] as const; // igual que la web: el servidor acepta 7, 30 o 90
+ export type DiasManejo = (typeof DIAS_MANEJO)[number];
+ 
+ /** Calificación, con los mismos nombres que usa el servidor en la web. */
 -- 
 2.55.0.windows.3
 
