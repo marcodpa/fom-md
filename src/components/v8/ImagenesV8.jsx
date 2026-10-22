@@ -12,7 +12,7 @@
 // desenfoque ni transform que reescale el contenido.
 // <picture> va con display: contents: el <img> sigue siendo la caja que maquetan las páginas
 // (className, alto, object-position y data-* van al <img>).
-import { fotoV8, MEDIA_MOVIL_V8 } from './fotosV8'
+import { fotoV8, hayFotoV8, MEDIA_MOVIL_V8 } from './fotosV8'
 
 const FUNDIDOS = { y: 'v8-funde-y', b: 'v8-funde-b', o: 'v8-funde-o', l: 'v8-funde-l', r: 'v8-funde-r' }
 const PICTURE = { display: 'contents' }
@@ -33,10 +33,27 @@ function Fuentes({ f, sizes, movil }) {
 
 // movil={false}: usa la foto de escritorio también en el teléfono (cuando la composición del
 // teléfono necesita el encuadre horizontal).
-export function FotoIntegradaV8({ nombre, alt, fundido = 'y', sizes = '100vw', prioridad = false, movil = true, alto, posicion, className = '', style, ...resto }) {
-  const f = fotoV8(nombre)
-  if (!f) return null
-  const clases = ['v8-foto', FUNDIDOS[fundido] || (fundido === 'ninguno' ? 'is-objeto' : ''), alto ? 'is-cubre' : '', className].filter(Boolean).join(' ')
+// marco (T-118, pedido de Marco: el degradado no queda bien en las fotos de escena):
+//  - 'fundido' (por defecto): bordes fundidos con el fondo según `fundido`. Solo para fotos que
+//    son fondo a sangre de pantalla completa (paisajes, aéreas, heroes).
+//  - 'redondo': foto de escena dentro del contenido (personas, oficinas, monitores, talleres,
+//    cabinas, objetos con fondo): completa y rectangular, esquinas de 28 px, sin máscara, sin
+//    borde ni sombra. Ignora `fundido`.
+//  - 'plano': igual que 'redondo' pero sin radio propio, para la foto que llena el borde de una
+//    tarjeta de vidrio (la tarjeta la recorta con su propio radio).
+// Con 'redondo' o 'plano' se sirve sola la versión <nombre>-plena (sin el fundido horneado en la
+// orilla ni el alfa) si existe en el catálogo.
+// movilNombre: otra foto (nombre estable) para el teléfono en vez de <nombre>-movil, p. ej. las
+// portadas verticales de T-120 (`inicio-hero-movil-v`). Si aún no existe en el catálogo, se usa
+// la de siempre: la página queda lista para enchufarla con solo correr preparar_fotos.py.
+const MARCOS = { redondo: 'is-redonda', plano: 'is-plana' }
+export function FotoIntegradaV8({ nombre, alt, fundido = 'y', marco = 'fundido', sizes = '100vw', prioridad = false, movil = true, movilNombre, alto, posicion, className = '', style, ...resto }) {
+  const sinFundido = Boolean(MARCOS[marco])
+  const base = fotoV8(sinFundido && hayFotoV8(`${nombre}-plena`) ? `${nombre}-plena` : nombre)
+  if (!base) return null
+  const otra = movilNombre && hayFotoV8(movilNombre) ? fotoV8(movilNombre) : null
+  const f = otra ? { ...base, movil: otra } : base
+  const clases = ['v8-foto', sinFundido ? MARCOS[marco] : FUNDIDOS[fundido] || (fundido === 'ninguno' ? 'is-objeto' : ''), alto ? 'is-cubre' : '', className].filter(Boolean).join(' ')
   return <picture style={PICTURE}>
     <Fuentes f={f} sizes={sizes} movil={movil} />
     <img className={clases} src={f.src} srcSet={f.srcSet} sizes={sizes} width={f.width} height={f.height} alt={alt}
@@ -62,7 +79,7 @@ export function CapturaFlotanteV8({ nombre, alt, tipo, ancho, sizes, nota = fals
   const medida = sizes || (typeof ancho === 'number' ? `${Math.max(ancho - marco, 1)}px` : t === 'telefono' ? '280px' : `(min-width: 1240px) ${Math.min(1160, tope)}px, calc(100vw - 56px)`)
   const etiqueta = nota === true ? (t === 'telefono' ? 'Captura real de la app · Datos de demostración' : 'Captura real del panel · Datos de demostración') : nota
   return <figure className={`v8-captura-figura ${className}`} style={{ width: anchoCss, maxWidth: `min(100%, ${tope + marco}px)`, ...style }}>
-    <div className={`v8-captura is-${t}`}>
+    <div className={`v8-captura is-${t}`} data-v8-3d="captura">
       <picture style={PICTURE}>
         <Fuentes f={f} sizes={medida} movil={false} />
         <img src={f.src} srcSet={f.srcSet} sizes={medida} width={f.width} height={f.height} alt={alt}

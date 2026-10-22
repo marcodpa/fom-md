@@ -1,0 +1,1894 @@
+{
+ "inicio|escritorio": [
+  {
+   "nombre": "hero-monitor-carretera",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 566,
+   "w": 1440,
+   "h": 814,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "oficina-monitor-resumen-plena",
+   "clase": "v8-foto is-redonda inicio-duo-foto",
+   "x": 152,
+   "y": 2162,
+   "w": 1136,
+   "h": 642,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-resumen",
+   "clase": "",
+   "x": 201,
+   "y": 2312,
+   "w": 212,
+   "h": 459,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "operadora-mapa-plena",
+   "clase": "v8-foto is-plana",
+   "x": 153,
+   "y": 3543,
+   "w": 398,
+   "h": 340,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "telematica-plena",
+   "clase": "v8-foto is-plana",
+   "x": 573,
+   "y": 3543,
+   "w": 398,
+   "h": 340,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-mantenimiento",
+   "clase": "",
+   "x": 1091,
+   "y": 3580,
+   "w": 202,
+   "h": 437,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "oficina-reportes-plena",
+   "clase": "v8-foto is-plana",
+   "x": 1413,
+   "y": 3543,
+   "w": 398,
+   "h": 340,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-reportes",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "tecnico-app-unidad-plena",
+   "clase": "v8-foto is-plana",
+   "x": 1833,
+   "y": 3543,
+   "w": 398,
+   "h": 340,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-alertas",
+   "clase": "",
+   "x": 2351,
+   "y": 3580,
+   "w": 202,
+   "h": 437,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "conductor-sos-plena",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 703,
+   "y": 4207,
+   "w": 585,
+   "h": 439,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "patio-monitor-mapa-plena",
+   "clase": "v8-foto is-redonda inicio-mapa-foto",
+   "x": 152,
+   "y": 5167,
+   "w": 1136,
+   "h": 642,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "furgoneta-fom-plena",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 152,
+   "y": 6893,
+   "w": 585,
+   "h": 585,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  }
+ ],
+ "plataforma|escritorio": [
+  {
+   "nombre": "oficina-monitor-resumen",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 602,
+   "w": 1440,
+   "h": 814,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-resumen",
+   "clase": "",
+   "x": 133,
+   "y": 1800,
+   "w": 1174,
+   "h": 734,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-resumen",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "operadora-mapa-plena",
+   "clase": "v8-foto is-redonda plat-webapp-foto",
+   "x": 658,
+   "y": 3062,
+   "w": 630,
+   "h": 356,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 1072,
+   "y": 3036,
+   "w": 182,
+   "h": 394,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "patio-monitor-mapa-plena",
+   "clase": "v8-foto is-redonda plat-mapa-foto",
+   "x": 152,
+   "y": 3822,
+   "w": 1136,
+   "h": 642,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "servidores-plena",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 152,
+   "y": 4808,
+   "w": 585,
+   "h": 439,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "equipo-roles-plena",
+   "clase": "v8-foto is-redonda plat-roles-foto",
+   "x": 152,
+   "y": 5672,
+   "w": 453,
+   "h": 567,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  }
+ ],
+ "app|escritorio": [
+  {
+   "nombre": "mano-app-perfil",
+   "clase": "v8-foto v8-funde-l app-hero-foto",
+   "x": 547,
+   "y": 78,
+   "w": 893,
+   "h": 560,
+   "mask": "linear-gradient(90deg, rgba(0,",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-inicio",
+   "clase": "",
+   "x": 251,
+   "y": 1112,
+   "w": 262,
+   "h": 567,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-mantenimiento",
+   "clase": "",
+   "x": 579,
+   "y": 1029,
+   "w": 282,
+   "h": 610,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-perfil",
+   "clase": "",
+   "x": 927,
+   "y": 1112,
+   "w": 262,
+   "h": 567,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-inicio",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-mantenimiento",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-perfil",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "tecnico-app-unidad-plena",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 703,
+   "y": 1971,
+   "w": 585,
+   "h": 439,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "camion-lateral-fom-plena",
+   "clase": "v8-foto is-redonda app-unidad-foto",
+   "x": 152,
+   "y": 2629,
+   "w": 630,
+   "h": 354,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-mapa",
+   "clase": "",
+   "x": 211,
+   "y": 2588,
+   "w": 192,
+   "h": 415,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "camioneta-ciudad-plena",
+   "clase": "v8-foto is-redonda app-indice-foto",
+   "x": 658,
+   "y": 3238,
+   "w": 630,
+   "h": 341,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-perfil",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  }
+ ],
+ "funciones|escritorio": [
+  {
+   "nombre": "costa-ruta-plena",
+   "clase": "v8-foto is-plana funciones-costa-plena",
+   "x": 0,
+   "y": 618,
+   "w": 1440,
+   "h": 594,
+   "mask": "linear-gradient(90deg, rgba(0,",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "operadora-mapa",
+   "clase": "v8-foto v8-funde-o funciones-gps-foto",
+   "x": 658,
+   "y": 1413,
+   "w": 630,
+   "h": 356,
+   "mask": "radial-gradient(70% 72% at 50%",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "telematica-plena",
+   "clase": "v8-foto is-redonda funciones-telematica-foto",
+   "x": 130,
+   "y": 2213,
+   "w": 1181,
+   "h": 664,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-mantenimiento",
+   "clase": "",
+   "x": 579,
+   "y": 3452,
+   "w": 698,
+   "h": 436,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-reportes",
+   "clase": "",
+   "x": 579,
+   "y": 3452,
+   "w": 698,
+   "h": 436,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-alertas",
+   "clase": "",
+   "x": 579,
+   "y": 3452,
+   "w": 698,
+   "h": 436,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-mantenimiento",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-alertas",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-reportes",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "oficina-reportes",
+   "clase": "v8-foto v8-funde-r v8-escena-foto ",
+   "x": 0,
+   "y": 4121,
+   "w": 893,
+   "h": 504,
+   "mask": "linear-gradient(270deg, rgba(0",
+   "radio": "0px",
+   "vw": 1440
+  }
+ ],
+ "seguridad|escritorio": [
+  {
+   "nombre": "cabina-carretera",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 78,
+   "w": 1440,
+   "h": 863,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-alertas",
+   "clase": "",
+   "x": 163,
+   "y": 1365,
+   "w": 1114,
+   "h": 696,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-alertas",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "camara-tablero-plena",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 152,
+   "y": 2633,
+   "w": 585,
+   "h": 439,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "mano-app-perfil-plena",
+   "clase": "v8-foto is-redonda seguridad-puntaje-foto",
+   "x": 152,
+   "y": 3357,
+   "w": 630,
+   "h": 356,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "conductor-sos-plena",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 703,
+   "y": 3948,
+   "w": 585,
+   "h": 439,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  }
+ ],
+ "areas|escritorio": [
+  {
+   "nombre": "aerea-terminal",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 565,
+   "w": 1440,
+   "h": 814,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "fila-flota-plena",
+   "clase": "v8-foto is-redonda areas-grupos-foto",
+   "x": 658,
+   "y": 1575,
+   "w": 630,
+   "h": 356,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "aerea-taller-plena",
+   "clase": "v8-foto is-redonda areas-geo-foto",
+   "x": 152,
+   "y": 2397,
+   "w": 1136,
+   "h": 642,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-mapa",
+   "clase": "",
+   "x": 163,
+   "y": 3396,
+   "w": 1114,
+   "h": 696,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  }
+ ],
+ "quienes-somos|escritorio": [
+  {
+   "nombre": "autopista-atardecer",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 491,
+   "w": 1440,
+   "h": 814,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "supervisor-fila-plena",
+   "clase": "v8-foto is-redonda qs-fila-foto",
+   "x": 152,
+   "y": 1756,
+   "w": 1136,
+   "h": 640,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "carretera-curvas-plena",
+   "clase": "v8-foto is-plana is-cubre qs-principio-foto",
+   "x": 153,
+   "y": 2771,
+   "w": 363,
+   "h": 260,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-mapa",
+   "clase": "v8-foto is-plana is-cubre qs-principio-foto",
+   "x": 538,
+   "y": 2771,
+   "w": 363,
+   "h": 260,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "tecnico-app-unidad-plena",
+   "clase": "v8-foto is-plana is-cubre qs-principio-foto",
+   "x": 924,
+   "y": 2771,
+   "w": 363,
+   "h": 260,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  }
+ ],
+ "que-ofrecemos|escritorio": [
+  {
+   "nombre": "laptop-vehiculos",
+   "clase": "v8-foto is-objeto qo-hero-img",
+   "x": 0,
+   "y": 166,
+   "w": 864,
+   "h": 722,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "patio-monitor-mapa-plena",
+   "clase": "v8-foto is-plana is-cubre qo-tarjeta-foto",
+   "x": 153,
+   "y": 1087,
+   "w": 363,
+   "h": 280,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "tecnico-app-unidad-plena",
+   "clase": "v8-foto is-plana is-cubre qo-tarjeta-foto",
+   "x": 538,
+   "y": 1087,
+   "w": 363,
+   "h": 280,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "conductor-sos-plena",
+   "clase": "v8-foto is-plana is-cubre qo-tarjeta-foto",
+   "x": 924,
+   "y": 1087,
+   "w": 363,
+   "h": 280,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "camion-marca-plena",
+   "clase": "v8-foto is-redonda qo-insp-foto",
+   "x": 703,
+   "y": 1766,
+   "w": 585,
+   "h": 439,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-cond-mantenimiento",
+   "clase": "",
+   "x": 1109,
+   "y": 1850,
+   "w": 182,
+   "h": 394,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-reportes",
+   "clase": "",
+   "x": 669,
+   "y": 2444,
+   "w": 608,
+   "h": 380,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "instalacion-gps-plena",
+   "clase": "v8-foto is-redonda qo-gps-foto",
+   "x": 152,
+   "y": 3057,
+   "w": 585,
+   "h": 585,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  }
+ ],
+ "beneficios|escritorio": [
+  {
+   "nombre": "camioneta-noche",
+   "clase": "v8-foto v8-funde-l ben-hero-img",
+   "x": 490,
+   "y": 78,
+   "w": 950,
+   "h": 578,
+   "mask": "linear-gradient(90deg, rgba(0,",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-flota",
+   "clase": "",
+   "x": 579,
+   "y": 980,
+   "w": 698,
+   "h": 436,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-vehiculos",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-mapa",
+   "clase": "",
+   "x": 579,
+   "y": 980,
+   "w": 698,
+   "h": 436,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-alertas",
+   "clase": "",
+   "x": 579,
+   "y": 980,
+   "w": 698,
+   "h": 436,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-alertas",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-panel-reportes",
+   "clase": "",
+   "x": 579,
+   "y": 980,
+   "w": 698,
+   "h": 436,
+   "mask": "none",
+   "radio": "16px",
+   "vw": 1440
+  },
+  {
+   "nombre": "cap-movil-sup-reportes",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "40px",
+   "vw": 1440
+  },
+  {
+   "nombre": "camion-autopista",
+   "clase": "v8-foto v8-funde-y ben-campo-foto",
+   "x": 0,
+   "y": 1853,
+   "w": 1440,
+   "h": 814,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 1440
+  }
+ ],
+ "preguntas-frecuentes|escritorio": [
+  {
+   "nombre": "camion-noche",
+   "clase": "v8-foto v8-funde-b preguntas-hero-foto",
+   "x": 0,
+   "y": 495,
+   "w": 1440,
+   "h": 560,
+   "mask": "linear-gradient(rgb(0, 0, 0) 0",
+   "radio": "0px",
+   "vw": 1440
+  }
+ ],
+ "contacto|escritorio": [
+  {
+   "nombre": "furgoneta-ruta",
+   "clase": "v8-foto v8-funde-y contacto-hero-foto",
+   "x": 0,
+   "y": 78,
+   "w": 1440,
+   "h": 900,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 1440
+  },
+  {
+   "nombre": "reunion-plena",
+   "clase": "v8-foto is-redonda",
+   "x": 152,
+   "y": 1464,
+   "w": 450,
+   "h": 253,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  },
+  {
+   "nombre": "instalacion-gps-plena",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 703,
+   "y": 2442,
+   "w": 585,
+   "h": 585,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 1440
+  }
+ ],
+ "inicio|telefono": [
+  {
+   "nombre": "inicio-hero-movil-v",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 576,
+   "w": 390,
+   "h": 690,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "oficina-monitor-resumen-plena",
+   "clase": "v8-foto is-redonda inicio-duo-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-resumen",
+   "clase": "",
+   "x": 62,
+   "y": 1825,
+   "w": 266,
+   "h": 576,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "operadora-mapa-plena",
+   "clase": "v8-foto is-plana",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 67,
+   "y": 3294,
+   "w": 206,
+   "h": 446,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "telematica-plena-movil",
+   "clase": "v8-foto is-plana",
+   "x": 335,
+   "y": 3267,
+   "w": 298,
+   "h": 250,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-mantenimiento",
+   "clase": "",
+   "x": 695,
+   "y": 3294,
+   "w": 206,
+   "h": 446,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "oficina-reportes-plena",
+   "clase": "v8-foto is-plana",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-reportes",
+   "clase": "",
+   "x": 1009,
+   "y": 3294,
+   "w": 206,
+   "h": 446,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "tecnico-app-unidad-plena",
+   "clase": "v8-foto is-plana",
+   "x": 1277,
+   "y": 3267,
+   "w": 298,
+   "h": 250,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-alertas",
+   "clase": "",
+   "x": 1637,
+   "y": 3294,
+   "w": 206,
+   "h": 446,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "conductor-sos-plena-movil",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 20,
+   "y": 3708,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "patio-monitor-mapa-plena",
+   "clase": "v8-foto is-redonda inicio-mapa-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 62,
+   "y": 5178,
+   "w": 266,
+   "h": 576,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "furgoneta-fom-plena-movil",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 20,
+   "y": 6943,
+   "w": 350,
+   "h": 380,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  }
+ ],
+ "plataforma|telefono": [
+  {
+   "nombre": "plataforma-hero-movil-v",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 439,
+   "w": 390,
+   "h": 690,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-resumen",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-resumen",
+   "clase": "",
+   "x": 62,
+   "y": 1327,
+   "w": 266,
+   "h": 576,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "operadora-mapa-plena",
+   "clase": "v8-foto is-redonda plat-webapp-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 87,
+   "y": 2592,
+   "w": 216,
+   "h": 467,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "patio-monitor-mapa-plena",
+   "clase": "v8-foto is-redonda plat-mapa-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 62,
+   "y": 3330,
+   "w": 266,
+   "h": 576,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "servidores-plena-movil",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 20,
+   "y": 4321,
+   "w": 350,
+   "h": 438,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "equipo-roles-plena-movil",
+   "clase": "v8-foto is-redonda plat-roles-foto",
+   "x": 20,
+   "y": 5316,
+   "w": 350,
+   "h": 438,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  }
+ ],
+ "app|telefono": [
+  {
+   "nombre": "mano-app-perfil-movil",
+   "clase": "v8-foto v8-funde-l app-hero-foto",
+   "x": 0,
+   "y": 471,
+   "w": 390,
+   "h": 480,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-inicio",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-mantenimiento",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-perfil",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-inicio",
+   "clase": "",
+   "x": 27,
+   "y": 1123,
+   "w": 236,
+   "h": 511,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-mantenimiento",
+   "clase": "",
+   "x": 291,
+   "y": 1123,
+   "w": 236,
+   "h": 511,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-perfil",
+   "clase": "",
+   "x": 555,
+   "y": 1123,
+   "w": 236,
+   "h": 511,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "tecnico-app-unidad-plena-movil",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 20,
+   "y": 1922,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "camion-lateral-fom-plena",
+   "clase": "v8-foto is-redonda app-unidad-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-mapa",
+   "clase": "",
+   "x": 82,
+   "y": 2949,
+   "w": 226,
+   "h": 489,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "camioneta-ciudad-plena",
+   "clase": "v8-foto is-redonda app-indice-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-perfil",
+   "clase": "",
+   "x": 82,
+   "y": 3891,
+   "w": 226,
+   "h": 489,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  }
+ ],
+ "funciones|telefono": [
+  {
+   "nombre": "costa-ruta-plena-movil",
+   "clase": "v8-foto is-plana funciones-costa-plena",
+   "x": 0,
+   "y": 465,
+   "w": 390,
+   "h": 487,
+   "mask": "linear-gradient(90deg, rgba(0,",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "operadora-mapa-movil",
+   "clase": "v8-foto v8-funde-o funciones-gps-foto",
+   "x": 0,
+   "y": 1101,
+   "w": 390,
+   "h": 380,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "telematica-plena-movil",
+   "clase": "v8-foto is-redonda funciones-telematica-foto",
+   "x": 20,
+   "y": 1921,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-mantenimiento",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-reportes",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-alertas",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-mantenimiento",
+   "clase": "",
+   "x": 82,
+   "y": 2879,
+   "w": 226,
+   "h": 489,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-alertas",
+   "clase": "",
+   "x": 82,
+   "y": 3511,
+   "w": 226,
+   "h": 489,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-reportes",
+   "clase": "",
+   "x": 82,
+   "y": 4268,
+   "w": 226,
+   "h": 489,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "oficina-reportes",
+   "clase": "v8-foto v8-funde-r v8-escena-foto ",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  }
+ ],
+ "seguridad|telefono": [
+  {
+   "nombre": "cabina-carretera-movil",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 68,
+   "w": 390,
+   "h": 420,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-alertas",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-alertas",
+   "clase": "",
+   "x": 82,
+   "y": 1001,
+   "w": 226,
+   "h": 489,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "camara-tablero-plena-movil",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 20,
+   "y": 1930,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "mano-app-perfil-plena-movil",
+   "clase": "v8-foto is-redonda seguridad-puntaje-foto",
+   "x": 20,
+   "y": 2876,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "conductor-sos-plena-movil",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 20,
+   "y": 3441,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  }
+ ],
+ "areas|telefono": [
+  {
+   "nombre": "aerea-terminal-movil",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 453,
+   "w": 390,
+   "h": 480,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "fila-flota-plena-movil",
+   "clase": "v8-foto is-redonda areas-grupos-foto",
+   "x": 20,
+   "y": 1096,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "aerea-taller-plena-movil",
+   "clase": "v8-foto is-redonda areas-geo-foto",
+   "x": 20,
+   "y": 1973,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-mapa",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 82,
+   "y": 2849,
+   "w": 226,
+   "h": 489,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  }
+ ],
+ "quienes-somos|telefono": [
+  {
+   "nombre": "autopista-atardecer-movil",
+   "clase": "v8-foto v8-funde-y",
+   "x": 0,
+   "y": 403,
+   "w": 390,
+   "h": 440,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "supervisor-fila-plena-movil",
+   "clase": "v8-foto is-redonda qs-fila-foto",
+   "x": 20,
+   "y": 1197,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "carretera-curvas-plena",
+   "clase": "v8-foto is-plana is-cubre qs-principio-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-mapa",
+   "clase": "v8-foto is-plana is-cubre qs-principio-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "tecnico-app-unidad-plena",
+   "clase": "v8-foto is-plana is-cubre qs-principio-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  }
+ ],
+ "que-ofrecemos|telefono": [
+  {
+   "nombre": "que-ofrecemos-hero-movil-v",
+   "clase": "v8-foto is-objeto qo-hero-img",
+   "x": 0,
+   "y": 485,
+   "w": 390,
+   "h": 690,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "patio-monitor-mapa-plena",
+   "clase": "v8-foto is-plana is-cubre qo-tarjeta-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "tecnico-app-unidad-plena",
+   "clase": "v8-foto is-plana is-cubre qo-tarjeta-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "conductor-sos-plena",
+   "clase": "v8-foto is-plana is-cubre qo-tarjeta-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "camion-marca-plena",
+   "clase": "v8-foto is-redonda qo-insp-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-cond-mantenimiento",
+   "clase": "",
+   "x": 82,
+   "y": 2099,
+   "w": 226,
+   "h": 489,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-reportes",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "instalacion-gps-plena-movil",
+   "clase": "v8-foto is-redonda qo-gps-foto",
+   "x": 20,
+   "y": 2699,
+   "w": 350,
+   "h": 263,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  }
+ ],
+ "beneficios|telefono": [
+  {
+   "nombre": "camioneta-noche-movil",
+   "clase": "v8-foto v8-funde-l ben-hero-img",
+   "x": 0,
+   "y": 68,
+   "w": 390,
+   "h": 420,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-flota",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-vehiculos",
+   "clase": "",
+   "x": 62,
+   "y": 965,
+   "w": 266,
+   "h": 576,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-mapa",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-mapa",
+   "clase": "",
+   "x": 62,
+   "y": 965,
+   "w": 266,
+   "h": 576,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-alertas",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-alertas",
+   "clase": "",
+   "x": 62,
+   "y": 965,
+   "w": 266,
+   "h": 576,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-panel-reportes",
+   "clase": "",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "12px",
+   "vw": 390
+  },
+  {
+   "nombre": "cap-movil-sup-reportes",
+   "clase": "",
+   "x": 62,
+   "y": 965,
+   "w": 266,
+   "h": 576,
+   "mask": "none",
+   "radio": "32px",
+   "vw": 390
+  },
+  {
+   "nombre": "camion-autopista-movil",
+   "clase": "v8-foto v8-funde-y ben-campo-foto",
+   "x": 0,
+   "y": 2112,
+   "w": 390,
+   "h": 380,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  }
+ ],
+ "preguntas-frecuentes|telefono": [
+  {
+   "nombre": "camion-noche-movil",
+   "clase": "v8-foto v8-funde-b preguntas-hero-foto",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "linear-gradient(rgb(0, 0, 0) 0",
+   "radio": "0px",
+   "vw": 390
+  }
+ ],
+ "contacto|telefono": [
+  {
+   "nombre": "furgoneta-ruta-movil",
+   "clase": "v8-foto v8-funde-y contacto-hero-foto",
+   "x": 0,
+   "y": 68,
+   "w": 390,
+   "h": 360,
+   "mask": "linear-gradient(rgba(0, 0, 0, ",
+   "radio": "0px",
+   "vw": 390
+  },
+  {
+   "nombre": "reunion-plena",
+   "clase": "v8-foto is-redonda",
+   "x": 0,
+   "y": 0,
+   "w": 0,
+   "h": 0,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  },
+  {
+   "nombre": "instalacion-gps-plena-movil",
+   "clase": "v8-foto is-redonda v8-escena-foto ",
+   "x": 20,
+   "y": 2584,
+   "w": 350,
+   "h": 437,
+   "mask": "none",
+   "radio": "28px",
+   "vw": 390
+  }
+ ]
+}

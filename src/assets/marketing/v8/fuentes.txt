@@ -77,6 +77,62 @@ puente-lago-maracaibo-movil      foto      comparativa/web-v8-fotos/maestros/pue
 carretera-zulia                  foto      comparativa/web-v8-fotos/maestros/carretera-zulia.webp
 carretera-zulia-movil            foto      comparativa/web-v8-fotos/maestros/carretera-zulia-movil.webp
 
+# Portadas verticales 9:16 para el teléfono (T-120): FotoIntegradaV8 movilNombre="<nombre>" en
+# Inicio, Plataforma y Qué ofrecemos (se sirven solas en ≤ 599 px).
+inicio-hero-movil-v              foto      comparativa/web-v8-fotos/maestros/inicio-hero-movil-v.webp
+plataforma-hero-movil-v          foto      comparativa/web-v8-fotos/maestros/plataforma-hero-movil-v.webp
+que-ofrecemos-hero-movil-v       foto      comparativa/web-v8-fotos/maestros/que-ofrecemos-hero-movil-v.webp
+
+# Fotos «-plena» (T-118): la misma foto SIN fundido ni alfa y sin graduar a #0a0d12, completa y
+# rectangular, para las fotos de escena que van con esquinas redondeadas (FotoIntegradaV8
+# marco="redondo" | "plano" las elige solas). Salen de scratchpad/t118/plena.py (mismas fuentes
+# y retoques de T-113; servidores, instalacion-gps, furgoneta-fom y equipo-roles recortadas para
+# dejar fuera las zonas lisas que antes tapaba el degradado).
+oficina-monitor-resumen-plena    foto      comparativa/web-v8-fotos/plenas/oficina-monitor-resumen-plena.webp
+oficina-monitor-resumen-plena-movil  foto      comparativa/web-v8-fotos/plenas/oficina-monitor-resumen-plena-movil.webp
+operadora-mapa-plena             foto      comparativa/web-v8-fotos/plenas/operadora-mapa-plena.webp
+operadora-mapa-plena-movil       foto      comparativa/web-v8-fotos/plenas/operadora-mapa-plena-movil.webp
+telematica-plena                 foto      comparativa/web-v8-fotos/plenas/telematica-plena.webp
+telematica-plena-movil           foto      comparativa/web-v8-fotos/plenas/telematica-plena-movil.webp
+oficina-reportes-plena           foto      comparativa/web-v8-fotos/plenas/oficina-reportes-plena.webp
+oficina-reportes-plena-movil     foto      comparativa/web-v8-fotos/plenas/oficina-reportes-plena-movil.webp
+tecnico-app-unidad-plena         foto      comparativa/web-v8-fotos/plenas/tecnico-app-unidad-plena.webp
+tecnico-app-unidad-plena-movil   foto      comparativa/web-v8-fotos/plenas/tecnico-app-unidad-plena-movil.webp
+conductor-sos-plena              foto      comparativa/web-v8-fotos/plenas/conductor-sos-plena.webp
+conductor-sos-plena-movil        foto      comparativa/web-v8-fotos/plenas/conductor-sos-plena-movil.webp
+patio-monitor-mapa-plena         foto      comparativa/web-v8-fotos/plenas/patio-monitor-mapa-plena.webp
+patio-monitor-mapa-plena-movil   foto      comparativa/web-v8-fotos/plenas/patio-monitor-mapa-plena-movil.webp
+furgoneta-fom-plena              foto      comparativa/web-v8-fotos/plenas/furgoneta-fom-plena.webp
+furgoneta-fom-plena-movil        foto      comparativa/web-v8-fotos/plenas/furgoneta-fom-plena-movil.webp
+servidores-plena                 foto      comparativa/web-v8-fotos/plenas/servidores-plena.webp
+servidores-plena-movil           foto      comparativa/web-v8-fotos/plenas/servidores-plena-movil.webp
+equipo-roles-plena               foto      comparativa/web-v8-fotos/plenas/equipo-roles-plena.webp
+equipo-roles-plena-movil         foto      comparativa/web-v8-fotos/plenas/equipo-roles-plena-movil.webp
+camion-lateral-fom-plena         foto      comparativa/web-v8-fotos/plenas/camion-lateral-fom-plena.webp
+camion-lateral-fom-plena-movil   foto      comparativa/web-v8-fotos/plenas/camion-lateral-fom-plena-movil.webp
+camioneta-ciudad-plena           foto      comparativa/web-v8-fotos/plenas/camioneta-ciudad-plena.webp
+camioneta-ciudad-plena-movil     foto      comparativa/web-v8-fotos/plenas/camioneta-ciudad-plena-movil.webp
+camara-tablero-plena             foto      comparativa/web-v8-fotos/plenas/camara-tablero-plena.webp
+camara-tablero-plena-movil       foto      comparativa/web-v8-fotos/plenas/camara-tablero-plena-movil.webp
+mano-app-perfil-plena            foto      comparativa/web-v8-fotos/plenas/mano-app-perfil-plena.webp
+mano-app-perfil-plena-movil      foto      comparativa/web-v8-fotos/plenas/mano-app-perfil-plena-movil.webp
+fila-flota-plena                 foto      comparativa/web-v8-fotos/plenas/fila-flota-plena.webp
+fila-flota-plena-movil           foto      comparativa/web-v8-fotos/plenas/fila-flota-plena-movil.webp
+aerea-taller-plena               foto      comparativa/web-v8-fotos/plenas/aerea-taller-plena.webp
+aerea-taller-plena-movil         foto      comparativa/web-v8-fotos/plenas/aerea-taller-plena-movil.webp
+supervisor-fila-plena            foto      comparativa/web-v8-fotos/plenas/supervisor-fila-plena.webp
+supervisor-fila-plena-movil      foto      comparativa/web-v8-fotos/plenas/supervisor-fila-plena-movil.webp
+carretera-curvas-plena           foto      comparativa/web-v8-fotos/plenas/carretera-curvas-plena.webp
+carretera-curvas-plena-movil     foto      comparativa/web-v8-fotos/plenas/carretera-curvas-plena-movil.webp
+camion-marca-plena               foto      comparativa/web-v8-fotos/plenas/camion-marca-plena.webp
+camion-marca-plena-movil         foto      comparativa/web-v8-fotos/plenas/camion-marca-plena-movil.webp
+instalacion-gps-plena            foto      comparativa/web-v8-fotos/plenas/instalacion-gps-plena.webp
+instalacion-gps-plena-movil      foto      comparativa/web-v8-fotos/plenas/instalacion-gps-plena-movil.webp
+reunion-plena                    foto      comparativa/web-v8-fotos/plenas/reunion-plena.webp
+reunion-plena-movil              foto      comparativa/web-v8-fotos/plenas/reunion-plena-movil.webp
+costa-ruta-plena                 foto      comparativa/web-v8-fotos/plenas/costa-ruta-plena.webp
+costa-ruta-plena-movil           foto      comparativa/web-v8-fotos/plenas/costa-ruta-plena-movil.webp
+
 # Capturas reales del panel y de la app (3x, planas)
 cap-panel-resumen                panel     comparativa/web-v8-fotos/capturas-panel/3x/w-resumen.png
 cap-panel-mapa                   panel     comparativa/web-v8-fotos/capturas-panel/3x/w-centro-control.png

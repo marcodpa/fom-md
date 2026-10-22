@@ -26,9 +26,9 @@
 
 /* ── Cuidado y comunicación, desde el campo ──────────────────────────── */
 .ben-campo-escena { position: relative; }
-.v8-c.ben-campo-texto { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; }
+.ben-campo-escena { margin-top: 24px; }
 .ben-campo-titulo { max-width: 640px; }
-.ben-campo-notas { margin-top: 40px; }
+.ben-campo-notas { margin-top: 8px; }
 .ben-nota .v8-sm { margin-top: 8px; }
 
 /* ── Cifras y cierre ─────────────────────────────────────────────────── */
@@ -37,6 +37,13 @@
    aquí se decide cuál se ve. */
 .ben-cifras .v8-cifra span span { display: inline; margin: 0; font-size: inherit; }
 .ben-cifras .v8-cifra span .v8-solo-movil { display: none; }
+/* Fila pareja en escritorio: cada cifra en un solo renglón («100% web» se partía en dos). La cifra
+   baja un poco (como en Seguridad) para caber en su cuarta parte; si aun así no cabe, su columna
+   crece lo justo y las otras ceden ese espacio. */
+@media (min-width: 900px) {
+  .v8-cifras.ben-cifras { grid-template-columns: repeat(var(--v8-cols, 4), minmax(min-content, 1fr)); }
+  .ben-cifras .v8-cifra strong { white-space: nowrap; font-size: clamp(34px, 3.4vw, 48px); }
+}
 
 /* ── Tableta y teléfono: piezas apiladas, sin escena fija ────────────── */
 @media (max-width: 1023px) {
@@ -56,7 +63,7 @@
   .ben-pasos li.is-tenue { opacity: 1; }
 
   .v8-foto.ben-campo-foto { height: 440px; object-fit: cover; object-position: 60% 50%; }
-  .v8-c.ben-campo-texto { position: relative; inset: auto; display: block; margin-top: -60px; padding-top: 0; }
+
 }
 
 @media (max-width: 599px) {

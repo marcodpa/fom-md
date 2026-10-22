@@ -85,6 +85,10 @@ html:has(.v8-site), body:has(.v8-site) { background: #0a0d12; }
 .v8-centro { text-align: center; }
 .v8-mx { margin-left: auto; margin-right: auto; }
 .v8-fuerte { color: var(--v8-texto); font-weight: 600; }
+/* Sin palabras sueltas en el último renglón (sobre todo en el teléfono, donde las líneas de un
+   titular corren seguidas): los titulares reparten el texto parejo y los párrafos evitan viudas. */
+.v8-site :where(h1, h2, h3, h4), .v8-h1, .v8-h2, .v8-h3, .v8-h4, .v8-kick { text-wrap: balance; }
+.v8-lead, .v8-frase { text-wrap: pretty; }
 /* Líneas de un titular: en escritorio cada una en su renglón; en el teléfono corren seguidas. */
 .v8-linea { display: block; }
 @media (max-width: 599px) { .v8-linea { display: inline; } }
@@ -190,35 +194,44 @@ html:has(.v8-site), body:has(.v8-site) { background: #0a0d12; }
 /* Con alto fijo, la foto (o su recorte de teléfono) recorta en vez de deformarse. */
 .v8-foto:not(.is-objeto) { object-fit: cover; }
 /* Degradados con curva suave (varias paradas) para que el borde no se note ni haga escalones.
-   La foto se vuelve transparente: debajo queda el MISMO fondo de la sección (noche o banda). */
+   La foto se vuelve transparente: debajo queda el MISMO fondo de la sección (noche o banda).
+   T-118 (Marco: «que se aprecie la imagen»): fundidos CORTOS, solo en el borde (antes ocupaban
+   hasta un tercio de la foto). Solo para fondos a sangre; las fotos de escena van con
+   marco="redondo". */
 .v8-funde-b {
-  -webkit-mask-image: linear-gradient(180deg, #000 52%, rgba(0,0,0,.94) 58%, rgba(0,0,0,.8) 65%, rgba(0,0,0,.6) 72%, rgba(0,0,0,.38) 80%, rgba(0,0,0,.18) 88%, rgba(0,0,0,.05) 95%, transparent);
-  mask-image: linear-gradient(180deg, #000 52%, rgba(0,0,0,.94) 58%, rgba(0,0,0,.8) 65%, rgba(0,0,0,.6) 72%, rgba(0,0,0,.38) 80%, rgba(0,0,0,.18) 88%, rgba(0,0,0,.05) 95%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 84%, rgba(0,0,0,.85) 88.5%, rgba(0,0,0,.55) 93%, rgba(0,0,0,.2) 97%, transparent);
+  mask-image: linear-gradient(180deg, #000 84%, rgba(0,0,0,.85) 88.5%, rgba(0,0,0,.55) 93%, rgba(0,0,0,.2) 97%, transparent);
 }
 .v8-funde-y {
-  -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
-  mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.2) 1.5%, rgba(0,0,0,.55) 3.5%, rgba(0,0,0,.85) 5.5%, #000 8%, #000 86%, rgba(0,0,0,.85) 90%, rgba(0,0,0,.55) 94%, rgba(0,0,0,.2) 97.5%, transparent);
+  mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.2) 1.5%, rgba(0,0,0,.55) 3.5%, rgba(0,0,0,.85) 5.5%, #000 8%, #000 86%, rgba(0,0,0,.85) 90%, rgba(0,0,0,.55) 94%, rgba(0,0,0,.2) 97.5%, transparent);
 }
 .v8-funde-o {
   -webkit-mask-image: radial-gradient(70% 72% at 50% 46%, #000 48%, rgba(0,0,0,.92) 56%, rgba(0,0,0,.75) 65%, rgba(0,0,0,.5) 75%, rgba(0,0,0,.26) 85%, rgba(0,0,0,.08) 94%, transparent);
   mask-image: radial-gradient(70% 72% at 50% 46%, #000 48%, rgba(0,0,0,.92) 56%, rgba(0,0,0,.75) 65%, rgba(0,0,0,.5) 75%, rgba(0,0,0,.26) 85%, rgba(0,0,0,.08) 94%, transparent);
 }
 .v8-funde-l, .v8-funde-r {
-  --v8-funde-v: linear-gradient(180deg, transparent, rgba(0,0,0,.2) 4%, rgba(0,0,0,.55) 8%, rgba(0,0,0,.88) 12%, #000 16%, #000 74%, rgba(0,0,0,.88) 79%, rgba(0,0,0,.55) 86%, rgba(0,0,0,.2) 93%, transparent);
+  --v8-funde-v: linear-gradient(180deg, transparent, rgba(0,0,0,.3) 2%, rgba(0,0,0,.75) 4.5%, #000 7%, #000 88%, rgba(0,0,0,.75) 92%, rgba(0,0,0,.3) 96%, transparent);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
 .v8-funde-l {
-  -webkit-mask-image: linear-gradient(90deg, transparent, rgba(0,0,0,.05) 6%, rgba(0,0,0,.2) 13%, rgba(0,0,0,.45) 21%, rgba(0,0,0,.72) 29%, rgba(0,0,0,.92) 37%, #000 44%), var(--v8-funde-v);
-  mask-image: linear-gradient(90deg, transparent, rgba(0,0,0,.05) 6%, rgba(0,0,0,.2) 13%, rgba(0,0,0,.45) 21%, rgba(0,0,0,.72) 29%, rgba(0,0,0,.92) 37%, #000 44%), var(--v8-funde-v);
+  -webkit-mask-image: linear-gradient(90deg, transparent, rgba(0,0,0,.2) 5%, rgba(0,0,0,.55) 11%, rgba(0,0,0,.85) 17%, #000 24%), var(--v8-funde-v);
+  mask-image: linear-gradient(90deg, transparent, rgba(0,0,0,.2) 5%, rgba(0,0,0,.55) 11%, rgba(0,0,0,.85) 17%, #000 24%), var(--v8-funde-v);
 }
 .v8-funde-r {
-  -webkit-mask-image: linear-gradient(270deg, transparent, rgba(0,0,0,.05) 6%, rgba(0,0,0,.2) 13%, rgba(0,0,0,.45) 21%, rgba(0,0,0,.72) 29%, rgba(0,0,0,.92) 37%, #000 44%), var(--v8-funde-v);
-  mask-image: linear-gradient(270deg, transparent, rgba(0,0,0,.05) 6%, rgba(0,0,0,.2) 13%, rgba(0,0,0,.45) 21%, rgba(0,0,0,.72) 29%, rgba(0,0,0,.92) 37%, #000 44%), var(--v8-funde-v);
+  -webkit-mask-image: linear-gradient(270deg, transparent, rgba(0,0,0,.2) 5%, rgba(0,0,0,.55) 11%, rgba(0,0,0,.85) 17%, #000 24%), var(--v8-funde-v);
+  mask-image: linear-gradient(270deg, transparent, rgba(0,0,0,.2) 5%, rgba(0,0,0,.55) 11%, rgba(0,0,0,.85) 17%, #000 24%), var(--v8-funde-v);
 }
 /* Foto u objeto recortado (PNG/WebP con transparencia): sin máscara, sin radio, sin borde, sin
    sombra; se apoya directo sobre el fondo. */
 .v8-foto.is-objeto { -webkit-mask-image: none; mask-image: none; }
+/* Foto de escena (T-118, marco="redondo"): personas, oficinas, monitores, talleres, cabinas,
+   objetos con fondo. Completa y rectangular, esquinas de 28 px (estilo Apple), sin máscara, sin
+   óvalo ni viñeta, sin borde ni sombra. marco="plano": igual pero sin radio propio (la recorta la
+   tarjeta de vidrio que la contiene). Gana a cualquier máscara de página o de escena. */
+.v8-site .v8-foto.is-redonda, .v8-site .v8-foto.is-plana { -webkit-mask-image: none; mask-image: none; }
+.v8-site .v8-foto.is-redonda { border-radius: var(--v8-r-hoja); }
 
 /* ── Capturas reales, planas y nítidas dentro del vidrio ─────────────── */
 .v8-captura-figura { margin: 0 auto; }
@@ -269,9 +282,26 @@ html:has(.v8-site), body:has(.v8-site) { background: #0a0d12; }
 .v8-escena-caja { width: min(100%, var(--v8-escena-texto, 520px)); }
 @media (max-width: 899px) {
   .v8-escena-foto { width: 100%; height: var(--v8-escena-alto-movil, 440px); object-fit: cover; object-position: var(--v8-escena-pos, 70% 50%);
-    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent); mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent); -webkit-mask-composite: source-over; mask-composite: add; }
+    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.2) 1.5%, rgba(0,0,0,.55) 3.5%, rgba(0,0,0,.85) 5.5%, #000 8%, #000 86%, rgba(0,0,0,.85) 90%, rgba(0,0,0,.55) 94%, rgba(0,0,0,.2) 97.5%, transparent); mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.2) 1.5%, rgba(0,0,0,.55) 3.5%, rgba(0,0,0,.85) 5.5%, #000 8%, #000 86%, rgba(0,0,0,.85) 90%, rgba(0,0,0,.55) 94%, rgba(0,0,0,.2) 97.5%, transparent); -webkit-mask-composite: source-over; mask-composite: add; }
   .v8-escena-texto { position: relative; inset: auto; display: block; margin-top: -60px; }
   .v8-escena-caja { width: auto; }
+}
+/* Escena con foto redonda (T-118): dos columnas dentro del contenedor, la foto nunca queda
+   debajo del texto. Teléfono y tableta: foto arriba, texto debajo. */
+.v8-escena.is-redonda { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 64px; align-items: center; }
+.v8-escena.is-redonda.is-izquierda { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
+.v8-escena.is-redonda.is-izquierda .v8-escena-foto { order: -1; }
+.v8-escena.is-redonda.is-izquierda .v8-escena-caja { justify-self: end; }
+.v8-escena.is-redonda .v8-escena-foto { width: 100%; height: auto; aspect-ratio: var(--v8-escena-proporcion, 4 / 3); object-fit: cover; }
+@media (max-width: 899px) {
+  .v8-escena.is-redonda, .v8-escena.is-redonda.is-izquierda { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .v8-escena.is-redonda .v8-escena-foto { order: -1; aspect-ratio: 4 / 3; object-position: var(--v8-escena-pos, 50% 50%); }
+  .v8-escena.is-redonda .v8-escena-caja { justify-self: stretch; width: auto; }
+}
+@media (max-width: 599px) {
+  /* el teléfono sirve el recorte vertical (<nombre>-plena-movil) */
+  .v8-escena.is-redonda .v8-escena-foto { aspect-ratio: auto; height: var(--v8-escena-alto-movil, auto); }
+  .v8-escena.is-redonda { gap: 24px; }
 }
 
 /* ── Rasgos (icono, título, texto) ──────────────────────────────────── */
@@ -315,6 +345,11 @@ html:has(.v8-site), body:has(.v8-site) { background: #0a0d12; }
 .v8-tarjeta-medio-foto { margin-top: auto; height: 340px; }
 .v8-tarjeta-medio-foto .v8-foto { height: 100%; object-fit: cover; } /* <picture> va con display: contents */
 .v8-tarjeta-medio-foto.is-telefono { display: flex; justify-content: center; padding-top: 28px; overflow: hidden; }
+.v8-tarjeta-medio-foto.is-solo-movil { display: none; }
+@media (max-width: 599px) {
+  .v8-tarjeta-medio-foto.is-sin-movil { display: none; }
+  .v8-tarjeta-medio-foto.is-solo-movil { display: flex; }
+}
 @media (max-width: 599px) {
   .v8-tarjeta-medio { width: min(300px, 78vw); height: 440px; }
   .v8-tarjeta-medio-texto { padding: 24px 24px 0; }
@@ -520,3 +555,16 @@ html:has(.v8-site), body:has(.v8-site) { background: #0a0d12; }
 @media (prefers-reduced-motion: reduce) {
   .v8-site *, .v8-site *::before, .v8-site *::after { animation: none !important; transition: none !important; }
 }
+
+/* ── Profundidad 3D (T-121) ──────────────────────────────────────────────
+   El movimiento lo pone useMomentoV8 según data-v8-3d (solo transform y opacidad). Aquí solo el
+   brillo que sigue al cursor sobre las tarjetas de vidrio (solo con ratón: la clase is-brillo la
+   pone el hook al pasar). :where = especificidad cero, cualquier posición de página gana. */
+:where(.v8-site [data-v8-3d='tarjeta']) { position: relative; }
+.v8-site [data-v8-3d='tarjeta']::after {
+  content: ''; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(480px circle at var(--v8-brillo-x, 50%) var(--v8-brillo-y, 0%), rgba(139, 198, 255, .14), rgba(139, 198, 255, .04) 38%, transparent 66%);
+  opacity: 0; transition: opacity .5s var(--v8-ease);
+}
+.v8-site [data-v8-3d='tarjeta'].is-brillo::after { opacity: 1; }
+.v8-site [data-v8-3d='tarjeta'].is-brillo { border-color: rgba(255, 255, 255, .17); }

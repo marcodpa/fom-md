@@ -50,4 +50,7 @@ export function fotoV8(nombre) {
   return { ...f, movil: nombre.endsWith('-movil') ? null : armar(`${nombre}-movil`) }
 }
 
-export const NOMBRES_FOTOS_V8 = Object.keys(CATALOGO).filter(n => !n.endsWith('-movil')).sort()
+// true si existe la foto <nombre> en el catálogo (sin aviso).
+export const hayFotoV8 = nombre => Boolean(CATALOGO[nombre])
+
+export const NOMBRES_FOTOS_V8 =Object.keys(CATALOGO).filter(n => !n.endsWith('-movil')).sort()

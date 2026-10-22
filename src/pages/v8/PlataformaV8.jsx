@@ -95,7 +95,7 @@ export default function PlataformaV8() {
       bajadaAngosta
       primaria={{ to: rutaV8('contacto'), texto: 'Solicitar demostración' }}
       secundaria={{ to: '#panel', texto: 'Ver el panel' }}
-      foto={{ nombre: 'oficina-monitor-resumen', alt: 'Oficina de FOM con el Resumen actual del panel en el monitor. Datos de demostración.', posicion: '62% 50%' }}
+      foto={{ nombre: 'oficina-monitor-resumen', movilNombre: 'plataforma-hero-movil-v', alt: 'Oficina de FOM con el Resumen actual del panel en el monitor. Datos de demostración.', posicion: '62% 50%' }}
     />
 
     <NavLocalV8 titulo="Plataforma" enlaces={LOCAL} />
@@ -107,8 +107,10 @@ export default function PlataformaV8() {
       </ContenedorV8>
       <div className="plat-panel-escena">
         <ContenedorV8 className="plat-panel-marco">
-          <CapturaFlotanteV8 className="plat-panel-captura" nombre="cap-panel-resumen" nota
+          <CapturaFlotanteV8 className="plat-panel-captura plat-solo-escritorio" nombre="cap-panel-resumen" nota
             alt="Resumen actual del panel FOM: flota, vehículos en tiempo real y vehículo seleccionado. Datos de demostración." />
+          <CapturaFlotanteV8 className="plat-panel-telefono plat-solo-movil" nombre="cap-movil-sup-resumen" ancho={280} nota
+            alt="Resumen actual en la app del supervisor: flota y vehículos en tiempo real. Datos de demostración." />
         </ContenedorV8>
       </div>
       <ContenedorV8>
@@ -130,8 +132,8 @@ export default function PlataformaV8() {
           </ul>
         </div>
         <div className="plat-webapp-medio">
-          <FotoIntegradaV8 className="plat-webapp-foto" nombre="operadora-mapa" fundido="o" sizes="(min-width: 900px) 58vw, 100vw"
-            alt="Operadora de FOM frente al Centro de control actual. Datos de demostración." />
+          <FotoIntegradaV8 className="plat-webapp-foto" nombre="operadora-mapa" marco="redondo" sizes="(min-width: 1240px) 640px, 56vw"
+            alt="Supervisor de FOM frente al Centro de control actual. Datos de demostración." />
           <CapturaFlotanteV8 className="plat-webapp-telefono" nombre="cap-movil-sup-mapa" ancho={200}
             alt="Centro de control actual en el teléfono. Datos de demostración." />
         </div>
@@ -143,18 +145,20 @@ export default function PlataformaV8() {
         <EncabezadoV8 centro id="plat-mapa-titulo" kicker="Mapa general en vivo"
           titulo={<><span className="v8-solo-escritorio">La foto completa de la flota, en tiempo real.</span><span className="v8-solo-movil">La foto completa de la flota.</span></>} />
       </ContenedorV8>
-      <div className="plat-mapa-escena">
-        <FotoIntegradaV8 className="plat-mapa-foto" nombre="patio-monitor-mapa" fundido="y" sizes="100vw" posicion="62% 50%"
+      <ContenedorV8 className="plat-mapa-escena">
+        <FotoIntegradaV8 className="plat-mapa-foto" nombre="patio-monitor-mapa" marco="redondo" sizes="(min-width: 1240px) 1136px, calc(100vw - 40px)" posicion="62% 50%"
           alt="Monitor con el Centro de control actual frente al patio de la flota. Datos de demostración." />
-        <ContenedorV8 className="plat-mapa-chips">
+        <CapturaFlotanteV8 className="plat-mapa-telefono plat-solo-movil" nombre="cap-movil-sup-mapa" ancho={280}
+          alt="Centro de control actual en la app del supervisor: toda la flota en el mapa. Datos de demostración." />
+        <div className="plat-mapa-chips">
           {CHIPS_MAPA.map(c => <ChipV8 key={c.titulo} titulo={c.titulo} texto={c.texto} className={c.movil === false ? 'plat-sin-movil' : undefined} data-v8-aparece="" />)}
-        </ContenedorV8>
-      </div>
+        </div>
+      </ContenedorV8>
       <ContenedorV8><BloqueCifrasV8 className="plat-cifra-mapa" centro columnas={1} cifras={[cifra(stat('Mapa general'))]} /></ContenedorV8>
     </SeccionV8>
 
     <SeccionV8 id="datos" className="plat-datos plat-banda-movil" aria-labelledby="plat-datos-titulo">
-      <EscenaV8 lado="izquierda" ancho="60%" anchoTexto={500} posicionMovil="30% 50%" altoMovil={360}
+      <EscenaV8 lado="izquierda" marco="redondo" anchoTexto={500} posicionMovil="30% 50%"
         foto={{ nombre: 'servidores', alt: 'Pasillo de servidores con luces azules.' }}>
         <p className="v8-kick" data-v8-aparece="">Captura y resguardo de datos</p>
         <h2 id="plat-datos-titulo" className="v8-h2" data-v8-aparece="">Tu historial, sin administrar servidores.</h2>
@@ -170,12 +174,15 @@ export default function PlataformaV8() {
       <ContenedorV8>
         <EncabezadoV8 centro className="plat-roles-cab" id="plat-roles-titulo" kicker="Roles y permisos" titulo="Cada persona entra a lo que le corresponde." />
       </ContenedorV8>
-      <FotoIntegradaV8 className="plat-roles-foto" nombre="equipo-roles" fundido="y" sizes="100vw" posicion="35% 50%"
-        alt="Equipo de operaciones de FOM revisando la flota en una laptop." />
-      <ContenedorV8 className="v8-g3 plat-roles-cajas">
-        {ROLES.map(r => <TarjetaVidrioV8 key={r.titulo} data-v8-aparece="">
-          <h3 className="v8-h4">{r.titulo}</h3><p className="v8-sm v8-t2">{r.texto}</p>
-        </TarjetaVidrioV8>)}
+      {/* T-118: las tres personas completas (esquinas redondeadas) junto a las tres tarjetas. */}
+      <ContenedorV8 className="plat-roles-cuerpo">
+        <FotoIntegradaV8 className="plat-roles-foto" nombre="equipo-roles" marco="redondo" sizes="(min-width: 1240px) 440px, (min-width: 900px) 38vw, calc(100vw - 40px)"
+          alt="Equipo de operaciones de FOM revisando la flota en una laptop." />
+        <div className="plat-roles-cajas">
+          {ROLES.map(r => <TarjetaVidrioV8 key={r.titulo} data-v8-aparece="">
+            <h3 className="v8-h4">{r.titulo}</h3><p className="v8-sm v8-t2">{r.texto}</p>
+          </TarjetaVidrioV8>)}
+        </div>
       </ContenedorV8>
       <ContenedorV8 as="p" className="v8-centro v8-sm v8-t2 plat-roles-nota v8-solo-escritorio">Jerarquía de mando: cada quien gestiona solo a los de rango menor. Todo queda en auditoría.</ContenedorV8>
     </SeccionV8>

@@ -53,7 +53,7 @@ export default function QueOfrecemosV8() {
     {/* Hero: la laptop con Vehículos a la izquierda, fundida; el texto a la derecha. */}
     <section className="qo-hero" aria-labelledby="qo-titulo">
       <div className="qo-hero-foto" data-v8-crece="">
-        <FotoIntegradaV8 prioridad nombre="laptop-vehiculos" fundido="ninguno" sizes="100vw" className="qo-hero-img"
+        <FotoIntegradaV8 prioridad nombre="laptop-vehiculos" movilNombre="que-ofrecemos-hero-movil-v" fundido="ninguno" sizes="(max-width: 599px) 100vw, 60vw" className="qo-hero-img"
           alt="Laptop con la lista actual de Vehículos del panel FOM. Datos de demostración." />
       </div>
       <ContenedorV8 className="qo-hero-texto">
@@ -81,7 +81,7 @@ export default function QueOfrecemosV8() {
         <ul className="qo-oferta v8-g3">
           {OFERTA.map(o => <li key={o.clave} data-v8-aparece="">
             <TarjetaVidrioV8 as="article" caja={false} className="qo-tarjeta">
-              <FotoIntegradaV8 className="qo-tarjeta-foto" fundido="b" alto={280} sizes="(min-width: 1180px) 380px, (min-width: 1024px) 31vw, 46vw" {...o.foto} />
+              <FotoIntegradaV8 className="qo-tarjeta-foto" marco="plano" alto={280} sizes="(min-width: 1180px) 380px, (min-width: 1024px) 31vw, 46vw" {...o.foto} />
               <div className="qo-tarjeta-texto">
                 <p className="v8-kick qo-tarjeta-kick">{o.kicker}</p>
                 <h3 className="v8-h3">{o.titulo}</h3>
@@ -97,22 +97,23 @@ export default function QueOfrecemosV8() {
       </ContenedorV8>
     </SeccionV8>
 
-    {/* Inspecciones y mantenimiento: el camión FOM a la derecha y el teléfono encima. */}
+    {/* Inspecciones y mantenimiento: texto a la izquierda; el camión FOM completo (esquinas
+        redondeadas, T-118) a la derecha con el teléfono encima. */}
     <SeccionV8 id="inspecciones" aria-labelledby="qo-insp-titulo">
-      <div className="qo-insp">
-        <FotoIntegradaV8 className="qo-insp-foto" nombre="camion-marca" fundido="l" sizes="(min-width: 900px) 62vw, 100vw"
-          alt="Cabina de un camión blanco con el logo FOM en el patio de noche." />
-        <ContenedorV8 className="qo-insp-texto">
-          <div className="qo-insp-caja">
-            <p className="v8-kick" data-v8-aparece="">Inspecciones y mantenimiento</p>
-            <h2 id="qo-insp-titulo" className="v8-h2" data-v8-aparece="">Menos imprevistos, más tiempo en movimiento.</h2>
-            <p className="v8-lead qo-mt20 v8-solo-escritorio" data-v8-aparece="">La revisión diaria, los hallazgos y las órdenes de trabajo, en un mismo seguimiento.</p>
-            <p className="qo-mt24 v8-solo-escritorio"><EnlaceV8 to={rutaV8('app')}>App del conductor</EnlaceV8></p>
-          </div>
-        </ContenedorV8>
-        <CapturaFlotanteV8 className="qo-insp-telefono" nombre="cap-movil-cond-mantenimiento" ancho={220}
-          alt="Mantenimiento de mi unidad en la app actual. Datos de demostración." />
-      </div>
+      <ContenedorV8 className="qo-insp">
+        <div className="qo-insp-caja">
+          <p className="v8-kick" data-v8-aparece="">Inspecciones y mantenimiento</p>
+          <h2 id="qo-insp-titulo" className="v8-h2" data-v8-aparece="">Menos imprevistos, más tiempo en movimiento.</h2>
+          <p className="v8-lead qo-mt20 v8-solo-escritorio" data-v8-aparece="">La revisión diaria, los hallazgos y las órdenes de trabajo, en un mismo seguimiento.</p>
+          <p className="qo-mt24 v8-solo-escritorio"><EnlaceV8 to={rutaV8('app')}>App del conductor</EnlaceV8></p>
+        </div>
+        <div className="qo-insp-medio">
+          <FotoIntegradaV8 className="qo-insp-foto" nombre="camion-marca" marco="redondo" sizes="(min-width: 1240px) 620px, 52vw"
+            alt="Cabina de un camión blanco con el logo FOM en el patio de noche." />
+          <CapturaFlotanteV8 className="qo-insp-telefono" nombre="cap-movil-cond-mantenimiento" ancho={220}
+            alt="Mantenimiento de mi unidad en la app actual. Datos de demostración." />
+        </div>
+      </ContenedorV8>
     </SeccionV8>
 
     {/* Alertas, seguridad y reportes: captura real de Reportes. */}
@@ -131,23 +132,21 @@ export default function QueOfrecemosV8() {
 
     {/* Instalación de los equipos GPS. */}
     <SeccionV8 id="instalacion" className="qo-gps" aria-labelledby="qo-gps-titulo">
-      <div className="qo-gps-escena">
-        <FotoIntegradaV8 className="qo-gps-foto" nombre="instalacion-gps" fundido="r" sizes="(min-width: 900px) 58vw, 100vw"
+      <ContenedorV8 className="qo-gps-escena">
+        <FotoIntegradaV8 className="qo-gps-foto" nombre="instalacion-gps" marco="redondo" sizes="(min-width: 1240px) 560px, (min-width: 900px) 46vw, calc(100vw - 40px)"
           alt="Técnico de FOM instalando el equipo GPS bajo el tablero de un camión." />
-        <ContenedorV8 className="qo-gps-texto">
-          <div className="qo-gps-caja">
-            <p id="qo-gps-titulo" className="v8-kick" data-v8-aparece="">Instalación de los equipos GPS</p>
-            <p className="qo-gps-cifra" data-v8-aparece=""><strong>{INSTALACION.value}</strong><span>{etiquetaInstalacion}</span></p>
-            <ul className="qo-gps-lista v8-sm v8-t2 v8-solo-escritorio" data-v8-aparece="">
-              {PASOS_INSTALACION.map(p => <li key={p.titulo}><b className="v8-fuerte">{p.titulo}</b> {p.texto}</li>)}
-            </ul>
-            <ul className="qo-gps-lista v8-sm v8-t2 v8-solo-movil">
-              <li><b className="v8-fuerte">Por lotes.</b> 8 a 12 equipos por día.</li>
-              <li><b className="v8-fuerte">Personal propio</b> de FOM.</li>
-            </ul>
-          </div>
-        </ContenedorV8>
-      </div>
+        <div className="qo-gps-caja">
+          <p id="qo-gps-titulo" className="v8-kick" data-v8-aparece="">Instalación de los equipos GPS</p>
+          <p className="qo-gps-cifra" data-v8-aparece=""><strong>{INSTALACION.value}</strong><span>{etiquetaInstalacion}</span></p>
+          <ul className="qo-gps-lista v8-sm v8-t2 v8-solo-escritorio" data-v8-aparece="">
+            {PASOS_INSTALACION.map(p => <li key={p.titulo}><b className="v8-fuerte">{p.titulo}</b> {p.texto}</li>)}
+          </ul>
+          <ul className="qo-gps-lista v8-sm v8-t2 v8-solo-movil">
+            <li><b className="v8-fuerte">Por lotes.</b> 8 a 12 equipos por día.</li>
+            <li><b className="v8-fuerte">Personal propio</b> de FOM.</li>
+          </ul>
+        </div>
+      </ContenedorV8>
     </SeccionV8>
 
     {/* Cierre: enlaces a las páginas del producto, lema y demostración. */}

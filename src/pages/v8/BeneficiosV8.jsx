@@ -26,13 +26,13 @@ const CIFRAS = [
 // Recorrido: cada beneficio con su vista del panel tal como es hoy.
 const BENEFICIOS = [
   { pestana: 'Vehículos', titulo: 'Visibilidad de la operación', texto: 'Ubicación, estado y responsable de cada unidad en una misma vista.', corto: 'Ubicación, estado y responsable de cada unidad.',
-    captura: 'cap-panel-flota', alt: 'Vehículos actuales del panel FOM: unidades, estado, conductor y documentos. Datos de demostración.' },
+    captura: 'cap-panel-flota', capturaMovil: 'cap-movil-sup-vehiculos', alt: 'Vehículos actuales del panel FOM: unidades, estado, conductor y documentos. Datos de demostración.' },
   { pestana: 'Áreas', titulo: 'Organización por áreas', texto: 'Zona, sede o contrato: la parte de la flota que te corresponde.', corto: 'Zona, sede o contrato.',
-    captura: 'cap-panel-mapa', alt: 'Centro de control actual del panel FOM con el filtro de áreas. Datos de demostración.' },
+    captura: 'cap-panel-mapa', capturaMovil: 'cap-movil-sup-mapa', alt: 'Centro de control actual del panel FOM con el filtro de áreas. Datos de demostración.' },
   { pestana: 'Alertas', titulo: 'Atención a las alertas', texto: 'Los avisos que requieren revisión, con el contexto del evento.', corto: 'Los avisos con su contexto.',
-    captura: 'cap-panel-alertas', alt: 'Alertas actuales del panel FOM. Datos de demostración.' },
+    captura: 'cap-panel-alertas', capturaMovil: 'cap-movil-sup-alertas', alt: 'Alertas actuales del panel FOM. Datos de demostración.' },
   { pestana: 'Reportes', titulo: 'Información para decidir', texto: 'Reportes e historial para planificar los siguientes pasos.', corto: 'Reportes e historial.',
-    captura: 'cap-panel-reportes', alt: 'Reportes actuales del panel FOM. Datos de demostración.' },
+    captura: 'cap-panel-reportes', capturaMovil: 'cap-movil-sup-reportes', alt: 'Reportes actuales del panel FOM. Datos de demostración.' },
 ]
 const PESTANAS = BENEFICIOS.map(b => b.pestana)
 const PASOS = BENEFICIOS.map(b => ({
@@ -109,22 +109,27 @@ export default function BeneficiosV8() {
           <PestanasV8 className="ben-pestanas" etiqueta="Vistas del panel" opciones={PESTANAS} activa={activo} alCambiar={elegir} />
           <div className="ben-capturas">
             {BENEFICIOS.map((b, i) => <div key={b.captura} className={`ben-captura${i === activo ? ' is-activa' : ''}`} aria-hidden={i === activo ? undefined : 'true'}>
-              <CapturaFlotanteV8 nombre={b.captura} alt={b.alt}
+              <CapturaFlotanteV8 className="v8-solo-escritorio" nombre={b.captura} alt={b.alt}
                 sizes="(min-width: 1180px) 720px, (min-width: 900px) 62vw, calc(100vw - 56px)" />
+              {/* T-118: en el teléfono, la misma vista en la app, entera y nítida (no el panel de escritorio encogido). */}
+              <CapturaFlotanteV8 className="v8-solo-movil" nombre={b.capturaMovil} alt={b.alt.replace('del panel FOM', 'en la app del supervisor')} ancho={280} />
             </div>)}
           </div>
-          <p className="v8-nota-demo">Captura real del panel · Datos de demostración</p>
+          <p className="v8-nota-demo"><span className="v8-solo-escritorio">Captura real del panel</span><span className="v8-solo-movil">Captura real de la app</span> · Datos de demostración</p>
         </div>
       </ContenedorV8>
     </SeccionV8>
 
-    {/* Cuidado y comunicación, desde el campo: el camión en la autopista y tres notas de vidrio. */}
+    {/* Cuidado y comunicación, desde el campo: el título arriba, el camión en la autopista limpio
+        (sin texto ni capas encima, T-118) y las tres notas debajo. */}
     <SeccionV8 id="campo" className="ben-campo" aria-labelledby="ben-campo-titulo">
+      <ContenedorV8>
+        <h2 id="ben-campo-titulo" className="v8-h2 ben-campo-titulo" data-v8-aparece="">Cuidado y comunicación, desde el campo.</h2>
+      </ContenedorV8>
       <div className="ben-campo-escena">
         <FotoIntegradaV8 className="ben-campo-foto" nombre="camion-autopista" fundido="y" sizes="100vw"
           alt="Camión de la flota en la autopista de noche, con la ciudad iluminada al fondo." />
         <ContenedorV8 className="ben-campo-texto">
-          <h2 id="ben-campo-titulo" className="v8-h2 ben-campo-titulo" data-v8-aparece="">Cuidado y comunicación, desde el campo.</h2>
           <ul className="ben-campo-notas v8-g3">
             {CAMPO.map(c => <li key={c.titulo} className={c.corto ? undefined : 'ben-solo-ancho'} data-v8-aparece="">
               <TarjetaVidrioV8 className="ben-nota">

@@ -4,6 +4,9 @@
 .contacto-hero { position: relative; }
 .v8-foto.contacto-hero-foto { height: 900px; object-fit: cover; object-position: 70% 50%; }
 .v8-c.contacto-hero-c { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; align-items: center; }
+/* T-118: el formulario se apoya abajo, en el asfalto oscuro: la marca FOM y el lema de la furgoneta
+   quedan a la vista encima de él. */
+@media (min-width: 900px) { .contacto-hero-form { align-self: end; margin-bottom: 40px; } }
 /* El desplegable de la flota es angosto en la columna del hero: que «Selecciona una opción» quepa entero. */
 @media (min-width: 1024px) { .contacto-hero-form .v8-campo select { padding: 0 30px 0 13px; background-position: right 11px center; font-size: 15px; } }
 .contacto-h1 { font-size: clamp(42px, 5vw, 72px); }
@@ -75,6 +78,5 @@
   .contacto-canal .v8-sm { margin-top: 2px; font-size: 17px; }
   .contacto-canal-correo { margin-top: 2px; font-size: 17px; }
 
-  .contacto-instalacion .v8-escena-texto { margin-top: -30px; }
   .contacto-instalacion-cobertura { font-size: 17px; }
 }

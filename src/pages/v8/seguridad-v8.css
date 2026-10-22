@@ -34,7 +34,10 @@
 /* Puntaje y coaching: foto a la izquierda (7), texto a la derecha (5). */
 .seguridad-puntaje-rejilla { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: center; }
 .seguridad-puntaje-lead { margin-top: 20px; }
-.seguridad-cifras { display: grid; grid-template-columns: repeat(2, max-content); gap: 28px 40px; margin-top: 32px; }
+/* Dos columnas iguales dentro de la columna de texto; la cifra baja un poco para que «Semanal»
+   no se salga por la derecha (con 56 px pedía 226 px y la columna da 209). */
+.seguridad-cifras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 32px; margin-top: 32px; }
+@media (min-width: 900px) { .seguridad-cifras .v8-cifra strong { font-size: clamp(34px, 3.4vw, 48px); } }
 .seguridad-cifras .v8-cifra span { max-width: 210px; }
 .seguridad-puntaje-lista { gap: 10px; }
 
@@ -47,6 +50,8 @@
   position: absolute; z-index: 1; right: var(--v8-margen); top: 22%; width: 340px;
   display: flex; gap: 14px; align-items: center; padding: 18px 20px; border-radius: var(--v8-r-tarjeta);
 }
+/* T-118: con la foto redonda el aviso flota dentro de ella, a 24 px de su borde. */
+.seguridad-sos-escena .seguridad-sos-aviso { right: calc(var(--v8-margen) + 24px); top: 24px; }
 .seguridad-sos-sello {
   flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
   background: #2a1416; color: var(--v8-peligro); font-size: 12px; font-weight: 700; letter-spacing: 0;
@@ -100,13 +105,11 @@
   .seguridad-eventos-cajas .v8-h4 { margin-bottom: 2px; }
   .seguridad-eventos-cifra { margin-top: 28px; text-align: left; }
 
-  .seguridad-video .v8-escena-texto { margin-top: -30px; }
   .seguridad-video-lead { margin-top: 12px; }
   .seguridad-video .seguridad-lista { display: none; }
 
-  .seguridad-puntaje-rejilla { gap: 20px; padding: 0; }
-  .seguridad-puntaje-texto { padding: 0 var(--v8-margen); }
-  .seguridad-puntaje-foto { order: 2; height: 400px; object-fit: cover; object-position: 30% 50%;
+  .seguridad-puntaje-rejilla { gap: 20px; }
+  .seguridad-puntaje-foto { order: 2; height: auto; object-fit: cover; object-position: 30% 50%;
     -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
     mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent); }
   .seguridad-puntaje-lead, .seguridad-puntaje-lista { display: none; }
@@ -123,7 +126,6 @@
       rgba(15, 20, 27, .2) calc(100% - var(--seguridad-entrada) * .25), rgba(15, 20, 27, 0) 100%);
   }
   .v8-sec.seguridad-sos { padding-top: 64px; }
-  .seguridad-sos .v8-escena-texto { margin-top: -80px; }
   .seguridad-sos-aviso { padding: 16px; gap: 12px; margin-bottom: 28px; }
   .seguridad-sos-sello { width: 44px; height: 44px; }
   .seguridad-sos-aviso p { font-size: 12px; letter-spacing: -0.12px; }

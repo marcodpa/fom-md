@@ -32,16 +32,19 @@
 .v8-site .plat-webapp-telefono { position: absolute; right: 4%; bottom: -6%; z-index: 1; }
 
 /* Mapa general en vivo */
+/* T-118: el monitor del patio completo con esquinas redondeadas; los chips flotan dentro de la
+   foto, a 24 px de sus bordes. */
 .v8-site .plat-mapa-escena { position: relative; margin-top: 32px; }
-.v8-site .v8-c.plat-mapa-chips { position: absolute; left: 0; right: 0; bottom: 14%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.v8-site .plat-mapa-chips { position: absolute; left: calc(var(--v8-margen) + 24px); right: calc(var(--v8-margen) + 24px); bottom: 24px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .v8-site .plat-cifra-mapa { margin-top: 32px; }
 
 /* Captura y resguardo de datos */
 .v8-site .plat-cifra-datos { margin-top: 32px; }
 
 /* Roles y permisos */
-.v8-site .plat-roles-foto { margin-top: 24px; height: 520px; object-fit: cover; }
-.v8-site .v8-c.plat-roles-cajas { margin-top: -80px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.v8-site .v8-c.plat-roles-cuerpo { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: center; margin-top: 40px; }
+.v8-site .plat-roles-foto { aspect-ratio: 560 / 700; height: auto; object-position: 50% 30%; }
+.v8-site .plat-roles-cajas { display: grid; gap: 16px; }
 .v8-site .plat-roles-cajas .v8-sm, .v8-site .plat-seguridad-cajas .v8-sm { margin-top: 8px; }
 .v8-site .plat-roles-nota { margin-top: 28px; }
 
@@ -63,10 +66,10 @@
   .v8-site .plat-panel-escena { margin-top: 32px; }
   .v8-site .plat-rasgos { margin-top: 40px; }
   .v8-site .plat-webapp-telefono { right: 3%; bottom: -4%; width: 180px !important; }
-  .v8-site .v8-c.plat-mapa-chips { position: relative; bottom: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: -40px; }
-  .v8-site .plat-mapa-foto { height: 480px; object-fit: cover; }
-  .v8-site .plat-roles-foto { height: 420px; }
-  .v8-site .v8-c.plat-roles-cajas { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: -60px; }
+  .v8-site .plat-mapa-chips { position: relative; left: auto; right: auto; bottom: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+  .v8-site .v8-c.plat-roles-cuerpo { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 24px; }
+  .v8-site .plat-roles-foto { aspect-ratio: 4 / 3; }
+  .v8-site .plat-roles-cajas { gap: 12px; }
   .v8-site .plat-seguridad-cab { display: block; }
   .v8-site .plat-cifra-seguridad { text-align: left; margin-top: 20px; }
   .v8-site .plat-seguridad-cajas { margin-top: 32px; }
@@ -76,7 +79,12 @@
 @media (max-width: 599px) {
   .v8-site .plat-hero .v8-hero-medio { margin-top: 20px; }
   .v8-site .plat-hero .v8-acciones .v8-enlace { display: none; }
-  .v8-site .plat-hero .v8-hero-medio .v8-foto { height: 440px; }
+  /* portada: foto vertical de T-120 (plataforma-hero-movil-v) en cuanto exista; mientras, el
+     recorte con el monitor completo (T-118: sin textos mochos). */
+  .v8-site .plat-hero .v8-hero-medio .v8-foto { height: auto; }
+  .v8-site .plat-panel-telefono { margin: 0 auto; }
+  .v8-site .plat-mapa-foto { display: none; }
+  .v8-site .plat-mapa-telefono { margin: 0 auto; }
   .v8-site .v8-sec.plat-panel { padding-top: 24px; }
   .v8-site .plat-panel-escena { margin-top: 28px; }
   .v8-site .plat-rasgos { margin-top: 32px; }
@@ -86,15 +94,12 @@
   .v8-site .plat-webapp-foto { display: none; }
   .v8-site .plat-webapp-telefono { position: relative; right: auto; bottom: auto; width: 230px !important; }
   .v8-site .plat-mapa-escena { margin-top: 20px; }
-  .v8-site .plat-mapa-foto { height: 440px; }
-  .v8-site .v8-c.plat-mapa-chips { grid-template-columns: minmax(0, 1fr); margin-top: -30px; }
+  .v8-site .plat-mapa-chips { grid-template-columns: minmax(0, 1fr); margin-top: 24px; }
   .v8-site .plat-mapa-chips .plat-sin-movil { display: none; }
   .v8-site .plat-cifra-mapa { margin-top: 28px; }
-  .v8-site .plat-datos .v8-escena-texto { margin-top: -30px; }
   .v8-site .plat-cifra-datos { margin-top: 24px; }
   .v8-site .v8-encabezado.plat-roles-cab { text-align: left; }
-  .v8-site .plat-roles-foto { margin-top: 20px; height: 340px; }
-  .v8-site .v8-c.plat-roles-cajas { margin-top: -40px; }
+  .v8-site .plat-roles-foto { aspect-ratio: auto; height: auto; }
   .v8-site .plat-roles-cajas .v8-sm { margin-top: 6px; }
   .v8-site .plat-seguridad-cab .v8-h2 { max-width: none; }
   .v8-site .plat-faq-boton { margin-top: 32px; }

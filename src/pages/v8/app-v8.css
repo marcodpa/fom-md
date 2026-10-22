@@ -34,7 +34,7 @@
    caja baja al pie de la foto, sobre la carretera, para no tapar las camionetas; el relleno de
    abajo le guarda su sitio y la columna sigue a la altura del texto. */
 .v8-site .app-indice-medio { position: relative; padding-bottom: 80px; }
-.v8-site .v8-vidrio.app-indice-caja { position: absolute; right: 0; bottom: 0; width: 300px; }
+.v8-site .v8-vidrio.app-indice-caja { position: absolute; right: 24px; bottom: 0; width: 300px; }
 .v8-site .app-indice-caja .v8-sm { margin-top: 6px; }
 .v8-site .app-indice-telefono { display: none; }
 
@@ -73,7 +73,6 @@
   .v8-site .v8-sec.app-pantallas { padding-top: 24px; }
   .v8-site .v8-glow.app-pantallas-glow { display: none; }
   .v8-site .app-pantalla-movil .v8-nota-demo { margin-top: 14px; }
-  .v8-site #inspeccion .v8-escena-texto { margin-top: -40px; }
   .v8-site .app-unidad-foto { display: none; }
   .v8-site .app-unidad-telefono { position: relative; left: auto; bottom: auto; width: 240px !important; }
   .v8-site .app-indice-cifras { margin-top: 24px; gap: 26px 16px; }

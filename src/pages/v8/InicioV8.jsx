@@ -31,10 +31,10 @@ const RASGOS = [
 ]
 
 const FUNCIONES = [
-  { titulo: 'Rastreo GPS en tiempo real', texto: 'Posición cada 10 segundos con el vehículo en movimiento.', foto: { nombre: 'operadora-mapa', alt: 'Operadora de FOM frente al Centro de control actual. Datos de demostración.' } },
+  { titulo: 'Rastreo GPS en tiempo real', texto: 'Posición cada 10 segundos con el vehículo en movimiento.', foto: { nombre: 'operadora-mapa', alt: 'Supervisor de FOM frente al Centro de control actual. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-mapa', alt: 'Centro de control actual en la app del supervisor. Datos de demostración.' } },
   { titulo: 'Telemática y diagnóstico', texto: 'Batería, motor, kilometraje y códigos de falla de cada unidad.', foto: { nombre: 'telematica', alt: 'Camioneta FOM con el motor y el equipo de telemática a la vista.' } },
   { titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha y órdenes de trabajo con historial.', captura: { nombre: 'cap-movil-cond-mantenimiento', alt: 'Mantenimiento de la unidad en la app actual. Datos de demostración.' } },
-  { titulo: 'Reportes y analítica', texto: 'Costo por kilómetro, uso y disponibilidad. En PDF o Excel.', foto: { nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM. Datos de demostración.' } },
+  { titulo: 'Reportes y analítica', texto: 'Costo por kilómetro, uso y disponibilidad. En PDF o Excel.', foto: { nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-reportes', alt: 'Reportes actuales en la app del supervisor. Datos de demostración.' } },
   { titulo: 'Inspección en campo', texto: 'El conductor revisa su unidad con la app antes de salir.', foto: { nombre: 'tecnico-app-unidad', alt: 'Conductor de FOM con su unidad abierta en la app, junto al camión.', posicion: '40% 50%' } },
   { titulo: 'Alertas operativas', texto: 'Exceso de velocidad, motor encendido detenido y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas actuales en la app del supervisor. Datos de demostración.' } },
 ]
@@ -70,13 +70,13 @@ export default function InicioV8() {
   })
 
   return <SitioV8 raiz={raiz} titulo="FOM — Tu flota conectada. Tu operación, bajo control." descripcion="FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas: panel web para el supervisor y app para el conductor.">
-    <HeroV8
+    <HeroV8 className="inicio-hero"
       kicker="Flotas que mantienen el mundo en movimiento" kickerTinta
       titulo={['Tu flota conectada.', 'Tu operación, bajo control.']}
       bajada="La oficina y la carretera, en una misma plataforma."
       primaria={{ to: rutaV8('contacto'), texto: 'Solicitar demostración' }}
       secundaria={{ to: rutaV8('plataforma'), texto: 'Ver cómo funciona' }}
-      foto={{ nombre: 'hero-monitor-carretera', alt: 'Monitor con el Resumen actual del panel FOM frente a la autopista al atardecer. Datos de demostración.', posicion: '70% 50%' }}
+      foto={{ nombre: 'hero-monitor-carretera', movilNombre: 'inicio-hero-movil-v', alt: 'Monitor con el Resumen actual del panel FOM frente a la autopista al atardecer. Datos de demostración.', posicion: '70% 50%' }}
       nota={{ titulo: 'Panel web y app del conductor', texto: 'Sobre los mismos datos · Datos de demostración', accion: { to: rutaV8('plataforma'), texto: 'Conocer la plataforma' } }}
     />
 
@@ -94,8 +94,8 @@ export default function InicioV8() {
           bajada={<><span className="v8-solo-escritorio">El supervisor trabaja desde la computadora con el panel completo y el conductor lleva la app en el teléfono. </span>Lo que hace uno lo ve el otro.</>}
           anchoBajada={700} />
       </ContenedorV8>
-      <div className="inicio-duo-escena">
-        <FotoIntegradaV8 className="inicio-duo-foto" nombre="oficina-monitor-resumen" fundido="o" sizes="100vw"
+      <ContenedorV8 className="inicio-duo-escena">
+        <FotoIntegradaV8 className="inicio-duo-foto" nombre="oficina-monitor-resumen" marco="redondo" sizes="(min-width: 1240px) 1136px, calc(100vw - 40px)"
           alt="Oficina de FOM con el Resumen actual del panel en el monitor. Datos de demostración." />
         <CapturaFlotanteV8 className="inicio-duo-telefono" nombre="cap-movil-sup-resumen" ancho={230}
           alt="Resumen actual en el teléfono del supervisor. Datos de demostración." />
@@ -103,7 +103,7 @@ export default function InicioV8() {
           <span><b className="v8-fuerte">En la oficina.</b> Panel web del supervisor.</span>
           <span><b className="v8-fuerte">En la carretera.</b> App del conductor.</span>
         </p>
-      </div>
+      </ContenedorV8>
       <ContenedorV8><RasgosV8 className="inicio-rasgos" items={RASGOS} /></ContenedorV8>
     </SeccionV8>
 
@@ -115,12 +115,13 @@ export default function InicioV8() {
       <CarruselV8 className="inicio-carrusel" etiqueta="Funciones de FOM, desliza para ver más">
         {FUNCIONES.map(f => <TarjetaCarruselV8 key={f.titulo} titulo={f.titulo} texto={f.texto}
           foto={f.foto && { ...f.foto, alto: undefined }}
-          medio={f.captura && <CapturaFlotanteV8 nombre={f.captura.nombre} alt={f.captura.alt} ancho={220} className="inicio-carrusel-telefono" />} />)}
+          medio={f.captura && <CapturaFlotanteV8 nombre={f.captura.nombre} alt={f.captura.alt} ancho={220} className="inicio-carrusel-telefono" />}
+          medioMovil={f.capturaMovil && <CapturaFlotanteV8 nombre={f.capturaMovil.nombre} alt={f.capturaMovil.alt} ancho={220} className="inicio-carrusel-telefono" />} />)}
       </CarruselV8>
     </SeccionV8>
 
     <SeccionV8 id="seguridad" aria-labelledby="inicio-seguridad-titulo">
-      <EscenaV8 lado="derecha" ancho="72%" anchoTexto={520} posicionMovil="72% 50%"
+      <EscenaV8 lado="derecha" marco="redondo" anchoTexto={520} posicionMovil="72% 50%"
         foto={{ nombre: 'conductor-sos', alt: 'Conductor de FOM revisando su teléfono junto al camión al atardecer.' }}>
         <p className="v8-kick" data-v8-aparece="">Seguridad del conductor</p>
         <h2 id="inicio-seguridad-titulo" className="v8-h2" data-v8-aparece="">Conducir mejor empieza por entender cada viaje.</h2>
@@ -135,13 +136,15 @@ export default function InicioV8() {
         <EncabezadoV8 centro id="inicio-mapa-titulo" kicker="Mapa y GPS" titulo={['Toda tu flota.', 'Un solo mapa.']}
           bajada={<span className="v8-solo-escritorio">La ubicación de todas las unidades sobre una vista única y actualizada, con su identificación y estado.</span>} anchoBajada={680} />
       </ContenedorV8>
-      <div className="inicio-mapa-escena">
-        <FotoIntegradaV8 className="inicio-mapa-foto" nombre="patio-monitor-mapa" fundido="y" sizes="100vw" posicion="62% 50%"
+      <ContenedorV8 className="inicio-mapa-escena">
+        <FotoIntegradaV8 className="inicio-mapa-foto" nombre="patio-monitor-mapa" marco="redondo" sizes="(min-width: 1240px) 1136px, calc(100vw - 40px)" posicion="62% 50%"
           alt="Monitor con el Centro de control actual frente al patio de la flota al anochecer. Datos de demostración." />
-        <ContenedorV8 className="inicio-mapa-chips">
+        <div className="inicio-mapa-chips">
           {CHIPS_MAPA.map(c => <ChipV8 key={c.titulo} {...c} />)}
-        </ContenedorV8>
-      </div>
+        </div>
+        <CapturaFlotanteV8 className="inicio-mapa-telefono v8-solo-movil" nombre="cap-movil-sup-mapa" ancho={280}
+          alt="Centro de control actual en la app del supervisor: toda la flota en el mapa. Datos de demostración." />
+      </ContenedorV8>
       <ContenedorV8><BloqueCifrasV8 className="inicio-cifras-mapa" cifras={CIFRAS_MAPA} /></ContenedorV8>
     </SeccionV8>
 

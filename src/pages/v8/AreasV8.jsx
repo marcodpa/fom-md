@@ -97,7 +97,7 @@ export default function AreasV8() {
             {GRUPOS.map(g => <li key={g.titulo} data-v8-aparece=""><b className="v8-fuerte">{g.titulo}.</b> {g.texto}</li>)}
           </ul></div>
         </div>
-        <FotoIntegradaV8 className="areas-grupos-foto" nombre="fila-flota" fundido="o" sizes="(min-width: 900px) 58vw, 100vw" posicion="40% 50%"
+        <FotoIntegradaV8 className="areas-grupos-foto" nombre="fila-flota" marco="redondo" sizes="(min-width: 1240px) 640px, (min-width: 900px) 56vw, calc(100vw - 40px)" posicion="62% 50%"
           alt="Supervisor de FOM con una tableta junto a la fila de camiones de la flota de noche." />
         <div className="v8-solo-movil"><ul className="areas-grupos-movil">
           {GRUPOS.filter(g => g.movil).map(g => <li key={g.titulo}><h3 className="v8-h4">{g.titulo}</h3><p className="v8-sm v8-t2">{g.movil}</p></li>)}
@@ -111,8 +111,8 @@ export default function AreasV8() {
           bajada={<span className="v8-solo-escritorio">Dibuja zonas sobre patios, muelles, pozos y rutas de la Costa Oriental. Cada zona avisa sola, con hora y grupo.</span>}
           className="areas-geo-cab" />
       </ContenedorV8>
-      <div className="areas-geo-escena">
-        <FotoIntegradaV8 className="areas-geo-foto" nombre="aerea-taller" fundido="o" sizes="(min-width: 900px) 90vw, 100vw"
+      <ContenedorV8 className="areas-geo-escena">
+        <FotoIntegradaV8 className="areas-geo-foto" nombre="aerea-taller" marco="redondo" sizes="(min-width: 1240px) 1136px, calc(100vw - 40px)"
           alt="Vista aérea de un taller y patio de flota con camiones estacionados." />
         <div className="areas-geo-etiquetas">
           {ETIQUETAS.map(e => <div key={e.titulo} className={`v8-vidrio v8-chip areas-geo-etiqueta ${e.clase}`}>
@@ -120,7 +120,7 @@ export default function AreasV8() {
             <div><b>{e.titulo}</b><p>{e.texto}</p></div>
           </div>)}
         </div>
-      </div>
+      </ContenedorV8>
     </SeccionV8>
 
     <SeccionV8 id="multisitio" className="areas-multi" aria-labelledby="areas-multi-titulo">

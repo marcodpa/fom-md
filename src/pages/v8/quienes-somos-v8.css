@@ -13,7 +13,7 @@
 
 /* La fila de la flota, a sangre y fundida arriba y abajo. */
 .qs-fila { position: relative; padding-bottom: 90px; }
-.qs-fila-foto { max-height: 760px; object-fit: cover; }
+.qs-fila-foto { max-height: 640px; object-fit: cover; object-position: 50% 60%; }
 
 /* De cada dato a una acción concreta. */
 .qs-principios-lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 56px; }
@@ -28,7 +28,7 @@
   .qs-forma-rejilla { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .qs-forma-texto { padding-top: 20px; }
   .qs-fila { padding-bottom: 64px; }
-  .v8-site .qs-fila-foto { height: 400px; object-fit: cover; object-position: 30% 50%; }
+  .v8-site .qs-fila-foto { height: auto; max-height: none; object-position: 30% 50%; }
   .qs-principios-lista { grid-template-columns: minmax(0, 1fr); gap: 12px; }
 }
 @media (max-width: 599px) {
@@ -36,7 +36,7 @@
   .qs-hero .v8-hero-medio .v8-foto { height: 440px; }
   .v8-sec.qs-forma { padding-top: 24px; }
   .qs-forma-texto { padding-top: 16px; }
-  .qs-fila { padding-bottom: 0; margin-top: -44px; }
+  .qs-fila { padding-bottom: 0; margin-top: 0; }
   .v8-encabezado.qs-principios-cab { text-align: left; }
   .qs-principios-lista { margin-top: 24px; }
   .v8-site .qs-principio-foto { display: none; }

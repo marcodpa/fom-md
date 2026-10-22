@@ -69,7 +69,7 @@ export default function ContactoV8() {
 
     <SeccionV8 banda className="contacto-demo" aria-labelledby="contacto-demo-titulo">
       <ContenedorV8 className="v8-split">
-        <FotoIntegradaV8 nombre="reunion" fundido="o" sizes="(min-width: 1240px) 480px, (min-width: 900px) 40vw, 100vw"
+        <FotoIntegradaV8 nombre="reunion" marco="redondo" sizes="(min-width: 1240px) 480px, (min-width: 900px) 40vw, calc(100vw - 40px)"
           alt="Sala de reuniones de FOM con vista al patio de la flota." />
         <div>
           <p className="v8-kick">La demostración</p>
@@ -97,7 +97,7 @@ export default function ContactoV8() {
     </SeccionV8>
 
     <SeccionV8 banda className="contacto-instalacion" aria-labelledby="contacto-instalacion-titulo">
-      <EscenaV8 lado="derecha" ancho="60%" anchoTexto={480} posicionMovil="75% 50%" altoMovil={340}
+      <EscenaV8 lado="derecha" marco="redondo" anchoTexto={480} posicionMovil="75% 50%" proporcion="1 / 1"
         foto={{ nombre: 'instalacion-gps', alt: 'Técnico de FOM instalando el equipo GPS bajo el tablero de un camión.' }}>
         <p className="v8-kick v8-solo-escritorio">Instalación, soporte y cobertura</p>
         <h2 id="contacto-instalacion-titulo" className="v8-oculto">Instalación, soporte y cobertura</h2>

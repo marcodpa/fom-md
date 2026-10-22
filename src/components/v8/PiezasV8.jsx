@@ -36,7 +36,7 @@ export function Lineas({ texto }) {
 // degradado largo (sin cortes). El contenido NO va en contenedor: usa <ContenedorV8> donde toque,
 // así las fotos a sangre pueden ocupar todo el ancho.
 export function SeccionV8({ as: Etiqueta = 'section', id, banda = false, className = '', style, children, ...resto }) {
-  return <Etiqueta id={id} className={['v8-sec', banda && 'v8-banda', className].filter(Boolean).join(' ')} style={style} {...resto}>{children}</Etiqueta>
+  return <Etiqueta id={id} className={['v8-sec', banda && 'v8-banda', className].filter(Boolean).join(' ')} style={style} data-v8-3d="seccion" {...resto}>{children}</Etiqueta>
 }
 
 export function ContenedorV8({ as: Etiqueta = 'div', className = '', children, ...resto }) {
@@ -59,7 +59,7 @@ export function EncabezadoV8({ kicker, titulo, bajada, centro = false, nivel = 2
 // 92 % a 100 % al bajar, con nota de vidrio opcional encima. Para una composición distinta pasa
 // `medio` (reemplaza a la foto).
 export function HeroV8({ kicker, kickerTinta = false, titulo, bajada, bajadaAngosta = false, primaria, secundaria, foto, nota, medio, className = '' }) {
-  return <section className={`v8-hero ${className}`} aria-labelledby="v8-titulo">
+  return <section className={`v8-hero ${className}`} aria-labelledby="v8-titulo" data-v8-3d="hero">
     <div className="v8-c">
       {kicker && <p className={`v8-kick${kickerTinta ? ' is-tinta' : ''}`} data-v8-entra="">{kicker}</p>}
       <h1 id="v8-titulo" className="v8-h1">{(Array.isArray(titulo) ? titulo : [titulo]).map((l, i, t) => <span className="v8-linea" data-v8-entra="" key={i}>{l}{i < t.length - 1 ? ' ' : ''}</span>)}</h1>
@@ -85,9 +85,10 @@ export function NotaVidrioV8({ titulo, texto, accion, className = '', style }) {
 }
 
 // Tarjeta de vidrio oscuro. caja = relleno de 28 px (20 en el teléfono). radio: 'hoja' (28) o
-// 'tarjeta' (24).
+// 'tarjeta' (24). Entra con giro 3D y se inclina con el ratón (data-v8-3d="tarjeta"; pasa
+// data-v8-3d="" para apagarlo, p. ej. en un panel grande).
 export function TarjetaVidrioV8({ as: Etiqueta = 'div', caja = true, radio = 'hoja', className = '', children, ...resto }) {
-  return <Etiqueta className={['v8-vidrio', caja && 'is-caja', radio === 'tarjeta' && 'is-tarjeta', className].filter(Boolean).join(' ')} {...resto}>{children}</Etiqueta>
+  return <Etiqueta className={['v8-vidrio', caja && 'is-caja', radio === 'tarjeta' && 'is-tarjeta', className].filter(Boolean).join(' ')} data-v8-3d="tarjeta" {...resto}>{children}</Etiqueta>
 }
 
 // Chip de vidrio con icono, título y texto corto (se usa sobre las fotos).
@@ -109,10 +110,11 @@ export function RasgosV8({ items, columnas = 4, className = '' }) {
   </ul>
 }
 
-// Cifras grandes y quietas (sin contadores). cifras: [{ valor, etiqueta }].
+// Cifras grandes (sin contadores): entran girando como una paleta (data-v8-3d="cifra").
+// cifras: [{ valor, etiqueta }].
 export function BloqueCifrasV8({ cifras, columnas = 4, centro = false, className = '' }) {
   return <div className={`v8-cifras${centro ? ' is-centro' : ''} ${className}`} style={{ '--v8-cols': columnas }}>
-    {cifras.map(c => <p className="v8-cifra" key={c.etiqueta} data-v8-aparece="">
+    {cifras.map(c => <p className="v8-cifra" key={c.etiqueta} data-v8-3d="cifra">
       <strong>{c.valor}</strong><span>{c.etiqueta}</span>
     </p>)}
   </div>
@@ -121,7 +123,18 @@ export function BloqueCifrasV8({ cifras, columnas = 4, centro = false, className
 // Escena: foto a un lado, fundida, con el texto encima del otro lado (escritorio). En el teléfono
 // la foto va arriba (alta, recortada) y el texto debajo, subiendo un poco sobre ella.
 // lado: 'derecha' (foto a la derecha, texto a la izquierda) | 'izquierda'.
-export function EscenaV8({ foto, lado = 'derecha', ancho = '72%', anchoTexto = 520, posicionMovil, altoMovil, children, className = '' }) {
+// marco="redondo" (T-118): para fotos de escena (personas, oficinas, objetos con fondo). La foto
+// va completa con esquinas de 28 px en su propia columna, sin tocar el texto (dos columnas dentro
+// del contenedor; en el teléfono, foto arriba y texto debajo). `proporcion` = aspect-ratio de la
+// foto en escritorio (4 / 3 por defecto); en el teléfono usa su recorte vertical o `altoMovil`.
+export function EscenaV8({ foto, lado = 'derecha', ancho = '72%', anchoTexto = 520, posicionMovil, altoMovil, marco = 'fundido', proporcion = '4 / 3', children, className = '' }) {
+  if (marco === 'redondo') {
+    return <div className={`v8-escena is-redonda is-${lado} v8-c ${className}`}
+      style={{ '--v8-escena-texto': `${anchoTexto}px`, '--v8-escena-proporcion': proporcion, ...(posicionMovil ? { '--v8-escena-pos': posicionMovil } : null), ...(altoMovil ? { '--v8-escena-alto-movil': `${altoMovil}px` } : null) }}>
+      <div className="v8-escena-caja">{children}</div>
+      <FotoIntegradaV8 marco="redondo" sizes="(min-width: 1240px) 600px, (min-width: 900px) 50vw, calc(100vw - 40px)" {...foto} className={`v8-escena-foto ${foto.className || ''}`} />
+    </div>
+  }
   return <div className={`v8-escena is-${lado} ${className}`}
     style={{ '--v8-escena-ancho': ancho, '--v8-escena-texto': `${anchoTexto}px`, ...(posicionMovil ? { '--v8-escena-pos': posicionMovil } : null), ...(altoMovil ? { '--v8-escena-alto-movil': `${altoMovil}px` } : null) }}>
     <FotoIntegradaV8 fundido={lado === 'derecha' ? 'l' : 'r'} sizes={`(min-width: 900px) ${ancho.endsWith('%') ? `${parseFloat(ancho)}vw` : ancho}, 100vw`} {...foto} className={`v8-escena-foto ${foto.className || ''}`} />
@@ -170,12 +183,17 @@ export function CarruselV8({ etiqueta, children, className = '' }) {
 
 // Tarjeta del carrusel de funciones: título y texto arriba, foto o teléfono abajo.
 // foto: props de FotoIntegradaV8; o pasa `medio` (p. ej. <CapturaFlotanteV8 ancho={220} />).
-export function TarjetaCarruselV8({ titulo, texto, foto, medio }) {
-  return <article className="v8-vidrio v8-tarjeta-medio">
+// La foto llena el pie de la tarjeta completa, sin fundido (marco="plano"): la tarjeta la recorta
+// con su propio radio.
+// medioMovil (T-118): pieza solo para el teléfono (p. ej. la captura plana de la app en lugar de la
+// foto de un monitor, que a 390 px se corta).
+export function TarjetaCarruselV8({ titulo, texto, foto, medio, medioMovil }) {
+  return <article className="v8-vidrio v8-tarjeta-medio" data-v8-3d="tarjeta">
     <div className="v8-tarjeta-medio-texto"><h3 className="v8-h3">{titulo}</h3>{texto && <p>{texto}</p>}</div>
-    <div className={`v8-tarjeta-medio-foto${medio ? ' is-telefono' : ''}`}>
-      {medio || <FotoIntegradaV8 fundido="y" sizes="(max-width: 599px) 78vw, 400px" {...foto} />}
+    <div className={`v8-tarjeta-medio-foto${medio ? ' is-telefono' : ''}${medioMovil ? ' is-sin-movil' : ''}`}>
+      {medio || <FotoIntegradaV8 marco="plano" sizes="(max-width: 599px) 78vw, 400px" {...foto} />}
     </div>
+    {medioMovil && <div className="v8-tarjeta-medio-foto is-telefono is-solo-movil">{medioMovil}</div>}
   </article>
 }
 
@@ -230,16 +248,18 @@ export function PreguntasV8({ items, abierta = 0, className = '' }) {
   </div>
 }
 
-// Llamada final: «Hablemos de tu operación.» con la foto de la furgoneta fundida a un lado.
+// Llamada final: «Hablemos de tu operación.» con la foto de la furgoneta a un lado. Desde T-118
+// la furgoneta va completa con esquinas redondeadas (marco="redondo"); marco="fundido" vuelve a la
+// foto fundida a sangre.
 export function CtaFinalV8({
   titulo = 'Hablemos de tu operación.',
   texto = 'Cuéntanos cómo trabajas y coordinamos una demostración sin costo.',
   nota = '48 h: tiempo promedio para agendar la demostración.',
   foto = { nombre: 'furgoneta-fom', alt: 'Furgoneta FOM con el lema Operación segura, mayor disponibilidad.', posicion: undefined },
-  lado = 'izquierda', ancho = '64%',
+  lado = 'izquierda', ancho = '64%', marco = 'redondo',
 }) {
-  return <SeccionV8 className="v8-cta-final" style={{ paddingBottom: 0 }} aria-labelledby="v8-cta-titulo">
-    <EscenaV8 foto={foto} lado={lado} ancho={ancho} anchoTexto={500} posicionMovil="80% 50%" altoMovil={380}>
+  return <SeccionV8 className="v8-cta-final" style={marco === 'fundido' ? { paddingBottom: 0 } : undefined} aria-labelledby="v8-cta-titulo">
+    <EscenaV8 foto={foto} lado={lado} ancho={ancho} anchoTexto={500} posicionMovil="80% 50%" altoMovil={380} marco={marco} proporcion="1 / 1">
       <h2 id="v8-cta-titulo" className="v8-h2" data-v8-aparece="">{titulo}</h2>
       <p className="v8-lead" style={{ marginTop: 16 }} data-v8-aparece="">{texto}</p>
       <div className="v8-cta-botones" data-v8-aparece="">

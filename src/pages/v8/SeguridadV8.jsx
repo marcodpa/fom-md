@@ -137,7 +137,7 @@ export default function SeguridadV8() {
     </SeccionV8>
 
     <SeccionV8 id="video" banda className="seguridad-video" aria-labelledby="seguridad-video-titulo">
-      <EscenaV8 lado="izquierda" ancho="60%" anchoTexto={480} posicionMovil="40% 50%" altoMovil={360}
+      <EscenaV8 lado="izquierda" marco="redondo" anchoTexto={480} posicionMovil="40% 50%"
         foto={{ nombre: 'camara-tablero', alt: 'Cámara a bordo en el parabrisas con un camión en la carretera.' }}>
         <p className="v8-kick" data-v8-aparece=""><span className="v8-solo-escritorio">Seguridad basada en video</span><span className="v8-solo-movil">Video</span></p>
         <h2 id="seguridad-video-titulo" className="v8-h2" data-v8-aparece=""><span className="v8-solo-escritorio">Un hecho verificable, no una discusión.</span><span className="v8-solo-movil">Un hecho verificable.</span></h2>
@@ -153,7 +153,7 @@ export default function SeguridadV8() {
 
     <SeccionV8 id="coaching" className="seguridad-puntaje" aria-labelledby="seguridad-puntaje-titulo">
       <ContenedorV8 className="seguridad-puntaje-rejilla">
-        <FotoIntegradaV8 className="seguridad-puntaje-foto" nombre="mano-app-perfil" fundido="o" sizes="(min-width: 900px) 58vw, 100vw"
+        <FotoIntegradaV8 className="seguridad-puntaje-foto" nombre="mano-app-perfil" marco="redondo" sizes="(min-width: 1240px) 640px, (min-width: 900px) 56vw, calc(100vw - 40px)"
           alt="Mano con el teléfono mostrando el índice de manejo seguro en la app actual. Datos de demostración." />
         <div className="seguridad-puntaje-texto">
           <p className="v8-kick" data-v8-aparece="">Puntaje y coaching</p>
@@ -172,7 +172,7 @@ export default function SeguridadV8() {
     </SeccionV8>
 
     <SeccionV8 id="sos" className="seguridad-sos" aria-labelledby="seguridad-sos-titulo">
-      <EscenaV8 className="seguridad-sos-escena" lado="derecha" ancho="66%" anchoTexto={460} posicionMovil="72% 50%" altoMovil={420}
+      <EscenaV8 className="seguridad-sos-escena" lado="derecha" marco="redondo" anchoTexto={460} posicionMovil="72% 50%"
         foto={{ nombre: 'conductor-sos', alt: 'Conductor de FOM revisando su teléfono junto al camión al atardecer.' }}>
         <AvisoSos />
         <p className="v8-kick seguridad-sos-kick" data-v8-aparece="">Botón SOS</p>

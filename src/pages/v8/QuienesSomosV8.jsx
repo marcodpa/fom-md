@@ -50,10 +50,10 @@ export default function QuienesSomosV8() {
       </ContenedorV8>
     </SeccionV8>
 
-    <div className="qs-fila">
-      <FotoIntegradaV8 className="qs-fila-foto" nombre="supervisor-fila" fundido="y" sizes="100vw"
+    <ContenedorV8 className="qs-fila">
+      <FotoIntegradaV8 className="qs-fila-foto" nombre="supervisor-fila" marco="redondo" sizes="(min-width: 1240px) 1136px, calc(100vw - 40px)"
         alt="Supervisor de FOM frente a la fila de camiones de la flota de noche." />
-    </div>
+    </ContenedorV8>
 
     <SeccionV8 banda className="qs-principios" aria-labelledby="qs-principios-titulo">
       <ContenedorV8>
@@ -61,7 +61,7 @@ export default function QuienesSomosV8() {
           bajada={<span className="v8-solo-escritorio">Recorridos, alertas, inspecciones y mantenimiento comparten una misma vista de la operación.</span>} />
         <ul className="qs-principios-lista">
           {PRINCIPIOS.map(p => <TarjetaVidrioV8 as="li" key={p.titulo} caja={false} className="qs-principio" data-v8-aparece="">
-            <FotoIntegradaV8 className="qs-principio-foto" fundido="b" alto={260} sizes="(min-width: 1180px) 380px, (min-width: 900px) 32vw, 100vw" {...p.foto} />
+            <FotoIntegradaV8 className="qs-principio-foto" marco="plano" alto={260} sizes="(min-width: 1180px) 380px, (min-width: 900px) 32vw, 100vw" {...p.foto} />
             <div className="qs-principio-texto">
               <h3 className="v8-h3">{p.titulo}</h3>
               <p className="v8-t2">{p.texto}</p>

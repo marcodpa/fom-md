@@ -6,7 +6,9 @@
 /* Panel en la oficina, app en la calle */
 .v8-sec.inicio-duo { padding-top: 60px; }
 .inicio-duo-escena { position: relative; margin-top: 48px; }
-.inicio-duo-telefono { position: absolute; left: max(40px, calc((100% - 1180px) / 2 + 40px)); bottom: 2%; z-index: 1; }
+/* T-118: la oficina va completa con esquinas redondeadas dentro del contenedor; el teléfono se
+   apoya sobre su esquina inferior izquierda. */
+.inicio-duo-telefono { position: absolute; left: calc(var(--v8-margen) + 40px); bottom: 8%; z-index: 1; }
 .inicio-duo-pie { display: flex; justify-content: center; gap: 44px; margin-top: 8px; padding: 0 22px; }
 .inicio-rasgos { margin-top: 72px; }
 
@@ -20,7 +22,9 @@
 
 /* Mapa y GPS */
 .inicio-mapa-escena { position: relative; margin-top: 32px; }
-.v8-c.inicio-mapa-chips { position: absolute; left: 0; right: 0; bottom: 12%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+/* T-118: el monitor del patio va completo con esquinas redondeadas; los chips flotan dentro de la
+   foto, a 24 px de sus bordes. */
+.inicio-mapa-chips { position: absolute; left: calc(var(--v8-margen) + 24px); right: calc(var(--v8-margen) + 24px); bottom: 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .inicio-cifras-mapa { margin-top: 56px; }
 
 .inicio-faq-mas { margin-top: 32px; }
@@ -35,8 +39,8 @@
   .inicio-funciones-cab .v8-enlace { margin-top: 10px; }
   .inicio-carrusel { margin-top: 28px; }
   .inicio-mapa-escena { margin-top: 20px; }
-  .inicio-mapa-foto { height: 440px; object-fit: cover; }
-  .v8-c.inicio-mapa-chips { position: relative; bottom: auto; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: -40px; }
+  .inicio-duo-foto { height: auto; }
+  .inicio-mapa-chips { position: relative; left: auto; right: auto; bottom: auto; grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 16px 0 0; }
   .inicio-cifras-mapa { margin-top: 40px; }
   .inicio-faq-mas { margin-top: 24px; }
 }
@@ -44,4 +48,15 @@
   .v8-sec.inicio-frase { padding: 40px 0 64px; }
   .v8-sec.inicio-duo { padding-top: 16px; }
   .inicio-cifras-seguridad { margin-top: 28px; }
+}
+
+/* T-118 · Teléfono (decisión de Marco): las fotos de monitores no se recortan a 390 px; en su
+   lugar va la captura plana de la app, entera. La portada usa la foto vertical de T-120
+   (inicio-hero-movil-v) en cuanto exista; mientras, el recorte con el monitor completo. */
+@media (max-width: 599px) {
+  .inicio-hero .v8-hero-medio .v8-foto { height: auto; }
+  .v8-site .v8-foto.inicio-duo-foto, .v8-site .v8-foto.inicio-mapa-foto { display: none; }
+  .inicio-duo-telefono { margin: 0 auto; width: 280px !important; }
+  .inicio-mapa-telefono { margin: 0 auto; }
+  .inicio-mapa-chips { margin-top: 24px; }
 }

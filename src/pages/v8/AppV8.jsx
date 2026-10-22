@@ -109,7 +109,7 @@ export default function AppV8() {
     </SeccionV8>
 
     <SeccionV8 id="inspeccion" banda aria-labelledby="app-inspeccion-titulo">
-      <EscenaV8 lado="derecha" ancho="66%" anchoTexto={470} posicionMovil="75% 50%" altoMovil={420}
+      <EscenaV8 lado="derecha" marco="redondo" anchoTexto={470} posicionMovil="75% 50%"
         foto={{ nombre: 'tecnico-app-unidad', alt: 'Técnico de FOM con Mi unidad abierta en el teléfono junto al camión. Datos de demostración.' }}>
         <p className="v8-kick" data-v8-aparece="">Inspección</p>
         <h2 id="app-inspeccion-titulo" className="v8-h2" data-v8-aparece="">Una inspección que queda registrada.</h2>
@@ -127,7 +127,7 @@ export default function AppV8() {
     <SeccionV8 id="mi-unidad" aria-labelledby="app-unidad-titulo">
       <ContenedorV8 className="v8-split is-inverso app-unidad">
         <div className="app-unidad-medio">
-          <FotoIntegradaV8 className="app-unidad-foto" nombre="camion-lateral-fom" fundido="o" sizes="(min-width: 900px) 58vw, 100vw"
+          <FotoIntegradaV8 className="app-unidad-foto" nombre="camion-lateral-fom" marco="redondo" sizes="(min-width: 1240px) 640px, 56vw"
             alt="Camión blanco de FOM estacionado en el patio, con el lema de la marca." />
           <CapturaFlotanteV8 className="app-unidad-telefono" nombre="cap-movil-cond-mapa" ancho={210}
             alt="Mi mapa en la app actual, con la unidad asignada. Datos de demostración." />
@@ -162,7 +162,7 @@ export default function AppV8() {
           </div>)}
         </div>
         <div className="app-indice-medio">
-          <FotoIntegradaV8 className="app-indice-foto" nombre="camioneta-ciudad" fundido="o" sizes="(min-width: 900px) 58vw, 100vw"
+          <FotoIntegradaV8 className="app-indice-foto" nombre="camioneta-ciudad" marco="redondo" sizes="(min-width: 1240px) 640px, 56vw"
             alt="Camioneta de la flota circulando por una avenida con montañas al fondo." />
           <TarjetaVidrioV8 className="app-indice-caja" data-v8-aparece="">
             <h3 className="v8-h4">Frenadas, aceleraciones y excesos</h3>

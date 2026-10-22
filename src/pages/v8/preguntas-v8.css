@@ -2,9 +2,11 @@
    components/v8/v8-base.css. Página quieta: sin animación salvo el acordeón (0,3 s, de la base). */
 
 /* ── Hero: foto del camión de noche a sangre, tenue y fundida abajo; titular, buscador y temas ── */
-.preguntas-hero { position: relative; }
+/* T-118 (Marco: nada de velos ni capas): el titular y el buscador van arriba, sobre el fondo
+   limpio; la foto va debajo, con su brillo natural (sin opacidad) y solo el fundido de abajo. */
+.preguntas-hero { position: relative; display: flex; flex-direction: column-reverse; }
 .v8-foto.preguntas-hero-foto {
-  height: 560px; object-fit: cover; object-position: 50% 0; opacity: .55;
+  height: 560px; object-fit: cover; object-position: 50% 0; margin-top: 8px;
   /* La foto de origen trae una franja oscura pegada abajo (fila 597 de 941, un corte horizontal
      visible). El fundido termina ANTES de esa fila: --corte = dónde cae la fila según el ancho
      (cover con la foto arriba: 597/1672 del ancho, o 355 px cuando manda el alto de 560; tope 560). */
@@ -12,7 +14,7 @@
   -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(var(--corte) * .5), rgba(0,0,0,.9) calc(var(--corte) * .58), rgba(0,0,0,.72) calc(var(--corte) * .67), rgba(0,0,0,.5) calc(var(--corte) * .76), rgba(0,0,0,.28) calc(var(--corte) * .85), rgba(0,0,0,.1) calc(var(--corte) * .93), transparent calc(var(--corte) - 6px));
   mask-image: linear-gradient(180deg, #000 0, #000 calc(var(--corte) * .5), rgba(0,0,0,.9) calc(var(--corte) * .58), rgba(0,0,0,.72) calc(var(--corte) * .67), rgba(0,0,0,.5) calc(var(--corte) * .76), rgba(0,0,0,.28) calc(var(--corte) * .85), rgba(0,0,0,.1) calc(var(--corte) * .93), transparent calc(var(--corte) - 6px));
 }
-.preguntas-hero-cuerpo { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.preguntas-hero-cuerpo { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-top: 128px; }
 .preguntas-hero-cuerpo > .v8-c { width: 100%; }
 .preguntas-hero-bajada { margin-top: 18px; }
 
