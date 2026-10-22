@@ -127,7 +127,7 @@ function BandejaAlertas() {
         {manejo.estado === 'error' && <ErrorCarga error={manejo.error} texto="No se pudieron consultar los eventos de manejo." onReintentar={manejo.recargar} />}
         {manejo.datos !== null && <><Chips opciones={filtrosEvento} valor={tipoEvento} alCambiar={setTipoEvento} />
           {eventosFiltrados.length > 0 && <div className="fa-severidades" aria-label="Severidad de los eventos consultados">{['alta', 'media', 'baja'].map(s => <span key={s}><Tag color={color('alerta_severidad', s)}>{etiqueta('alerta_severidad', s)}</Tag><strong>{eventosFiltrados.filter(e => e.severidad === s).length}</strong></span>)}</div>}
-          <Tarjeta titulo="Detalle de eventos" accion={<span className="pa-nota">{f.numero(eventosFiltrados.length)} registros</span>}>
+          <Tarjeta titulo="Detalle de eventos" accion={<span className="pa-nota">{f.cantidad(eventosFiltrados.length, 'registro', 'registros')}</span>}>
           {eventosFiltrados.length ? <TablaEventos eventos={eventosFiltrados} /> : <Vacio icono="velocidad" titulo={tipoEvento ? 'Sin eventos de este tipo' : 'Sin eventos registrados'} texto={tipoEvento ? 'Consulta otros tipos o vuelve a mostrar todos.' : `No hay eventos registrados en los últimos ${DIAS_EVENTOS} días.`} accion={tipoEvento && <button className="pnl-btn" onClick={() => setTipoEvento('')}>Ver todos</button>} />}
         </Tarjeta></>}
       </>}

@@ -379,7 +379,7 @@ function Contenido({
                           ) : null
                         )}
                         {p.papelesPendientes > 1 && (
-                          <Tag color="gris" plano>{p.papelesPendientes} documentos por vencer</Tag>
+                          <Tag color="gris" plano>{f.cantidad(p.papelesPendientes, 'documento por vencer', 'documentos por vencer')}</Tag>
                         )}
                       </div>
                     </td>

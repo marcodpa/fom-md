@@ -22,7 +22,9 @@
 .pnl-mapa .mapboxgl-ctrl-attrib.mapboxgl-compact .mapboxgl-ctrl-attrib-button { filter: invert(0.85); }
 .pnl-mapa .mapboxgl-ctrl-bottom-left { bottom: 34px; }
 .pnl-mapa .mapboxgl-ctrl-logo { opacity: 0.85; }
-.control-map .pnl-mapa .mapboxgl-ctrl-bottom-left { bottom: 64px; }
+/* En el teléfono la hoja de la unidad (o la lista) tapa el pie del mapa: el logo sube encima de
+   ella. `--hoja-alto` lo mide el Centro de control (0 en escritorio, donde la ficha va a un lado). */
+.control-map .pnl-mapa .mapboxgl-ctrl-bottom-left { bottom: max(64px, calc(var(--hoja-alto, 0px) + 8px)); }
 .control-map .pnl-mapa .mapboxgl-ctrl-bottom-right { margin: 0 18px 32px 0; }
 
 /* Marcadores: Mapbox pone el contenedor; el SVG de dentro ya trae el carro y la etiqueta. */
@@ -139,7 +141,8 @@
   /* En teléfono la tarjeta va abajo, a lo ancho, con 16 px a cada lado. */
   .mapa-herr { right: 16px; left: 16px; width: auto; top: auto; bottom: 62px; }
   .control-map .mapa-herr { top: auto; bottom: 62px; }
-  .control-map .mapa-capas { bottom: auto; top: 200px; right: 12px; }
+  /* A la altura de la segunda fila de filtros (el selector de área), a la derecha. */
+  .control-map .mapa-capas { bottom: auto; top: 194px; right: 12px; }
   .control-map .mapa-capas-panel { top: calc(100% + 8px); bottom: auto; }
   .mapa-capas-boton span { display: none; }
   .mapa-capas-boton { padding: 0 9px; }

@@ -399,7 +399,7 @@ export default function Flota() {
                   valor={enMarcha}
                   icono="velocidad"
                   tono="ok"
-                  nota={`${lista.length - enMarcha} detenidas`}
+                  nota={f.cantidad(lista.length - enMarcha, 'detenida', 'detenidas')}
                 />
               ) : (
                 /* La base no guarda la velocidad: se informa cuántos equipos

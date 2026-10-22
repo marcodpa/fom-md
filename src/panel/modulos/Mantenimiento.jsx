@@ -453,7 +453,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
       let faltaron = ''
       if (paso.a === 'cerrada' && fotosCierre.length) {
         const r = await subirVarios({ coleccion: 'work-orders', padreId: odt.id, proposito: 'work_order_closure', archivos: fotosCierre })
-        if (r.errores.length) faltaron = `La orden quedó cerrada, pero ${r.errores.length} de ${fotosCierre.length} fotos no se subieron: ${r.errores[0]} Puedes agregarlas en «Fotos del trabajo terminado».`
+        if (r.errores.length) faltaron = `La orden quedó cerrada, pero ${r.errores.length} de ${f.cantidad(fotosCierre.length, 'foto', 'fotos')} no se subieron: ${r.errores[0]} Puedes agregarlas en «Fotos del trabajo terminado».`
       }
       setAviso(paso.a === 'asignar' ? 'Responsable asignado.' : `Cambio confirmado: ${paso.t}.`)
       setPendiente(null)
@@ -716,7 +716,7 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
             }
           }
           if (s.errores.length) {
-            setFallo(`La orden quedó creada, pero ${s.errores.length} de ${fotos.length} fotos no se subieron: ${s.errores[0]} Puedes agregarlas desde el detalle de la orden.`)
+            setFallo(`La orden quedó creada, pero ${s.errores.length} de ${f.cantidad(fotos.length, 'foto', 'fotos')} no se subieron: ${s.errores[0]} Puedes agregarlas desde el detalle de la orden.`)
             setCreada(true)
             setGuardando(false)
             return recargar()

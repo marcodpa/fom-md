@@ -125,7 +125,7 @@ export default function Plataforma() {
         {personas.estado === 'error' && <ErrorCarga onReintentar={personas.recargar} error={personas.error} />}
         {personas.estado === 'ok' && (
           <div className="adm-layout">
-            <Tarjeta titulo={total == null ? 'Personas' : `${f.numero(total)} personas`} sinCuerpo>
+            <Tarjeta titulo={total == null ? 'Personas' : f.cantidad(total, 'persona', 'personas')} sinCuerpo>
               {visibles.length === 0 ? (
                 <div className="pnl-card-cuerpo">
                   <Vacio icono="buscar" titulo="Nadie coincide" texto="Prueba con parte del nombre, el correo o el código de la empresa." />

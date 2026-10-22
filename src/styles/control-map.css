@@ -66,11 +66,14 @@
  .control-search .pnl-buscar{width:100%}
  .fom-dark .control-search .pnl-btn{font-size:0;width:44px;padding:8px}
  .control-search .pnl-btn svg{width:20px}
- .control-filters{top:146px;left:12px;right:12px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
+ /* A 390 px los tres chips y el selector de área no caben en una fila: el selector baja a la
+    segunda, entero, en vez de quedar cortado («Todas las área»). */
+ .control-filters{top:146px;left:12px;right:12px;flex-wrap:wrap;gap:8px 6px}
+ .control-filters .pnl-chips{flex-shrink:1;min-width:0;max-width:100%}
  .fom-dark .control-filters .pnl-chip{font-size:12px;min-height:40px;padding:8px 10px}
- .fom-dark .control-filters select.pnl-input{min-width:140px;font-size:12px;height:40px;min-height:40px}
+ .fom-dark .control-filters select.pnl-input{min-width:150px;max-width:100%;font-size:12px;height:40px;min-height:40px}
  .control-panel{left:12px;right:12px;top:auto;bottom:62px;width:auto;max-height:44dvh;padding:16px}
- .control-feedback{top:200px;bottom:auto;max-height:40dvh}
+ .control-feedback{top:246px;bottom:auto;max-height:40dvh}
  .control-live{display:none}
  .control-map .fleet-map-legend{right:auto;left:12px;bottom:25px}
  .control-map .leaflet-bottom.leaflet-right .leaflet-control-zoom{margin:0 12px 25px 0}
@@ -84,6 +87,8 @@
  .control-unit .fleet-vehicle-image img{height:66px}
  .control-unit .fleet-vehicle-image figcaption{font-size:9px}
  .control-unit .fleet-facts{gap:9px}
+ /* Con el recorrido la hoja crece, pero sin llegar a los filtros: encima queda sitio para el logo de Mapbox. */
+ .control-map .control-unit.con-ruta{max-height:calc(100% - 332px)}
 }
 
 /* Recorrido: viajes con inicio y fin, paradas y hora de cada punto */

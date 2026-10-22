@@ -84,7 +84,7 @@ export default function UsuariosUnidad({ unidad: v, conductores, puedeEditar, el
             <td><EnlacePerfil usuarioId={j.usuarioId} nombre={j.conductor} /></td>
           </tr>)}</tbody>
         </table></div>)}
-        <div className="eu-paginacion"><span>{total != null ? `${total} jornadas · ` : ''}Página {pagina + 1}</span><button type="button" className="pnl-btn sutil" disabled={!pagina || jornadas.estado !== 'ok'} onClick={() => setPagina(p => p - 1)}>Anterior</button><button type="button" className="pnl-btn sutil" disabled={!haySiguiente || jornadas.estado !== 'ok'} onClick={() => setPagina(p => p + 1)}>Siguiente</button></div>
+        <div className="eu-paginacion"><span>{total != null ? `${f.cantidad(total, 'jornada', 'jornadas')} · ` : ''}Página {pagina + 1}</span><button type="button" className="pnl-btn sutil" disabled={!pagina || jornadas.estado !== 'ok'} onClick={() => setPagina(p => p - 1)}>Anterior</button><button type="button" className="pnl-btn sutil" disabled={!haySiguiente || jornadas.estado !== 'ok'} onClick={() => setPagina(p => p + 1)}>Siguiente</button></div>
       </>}
     </Tarjeta>
   </div>

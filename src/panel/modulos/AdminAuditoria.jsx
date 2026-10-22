@@ -156,7 +156,7 @@ export default function AdminAuditoria() {
             </div>
 
             <div className="adm-layout">
-              <Tarjeta titulo={`${visibles.length} eventos`} sinCuerpo>
+              <Tarjeta titulo={f.cantidad(visibles.length, 'evento', 'eventos')} sinCuerpo>
                 {visibles.length === 0 ? (
                   <div className="pnl-card-cuerpo"><Vacio icono="auditoria" titulo="Sin eventos" texto="Ninguna acción coincide con el filtro." /></div>
                 ) : dias.map(([dia, eventos]) => (

@@ -225,7 +225,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
             </div>
           </div>
         </Link>
-        <Kpi titulo="ODT por resolver" valor={odtAbiertas} icono="llave" nota={`${num(r.odtAbiertas ?? 0)} abiertas · ${num(r.odtEnRevision ?? 0)} en revisión`} a="/panel/mantenimiento" />
+        <Kpi titulo="ODT por resolver" valor={odtAbiertas} icono="llave" nota={`${f.cantidad(r.odtAbiertas ?? 0, 'abierta', 'abiertas')} · ${num(r.odtEnRevision ?? 0)} en revisión`} a="/panel/mantenimiento" />
         <Kpi titulo="Alertas nuevas" valor={num(r.alertasSinLeer)} icono="campana" nota="Pendientes de leer" a="/panel/alertas" />
       </div>
       <div className="pnl-resumen-central">
@@ -245,7 +245,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
         </div>
       </div>
       <div className="pnl-resumen-acciones">
-        <Kpi titulo="Inspecciones de hoy" valor={num(r.inspeccionesHoy)} icono="inspeccion" nota={sinInspeccion == null ? 'Consulta el historial' : `${sinInspeccion} unidades pendientes`} a="/panel/inspecciones" />
+        <Kpi titulo="Inspecciones de hoy" valor={num(r.inspeccionesHoy)} icono="inspeccion" nota={sinInspeccion == null ? 'Consulta el historial' : f.cantidad(sinInspeccion, 'unidad pendiente', 'unidades pendientes')} a="/panel/inspecciones" />
         <Kpi titulo="Mantenimiento" valor={odtAbiertas} icono="llave" nota="Órdenes pendientes y en revisión" tono={odtAbiertas ? 'aviso' : ''} a="/panel/mantenimiento" />
         <Kpi titulo="Documentos por vencer" valor={num(r.docsPorVencer)} icono="documento" nota="Revisa los próximos vencimientos" tono={r.docsPorVencer ? 'aviso' : ''} a="/panel/documentos" />
       </div>

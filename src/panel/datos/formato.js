@@ -73,6 +73,14 @@ export function numero(n) {
   return Number(n).toLocaleString('es')
 }
 
+/**
+ * Número con su palabra en singular o en plural, para no escribir «1 observaciones»:
+ * cantidad(1, 'observación', 'observaciones') → "1 observación"; cantidad(3, …) → "3 observaciones".
+ */
+export function cantidad(n, uno, varios) {
+  return `${numero(n)} ${Number(n) === 1 ? uno : varios}`
+}
+
 /** "48.230 km" */
 export function km(n) {
   if (n === null || n === undefined) return '—'

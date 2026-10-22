@@ -847,7 +847,7 @@ export default function ExpedienteVehiculo() {
                       <div className="pnl-fila">
                         <div className="pnl-fila-txt">
                           <b>Total del período</b>
-                          <span>{v.costos.length} movimientos registrados</span>
+                          <span>{f.cantidad(v.costos.length, 'movimiento registrado', 'movimientos registrados')}</span>
                         </div>
                         <em>{f.moneda(totalCostos)}</em>
                       </div>

@@ -126,7 +126,7 @@ function MapaEsquema({
   return (
     <div className="pnl-mapa" style={{ height: alto }}>
       <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" role="img"
-        aria-label={`Mapa de la flota: ${pines.length} unidades, ${enMarcha} en marcha`}>
+        aria-label={`Mapa de la flota: ${pines.length} ${pines.length === 1 ? 'unidad' : 'unidades'}, ${enMarcha} en marcha`}>
         <defs>
           <linearGradient id="pnl-agua" x1="0" y1="0" x2="0.6" y2="1">
             <stop offset="0" stopColor="#1b3f77" />
@@ -208,7 +208,7 @@ function MapaEsquema({
           <i />
           En vivo
         </span>
-        <span>{pines.length} unidades</span>
+        <span>{pines.length} {pines.length === 1 ? 'unidad' : 'unidades'}</span>
         <span className="sep">·</span>
         <span>{enMarcha} en marcha</span>
         <span className="sep">·</span>

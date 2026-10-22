@@ -163,7 +163,7 @@ function Contenido({ lista, todas, q, setQ, tipo, setTipo, servicio, setServicio
           <button type="button" className={`emp-fila${seleccion?.id === e.id ? ' seleccionada' : ''}`} aria-pressed={seleccion?.id === e.id} aria-label={`Ver detalles de ${e.nombre}`} onClick={()=>setSeleccionId(e.id)}>
             <span className="emp-simbolo"><LogoEmpresa empresaId={e.id} nombre={e.nombre} respaldo={<Icono nombre={e.tipo === 'personal' ? 'gente' : 'empresa'} tam={23} />} /></span>
             <span className="emp-fila-identidad"><strong>{e.nombre}</strong><span>{e.respaldo ? 'Respaldo del sistema' : e.tipoEtiqueta || etiqueta('company_tipo',e.tipo)}{e.rif ? ` · ${e.rif}` : ''}</span><span>{e.contacto || e.email || e.telefono || 'Sin contacto registrado'}</span></span>
-            <span className="emp-fila-estado"><Tag color={e.respaldo ? 'gris' : e.servicioActivo ? 'verde' : 'rojo'}>{e.respaldo ? 'Respaldo' : e.servicioActivo ? 'Activo' : 'Suspendido'}</Tag><span>{Number.isFinite(e.vehiculos) ? `${e.vehiculos} vehículos` : 'Flota sin dato'}</span></span>
+            <span className="emp-fila-estado"><Tag color={e.respaldo ? 'gris' : e.servicioActivo ? 'verde' : 'rojo'}>{e.respaldo ? 'Respaldo' : e.servicioActivo ? 'Activo' : 'Suspendido'}</Tag><span>{Number.isFinite(e.vehiculos) ? f.cantidad(e.vehiculos, 'vehículo', 'vehículos') : 'Flota sin dato'}</span></span>
             <Icono nombre="flecha" tam={18} />
           </button>
           {seleccionId === e.id && <div className="emp-ficha-inline"><FichaEmpresa empresa={e} {...fichaProps} /><button type="button" className="pnl-btn sutil" onClick={()=>setSeleccionId(null)}>Cerrar detalles</button></div>}

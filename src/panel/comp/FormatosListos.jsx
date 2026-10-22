@@ -23,7 +23,7 @@ export function puedePublicarFormatos(perfil) {
 const criticos = (f) => f.items.filter((i) => i.isCritical).length
 const tituloCompleto = ({ formato, titulo }) => {
   const n = criticos(formato)
-  return `${titulo} (${n === formato.items.length ? `${n} puntos críticos` : `${formato.items.length} puntos, ${n} críticos`})`
+  return `${titulo} (${n === formato.items.length ? `${n} puntos críticos` : `${formato.items.length} puntos, ${n} ${n === 1 ? 'crítico' : 'críticos'}`})`
 }
 
 /**

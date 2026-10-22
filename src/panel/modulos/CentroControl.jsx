@@ -172,8 +172,33 @@ export default function CentroControl() {
   const unidad = unidadLista ? { ...unidadDetalle, ...unidadLista } : null
   const estadosVisibles = [...new Map(lista.map(v => { const e = estadoUnidad(v); return [e.clave, e] })).values()]
 
+  // En el teléfono la ficha y la lista son hojas a lo ancho que tapan el pie del mapa. Se mide
+  // cuánto tapan (`--hoja-alto`) para subir encima el logo de Mapbox, que su licencia exige ver.
+  const raiz = useRef(null)
+  const hayLista = lista.length > 0
+  useEffect(() => {
+    const seccion = raiz.current
+    if (!seccion || typeof ResizeObserver === 'undefined') return undefined
+    const hojas = () => seccion.querySelectorAll(':scope > .control-panel')
+    const medir = () => {
+      const caja = seccion.getBoundingClientRect()
+      let alto = 0
+      hojas().forEach((el) => {
+        const r = el.getBoundingClientRect()
+        // Solo las de abajo a lo ancho: en escritorio la ficha va a un lado y no tapa el logo.
+        if (r.width >= caja.width * 0.6 && caja.bottom - r.bottom < 120) alto = Math.max(alto, caja.bottom - r.top)
+      })
+      seccion.style.setProperty('--hoja-alto', `${Math.round(alto)}px`)
+    }
+    const observador = new ResizeObserver(medir)
+    observador.observe(seccion)
+    hojas().forEach((el) => observador.observe(el))
+    medir()
+    return () => observador.disconnect()
+  }, [seleccionado, listaAbierta, viendoRecorrido, flota.estado, hayLista])
+
   return (
-    <section className="control-map" aria-label="Centro de control">
+    <section className="control-map" aria-label="Centro de control" ref={raiz}>
       <div className="control-map-canvas">
         <Mapa vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado}
           cola={seleccionado && !viendoRecorrido ? colaPuntos : null} viajes={analisis?.viajes} paradas={analisis?.paradas} foco={foco} viajeActivo={viajeActivo} alElegirViaje={(n) => setViajeActivo((a) => (a === n ? null : n))}

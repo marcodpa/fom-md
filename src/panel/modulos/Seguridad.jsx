@@ -227,7 +227,7 @@ export default function Seguridad() {
                     <Icono nombre={r.tipo === 'velocidad' ? 'velocidad' : 'alerta'} tam={18} />
                     <div className="pnl-fila-txt">
                       <b>{r.tipo === 'velocidad' ? `Velocidad máxima ${f.numero(r.umbralKmh)} km/h` : `Condición ${r.variable ?? ''} ${r.operador ?? ''} ${r.umbral ?? ''}`.trim()}</b>
-                      <span>{r.vehiculos ? `${r.vehiculos} unidades` : 'Toda la flota'}</span>
+                      <span>{r.vehiculos ? f.cantidad(r.vehiculos, 'unidad', 'unidades') : 'Toda la flota'}</span>
                     </div>
                     <Tag color={r.activa ? 'verde' : 'gris'}>{r.activa ? 'Activa' : 'Apagada'}</Tag>
                     <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => actuar(() => repo.reglas.set(r.id, { activa: !r.activa }), r.activa ? 'Regla apagada.' : 'Regla activada.')}>

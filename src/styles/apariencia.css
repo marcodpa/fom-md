@@ -138,6 +138,8 @@
     border-color: var(--e-primario);
     color: #e4f2ff;
   }
+  /* Sobre el mapa el chip elegido va opaco: con transparencia se veían a través los escudos de carretera. */
+  .pnl.fom-dark[data-diseno] .control-filters .pnl-chip.activo { background: color-mix(in srgb, var(--e-primario) 24%, var(--e-sup)); }
   .pnl.fom-dark[data-diseno] .control-filters select.pnl-input { background-color: var(--e-sup); border-color: var(--e-borde); color: var(--e-texto); }
   .pnl.fom-dark[data-diseno] .control-filters select.pnl-input option { background: var(--e-sup); color: var(--e-texto); }
   .pnl.fom-dark[data-diseno] :is(.mapa-herr-cab span, .mapa-capas-grupo > span, .mapa-capas-switch small, .control-live) { color: var(--e-texto-2); }
@@ -158,7 +160,7 @@
   .pnl.fom-dark[data-diseno="glass"] :is(.fleet-metrics > div, .ruta-item, .ruta-rangos button, .control-panel-heading button) { background: var(--e-sup-baja); border-color: var(--e-borde); color: var(--e-texto); }
   .pnl.fom-dark[data-diseno="glass"] .fleet-vehicle-image { background: transparent; }
   .pnl.fom-dark[data-diseno="glass"] .fleet-card-content { scrollbar-color: #777d86 #292c32; }
-  .pnl.fom-dark[data-diseno="glass"] .control-filters .pnl-chip { background: #292c32e8; border-color: var(--e-borde); color: var(--e-texto-2); }
+  .pnl.fom-dark[data-diseno="glass"] .control-filters .pnl-chip { background: #292c32; border-color: var(--e-borde); color: var(--e-texto-2); }
   .pnl.fom-dark[data-diseno="glass"] .control-filters .pnl-chip.activo { background: var(--e-activo-sup); color: var(--e-activo-texto); }
   .pnl.fom-dark[data-diseno="glass"] .control-filters select.pnl-input { background-color: #292c32; border-color: var(--e-borde); color: var(--e-texto); }
   .pnl.fom-dark[data-diseno="glass"] .control-filters select.pnl-input option { background: #292c32; color: var(--e-texto); }

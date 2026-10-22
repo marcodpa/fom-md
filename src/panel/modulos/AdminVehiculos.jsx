@@ -151,7 +151,7 @@ export default function AdminVehiculos() {
             </table>
           </div>
           <div className="av-pie">
-            <span>{f.numero(Math.min(mostrar, lista.length))} de {f.numero(lista.length)} unidades</span>
+            <span>{f.numero(Math.min(mostrar, lista.length))} de {f.cantidad(lista.length, 'unidad', 'unidades')}</span>
             {mostrar < lista.length && <button type="button" className="pnl-btn sutil" onClick={() => setMostrar((n) => n + POR_PAGINA)}>Mostrar más</button>}
           </div>
         </div>

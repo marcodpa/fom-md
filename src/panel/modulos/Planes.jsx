@@ -92,12 +92,12 @@ export default function Planes({ vista = 'acciones' }) {
                         <span>
                           {ESTRATEGIA[p.estrategia] ?? p.estrategia}
                           {p.cadaKm ? ` · cada ${f.numero(p.cadaKm)} km` : ''}
-                          {p.cadaDias ? ` · cada ${p.cadaDias} días` : ''}
+                          {p.cadaDias ? ` · cada ${f.cantidad(p.cadaDias, 'día', 'días')}` : ''}
                           {' · '}{p.unidades} {p.unidades === 1 ? 'unidad' : 'unidades'}
                           {p.descripcion ? ` · ${p.descripcion}` : ''}
                         </span>
                       </div>
-                      <div className="mnt-plan-interval"><b>{p.cadaKm ? f.numero(p.cadaKm) : p.cadaDias}</b><span>{p.cadaKm ? 'km' : 'días'}{p.cadaKm && p.cadaDias ? ` / ${p.cadaDias} días` : ''}</span></div>
+                      <div className="mnt-plan-interval"><b>{p.cadaKm ? f.numero(p.cadaKm) : p.cadaDias}</b><span>{p.cadaKm ? 'km' : Number(p.cadaDias) === 1 ? 'día' : 'días'}{p.cadaKm && p.cadaDias ? ` / ${f.cantidad(p.cadaDias, 'día', 'días')}` : ''}</span></div>
                       <Tag color={crC}>{crT}</Tag>
                       <Tag color={p.activo ? 'verde' : 'gris'} plano>{p.activo ? 'Activo' : 'Apagado'}</Tag>
                       <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => actuar(() => repo.planes.encender(p, !p.activo), p.activo ? 'Plan apagado: ya no genera servicios.' : 'Plan encendido.')}>{p.activo ? 'Apagar' : 'Encender'}</button>
@@ -232,7 +232,7 @@ function ModalPlan({ abierto, alCerrar, guardar, fallo }) {
           {Object.entries(CRITICIDAD).map(([v, [t]]) => <option key={v} value={v}>{t}</option>)}
         </select>
       </Campo>
-      </div><aside className="mnt-plan-preview"><span className="mnt-eyebrow">VISTA PREVIA</span><Icono nombre="sync" tam={32}/><h3>{d.servicio || 'Tu próximo servicio'}</h3><div className="mnt-plan-interval"><b>{d.cadaKm ? f.numero(Number(d.cadaKm)) : d.cadaDias || '—'}</b><span>{d.cadaKm ? 'km' : 'días'}</span></div>{d.cadaKm && d.cadaDias && <p>O cada {d.cadaDias} días</p>}<p>{ESTRATEGIA[d.estrategia]}</p><Tag color={CRITICIDAD[d.criticidad][1]}>{CRITICIDAD[d.criticidad][0]}</Tag><hr/><p>Después de crear el plan, asigna las unidades que cubrirá.</p></aside></div>
+      </div><aside className="mnt-plan-preview"><span className="mnt-eyebrow">VISTA PREVIA</span><Icono nombre="sync" tam={32}/><h3>{d.servicio || 'Tu próximo servicio'}</h3><div className="mnt-plan-interval"><b>{d.cadaKm ? f.numero(Number(d.cadaKm)) : d.cadaDias || '—'}</b><span>{d.cadaKm ? 'km' : Number(d.cadaDias) === 1 ? 'día' : 'días'}</span></div>{d.cadaKm && d.cadaDias && <p>O cada {f.cantidad(d.cadaDias, 'día', 'días')}</p>}<p>{ESTRATEGIA[d.estrategia]}</p><Tag color={CRITICIDAD[d.criticidad][1]}>{CRITICIDAD[d.criticidad][0]}</Tag><hr/><p>Después de crear el plan, asigna las unidades que cubrirá.</p></aside></div>
       <div style={PIE}>
         <button type="button" className="pnl-btn sutil" onClick={alCerrar} disabled={guardando}>Cancelar</button>
         <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar plan'}</button>

@@ -48,6 +48,8 @@ const mapaClaro = (prefs) => prefs.vista !== 'satelite' && ['day', 'dawn'].inclu
 const sinMovimiento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 // Un punto de la cola reconocible entre refrescos (la cola se corre: entran puntos y salen otros).
 const marcaDe = (p) => `${p.hora}|${p.lat}|${p.lng}`
+/** Lo que flota sobre el mapa y no debe tapar lo que se encuadra (la leyenda y el pie no cuentan). */
+const PIEZAS_ENCIMA = '.control-search, .control-filters, .control-panel, .mapa-capas, .mapa-herr, .fleet-card.flotante'
 
 /**
  * Desliza los marcadores de su posición a la nueva (ver MapaLibre.jsx) con UN solo bucle
@@ -306,17 +308,25 @@ export default function MapaMapbox({
   }
 
   /**
-   * Margen para encuadrar unidad y destino dejando sitio a la ficha (izquierda) y a la
-   * tarjeta de llegada (a la derecha en escritorio, abajo a lo ancho en el teléfono).
+   * Márgenes para encuadrar: los de `base` más lo que tapan las piezas que flotan encima del
+   * mapa (cabecera, filtros, botón de capas, ficha u hoja de la unidad, tarjeta de llegada).
+   * Se miden en pantalla: en el teléfono la hoja va abajo a lo ancho y en escritorio a un lado,
+   * y así ningún marcador encuadrado queda debajo de ellas.
    */
-  const encuadre = (m) => {
+  const margenes = (m, base) => {
     const lienzo = m.getContainer().getBoundingClientRect()
-    const p = { top: 110, left: lienzo.width > 600 && (ficha || espacioFicha) ? 420 : 40, right: 40, bottom: 90 }
-    const tarjeta = contenedor.current?.parentElement?.querySelector('.mapa-herr')?.getBoundingClientRect()
-    if (tarjeta?.width) {
-      if (tarjeta.width < lienzo.width * 0.6) p.right = Math.max(p.right, lienzo.right - tarjeta.left + 24)
-      else p.bottom = Math.max(p.bottom, lienzo.bottom - tarjeta.top + 24)
-    }
+    const p = { ...base }
+    const raiz = contenedor.current?.closest('.control-map') ?? contenedor.current?.parentElement
+    raiz?.querySelectorAll(PIEZAS_ENCIMA).forEach((el) => {
+      const r = el.getBoundingClientRect()
+      if (!r.width || !r.height || r.bottom <= lienzo.top || r.top >= lienzo.bottom) return
+      if (r.width >= lienzo.width * 0.6) {
+        // A lo ancho: tapa por arriba o por abajo, según el borde al que esté más cerca.
+        if (r.top - lienzo.top < lienzo.bottom - r.bottom) p.top = Math.max(p.top, r.bottom - lienzo.top + 16)
+        else p.bottom = Math.max(p.bottom, lienzo.bottom - r.top + 16)
+      } else if (r.left - lienzo.left < lienzo.right - r.right) p.left = Math.max(p.left, r.right - lienzo.left + 16)
+      else p.right = Math.max(p.right, lienzo.right - r.left + 16)
+    })
     // Con márgenes más grandes que el mapa, Mapbox no encuadra: se dejan al menos 120 px libres.
     const ajustar = (a, b, total) => {
       const libre = total - 120
@@ -329,6 +339,12 @@ export default function MapaMapbox({
     ajustar('left', 'right', lienzo.width)
     ajustar('top', 'bottom', lienzo.height)
     return p
+  }
+  /** Lo que hay que correr el centro para que un punto quede en medio de lo que se ve libre. */
+  const desplazamientoLibre = (m) => {
+    if (!ficha && !espacioFicha) return [0, 0]
+    const p = margenes(m, { top: 0, left: 0, right: 0, bottom: 0 })
+    return [(p.left - p.right) / 2, (p.top - p.bottom) / 2]
   }
 
   /** `destino`: { lat, lng, nombre? } — el nombre es la placa si se tocó otra unidad. */
@@ -346,7 +362,11 @@ export default function MapaMapbox({
       if (!mapa.current || seleccionadoRef.current !== u.id || !estiloListo.current) return
       llegadaCapa.current = pintarLlegada(mapboxgl, m, { trazo: r.trazo, destino, mapaClaro: mapaClaro(prefsRef.current) })
       const limites = limitesDe(mapboxgl, [r.trazo, [u.lng, u.lat], [destino.lng, destino.lat]])
-      if (limites) m.fitBounds(limites, { padding: encuadre(m), maxZoom: 15, duration: sinMovimiento() ? 0 : 800 })
+      if (limites) {
+        const ancho = m.getContainer().getBoundingClientRect().width > 600
+        const base = { top: 110, left: ancho && (ficha || espacioFicha) ? 420 : 40, right: 40, bottom: 90 }
+        m.fitBounds(limites, { padding: margenes(m, base), maxZoom: 15, duration: sinMovimiento() ? 0 : 800 })
+      }
       setHerr((h) => ({ ...h, cargandoLlegada: false, llegada: { ...r, destino, calculadaEn: Date.now() } }))
     } catch (e) {
       console.warn('[mapa] No se pudo calcular la llegada:', e?.message || e)
@@ -641,7 +661,7 @@ export default function MapaMapbox({
         m.jumpTo({ center: puntos[0], zoom: 13 })
       } else {
         const limites = puntos.reduce((b, p) => b.extend(p), new mapboxgl.LngLatBounds(puntos[0], puntos[0]))
-        m.fitBounds(limites, { padding: 48, maxZoom: 12, duration: 0 })
+        m.fitBounds(limites, { padding: margenes(m, { top: 48, left: 48, right: 48, bottom: 48 }), maxZoom: 12, duration: 0 })
       }
       encuadrado.current = true
     }
@@ -657,9 +677,8 @@ export default function MapaMapbox({
     if (!m || !seleccionado) return
     const v = vehiculosRef.current.find((x) => x.id === seleccionado)
     if (!validPosition(v)) return
-    const lienzo = m.getContainer().getBoundingClientRect()
-    const offset = (ficha || espacioFicha) ? (lienzo.width > 600 ? [175, 0] : [0, -lienzo.height * 0.18]) : [0, 0]
-    m.easeTo({ center: [v.lng, v.lat], offset, duration: sinMovimiento() ? 0 : 600 })
+    // En medio de lo que se ve: ni bajo la ficha (o la hoja del teléfono) ni bajo los filtros.
+    m.easeTo({ center: [v.lng, v.lat], offset: desplazamientoLibre(m), duration: sinMovimiento() ? 0 : 600 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seleccionado])
 
@@ -770,7 +789,7 @@ export default function MapaMapbox({
       const limites = util.reduce((b, p) => b.extend([p.lng, p.lat]), new mapboxgl.LngLatBounds([util[0].lng, util[0].lat], [util[0].lng, util[0].lat]))
       const ancho = lienzo.width > 600
       m.fitBounds(limites, {
-        padding: { top: 150, left: (ficha || espacioFicha) && ancho ? 410 : 40, right: 80, bottom: (ficha || espacioFicha) && !ancho ? Math.min(lienzo.height * 0.45, 350) : 80 },
+        padding: margenes(m, { top: 150, left: (ficha || espacioFicha) && ancho ? 410 : 40, right: 80, bottom: (ficha || espacioFicha) && !ancho ? Math.min(lienzo.height * 0.45, 350) : 80 }),
         maxZoom: 16,
         duration: sinMovimiento() ? 0 : 800,
       })
@@ -873,9 +892,7 @@ export default function MapaMapbox({
     }
     capa.abrir(e, partesEvento(e), () => elegirEventoRef.current?.(null))
     if (!desdeMapa) {
-      const lienzo = m.getContainer().getBoundingClientRect()
-      const offset = (ficha || espacioFicha) ? (lienzo.width > 600 ? [175, 0] : [0, -lienzo.height * 0.18]) : [0, 0]
-      m.flyTo({ center: [e.lng, e.lat], offset, zoom: Math.max(m.getZoom(), 15), duration: sinMovimiento() ? 0 : 800 })
+      m.flyTo({ center: [e.lng, e.lat], offset: desplazamientoLibre(m), zoom: Math.max(m.getZoom(), 15), duration: sinMovimiento() ? 0 : 800 })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventoElegido, listo])
@@ -888,7 +905,7 @@ export default function MapaMapbox({
     if (foco.limites?.length > 1) {
       const ancho = m.getContainer().getBoundingClientRect().width
       const limites = foco.limites.reduce((b, p) => b.extend([p[1], p[0]]), new mapboxgl.LngLatBounds([foco.limites[0][1], foco.limites[0][0]], [foco.limites[0][1], foco.limites[0][0]]))
-      m.fitBounds(limites, { padding: { top: 110, left: ancho > 600 ? 440 : 30, right: 60, bottom: 80 }, maxZoom: 17, duration: 800 })
+      m.fitBounds(limites, { padding: margenes(m, { top: 110, left: ancho > 600 ? 440 : 30, right: 60, bottom: 80 }), maxZoom: 17, duration: 800 })
       return
     }
     m.flyTo({ center: [foco.lng, foco.lat], zoom: Math.max(m.getZoom(), 16), duration: 800 })

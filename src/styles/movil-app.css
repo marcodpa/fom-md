@@ -173,8 +173,14 @@
   .pnl.fom-dark[data-diseno][data-movil][data-screen="/mapa"] .control-search { top: calc(74px + env(safe-area-inset-top)); left: 12px; right: 12px; }
   /* Los filtros bajan lo mismo que la cabecera (control-map.css los pone a 146 bajo 600 px). */
   .pnl.fom-dark[data-movil][data-screen="/mapa"] .control-filters { top: calc(208px + env(safe-area-inset-top)); }
-  /* Y el botón de capas, bajo los filtros cuando los hay. */
-  .pnl.fom-dark[data-movil][data-screen="/mapa"] .control-map:has(.control-filters) .mapa-capas { top: calc(262px + env(safe-area-inset-top)); }
+  /* Y el botón de capas, bajo los chips: a la altura del selector de área, que va en la segunda fila. */
+  .pnl.fom-dark[data-movil][data-screen="/mapa"] .control-map:has(.control-filters) .mapa-capas { top: calc(256px + env(safe-area-inset-top)); }
+  @media (max-width: 600px) {
+    /* Avisos (cargando, sin resultados) bajo las dos filas de filtros. */
+    .pnl.fom-dark[data-movil][data-screen="/mapa"] .control-feedback { top: calc(304px + env(safe-area-inset-top)); }
+    /* La hoja del recorrido no sube hasta los filtros: encima queda sitio para el logo de Mapbox. */
+    .pnl.fom-dark[data-movil][data-screen="/mapa"] .control-map .control-unit.con-ruta { max-height: calc(100% - 394px - env(safe-area-inset-top)); }
+  }
   /* Empujada sobre un mapa: sin franja abajo, el mapa llega al borde. */
   .pnl.fom-dark[data-movil="pila"][data-screen="/mapa"] .pnl-main { padding-bottom: 0; }
 

@@ -101,9 +101,9 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
   return (
     <>
       <div className="pnl-grid k4">
-        <Kpi titulo="Vencido (USD)" valor={f.moneda(suma('vencido'))} icono="alerta" tono={suma('vencido') > 0 ? 'malo' : 'ok'} nota={`${cuenta('vencido')} cuotas vencidas`} />
+        <Kpi titulo="Vencido (USD)" valor={f.moneda(suma('vencido'))} icono="alerta" tono={suma('vencido') > 0 ? 'malo' : 'ok'} nota={f.cantidad(cuenta('vencido'), 'cuota vencida', 'cuotas vencidas')} />
         <Kpi titulo="Pendiente (USD)" valor={f.moneda(suma('pendiente'))} icono="reloj" tono={suma('pendiente') > 0 ? 'aviso' : 'ok'} nota={`${cuenta('pendiente')} por cobrar`} />
-        <Kpi titulo="Cobrado (USD)" valor={f.moneda(suma('pagado'))} icono="check" tono="ok" nota={`${cuenta('pagado')} cuotas pagadas`} />
+        <Kpi titulo="Cobrado (USD)" valor={f.moneda(suma('pagado'))} icono="check" tono="ok" nota={f.cantidad(cuenta('pagado'), 'cuota pagada', 'cuotas pagadas')} />
         <Kpi titulo="Cuotas registradas" valor={todos.length} icono="costos" nota="En todo el sistema" />
       </div>
 
