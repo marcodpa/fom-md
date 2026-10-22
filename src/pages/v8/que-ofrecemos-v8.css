@@ -1,0 +1,155 @@
+/* Qué ofrecemos v8 (T-108): solo lo propio de esta página; lo común vive en components/v8/v8-base.css.
+   Ojo: no se fija `display` en elementos con v8-solo-escritorio / v8-solo-movil (la base los oculta). */
+
+.qo-mt20 { margin-top: 20px; }
+.qo-mt24 { margin-top: 24px; }
+
+/* ── Hero: laptop a la izquierda, texto a la derecha ─────────────────── */
+.qo-hero { position: relative; display: flex; align-items: center; min-height: clamp(620px, 56.25vw, 900px); }
+.qo-hero-foto { position: absolute; inset: 0; }
+/* La foto trae un panel azul liso pegado a la derecha (borde duro al 61 %): se funde hacia el fondo
+   noche antes de llegar a él, y arriba y abajo con el mismo degradado largo de la base. */
+.v8-foto.qo-hero-img {
+  width: 100%; height: 100%; object-fit: cover; object-position: 0% 50%;
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, rgba(0,0,0,.92) 44%, rgba(0,0,0,.72) 48%, rgba(0,0,0,.45) 52%, rgba(0,0,0,.2) 55.5%, rgba(0,0,0,.05) 58%, transparent 60%),
+    linear-gradient(180deg, transparent, rgba(0,0,0,.35) 5%, rgba(0,0,0,.8) 10%, #000 15%, #000 70%, rgba(0,0,0,.88) 76%, rgba(0,0,0,.55) 84%, rgba(0,0,0,.2) 92%, transparent);
+  mask-image: linear-gradient(90deg, #000 40%, rgba(0,0,0,.92) 44%, rgba(0,0,0,.72) 48%, rgba(0,0,0,.45) 52%, rgba(0,0,0,.2) 55.5%, rgba(0,0,0,.05) 58%, transparent 60%),
+    linear-gradient(180deg, transparent, rgba(0,0,0,.35) 5%, rgba(0,0,0,.8) 10%, #000 15%, #000 70%, rgba(0,0,0,.88) 76%, rgba(0,0,0,.55) 84%, rgba(0,0,0,.2) 92%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.v8-c.qo-hero-texto { display: flex; justify-content: flex-end; width: 100%; padding-top: 40px; padding-bottom: 40px; }
+.qo-hero-caja { width: min(100%, 520px); }
+.v8-h1.qo-h1 { font-size: clamp(42px, 4.45vw, 64px); }
+.qo-hero-bajada { margin-top: 20px; }
+.qo-hero-accion { margin-top: 32px; }
+.qo-hero-puntos { display: flex; gap: 28px; margin-top: 36px; }
+.qo-hero-puntos li { flex: 1 1 0; min-width: 0; }
+
+/* ── Qué ofrecemos: tres tarjetas de vidrio ──────────────────────────── */
+.qo-oferta-titulo { text-align: center; }
+.qo-oferta { margin-top: 48px; }
+.qo-oferta > li { display: flex; }
+.qo-tarjeta { display: flex; flex-direction: column; width: 100%; overflow: hidden; }
+/* La foto del técnico trae un panel liso pegado a la derecha (borde duro al 57 %): se funde hacia el
+   vidrio de la tarjeta antes de llegar a él, además del fundido de abajo. */
+.v8-foto.qo-tarjeta-foto.is-corte {
+  -webkit-mask-image: linear-gradient(90deg, #000 52%, rgba(0,0,0,.8) 58%, rgba(0,0,0,.45) 64%, rgba(0,0,0,.15) 70%, transparent 75%),
+    linear-gradient(180deg, #000 52%, rgba(0,0,0,.94) 58%, rgba(0,0,0,.8) 65%, rgba(0,0,0,.6) 72%, rgba(0,0,0,.38) 80%, rgba(0,0,0,.18) 88%, rgba(0,0,0,.05) 95%, transparent);
+  mask-image: linear-gradient(90deg, #000 52%, rgba(0,0,0,.8) 58%, rgba(0,0,0,.45) 64%, rgba(0,0,0,.15) 70%, transparent 75%),
+    linear-gradient(180deg, #000 52%, rgba(0,0,0,.94) 58%, rgba(0,0,0,.8) 65%, rgba(0,0,0,.6) 72%, rgba(0,0,0,.38) 80%, rgba(0,0,0,.18) 88%, rgba(0,0,0,.05) 95%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.qo-tarjeta-texto { display: flex; flex-direction: column; flex: 1; padding: 4px 28px 30px; }
+.v8-kick.qo-tarjeta-kick { font-size: 14px; margin-bottom: 8px; }
+.qo-tarjeta-bajada { margin-top: 10px; }
+.qo-tarjeta-enlace { margin-top: auto; padding-top: 14px; }
+
+/* ── Inspecciones y mantenimiento ────────────────────────────────────── */
+.qo-insp { position: relative; }
+.v8-foto.qo-insp-foto { width: 62%; margin-left: auto; }
+.v8-c.qo-insp-texto { position: absolute; inset: 0; display: flex; align-items: center; }
+.qo-insp-caja { max-width: 460px; }
+.v8-captura-figura.qo-insp-telefono {
+  position: absolute; z-index: 1; bottom: 4%;
+  right: max(60px, calc((100% - 1180px) / 2 + 40px)); width: clamp(176px, 15.3vw, 220px) !important;
+}
+
+/* ── Alertas: texto y captura de Reportes ────────────────────────────── */
+/* (estilos de la base: v8-split + CapturaFlotanteV8) */
+
+/* ── Instalación de los equipos GPS ──────────────────────────────────── */
+.qo-gps-escena { position: relative; }
+.v8-foto.qo-gps-foto { width: 58%; }
+.v8-c.qo-gps-texto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-end; }
+.qo-gps-caja { width: min(100%, 480px); }
+.qo-gps-cifra strong { display: block; font-size: clamp(48px, 5.56vw, 80px); font-weight: 600; line-height: 1; letter-spacing: -1.2px; font-variant-numeric: tabular-nums; }
+.qo-gps-cifra span { display: block; margin-top: 10px; font-size: 15px; line-height: 1.35; color: var(--v8-texto-2); }
+.qo-gps-lista { margin-top: 28px; }
+.qo-gps-lista li + li { margin-top: 12px; }
+
+/* ── Cierre ──────────────────────────────────────────────────────────── */
+.v8-sec.qo-cierre { padding-top: 40px; }
+.qo-mas { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 28px; }
+.qo-lema { margin-top: 64px; font-size: clamp(34px, 3.9vw, 56px); font-weight: 600; line-height: 1.07; letter-spacing: clamp(-0.9px, -0.06vw, -0.6px); }
+.qo-cierre-accion { margin-top: 32px; }
+
+/* Tableta: las tres tarjetas siguen en una fila (la base pasaría a 2 + 1 huérfana). */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .qo-oferta.v8-g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .v8-foto.qo-tarjeta-foto { height: 200px !important; }
+  .qo-tarjeta-texto { padding: 4px 20px 24px; }
+  .qo-tarjeta .v8-h3 { font-size: 22px; }
+  .qo-tarjeta-bajada { font-size: 15px; line-height: 1.45; }
+}
+
+/* ── Tableta y teléfono: piezas apiladas ─────────────────────────────── */
+@media (max-width: 899px) {
+  .qo-hero { display: flex; flex-direction: column; align-items: stretch; min-height: 0; }
+  .v8-c.qo-hero-texto { order: 1; display: block; padding-top: 56px; padding-bottom: 0; }
+  .qo-hero-caja { width: auto; max-width: 640px; }
+  .qo-hero-foto { order: 2; position: relative; inset: auto; margin-top: 16px; }
+  .v8-foto.qo-hero-img { height: auto; aspect-ratio: 16 / 9; }
+
+  .qo-oferta { margin-top: 32px; }
+
+  .v8-foto.qo-insp-foto { display: none; }
+  .v8-c.qo-insp-texto { position: relative; inset: auto; display: block; }
+  .qo-insp-caja { max-width: 640px; }
+  .v8-captura-figura.qo-insp-telefono { position: relative; right: auto; bottom: auto; margin: 32px auto 0; width: 240px !important; }
+
+  .v8-foto.qo-gps-foto { width: 100%; height: 380px; object-fit: cover; object-position: 75% 50%;
+    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    -webkit-mask-composite: source-over; mask-composite: add; }
+  .v8-c.qo-gps-texto { position: relative; inset: auto; display: block; margin-top: -30px; }
+  .qo-gps-caja { width: auto; }
+}
+
+@media (max-width: 599px) {
+  .v8-c.qo-hero-texto { padding-top: 48px; }
+  .qo-hero-bajada { margin-top: 16px; }
+  .qo-hero-accion { margin-top: 24px; }
+  .qo-hero-puntos { display: none; }
+  /* Teléfono: la foto alta, recortada antes del panel liso de la derecha. */
+  .v8-foto.qo-hero-img { aspect-ratio: auto; height: 440px; object-position: 18% 50%;
+    -webkit-mask-image: linear-gradient(90deg, #000 82%, rgba(0,0,0,.6) 92%, transparent),
+      linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    mask-image: linear-gradient(90deg, #000 82%, rgba(0,0,0,.6) 92%, transparent),
+      linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent); }
+
+  .qo-oferta-titulo { text-align: left; }
+  .qo-oferta { margin-top: 24px; }
+  .v8-foto.qo-tarjeta-foto { display: none; }
+  .qo-tarjeta-texto { padding: 20px; }
+  .v8-kick.qo-tarjeta-kick { font-size: 13px; margin-bottom: 6px; }
+  .qo-tarjeta-bajada { margin-top: 6px; font-size: 15px; line-height: 1.45; }
+  .qo-tarjeta-enlace { padding-top: 10px; }
+  .qo-tarjeta-enlace .v8-enlace { font-size: 15px; }
+
+  .v8-captura-figura.qo-insp-telefono { margin-top: 24px; }
+
+  /* El tablero del teléfono no lleva la sección de Reportes ni la fila de enlaces. */
+  .qo-alertas, .qo-mas { display: none; }
+
+  /* En el teléfono la instalación va sobre banda, con la misma entrada y salida suave. */
+  .v8-sec.qo-gps {
+    padding-top: 40px;
+    --v8-entrada: 120px;
+    background: linear-gradient(180deg,
+      rgba(15, 20, 27, 0) 0, rgba(15, 20, 27, .2) calc(var(--v8-entrada) * .25), rgba(15, 20, 27, .55) calc(var(--v8-entrada) * .5),
+      rgba(15, 20, 27, .85) calc(var(--v8-entrada) * .75), var(--v8-banda) var(--v8-entrada),
+      var(--v8-banda) calc(100% - var(--v8-entrada)),
+      rgba(15, 20, 27, .85) calc(100% - var(--v8-entrada) * .75), rgba(15, 20, 27, .55) calc(100% - var(--v8-entrada) * .5),
+      rgba(15, 20, 27, .2) calc(100% - var(--v8-entrada) * .25), rgba(15, 20, 27, 0) 100%);
+  }
+  .qo-gps-lista { margin-top: 20px; }
+  .qo-gps-lista li + li { margin-top: 22px; }
+
+  .v8-sec.qo-cierre { padding-top: 64px; }
+  .qo-lema { margin-top: 0; font-size: 34px; line-height: 1.1; letter-spacing: -0.6px; }
+  .qo-lema .v8-linea { display: inline; }
+  .qo-cierre-accion { margin-top: 28px; }
+  .qo-cierre-accion .v8-pill { width: 100%; }
+}

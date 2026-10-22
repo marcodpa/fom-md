@@ -1,0 +1,99 @@
+/* Beneficios v8 (T-108): solo lo propio de esta página; lo común vive en components/v8/v8-base.css.
+   Ojo: no se fija `display` en elementos con v8-solo-escritorio / v8-solo-movil (la base los oculta). */
+
+/* ── Hero: camioneta a la derecha, texto a la izquierda ──────────────── */
+.ben-hero { position: relative; display: flex; align-items: center; min-height: max(520px, 37.2vw); }
+.ben-hero-foto { position: absolute; top: 0; right: 0; bottom: 0; width: 66%; }
+.v8-foto.ben-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 50%; }
+.v8-c.ben-hero-texto { width: 100%; padding-top: 24px; padding-bottom: 24px; }
+.ben-hero-caja { max-width: 540px; }
+.v8-h1.ben-h1 { font-size: clamp(42px, 5vw, 72px); }
+.ben-hero-bajada { margin-top: 20px; }
+.ben-hero-accion { margin-top: 32px; }
+
+/* ── Lo que cambia en el día a día: recorrido fijo ───────────────────── */
+.v8-sec.ben-dia { padding-top: 100px; }
+.ben-dia-cab { text-align: center; }
+.ben-dia-bajada { max-width: 640px; margin: 16px auto 0; }
+.v8-c.ben-recorrido { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; align-items: center; margin-top: 56px; }
+.ben-pasos .v8-paso .v8-h3 { font-size: 24px; }
+.ben-pasos .v8-paso p { margin-top: 6px; }
+.ben-pestanas { margin-bottom: 16px; }
+/* Las cuatro capturas ocupan el mismo sitio; la activa se ve y las demás se apagan (solo opacidad). */
+.ben-capturas { display: grid; }
+.ben-captura { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity .45s var(--v8-ease), visibility 0s linear .45s; }
+.ben-captura.is-activa { opacity: 1; visibility: visible; transition: opacity .45s var(--v8-ease), visibility 0s; }
+
+/* ── Cuidado y comunicación, desde el campo ──────────────────────────── */
+.ben-campo-escena { position: relative; }
+.v8-c.ben-campo-texto { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; }
+.ben-campo-titulo { max-width: 640px; }
+.ben-campo-notas { margin-top: 40px; }
+.ben-nota .v8-sm { margin-top: 8px; }
+
+/* ── Cifras y cierre ─────────────────────────────────────────────────── */
+.ben-cifras-accion { margin-top: 36px; }
+/* Etiqueta larga (escritorio) o corta (teléfono): la base pinta `.v8-cifra span` en bloque, así que
+   aquí se decide cuál se ve. */
+.ben-cifras .v8-cifra span span { display: inline; margin: 0; font-size: inherit; }
+.ben-cifras .v8-cifra span .v8-solo-movil { display: none; }
+
+/* ── Tableta y teléfono: piezas apiladas, sin escena fija ────────────── */
+@media (max-width: 1023px) {
+  .v8-c.ben-recorrido { gap: 40px; }
+}
+@media (max-width: 899px) {
+  .ben-hero { display: block; min-height: 0; }
+  .ben-hero-foto { position: relative; width: 100%; }
+  .v8-foto.ben-hero-img { height: 420px; object-position: 62% 50%;
+    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    -webkit-mask-composite: source-over; mask-composite: add; }
+  .v8-c.ben-hero-texto { margin-top: -50px; padding-top: 0; padding-bottom: 0; }
+
+  .v8-c.ben-recorrido { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 20px; }
+  .ben-vista { order: -1; }
+  .ben-pasos li.is-tenue { opacity: 1; }
+
+  .v8-foto.ben-campo-foto { height: 440px; object-fit: cover; object-position: 60% 50%; }
+  .v8-c.ben-campo-texto { position: relative; inset: auto; display: block; margin-top: -60px; padding-top: 0; }
+}
+
+@media (max-width: 599px) {
+  .ben-hero-bajada { margin-top: 14px; }
+  .ben-hero-accion { margin-top: 24px; }
+
+  .v8-sec.ben-dia { padding-top: 64px; }
+  .ben-dia-cab { text-align: left; }
+  /* Pestañas a lo ancho, con el dedo, alineadas con el margen. */
+  .ben-pestanas { margin: 0 calc(-1 * var(--v8-margen)) 20px; padding: 0 var(--v8-margen); }
+  .ben-pestanas .v8-pestana { padding: 0 14px; }
+  /* La lista del teléfono: sin números ni rayas, títulos cortos. */
+  .ben-pasos li, .ben-pasos li:last-child { border: 0; }
+  .ben-pasos li + li { margin-top: 22px; }
+  .ben-pasos .v8-paso { padding: 0; gap: 0; }
+  .ben-pasos .v8-paso-n { display: none; }
+  .ben-pasos .v8-paso .v8-h3 { font-size: 17px; line-height: 1.25; letter-spacing: -0.2px; }
+  .ben-pasos .v8-paso p { margin-top: 2px; font-size: 15px; line-height: 1.45; }
+
+  /* En el teléfono el campo va sobre banda (entrada y salida suaves) y las cifras sobre el fondo. */
+  .v8-sec.ben-campo {
+    --v8-entrada: 120px;
+    background: linear-gradient(180deg,
+      rgba(15, 20, 27, 0) 0, rgba(15, 20, 27, .2) calc(var(--v8-entrada) * .25), rgba(15, 20, 27, .55) calc(var(--v8-entrada) * .5),
+      rgba(15, 20, 27, .85) calc(var(--v8-entrada) * .75), var(--v8-banda) var(--v8-entrada),
+      var(--v8-banda) calc(100% - var(--v8-entrada)),
+      rgba(15, 20, 27, .85) calc(100% - var(--v8-entrada) * .75), rgba(15, 20, 27, .55) calc(100% - var(--v8-entrada) * .5),
+      rgba(15, 20, 27, .2) calc(100% - var(--v8-entrada) * .25), rgba(15, 20, 27, 0) 100%);
+  }
+  .v8-foto.ben-campo-foto { height: 380px; }
+  .ben-campo-titulo { margin-bottom: 12px; }
+  .ben-campo-notas { margin-top: 0; }
+  .ben-campo-notas > li.ben-solo-ancho { display: none; }
+  .ben-nota .v8-sm { margin-top: 2px; }
+  .v8-sec.v8-banda.ben-cifras-sec { background: none; }
+
+  .ben-cierre { display: none; }
+  .ben-cifras .v8-cifra span .v8-solo-escritorio { display: none; }
+  .ben-cifras .v8-cifra span .v8-solo-movil { display: inline; }
+}
