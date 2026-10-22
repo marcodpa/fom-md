@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { Campo, Datos, Kpi, Modal, Tag, Tarjeta, Vacio } from './ui'
-import { BarrasH } from './Grafico'
 import ManejoConductor from './ManejoConductor'
 import { eventosManejo } from '../datos/manejo'
 import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
 import { color, estadoDocumento, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
-import { etiquetaRolSesion } from '../roles'
+import { etiquetaRolSesion, rolCanonico } from '../roles'
+import { useSesion } from '../useSesion'
+import EventosManejoMapa from './EventosManejoMapa'
 import { cambiosDatosUsuario, indiceDePersona, nombreDocumentoUsuario } from '../datos/perfilUsuario'
 import FotoUnidad from './FotoUnidad'
 import CredencialesPersona from './CredencialesPersona'
@@ -210,56 +211,16 @@ function UnidadAsignada({ persona: p, unidadActual, puedeEditar, unidades, carga
   )
 }
 
-function Conduccion({ persona: p, porTipo }) {
-  // Lo más nuevo arriba (regla de toda lista con fecha).
-  const eventos = masNuevoPrimero(p.eventos, 'creadaEn')
-
-  return (
-    <div className="pnl-grid">
-      <div className="pnl-grid">
-        <Tarjeta titulo="Eventos por tipo">
-          {porTipo.length ? <BarrasH datos={porTipo} formato={(n) => f.numero(n)} /> : <Vacio
-            icono="velocidad" titulo={p.eventosDisponibles === false ? 'Eventos no disponibles' : 'Sin eventos registrados'}
-            texto={p.manejoError || p.eventosError || 'No hay eventos de manejo registrados en este perfil.'} />}
-        </Tarjeta>
-
-      </div>
-
-      <Tarjeta titulo="Eventos de manejo" sinCuerpo={eventos.length > 0}>
-        {eventos.length ? <div className="pnl-tabla-wrap">
-          <table className="pnl-tabla">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>Severidad</th>
-                <th className="num">Valor</th>
-                <th>Ubicación</th>
-                <th>Cuándo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventos.map((e) => (
-                <tr key={e.id}>
-                  <td>{e.nombre}</td>
-                  <td>
-                    <Tag color={color('alerta_severidad', e.severidad)}>
-                      {etiqueta('alerta_severidad', e.severidad)}
-                    </Tag>
-                  </td>
-                  <td className="num">
-                    {e.clave === 'exceso_velocidad' ? f.velocidad(e.valor) : f.numero(e.valor)}
-                  </td>
-                  <td>{e.ubicacion}</td>
-                  <td>{f.desde(e.creadaEn)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div> : <Vacio icono="alerta" titulo={p.eventosDisponibles === false ? 'Detalle de eventos no disponible' : 'Sin eventos registrados'}
-          texto={p.eventosError || 'No hay eventos registrados en este perfil.'} />}
-      </Tarjeta>
-    </div>
-  )
+/**
+ * Pestaña Conducción: el mapa y la lista de frenadas, aceleraciones y excesos de más de 120 km/h
+ * del período. Mi perfil (el conductor en sesión) los lee por `me/`; la ficha que mira el
+ * supervisor, por la persona. `porTipo` ya no se usa: los conteos van en la leyenda del mapa.
+ */
+function Conduccion({ persona: p }) {
+  const sesion = useSesion()
+  const id = p.userId ?? p.id
+  const propio = Boolean(id) && sesion?.perfil?.id === id && rolCanonico(sesion?.perfil?.rol) === 'conductor'
+  return <EventosManejoMapa key={`${id}:${propio}`} userId={id} propio={propio} />
 }
 
 function Inspecciones({ inspecciones, error }) {

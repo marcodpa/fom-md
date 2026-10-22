@@ -1,0 +1,35 @@
+/* Eventos de manejo en el mapa (pestaña Conducción). Colores de cada tipo: datos/eventosManejo.js. */
+.em-dias { flex: none; gap: 6px; }
+.em-dias .pnl-chip { height: 30px; padding: 0 12px; font-size: 12px; }
+
+/* El ícono: círculo del color del tipo, glifo oscuro encima (nunca blanco sobre color). */
+.em-icono { flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--em-color); color: #08121C; box-shadow: 0 0 0 2px #FFFFFF33; }
+.em-icono svg { width: 58%; height: 58%; }
+
+/* Leyenda con conteos: cada tipo es un filtro que se enciende y se apaga. */
+.em-leyenda { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.em-filtro { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 7px; border-radius: 10px; border: 1px solid var(--e-borde); background: var(--e-sup-baja); color: var(--e-texto-2); font: 500 13px var(--e-fuente); cursor: pointer; transition: border-color var(--e-d-base) var(--e-curva), opacity var(--e-d-base) var(--e-curva); }
+.em-filtro b { color: var(--e-texto); font-variant-numeric: tabular-nums; font-weight: 700; }
+.em-filtro:hover { border-color: var(--e-borde-fuerte); }
+.em-filtro.activo { background: #173553; border-color: #2D5D88; color: #8BC6FF; }
+.em-filtro:not(.activo) { opacity: 0.62; }
+.em-filtro:not(.activo) .em-icono { filter: grayscale(1); }
+
+.em-mapa { position: relative; border-radius: 16px; overflow: hidden; scroll-margin-top: 90px; }
+.em-sobre-mapa { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); z-index: 470; margin: 0; padding: 8px 14px; border-radius: 999px; background: #0b1927ed; border: 1px solid #263b4d; color: #e3ecf7; font-size: 13px; white-space: nowrap; box-shadow: 0 6px 18px rgba(0, 0, 0, .5); }
+.em-nota { margin: 12px 0 0; font-size: 12px; line-height: 1.5; color: var(--e-texto-2); }
+
+/* Lista debajo del mapa, lo más nuevo primero. Tocar una fila lleva el mapa a ese evento. */
+.em-lista { list-style: none; margin: 0; padding: 0 var(--e-sm) var(--e-sm); max-height: 460px; overflow: auto; }
+.em-fila { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 10px; border: 0; border-top: 1px solid var(--e-borde); background: transparent; color: var(--e-texto); font: inherit; text-align: left; cursor: pointer; border-radius: 0; }
+.em-lista li:first-child .em-fila { border-top: 0; }
+.em-fila:hover { background: var(--e-sup-baja); }
+.em-fila.activo { background: #173553; border-radius: 10px; }
+.em-fila.activo + * { border-top-color: transparent; }
+.em-fila-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.em-fila-txt b { font-size: 14px; font-weight: 600; }
+.em-fila-txt em { font-style: normal; font-weight: 500; color: var(--e-texto-2); font-variant-numeric: tabular-nums; }
+.em-fila-txt small { font-size: 12px; color: var(--e-texto-2); }
+@media (max-width: 600px) {
+  .em-sobre-mapa { white-space: normal; width: calc(100% - 32px); text-align: center; border-radius: 16px; }
+}

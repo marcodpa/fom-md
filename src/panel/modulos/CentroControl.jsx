@@ -9,6 +9,7 @@ import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
 import PanelRecorrido from '../comp/PanelRecorrido'
 import { analizar, COLA_MIN, colaReciente } from '../datos/recorrido'
 import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
+import { EXCESO_KMH, contarPorTipo, eventosParaMapa, resumenEventos } from '../datos/eventosManejo'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import '../../styles/control-map.css'
@@ -40,6 +41,7 @@ function coincide(v, texto) {
 const firmaFlota = (lista) => lista.map((v) => `${v.id}:${v.lat}:${v.lng}:${v.estadoMarcha}:${v.velocidadKmh}:${v.ultimoReporte}:${v.conectado}:${v.conductorNombre}`).join('|') + (lista.incompleta ? '|incompleta' : '')
 const firmaPuntos = (p) => `${p.length}|${p[0]?.hora}|${p.at(-1)?.hora}|${p.at(-1)?.lat}|${p.at(-1)?.lng}`
 const firmaAnalisis = (a) => `${firmaPuntos(a.puntos)}|${a.viajes.length}|${a.paradas.length}`
+const firmaEventos = (l) => l.map((e) => e.id).join('|')
 
 export default function CentroControl() {
   const [q, setQ] = useState('')
@@ -106,6 +108,19 @@ export default function CentroControl() {
   )
   const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
 
+  // Eventos de manejo sobre el recorrido. El servidor no los da por unidad, solo por conductor:
+  // se piden los del conductor asignado (7 días, el período más corto) y se dejan los de esta
+  // unidad dentro del rango del recorrido. Los de otro conductor en la misma unidad no llegan.
+  const conductorId = lista.find((v) => v.id === seleccionado)?.conductorPrincipalId ?? null
+  const eventosConductor = useDatos(
+    () => (seleccionado && viendoRecorrido && conductorId ? repo.manejo.eventos({ userId: conductorId, dias: 7 }) : Promise.resolve(null)),
+    [seleccionado, viendoRecorrido, conductorId],
+    60000
+  )
+  const eventosRecorrido = useEstable(useMemo(() => (viendoRecorrido && eventosConductor.datos
+    ? eventosParaMapa(eventosConductor.datos, { vehiculoId: seleccionado, desde: Date.now() - horas * 3600000 })
+    : null), [viendoRecorrido, eventosConductor.datos, seleccionado, horas]), firmaEventos)
+
   // Si un filtro deja fuera la unidad abierta, se cierra el detalle.
   useEffect(() => {
     if (seleccionado && !lista.some((v) => v.id === seleccionado)) setSeleccionado(null)
@@ -145,6 +160,7 @@ export default function CentroControl() {
       <div className="control-map-canvas">
         <Mapa vehiculos={lista} seleccionado={seleccionado} alSeleccionar={setSeleccionado}
           cola={seleccionado && !viendoRecorrido ? colaPuntos : null} viajes={analisis?.viajes} paradas={analisis?.paradas} foco={foco} viajeActivo={viajeActivo} alElegirViaje={(n) => setViajeActivo((a) => (a === n ? null : n))}
+          eventosManejo={eventosRecorrido} encuadrarEventos={false}
           alto="100%" ficha={false} leyenda={false} espacioFicha herramientas />
       </div>
       <div className="control-search">
@@ -184,6 +200,11 @@ export default function CentroControl() {
         {!viendoRecorrido && cola.estado !== 'error' && (!colaActual || cola.estado === 'cargando') && <p className="control-detail-note" role="status">Cargando los últimos 5 minutos…</p>}
         {!viendoRecorrido && colaActual && cola.estado === 'ok' && colaPuntos.length < 2 && <p className="control-detail-note" role="status">{cola.datos.puntos.length > 1 ? 'Sin movimiento registrado en el tramo reciente.' : 'No hay suficientes posiciones para dibujar el recorrido reciente.'} Puedes consultar el día completo en «Ver recorrido».</p>}
         {viendoRecorrido && <PanelRecorrido analisis={analisis} horas={horas} alCambiarHoras={setHoras} cargando={dia.estado === 'cargando'} truncado={dia.datos?.truncado} alEnfocar={(p) => setFoco({ ...p, clave: Date.now() })} viajeActivo={viajeActivo} alElegirViaje={setViajeActivo} />}
+        {viendoRecorrido && <p className="control-detail-note" role="status">{!conductorId
+          ? 'Sin conductor asignado: no se pueden mostrar frenadas ni excesos sobre el recorrido (el servidor los entrega por conductor).'
+          : eventosConductor.estado === 'error' ? <>No se pudieron cargar los eventos de manejo. <button type="button" onClick={eventosConductor.recargar}>Reintentar</button></>
+            : eventosRecorrido ? `Eventos de manejo en este rango: ${resumenEventos(contarPorTipo(eventosRecorrido)).toLowerCase()} (excesos de más de ${EXCESO_KMH} km/h). Toca un ícono para ver el detalle.`
+              : 'Buscando eventos de manejo…'}</p>}
         {viendoRecorrido && dia.estado === 'error' && <p className="control-detail-note">No se pudo cargar el recorrido. <button onClick={dia.recargar}>Reintentar</button></p>}
         {detalle.estado === 'error' && <p className="control-detail-note">No se pudo cargar la ficha de la unidad. <button onClick={detalle.recargar}>Reintentar</button></p>}
       </aside>}

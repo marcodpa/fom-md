@@ -327,6 +327,9 @@ export const api = {
   miScoreManejo: (days = 7) => pedir(`${CONSOLA}/me/driving-score?days=${days}`),
   /** Score de todos los conductores de la empresa (supervisor / administrador). */
   scoresManejo: (days = 7) => pedir(`${CONSOLA}/driving-scores?days=${days}`),
+  /** Mis eventos de manejo (solo el conductor en sesión). days: 7 | 30 | 90; limit hasta 100. */
+  misEventosManejo: (days = 7, limit = 50) => pedir(`${CONSOLA}/me/driving-events?days=${days}&limit=${limit}`),
+  /** Eventos de manejo de un conductor, del más nuevo al más viejo (supervisor / administrador). */
   eventosManejoDe: (userId, days = 7, limit = 50) =>
     pedir(`${CONSOLA}/drivers/${encodeURIComponent(userId)}/driving-events?days=${days}&limit=${limit}`),
   /** Resumen por día de una unidad (kilómetros, posiciones, velocidad máxima), calculado por el servidor. Fechas AAAA-MM-DD. */

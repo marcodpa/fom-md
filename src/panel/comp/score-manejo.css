@@ -40,7 +40,7 @@
   .sm-eventos span { margin: 0; }
 }
 @container (max-width: 300px) { .sm-protagonista { flex-wrap: wrap; gap: 16px; } }
-/* Selector 7 / 28 días y enlace a los eventos (la tarjeta de siempre, con el período elegible). */
+/* Selector 7 / 30 días y enlace a los eventos (la tarjeta de siempre, con el período elegible). */
 .sm-dias { flex: none; gap: 6px; }
 .sm-dias .pnl-chip { height: 30px; padding: 0 12px; font-size: 12px; }
 .sm-ver-eventos { color: var(--e-primario); font-weight: 600; text-decoration: none; }

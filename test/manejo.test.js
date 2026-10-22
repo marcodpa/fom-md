@@ -57,5 +57,5 @@ test('eventos del período y búsqueda en el ranking', () => {
   assert.equal(manejoDe(ranking, 'b').indice, 90)
   assert.equal(manejoDe(ranking, 'z'), null)
   assert.equal(manejoDe(null, 'a'), null)
-  assert.deepEqual(DIAS_MANEJO, [7, 28])
+  assert.deepEqual(DIAS_MANEJO, [7, 30])
 })

@@ -5,7 +5,8 @@ import { pintarCola, pintarRuta } from './rutaMapbox'
 import { textoSinSenal } from '../datos/sinSenal'
 import CapasMapa from './CapasMapa'
 import HerramientasRuta from './HerramientasRuta'
-import { limitesDe, mensajeLlegada, pintarLlegada } from './herramientasMapbox'
+import { limitesDe, mensajeLlegada, pintarEventosManejo, pintarLlegada } from './herramientasMapbox'
+import { TIPOS_EVENTO, geojsonEventos, partesEvento } from '../datos/eventosManejo'
 import { emparejarPuntos, emparejarViajes, rutaConTrafico } from '../datos/mapboxApi'
 import { CLAVES_COLOR, coloresDe, configDe, estiloDe, guardarPrefs, leerPrefs, luzEfectiva, sin3d } from './mapaPrefs'
 import '../../styles/fleet-map.css'
@@ -228,6 +229,13 @@ export default function MapaMapbox({
   // «Llegada» solo donde se opera la flota (Centro de control); en el
   // Resumen o Mi unidad el mapa es de consulta y no la muestra.
   herramientas = false,
+  // Eventos de manejo (ya filtrados, ver datos/eventosManejo.js) como capa de símbolos.
+  // `eventoActivo` / `alElegirEvento`: el elegido lo puede llevar el padre (lista debajo);
+  // si no lo lleva, el mapa lo recuerda solo. `encuadrarEventos`: encuadrarlos al cambiar.
+  eventosManejo = null,
+  eventoActivo,
+  alElegirEvento,
+  encuadrarEventos = true,
   alFallar,
 }) {
   const contenedor = useRef(null)
@@ -273,6 +281,15 @@ export default function MapaMapbox({
   const [luzActual, setLuzActual] = useState(() => luzEfectiva(prefs))
   const seleccionadoRef = useRef(seleccionado)
   seleccionadoRef.current = seleccionado
+
+  // Eventos de manejo: la capa, el elegido y si el toque vino del mapa (entonces no se vuela).
+  const eventosCapa = useRef(null)
+  const [eventoLocal, setEventoLocal] = useState(null)
+  const eventoElegido = eventoActivo !== undefined ? eventoActivo : eventoLocal
+  const elegirEventoRef = useRef(null)
+  elegirEventoRef.current = (id) => (alElegirEvento ? alElegirEvento(id) : setEventoLocal(id))
+  const toqueEnMapa = useRef(false)
+  const eventosEncuadrados = useRef('')
 
   // Llegada de la unidad elegida (Directions de Mapbox, con el tráfico de ahora)
   const [herr, setHerr] = useState(HERR_VACIO)
@@ -472,6 +489,8 @@ export default function MapaMapbox({
       colaCapa.current?.quitar?.()
       colaCapa.current = null
       colaPegada.current = null
+      eventosCapa.current?.quitar?.()
+      eventosCapa.current = null
       mapa.current?.remove()
       mapa.current = null
       encuadrado.current = false
@@ -526,6 +545,8 @@ export default function MapaMapbox({
       ruta.current = null
       colaCapa.current?.quitar?.()
       colaCapa.current = null
+      eventosCapa.current?.quitar?.()
+      eventosCapa.current = null
       limpiarHerramientas()
       estiloListo.current = false
       const config = configCompleta(nuevas)
@@ -758,6 +779,61 @@ export default function MapaMapbox({
     return () => control.abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cola, seleccionado, listo])
+
+  // Eventos de manejo: una capa de símbolos que se crea una vez por estilo y en cada cambio
+  // (período, filtros, elegido) solo cambia sus datos.
+  useEffect(() => {
+    const m = mapa.current
+    const mapboxgl = gl.current
+    const lista = eventosManejo ?? []
+    if (!m || !mapboxgl || !listo || !estiloListo.current || !lista.length) {
+      eventosCapa.current?.quitar?.()
+      eventosCapa.current = null
+      if (!lista.length) eventosEncuadrados.current = ''
+      return
+    }
+    const coleccion = geojsonEventos(lista, eventoElegido)
+    if (eventosCapa.current) eventosCapa.current.actualizar(coleccion)
+    else {
+      eventosCapa.current = pintarEventosManejo(m, {
+        gl: mapboxgl,
+        coleccion,
+        tipos: TIPOS_EVENTO,
+        alTocar: (id) => {
+          if (modoDestino.current) return
+          toqueEnMapa.current = true
+          elegirEventoRef.current?.(id)
+        },
+      })
+    }
+    // Encuadrar todos al cambiar el conjunto (período o filtros), no al elegir uno.
+    const firma = lista.map((e) => e.id).join('|')
+    if (encuadrarEventos && firma !== eventosEncuadrados.current) {
+      eventosEncuadrados.current = firma
+      if (lista.length === 1) m.jumpTo({ center: [lista[0].lng, lista[0].lat], zoom: 14 })
+      else {
+        const limites = limitesDe(mapboxgl, lista.map((e) => [e.lng, e.lat]))
+        if (limites) m.fitBounds(limites, { padding: 56, maxZoom: 15, duration: sinMovimiento() ? 0 : 600 })
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventosManejo, eventoElegido, listo])
+
+  // El evento elegido: su globo y, si se eligió en la lista, el mapa va hasta él.
+  useEffect(() => {
+    const capa = eventosCapa.current
+    const m = mapa.current
+    const desdeMapa = toqueEnMapa.current
+    toqueEnMapa.current = false
+    const e = (eventosManejo ?? []).find((x) => x.id === eventoElegido)
+    if (!capa || !m || !e) {
+      capa?.cerrar?.()
+      return
+    }
+    capa.abrir(e, partesEvento(e), () => elegirEventoRef.current?.(null))
+    if (!desdeMapa) m.flyTo({ center: [e.lng, e.lat], zoom: Math.max(m.getZoom(), 15), duration: sinMovimiento() ? 0 : 800 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventoElegido, listo])
 
   // Llevar la vista a un punto (una parada o un viaje de la lista)
   useEffect(() => {

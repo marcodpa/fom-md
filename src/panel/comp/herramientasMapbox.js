@@ -94,3 +94,117 @@ export function mensajeLlegada(error) {
   if (/respondió 422|ruta|route|segment/iu.test(texto)) return 'No encontramos un camino por carretera hasta ese punto. Prueba con otro destino.'
   return 'No pudimos calcular la llegada. Revisa la conexión y prueba otra vez.'
 }
+
+// --- Eventos de manejo (frenadas, aceleraciones y excesos) ------------------
+// Una sola capa GeoJSON de símbolos para todos los eventos: un marcador DOM por evento
+// pesaba demasiado con 100 eventos. Los íconos se dibujan una vez en un lienzo y se
+// registran en el estilo (al cambiar de estilo se vuelven a registrar).
+
+const ICONO_EVENTO_PX = 30
+const RATIO_ICONO = 2
+
+/** El ícono de un tipo: círculo de su color, aro blanco y el glifo en oscuro. */
+function imagenEvento(tipo) {
+  const lado = ICONO_EVENTO_PX * RATIO_ICONO
+  const lienzo = document.createElement('canvas')
+  lienzo.width = lado
+  lienzo.height = lado
+  const ctx = lienzo.getContext('2d')
+  ctx.scale(RATIO_ICONO, RATIO_ICONO)
+  const c = ICONO_EVENTO_PX / 2
+  ctx.beginPath()
+  ctx.arc(c, c, c - 1, 0, Math.PI * 2)
+  ctx.fillStyle = BORDE_OSCURO
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(c, c, c - 2.5, 0, Math.PI * 2)
+  ctx.fillStyle = BORDE_CLARO
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(c, c, c - 4.5, 0, Math.PI * 2)
+  ctx.fillStyle = tipo.color
+  ctx.fill()
+  // El glifo es de 24×24: se dibuja a 15 px en el centro.
+  const k = 15 / 24
+  ctx.translate(c - 12 * k, c - 12 * k)
+  ctx.scale(k, k)
+  ctx.strokeStyle = BORDE_OSCURO
+  ctx.lineWidth = 2.4
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  for (const d of tipo.glifo) ctx.stroke(new Path2D(d))
+  return ctx.getImageData(0, 0, lado, lado)
+}
+
+const escHtml = (t) => String(t).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch])
+
+/**
+ * Pinta los eventos de manejo (`coleccion`, de `geojsonEventos`) y devuelve cómo actualizarlos,
+ * cómo abrir el globo de uno y cómo quitarlos. `tipos`: TIPOS_EVENTO; `alTocar(id)`: al tocar un ícono.
+ */
+export function pintarEventosManejo(mapa, { coleccion, tipos, alTocar, gl }) {
+  const ID = `eventos-manejo-${Date.now().toString(36)}`
+  for (const t of tipos) {
+    const nombre = `evento-manejo-${t.clave}`
+    if (!mapa.hasImage(nombre)) mapa.addImage(nombre, imagenEvento(t), { pixelRatio: RATIO_ICONO })
+  }
+  mapa.addSource(ID, { type: 'geojson', data: coleccion })
+  mapa.addLayer({
+    id: `${ID}-iconos`,
+    type: 'symbol',
+    source: ID,
+    slot: 'top',
+    layout: {
+      'icon-image': ['concat', 'evento-manejo-', ['get', 'tipo']],
+      'icon-size': ['case', ['get', 'activo'], 1.3, 1],
+      'icon-allow-overlap': true,
+      'icon-ignore-placement': true,
+      'symbol-sort-key': ['get', 'orden'],
+      'symbol-z-order': 'source',
+    },
+    paint: { 'icon-emissive-strength': 1 },
+  })
+  let globo = null
+  const alClic = (e) => {
+    const id = e.features?.[0]?.properties?.id
+    if (id != null) alTocar?.(String(id))
+  }
+  const sobre = () => { mapa.getCanvas().style.cursor = 'pointer' }
+  const fuera = () => { mapa.getCanvas().style.cursor = '' }
+  mapa.on('click', `${ID}-iconos`, alClic)
+  mapa.on('mouseenter', `${ID}-iconos`, sobre)
+  mapa.on('mouseleave', `${ID}-iconos`, fuera)
+  return {
+    capa: `${ID}-iconos`,
+    actualizar: (nueva) => { mapa.getSource(ID)?.setData(nueva) },
+    /** Abre el globo de un evento (`partes`: nombre, velocidades, hora, unidad). `alCerrar` al cerrarlo a mano. */
+    abrir: (evento, partes, alCerrar) => {
+      // El de antes se suelta primero: así su «close» no cuenta como cerrar a mano.
+      const previo = globo
+      globo = null
+      previo?.remove()
+      const [titulo, ...resto] = partes
+      globo = new gl.Popup({ className: 'ruta-popup', closeButton: true, closeOnClick: false, maxWidth: '260px', offset: 18 })
+        .setLngLat([evento.lng, evento.lat])
+        .setHTML(`<strong>${escHtml(titulo)}</strong>${resto.map((p) => `<span>${escHtml(p)}</span>`).join('')}`)
+        .addTo(mapa)
+      const este = globo
+      este.on('close', () => { if (globo === este) { globo = null; alCerrar?.() } })
+    },
+    cerrar: () => {
+      const g = globo
+      globo = null
+      g?.remove()
+    },
+    quitar: () => {
+      mapa.off('click', `${ID}-iconos`, alClic)
+      mapa.off('mouseenter', `${ID}-iconos`, sobre)
+      mapa.off('mouseleave', `${ID}-iconos`, fuera)
+      const g = globo
+      globo = null
+      g?.remove()
+      if (mapa.getLayer(`${ID}-iconos`)) mapa.removeLayer(`${ID}-iconos`)
+      if (mapa.getSource(ID)) mapa.removeSource(ID)
+    },
+  }
+}

@@ -21,6 +21,7 @@ import { transmitiendo } from './sinSenal.js'
 import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
 import { cuerpoCredencial, credencialesVigentes } from './credencialesPersona'
 import { cambiosGps } from './metadatosGps'
+import { LIMITE_EVENTOS, comoEventoManejo, diasServidor } from './eventosManejo'
 
 /**
  * Une el vehículo con su estado en vivo en la forma que consumen los módulos.
@@ -473,6 +474,19 @@ export const repoApi = {
       // Un fallo no se guarda: el siguiente intento sale de verdad al servidor.
       peticion.catch(() => { if (rankingsGuardados.get(clave) === guardado) rankingsGuardados.delete(clave) })
       return peticion
+    },
+    /**
+     * Frenadas, aceleraciones y excesos de un conductor (`propio`: los míos, por `me/`), del más nuevo
+     * al más viejo. El servidor solo acepta 7, 30 o 90 días: se pide el que cubre `dias` y la pantalla
+     * recorta. Trae como mucho 100: `tope` dice si pudo haber más viejos que no llegaron.
+     */
+    async eventos({ userId, propio = false, dias = 7 } = {}) {
+      const d = diasServidor(dias)
+      const r = propio ? await api.misEventosManejo(d, LIMITE_EVENTOS) : await api.eventosManejoDe(userId, d, LIMITE_EVENTOS)
+      const filas = Array.isArray(r) ? r : r?.items ?? []
+      const lista = filas.map(comoEventoManejo)
+      if (filas.length >= LIMITE_EVENTOS) lista.tope = true
+      return lista
     },
   },
 

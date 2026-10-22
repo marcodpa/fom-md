@@ -19,6 +19,7 @@ import {
   estadoDocumento, etiquetaRol, puedeGestionarA, validarRolEmpresa,
 } from './catalogos'
 import { hoyISO } from './formato'
+import { comoEventoManejo } from './eventosManejo'
 import { empresaGestionActualId } from './api'
 import { argumentosDeFormato, cuerpoPlantilla, publicarSiHaceFalta } from './repoApi'
 
@@ -31,6 +32,44 @@ const {
 } = SEMILLA
 
 const CLAVE_CAMBIOS = SEMILLA.claveCambios ?? 'fom.panel.cambios'
+
+/**
+ * Eventos de manejo de ejemplo de una unidad (forma del servidor, pasada por `comoEventoManejo`).
+ * Caen sobre puntos de su recorrido: los primeros hoy, el resto en días anteriores por el mismo
+ * camino. Algunos excesos quedan en 120 km/h o menos a propósito: el mapa no los muestra.
+ */
+function eventosManejoDemo(v) {
+  let semilla = v.id.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 17)
+  const azar = () => {
+    semilla = (semilla * 1664525 + 1013904223) >>> 0
+    return semilla / 4294967296
+  }
+  const rodando = recorridoDetalladoDe(v.id, 24).puntos.filter((p) => p.velocidadKmh > 0)
+  if (!rodando.length) return []
+  const tipos = ['harsh_braking', 'speeding', 'harsh_acceleration', 'harsh_braking', 'speeding', 'harsh_acceleration']
+  const salida = []
+  for (let i = 0; i < 16; i += 1) {
+    const p = rodando[Math.floor(azar() * rodando.length)]
+    const type = tipos[i % tipos.length]
+    const dia = i < 5 ? 0 : 1 + Math.floor(azar() * 27)
+    const antes = type === 'speeding' ? 108 + Math.round(azar() * 40)
+      : type === 'harsh_braking' ? 62 + Math.round(azar() * 34) : 8 + Math.round(azar() * 22)
+    const despues = type === 'speeding' ? null
+      : type === 'harsh_braking' ? Math.max(0, antes - 30 - Math.round(azar() * 25)) : antes + 30 + Math.round(azar() * 18)
+    salida.push(comoEventoManejo({
+      id: `ev-manejo-${v.id}-${i + 1}`,
+      type,
+      occurredAt: new Date(Date.parse(p.hora) - dia * 86400000).toISOString(),
+      vehicleId: v.id,
+      vehicleCode: v.alias,
+      lat: p.lat,
+      lng: p.lng,
+      speedBeforeKph: antes,
+      speedAfterKph: despues,
+    }))
+  }
+  return salida.sort((a, b) => Date.parse(b.hora) - Date.parse(a.hora))
+}
 
 // --- Capa de cambios locales ----------------------------------------------
 function leerCambios() {
@@ -930,6 +969,15 @@ export const repo = {
   manejo: {
     miScore: () => responder(null, 60),
     ranking: () => responder([], 60),
+    /**
+     * Eventos de ejemplo para ver el mapa de frenadas, aceleraciones y excesos en demo: los de la
+     * unidad de la persona, sobre su recorrido. Misma forma que `repoApi.manejo.eventos`.
+     */
+    eventos: ({ userId, dias = 7 } = {}) => {
+      const v = todosVehiculos().find((x) => x.conductorPrincipalId === userId)
+      const corte = Date.now() - dias * 86400000
+      return responder(v ? eventosManejoDemo(v).filter((e) => Date.parse(e.hora) >= corte) : [], 120)
+    },
   },
 
   /** Asignaciones vigentes: quién maneja qué unidad (misma forma que la base real). */

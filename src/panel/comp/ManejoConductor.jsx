@@ -21,7 +21,7 @@ export function PastillaConductor({ userId, dias = 7 }) {
 }
 
 /**
- * La tarjeta «Manejo» de una persona, con el selector 7 / 28 días.
+ * La tarjeta «Manejo» de una persona, con el selector 7 / 30 días.
  * - `propio`: el de la sesión (`/me/driving-score`). Si no, el de `userId` dentro del ranking.
  * - `inicial`: lo que la pantalla ya leyó para `diasInicial`; con eso no se vuelve a pedir
  *   (`cargandoInicial` mientras la pantalla todavía lo está leyendo).

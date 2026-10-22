@@ -9,7 +9,7 @@
 import * as f from './formato.js'
 
 /** Períodos que se pueden elegir (días hacia atrás desde hoy). */
-export const DIAS_MANEJO = [7, 28]
+export const DIAS_MANEJO = [7, 30] // el servidor solo acepta 7, 30 o 90 días (28 da error 400)
 
 /** Calificación del servidor → color de la pastilla (los de `Tag`). */
 export const TONO_MANEJO = { green: 'verde', yellow: 'ambar', red: 'rojo', unavailable: 'gris' }

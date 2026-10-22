@@ -5,7 +5,7 @@ import * as f from '../datos/formato'
 import './score-manejo.css'
 
 // La tarjeta «Manejo» de siempre (índice grande, estado, barra y los tres eventos con su ícono),
-// con el período 7 / 28 días y «Ver eventos». Calificación y textos: datos/manejo.js, los mismos
+// con el período 7 / 30 días y «Ver eventos». Calificación y textos: datos/manejo.js, los mismos
 // de la pastilla del Resumen, Usuarios y la ficha del vehículo.
 const RANGO = { green: 'verde', yellow: 'amarillo', red: 'rojo', unavailable: 'sin-dato' }
 const ETIQUETA = { verde: 'Manejo seguro', amarillo: 'Puede mejorar', rojo: 'Requiere atención' }
@@ -63,7 +63,7 @@ export function TarjetaManejo({
         </li>)}</ul>
         <footer className="sm-pie"><span><b>{!cargando && Number.isFinite(score?.km) ? f.numero(Math.round(score.km)) : '—'} km</b> evaluados</span>
           <span><b>{cargando ? '—' : numeroDisponible(score?.eventosPor100)} eventos</b> por cada 100 km</span>
-          {enlaceEventos && !cargando && eventos > 0 && <Link className="sm-ver-eventos" to={enlaceEventos}>Ver eventos →</Link>}</footer>
+          {enlaceEventos && !cargando && eventos > 0 && <Link className="sm-ver-eventos" to={`${enlaceEventos}${enlaceEventos.includes('?') ? '&' : '?'}dias=${dias}`}>Ver eventos →</Link>}</footer>
       </div>
     </section>
   )
