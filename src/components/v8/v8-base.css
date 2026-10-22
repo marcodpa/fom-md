@@ -187,6 +187,8 @@ html:has(.v8-site), body:has(.v8-site) { background: #0a0d12; }
 /* ── Fotos integradas: a sangre, con bordes que se funden con el fondo ─ */
 .v8-foto { display: block; width: 100%; height: auto; }
 .v8-foto.is-cubre { object-fit: cover; }
+/* Con alto fijo, la foto (o su recorte de teléfono) recorta en vez de deformarse. */
+.v8-foto:not(.is-objeto) { object-fit: cover; }
 /* Degradados con curva suave (varias paradas) para que el borde no se note ni haga escalones.
    La foto se vuelve transparente: debajo queda el MISMO fondo de la sección (noche o banda). */
 .v8-funde-b {
@@ -311,7 +313,7 @@ html:has(.v8-site), body:has(.v8-site) { background: #0a0d12; }
 .v8-tarjeta-medio-texto { padding: 32px 32px 0; }
 .v8-tarjeta-medio-texto p { margin-top: 10px; color: var(--v8-texto-2); }
 .v8-tarjeta-medio-foto { margin-top: auto; height: 340px; }
-.v8-tarjeta-medio-foto > .v8-foto { height: 100%; object-fit: cover; }
+.v8-tarjeta-medio-foto .v8-foto { height: 100%; object-fit: cover; } /* <picture> va con display: contents */
 .v8-tarjeta-medio-foto.is-telefono { display: flex; justify-content: center; padding-top: 28px; overflow: hidden; }
 @media (max-width: 599px) {
   .v8-tarjeta-medio { width: min(300px, 78vw); height: 440px; }

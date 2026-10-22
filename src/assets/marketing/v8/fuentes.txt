@@ -1,60 +1,105 @@
 # Fotos y capturas de la web v8: nombre estable, tipo y fuente (rutas desde la raíz del repo).
 # Para cambiar una foto: cambia la ruta aquí (o usa el comando de una sola foto) y vuelve a correr
 #   python src/assets/marketing/v8/preparar_fotos.py --lista src/assets/marketing/v8/fuentes.txt
-# Las fotos nuevas de alta resolución llegarán a comparativa/web-v8-fotos/ (ver su INDICE.md).
+# Fuente = maestro del paquete T-102 (comparativa/web-v8-fotos, ver su INDICE.md): foto completa
+# graduada con transparencia. Si el paquete trae las copias listas en web/, el script las copia sin
+# recomprimir. La entrada <nombre>-movil es el recorte para teléfono (se sirve sola por <source media>).
 
-# Fotos con la pantalla actual integrada (paquete T-99)
-hero-monitor-carretera   foto  comparativa/web-v8-diseno/fotos-integradas/hero-monitor-carretera.jpg
-oficina-monitor-resumen  foto  comparativa/web-v8-diseno/fotos-integradas/oficina-monitor-resumen.jpg
-patio-monitor-mapa       foto  comparativa/web-v8-diseno/fotos-integradas/patio-monitor-mapa.jpg
-operadora-mapa           foto  comparativa/web-v8-diseno/fotos-integradas/operadora-mapa.jpg
-oficina-reportes         foto  comparativa/web-v8-diseno/fotos-integradas/oficina-reportes.jpg
-laptop-vehiculos         foto  comparativa/web-v8-diseno/fotos-integradas/laptop-vehiculos.jpg
-mano-app-perfil          foto  comparativa/web-v8-diseno/fotos-integradas/mano-app-perfil.jpg
-tecnico-app-unidad       foto  comparativa/web-v8-diseno/fotos-integradas/tecnico-app-unidad.jpg
+# Fotos (escritorio y teléfono)
+hero-monitor-carretera           foto      comparativa/web-v8-fotos/maestros/hero-monitor-carretera.webp
+hero-monitor-carretera-movil     foto      comparativa/web-v8-fotos/maestros/hero-monitor-carretera-movil.webp
+oficina-monitor-resumen          foto      comparativa/web-v8-fotos/maestros/oficina-monitor-resumen.webp
+oficina-monitor-resumen-movil    foto      comparativa/web-v8-fotos/maestros/oficina-monitor-resumen-movil.webp
+mano-app-perfil                  foto      comparativa/web-v8-fotos/maestros/mano-app-perfil.webp
+mano-app-perfil-movil            foto      comparativa/web-v8-fotos/maestros/mano-app-perfil-movil.webp
+laptop-vehiculos                 foto      comparativa/web-v8-fotos/maestros/laptop-vehiculos.webp
+laptop-vehiculos-movil           foto      comparativa/web-v8-fotos/maestros/laptop-vehiculos-movil.webp
+patio-monitor-mapa               foto      comparativa/web-v8-fotos/maestros/patio-monitor-mapa.webp
+patio-monitor-mapa-movil         foto      comparativa/web-v8-fotos/maestros/patio-monitor-mapa-movil.webp
+operadora-mapa                   foto      comparativa/web-v8-fotos/maestros/operadora-mapa.webp
+operadora-mapa-movil             foto      comparativa/web-v8-fotos/maestros/operadora-mapa-movil.webp
+oficina-reportes                 foto      comparativa/web-v8-fotos/maestros/oficina-reportes.webp
+oficina-reportes-movil           foto      comparativa/web-v8-fotos/maestros/oficina-reportes-movil.webp
+tecnico-app-unidad               foto      comparativa/web-v8-fotos/maestros/tecnico-app-unidad.webp
+tecnico-app-unidad-movil         foto      comparativa/web-v8-fotos/maestros/tecnico-app-unidad-movil.webp
+taller-mantenimiento             foto      comparativa/web-v8-fotos/maestros/taller-mantenimiento.webp
+taller-mantenimiento-movil       foto      comparativa/web-v8-fotos/maestros/taller-mantenimiento-movil.webp
+conductor-cabina                 foto      comparativa/web-v8-fotos/maestros/conductor-cabina.webp
+conductor-cabina-movil           foto      comparativa/web-v8-fotos/maestros/conductor-cabina-movil.webp
+costa-ruta                       foto      comparativa/web-v8-fotos/maestros/costa-ruta.webp
+costa-ruta-movil                 foto      comparativa/web-v8-fotos/maestros/costa-ruta-movil.webp
+cabina-carretera                 foto      comparativa/web-v8-fotos/maestros/cabina-carretera.webp
+cabina-carretera-movil           foto      comparativa/web-v8-fotos/maestros/cabina-carretera-movil.webp
+aerea-terminal                   foto      comparativa/web-v8-fotos/maestros/aerea-terminal.webp
+aerea-terminal-movil             foto      comparativa/web-v8-fotos/maestros/aerea-terminal-movil.webp
+camioneta-noche                  foto      comparativa/web-v8-fotos/maestros/camioneta-noche.webp
+camioneta-noche-movil            foto      comparativa/web-v8-fotos/maestros/camioneta-noche-movil.webp
+furgoneta-ruta                   foto      comparativa/web-v8-fotos/maestros/furgoneta-ruta.webp
+furgoneta-ruta-movil             foto      comparativa/web-v8-fotos/maestros/furgoneta-ruta-movil.webp
+autopista-atardecer              foto      comparativa/web-v8-fotos/maestros/autopista-atardecer.webp
+autopista-atardecer-movil        foto      comparativa/web-v8-fotos/maestros/autopista-atardecer-movil.webp
+camion-noche                     foto      comparativa/web-v8-fotos/maestros/camion-noche.webp
+camion-noche-movil               foto      comparativa/web-v8-fotos/maestros/camion-noche-movil.webp
+fila-flota                       foto      comparativa/web-v8-fotos/maestros/fila-flota.webp
+fila-flota-movil                 foto      comparativa/web-v8-fotos/maestros/fila-flota-movil.webp
+aerea-taller                     foto      comparativa/web-v8-fotos/maestros/aerea-taller.webp
+aerea-taller-movil               foto      comparativa/web-v8-fotos/maestros/aerea-taller-movil.webp
+camion-autopista                 foto      comparativa/web-v8-fotos/maestros/camion-autopista.webp
+camion-autopista-movil           foto      comparativa/web-v8-fotos/maestros/camion-autopista-movil.webp
+supervisor-fila                  foto      comparativa/web-v8-fotos/maestros/supervisor-fila.webp
+supervisor-fila-movil            foto      comparativa/web-v8-fotos/maestros/supervisor-fila-movil.webp
+conductor-sos                    foto      comparativa/web-v8-fotos/maestros/conductor-sos.webp
+conductor-sos-movil              foto      comparativa/web-v8-fotos/maestros/conductor-sos-movil.webp
+camara-tablero                   foto      comparativa/web-v8-fotos/maestros/camara-tablero.webp
+camara-tablero-movil             foto      comparativa/web-v8-fotos/maestros/camara-tablero-movil.webp
+telematica                       foto      comparativa/web-v8-fotos/maestros/telematica.webp
+telematica-movil                 foto      comparativa/web-v8-fotos/maestros/telematica-movil.webp
+furgoneta-fom                    foto      comparativa/web-v8-fotos/maestros/furgoneta-fom.webp
+furgoneta-fom-movil              foto      comparativa/web-v8-fotos/maestros/furgoneta-fom-movil.webp
+camion-marca                     foto      comparativa/web-v8-fotos/maestros/camion-marca.webp
+camion-marca-movil               foto      comparativa/web-v8-fotos/maestros/camion-marca-movil.webp
+reunion                          foto      comparativa/web-v8-fotos/maestros/reunion.webp
+reunion-movil                    foto      comparativa/web-v8-fotos/maestros/reunion-movil.webp
+camion-lateral-fom               foto      comparativa/web-v8-fotos/maestros/camion-lateral-fom.webp
+camion-lateral-fom-movil         foto      comparativa/web-v8-fotos/maestros/camion-lateral-fom-movil.webp
+carretera-curvas                 foto      comparativa/web-v8-fotos/maestros/carretera-curvas.webp
+carretera-curvas-movil           foto      comparativa/web-v8-fotos/maestros/carretera-curvas-movil.webp
+instalacion-gps                  foto      comparativa/web-v8-fotos/maestros/instalacion-gps.webp
+instalacion-gps-movil            foto      comparativa/web-v8-fotos/maestros/instalacion-gps-movil.webp
+camioneta-ciudad                 foto      comparativa/web-v8-fotos/maestros/camioneta-ciudad.webp
+camioneta-ciudad-movil           foto      comparativa/web-v8-fotos/maestros/camioneta-ciudad-movil.webp
+servidores                       foto      comparativa/web-v8-fotos/maestros/servidores.webp
+servidores-movil                 foto      comparativa/web-v8-fotos/maestros/servidores-movil.webp
+equipo-roles                     foto      comparativa/web-v8-fotos/maestros/equipo-roles.webp
+equipo-roles-movil               foto      comparativa/web-v8-fotos/maestros/equipo-roles-movil.webp
+puente-lago-maracaibo            foto      comparativa/web-v8-fotos/maestros/puente-lago-maracaibo.webp
+puente-lago-maracaibo-movil      foto      comparativa/web-v8-fotos/maestros/puente-lago-maracaibo-movil.webp
+carretera-zulia                  foto      comparativa/web-v8-fotos/maestros/carretera-zulia.webp
+carretera-zulia-movil            foto      comparativa/web-v8-fotos/maestros/carretera-zulia-movil.webp
 
-# Fotos de escena (de src/assets/marketing)
-telematica               foto  src/assets/marketing/v7/04-funciones/telematica.webp
-conductor-sos            foto  src/assets/marketing/generated-v6/driver-sos.png
-furgoneta-fom            foto  src/assets/marketing/v7/11-contacto/06.webp
-camion-marca             foto  src/assets/marketing/generated-v6/truck-brand.png
-fila-flota               foto  src/assets/marketing/generated-v6/fleet-lineup.png
-autopista-atardecer      foto  src/assets/marketing/v7/07-quienes-somos/05.webp
-reunion                  foto  src/assets/marketing/v7/11-contacto/reunion.webp
-camioneta-noche          foto  src/assets/marketing/v7/09-beneficios/01.webp
-camion-lateral-fom       foto  src/assets/marketing/v7/03-app/01.webp
-carretera-curvas         foto  src/assets/marketing/generated-v6/winding-road.png
-costa-ruta               foto  src/assets/marketing/v7/04-funciones/ruta.webp
-instalacion-gps          foto  src/assets/marketing/v7/11-contacto/05.webp
-camion-autopista         foto  src/assets/marketing/generated-v6/truck-highway.png
-aerea-terminal           foto  src/assets/marketing/generated-v6/aerial-terminal.png
-supervisor-fila          foto  src/assets/marketing/v7/06-areas/01.webp
-aerea-taller             foto  src/assets/marketing/generated-v6/aerial-workshop.png
-camioneta-ciudad         foto  src/assets/marketing/v7/03-app/03.webp
-camion-noche             foto  src/assets/marketing/v7/02-plataforma/10.webp
-furgoneta-ruta           foto  src/assets/marketing/v7/11-contacto/08.webp
-servidores               foto  src/assets/marketing/v7/02-plataforma/07.webp
-camara-tablero           foto  src/assets/marketing/generated-v6/dash-camera.png
-equipo-roles             foto  src/assets/marketing/v7/02-plataforma/roles.webp
-cabina-carretera         foto  src/assets/marketing/v7/05-seguridad/00.webp
-
-# Capturas reales del panel (planas, sin pérdida)
-cap-panel-resumen        panel  comparativa/web-v8-diseno/capturas-actuales/panel-resumen.png
-cap-panel-mapa           panel  comparativa/web-v8-diseno/capturas-actuales/panel-mapa.png
-cap-panel-alertas        panel  comparativa/web-v8-diseno/capturas-actuales/panel-alertas.png
-cap-panel-mantenimiento  panel  comparativa/web-v8-diseno/capturas-actuales/panel-mantenimiento.png
-cap-panel-reportes       panel  comparativa/web-v8-diseno/capturas-actuales/panel-reportes.png
-cap-panel-flota          panel  comparativa/web-v8-diseno/capturas-actuales/panel-flota.png
-cap-panel-inspecciones   panel  comparativa/web-v8-diseno/capturas-actuales/panel-inspecciones.png
-cap-panel-documentos     panel  comparativa/web-v8-diseno/capturas-actuales/panel-documentos.png
-cap-panel-personal       panel  comparativa/web-v8-diseno/capturas-actuales/panel-personal.png
-
-# Capturas reales de la app (planas, sin pérdida)
-cap-movil-cond-inicio          telefono  comparativa/web-v8-diseno/capturas-actuales/movil-cond-inicio.png
-cap-movil-cond-mantenimiento   telefono  comparativa/web-v8-diseno/capturas-actuales/movil-cond-mantenimiento.png
-cap-movil-cond-mapa            telefono  comparativa/web-v8-diseno/capturas-actuales/movil-cond-mapa.png
-cap-movil-cond-perfil          telefono  comparativa/web-v8-diseno/capturas-actuales/movil-cond-perfil.png
-cap-movil-sup-resumen          telefono  comparativa/web-v8-diseno/capturas-actuales/movil-sup-resumen.png
-cap-movil-sup-alertas          telefono  comparativa/web-v8-diseno/capturas-actuales/movil-sup-alertas.png
-cap-movil-sup-mantenimiento    telefono  comparativa/web-v8-diseno/capturas-actuales/movil-sup-mantenimiento.png
-cap-movil-sup-mapa             telefono  comparativa/web-v8-diseno/capturas-actuales/movil-sup-mapa.png
+# Capturas reales del panel y de la app (3x, planas)
+cap-panel-resumen                panel     comparativa/web-v8-fotos/capturas-panel/3x/w-resumen.png
+cap-panel-mapa                   panel     comparativa/web-v8-fotos/capturas-panel/3x/w-centro-control.png
+cap-panel-mapa-unidad            panel     comparativa/web-v8-fotos/capturas-panel/3x/w-centro-control-unidad.png
+cap-panel-alertas                panel     comparativa/web-v8-fotos/capturas-panel/3x/w-alertas.png
+cap-panel-mantenimiento          panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mantenimiento.png
+cap-panel-reportes               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-reportes.png
+cap-panel-flota                  panel     comparativa/web-v8-fotos/capturas-panel/3x/w-vehiculos.png
+cap-panel-inspecciones           panel     comparativa/web-v8-fotos/capturas-panel/3x/w-inspecciones.png
+cap-panel-documentos             panel     comparativa/web-v8-fotos/capturas-panel/3x/w-documentos.png
+cap-panel-personal               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-personal.png
+cap-panel-conductor              panel     comparativa/web-v8-fotos/capturas-panel/3x/w-conductor.png
+cap-panel-inventario-gps         panel     comparativa/web-v8-fotos/capturas-panel/3x/w-inventario-gps.png
+cap-movil-sup-resumen            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-resumen.png
+cap-movil-sup-alertas            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-alertas.png
+cap-movil-sup-mantenimiento      telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-mantenimiento.png
+cap-movil-sup-mapa               telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-centro-control.png
+cap-movil-sup-mapa-unidad        telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-centro-control-unidad.png
+cap-movil-sup-inspecciones       telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-inspecciones.png
+cap-movil-sup-reportes           telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-reportes.png
+cap-movil-sup-vehiculos          telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-vehiculos.png
+cap-movil-sup-conductor          telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-conductor.png
+cap-movil-cond-inicio            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-inicio.png
+cap-movil-cond-mantenimiento     telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-mantenimiento.png
+cap-movil-cond-mapa              telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-mapa.png
+cap-movil-cond-perfil            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-perfil.png

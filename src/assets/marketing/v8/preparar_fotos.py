@@ -1,20 +1,26 @@
 """Prepara las fotos y capturas de la web v8 con NOMBRES ESTABLES.
 
-Cada imagen queda como varias copias del mismo nombre, una por ancho:
-    <nombre>-<ancho>x<alto>.<ext>      p. ej. hero-monitor-carretera-1672x941.jpg
+Cada imagen queda como varias copias del mismo nombre, una por ancho y formato:
+    <nombre>-<ancho>x<alto>.avif / .webp     p. ej. hero-monitor-carretera-1920x1085.avif
 
-src/components/v8/fotosV8.js las encuentra solas (import.meta.glob) y arma el srcset con
-esos anchos. Para cambiar una foto NO se toca código: se vuelve a correr este script con
-el mismo nombre y la fuente nueva; borra las copias viejas de ese nombre y crea las nuevas.
+src/components/v8/fotosV8.js las encuentra solas (import.meta.glob) y arma un <picture> con
+AVIF primero y WebP de respaldo, con los anchos reales. La versión para teléfono es otra entrada
+con el sufijo «-movil» (p. ej. hero-monitor-carretera-movil): fotosV8.js la sirve sola con
+<source media> en pantallas de teléfono. Para cambiar una foto NO se toca código: se vuelve a
+correr este script con el mismo nombre y la fuente nueva; borra las copias viejas de ese nombre
+y crea las nuevas.
 
-Reglas de calidad (pedido de Marco: que las capturas se vean nítidas):
-  - Nunca se agranda: los anchos que superan el ancho real de la fuente se descartan.
-  - La copia más grande es la fuente tal cual cuando ya es JPG o WebP (sin recomprimir).
-  - Fotos: copias menores en WebP calidad 90, reducción LANCZOS.
-  - Capturas del panel y de la app (tipo panel / telefono): WebP SIN PÉRDIDA, para que el
-    texto de la interfaz se lea limpio.
-  - Las imágenes con transparencia (objetos recortados) la conservan en WebP con alfa.
-  - Una copia menor que pesa más del 70 % de la grande se descarta (no ahorra nada).
+Reglas de calidad (pedido de Marco: fotos nítidas y fondo compartido):
+  - Siempre AVIF + WebP CON CANAL ALFA cuando la fuente lo trae: las fotos del paquete
+    comparativa/web-v8-fotos llevan los bordes fundidos con transparencia. Nunca JPG.
+  - Nunca se agranda: los anchos mayores que la fuente se descartan y, si la fuente queda entre
+    dos anchos, su ancho real es la copia mayor.
+  - Sin recomprimir de más: si junto a la fuente hay una carpeta «web/» con las copias ya
+    optimizadas del paquete (<nombre>-<ancho>.avif|webp), se copian tal cual. Solo se codifica
+    desde la fuente cuando no existen.
+  - Anchos: fotos 640, 1280, 1920 y 2880 (2880 solo si la fuente lo tiene); fotos «-movil»
+    750 y 1170; capturas del panel 1280, 1920, 2880; capturas de la app 750 y 1170.
+  - Capturas (panel / telefono): calidad alta para que el texto de la interfaz se lea limpio.
 
 Uso (desde la raíz del repo):
     python src/assets/marketing/v8/preparar_fotos.py <nombre> <ruta-fuente> [foto|panel|telefono]
@@ -22,6 +28,7 @@ Uso (desde la raíz del repo):
 fuentes.txt: una línea por imagen «nombre  tipo  ruta» (las líneas con # se ignoran).
 """
 import os
+import re
 import shutil
 import sys
 
@@ -29,11 +36,20 @@ from PIL import Image
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 ANCHOS = {
-    'foto': [828, 1280, 1920, 2560, 3200],
-    'panel': [1080, 1440, 2160, 2880],
-    'telefono': [390, 585, 780, 1170],
+    'foto': [640, 1280, 1920, 2880],
+    'movil': [750, 1170],
+    'panel': [1280, 1920, 2880],
+    'telefono': [750, 1170],
+}
+# Calidad al codificar desde la fuente (solo si no hay copias listas en web/).
+CALIDAD = {
+    'foto': {'avif': 60, 'webp': 84},
+    'movil': {'avif': 60, 'webp': 84},
+    'panel': {'avif': 80, 'webp': 92},
+    'telefono': {'avif': 80, 'webp': 92},
 }
 EXTS = ('.webp', '.jpg', '.jpeg', '.png', '.avif')
+FORMATOS = ('avif', 'webp')
 
 
 def borrar_copias(nombre):
@@ -42,49 +58,84 @@ def borrar_copias(nombre):
         if ext.lower() not in EXTS:
             continue
         cab, _, medida = base.rpartition('-')
-        if cab == nombre and 'x' in medida and medida.replace('x', '').isdigit():
+        if cab == nombre and re.fullmatch(r'\d+x\d+', medida):
             os.remove(os.path.join(AQUI, f))
 
 
+def carpeta_lista(fuente):
+    """La carpeta web/ del paquete de fotos que contiene la fuente (sube hasta 3 niveles)."""
+    d = os.path.dirname(os.path.abspath(fuente))
+    for _ in range(3):
+        cand = os.path.join(d, 'web')
+        if os.path.isdir(cand):
+            return cand
+        d = os.path.dirname(d)
+    return None
+
+
+def copias_listas(nombre, fuente, W, H):
+    """{ancho: {formato: ruta}} con las copias ya optimizadas del paquete, si coinciden."""
+    web = carpeta_lista(fuente)
+    if not web:
+        return {}
+    listas = {}
+    patron = re.compile(re.escape(nombre) + r'-(\d+)\.(avif|webp)$')
+    for f in os.listdir(web):
+        m = patron.fullmatch(f)
+        if m:
+            listas.setdefault(int(m.group(1)), {})[m.group(2)] = os.path.join(web, f)
+    # Solo sirven si son la misma foto (misma proporción) y traen los dos formatos.
+    buenas = {}
+    for a, fmts in listas.items():
+        if set(fmts) != set(FORMATOS) or a > W:
+            continue
+        w, h = Image.open(fmts['webp']).size
+        if w == a and abs(h - H * a / W) <= 2:
+            buenas[a] = fmts
+    return buenas
+
+
 def preparar(nombre, fuente, tipo='foto'):
-    if tipo not in ANCHOS:
+    if tipo not in ('foto', 'panel', 'telefono'):
         raise SystemExit(f'tipo desconocido: {tipo}')
     if not os.path.isfile(fuente):
         raise SystemExit(f'no existe la fuente: {fuente}')
+    clase = 'movil' if tipo == 'foto' and nombre.endswith('-movil') else tipo
     im = Image.open(fuente)
     W, H = im.size
-    # Objetos recortados (teléfono, laptop, GPS, Hilux...): se conserva la transparencia para
-    # que se apoyen directo sobre el fondo de la página, sin caja de otro tono.
     alfa = im.mode in ('RGBA', 'LA', 'PA') or (im.mode == 'P' and 'transparency' in im.info)
     modo = 'RGBA' if alfa else 'RGB'
-    ext = os.path.splitext(fuente)[1].lower()
+    anchos = [a for a in ANCHOS[clase] if a <= W]
+    if W < ANCHOS[clase][-1] and (not anchos or W > anchos[-1] * 1.15):
+        anchos.append(W)  # la fuente queda entre dos anchos: su ancho real es la copia mayor
+    listas = copias_listas(nombre, fuente, W, H)
+    if listas:
+        # El paquete ya trae los anchos elegidos para esa foto (p. ej. sin 2880 cuando no va a
+        # sangre): se respetan tal cual, sin codificar anchos extra.
+        anchos = []
     borrar_copias(nombre)
     hechos = []
-    anchos = [W] + [a for a in reversed(ANCHOS[tipo]) if a < W]
-    peso_total = None
-    for a in anchos:
-        h = round(H * a / W)
-        destino = os.path.join(AQUI, f'{nombre}-{a}x{h}')
-        if a == W and tipo == 'foto' and ext in ('.jpg', '.jpeg', '.webp') and not alfa:
-            destino += '.jpg' if ext in ('.jpg', '.jpeg') else '.webp'
-            shutil.copyfile(fuente, destino)
+    base = None
+    for a in sorted(set(anchos) | set(listas)):
+        if a in listas:
+            w, h = Image.open(listas[a]['webp']).size
+            origen = 'lista'
         else:
-            copia = im.convert(modo) if a == W else im.convert(modo).resize((a, h), Image.LANCZOS)
-            destino += '.webp'
-            if tipo == 'foto':
-                copia.save(destino, 'WEBP', quality=90, method=6, exact=alfa)
+            if base is None:
+                base = im.convert(modo)
+            w, h = a, round(H * a / W)
+            copia = base if a == W else base.resize((w, h), Image.LANCZOS)
+            origen = 'nueva'
+        for fmt in FORMATOS:
+            destino = os.path.join(AQUI, f'{nombre}-{w}x{h}.{fmt}')
+            if origen == 'lista':
+                shutil.copyfile(listas[a][fmt], destino)
+            elif fmt == 'avif':
+                copia.save(destino, 'AVIF', quality=CALIDAD[clase]['avif'], speed=4)
             else:
-                copia.save(destino, 'WEBP', lossless=True, quality=100, method=4)
-        peso = os.path.getsize(destino)
-        if peso_total is None:
-            peso_total = peso
-        elif peso > peso_total * 0.7:
-            # Una copia menor que casi no ahorra peso no sirve: el navegador reduce la grande
-            # sin perder nitidez (pasa con las capturas sin pérdida).
-            os.remove(destino)
-            continue
-        hechos.append(f'{os.path.basename(destino)} ({peso // 1024} KB)')
-    print(nombre, '->', ', '.join(hechos))
+                copia.save(destino, 'WEBP', quality=CALIDAD[clase]['webp'], method=6, alpha_quality=100)
+            hechos.append(f'{os.path.basename(destino)} {os.path.getsize(destino) // 1024} KB')
+    print(nombre, f'({"alfa" if alfa else "sin alfa"}, {"copias listas" if listas else "codificada"}) ->', ', '.join(hechos))
 
 
 def main(args):

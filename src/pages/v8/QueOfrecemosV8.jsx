@@ -26,7 +26,7 @@ const OFERTA = [
     kicker: 'Inspecciones y mantenimiento', titulo: 'App del conductor', clave: 'app', enlace: 'App',
     texto: 'El conductor revisa la unidad; la oficina consulta hallazgos y da seguimiento al servicio.',
     textoMovil: 'El conductor revisa; la oficina da seguimiento.',
-    foto: { nombre: 'tecnico-app-unidad', alt: 'Técnico de FOM con Mi unidad abierta en el teléfono. Datos de demostración.', posicion: '0% 50%', className: 'qo-tarjeta-foto is-corte' },
+    foto: { nombre: 'tecnico-app-unidad', alt: 'Técnico de FOM con Mi unidad abierta en el teléfono. Datos de demostración.', posicion: '72% 50%', className: 'qo-tarjeta-foto' },
   },
   {
     kicker: 'Alertas, seguridad y reportes', titulo: 'Seguridad', clave: 'seguridad', enlace: 'Seguridad',

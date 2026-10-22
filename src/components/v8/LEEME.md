@@ -62,19 +62,24 @@ export default function PlataformaV8() {
 
 ## Fotos y capturas (`src/assets/marketing/v8/`)
 
-Cada imagen tiene un **nombre estable** y varias copias `<nombre>-<ancho>x<alto>.<ext>`.
-`fotosV8.js` las encuentra solas y arma el `srcset` con los anchos reales. Para **cambiar una
-foto sin tocar código**: cambia su ruta en `src/assets/marketing/v8/fuentes.txt` (o usa el
-comando de una sola foto) y corre desde la raíz del repo:
+Cada imagen tiene un **nombre estable** y varias copias `<nombre>-<ancho>x<alto>.avif|webp`
+(con canal alfa: las fotos del paquete T-102 traen la orilla fundida en transparencia).
+`fotosV8.js` las encuentra solas y `FotoIntegradaV8` / `CapturaFlotanteV8` arman un `<picture>`:
+AVIF primero, WebP de respaldo, `srcset` con los anchos reales. Si existe `<nombre>-movil`
+(recorte vertical o cuadrado), se sirve sola en el teléfono (≤ 599 px) con `<source media>`;
+`movil={false}` en `FotoIntegradaV8` la desactiva. Para **cambiar una foto sin tocar código**:
+cambia su ruta en `src/assets/marketing/v8/fuentes.txt` (o usa el comando de una sola foto) y
+corre desde la raíz del repo:
 
 ```
 python src/assets/marketing/v8/preparar_fotos.py --lista src/assets/marketing/v8/fuentes.txt
-python src/assets/marketing/v8/preparar_fotos.py camion-noche comparativa/web-v8-fotos/camion-noche.jpg foto
+python src/assets/marketing/v8/preparar_fotos.py camion-noche comparativa/web-v8-fotos/maestros/camion-noche.webp foto
 ```
 
-Tipos: `foto` (WebP 90 en copias menores, la mayor es la fuente sin recomprimir), `panel` y
-`telefono` (capturas en WebP sin pérdida). Nunca se agranda. La transparencia se conserva.
-Las fotos nuevas de alta resolución llegan a `comparativa/web-v8-fotos/` (ver su INDICE.md).
+Las fuentes son los maestros de `comparativa/web-v8-fotos/maestros/` y las capturas 3x de
+`capturas-panel/3x/` (ver su INDICE.md). Si el paquete trae las copias listas en `web/`, el script
+las copia sin recomprimir; si no, codifica AVIF + WebP con alfa. Anchos: fotos 640/1280/1920
+(+2880 en portadas), `-movil` 750/1170, panel 1280/1920/2880, app 750/1170. Nunca se agranda.
 
 Nombres listos (los de todos los tableros):
 
@@ -92,6 +97,11 @@ Nombres listos (los de todos los tableros):
 - Capturas de la app: `cap-movil-cond-inicio`, `cap-movil-cond-mantenimiento`,
   `cap-movil-cond-mapa`, `cap-movil-cond-perfil`, `cap-movil-sup-resumen`,
   `cap-movil-sup-alertas`, `cap-movil-sup-mantenimiento`, `cap-movil-sup-mapa`.
+- Nuevas del paquete T-102 (aún sin uso): fotos `taller-mantenimiento`, `conductor-cabina`,
+  `puente-lago-maracaibo`, `carretera-zulia`; capturas `cap-panel-mapa-unidad`,
+  `cap-panel-conductor`, `cap-panel-inventario-gps`, `cap-movil-sup-mapa-unidad`,
+  `cap-movil-sup-inspecciones`, `cap-movil-sup-reportes`, `cap-movil-sup-vehiculos`,
+  `cap-movil-sup-conductor`.
 
 En los tableros (`*.dc.html`) las fotos aparecen como `/_blob/<hash>`; el nombre de cada hash
 está en
