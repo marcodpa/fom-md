@@ -1,0 +1,81 @@
+/* App del conductor v8 (T-105): solo lo propio de esta página; lo común vive en
+   components/v8/v8-base.css. Todo con .v8-site delante para ganar a la base sin depender del
+   orden en que se cargan las hojas. */
+
+.v8-site .app-mt-lead { margin-top: 20px; }
+.v8-site .app-lista { display: grid; gap: 12px; margin-top: 28px; }
+
+/* Hero: foto a la derecha fundida hacia la izquierda y el texto encima, a la izquierda. */
+.v8-site .v8-hero.app-hero { padding: 0; text-align: left; }
+.v8-site .app-hero-escena { position: relative; }
+.v8-site .app-hero-foto { width: 62%; margin-left: auto; min-height: 560px; object-fit: cover; }
+.v8-site .app-hero-texto { position: absolute; inset: 0; display: flex; align-items: center; }
+.v8-site .app-hero-caja { max-width: 470px; }
+.v8-site .app-hero-titulo { font-size: clamp(42px, 4.72vw, 68px); }
+.v8-site .app-hero-lead { margin-top: 20px; }
+
+/* Todo lo del día, en tres pantallas */
+.v8-site .v8-sec.app-pantallas { padding-top: 120px; }
+.v8-site .v8-glow.app-pantallas-glow { top: 120px; height: 900px; }
+.v8-site .app-pantallas-escena { margin-top: 64px; }
+.v8-site .v8-c.app-pantallas-fila { display: flex; justify-content: center; align-items: flex-end; gap: 48px; }
+.v8-site .app-pantallas-fila .app-pantalla { margin: 0; flex: none; }
+.v8-site .app-pantallas-fila .app-pantalla:nth-child(2) { margin-bottom: 40px; }
+.v8-site :is(.app-pantalla, .app-pantalla-movil) .v8-nota-demo { margin-top: 18px; font-size: 15px; line-height: 1.45; letter-spacing: -0.2px; color: var(--v8-texto-2); }
+.v8-site .app-pantallas-carrusel { display: none; }
+
+/* Mi unidad */
+.v8-site .app-unidad-medio { position: relative; }
+.v8-site .app-unidad-telefono { position: absolute; left: 8%; bottom: -8%; z-index: 1; }
+
+/* Índice de manejo */
+.v8-site .app-indice-cifras { margin-top: 32px; gap: 28px; }
+.v8-site .app-indice-medio { position: relative; }
+.v8-site .v8-vidrio.app-indice-caja { position: absolute; right: 6%; bottom: 8%; width: 300px; }
+.v8-site .app-indice-caja .v8-sm { margin-top: 6px; }
+.v8-site .app-indice-telefono { display: none; }
+
+/* Solo escritorio / solo teléfono para piezas con display propio (clase doble: gana a la base). */
+@media (min-width: 600px) { .v8-site .app-solo-movil.app-solo-movil { display: none; } }
+
+/* Llamada final */
+.v8-site .app-cta-texto { margin-top: 16px; }
+
+/* Tableta: composiciones apiladas; las pantallas pasan al carrusel con el dedo. */
+@media (max-width: 899px) {
+  .v8-site .app-hero-escena { display: flex; flex-direction: column; }
+  .v8-site .app-hero-texto { order: -1; position: relative; inset: auto; display: block; padding-top: 48px; }
+  .v8-site .app-hero-caja { max-width: 560px; }
+  .v8-site .app-hero-foto {
+    width: 100%; height: 480px; min-height: 0; margin-top: 16px; object-fit: cover;
+    /* Fundido vertical (como .v8-funde-y): en el teléfono la foto va a lo ancho, bajo el texto. */
+    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+  }
+  .v8-site .v8-sec.app-pantallas { padding-top: 64px; }
+  .v8-site .app-pantallas-escena { display: none; }
+  .v8-site .app-pantallas-carrusel { display: block; margin-top: 28px; }
+  .v8-site .app-pantalla-movil { width: 250px; margin: 0; }
+  .v8-site .app-unidad-texto { order: -1; }
+  .v8-site .app-unidad-telefono { width: 190px !important; }
+}
+
+/* Teléfono (tablero «App · teléfono»). */
+@media (max-width: 599px) {
+  .v8-site .app-solo-escritorio.app-solo-escritorio { display: none; }
+  .v8-site .app-mt-lead { margin-top: 12px; }
+  .v8-site .app-hero-texto { padding-top: 48px; }
+  .v8-site .app-hero-lead { margin-top: 16px; }
+  .v8-site .app-hero-foto { width: 100%; height: 480px; }
+  .v8-site .v8-sec.app-pantallas { padding-top: 24px; }
+  .v8-site .v8-glow.app-pantallas-glow { display: none; }
+  .v8-site .app-pantalla-movil .v8-nota-demo { margin-top: 14px; }
+  .v8-site #inspeccion .v8-escena-texto { margin-top: -40px; }
+  .v8-site .app-unidad-foto { display: none; }
+  .v8-site .app-unidad-telefono { position: relative; left: auto; bottom: auto; width: 240px !important; }
+  .v8-site .app-indice-cifras { margin-top: 24px; gap: 26px 16px; }
+  .v8-site .app-indice-foto, .v8-site .v8-vidrio.app-indice-caja { display: none; }
+  .v8-site .app-indice-telefono { display: block; width: 240px !important; }
+  .v8-site .v8-pill.app-cta-boton { width: 100%; }
+  .v8-site .app-cta .v8-acciones { align-items: stretch; margin-top: 24px; }
+}

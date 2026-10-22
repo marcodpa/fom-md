@@ -1,0 +1,107 @@
+/* Plataforma v8 (T-105): solo lo propio de esta página; lo común vive en components/v8/v8-base.css. */
+
+/* Bandas que el tablero pone solo en escritorio o solo en el teléfono (mismo degradado largo que
+   .v8-banda, sin cortes). */
+.v8-site .plat-banda-escritorio, .v8-site .plat-banda-movil {
+  --plat-entrada: clamp(120px, 14vw, 200px);
+  --plat-banda: linear-gradient(180deg,
+    rgba(15, 20, 27, 0) 0, rgba(15, 20, 27, .2) calc(var(--plat-entrada) * .25), rgba(15, 20, 27, .55) calc(var(--plat-entrada) * .5),
+    rgba(15, 20, 27, .85) calc(var(--plat-entrada) * .75), #0f141b var(--plat-entrada),
+    #0f141b calc(100% - var(--plat-entrada)),
+    rgba(15, 20, 27, .85) calc(100% - var(--plat-entrada) * .75), rgba(15, 20, 27, .55) calc(100% - var(--plat-entrada) * .5),
+    rgba(15, 20, 27, .2) calc(100% - var(--plat-entrada) * .25), rgba(15, 20, 27, 0) 100%);
+}
+@media (min-width: 600px) { .v8-site .plat-banda-escritorio { background: var(--plat-banda); } }
+@media (max-width: 599px) { .v8-site .plat-banda-movil { background: var(--plat-banda); } }
+
+.v8-site .plat-mt-lead { margin-top: 20px; }
+.v8-site .plat-lista { display: grid; gap: 18px; margin-top: 32px; }
+.v8-site .plat-lista.is-corta { gap: 12px; margin-top: 28px; }
+
+/* Hero */
+.v8-site .plat-hero .v8-hero-medio { margin-top: 24px; }
+
+/* Un panel único (escena fija en escritorio) */
+.v8-site .v8-sec.plat-panel { padding-top: 120px; }
+.v8-site .plat-panel-escena { margin-top: 56px; }
+.v8-site .v8-c.plat-panel-marco { max-width: 1240px; }
+.v8-site .plat-rasgos { margin-top: 64px; }
+
+/* Web y app */
+.v8-site .plat-webapp-medio { position: relative; }
+.v8-site .plat-webapp-telefono { position: absolute; right: 4%; bottom: -6%; z-index: 1; }
+
+/* Mapa general en vivo */
+.v8-site .plat-mapa-escena { position: relative; margin-top: 32px; }
+.v8-site .v8-c.plat-mapa-chips { position: absolute; left: 0; right: 0; bottom: 14%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.v8-site .plat-cifra-mapa { margin-top: 32px; }
+
+/* Captura y resguardo de datos */
+.v8-site .plat-cifra-datos { margin-top: 32px; }
+
+/* Roles y permisos */
+.v8-site .plat-roles-foto { margin-top: 24px; height: 520px; object-fit: cover; }
+.v8-site .v8-c.plat-roles-cajas { margin-top: -80px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.v8-site .plat-roles-cajas .v8-sm, .v8-site .plat-seguridad-cajas .v8-sm { margin-top: 8px; }
+.v8-site .plat-roles-nota { margin-top: 28px; }
+
+/* Seguridad de datos y escalabilidad */
+.v8-site .plat-seguridad-cab { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; }
+.v8-site .plat-seguridad-cab .v8-h2 { max-width: 640px; }
+.v8-site .plat-cifra-seguridad { text-align: right; flex: none; }
+.v8-site .plat-seguridad-cajas { margin-top: 48px; }
+
+/* Cifras sueltas: una sola columna en todos los anchos (la base pasa a 2 bajo 900 px). */
+.v8-site .v8-cifras:is(.plat-cifra-mapa, .plat-cifra-datos, .plat-cifra-seguridad) { grid-template-columns: minmax(0, 1fr); }
+
+/* Llamada final */
+.v8-site .plat-cta-texto { margin-top: 16px; }
+
+/* Tableta: composiciones apiladas, sin escenas fijas. */
+@media (max-width: 899px) {
+  .v8-site .v8-sec.plat-panel { padding-top: 64px; }
+  .v8-site .plat-panel-escena { margin-top: 32px; }
+  .v8-site .plat-rasgos { margin-top: 40px; }
+  .v8-site .plat-webapp-telefono { right: 3%; bottom: -4%; width: 180px !important; }
+  .v8-site .v8-c.plat-mapa-chips { position: relative; bottom: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: -40px; }
+  .v8-site .plat-mapa-foto { height: 480px; object-fit: cover; }
+  .v8-site .plat-roles-foto { height: 420px; }
+  .v8-site .v8-c.plat-roles-cajas { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: -60px; }
+  .v8-site .plat-seguridad-cab { display: block; }
+  .v8-site .plat-cifra-seguridad { text-align: left; margin-top: 20px; }
+  .v8-site .plat-seguridad-cajas { margin-top: 32px; }
+}
+
+/* Teléfono (tablero «Plataforma · teléfono»). */
+@media (max-width: 599px) {
+  .v8-site .plat-hero .v8-hero-medio { margin-top: 20px; }
+  .v8-site .plat-hero .v8-acciones .v8-enlace { display: none; }
+  .v8-site .plat-hero .v8-hero-medio .v8-foto { height: 440px; }
+  .v8-site .v8-sec.plat-panel { padding-top: 24px; }
+  .v8-site .plat-panel-escena { margin-top: 28px; }
+  .v8-site .plat-rasgos { margin-top: 32px; }
+  .v8-site .plat-rasgos > li:nth-child(3) { display: none; }
+  .v8-site .plat-mt-lead { margin-top: 12px; }
+  .v8-site .plat-lista { gap: 14px; margin-top: 24px; }
+  .v8-site .plat-webapp-foto { display: none; }
+  .v8-site .plat-webapp-telefono { position: relative; right: auto; bottom: auto; width: 230px !important; }
+  .v8-site .plat-mapa-escena { margin-top: 20px; }
+  .v8-site .plat-mapa-foto { height: 440px; }
+  .v8-site .v8-c.plat-mapa-chips { grid-template-columns: minmax(0, 1fr); margin-top: -30px; }
+  .v8-site .plat-mapa-chips .plat-sin-movil { display: none; }
+  .v8-site .plat-cifra-mapa { margin-top: 28px; }
+  .v8-site .plat-datos .v8-escena-texto { margin-top: -30px; }
+  .v8-site .plat-cifra-datos { margin-top: 24px; }
+  .v8-site .v8-encabezado.plat-roles-cab { text-align: left; }
+  .v8-site .plat-roles-foto { margin-top: 20px; height: 340px; }
+  .v8-site .v8-c.plat-roles-cajas { margin-top: -40px; }
+  .v8-site .plat-roles-cajas .v8-sm { margin-top: 6px; }
+  .v8-site .plat-seguridad-cab .v8-h2 { max-width: none; }
+  .v8-site .plat-faq-boton { margin-top: 32px; }
+  .v8-site .plat-cta { display: none; }
+}
+
+/* Solo escritorio / solo teléfono para piezas con display propio (rejillas, listas): la clase
+   doble gana a .v8-g5 y .plat-lista. */
+@media (max-width: 599px) { .v8-site .plat-solo-escritorio.plat-solo-escritorio { display: none; } }
+@media (min-width: 600px) { .v8-site .plat-solo-movil.plat-solo-movil { display: none; } }
