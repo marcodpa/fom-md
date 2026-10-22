@@ -1,0 +1,81 @@
+/* Preguntas frecuentes v8 (T-109): solo lo propio de esta página; lo común vive en
+   components/v8/v8-base.css. Página quieta: sin animación salvo el acordeón (0,3 s, de la base). */
+
+/* ── Hero: foto del camión de noche a sangre, tenue y fundida abajo; titular, buscador y temas ── */
+.preguntas-hero { position: relative; }
+.v8-foto.preguntas-hero-foto {
+  height: 560px; object-fit: cover; object-position: 50% 0; opacity: .55;
+  /* La foto de origen trae una franja oscura pegada abajo (fila 597 de 941, un corte horizontal
+     visible). El fundido termina ANTES de esa fila: --corte = dónde cae la fila según el ancho
+     (cover con la foto arriba: 597/1672 del ancho, o 355 px cuando manda el alto de 560; tope 560). */
+  --corte: clamp(352px, 35.4vw, 560px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(var(--corte) * .5), rgba(0,0,0,.9) calc(var(--corte) * .58), rgba(0,0,0,.72) calc(var(--corte) * .67), rgba(0,0,0,.5) calc(var(--corte) * .76), rgba(0,0,0,.28) calc(var(--corte) * .85), rgba(0,0,0,.1) calc(var(--corte) * .93), transparent calc(var(--corte) - 6px));
+  mask-image: linear-gradient(180deg, #000 0, #000 calc(var(--corte) * .5), rgba(0,0,0,.9) calc(var(--corte) * .58), rgba(0,0,0,.72) calc(var(--corte) * .67), rgba(0,0,0,.5) calc(var(--corte) * .76), rgba(0,0,0,.28) calc(var(--corte) * .85), rgba(0,0,0,.1) calc(var(--corte) * .93), transparent calc(var(--corte) - 6px));
+}
+.preguntas-hero-cuerpo { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.preguntas-hero-cuerpo > .v8-c { width: 100%; }
+.preguntas-hero-bajada { margin-top: 18px; }
+
+.preguntas-buscar {
+  position: relative; display: flex; align-items: center; gap: 12px;
+  width: min(620px, 100%); height: 56px; margin: 36px auto 0; padding: 0 22px;
+  border-radius: 999px; text-align: left; transition: border-color .2s var(--v8-ease);
+}
+.preguntas-buscar:focus-within { border-color: var(--v8-azul); box-shadow: 0 0 0 3px rgba(61, 155, 245, .22); }
+.preguntas-buscar .v8-ico { width: 20px; height: 20px; color: var(--v8-tenue); }
+.preguntas-buscar input {
+  flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: 0;
+  color: var(--v8-texto); font: 400 17px var(--v8-font); letter-spacing: -0.374px;
+}
+.v8-site .preguntas-buscar input:focus-visible { outline: none; }
+.preguntas-buscar input::placeholder { color: var(--v8-tenue); opacity: 1; }
+.preguntas-buscar input::-webkit-search-cancel-button { filter: invert(.7); cursor: pointer; }
+
+.preguntas-temas { justify-content: center; gap: 10px; margin-top: 22px; padding: 0 22px; max-width: 100%; }
+.v8-site .preguntas-temas a.v8-pestana { color: var(--v8-texto-2); text-decoration: none; }
+.v8-site .preguntas-temas a.v8-pestana:hover { color: var(--v8-texto); }
+.v8-site .preguntas-temas a.v8-pestana.is-activa { color: var(--v8-azul-claro); }
+.preguntas-temas a.is-vacia { opacity: .4; }
+
+/* ── Grupos: título y bajada a la izquierda (4/12), preguntas a la derecha (8/12) ── */
+.v8-sec.preguntas-grupo { scroll-margin-top: 44px; }
+.preguntas-hero + .v8-sec.preguntas-grupo { padding-top: 40px; }
+.preguntas-grupo-c { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; align-items: start; }
+.preguntas-grupo-resumen { margin-top: 8px; }
+.preguntas-grupo .v8-preguntas { max-width: none; margin: 0; }
+
+/* Sin resultados */
+.v8-sec.preguntas-vacio { padding-top: 40px; }
+.preguntas-vacio-texto { margin-top: 10px; }
+.preguntas-vacio-boton { margin-top: 24px; }
+
+/* ── Cierre: «¿No encontraste tu respuesta?» (sin banda en escritorio, con banda en el teléfono) ── */
+.preguntas-cta-texto { margin-top: 16px; }
+@media (min-width: 600px) { .v8-sec.preguntas-cta { background: none; } }
+
+/* Tableta: el grupo se apila (título arriba, preguntas debajo). */
+@media (max-width: 899px) {
+  .preguntas-grupo-c { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}
+
+/* Teléfono: hero sin foto, alineado a la izquierda; temas que corren de borde a borde. */
+@media (max-width: 599px) {
+  .v8-foto.preguntas-hero-foto { display: none; }
+  .preguntas-hero-cuerpo { position: static; display: block; text-align: left; padding: 56px 0 32px; }
+  .preguntas-hero-bajada { margin-top: 14px; }
+  .preguntas-buscar { width: 100%; height: 52px; margin-top: 24px; padding: 0 18px; gap: 10px; }
+  .preguntas-buscar .v8-ico { width: 18px; height: 18px; }
+  .preguntas-temas { justify-content: flex-start; gap: 8px; margin-top: 18px; padding: 0 20px; }
+  .preguntas-temas .v8-pestana { padding: 0 14px; }
+
+  .v8-sec.preguntas-grupo { padding: 20px 0; background: none; scroll-margin-top: 48px; }
+  .preguntas-hero + .v8-sec.preguntas-grupo { padding-top: 0; }
+  .preguntas-grupo-c { gap: 16px; }
+  .preguntas-grupo-resumen { display: none; }
+  .preguntas-grupo .v8-preguntas { margin: 0; }
+
+  .v8-sec.preguntas-cta { margin-top: 44px; }
+  .preguntas-cta-texto { margin-top: 12px; font-size: 19px; }
+  .preguntas-cta-acciones { margin-top: 24px; }
+  .preguntas-cta-acciones .v8-pill { width: 100%; }
+}

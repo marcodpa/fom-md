@@ -1,0 +1,80 @@
+/* Contacto v8 (T-109): solo lo propio de esta página; lo común vive en components/v8/v8-base.css. */
+
+/* ── Hero: furgoneta a sangre (fundida arriba y abajo), texto a la izquierda y formulario de vidrio ── */
+.contacto-hero { position: relative; }
+.v8-foto.contacto-hero-foto { height: 900px; object-fit: cover; object-position: 70% 50%; }
+.v8-c.contacto-hero-c { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; align-items: center; }
+/* El desplegable de la flota es angosto en la columna del hero: que «Selecciona una opción» quepa entero. */
+@media (min-width: 1024px) { .contacto-hero-form .v8-campo select { padding: 0 30px 0 13px; background-position: right 11px center; font-size: 15px; } }
+.contacto-h1 { font-size: clamp(42px, 5vw, 72px); }
+.contacto-hero-bajada { margin-top: 20px; }
+.contacto-hero-cifra { margin-top: 32px; }
+
+/* ── Qué pasa después: fila de 5 pasos con la raya azul en el primero ── */
+.v8-sec.contacto-pasos { padding-top: 60px; }
+.contacto-pasos-titulo { text-align: center; }
+.contacto-pasos-lista { margin-top: 56px; }
+/* En escritorio esta sección va sobre el fondo noche; la banda es solo del teléfono. */
+@media (min-width: 600px) { .v8-sec.contacto-pasos { background: none; } }
+
+/* ── La demostración ── */
+.contacto-demo-lista { display: grid; gap: 14px; margin-top: 28px; }
+
+/* ── Canales ── */
+.contacto-canales-cab { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; }
+.contacto-canales-cifra { flex: none; text-align: right; max-width: 300px; }
+.contacto-canales-lista { margin-top: 48px; }
+.contacto-canales-lista > li { display: flex; }
+.contacto-canal { width: 100%; }
+.contacto-canal .v8-sm { margin-top: 8px; }
+.contacto-canal-correo { margin-top: 10px; font-size: 15px; }
+.v8-site a.contacto-canal.is-enlace { display: block; color: var(--v8-texto); transition: border-color .3s var(--v8-ease); }
+.v8-site a.contacto-canal.is-enlace:hover { border-color: rgba(255, 255, 255, .24); }
+
+/* ── Instalación, soporte y cobertura ── */
+.contacto-instalacion-cifra strong { font-size: clamp(48px, 5vw, 72px); letter-spacing: -1.2px; }
+.contacto-instalacion-texto { margin-top: 24px; }
+.contacto-instalacion-cobertura { margin-top: 16px; }
+
+/* Escritorio angosto: la columna del formulario no da para dos campos por fila. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .contacto-hero-form .v8-form-fila { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Tableta y teléfono: foto arriba, texto debajo subiendo sobre ella y el formulario a continuación. */
+@media (max-width: 1023px) {
+  .v8-foto.contacto-hero-foto { height: 480px; object-position: 78% 50%; }
+  .v8-c.contacto-hero-c { position: relative; inset: auto; display: block; margin-top: -60px; }
+  .contacto-hero-form { margin-top: 40px; padding-bottom: 64px; }
+}
+
+@media (max-width: 899px) {
+  .contacto-canales-cab { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .contacto-canales-cifra { text-align: left; }
+}
+
+@media (max-width: 599px) {
+  .v8-foto.contacto-hero-foto { height: 360px; }
+  .contacto-hero-bajada { margin-top: 14px; }
+  .contacto-hero-cifra { margin-top: 22px; }
+  .contacto-hero-form { margin-top: 32px; }
+
+  .v8-sec.contacto-pasos { padding-top: 64px; }
+  .contacto-pasos-titulo { text-align: left; }
+  .contacto-pasos-lista { margin-top: 24px; gap: 22px; }
+  .contacto-pasos-lista.v8-pasos.is-linea li { border-top: 0; padding-top: 0; }
+  .contacto-pasos-lista.v8-pasos.is-linea p { margin-top: 0; }
+  .contacto-pasos-lista.v8-pasos.is-linea .v8-sm { margin-top: 2px; font-size: 17px; }
+
+  /* El tablero del teléfono no lleva «La demostración» ni las preguntas (están en /preguntas). */
+  .v8-sec.contacto-demo, .v8-sec.contacto-faq { display: none; }
+
+  .contacto-canales-lista { margin-top: 24px; }
+  .contacto-canales-lista > li.v8-solo-escritorio { display: none; }
+  .contacto-canal .v8-h4 { font-size: 17px; }
+  .contacto-canal .v8-sm { margin-top: 2px; font-size: 17px; }
+  .contacto-canal-correo { margin-top: 2px; font-size: 17px; }
+
+  .contacto-instalacion .v8-escena-texto { margin-top: -30px; }
+  .contacto-instalacion-cobertura { font-size: 17px; }
+}
