@@ -398,13 +398,16 @@ function posicionesDemo(g, tramas) {
   const unidad = g.vehiculoId ? VEHICULOS.find((v) => v.id === g.vehiculoId) : null
   const lat0 = unidad?.lat ?? 10.6427
   const lng0 = unidad?.lng ?? -71.6125
+  // Las lecturas «andando» salen del rastro reciente de la unidad: caen sobre su vía, no en el lago.
+  const rastro = unidad ? recorridoDetalladoDe(unidad.id, 24).puntos : []
   return tramas
     .filter((m) => m.diagnostico.endsWith('position_valid'))
     .map((m, i) => {
       const anda = i % 5 === 2
+      const p = (anda && rastro.at(-1 - i)) || { lat: lat0, lng: lng0 }
       return {
         id: `pos-${m.id}`, recibido: m.recibido, hora: m.recibido,
-        lat: lat0 + (anda ? i * 0.0004 : 0), lng: lng0 - (anda ? i * 0.0003 : 0), valida: true,
+        lat: p.lat, lng: p.lng, valida: true,
         velocidad: anda ? 12 : 0, rumbo: anda ? 120 : null, encendido: i !== 0,
       }
     })

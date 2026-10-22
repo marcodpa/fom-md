@@ -12,6 +12,7 @@
 // ============================================================
 
 import { hoyISO } from './formato'
+import { kmEnTierraFirme, puntoEnRuta, sitioEnZona } from './geoZulia'
 
 // --- PRNG determinista (Lehmer, igual que costService de la app) -----------
 function rng(semilla) {
@@ -153,13 +154,15 @@ const REPARTO = [
   ...Array(5).fill('area-3'),
 ]
 
+// Vía y kilómetro de cada unidad: de ahí salen su recorrido y su rastro (ver geoZulia.js).
+const sitioPorId = new Map()
+
 export const VEHICULOS = REPARTO.map((areaId, i) => {
   const [marca, modelo, tipo] = FLOTA[i % FLOTA.length]
-  const area = AREAS.find((a) => a.id === areaId)
   const enMarcha = R() > 0.32
   const conductor = PERFILES[i + 1] // usr-002 en adelante
   const km = entero(18000, 240000)
-  return {
+  const fila = {
     id: `veh-${String(i + 1).padStart(3, '0')}`,
     empresaId: EMPRESA.id,
     marca,
@@ -183,8 +186,10 @@ export const VEHICULOS = REPARTO.map((areaId, i) => {
     estadoMarcha: enMarcha ? 'en_marcha' : 'parada',
     velocidadKmh: enMarcha ? entero(18, 92) : 0,
     km,
-    lat: area.base.lat + entre(-0.09, 0.09),
-    lng: area.base.lng + entre(-0.09, 0.09),
+    // Dos sorteos en el mismo turno del azar de siempre (así el resto de la semilla no cambia);
+    // abajo eligen la vía y el punto sobre ella. Antes eran un desvío al azar que caía en el lago.
+    lat: R(),
+    lng: R(),
     indiceSeguro: entero(58, 99),
     // Telemetría que la app simula (aún sin columnas en la base):
     aceitePct: entero(28, 96),
@@ -193,6 +198,9 @@ export const VEHICULOS = REPARTO.map((areaId, i) => {
     ultimoReporte: haceMin(entero(0, enMarcha ? 3 : 240)),
     creadoEn: haceDias(entero(90, 1200)),
   }
+  const sitio = sitioEnZona(areaId, fila.lat, fila.lng, { detenida: !enMarcha })
+  sitioPorId.set(fila.id, sitio)
+  return { ...fila, lat: sitio.lat, lng: sitio.lng, ubicacionTexto: `${sitio.via}, ${sitio.ciudad}` }
 })
 
 const vehPorId = Object.fromEntries(VEHICULOS.map((v) => [v.id, v]))
@@ -434,15 +442,14 @@ export function recorridoDe(vehiculoId, puntos = 26) {
   const v = vehPorId[vehiculoId]
   if (!v) return []
   const r = rng(vehiculoId.split('').reduce((a, c) => a + c.charCodeAt(0), 7))
+  const { ruta, km } = sitioPorId.get(vehiculoId)
   const salida = []
-  let lat = v.lat - 0.055
-  let lng = v.lng - 0.05
+  // Por su vía, unos 300 m entre punto y punto, hasta donde está ahora (con la deriva del GPS).
   for (let i = 0; i < puntos; i++) {
-    lat += (v.lat - lat) / (puntos - i) + (r() - 0.5) * 0.008
-    lng += (v.lng - lng) / (puntos - i) + (r() - 0.5) * 0.008
+    const [lat, lng] = puntoEnRuta(ruta, km - (puntos - 1 - i) * 0.3)
     salida.push({
-      lat,
-      lng,
+      lat: lat + (r() - 0.5) * 0.0001,
+      lng: lng + (r() - 0.5) * 0.0001,
       velocidadKmh: Math.round(r() * 88),
       hora: new Date(AHORA - (puntos - i) * 18 * 60000).toISOString(),
     })
@@ -461,47 +468,47 @@ export function recorridoDetalladoDe(vehiculoId, horas = 24) {
   if (!v) return { puntos: [], truncado: false }
   const r = rng(vehiculoId.split('').reduce((a, c) => a + c.charCodeAt(0) * 31, 11))
   const finEnMarcha = v.estadoMarcha === 'en_marcha'
-  const inicioLat = v.lat - 0.06
-  const inicioLng = v.lng - 0.055
-  // Sitios de las paradas, repartidos entre la salida y el destino.
-  const sitios = [0.34, 0.68].map((k) => ({
-    lat: inicioLat + (v.lat - inicioLat) * k + (r() - 0.5) * 0.006,
-    lng: inicioLng + (v.lng - inicioLng) * k + (r() - 0.5) * 0.006,
-  }))
+  const { ruta, km: kmFin } = sitioPorId.get(vehiculoId)
   const duraciones = [Math.round(14 + r() * 16), Math.round(22 + r() * 25)] // minutos parada
   const rodar = [Math.round(18 + r() * 8), Math.round(16 + r() * 8), Math.round(12 + r() * 10)] // minutos de cada viaje
+  // Todo el día va por su vía, a unos 27 km/h de media con el tráfico. La salida y las
+  // paradas caen en tierra firme: nadie se detiene sobre el puente.
+  const KM_POR_MIN = 0.45
+  const kmSalida = kmEnTierraFirme(ruta, kmFin - rodar.reduce((a, b) => a + b, 0) * KM_POR_MIN)
+  const parada1 = kmEnTierraFirme(ruta, kmSalida + rodar[0] * KM_POR_MIN)
+  const parada2 = kmEnTierraFirme(ruta, parada1 + rodar[1] * KM_POR_MIN)
   const puntos = []
   const fin = AHORA
   const total =
     rodar.reduce((a, b) => a + b, 0) + duraciones.reduce((a, b) => a + b, 0) + (finEnMarcha ? 0 : 12)
   let t = fin - total * 60000
-  let lat = inicioLat
-  let lng = inicioLng
-  const empujar = (la, ln, vel) => puntos.push({ lat: la, lng: ln, velocidadKmh: vel, hora: new Date(t).toISOString() })
+  let km = kmSalida
+  // `deriva`: lo que se mueve la lectura del GPS alrededor del punto real (en grados).
+  const empujar = (enKm, deriva, vel) => {
+    const [la, ln] = puntoEnRuta(ruta, enKm)
+    puntos.push({ lat: la + (r() - 0.5) * deriva, lng: ln + (r() - 0.5) * deriva, velocidadKmh: vel, hora: new Date(t).toISOString() })
+  }
 
   const viaje = (destino, minutos) => {
     for (let m = 0; m < minutos; m++) {
       const k = (m + 1) / minutos
-      const la = lat + (destino.lat - lat) * k + (r() - 0.5) * 0.0006
-      const ln = lng + (destino.lng - lng) * k + (r() - 0.5) * 0.0006
-      empujar(la, ln, Math.round(34 + r() * 52))
+      empujar(km + (destino - km) * k, 0.0001, Math.round(34 + r() * 52))
       t += 60000
     }
-    lat = destino.lat
-    lng = destino.lng
+    km = destino
   }
   const parar = (minutos) => {
     for (let m = 0; m <= minutos; m += 2) {
-      empujar(lat + (r() - 0.5) * 0.00018, lng + (r() - 0.5) * 0.00018, 0)
+      empujar(km, 0.00018, 0)
       t += 120000
     }
   }
-  empujar(lat, lng, 0)
-  viaje(sitios[0], rodar[0])
+  empujar(km, 0, 0)
+  viaje(parada1, rodar[0])
   parar(duraciones[0])
-  viaje(sitios[1], rodar[1])
+  viaje(parada2, rodar[1])
   parar(duraciones[1])
-  viaje({ lat: v.lat, lng: v.lng }, rodar[2])
+  viaje(kmFin, rodar[2])
   if (!finEnMarcha) parar(12)
   const desde = AHORA - horas * 3600000
   return { puntos: puntos.filter((p) => Date.parse(p.hora) >= desde), truncado: false }

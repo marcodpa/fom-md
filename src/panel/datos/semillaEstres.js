@@ -20,6 +20,7 @@
 
 import { HAY_API } from './api'
 import { hoyISO } from './formato'
+import { RUTAS_LISTAS, enAgua, kmEnTierraFirme, puntoEnRuta } from './geoZulia'
 
 export const CLAVE_ESTRES = 'fom.demo.estres'
 /** Unidades con `?estres=1`: 300 + 40. */
@@ -91,70 +92,8 @@ function rng(semilla) {
 }
 
 // --- Carreteras del Zulia ---------------------------------------------------
-// Trazos aproximados por los que circulan las unidades en marcha (ida y
-// vuelta). Cada área tiene las suyas, con la vía y la ciudad para el texto.
-const RUTAS = {
-  'area-1': [
-    { via: 'Circunvalación 2', ciudad: 'Maracaibo', puntos: [[10.705, -71.640], [10.692, -71.672], [10.668, -71.695], [10.640, -71.700], [10.612, -71.682], [10.596, -71.658], [10.578, -71.646]] },
-    { via: 'Av. Bella Vista', ciudad: 'Maracaibo', puntos: [[10.700, -71.625], [10.682, -71.626], [10.664, -71.626], [10.646, -71.628], [10.632, -71.630]] },
-    { via: 'Av. La Limpia', ciudad: 'Maracaibo', puntos: [[10.664, -71.630], [10.667, -71.650], [10.670, -71.672], [10.673, -71.700]] },
-    { via: 'Puente Rafael Urdaneta', ciudad: 'Santa Rita', puntos: [[10.612, -71.634], [10.600, -71.620], [10.578, -71.594], [10.556, -71.566], [10.545, -71.545], [10.538, -71.515]] },
-    { via: 'Troncal del Caribe', ciudad: 'Maracaibo', puntos: [[10.705, -71.640], [10.760, -71.648], [10.820, -71.664], [10.880, -71.700], [10.940, -71.738]] },
-    { via: 'Carretera a La Concepción', ciudad: 'San Francisco', puntos: [[10.640, -71.700], [10.628, -71.745], [10.616, -71.790], [10.602, -71.840]] },
-    { via: 'Av. 5 de Julio', ciudad: 'Maracaibo', puntos: [[10.668, -71.618], [10.668, -71.640], [10.669, -71.662]] },
-  ],
-  'area-2': [
-    { via: 'Av. Intercomunal', ciudad: 'Cabimas', puntos: [[10.405, -71.438], [10.372, -71.415], [10.330, -71.392], [10.290, -71.370], [10.262, -71.350], [10.232, -71.322], [10.206, -71.296]] },
-    { via: 'Carretera H', ciudad: 'Cabimas', puntos: [[10.402, -71.436], [10.392, -71.405], [10.378, -71.372], [10.352, -71.340]] },
-    { via: 'Carretera Santa Rita–Cabimas', ciudad: 'Santa Rita', puntos: [[10.536, -71.506], [10.500, -71.488], [10.462, -71.470], [10.430, -71.452], [10.405, -71.438]] },
-    { via: 'Av. Andrés Bello', ciudad: 'Cabimas', puntos: [[10.432, -71.444], [10.418, -71.442], [10.402, -71.438], [10.386, -71.432]] },
-  ],
-  'area-3': [
-    { via: 'Carretera Nacional Ciudad Ojeda', ciudad: 'Lagunillas', puntos: [[10.206, -71.290], [10.170, -71.262], [10.130, -71.232], [10.090, -71.204], [10.040, -71.172], [9.990, -71.140], [9.962, -71.118]] },
-    { via: 'Carretera Lara-Zulia', ciudad: 'Lagunillas', puntos: [[10.130, -71.232], [10.105, -71.170], [10.075, -71.100], [10.040, -71.030], [10.005, -70.960]] },
-    { via: 'Troncal 17', ciudad: 'Bachaquero', puntos: [[9.962, -71.118], [9.930, -71.070], [9.890, -71.015], [9.850, -70.965], [9.822, -70.930]] },
-  ],
-  'area-4': [
-    { via: 'Av. Principal Tamare', ciudad: 'Ciudad Ojeda', puntos: [[10.206, -71.292], [10.218, -71.262], [10.232, -71.226], [10.250, -71.186], [10.270, -71.140]] },
-    { via: 'Vía El Menito', ciudad: 'Ciudad Ojeda', puntos: [[10.198, -71.296], [10.184, -71.278], [10.168, -71.254], [10.150, -71.236]] },
-  ],
-}
-
-// Patios donde quedan las unidades detenidas.
-const PATIOS = {
-  'area-1': [['Maracaibo', 10.655, -71.645], ['San Francisco', 10.585, -71.652], ['Santa Rita', 10.534, -71.500]],
-  'area-2': [['Cabimas', 10.405, -71.436], ['Tía Juana', 10.268, -71.352], ['Ciudad Ojeda', 10.210, -71.292]],
-  'area-3': [['Lagunillas', 10.130, -71.234], ['Bachaquero', 9.962, -71.114], ['Mene Grande', 9.822, -70.928]],
-  'area-4': [['Ciudad Ojeda', 10.212, -71.286], ['Tamare', 10.250, -71.184]],
-}
-
-/** Kilómetros entre dos puntos (aproximación plana: basta para tramos cortos). */
-function km(a, b) {
-  const dy = (b[0] - a[0]) * 110.57
-  const dx = (b[1] - a[1]) * 111.32 * Math.cos(((a[0] + b[0]) / 2) * Math.PI / 180)
-  return Math.hypot(dx, dy)
-}
-
-function prepararRuta(r) {
-  const acumulado = [0]
-  for (let i = 1; i < r.puntos.length; i++) acumulado.push(acumulado[i - 1] + km(r.puntos[i - 1], r.puntos[i]))
-  return { ...r, acumulado, largo: acumulado[acumulado.length - 1] }
-}
-const RUTAS_LISTAS = Object.fromEntries(Object.entries(RUTAS).map(([area, rs]) => [area, rs.map(prepararRuta)]))
-
-/** Punto de la ruta a `d` km recorridos, de ida y vuelta (al llegar al final, regresa). */
-function puntoEnRuta(ruta, d) {
-  const L = ruta.largo
-  let s = d % (2 * L)
-  if (s < 0) s += 2 * L
-  if (s > L) s = 2 * L - s
-  const { acumulado, puntos } = ruta
-  let i = 1
-  while (i < acumulado.length - 1 && acumulado[i] < s) i++
-  const tramo = acumulado[i] - acumulado[i - 1] || 1
-  const k = Math.min(1, Math.max(0, (s - acumulado[i - 1]) / tramo))
-  return [puntos[i - 1][0] + (puntos[i][0] - puntos[i - 1][0]) * k, puntos[i - 1][1] + (puntos[i][1] - puntos[i - 1][1]) * k]
-}
+// Las vías por las que van y vienen las unidades (en marcha o detenidas a un
+// lado) están en geoZulia.js, sobre trazos reales: ninguna cae en el lago.
 
 // --- Catálogos de la empresa grande -----------------------------------------
 const PILA = [
@@ -366,14 +305,19 @@ export function crearSemillaEstres(base, { vehiculos: total = FLOTA_ESTRES, ahor
         },
       })
     } else {
-      const [ciudad, la, ln] = elegir(PATIOS[areaId])
-      const mov = { enMarcha: false, lat: la + entre(-0.006, 0.006), lng: ln + entre(-0.006, 0.006), paradaMin: entero(5, 600) }
+      // Detenida a un lado de una vía de su zona, en tierra firme (nunca sobre el puente).
+      // Los mismos sorteos de antes, en el mismo orden: el resto de la flota no cambia.
+      const ruta = elegir(RUTAS_LISTAS[areaId])
+      const km = kmEnTierraFirme(ruta, entre(0, ruta.largo))
+      const orilla = entre(-0.0001, 0.0001)
+      const [la, ln] = puntoEnRuta(ruta, km)
+      const mov = { enMarcha: false, ruta, km, lat: la + orilla, lng: ln - orilla, paradaMin: entero(5, 600) }
       movimiento.set(id, mov)
       Object.assign(v, {
         velocidadKmh: 0,
         lat: mov.lat,
         lng: mov.lng,
-        ubicacionTexto: `Patio, ${ciudad}`,
+        ubicacionTexto: `${ruta.via}, ${ruta.ciudad}`,
         ultimoReporte: haceMin(mov.paradaMin),
       })
     }
@@ -619,11 +563,13 @@ export function crearSemillaEstres(base, { vehiculos: total = FLOTA_ESTRES, ahor
     }
     const r = rng(vehiculoId.split('').reduce((a, c) => a + c.charCodeAt(0), 7))
     const fin = t - mov.paradaMin * MIN
+    // Los últimos ~7 km por su vía hasta donde quedó parada.
     return Array.from({ length: puntos }, (_, i) => {
       const k = (i + 1) / puntos
+      const [la, ln] = k === 1 ? [mov.lat, mov.lng] : puntoEnRuta(mov.ruta, mov.km - 7 * (1 - k))
       return {
-        lat: mov.lat - 0.05 * (1 - k) + (r() - 0.5) * 0.004 * (1 - k),
-        lng: mov.lng - 0.045 * (1 - k) + (r() - 0.5) * 0.004 * (1 - k),
+        lat: la + (r() - 0.5) * 0.0001 * (1 - k),
+        lng: ln + (r() - 0.5) * 0.0001 * (1 - k),
         velocidadKmh: i === puntos - 1 ? 0 : Math.round(30 + r() * 50),
         hora: new Date(fin - (puntos - 1 - i) * 3 * MIN).toISOString(),
       }
@@ -638,7 +584,9 @@ export function crearSemillaEstres(base, { vehiculos: total = FLOTA_ESTRES, ahor
     const salida = []
     if (mov.enMarcha) {
       // Sale del patio (quieta unos minutos) y rueda desde entonces, un punto por minuto.
-      const inicio = ahoraMin - mov.jornadaMin * MIN
+      // El patio queda en tierra: si a esa hora iba por el puente, salió unos minutos antes.
+      let inicio = ahoraMin - mov.jornadaMin * MIN
+      for (let n = 0; n < 60 && enAgua(mov.en(inicio).lat, mov.en(inicio).lng); n++) inicio -= MIN
       const patio = mov.en(inicio)
       for (let t = inicio - 20 * MIN; t < inicio; t += 2 * MIN) salida.push({ ...patio, velocidadKmh: 0, hora: new Date(t).toISOString() })
       for (let t = inicio; t <= ahoraMin; t += MIN) salida.push({ ...mov.en(t), velocidadKmh: mov.velocidad(t), hora: new Date(t).toISOString() })
@@ -646,11 +594,13 @@ export function crearSemillaEstres(base, { vehiculos: total = FLOTA_ESTRES, ahor
       const r = rng(vehiculoId.split('').reduce((a, c) => a + c.charCodeAt(0) * 31, 11))
       const llegada = ahoraMin - mov.paradaMin * MIN
       const viaje = 40
+      // El último viaje, por su vía, a unos 27 km/h de media hasta donde quedó parada.
       for (let m = 0; m <= viaje; m++) {
         const k = m / viaje
+        const [la, ln] = m === viaje ? [mov.lat, mov.lng] : puntoEnRuta(mov.ruta, mov.km - 0.45 * (viaje - m))
         salida.push({
-          lat: mov.lat - 0.04 * (1 - k) + (r() - 0.5) * 0.0006,
-          lng: mov.lng - 0.035 * (1 - k) + (r() - 0.5) * 0.0006,
+          lat: la + (r() - 0.5) * 0.0001 * (1 - k),
+          lng: ln + (r() - 0.5) * 0.0001 * (1 - k),
           velocidadKmh: m === viaje ? 0 : Math.round(34 + r() * 52),
           hora: new Date(llegada - (viaje - m) * MIN).toISOString(),
         })
