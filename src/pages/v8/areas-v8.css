@@ -1,0 +1,72 @@
+/* Áreas v8 (T-107): solo lo propio de esta página; lo común vive en components/v8/v8-base.css. */
+
+/* Hero: la foto aérea queda más cerca del botón, como en el tablero. */
+.areas-hero .v8-hero-medio { margin-top: 16px; }
+
+/* Agrupa la flota: texto a la izquierda, foto fundida a la derecha. */
+.v8-sec.areas-grupos { padding-top: 120px; }
+.areas-grupos-split { align-items: center; }
+.areas-grupos-lista { display: grid; gap: 14px; margin-top: 28px; }
+
+/* Geocercas: foto aérea al 90 % con las tres etiquetas de vidrio encima. */
+.v8-sec.areas-geo { padding-bottom: 60px; }
+.areas-geo-cab .v8-lead { max-width: 720px; }
+.areas-geo-escena { position: relative; margin-top: 32px; }
+.areas-geo-foto { width: 90%; margin: 0 auto; }
+.areas-geo-etiqueta { position: absolute; z-index: 1; }
+.areas-geo-etiqueta p { margin-top: 3px; }
+.areas-geo-etiqueta.is-entrada { left: 18%; top: 26%; width: 260px; }
+.areas-geo-etiqueta.is-salida { right: 16%; top: 44%; width: 270px; }
+.areas-geo-etiqueta.is-horario { left: 30%; bottom: 14%; width: 270px; }
+
+/* Operación multi-sitio. */
+.areas-multi-captura { margin-top: 48px; }
+.areas-multi-rasgos { margin-top: 48px; --v8-cols: 4; }
+
+/* Control de acceso por área. */
+.areas-acceso-cab { max-width: 720px; }
+.areas-acceso-cajas { margin-top: 48px; gap: 20px; }
+.areas-acceso-cajas .v8-h4 + p { margin-top: 8px; }
+
+/* Cierre: «Ordena tu flota como trabajas.» */
+.v8-sec.areas-cierre { padding-top: 20px; }
+
+/* Tableta y teléfono: piezas apiladas, sin escena fija. */
+@media (max-width: 899px) {
+  .areas-grupos-split { gap: 0; }
+  .v8-site .areas-grupos-foto {
+    width: calc(100% + 2 * var(--v8-margen)); max-width: none; margin: 16px calc(-1 * var(--v8-margen)) 0;
+    height: 380px; object-fit: cover;
+    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+  }
+  .areas-grupos-lista { margin-top: 24px; }
+  .areas-grupos-movil { display: grid; gap: 22px; margin-top: 8px; }
+  .areas-grupos-movil .v8-h4 + p { margin-top: 2px; }
+
+  .areas-geo-escena { margin-top: 16px; }
+  .v8-site .areas-geo-foto {
+    width: 100%; height: 400px; object-fit: cover;
+    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
+  }
+  .areas-geo-etiquetas { position: relative; display: grid; gap: 12px; max-width: var(--v8-ancho); margin: -50px auto 0; padding: 0 var(--v8-margen); }
+  .areas-geo-etiqueta { position: static; width: auto !important; }
+}
+@media (max-width: 599px) {
+  .v8-sec.areas-grupos { padding-top: 24px; }
+  .areas-geo-etiqueta .v8-ico, .areas-geo-etiqueta.is-horario { display: none; }
+  .areas-geo-etiqueta { padding: 16px; border-radius: 22px; }
+  .areas-geo-etiqueta p { margin-top: 0; }
+  .areas-multi-telefono { margin-top: 24px; }
+  .areas-acceso-cajas { margin-top: 24px; gap: 12px; }
+  .areas-acceso-cajas .v8-h4 + p { margin-top: 2px; }
+  .areas-acceso-cajas .v8-sm { font-size: 17px; line-height: 1.47; }
+  /* En el teléfono el cierre es solo el botón a lo ancho, bajo las preguntas. */
+  .v8-sec.areas-preguntas { padding-bottom: 0; }
+  .v8-sec.areas-cierre { padding-top: 32px; padding-bottom: 0; }
+  .v8-encabezado.areas-geo-cab, .v8-encabezado.areas-multi-cab { text-align: left; }
+  .areas-cierre .v8-h2 { display: none; }
+  .areas-cierre .v8-acciones { margin-top: 0; }
+  .v8-site .areas-cierre-boton { display: flex; width: 100%; }
+}
