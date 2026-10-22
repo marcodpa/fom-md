@@ -26,6 +26,8 @@ const Entrar = lazy(() => import('./pages/Entrar'))
 const CambiarClaveInicial = lazy(() => import('./pages/CambiarClaveInicial'))
 const Consola = lazy(() => import('./panel/Consola'))
 const MotionPage = lazy(() => import('./motion/MotionPage'))
+// T-99: Inicio rediseñado (v8), aparte en /nuevo hasta que Marco lo apruebe.
+const InicioV8 = lazy(() => import('./pages/v8/InicioV8'))
 if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
 
 function ScrollTop() {
@@ -69,6 +71,7 @@ export default function App() {
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cambiar-clave-inicial" element={<CambiarClaveInicial />} />
         <Route path="/panel/*" element={<Consola />} />
+        <Route path="/nuevo" element={<InicioV8 />} />
         <Route path="*" element={<Marketing />} />
       </Routes>
     </Suspense>
