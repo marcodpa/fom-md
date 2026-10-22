@@ -117,7 +117,7 @@ está en
   Información · Contacto, Iniciar sesión, Solicitar demostración; desplegables al pasar o enfocar;
   menú de pantalla completa en el teléfono. Ya va dentro de `SitioV8`. `GRUPOS_V8` = sus grupos.
 - **`PieV8`** — pie de 4 columnas (2 en el teléfono). Ya va dentro de `SitioV8`.
-- **`NavLocalV8`** `{ titulo, enlaces: [[id | ruta, nombre]] }` — barra local de 52 px bajo la
+- **`NavLocalV8`** (ya NO se muestra: Marco pidió una sola barra flotante; se deja para no romper páginas) `{ titulo, enlaces: [[id | ruta, nombre]] }` — barra local de 52 px bajo la
   global (solo ≥ 900 px). Marca la sección visible. Define `enlaces` FUERA del componente.
   `<NavLocalV8 titulo="Funciones" enlaces={LOCAL} />` con `const LOCAL = [['gps','GPS'], …]`.
 
