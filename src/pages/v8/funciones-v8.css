@@ -4,6 +4,58 @@
 .funciones-hero .v8-hero-medio .v8-nota-vidrio { bottom: 18%; padding: 12px 22px; }
 .funciones-hero .v8-nota-vidrio b { font-size: 14px; }
 
+/* Hero (T-117): la foto aérea ENTERA (1920 × 792; en el teléfono su recorte 750 × 937), sin
+   recorte ni máscara encima: la orilla de la foto ya viene fundida en transparencia hacia el fondo.
+   El recorrido es un SVG en píxeles de la foto, encima y del mismo tamaño: sigue la calle a
+   cualquier ancho. Solo se ve el SVG del recorte que se está mostrando. */
+.funciones-hero-medio .v8-foto { height: auto; }
+/* Versión -plena de la costa (si existe): solo un fundido corto en el borde, sin velo encima. */
+.v8-site .funciones-hero-medio .v8-foto.funciones-costa-plena {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 88%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 88%, transparent);
+  mask-composite: intersect;
+}
+.funciones-ruta { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.funciones-ruta.is-movil { display: none; }
+.funciones-ruta path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.funciones-ruta-plan { stroke: #8cc4ff; stroke-width: 2.5; stroke-dasharray: 2 12; opacity: .5; }
+.funciones-ruta-brillo { stroke: #3d9bf5; stroke-width: 18; opacity: .26; }
+.funciones-ruta-linea { stroke: #3d9bf5; stroke-width: 6; }
+.funciones-ruta-ping .is-punto { fill: #08121c; stroke: #8cc4ff; stroke-width: 3.5; }
+.funciones-ruta-ping .is-onda { fill: none; stroke: #8cc4ff; stroke-width: 2.5; opacity: 0; }
+.funciones-ruta-vehiculo .is-cuerpo { fill: #f3f5f8; stroke: #3d9bf5; stroke-width: 5; }
+.funciones-ruta-vehiculo .is-halo { fill: rgba(61, 155, 245, .3); }
+@media (prefers-reduced-motion: no-preference) {
+  .funciones-ruta-vehiculo .is-halo { transform-box: fill-box; transform-origin: center; animation: funciones-halo 1.6s ease-in-out infinite alternate; }
+}
+@keyframes funciones-halo { from { transform: scale(.7); opacity: .55; } to { transform: scale(1.15); opacity: 1; } }
+
+/* Telemática (T-117): señales sobre la Hilux, en píxeles de la foto (SVG + etiquetas en %). */
+.funciones-tele-medio { position: relative; width: 82%; margin: 24px auto 0; }
+.funciones-tele-medio .funciones-telematica-foto { width: 100%; margin: 0; }
+.funciones-senales { position: absolute; inset: 0; pointer-events: none; }
+.funciones-senales.is-movil { display: none; }
+.funciones-senales svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.funciones-senales path { fill: none; stroke-linecap: round; }
+.funciones-senal-via .is-linea { stroke: #3d9bf5; stroke-width: 2; opacity: .55; }
+.funciones-senal-via .is-paquete { stroke: #3d9bf5; stroke-width: 5; opacity: 0; }
+.funciones-senal-guia { stroke: #3d9bf5; stroke-width: 1.8; opacity: .7; }
+.funciones-senal-onda { stroke: #3d9bf5; stroke-width: 4; }
+.funciones-senal-onda:nth-of-type(1) { opacity: .85; }
+.funciones-senal-onda:nth-of-type(2) { opacity: .55; }
+.funciones-senal-onda:nth-of-type(3) { opacity: .3; }
+.funciones-senal-punto .is-nucleo { fill: #3d9bf5; stroke: #f3f5f8; stroke-width: 3; }
+.funciones-senal-punto .is-halo { fill: rgba(61, 155, 245, .28); stroke: #3d9bf5; stroke-width: 2; opacity: .5; }
+.funciones-senal-etiqueta {
+  position: absolute; display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; line-height: 1.2; color: var(--v8-texto, #f3f5f8); white-space: nowrap;
+}
+.funciones-senal-etiqueta.is-izq { translate: -100% -50%; }
+.funciones-senal-etiqueta.is-der { translate: 0 -50%; }
+.funciones-senal-etiqueta i { width: 6px; height: 6px; border-radius: 50%; background: #3d9bf5; flex: none; }
+.v8-nota-demo.funciones-tele-nota { margin-top: 8px; }
+
 /* GPS: texto a la izquierda, foto de la operadora a la derecha. */
 .v8-sec.funciones-gps { padding-top: 120px; }
 .funciones-gps-rejilla {
@@ -17,7 +69,7 @@
 .funciones-gps-lista-movil { display: none; }
 
 /* Telemática */
-.funciones-telematica-foto { width: 82%; margin: 24px auto 0; }
+/* (la caja de la foto de Telemática es .funciones-tele-medio, arriba) */
 .funciones-telematica-cajas.is-escritorio { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 8px; }
 .funciones-telematica-cajas.is-movil { display: none; }
 .funciones-telematica-cajas .v8-h4 { margin-bottom: 8px; }
@@ -35,6 +87,7 @@
 .funciones-aviso-movil { display: none; }
 
 /* Reportes */
+.funciones-reportes-movil { display: none; }
 .funciones-reportes-lead { margin-top: 20px; }
 .funciones-reportes-cifra { margin-top: 28px; }
 
@@ -49,14 +102,17 @@
   .v8-sec.funciones-gps { padding-top: 72px; }
   .funciones-gps-rejilla { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'cab' 'foto' 'lista'; }
   .funciones-gps-foto { margin-top: 24px; }
-  .funciones-telematica-foto { width: 100%; }
+  .funciones-telematica-foto, .funciones-tele-medio { width: 100%; }
   .funciones-aviso-escena { grid-template-columns: minmax(0, 1fr); gap: 32px; margin-top: 40px; }
 }
 
 /* Teléfono: lo del tablero móvil, sin escenas fijas y con los teléfonos apilados. */
 @media (max-width: 599px) {
   .funciones-hero .v8-hero-medio .v8-nota-vidrio { display: none; }
-  .funciones-hero .v8-hero-medio .v8-foto { height: 440px; }
+  .funciones-hero .v8-hero-medio .v8-foto { height: auto; }
+  .funciones-ruta.is-escritorio, .funciones-senales.is-escritorio { display: none; }
+  .funciones-ruta.is-movil, .funciones-senales.is-movil { display: block; }
+  .funciones-senal-etiqueta { font-size: 11px; padding: 5px 10px; gap: 6px; }
 
   .v8-sec.funciones-gps { padding-top: 24px; }
   .funciones-gps-rejilla { padding: 0; }
@@ -69,7 +125,7 @@
   .funciones-gps-lista-movil .v8-h4 { margin-bottom: 2px; }
 
   .funciones-telematica-cab.is-centro { text-align: left; }
-  .funciones-telematica-foto { margin-top: 16px; }
+  .funciones-tele-medio { width: auto; margin: 16px var(--v8-margen) 0; }
   .funciones-telematica-cajas.is-escritorio { display: none; }
   .funciones-telematica-cajas.is-movil { display: grid; gap: 12px; }
   .funciones-telematica-cajas .v8-h4 { margin-bottom: 2px; }
@@ -86,7 +142,9 @@
   .funciones-movil-item .v8-c { margin-top: 24px; }
   .funciones-movil-item .v8-h4 { margin-bottom: 4px; }
 
-  .funciones-reportes .v8-escena-texto { margin-top: -30px; }
+  .funciones-reportes-movil { display: block; }
+  .funciones-reportes .v8-escena-foto { display: none; }
+  .funciones-reportes .v8-escena-texto { margin-top: 28px; }
   .funciones-reportes-cifra { margin-top: 20px; }
 
   .funciones-boton-movil { margin-top: 32px; }

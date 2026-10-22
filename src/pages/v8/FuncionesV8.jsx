@@ -2,6 +2,10 @@
 // y «Funciones · teléfono» (Funciones-movil.dc.html) del lienzo «Web FOM nueva».
 // Animación (nota azul del tablero, solo 2 momentos):
 //   1) Hero: el titular entra escalonado y la foto pasa de 92 % a 100 % al bajar (base: HeroV8).
+//   1b) Hero (T-117): la foto aérea entera, con el recorrido por la carretera que se dibuja, el
+//      vehículo que avanza y un ping de posición por tramo (funciones-animaciones.jsx).
+//   1c) Telemática (T-117): señales que toma el equipo sobre la Hilux (puntos, líneas a la antena,
+//      ondas hacia el panel y etiquetas escalonadas).
 //   2) Recorrido fijo «Del aviso a la decisión»: la captura en vidrio cambia entre Mantenimiento,
 //      Reportes y Alertas mientras el texto avanza (solo escritorio ≥ 1024 px).
 // Todo lo demás: quieto o aparición suave. Teléfono: capturas apiladas, sin escena fija.
@@ -9,8 +13,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { PAGES } from '../../content/pages'
 import {
   SitioV8, NavLocalV8, HeroV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8,
-  TarjetaVidrioV8, EscenaV8, ListaPasosV8, PestanasV8, PreguntasV8, BotonV8, EnlaceV8, useMomentoV8, rutaV8,
+  TarjetaVidrioV8, EscenaV8, ListaPasosV8, PestanasV8, PreguntasV8, BotonV8, EnlaceV8, NotaVidrioV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
+import { hayFotoV8 } from '../../components/v8/fotosV8'
+import { RutaCostaV8, SenalesTelematicaV8, animarRutaCostaV8, animarSenalesV8 } from './funciones-animaciones'
 import './funciones-v8.css'
 
 const F = PAGES.funciones
@@ -63,24 +69,31 @@ const MOVIL = [
 const SALTOS_MOVIL = [['#funciones-movil-mantenimiento', 'Mantenimiento'], ['#reportes', 'Reportes'], ['#funciones-movil-alertas', 'Alertas']]
 
 const REPORTES = seccion('Reportes').stat
+// Costa con brillo natural (pedido de Marco): si existe `costa-ruta-plena` (misma toma, sin el
+// grado a anochecer ni la orilla horneada) se sirve esa con un fundido corto en el borde; si no,
+// la de siempre, cuya orilla ya viene fundida en transparencia. El recorrido usa los mismos píxeles.
+const COSTA_PLENA = hayFotoV8('costa-ruta-plena')
 
 export default function FuncionesV8() {
   const raiz = useRef(null)
   const recorrido = useRef(null) // ScrollTrigger del recorrido fijo (solo escritorio con movimiento)
   const [paso, setPaso] = useState(0)
 
-  useMomentoV8(raiz, ({ q, ScrollTrigger, escritorio }) => {
-    if (!escritorio) return
+  useMomentoV8(raiz, ({ q, gsap, ScrollTrigger, escritorio }) => {
+    // 1b y 1c · Recorrido de la costa y señales de telemática (escritorio y teléfono).
+    const limpiezas = [animarRutaCostaV8({ q, gsap, ScrollTrigger }), animarSenalesV8({ q, gsap, ScrollTrigger })]
+    const limpiar = () => limpiezas.forEach(f => f?.())
+    if (!escritorio) return limpiar
     // 2 · Recorrido fijo: la escena queda fija y el avance del scroll elige el paso (01 → 02 → 03);
     //     la captura cambia con un fundido de opacidad (CSS). Nada se reescala.
     const escena = q('.funciones-aviso-escena')[0]
-    if (!escena) return
+    if (!escena) return limpiar
     const st = ScrollTrigger.create({
       trigger: escena, start: 'center center', end: '+=160%', pin: true, anticipatePin: 1,
       onUpdate: self => setPaso(Math.min(2, Math.floor(self.progress * 3))),
     })
     recorrido.current = st
-    return () => { recorrido.current = null; setPaso(0) }
+    return () => { limpiar(); recorrido.current = null; setPaso(0) }
   })
 
   // Con la escena fija, elegir un paso (pestaña, paso o barra local) lleva el scroll a su tramo.
@@ -117,8 +130,13 @@ export default function FuncionesV8() {
       </>}
       bajadaAngosta
       primaria={{ to: rutaV8('contacto'), texto: 'Solicitar demostración' }}
-      foto={{ nombre: 'costa-ruta', alt: 'Vista aérea de una carretera junto al mar con camiones circulando.', posicion: '50% 50%' }}
-      nota={{ titulo: 'Posición cada 10 segundos', texto: 'con el vehículo en movimiento' }}
+      medio={<div className="v8-hero-medio funciones-hero-medio" data-v8-crece="">
+        {/* La foto entera (sin recorte ni máscara encima): su orilla ya viene fundida en transparencia. */}
+        <FotoIntegradaV8 prioridad sizes="100vw" nombre="costa-ruta" {...(COSTA_PLENA ? { marco: 'plano', className: 'funciones-costa-plena' } : { fundido: 'ninguno' })}
+          alt="Vista aérea de una carretera junto al mar; una línea azul marca el recorrido de un vehículo con su posición cada 10 segundos." />
+        <RutaCostaV8 />
+        <NotaVidrioV8 titulo="Posición cada 10 segundos" texto="con el vehículo en movimiento" />
+      </div>}
     />
 
     <NavLocalV8 titulo="Funciones" enlaces={LOCAL} />
@@ -149,8 +167,13 @@ export default function FuncionesV8() {
             <span className="v8-solo-movil">Cómo se usa cada unidad.</span>
           </>} />
       </ContenedorV8>
-      <FotoIntegradaV8 className="funciones-telematica-foto" nombre="telematica" fundido="o" sizes="(min-width: 900px) 82vw, 100vw"
-        alt="Camioneta FOM con el motor y el equipo de telemática a la vista." />
+      <div className="funciones-tele-medio">
+        {/* Foto completa con su brillo natural (versión -plena, marco redondo), sin velo ni degradado. */}
+        <FotoIntegradaV8 className="funciones-telematica-foto" nombre="telematica" marco="redondo" sizes="(min-width: 900px) 82vw, 100vw"
+          alt="Camioneta FOM con el motor a la vista y las señales que toma el equipo: ubicación GPS, kilómetros, voltaje de batería, RPM y temperatura, frenada brusca y combustible." />
+        <SenalesTelematicaV8 />
+      </div>
+      <p className="v8-nota-demo funciones-tele-nota">Valores de ejemplo · Datos de demostración</p>
       <ContenedorV8 className="funciones-telematica-cajas is-escritorio">
         {TELEMATICA.map(([t, x]) => <TarjetaVidrioV8 key={t} radio="tarjeta" data-v8-aparece="">
           <h3 className="v8-h4">{t}</h3><p className="v8-sm v8-t2">{x}</p>
@@ -198,6 +221,11 @@ export default function FuncionesV8() {
     </SeccionV8>
 
     <SeccionV8 id="reportes" banda className="funciones-reportes" aria-labelledby="funciones-reportes-titulo">
+      {/* Teléfono: la captura REAL de Reportes, entera, y el texto debajo (la foto del monitor
+          recortada cortaba «Reportes» y quedaba bajo el rótulo). En escritorio, la escena de siempre. */}
+      <div className="funciones-reportes-movil">
+        <CapturaFlotanteV8 nombre="cap-movil-sup-reportes" alt="Reportes actuales en el teléfono del supervisor: vehículos, usuarios, costos y estadístico. Datos de demostración." ancho={240} />
+      </div>
       <EscenaV8 lado="izquierda" ancho="62%" anchoTexto={460} posicionMovil="70% 50%" altoMovil={360}
         foto={{ nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM en la oficina. Datos de demostración.' }}>
         <p className="v8-kick" data-v8-aparece="">Reportes</p>
