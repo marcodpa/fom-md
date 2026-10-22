@@ -120,12 +120,105 @@ export default function useMomentoV8(raiz, momentos) {
 
       // 4 · Momentos propios de la página (antes del 3D, para saber qué escenas quedan fijas).
       const limpiarPagina = momentos?.({ q, gsap, ScrollTrigger, escritorio })
+
+      // 4b · Carruseles de tarjetas sincronizados con el scroll (T-122).
+      //      Escritorio: la sección queda fija, el scroll vertical mueve la pista de derecha a
+      //      izquierda (scrub) y cada tarjeta aparece con su giro 3D justo cuando entra; el tramo
+      //      fijo dura lo justo para recorrerlas todas. Teléfono y tableta: sin escena fija; cada
+      //      tarjeta aparece cuando de verdad se ve (al bajar o al deslizar el carrusel).
+      const listas = new WeakSet() // ya asentadas: pueden inclinarse con el ratón
+      const manejadas = new Set() // tarjetas que anima el carrusel (no la entrada general)
+      const BASE_CARRUSEL = { transformOrigin: '0% 50%', transformPerspective: 1400 }
+      const desdeCarrusel = { opacity: 0, x: 150 * f, z: -220 * f, rotationY: 42 * f }
+      const asentada = { opacity: 1, x: 0, z: 0, rotationY: 0 }
+      const modos = []
+      const observadores = []
+      q('.v8-carrusel').forEach(car => {
+        const pista = car.querySelector('.v8-carrusel-pista')
+        const items = pista ? [...pista.children] : []
+        const tarjetasC = items.map(li => li.querySelector('[data-v8-3d="tarjeta"]')).filter(Boolean)
+        if (!tarjetasC.length || car.closest('[data-v8-3d="hero"]')) return
+        tarjetasC.forEach(t => manejadas.add(t))
+
+        if (escritorio && items.length > 1) {
+          car.setAttribute('data-v8-modo', 'recorrido')
+          modos.push(car)
+          const seccion = car.closest('section') || car
+          const barra = car.querySelector('.v8-carrusel-barra span')
+          // Medidas sin transform (offsetLeft): posición de cada tarjeta con la pista en 0.
+          const pad = () => parseFloat(getComputedStyle(pista).paddingLeft) || 0
+          const izq = i => pad() + items[i].offsetLeft - items[0].offsetLeft
+          const recorrido = () => Math.max(0, izq(items.length - 1) + items[items.length - 1].offsetWidth + pad() - pista.clientWidth)
+          const ancho = car.clientWidth
+          const T = recorrido()
+          const PASO = 240 // px de scroll entre las tarjetas que ya están a la vista
+          const DUR = 380  // px de scroll que tarda cada tarjeta en asentarse
+          const vistas = Math.max(1, items.filter((_, i) => izq(i) < ancho - 140).length)
+          const arranque = (vistas - 1) * PASO + DUR * 0.55 // la pista empieza a moverse
+          const inicio = i => i < vistas ? i * PASO : arranque + Math.max(0, izq(i) - (ancho - 60))
+          const fin = Math.max(arranque + T, inicio(items.length - 1) + DUR) + 140 // pausa corta al final
+          // Queda fijo con el bloque (titular de la sección → barra de avance) centrado entre la
+          // barra global (80 px) y el pie de la ventana; si no cabe, arriba, bajo la barra global.
+          const cab = seccion.querySelector('h2') || car
+          const barraCaja = car.querySelector('.v8-carrusel-barra') || car
+          const arriba = () => {
+            const y = window.scrollY
+            const a = cab.getBoundingClientRect().top + y
+            const b = barraCaja.getBoundingClientRect().bottom + y
+            const libre = window.innerHeight - 88
+            return Math.round(b - a <= libre ? (a + b) / 2 - (88 + window.innerHeight) / 2 : a - 96)
+          }
+          const tl = gsap.timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: {
+              trigger: pista, pin: seccion, start: arriba,
+              end: () => `+=${Math.round(fin * (recorrido() / Math.max(T, 1) || 1))}`,
+              scrub: 0.7, anticipatePin: 1, invalidateOnRefresh: true,
+            },
+          })
+          items.forEach((li, i) => {
+            const t = li.querySelector('[data-v8-3d="tarjeta"]')
+            if (!t) return
+            gsap.set(t, BASE_CARRUSEL)
+            tl.fromTo(t, desdeCarrusel, {
+              ...asentada, duration: DUR, ease: 'power2.out',
+              onComplete: () => listas.add(t),
+              onUpdate() { if (this.progress() < 1) listas.delete(t) },
+            }, inicio(i))
+          })
+          tl.fromTo(pista, { x: 0 }, { x: () => -recorrido(), duration: T }, arranque)
+          if (barra) tl.fromTo(barra, { scaleX: 0 }, { scaleX: 1, duration: fin }, 0)
+          return
+        }
+
+        // Teléfono y tableta: aparecen una por una cuando se ven (bajando o deslizando). Se observa
+        // la diapositiva (sin transform), así la que asoma por el borde también aparece y sigue
+        // invitando a deslizar.
+        tarjetasC.forEach(t => gsap.set(t, { ...BASE_CARRUSEL, ...desdeCarrusel }))
+        let cola = 0
+        const io = new IntersectionObserver(entradas => entradas.forEach(e => {
+          if (!e.isIntersecting) return
+          io.unobserve(e.target)
+          const t = e.target.querySelector('[data-v8-3d="tarjeta"]')
+          if (!t) return
+          const ya = ahora() / 1000
+          const sale = Math.max(ya + espera(), cola)
+          cola = sale + 0.16
+          ctx.add(() => gsap.to(t, {
+            ...asentada, duration: 1.15, ease: 'power3.out', delay: sale - ya, overwrite: true,
+            clearProps: 'transform,opacity', onComplete: () => listas.add(t),
+          }))
+        }), { threshold: 0.12 })
+        items.forEach(li => li.querySelector('[data-v8-3d="tarjeta"]') && io.observe(li))
+        observadores.push(io)
+      })
+
       const fijas = ScrollTrigger.getAll().map(st => st.pin).filter(Boolean)
       const enFija = el => fijas.some(p => p.contains(el) || el.contains(p))
 
       // 5 · Tarjetas: entran una tras otra con giro 3D.
-      const listas = new WeakSet() // ya asentadas: pueden inclinarse con el ratón
       const tarjetas = q('[data-v8-3d="tarjeta"]').filter(el => {
+        if (manejadas.has(el)) return false
         if (enFija(el) || el.closest('[data-v8-3d="hero"]')) { listas.add(el); return false }
         return true
       })
@@ -219,7 +312,15 @@ export default function useMomentoV8(raiz, momentos) {
           const el = actual
           actual = null
           el.classList.remove('is-brillo')
-          gsap.to(el, { rotationX: 0, rotationY: 0, z: 0, duration: 0.8, ease: 'power3.out', overwrite: true, clearProps: 'transform' })
+          // Tarjeta que el scroll está moviendo otra vez (recorrido hacia atrás): manda el scroll.
+          if (!listas.has(el)) return
+          // En un recorrido fijo la tarjeta conserva su origen y perspectiva (el scroll puede volver
+          // a girarla); overwrite 'auto' no toca la línea de tiempo del recorrido.
+          const enRecorrido = el.closest('[data-v8-modo="recorrido"]')
+          gsap.to(el, {
+            rotationX: 0, rotationY: 0, z: 0, duration: 0.8, ease: 'power3.out', overwrite: 'auto',
+            ...(enRecorrido ? { onComplete: () => gsap.set(el, BASE_CARRUSEL) } : { clearProps: 'transform' }),
+          })
         }
         const tomar = el => {
           const r = el.getBoundingClientRect()
@@ -268,6 +369,8 @@ export default function useMomentoV8(raiz, momentos) {
 
       return () => {
         quitarInclinacion?.()
+        observadores.forEach(io => io.disconnect())
+        modos.forEach(car => car.removeAttribute('data-v8-modo'))
         if (typeof limpiarPagina === 'function') limpiarPagina()
       }
     })

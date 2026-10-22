@@ -143,7 +143,9 @@ export function EscenaV8({ foto, lado = 'derecha', ancho = '72%', anchoTexto = 5
 }
 
 // Carrusel horizontal con el dedo / la rueda, con puntos en una píldora de vidrio. Cada hijo es
-// una diapositiva. Sin animación propia: el desplazamiento es nativo (scroll-snap).
+// una diapositiva. El desplazamiento es nativo (scroll-snap). Si sus diapositivas son tarjetas
+// (TarjetaCarruselV8), useMomentoV8 lo sincroniza con el scroll en escritorio (T-122): la sección
+// queda fija, el scroll vertical lo mueve de derecha a izquierda y cada tarjeta aparece al entrar.
 export function CarruselV8({ etiqueta, children, className = '' }) {
   const pista = useRef(null)
   const items = Children.toArray(children)
@@ -178,6 +180,9 @@ export function CarruselV8({ etiqueta, children, className = '' }) {
     <div className="v8-vidrio v8-puntos">
       {items.map((_, i) => <button type="button" key={i} aria-label={`Ir a la diapositiva ${i + 1}`} aria-current={i === activa ? 'true' : undefined} onClick={() => ir(i)} />)}
     </div>
+    {/* Barra de avance del recorrido con el scroll (T-122): solo se ve en escritorio cuando
+        useMomentoV8 pone el carrusel en data-v8-modo="recorrido"; ahí reemplaza a los puntos. */}
+    <div className="v8-vidrio v8-carrusel-barra" aria-hidden="true"><span /></div>
   </div>
 }
 
