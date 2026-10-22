@@ -1,7 +1,7 @@
 From 2581cf83b19ae476227262327ab72489b2526c13 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 14 Oct 2026 11:40:13 -0400
-Subject: [PATCH 01/26] Mapas con Mapbox, el mismo proveedor que el panel web
+Subject: [PATCH 01/27] Mapas con Mapbox, el mismo proveedor que el panel web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -3095,7 +3095,7 @@ index 0000000..269766b
 From de62044848b392b8caa43332444bea9c335718c8 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 09:05:25 -0400
-Subject: [PATCH 02/26] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
+Subject: [PATCH 02/27] =?UTF-8?q?Dise=C3=B1o=20de=20la=20app=20igual=20al?=
  =?UTF-8?q?=20panel=20web:=20encabezado=20redondo=20en=20todas=20las=20pes?=
  =?UTF-8?q?ta=C3=B1as?=
 MIME-Version: 1.0
@@ -5530,7 +5530,7 @@ index 2ab97e8..1921048 100644
 From c000b636fd810bcce2f3a312f10fed67ade6af1c Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:14:53 -0400
-Subject: [PATCH 03/26] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
+Subject: [PATCH 03/27] =?UTF-8?q?Mapbox=20de=20la=20web=20en=20la=20app=20?=
  =?UTF-8?q?(tambi=C3=A9n=20en=20Expo=20Go),=20recorrido=20y=20entrada=20nu?=
  =?UTF-8?q?eva=20con=20el=20logo=20FOM?=
 MIME-Version: 1.0
@@ -26153,7 +26153,7 @@ index 5119764..7db24d0 100644
 From 50a59f9d818534889d46e3a94168948db6d9afa9 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 12:32:24 -0400
-Subject: [PATCH 04/26] Pantalla de carga FOM (motion) al arrancar y dentro de
+Subject: [PATCH 04/27] Pantalla de carga FOM (motion) al arrancar y dentro de
  la app, igual que la web
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -27297,7 +27297,7 @@ index 9c82d64..8328c9a 100644
 From 1056c6b78ec4ebc10b57f795e36b0e6a5699274d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:04:43 -0400
-Subject: [PATCH 05/26] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
+Subject: [PATCH 05/27] =?UTF-8?q?Pantallas=20que=20se=20desplazan=20comple?=
  =?UTF-8?q?tas,=20mapa=20completo=20de=20la=20flota=20y=20arreglo=20del=20?=
  =?UTF-8?q?mapa=20en=20el=20tel=C3=A9fono?=
 MIME-Version: 1.0
@@ -29762,7 +29762,7 @@ index 0d9b55d..39566b2 100644
 From 3e5342f146d3967ea90b01f55ab4c251a554cc74 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 13:48:17 -0400
-Subject: [PATCH 06/26] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
+Subject: [PATCH 06/27] =?UTF-8?q?Barra=20flotante=20sobre=20el=20contenido?=
  =?UTF-8?q?,=20recorrido=20en=20el=20mapa=20completo,=20=C3=ADcono=20de=20?=
  =?UTF-8?q?veh=C3=ADculo=20de=20la=20web=20y=20espera=20nueva?=
 MIME-Version: 1.0
@@ -31408,7 +31408,7 @@ index 4fb8a10..ef7b519 100644
 From 6ec07ef815bd8196b71c53b9772e567d5931bf30 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 14:14:13 -0400
-Subject: [PATCH 07/26] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
+Subject: [PATCH 07/27] =?UTF-8?q?Mapa=20m=C3=A1s=20r=C3=A1pido=20y=20sin?=
  =?UTF-8?q?=20el=20error=20=C2=ABStyle=20is=20not=20done=20loading=C2=BB?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32480,7 +32480,7 @@ index f6b5a22..e116c51 100644
 From 5f38ad38cd96d2426b421be91809e3017cbe4954 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Thu, 15 Oct 2026 16:18:12 -0400
-Subject: [PATCH 08/26] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
+Subject: [PATCH 08/27] =?UTF-8?q?Recorrido:=20pedirlo=20por=20tandas=20de?=
  =?UTF-8?q?=20200=20(el=20servidor=20de=20la=20app=20no=20acepta=20m=C3=A1?=
  =?UTF-8?q?s=20por=20pedido)?=
 MIME-Version: 1.0
@@ -32569,7 +32569,7 @@ index 8836fdd..2804942 100644
 From d8db74159e7bf9e52efb1c6faa6ee0abf78ee2ff Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:29:50 -0400
-Subject: [PATCH 09/26] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
+Subject: [PATCH 09/27] =?UTF-8?q?App=20lista=20para=20instalarse=20en=20el?=
  =?UTF-8?q?=20tel=C3=A9fono=20sin=20Expo=20Go?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -32732,7 +32732,7 @@ index 0086b83..f9ddcca 100644
 From 95b304af6cf2094fdef87a3885ce76ac6a994e5e Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:54:24 -0400
-Subject: [PATCH 10/26] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
+Subject: [PATCH 10/27] =?UTF-8?q?App=20m=C3=A1s=20r=C3=A1pida,=20Mapbox=20?=
  =?UTF-8?q?nativo=20completo,=20animaciones=20y=20proyecto=20de=20Expo=20p?=
  =?UTF-8?q?ara=20la=20APK?=
 MIME-Version: 1.0
@@ -36626,7 +36626,7 @@ index 7e0fe42..23cabaa 100644
 From 2e0a3b7e59cee9887a7171b60f89f64efcde644f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 07:55:54 -0400
-Subject: [PATCH 11/26] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
+Subject: [PATCH 11/27] =?UTF-8?q?npm=20con=20legacy-peer-deps:=20sin=20est?=
  =?UTF-8?q?o=20la=20compilaci=C3=B3n=20en=20Expo=20falla=20por=20mapbox-gl?=
  =?UTF-8?q?=203=20vs=20@rnmapbox/maps?=
 MIME-Version: 1.0
@@ -36656,7 +36656,7 @@ index 0000000..7c5134a
 From 8f73cfc0c36be11e3414c10a41964cce6e5b8cd2 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:20:22 -0400
-Subject: [PATCH 12/26] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
+Subject: [PATCH 12/27] =?UTF-8?q?Optimizaci=C3=B3n=20de=20Mapbox=20y=20de?=
  =?UTF-8?q?=20pedidos=20al=20servidor;=20teclado=20en=20la=20entrada=20(T-?=
  =?UTF-8?q?06=20a=20T-09,=20T-15)?=
 MIME-Version: 1.0
@@ -42315,7 +42315,7 @@ index 47f45a4..bd41d06 100644
 From f6b767485f055b63843290b9d57751bba10f5f60 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 09:42:17 -0400
-Subject: [PATCH 13/26] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
+Subject: [PATCH 13/27] =?UTF-8?q?Arreglos=20de=20la=20revisi=C3=B3n=20(T-1?=
  =?UTF-8?q?6,=20T-17):=20tarjetas=20del=20mapa=20en=20iOS,=20memorias=20po?=
  =?UTF-8?q?r=20generaci=C3=B3n,=20flota=20sin=20red?=
 MIME-Version: 1.0
@@ -42752,7 +42752,7 @@ index b1893fe..11e8247 100644
 From a72f6240bc42f357d00cc22fc14132a23dadc999 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Fri, 16 Oct 2026 10:22:30 -0400
-Subject: [PATCH 14/26] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
+Subject: [PATCH 14/27] =?UTF-8?q?Auditor=C3=ADa=20y=20arreglos=20de=20la?=
  =?UTF-8?q?=20app=20(T-19=20a=20T-23):=20SOS,=20sesi=C3=B3n,=20red,=20pant?=
  =?UTF-8?q?allas,=20mapas=20y=20limpieza?=
 MIME-Version: 1.0
@@ -48916,7 +48916,7 @@ index 479ba30..63d5a63 100644
 From d5515163a0aaed218e618724c348a98585f81a5b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Mon, 19 Oct 2026 15:15:53 -0400
-Subject: [PATCH 15/26] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
+Subject: [PATCH 15/27] =?UTF-8?q?Dise=C3=B1o=20FOM=20normalizado=20en=20la?=
  =?UTF-8?q?=20app=20(T-33=20a=20T-41)=20y=20trabajo=20pendiente=20de=20otr?=
  =?UTF-8?q?a=20sesi=C3=B3n?=
 MIME-Version: 1.0
@@ -57967,7 +57967,7 @@ index 0000000..287208e
 From 792b0cbbe44bdd70d321c2fa9e504dd306d27d9f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 09:56:46 -0400
-Subject: [PATCH 16/26] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
+Subject: [PATCH 16/27] =?UTF-8?q?Reportes=20nuevo,=20PDF=20empresarial,=20?=
  =?UTF-8?q?inspecciones=20programadas=20y=20carga=20en=20c=C3=ADrculo=20(T?=
  =?UTF-8?q?-47=20a=20T-53)?=
 MIME-Version: 1.0
@@ -66593,7 +66593,7 @@ index 9c4c0ac..548f103 100644
 From 2fb6ae2ec8e7be32857eceac6d91afcee458c710 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Tue, 20 Oct 2026 11:15:45 -0400
-Subject: [PATCH 17/26] Inspecciones simples, calendario por persona, ODT
+Subject: [PATCH 17/27] Inspecciones simples, calendario por persona, ODT
  asignadas, fotos y teclado (T-60 a T-65)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -70046,7 +70046,7 @@ index 2147bee..3650649 100644
 From 31237d42b58cf5b50abb359a3f6f92a2dc2d966b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 09:02:22 -0400
-Subject: [PATCH 18/26] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
+Subject: [PATCH 18/27] =?UTF-8?q?ODT=20igual=20que=20la=20web,=20fotos=20q?=
  =?UTF-8?q?ue=20suben,=20una=20inspecci=C3=B3n=20por=20d=C3=ADa=20y=20fine?=
  =?UTF-8?q?s=20de=20semana=20(T-67=20a=20T-75)?=
 MIME-Version: 1.0
@@ -73909,7 +73909,7 @@ index 08bddf9..16d9fef 100644
 From 9e668a4055466a8d1a72a98677a27bdf462839fe Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 10:04:55 -0400
-Subject: [PATCH 19/26] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
+Subject: [PATCH 19/27] =?UTF-8?q?Llegada=20en=20el=20mapa,=20sin=20tr?=
  =?UTF-8?q?=C3=A1fico,=20y=20mantenimiento=20con=20la=20misma=20tarjeta=20?=
  =?UTF-8?q?(T-77,=20T-78)?=
 MIME-Version: 1.0
@@ -77071,7 +77071,7 @@ index 3b8c1a3..2b0d3a6 100644
 From 178d9a3cc8da965ee79a1bc11dd166d3ad458859 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 10:19:38 -0400
-Subject: [PATCH 20/26] Mantenimiento: borde normal en la tarjeta; el color
+Subject: [PATCH 20/27] Mantenimiento: borde normal en la tarjeta; el color
  solo en el degradado izquierdo
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
@@ -77099,7 +77099,7 @@ index c4e8b85..4a664f1 100644
 From 4f5b2dcc7c5bfd01841529370065bb4dba3dde65 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 11:07:44 -0400
-Subject: [PATCH 21/26] =?UTF-8?q?Empresas=20grandes:=20todas=20las=20unida?=
+Subject: [PATCH 21/27] =?UTF-8?q?Empresas=20grandes:=20todas=20las=20unida?=
  =?UTF-8?q?des,=20listas=20r=C3=A1pidas=20y=20=C2=ABFaltan=20hoy=C2=BB=20c?=
  =?UTF-8?q?ompleto=20(T-84,=20T-85)?=
 MIME-Version: 1.0
@@ -79641,7 +79641,7 @@ index 308c4c0..a74a9b9 100644
 From dbb7ea9ed377a8216a11468d50182c78b29ac57f Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 14:14:50 -0400
-Subject: [PATCH 22/26] =?UTF-8?q?Sin=20se=C3=B1al=20con=20tiempo,=20Report?=
+Subject: [PATCH 22/27] =?UTF-8?q?Sin=20se=C3=B1al=20con=20tiempo,=20Report?=
  =?UTF-8?q?es=20con=20tablero,=20manejo=20del=20conductor=20en=20todas=20p?=
  =?UTF-8?q?artes=20y=20Mantenimiento=20sin=20=C2=ABTodas=20las=20=C3=B3rde?=
  =?UTF-8?q?nes=C2=BB=20(T-87,=20T-89,=20T-90,=20T-92)?=
@@ -83966,7 +83966,7 @@ index b5779b0..6f8105e 100644
 From 218652185d63b5858d91eaec56913f6443a9403b Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 14:31:19 -0400
-Subject: [PATCH 23/26] =?UTF-8?q?Lo=20m=C3=A1s=20nuevo=20primero=20en=20to?=
+Subject: [PATCH 23/27] =?UTF-8?q?Lo=20m=C3=A1s=20nuevo=20primero=20en=20to?=
  =?UTF-8?q?das=20las=20listas=20con=20fecha;=20la=20tabla=20de=20manejo=20?=
  =?UTF-8?q?abre=20el=20perfil=20(T-93)?=
 MIME-Version: 1.0
@@ -84354,7 +84354,7 @@ index 4a6ebbf..be169d7 100644
 From d9eb99b35db6ce7e48276cf302b2d23684c53009 Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 14:54:34 -0400
-Subject: [PATCH 24/26] =?UTF-8?q?Manejo:=20vuelve=20el=20anillo=20de=20sie?=
+Subject: [PATCH 24/27] =?UTF-8?q?Manejo:=20vuelve=20el=20anillo=20de=20sie?=
  =?UTF-8?q?mpre=20en=20la=20app,=20con=20el=20per=C3=ADodo=207/28=20(T-97)?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -84750,7 +84750,7 @@ index e402be5..a0655eb 100644
 From 44a81662499f1c1802ccb9c618ea47cbe61d7c7d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 15:09:40 -0400
-Subject: [PATCH 25/26] =?UTF-8?q?Panel=20de=20GPS=20en=20la=20app:=20inven?=
+Subject: [PATCH 25/27] =?UTF-8?q?Panel=20de=20GPS=20en=20la=20app:=20inven?=
  =?UTF-8?q?tario,=20nuevo=20GPS,=20instalar=20y=20diagn=C3=B3stico=20(T-96?=
  =?UTF-8?q?)?=
 MIME-Version: 1.0
@@ -87801,7 +87801,7 @@ index 3aafe1b..45c958b 100644
 From 125f209f0aee1d43d37d32682294b496ece09c1d Mon Sep 17 00:00:00 2001
 From: marcodpa <marcodpa@users.noreply.github.com>
 Date: Wed, 21 Oct 2026 20:15:42 -0400
-Subject: [PATCH 26/26] =?UTF-8?q?Manejo:=20per=C3=ADodo=207/30=20d=C3=ADas?=
+Subject: [PATCH 26/27] =?UTF-8?q?Manejo:=20per=C3=ADodo=207/30=20d=C3=ADas?=
  =?UTF-8?q?=20como=20la=20web=20(el=20servidor=20no=20acepta=2028)?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -87899,6 +87899,2075 @@ index 7ccf32c..e98571b 100644
  export type DiasManejo = (typeof DIAS_MANEJO)[number];
  
  /** Calificación, con los mismos nombres que usa el servidor en la web. */
+-- 
+2.55.0.windows.3
+
+
+From 3a8fb8ccb48540755348ecbd181ee5f0804da4e6 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 21:32:18 -0400
+Subject: [PATCH 27/27] Eventos de manejo en el mapa de la flota con filtros
+ por tipo, listos para cuando el servidor los publique a la app (T-101)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/mapa-flota.tsx                   | 147 ++++++-
+ src/app/panel/flota.tsx                  |  16 +
+ src/app/ver-perfil.tsx                   |   3 +
+ src/components/eventos-manejo.tsx        | 491 ++++++++++++++++++++++
+ src/components/map-vehiculo-dom.tsx      |  17 +-
+ src/components/map-vehiculo-mapbox.tsx   |  35 +-
+ src/components/mapa-fom-dom.tsx          | 246 ++++++++++-
+ src/components/mapbox-nativo-eventos.tsx | 244 +++++++++++
+ src/lib/eventos-manejo.ts                | 497 +++++++++++++++++++++++
+ src/services/fomEventosManejo.ts         |  84 ++++
+ 10 files changed, 1766 insertions(+), 14 deletions(-)
+ create mode 100644 src/components/eventos-manejo.tsx
+ create mode 100644 src/components/mapbox-nativo-eventos.tsx
+ create mode 100644 src/lib/eventos-manejo.ts
+ create mode 100644 src/services/fomEventosManejo.ts
+
+diff --git a/src/app/mapa-flota.tsx b/src/app/mapa-flota.tsx
+index 7213e4e..88cb540 100644
+--- a/src/app/mapa-flota.tsx
++++ b/src/app/mapa-flota.tsx
+@@ -1,17 +1,26 @@
+ import { useLocalSearchParams, useRouter } from 'expo-router';
+-import { useMemo, useState } from 'react';
+-import { StyleSheet, View, useWindowDimensions } from 'react-native';
++import { useMemo, useState, type ComponentType } from 'react';
++import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+ import { useSafeAreaInsets } from 'react-native-safe-area-context';
+ import Svg, { Path } from 'react-native-svg';
+ 
+ import { Flotante } from '@/components/escalonado';
+-import { MapaVehiculo } from '@/components/map-vehiculo';
++import {
++  AvisoEventos,
++  FiltrosEventos,
++  ListaEventos,
++  NotaEventos,
++  useEventosManejo,
++  type EventosManejoEstado,
++} from '@/components/eventos-manejo';
++import { MapaVehiculo, type MapaVehiculoProps } from '@/components/map-vehiculo';
+ import { PanelRecorrido, useRecorrido, type Foco, type Rango } from '@/components/panel-recorrido';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { TextoVivo } from '@/components/texto-vivo';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { detalleDeUnidad, estadoDeUnidad, useFlotaFom } from '@/hooks/use-flota-fom';
++import { PERIODOS_MAPA, resumenEventos, type PropsEventosMapa } from '@/lib/eventos-manejo';
+ import { HAY_MAPBOX } from '@/lib/mapbox';
+ import { textoUltimoReporte } from '@/lib/sin-senal';
+ import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
+@@ -22,6 +31,14 @@ import type { MapMarker } from '@/types';
+ /** Superficie de las piezas que flotan sobre el mapa. */
+ const SOBRE_MAPA = 'rgba(20, 26, 34, 0.94)';
+ 
++/**
++ * El mapa con la capa de eventos de manejo. Los tres proveedores (nativo, vista
++ * web y clásico) reciben las props tal cual de `MapaVehiculo`; el tipo común
++ * vive en `map-vehiculo-clasico.tsx`, que esta tarea no toca, así que aquí se
++ * le suman las de los eventos (el clásico las ignora).
++ */
++const MapaConEventos = MapaVehiculo as ComponentType<MapaVehiculoProps & PropsEventosMapa>;
++
+ /**
+  * EL MAPA COMPLETO DE LA FLOTA, a pantalla entera, como el Centro de control
+  * de la web. Las unidades en vivo (se releen solas cada 20 s); al tocar una,
+@@ -30,14 +47,29 @@ const SOBRE_MAPA = 'rgba(20, 26, 34, 0.94)';
+  * y paradas abajo. Volver sale del recorrido antes que de la pantalla.
+  *
+  * Se puede abrir ya en un recorrido: `?recorrido=<id>&nombre=…&companyId=…`,
+- * o con una unidad ya tocada (su ficha abajo): `?unidad=<id>`.
++ * o con una unidad ya tocada (su ficha abajo): `?unidad=<id>`. Desde el perfil
++ * de un conductor, con uno de sus eventos de manejo abierto:
++ * `?unidad=<id>&evento=<id>&conductor=<userId>`.
++ *
++ * EVENTOS DE MANEJO: al elegir una unidad se pintan sus frenadas, aceleraciones
++ * y excesos de más de 120 km/h —por defecto los últimos 5 de cada tipo, sin
++ * globo abierto—, con sus pastillas y su lista corta en la ficha.
+  */
+ export default function MapaFlotaScreen() {
+   const { colors, spacing, radii } = useTheme();
+   const router = useRouter();
+   const insets = useSafeAreaInsets();
+   const ventana = useWindowDimensions();
+-  const params = useLocalSearchParams<{ recorrido?: string; nombre?: string; companyId?: string; unidad?: string }>();
++  const params = useLocalSearchParams<{
++    recorrido?: string;
++    nombre?: string;
++    companyId?: string;
++    unidad?: string;
++    evento?: string;
++    conductor?: string;
++    /** `1`: la ficha abre con sus eventos de manejo a la vista. */
++    eventos?: string;
++  }>();
+   const { unidades, sello: selloFlota, desactualizado } = useFlotaFom();
+   // Los puntos se sellan con la hora de la última lectura, no con un reloj: la
+   // flota se relee cada 20 s, y rehacer los marcadores cada segundo solo le
+@@ -85,7 +117,20 @@ export default function MapaFlotaScreen() {
+   const ultimoReporte =
+     unidad && estadoDeUnidad(unidad, sello) === 'sin-senal' ? textoUltimoReporte(unidad.pos?.recibidaEn) : null;
+   const altoPanel = Math.round(ventana.height * 0.42);
+-  const abajo = enRuta ? altoPanel + 8 : unidad ? (ultimoReporte ? 158 : 140) : 0;
++  /** Lo que mide la ficha de la unidad (crece al abrir sus eventos). */
++  const [altoFicha, setAltoFicha] = useState(0);
++  const abajo = enRuta ? altoPanel + 8 : unidad ? (altoFicha || (ultimoReporte ? 200 : 182)) + 8 : 0;
++
++  // Los eventos de manejo de la unidad tocada. El servidor los da por conductor:
++  // los de quien la tiene asignada (o los del conductor del enlace del perfil).
++  const conductorId = tocada && tocada === params.unidad && params.conductor ? params.conductor : unidad?.conductor?.id;
++  const eventos = useEventosManejo({
++    conductorId,
++    vehiculoId: tocada,
++    eventoInicial: params.evento ?? null,
++  });
++  /** La lista de eventos de la ficha, abierta o recogida (abierta si se llegó a uno). */
++  const [verEventos, setVerEventos] = useState(!!params.evento || params.eventos === '1');
+ 
+   const verRecorrido = (id: string, nombre: string, companyId?: string) => {
+     setViajeActivo(null);
+@@ -103,7 +148,7 @@ export default function MapaFlotaScreen() {
+ 
+   return (
+     <ThemedView style={styles.root}>
+-      <MapaVehiculo
++      <MapaConEventos
+         markers={markers}
+         sinUsuario
+         hideOverlays
+@@ -121,6 +166,10 @@ export default function MapaFlotaScreen() {
+         margenArriba={insets.top + 64}
+         margenAbajo={abajo + insets.bottom}
+         style={styles.mapa}
++        // En el recorrido mandan sus viajes y paradas: los eventos, con la flota.
++        eventosManejo={enRuta ? null : eventos.vista.visibles}
++        eventoActivo={enRuta ? null : eventos.activo}
++        alElegirEvento={eventos.elegir}
+       />
+ 
+       {/* Arriba: volver y qué se está viendo, flotando sobre el mapa. */}
+@@ -163,6 +212,7 @@ export default function MapaFlotaScreen() {
+         // La unidad tocada: quién es y, a un toque, su recorrido o su ficha.
+         // Sube y se funde al tocarla; baja y se apaga al soltarla.
+         <Flotante
++          onLayout={(e) => setAltoFicha(Math.round(e.nativeEvent.layout.height))}
+           style={[
+             styles.ficha,
+             { bottom: insets.bottom + spacing.sm, backgroundColor: 'rgba(20, 26, 34, 0.96)', borderRadius: radii.lg, gap: spacing.sm },
+@@ -225,12 +275,92 @@ export default function MapaFlotaScreen() {
+               <ThemedText style={styles.botonTexto}>Ficha</ThemedText>
+             </PressableScale>
+           </View>
++          <EventosDeLaFicha
++            ev={eventos}
++            abierta={verEventos}
++            alternar={() => setVerEventos((v) => !v)}
++            altoLista={Math.round(ventana.height * 0.26)}
++          />
+         </Flotante>
+       ) : null}
+     </ThemedView>
+   );
+ }
+ 
++/** Lo que dice la fila recogida: cuántos se ven en el mapa, o por qué no hay. */
++function resumenFicha(ev: EventosManejoEstado): string {
++  switch (ev.carga) {
++    case 'cargando':
++      return 'Cargando…';
++    case 'error':
++      return 'No pudimos cargarlos';
++    case 'no-publicado':
++      return 'Disponible cuando el servidor lo publique';
++    case 'sin-conductor':
++      return 'Sin conductor asignado';
++    default:
++      if (ev.periodo === 'oculto') return 'Ocultos en el mapa';
++      return ev.vista.visibles.length ? `${resumenEventos(ev.vista.mostrados)} en el mapa` : 'Sin eventos bruscos';
++  }
++}
++
++/**
++ * «Eventos de manejo» en la ficha de la unidad: recogida, una fila con el
++ * resumen; abierta, las pastillas (Últimos 5 / Hoy / 7 días / Ocultar y los
++ * tres tipos) y la lista corta. Tocar un evento centra el mapa y abre su globo.
++ */
++function EventosDeLaFicha({
++  ev,
++  abierta,
++  alternar,
++  altoLista,
++}: {
++  ev: EventosManejoEstado;
++  abierta: boolean;
++  alternar: () => void;
++  altoLista: number;
++}) {
++  const { colors, spacing } = useTheme();
++  const resumen = resumenFicha(ev);
++  return (
++    <View style={[styles.eventos, { borderTopColor: colors.border, paddingTop: spacing.sm, gap: spacing.sm }]}>
++      <PressableScale
++        onPress={alternar}
++        accessibilityRole="button"
++        accessibilityState={{ expanded: abierta }}
++        accessibilityLabel={`Eventos de manejo: ${resumen}`}
++        accessibilityHint={abierta ? 'Recoge la lista' : 'Muestra los filtros y la lista'}
++        style={[styles.fila, styles.centro, { gap: spacing.sm, minHeight: 32 }]}>
++        <View style={styles.flex1}>
++          <ThemedText style={styles.botonTexto} numberOfLines={1}>
++            Eventos de manejo
++          </ThemedText>
++          <ThemedText variant="caption" color="textSecondary" numberOfLines={1} style={styles.chico}>
++            {resumen}
++          </ThemedText>
++        </View>
++        <View style={{ transform: [{ rotate: abierta ? '270deg' : '90deg' }] }}>
++          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
++            <Path d="M9 18l6-6-6-6" stroke={colors.textMuted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
++          </Svg>
++        </View>
++      </PressableScale>
++      {abierta ? (
++        <View style={{ gap: spacing.sm }}>
++          {ev.carga === 'ok' ? <FiltrosEventos ev={ev} periodos={PERIODOS_MAPA} /> : null}
++          <AvisoEventos ev={ev} />
++          {ev.carga === 'ok' && ev.periodo !== 'oculto' && ev.vista.visibles.length > 0 ? (
++            <ScrollView style={{ maxHeight: altoLista }} nestedScrollEnabled>
++              <ListaEventos ev={ev} />
++              <NotaEventos ev={ev} />
++            </ScrollView>
++          ) : null}
++        </View>
++      ) : null}
++    </View>
++  );
++}
++
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+   mapa: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, height: '100%' },
+@@ -245,4 +375,7 @@ const styles = StyleSheet.create({
+   boton: { flex: 1, minHeight: 42, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+   botonTexto: { fontSize: 13, lineHeight: 17, fontWeight: '600' },
+   chico: { fontSize: 11, lineHeight: 15 },
++  eventos: { borderTopWidth: StyleSheet.hairlineWidth },
++  centro: { alignItems: 'center' },
++  flex1: { flex: 1, minWidth: 0 },
+ });
+diff --git a/src/app/panel/flota.tsx b/src/app/panel/flota.tsx
+index d04bcb3..eb6fd10 100644
+--- a/src/app/panel/flota.tsx
++++ b/src/app/panel/flota.tsx
+@@ -700,6 +700,22 @@ export default function AdminFlotaScreen() {
+                     style={[styles.botonFicha, { backgroundColor: colors.primary }]}>
+                     <ThemedText style={[styles.botonFichaTexto, { color: colors.onPrimary }]}>Ver recorrido</ThemedText>
+                   </PressableScale>
++                  {/* Sus frenadas, aceleraciones y excesos: en el mapa completo, con la lista abierta. */}
++                  <PressableScale
++                    onPress={() =>
++                      router.navigate({
++                        pathname: '/mapa-flota' as never,
++                        params: { unidad: tocada.f.vehicle.id, eventos: '1' },
++                      } as never)
++                    }
++                    accessibilityRole="button"
++                    accessibilityLabel="Eventos de manejo"
++                    accessibilityHint="Abre el mapa con las frenadas, aceleraciones y excesos de esta unidad"
++                    style={[styles.botonFicha, { backgroundColor: colors.surfaceSunken }]}>
++                    <ThemedText style={styles.botonFichaTexto} numberOfLines={1}>
++                      Eventos
++                    </ThemedText>
++                  </PressableScale>
+                   <PressableScale
+                     onPress={() =>
+                       router.navigate({ pathname: '/unidad', params: { vehicleId: tocada.f.vehicle.id, companyId: empresaId ?? '' } })
+diff --git a/src/app/ver-perfil.tsx b/src/app/ver-perfil.tsx
+index d135acf..ae7c265 100644
+--- a/src/app/ver-perfil.tsx
++++ b/src/app/ver-perfil.tsx
+@@ -7,6 +7,7 @@ import { esAdmin, etiquetaRol, useAuth } from '@/auth';
+ import { Card } from '@/components/card';
+ import { Chip } from '@/components/chip';
+ import { ErrorState } from '@/components/error-state';
++import { EventosManejoConductor } from '@/components/eventos-manejo';
+ import { ManejoConductor } from '@/components/manejo-conductor';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { ScreenHeader } from '@/components/screen-header';
+@@ -156,6 +157,8 @@ export default function VerPerfilScreen() {
+             {conduce ? (
+               <ManejoConductor userId={userId} nombre={perfil.nombre} empresaId={params.companyId} />
+             ) : null}
++            {/* Sus frenadas, aceleraciones y excesos: la lista; tocar uno abre el mapa de la flota. */}
++            {conduce ? <EventosManejoConductor userId={userId} empresaId={params.companyId} /> : null}
+ 
+             {/* Datos. */}
+             <Card style={{ gap: spacing.md }}>
+diff --git a/src/components/eventos-manejo.tsx b/src/components/eventos-manejo.tsx
+new file mode 100644
+index 0000000..5c2fcb3
+--- /dev/null
++++ b/src/components/eventos-manejo.tsx
+@@ -0,0 +1,491 @@
++import { useRouter } from 'expo-router';
++import { useEffect, useMemo, useRef, useState } from 'react';
++import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
++import Svg, { Circle, G, Path } from 'react-native-svg';
++
++import { Card } from '@/components/card';
++import { ErrorState } from '@/components/error-state';
++import { PastillaFiltro } from '@/components/pastilla-filtro';
++import { PressableScale } from '@/components/pressable-scale';
++import { ThemedText } from '@/components/themed-text';
++import {
++  agruparEventos,
++  CLAVES_EVENTO,
++  diasDePeriodo,
++  etiquetaConteo,
++  EXCESO_KMH,
++  eventosParaMapa,
++  fechaHoraEvento,
++  filtrarEventosManejo,
++  grupoDe,
++  PERIODOS_LISTA,
++  TINTA_EVENTO,
++  tipoEvento,
++  TIPOS_EVENTO,
++  textoEvento,
++  ULTIMOS_N,
++  unidadEvento,
++  velocidadesEvento,
++  vistaQueMuestra,
++  type EventoEnMapa,
++  type GrupoEventos,
++  type LimitesEvento,
++  type PeriodoEvento,
++  type TipoEvento,
++  type VistaEventos,
++} from '@/lib/eventos-manejo';
++import { getEventosManejoFom, type EventosManejoFom } from '@/services/fomEventosManejo';
++import { useTheme } from '@/theme';
++
++/*
++ * EVENTOS DE MANEJO — las piezas comunes del mapa de la flota (ficha de la
++ * unidad) y del perfil del conductor: el ícono, la carga con sus estados, las
++ * pastillas de período y de tipo, y la lista corta. Reglas y textos en
++ * `@/lib/eventos-manejo` (copia de la web).
++ */
++
++/**
++ * El ícono de un tipo: el mismo dibujo que la capa del mapa de la web (círculo
++ * de su color con aro blanco y borde oscuro, glifo oscuro encima).
++ */
++export function IconoEventoManejo({ tipo, tam = 28, apagado = false }: { tipo: TipoEvento; tam?: number; apagado?: boolean }) {
++  const t = tipoEvento(tipo);
++  if (!t) return null;
++  return (
++    <Svg width={tam} height={tam} viewBox="0 0 30 30" style={apagado ? styles.apagado : null}>
++      <Circle cx={15} cy={15} r={14} fill={TINTA_EVENTO} />
++      <Circle cx={15} cy={15} r={12.5} fill="#FFFFFF" />
++      <Circle cx={15} cy={15} r={10.5} fill={t.color} />
++      {/* El glifo es de 24×24: a 15 px en el centro, como la web. */}
++      <G transform="translate(7.5 7.5) scale(0.625)">
++        {t.glifo.map((d) => (
++          <Path key={d} d={d} fill="none" stroke={TINTA_EVENTO} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
++        ))}
++      </G>
++    </Svg>
++  );
++}
++
++/** Cómo va la lectura de los eventos. */
++export type CargaEventos = 'cargando' | 'ok' | 'error' | 'no-publicado' | 'sin-conductor';
++
++export interface EventosManejoEstado {
++  carga: CargaEventos;
++  /** Ya hay datos y se está trayendo otro período. */
++  refrescando: boolean;
++  /** Llegaron los 100 más recientes: puede haber más viejos. */
++  tope: boolean;
++  periodo: PeriodoEvento;
++  elegirPeriodo: (p: PeriodoEvento) => void;
++  tipos: ReadonlySet<TipoEvento>;
++  alternarTipo: (t: TipoEvento) => void;
++  /** «Ver 5 más» de un tipo. */
++  verMas: (t: TipoEvento) => void;
++  vista: VistaEventos;
++  grupos: GrupoEventos[];
++  /** El evento (o grupo `g:…`) con su globo abierto, si sigue a la vista. */
++  activo: string | null;
++  elegir: (id: string | null) => void;
++  reintentar: () => void;
++}
++
++const TODOS = (): ReadonlySet<TipoEvento> => new Set(CLAVES_EVENTO);
++
++/**
++ * Los eventos de manejo de un conductor (y, con `vehiculoId`, solo los de esa
++ * unidad), con sus filtros. Al cambiar de unidad o de conductor se limpia todo
++ * —período, tipos, tandas— y se cierra el globo.
++ * `eventoInicial`: un evento que hay que dejar a la vista y abierto al llegar
++ * (desde el perfil del conductor).
++ */
++export function useEventosManejo({
++  conductorId,
++  vehiculoId = null,
++  companyId = null,
++  periodoInicial = 'ultimos',
++  eventoInicial = null,
++}: {
++  conductorId: string | null | undefined;
++  vehiculoId?: string | null;
++  companyId?: string | null;
++  periodoInicial?: PeriodoEvento;
++  eventoInicial?: string | null;
++}): EventosManejoEstado {
++  const unidad = `${conductorId ?? ''}|${vehiculoId ?? ''}`;
++  const [periodo, setPeriodo] = useState<PeriodoEvento>(periodoInicial);
++  const [tipos, setTipos] = useState<ReadonlySet<TipoEvento>>(TODOS);
++  const [limites, setLimites] = useState<LimitesEvento>({});
++  const [activo, setActivo] = useState<string | null>(null);
++  const [pendiente, setPendiente] = useState<{ id: string; vehiculoId: string | null } | null>(
++    eventoInicial ? { id: eventoInicial, vehiculoId } : null,
++  );
++  // Otra unidad u otro conductor: se empieza de cero (durante el render, sin un cuadro de lo anterior).
++  const [unidadVista, setUnidadVista] = useState(unidad);
++  if (unidadVista !== unidad) {
++    setUnidadVista(unidad);
++    setPeriodo(periodoInicial);
++    setTipos(TODOS());
++    setLimites({});
++    setActivo(null);
++    if (pendiente && vehiculoId && pendiente.vehiculoId !== vehiculoId) setPendiente(null);
++  }
++
++  // «Ocultar» no pide nada nuevo: sigue con lo del mes (lo de «Últimos 5»).
++  const dias = diasDePeriodo(periodo);
++  const pedido = conductorId ? `${conductorId}|${companyId ?? ''}|${dias}` : null;
++  const [respuesta, setRespuesta] = useState<{ pedido: string; datos?: EventosManejoFom; error?: unknown } | null>(null);
++  /** Lo último bueno de esta unidad: al cambiar de período se sigue viendo mientras llega lo nuevo. */
++  const [ultimo, setUltimo] = useState<{ unidad: string; datos: EventosManejoFom } | null>(null);
++  const [intento, setIntento] = useState(0);
++  const fresco = useRef(false);
++
++  useEffect(() => {
++    if (!conductorId || !pedido) return;
++    let vivo = true;
++    const saltarMemoria = fresco.current;
++    fresco.current = false;
++    getEventosManejoFom(conductorId, dias, { companyId, fresco: saltarMemoria }).then(
++      (datos) => {
++        if (!vivo) return;
++        setRespuesta({ pedido, datos });
++        setUltimo({ unidad, datos });
++      },
++      (error: unknown) => {
++        if (vivo) setRespuesta({ pedido, error });
++      },
++    );
++    return () => {
++      vivo = false;
++    };
++  }, [conductorId, companyId, dias, pedido, unidad, intento]);
++
++  const actual = respuesta && respuesta.pedido === pedido ? respuesta : null;
++  const datos = actual?.datos ?? (ultimo && ultimo.unidad === unidad ? ultimo.datos : null);
++  const carga: CargaEventos = !conductorId
++    ? 'sin-conductor'
++    : datos
++      ? datos.estado === 'no-publicado'
++        ? 'no-publicado'
++        : 'ok'
++      : actual?.error !== undefined
++        ? 'error'
++        : 'cargando';
++
++  const eventos = useMemo<EventoEnMapa[]>(
++    () => (datos && datos.estado === 'ok' ? eventosParaMapa(datos.eventos, { vehiculoId }) : []),
++    [datos, vehiculoId],
++  );
++
++  // El evento pedido desde fuera: su tanda a la vista y su globo abierto.
++  if (pendiente && carga === 'ok' && (!pendiente.vehiculoId || pendiente.vehiculoId === vehiculoId)) {
++    const v = vistaQueMuestra(eventos, pendiente.id);
++    setPendiente(null);
++    if (v) {
++      setPeriodo(v.periodo);
++      setLimites(v.limites);
++      setTipos(TODOS());
++      setActivo(pendiente.id);
++    }
++  }
++
++  const vista = useMemo(() => filtrarEventosManejo(eventos, { periodo, tipos, limites }), [eventos, periodo, tipos, limites]);
++  const grupos = useMemo(() => agruparEventos(vista.visibles), [vista.visibles]);
++  // Si el filtro esconde el elegido, se suelta (y el mapa cierra su globo).
++  const elegido = grupoDe(grupos, activo) ? activo : null;
++
++  return {
++    carga,
++    refrescando: carga === 'ok' && !actual,
++    tope: !!datos && datos.estado === 'ok' && datos.tope,
++    periodo,
++    elegirPeriodo: (p) => {
++      setPeriodo(p);
++      setLimites({});
++      setActivo(null);
++    },
++    tipos,
++    alternarTipo: (t) =>
++      setTipos((antes) => {
++        const nuevo = new Set(antes);
++        if (nuevo.has(t)) nuevo.delete(t);
++        else nuevo.add(t);
++        return nuevo;
++      }),
++    verMas: (t) => setLimites((l) => ({ ...l, [t]: (l[t] ?? ULTIMOS_N) + ULTIMOS_N })),
++    vista,
++    grupos,
++    activo: elegido,
++    elegir: setActivo,
++    reintentar: () => {
++      fresco.current = true;
++      setRespuesta(null);
++      setIntento((n) => n + 1);
++    },
++  };
++}
++
++/**
++ * Las pastillas: el período (una a la vez) y, debajo, los tres tipos, cada uno
++ * con su conmutador y su cuenta («Frenadas 5 de 23»).
++ */
++export function FiltrosEventos({ ev, periodos }: { ev: EventosManejoEstado; periodos: readonly { v: PeriodoEvento; t: string }[] }) {
++  const { spacing } = useTheme();
++  const oculto = ev.periodo === 'oculto';
++  return (
++    <View style={{ gap: spacing.sm }}>
++      <ScrollView
++        horizontal
++        showsHorizontalScrollIndicator={false}
++        contentContainerStyle={{ gap: spacing.xs + 2 }}
++        accessibilityLabel="Período de los eventos">
++        {periodos.map((p) => (
++          <PastillaFiltro key={p.v} label={p.t} activo={ev.periodo === p.v} onPress={() => ev.elegirPeriodo(p.v)} />
++        ))}
++      </ScrollView>
++      <ScrollView
++        horizontal
++        showsHorizontalScrollIndicator={false}
++        contentContainerStyle={{ gap: spacing.xs + 2 }}
++        accessibilityLabel="Tipos de evento que se muestran">
++        {TIPOS_EVENTO.map((t) => (
++          <ConmutadorTipo
++            key={t.clave}
++            tipo={t.clave}
++            encendido={ev.tipos.has(t.clave)}
++            deshabilitado={oculto}
++            etiqueta={etiquetaConteo(t.clave, ev.vista.mostrados[t.clave], ev.vista.cuenta[t.clave])}
++            onPress={() => ev.alternarTipo(t.clave)}
++          />
++        ))}
++      </ScrollView>
++    </View>
++  );
++}
++
++/** Una pastilla de tipo: su ícono, su cuenta y un conmutador propio. */
++function ConmutadorTipo({
++  tipo,
++  encendido,
++  deshabilitado,
++  etiqueta,
++  onPress,
++}: {
++  tipo: TipoEvento;
++  encendido: boolean;
++  deshabilitado: boolean;
++  etiqueta: string;
++  onPress: () => void;
++}) {
++  const { colors, radii, spacing, borderWidths } = useTheme();
++  const vivo = encendido && !deshabilitado;
++  return (
++    <PressableScale
++      onPress={onPress}
++      disabled={deshabilitado}
++      accessibilityRole="switch"
++      accessibilityState={{ checked: encendido, disabled: deshabilitado }}
++      accessibilityLabel={`${tipoEvento(tipo)?.plural ?? etiqueta}: ${etiqueta}`}
++      accessibilityHint={encendido ? 'Toca para esconderlos' : 'Toca para mostrarlos'}
++      style={[
++        styles.tipo,
++        {
++          backgroundColor: vivo ? colors.activeSurface : colors.surfaceSunken,
++          borderColor: vivo ? colors.activeBorder : colors.border,
++          borderWidth: borderWidths.thin,
++          borderRadius: radii.sm,
++          paddingLeft: spacing.xs + 2,
++          paddingRight: spacing.sm + 2,
++          gap: spacing.xs + 2,
++          opacity: deshabilitado ? 0.5 : 1,
++        },
++      ]}>
++      <IconoEventoManejo tipo={tipo} tam={22} apagado={!vivo} />
++      <ThemedText tabular style={[styles.tipoTexto, { color: vivo ? colors.onActive : colors.textSecondary }]} numberOfLines={1}>
++        {etiqueta}
++      </ThemedText>
++      {/* El conmutador: pista y perilla, a la derecha cuando está encendido. */}
++      <View
++        style={[
++          styles.pista,
++          { backgroundColor: vivo ? colors.primary : colors.surfaceElevated, borderColor: colors.border, borderRadius: radii.pill },
++        ]}>
++        <View
++          style={[
++            styles.perilla,
++            { backgroundColor: vivo ? colors.onPrimary : colors.textMuted, alignSelf: encendido ? 'flex-end' : 'flex-start' },
++          ]}
++        />
++      </View>
++    </PressableScale>
++  );
++}
++
++/**
++ * Lo que se dice en lugar de la lista: cargando, sin conductor, sin publicar,
++ * error con «Reintentar» o sin eventos. null si hay lista que enseñar.
++ */
++export function AvisoEventos({ ev }: { ev: EventosManejoEstado }) {
++  const { colors, spacing } = useTheme();
++  if (ev.carga === 'error') {
++    return <ErrorState compacto description="No pudimos cargar los eventos de manejo." onRetry={ev.reintentar} />;
++  }
++  const texto =
++    ev.carga === 'cargando'
++      ? 'Cargando eventos…'
++      : ev.carga === 'sin-conductor'
++        ? 'Esta unidad no tiene conductor asignado: no hay eventos que mostrar.'
++        : ev.carga === 'no-publicado'
++          ? 'Disponible cuando el servidor lo publique.'
++          : ev.periodo === 'oculto'
++            ? 'Eventos ocultos en el mapa.'
++            : ev.vista.visibles.length === 0
++              ? ev.vista.total > 0
++                ? 'Enciende al menos un tipo de evento para verlo.'
++                : 'Sin eventos bruscos en este período.'
++              : null;
++  if (!texto) return null;
++  return (
++    <View
++      style={[styles.aviso, { gap: spacing.sm, paddingVertical: spacing.sm }]}
++      accessibilityRole={ev.carga === 'cargando' ? 'progressbar' : 'text'}
++      accessibilityLiveRegion="polite">
++      {ev.carga === 'cargando' ? <ActivityIndicator size="small" color={colors.textMuted} /> : null}
++      <ThemedText variant="caption" color="textMuted" style={styles.flex1}>
++        {texto}
++      </ThemedText>
++    </View>
++  );
++}
++
++/**
++ * La lista corta, lo más nuevo primero: tocar un evento lo elige (el mapa va a
++ * él y abre su globo). Debajo, «Ver 5 más» de cada tipo que tenga más.
++ * `conUnidad`: cada fila dice también la unidad (en el perfil, que mezcla varias).
++ */
++export function ListaEventos({
++  ev,
++  conUnidad = false,
++  onElegir,
++}: {
++  ev: EventosManejoEstado;
++  conUnidad?: boolean;
++  /** Si no se da, elige en `ev` (el mapa de la misma pantalla lo sigue). */
++  onElegir?: (e: EventoEnMapa) => void;
++}) {
++  const { colors, spacing, radii, borderWidths } = useTheme();
++  if (ev.carga !== 'ok' || ev.periodo === 'oculto') return null;
++  const elegido = ev.activo;
++  const masDe = TIPOS_EVENTO.filter((t) => ev.tipos.has(t.clave) && ev.vista.cuenta[t.clave] > ev.vista.mostrados[t.clave]);
++  return (
++    <View style={ev.refrescando ? styles.refrescando : null} accessibilityState={{ busy: ev.refrescando }}>
++      {ev.vista.visibles.map((e, i) => {
++        const activo = e.id === elegido;
++        const velocidades = velocidadesEvento(e);
++        return (
++          <PressableScale
++            key={e.id}
++            onPress={() => (onElegir ? onElegir(e) : ev.elegir(e.id))}
++            accessibilityRole="button"
++            accessibilityState={{ selected: activo }}
++            accessibilityLabel={`${textoEvento(e, { conUnidad })}. Ver en el mapa`}
++            style={[
++              styles.fila,
++              {
++                gap: spacing.md,
++                paddingVertical: spacing.sm + 2,
++                paddingHorizontal: spacing.sm,
++                borderTopWidth: i === 0 || activo ? 0 : borderWidths.hairline,
++                borderTopColor: colors.border,
++                borderRadius: activo ? radii.sm : 0,
++                backgroundColor: activo ? colors.activeSurface : 'transparent',
++              },
++            ]}>
++            <IconoEventoManejo tipo={e.tipo} tam={28} />
++            <View style={styles.flex1}>
++              <ThemedText variant="button" numberOfLines={1}>
++                {tipoEvento(e.tipo)?.nombre}
++                {velocidades ? <ThemedText variant="button" color="textSecondary" tabular>{` · ${velocidades}`}</ThemedText> : null}
++              </ThemedText>
++              <ThemedText variant="caption" color="textMuted" numberOfLines={1}>
++                {[fechaHoraEvento(e.hora), conUnidad ? unidadEvento(e) : ''].filter(Boolean).join(' · ')}
++              </ThemedText>
++            </View>
++          </PressableScale>
++        );
++      })}
++      {masDe.map((t) => (
++        <PressableScale
++          key={t.clave}
++          onPress={() => ev.verMas(t.clave)}
++          accessibilityRole="button"
++          accessibilityLabel={`Ver ${ULTIMOS_N} ${t.corto.toLowerCase()} más`}
++          style={[styles.verMas, { paddingVertical: spacing.sm, borderTopWidth: borderWidths.hairline, borderTopColor: colors.border }]}>
++          <ThemedText variant="caption" color="primary" style={styles.verMasTexto}>
++            {`Ver ${ULTIMOS_N} más · ${t.corto.toLowerCase()}`}
++          </ThemedText>
++        </PressableScale>
++      ))}
++    </View>
++  );
++}
++
++/** Las notas de pie: el umbral de los excesos y el aviso de tope. */
++export function NotaEventos({ ev }: { ev: EventosManejoEstado }) {
++  if (ev.carga !== 'ok') return null;
++  const notas = [
++    `Excesos: solo los de más de ${EXCESO_KMH} km/h.`,
++    ev.tope ? 'Llegaron los 100 eventos más recientes: puede haber más antiguos.' : '',
++  ].filter(Boolean);
++  return (
++    <ThemedText variant="caption" color="textMuted" style={styles.nota}>
++      {notas.join(' ')}
++    </ThemedText>
++  );
++}
++
++/**
++ * «Eventos de manejo» en el perfil de un conductor: solo la lista, con los
++ * mismos filtros que el mapa (sin «Ocultar», que no hay mapa que despejar).
++ * Tocar un evento abre el mapa de la flota con esa unidad y ese evento abierto.
++ */
++export function EventosManejoConductor({ userId, empresaId }: { userId: string; empresaId?: string | null }) {
++  const router = useRouter();
++  const { spacing } = useTheme();
++  const ev = useEventosManejo({ conductorId: userId, companyId: empresaId || null });
++  return (
++    <Card style={{ gap: spacing.sm }}>
++      <ThemedText variant="overline" color="textMuted">
++        Eventos de manejo
++      </ThemedText>
++      {ev.carga === 'ok' ? <FiltrosEventos ev={ev} periodos={PERIODOS_LISTA} /> : null}
++      <AvisoEventos ev={ev} />
++      <ListaEventos
++        ev={ev}
++        conUnidad
++        onElegir={(e) => {
++          if (!e.vehiculoId) return;
++          router.navigate({
++            pathname: '/mapa-flota' as never,
++            params: { unidad: e.vehiculoId, evento: e.id, conductor: userId },
++          } as never);
++        }}
++      />
++      <NotaEventos ev={ev} />
++    </Card>
++  );
++}
++
++const styles = StyleSheet.create({
++  apagado: { opacity: 0.45 },
++  flex1: { flex: 1, minWidth: 0 },
++  tipo: { height: 36, flexDirection: 'row', alignItems: 'center' },
++  tipoTexto: { fontSize: 13, fontWeight: '600' },
++  pista: { width: 26, height: 16, borderWidth: 1, padding: 2, justifyContent: 'center' },
++  perilla: { width: 10, height: 10, borderRadius: 5 },
++  aviso: { flexDirection: 'row', alignItems: 'center' },
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  verMas: { alignItems: 'center' },
++  verMasTexto: { fontWeight: '600' },
++  refrescando: { opacity: 0.6 },
++  nota: { fontSize: 11, lineHeight: 15 },
++});
+diff --git a/src/components/map-vehiculo-dom.tsx b/src/components/map-vehiculo-dom.tsx
+index 3fffd8b..3b1b395 100644
+--- a/src/components/map-vehiculo-dom.tsx
++++ b/src/components/map-vehiculo-dom.tsx
+@@ -6,6 +6,7 @@ import { LlegadaTarjeta, puntosLlegada, useLlegada, type UnidadLlegada } from '@
+ import type { MapaVehiculoProps } from '@/components/map-vehiculo-clasico';
+ import MapaFomDom, { type MarcadorDom, type RutaDom } from '@/components/mapa-fom-dom';
+ import { useMapaPrefs } from '@/hooks/use-map-prefs';
++import { firmaEventos, type EventoEnMapa, type PropsEventosMapa } from '@/lib/eventos-manejo';
+ import { configStandard, ESTILO_MAPBOX, HAY_MAPBOX, MAPBOX_TOKEN } from '@/lib/mapbox';
+ import { useTheme } from '@/theme';
+ import type { MapMarker } from '@/types';
+@@ -41,8 +42,19 @@ export function MapaVehiculoDom({
+   foco = null,
+   interactivo = true,
+   llegadaClave: pedidoLlegada,
+-}: MapaVehiculoProps) {
++  eventosManejo = null,
++  eventoActivo = null,
++  alElegirEvento,
++}: MapaVehiculoProps & PropsEventosMapa) {
+   const { colors, colorScheme } = useTheme();
++  // Los eventos cruzan a la vista web solo cuando cambian de verdad (no en cada
++  // refresco de la flota): misma lista, mismo arreglo.
++  const firma = firmaEventos(eventosManejo);
++  const eventosDom = useMemo<EventoEnMapa[]>(
++    () => [...(eventosManejo ?? [])],
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++    [firma],
++  );
+   const { prefs, actualizar } = useMapaPrefs();
+   const esMulti = Array.isArray(markers);
+ 
+@@ -205,6 +217,9 @@ export function MapaVehiculoDom({
+         }}
+         onPrefs={async (cambio) => actualizar(cambio)}
+         onViaje={async (n) => onElegirViaje?.(n)}
++        eventos={eventosDom}
++        eventoActivo={eventoActivo}
++        onEvento={async (id) => alElegirEvento?.(id)}
+         interactivo={interactivo}
+         dom={{ style: styles.web, scrollEnabled: false, containerStyle: styles.web } as never}
+       />
+diff --git a/src/components/map-vehiculo-mapbox.tsx b/src/components/map-vehiculo-mapbox.tsx
+index 93968f9..1ce9b8b 100644
+--- a/src/components/map-vehiculo-mapbox.tsx
++++ b/src/components/map-vehiculo-mapbox.tsx
+@@ -10,12 +10,14 @@ import { TabIcon } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+ import { useMapaPrefs } from '@/hooks/use-map-prefs';
+ import { opcionesMapa, type MapaPrefs } from '@/lib/map-prefs';
++import { agruparEventos, grupoDe, type PropsEventosMapa } from '@/lib/eventos-manejo';
+ import { configStandard, ESTILO_MAPBOX, HAY_MAPBOX, MAPBOX_TOKEN } from '@/lib/mapbox';
+ import { useTheme } from '@/theme';
+ import type { MapMarker } from '@/types';
+ import { colorApagado } from '@/utils/paleta-flota';
+ 
+ import { coordsValidas, estilosMapa as styles, marcadoresValidos, type MapaVehiculoProps } from './map-vehiculo-clasico';
++import { EventosNativos } from './mapbox-nativo-eventos';
+ import { UnidadesNativas, type UnidadMapa } from './mapbox-nativo-marcador';
+ import {
+   EstelasNativas,
+@@ -82,7 +84,10 @@ export function MapaVehiculoMapbox({
+   foco = null,
+   interactivo = true,
+   llegadaClave: pedidoLlegada,
+-}: MapaVehiculoProps) {
++  eventosManejo = null,
++  eventoActivo = null,
++  alElegirEvento,
++}: MapaVehiculoProps & PropsEventosMapa) {
+   const { colors, radii, spacing, colorScheme } = useTheme();
+   // Solo lo dibujable: un NaN en `centerCoordinate` o en una estela tumba el
+   // mapa nativo, y el (0, 0) de las unidades sin posición (`coordsReales:
+@@ -250,6 +255,27 @@ export function MapaVehiculoMapbox({
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [focoClave]);
+ 
++  // Un evento de manejo elegido (en el mapa o en la lista): el mapa lo centra
++  // sobre lo que tapa la ficha, sin alejarse si ya estaba cerca.
++  const eventosRef = useRef(eventosManejo);
++  useEffect(() => {
++    eventosRef.current = eventosManejo;
++  });
++  useEffect(() => {
++    if (!eventoActivo) return;
++    const g = grupoDe(agruparEventos(eventosRef.current), eventoActivo);
++    if (!g) return;
++    const e = g.eventos.find((x) => x.id === eventoActivo) ?? g;
++    const m = margenesRef.current;
++    camara.current?.setCamera({
++      centerCoordinate: [e.lng, e.lat],
++      zoomLevel: Math.max(zoomRef.current, 15),
++      padding: { paddingTop: m.arriba + 40, paddingBottom: m.abajo + 40, paddingLeft: 40, paddingRight: 60 },
++      animationDuration: 600,
++      animationMode: 'flyTo',
++    });
++  }, [eventoActivo]);
++
+   // «Llegada» pedida desde fuera (el botón de la ficha): se abre si estaba cerrada.
+   useEffect(() => {
+     if (pedidoLlegada && llegadaRef.current.fase === 'cerrada') llegadaRef.current.abrir();
+@@ -401,6 +427,11 @@ export function MapaVehiculoMapbox({
+       <EstelasNativas estelas={estelas} />
+     </>
+   );
++  // Los eventos de manejo, encima de las unidades: son lo que se está mirando.
++  const eventos =
++    eventosManejo && eventosManejo.length > 0 ? (
++      <EventosNativos eventos={eventosManejo} activo={eventoActivo} onElegir={alElegirEvento} colores={coloresCapas} />
++    ) : null;
+ 
+   const avisoSinPermiso =
+     permiso === 'denegado' ? (
+@@ -483,6 +514,7 @@ export function MapaVehiculoMapbox({
+           {permiso === 'ok' && !sinUsuario ? puck : null}
+           {capas}
+           {marcadores}
++          {eventos}
+         </MapView>
+ 
+         {!hideOverlays ? (
+@@ -530,6 +562,7 @@ export function MapaVehiculoMapbox({
+           {permiso === 'ok' ? puck : null}
+           {capas}
+           {marcadores}
++          {eventos}
+           {puntoLegado ? (
+             <MarkerView coordinate={[vehiclePoint!.longitude, vehiclePoint!.latitude]} anchor={{ x: 0.5, y: 0.5 }} allowOverlap>
+               <View style={styles.markerWrap} accessibilityLabel={vehicleName}>
+diff --git a/src/components/mapa-fom-dom.tsx b/src/components/mapa-fom-dom.tsx
+index e6e7efa..3598761 100644
+--- a/src/components/mapa-fom-dom.tsx
++++ b/src/components/mapa-fom-dom.tsx
+@@ -17,6 +17,20 @@
+ import { IS_DOM, type DOMProps } from "expo/dom";
+ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+ 
++import {
++  agruparEventos,
++  fechaHoraEvento,
++  firmaEventos,
++  geojsonEventos,
++  grupoDe,
++  partesEvento,
++  TINTA_EVENTO,
++  TIPOS_EVENTO,
++  tipoEvento,
++  velocidadesEvento,
++  type EventoEnMapa,
++  type TipoEventoInfo,
++} from "@/lib/eventos-manejo";
+ import { AZUL_LLEGADA, bordeLlegada, PIN_DESTINO_SVG } from "@/lib/llegada";
+ import { duracion, horaCorta } from "@/lib/recorrido";
+ import { tiempoSinSenal } from "@/lib/sin-senal";
+@@ -120,6 +134,12 @@ type Props = {
+    * puntos y `onMapa` siguen; al destacar una unidad la cámara va sola a ella.
+    */
+   interactivo?: boolean;
++  /** Eventos de manejo ya filtrados: una capa de símbolos (los cercanos, en grupo). */
++  eventos?: EventoEnMapa[];
++  /** El evento (o grupo `g:…`) con su globo abierto: el mapa lo centra. */
++  eventoActivo?: string | null;
++  /** Se tocó un evento o un grupo (o se cerró su globo: null). */
++  onEvento?: (id: string | null) => Promise<void>;
+   dom?: DOMProps;
+ };
+ 
+@@ -316,11 +336,31 @@ export default function MapaFomDom(props: Props) {
+         new mapboxgl.AttributionControl({ compact: true }),
+         "bottom-left",
+       );
+-      m.on(
+-        "click",
+-        (e) =>
+-          void ultimas.current.onMapa?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }),
+-      );
++      m.on("click", (e) => {
++        // Un evento de manejo bajo el dedo (con margen: es un toque, no un clic):
++        // se elige él y el mapa no cuenta el toque como «fuera de todo».
++        const capas = CAPAS_EVENTOS.filter((c) => m.getLayer(c));
++        if (capas.length) {
++          const { x, y } = e.point;
++          const bajo = m.queryRenderedFeatures(
++            [
++              [x - 16, y - 16],
++              [x + 16, y + 16],
++            ],
++            { layers: capas },
++          );
++          const ids = bajo
++            .map((f) => String(f.properties?.id ?? ""))
++            .filter(Boolean);
++          const activo = ultimas.current.eventoActivo;
++          const id = ids.find((i) => i === activo) ?? ids[0];
++          if (id) {
++            void ultimas.current.onEvento?.(id);
++            return;
++          }
++        }
++        void ultimas.current.onMapa?.({ lat: e.lngLat.lat, lng: e.lngLat.lng });
++      });
+       // Tocar un viaje: registrado UNA vez aquí (no cada vez que se recrea la
+       // fuente). Con la capa en una lista, Mapbox lo ignora mientras no exista.
+       m.on("click", ["fom-ruta-toque"], (e) => {
+@@ -621,6 +661,161 @@ export default function MapaFomDom(props: Props) {
+     }
+   }, [marcadores, estiloListo]);
+ 
++  // EVENTOS DE MANEJO: una fuente y capas de símbolos, como la web. Se compara
++  // por contenido (las props cruzan el puente como objetos nuevos): el refresco
++  // de la flota cada 20 s no los vuelve a pintar.
++  const eventos = props.eventos;
++  const eventoActivo = props.eventoActivo ?? null;
++  const firmaCapaEventos = `${firmaEventos(eventos)}#${eventoActivo ?? ""}`;
++  useEffect(() => {
++    const m = mapa.current;
++    if (!m || !estiloListo || estiloCargando.current) return;
++    try {
++      for (const t of TIPOS_EVENTO) {
++        const nombre = `evento-manejo-${t.clave}`;
++        if (!m.hasImage(nombre))
++          m.addImage(nombre, imagenEvento(t), { pixelRatio: RATIO_ICONO });
++      }
++      const p = ultimas.current;
++      const datos = geojsonEventos(
++        agruparEventos(p.eventos ?? []),
++        p.eventoActivo ?? null,
++      );
++      const fuente = m.getSource("fom-eventos") as
++        import("mapbox-gl").GeoJSONSource | undefined;
++      if (fuente) fuente.setData(datos);
++      else {
++        m.addSource("fom-eventos", { type: "geojson", data: datos });
++        m.addLayer({
++          id: "fom-eventos-icono",
++          type: "symbol",
++          source: "fom-eventos",
++          slot: "top",
++          filter: ["!", ["get", "grupo"]],
++          layout: {
++            "icon-image": ["concat", "evento-manejo-", ["get", "tipo"]],
++            "icon-size": ["case", ["get", "activo"], 1.3, 1],
++            "icon-allow-overlap": true,
++            "icon-ignore-placement": true,
++            "symbol-sort-key": ["get", "orden"],
++            "symbol-z-order": "source",
++          },
++          paint: { "icon-emissive-strength": 1 },
++        } as never);
++        m.addLayer({
++          id: "fom-eventos-grupo",
++          type: "circle",
++          source: "fom-eventos",
++          slot: "top",
++          filter: ["get", "grupo"],
++          layout: { "circle-sort-key": ["get", "orden"] },
++          paint: {
++            "circle-radius": ["case", ["get", "activo"], 17, 14],
++            "circle-color": "#E3ECF7",
++            "circle-stroke-color": [
++              "match",
++              ["get", "tipo"],
++              ...TIPOS_EVENTO.flatMap((t) => [t.clave, t.color]),
++              "#FFFFFF",
++            ],
++            "circle-stroke-width": 3,
++            "circle-emissive-strength": 1,
++          },
++        } as never);
++        m.addLayer({
++          id: "fom-eventos-numero",
++          type: "symbol",
++          source: "fom-eventos",
++          slot: "top",
++          filter: ["get", "grupo"],
++          layout: {
++            "text-field": ["to-string", ["get", "n"]],
++            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
++            "text-size": 13,
++            "text-allow-overlap": true,
++            "text-ignore-placement": true,
++            "symbol-sort-key": ["get", "orden"],
++          },
++          paint: { "text-color": TINTA_EVENTO, "text-emissive-strength": 1 },
++        } as never);
++      }
++    } catch (e) {
++      // El estilo se cambió a mitad: `style.load` vuelve a correr esto.
++      console.warn("[mapa]", e);
++    }
++  }, [firmaCapaEventos, estiloListo]);
++
++  // El globo del evento elegido (o la lista de su grupo), y la cámara va a él.
++  const globoEvento = useRef<import("mapbox-gl").Popup | null>(null);
++  useEffect(() => {
++    const m = mapa.current;
++    const mapboxgl = gl.current;
++    const previo = globoEvento.current;
++    // El de antes se suelta primero: así su «close» no cuenta como cerrarlo a mano.
++    globoEvento.current = null;
++    previo?.remove();
++    if (!m || !mapboxgl || !estiloListo || !eventoActivo) return;
++    const g = grupoDe(agruparEventos(ultimas.current.eventos ?? []), eventoActivo);
++    if (!g) return;
++    const e = g.eventos.find((x) => x.id === eventoActivo) ?? null;
++    const lugar: Coord = e ? [e.lng, e.lat] : [g.lng, g.lat];
++    const html = e
++      ? (() => {
++          const [titulo, ...resto] = partesEvento(e, { conUnidad: false });
++          return `<strong>${esc(titulo)}</strong>${resto.map((r) => `<span>${esc(r)}</span>`).join("")}`;
++        })()
++      : `<strong>${g.eventos.length} eventos en este punto</strong>` +
++        g.eventos
++          .slice(0, 6)
++          .map(
++            (x) =>
++              `<button type="button" class="ev-fila" data-id="${esc(x.id)}" aria-label="${esc(partesEvento(x, { conUnidad: false }).join(", "))}. Ver detalle"><i style="background:${tipoEvento(x.tipo)?.color ?? "#fff"}"></i><b>${esc([tipoEvento(x.tipo)?.nombre ?? "", velocidadesEvento(x)].filter(Boolean).join(" · "))}</b><span>${esc(fechaHoraEvento(x.hora))}</span></button>`,
++          )
++          .join("") +
++        (g.eventos.length > 6
++          ? `<span>Y ${g.eventos.length - 6} más en la lista</span>`
++          : "");
++    const globo = new mapboxgl.Popup({
++      className: "ruta-popup",
++      closeButton: true,
++      closeOnClick: false,
++      maxWidth: "260px",
++      offset: 20,
++    })
++      .setLngLat(lugar)
++      .setHTML(html)
++      .addTo(m);
++    globo
++      .getElement()
++      ?.querySelectorAll<HTMLButtonElement>("button.ev-fila")
++      .forEach((b) =>
++        b.addEventListener("click", (ev) => {
++          ev.stopPropagation();
++          void ultimas.current.onEvento?.(b.dataset.id ?? null);
++        }),
++      );
++    globo.on("close", () => {
++      if (globoEvento.current === globo) {
++        globoEvento.current = null;
++        void ultimas.current.onEvento?.(null);
++      }
++    });
++    globoEvento.current = globo;
++    m.flyTo({
++      center: lugar,
++      zoom: Math.max(m.getZoom(), 15),
++      padding: {
++        top: margenArriba + 40,
++        bottom: margenAbajo + 40,
++        left: 40,
++        right: 60,
++      },
++      duration: 600,
++    });
++    // Solo al elegir otro (o al volver el estilo), no en cada refresco.
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, [eventoActivo, estiloListo]);
++
+   // TU ubicación: el punto azul de siempre.
+   useEffect(() => {
+     const m = mapa.current;
+@@ -1111,6 +1306,42 @@ export default function MapaFomDom(props: Props) {
+   );
+ }
+ 
++/** Las capas de los eventos de manejo que se pueden tocar. */
++const CAPAS_EVENTOS = ["fom-eventos-icono", "fom-eventos-grupo", "fom-eventos-numero"];
++/** El ícono de un evento: 30 px, dibujado a 2x (como `imagenEvento` de la web). */
++const ICONO_EVENTO_PX = 30;
++const RATIO_ICONO = 2;
++
++/** El ícono de un tipo: círculo de su color, aro blanco y el glifo en oscuro. */
++function imagenEvento(tipo: TipoEventoInfo): ImageData {
++  const lado = ICONO_EVENTO_PX * RATIO_ICONO;
++  const lienzo = document.createElement("canvas");
++  lienzo.width = lado;
++  lienzo.height = lado;
++  const ctx = lienzo.getContext("2d")!;
++  ctx.scale(RATIO_ICONO, RATIO_ICONO);
++  const c = ICONO_EVENTO_PX / 2;
++  const disco = (r: number, color: string) => {
++    ctx.beginPath();
++    ctx.arc(c, c, r, 0, Math.PI * 2);
++    ctx.fillStyle = color;
++    ctx.fill();
++  };
++  disco(c - 1, TINTA_EVENTO);
++  disco(c - 2.5, "#FFFFFF");
++  disco(c - 4.5, tipo.color);
++  // El glifo es de 24×24: se dibuja a 15 px en el centro.
++  const k = 15 / 24;
++  ctx.translate(c - 12 * k, c - 12 * k);
++  ctx.scale(k, k);
++  ctx.strokeStyle = TINTA_EVENTO;
++  ctx.lineWidth = 2.4;
++  ctx.lineCap = "round";
++  ctx.lineJoin = "round";
++  for (const d of tipo.glifo) ctx.stroke(new Path2D(d));
++  return ctx.getImageData(0, 0, lado, lado);
++}
++
+ /** Los colores del estado, los mismos del panel web. */
+ const COLOR_ESTADO = {
+   marcha: "#35e888",
+@@ -1195,5 +1426,10 @@ const CSS = (c: ColoresDom) => `
+ .ruta-pin.parada b{background:#f5c242;color:#241b00}
+ .ruta-popup .mapboxgl-popup-content{background:${c.superficie};color:${c.texto};border-radius:14px;padding:10px 12px;font:13px/18px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;display:flex;flex-direction:column;gap:2px;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+ .ruta-popup .mapboxgl-popup-content span{color:${c.textoSec};font-size:12px}
++.ruta-popup .ev-fila{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;min-height:36px;margin:4px 0 0;padding:6px 6px 6px 22px;position:relative;border:0;border-radius:10px;background:transparent;color:${c.texto};font:inherit;text-align:left;cursor:pointer}
++.ruta-popup .ev-fila:active{background:rgba(255,255,255,.06)}
++.ruta-popup .ev-fila i{position:absolute;left:4px;top:11px;width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1.5px #fff}
++.ruta-popup .ev-fila b{font-weight:600;font-size:12px}
++.ruta-popup .mapboxgl-popup-close-button{color:${c.textoSec};font-size:18px;padding:2px 8px}
+ .ruta-popup .mapboxgl-popup-tip{border-top-color:${c.superficie};border-bottom-color:${c.superficie}}
+ `;
+diff --git a/src/components/mapbox-nativo-eventos.tsx b/src/components/mapbox-nativo-eventos.tsx
+new file mode 100644
+index 0000000..5ab3361
+--- /dev/null
++++ b/src/components/mapbox-nativo-eventos.tsx
+@@ -0,0 +1,244 @@
++import {
++  CircleLayer,
++  Image as ImagenMapa,
++  Images,
++  MarkerView,
++  ShapeSource,
++  SymbolLayer,
++  type CircleLayerStyle,
++  type SymbolLayerStyle,
++} from '@rnmapbox/maps';
++import { memo, useMemo } from 'react';
++import { Pressable, StyleSheet, Text, View } from 'react-native';
++
++import { IconoEventoManejo } from '@/components/eventos-manejo';
++import {
++  agruparEventos,
++  fechaHoraEvento,
++  geojsonEventos,
++  grupoDe,
++  partesEvento,
++  TINTA_EVENTO,
++  tipoEvento,
++  TIPOS_EVENTO,
++  velocidadesEvento,
++  type EventoEnMapa,
++  type GrupoEventos,
++} from '@/lib/eventos-manejo';
++
++import type { ColoresCapas } from './mapbox-nativo-ruta';
++
++// ============================================================
++// EVENTOS DE MANEJO EN EL MAPBOX NATIVO
++// ------------------------------------------------------------
++// Lo mismo que pinta la web (`pintarEventosManejo`): UNA fuente GeoJSON y una
++// capa de símbolos con el ícono de cada tipo —nada de una vista por evento—.
++// Los que caen casi en el mismo punto van juntos en un círculo con el número.
++// Solo el globo abierto es una vista de React Native encima del mapa.
++// ============================================================
++
++/** Lado del ícono en el mapa (como la web: 30 px). */
++const LADO = 30;
++
++const FUENTE_NUMERO = ['DIN Pro Bold', 'Arial Unicode MS Bold'];
++
++/** Los íconos de cada tipo, dibujados por la app (el mismo SVG de la lista). */
++const IMAGENES = TIPOS_EVENTO.map((t) => (
++  <ImagenMapa key={t.clave} name={`evento-manejo-${t.clave}`}>
++    <View style={estilos.imagen} collapsable={false}>
++      <IconoEventoManejo tipo={t.clave} tam={LADO} />
++    </View>
++  </ImagenMapa>
++));
++
++const ESTILO_ICONO: SymbolLayerStyle = {
++  iconImage: ['concat', 'evento-manejo-', ['get', 'tipo']],
++  iconSize: ['case', ['get', 'activo'], 1.3, 1],
++  iconAllowOverlap: true,
++  iconIgnorePlacement: true,
++  symbolSortKey: ['get', 'orden'],
++  symbolZOrder: 'source',
++  iconEmissiveStrength: 1,
++};
++
++/** El grupo: un círculo claro con el borde del tipo más nuevo y el número oscuro. */
++const ESTILO_GRUPO: CircleLayerStyle = {
++  circleRadius: ['case', ['get', 'activo'], 17, 14],
++  circleColor: '#E3ECF7',
++  circleStrokeColor: [
++    'match',
++    ['get', 'tipo'],
++    ...TIPOS_EVENTO.flatMap((t) => [t.clave, t.color]),
++    '#FFFFFF',
++  ] as unknown as string,
++  circleStrokeWidth: 3,
++  circleSortKey: ['get', 'orden'],
++  circleEmissiveStrength: 1,
++};
++
++const ESTILO_NUMERO: SymbolLayerStyle = {
++  textField: ['to-string', ['get', 'n']],
++  textFont: FUENTE_NUMERO,
++  textSize: 13,
++  textColor: TINTA_EVENTO,
++  textAllowOverlap: true,
++  textIgnorePlacement: true,
++  symbolSortKey: ['get', 'orden'],
++  textEmissiveStrength: 1,
++};
++
++/**
++ * Los eventos (ya filtrados) en el mapa nativo. Tocar un ícono o un grupo avisa
++ * con su id; `activo` (evento o grupo `g:…`) abre su globo.
++ */
++export const EventosNativos = memo(function EventosNativos({
++  eventos,
++  activo,
++  onElegir,
++  colores,
++}: {
++  eventos: readonly EventoEnMapa[];
++  activo: string | null;
++  onElegir?: (id: string | null) => void;
++  colores: ColoresCapas;
++}) {
++  const grupos = useMemo(() => agruparEventos(eventos), [eventos]);
++  const datos = useMemo(() => geojsonEventos(grupos, activo), [grupos, activo]);
++  const abierto = grupoDe(grupos, activo);
++  if (grupos.length === 0) return null;
++  return (
++    <>
++      <Images>{IMAGENES}</Images>
++      <ShapeSource
++        id="fom-eventos"
++        shape={datos}
++        hitbox={{ width: 34, height: 34 }}
++        onPress={(e) => {
++          // Varios bajo el dedo: gana el elegido, si está entre ellos.
++          const ids = e.features.map((f) => String(f.properties?.id ?? '')).filter(Boolean);
++          const id = ids.find((x) => x === activo) ?? ids[0];
++          if (id) onElegir?.(id);
++        }}>
++        <SymbolLayer id="fom-eventos-icono" slot="top" filter={['!', ['get', 'grupo']] as never} style={ESTILO_ICONO} />
++        <CircleLayer id="fom-eventos-grupo" slot="top" filter={['get', 'grupo'] as never} style={ESTILO_GRUPO} />
++        <SymbolLayer id="fom-eventos-numero" slot="top" filter={['get', 'grupo'] as never} style={ESTILO_NUMERO} />
++      </ShapeSource>
++      {abierto && activo ? (
++        <GloboEvento grupo={abierto} activo={activo} colores={colores} onElegir={onElegir} />
++      ) : null}
++    </>
++  );
++});
++
++/**
++ * EL GLOBO: de un evento, «Frenada brusca», velocidades y la hora; de un grupo,
++ * la lista de sus eventos (tocar uno abre el suyo).
++ */
++function GloboEvento({
++  grupo,
++  activo,
++  colores,
++  onElegir,
++}: {
++  grupo: GrupoEventos;
++  activo: string;
++  colores: ColoresCapas;
++  onElegir?: (id: string | null) => void;
++}) {
++  const evento = grupo.eventos.find((e) => e.id === activo) ?? null;
++  const lugar: [number, number] = evento ? [evento.lng, evento.lat] : [grupo.lng, grupo.lat];
++  const cerrar = (
++    <Pressable
++      onPress={() => onElegir?.(null)}
++      hitSlop={10}
++      accessibilityRole="button"
++      accessibilityLabel="Cerrar"
++      style={estilos.cerrar}>
++      <Text style={[estilos.cerrarTexto, { color: colores.textoSec }]}>×</Text>
++    </Pressable>
++  );
++  return (
++    <MarkerView coordinate={lugar} anchor={{ x: 0.5, y: 1 }} allowOverlap isSelected>
++      <View style={estilos.caja} pointerEvents="box-none">
++        <View style={[estilos.globo, { backgroundColor: colores.superficie }]}>
++          {evento ? (
++            <View
++              style={estilos.cabeza}
++              accessible
++              accessibilityRole="text"
++              accessibilityLabel={partesEvento(evento, { conUnidad: false }).join(', ')}>
++              <View style={estilos.flex1}>
++                {partesEvento(evento, { conUnidad: false }).map((p, i) => (
++                  <Text
++                    key={p}
++                    style={i === 0 ? [estilos.titulo, { color: colores.texto }] : [estilos.detalle, { color: colores.textoSec }]}
++                    numberOfLines={1}>
++                    {p}
++                  </Text>
++                ))}
++              </View>
++              {cerrar}
++            </View>
++          ) : (
++            <>
++              <View style={estilos.cabeza}>
++                <Text style={[estilos.titulo, estilos.flex1, { color: colores.texto }]} numberOfLines={1}>
++                  {`${grupo.eventos.length} eventos en este punto`}
++                </Text>
++                {cerrar}
++              </View>
++              {grupo.eventos.slice(0, 6).map((e) => (
++                <Pressable
++                  key={e.id}
++                  onPress={() => onElegir?.(e.id)}
++                  accessibilityRole="button"
++                  accessibilityLabel={`${partesEvento(e, { conUnidad: false }).join(', ')}. Ver detalle`}
++                  style={estilos.fila}>
++                  <IconoEventoManejo tipo={e.tipo} tam={20} />
++                  <View style={estilos.flex1}>
++                    <Text style={[estilos.detalle, { color: colores.texto }]} numberOfLines={1}>
++                      {[tipoEvento(e.tipo)?.nombre, velocidadesEvento(e)].filter(Boolean).join(' · ')}
++                    </Text>
++                    <Text style={[estilos.chico, { color: colores.textoSec }]} numberOfLines={1}>
++                      {fechaHoraEvento(e.hora)}
++                    </Text>
++                  </View>
++                </Pressable>
++              ))}
++              {grupo.eventos.length > 6 ? (
++                <Text style={[estilos.chico, { color: colores.textoSec }]}>{`Y ${grupo.eventos.length - 6} más en la lista`}</Text>
++              ) : null}
++            </>
++          )}
++        </View>
++        {/* La punta, sobre el ícono. */}
++        <View style={[estilos.punta, { borderTopColor: colores.superficie }]} />
++      </View>
++    </MarkerView>
++  );
++}
++
++const estilos = StyleSheet.create({
++  imagen: { width: LADO, height: LADO },
++  // El globo queda encima del ícono: su punta llega al borde de arriba del círculo.
++  caja: { alignItems: 'center', paddingBottom: 18 },
++  globo: { width: 250, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 10, gap: 6 },
++  punta: {
++    width: 0,
++    height: 0,
++    borderLeftWidth: 7,
++    borderRightWidth: 7,
++    borderTopWidth: 8,
++    borderLeftColor: 'transparent',
++    borderRightColor: 'transparent',
++    marginTop: -1,
++  },
++  cabeza: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
++  flex1: { flex: 1, minWidth: 0 },
++  titulo: { fontFamily: 'SplineSans_600SemiBold', fontSize: 13, lineHeight: 17 },
++  detalle: { fontFamily: 'SplineSans_400Regular', fontSize: 12, lineHeight: 16 },
++  chico: { fontFamily: 'SplineSans_400Regular', fontSize: 11, lineHeight: 14 },
++  fila: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36 },
++  cerrar: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
++  cerrarTexto: { fontSize: 18, lineHeight: 20 },
++});
+diff --git a/src/lib/eventos-manejo.ts b/src/lib/eventos-manejo.ts
+new file mode 100644
+index 0000000..49c0fa9
+--- /dev/null
++++ b/src/lib/eventos-manejo.ts
+@@ -0,0 +1,497 @@
++/**
++ * EVENTOS DE MANEJO — frenadas bruscas, aceleraciones bruscas y excesos (política driving-v1).
++ *
++ * Copia de `src/panel/datos/eventosManejo.js` de la web: el mapa de la flota, la
++ * ficha de la unidad y el perfil del conductor dicen lo mismo aquí y allá. Las
++ * reglas (exceso de MÁS de 120 km/h, «Últimos 5» por tipo, «Hoy», «7 días») NO se
++ * cambian solo en un lado.
++ *
++ * Funciones puras: pasan cada evento del servidor a la forma de la app, deciden
++ * cuáles se pintan, los agrupan cuando caen casi en el mismo punto y escriben los
++ * textos. Los eventos los detecta el servidor; aquí no se detecta nada.
++ *
++ * Excesos: el servidor los marca con el umbral que configuró la empresa (puede ser
++ * 80 o 100 km/h). Marco pidió ver solo los de MÁS de 120 km/h: se filtra otra vez
++ * con `EXCESO_KMH`.
++ */
++
++import { formatFechaCorta, formatHora } from '@/utils/date';
++import { miles } from '@/utils/numero';
++
++/** Un exceso solo se muestra si la velocidad registrada pasa de esto. */
++export const EXCESO_KMH = 120;
++
++export type TipoEvento = 'frenada' | 'aceleracion' | 'exceso';
++
++export interface TipoEventoInfo {
++  clave: TipoEvento;
++  /** El `type` que manda el servidor. */
++  servidor: string;
++  nombre: string;
++  plural: string;
++  /** El nombre corto de la pastilla («Frenadas 5 de 23»). */
++  corto: string;
++  /** Color del círculo; el glifo va oscuro encima (nunca blanco sobre color). */
++  color: string;
++  /** Quién queda encima cuando se tapan (más alto, encima). */
++  orden: number;
++  /** El mismo dibujo de la web: trazos de 24×24. */
++  glifo: string[];
++}
++
++/** Los tres tipos, en el orden de la leyenda. Mismos colores y glifos que la web. */
++export const TIPOS_EVENTO: readonly TipoEventoInfo[] = [
++  {
++    clave: 'frenada',
++    servidor: 'harsh_braking',
++    nombre: 'Frenada brusca',
++    plural: 'Frenadas bruscas',
++    corto: 'Frenadas',
++    color: '#F5C242',
++    orden: 2,
++    glifo: ['M6 12a6 6 0 1 0 12 0a6 6 0 1 0-12 0', 'M4 5a10 10 0 0 0 0 14M20 5a10 10 0 0 1 0 14M12 8v5m0 3h.01'],
++  },
++  {
++    clave: 'aceleracion',
++    servidor: 'harsh_acceleration',
++    nombre: 'Aceleración brusca',
++    plural: 'Aceleraciones bruscas',
++    corto: 'Aceleraciones',
++    color: '#B48CFF',
++    orden: 1,
++    glifo: ['M4 17 11 10l4 4 5-9M15 5h5v5M4 21h16'],
++  },
++  {
++    clave: 'exceso',
++    servidor: 'speeding',
++    nombre: 'Exceso de velocidad',
++    plural: `Excesos de más de ${EXCESO_KMH} km/h`,
++    corto: 'Excesos',
++    color: '#FF6369',
++    orden: 3,
++    glifo: ['M4 18a9 9 0 1 1 16 0M12 5v2M5 9l2 1M19 9l-2 1M12 14l4-5', 'M10 14a2 2 0 1 0 4 0a2 2 0 1 0-4 0'],
++  },
++];
++
++/** Tinta del glifo y del número de los grupos: el oscuro FOM. */
++export const TINTA_EVENTO = '#08121C';
++
++export const CLAVES_EVENTO: readonly TipoEvento[] = TIPOS_EVENTO.map((t) => t.clave);
++const POR_CLAVE = Object.fromEntries(TIPOS_EVENTO.map((t) => [t.clave, t])) as Record<TipoEvento, TipoEventoInfo>;
++const POR_SERVIDOR: Record<string, TipoEvento> = Object.fromEntries(TIPOS_EVENTO.map((t) => [t.servidor, t.clave]));
++
++/** El tipo (nombre, color, glifo) de una clave; null si no es de los tres. */
++export function tipoEvento(clave: unknown): TipoEventoInfo | null {
++  return typeof clave === 'string' && clave in POR_CLAVE ? POR_CLAVE[clave as TipoEvento] : null;
++}
++
++/** Días que acepta el servidor para `driving-events`. */
++export const DIAS_SERVIDOR = [7, 30, 90] as const;
++/** Tope de eventos por pedido que acepta el servidor. */
++export const LIMITE_EVENTOS = 100;
++
++/** El período del servidor que cubre el pedido (28 se pide como 30 y se recorta aquí). */
++export function diasServidor(dias: number): number {
++  const n = Number(dias);
++  return DIAS_SERVIDOR.find((d) => d >= n) ?? DIAS_SERVIDOR[DIAS_SERVIDOR.length - 1];
++}
++
++/** Un evento en la forma de la app. */
++export interface EventoManejo {
++  id: string;
++  tipo: TipoEvento | null;
++  hora: string | null;
++  vehiculoId: string | null;
++  unidad: string | null;
++  lat: number | null;
++  lng: number | null;
++  /** Velocidad antes (en un exceso, la registrada). */
++  antes: number | null;
++  despues: number | null;
++}
++
++/** Uno que sí se pinta: de los tres tipos, con hora y posición. */
++export type EventoEnMapa = EventoManejo & { tipo: TipoEvento; hora: string; lat: number; lng: number };
++
++const numeroONulo = (n: unknown): number | null => {
++  if (n === null || n === undefined || n === '') return null;
++  const v = Number(n);
++  return Number.isFinite(v) ? v : null;
++};
++
++/** Un evento de `GET …/driving-events` en la forma de la app. */
++export function comoEventoManejo(crudo: unknown): EventoManejo {
++  const e = (crudo ?? {}) as Record<string, unknown>;
++  const texto = (v: unknown) => (typeof v === 'string' && v ? v : null);
++  return {
++    id: String(e.id ?? ''),
++    tipo: POR_SERVIDOR[String(e.type ?? '')] ?? null,
++    hora: texto(e.occurredAt),
++    vehiculoId: texto(e.vehicleId),
++    unidad: texto(e.vehicleCode),
++    lat: numeroONulo(e.lat),
++    lng: numeroONulo(e.lng),
++    antes: numeroONulo(e.speedBeforeKph),
++    despues: numeroONulo(e.speedAfterKph),
++  };
++}
++
++/** La velocidad que registró un exceso (el servidor la guarda en «antes»). */
++export function velocidadExceso(e: Pick<EventoManejo, 'antes' | 'despues'> | null | undefined): number | null {
++  return e?.antes ?? e?.despues ?? null;
++}
++
++const msDe = (iso: string | null | undefined): number | null => {
++  const t = Date.parse(iso ?? '');
++  return Number.isFinite(t) ? t : null;
++};
++
++const conPosicion = (e: EventoManejo) =>
++  typeof e.lat === 'number' &&
++  typeof e.lng === 'number' &&
++  Number.isFinite(e.lat) &&
++  Number.isFinite(e.lng) &&
++  Math.abs(e.lat) <= 90 &&
++  Math.abs(e.lng) <= 180 &&
++  !(e.lat === 0 && e.lng === 0);
++
++/** ¿Va en el mapa? De los tres tipos, con hora y posición, y si es exceso, de MÁS de 120. */
++export function vaEnMapa(e: EventoManejo | null | undefined): e is EventoEnMapa {
++  if (!e || !e.tipo || !(e.tipo in POR_CLAVE) || !conPosicion(e) || msDe(e.hora) === null) return false;
++  if (e.tipo !== 'exceso') return true;
++  const v = velocidadExceso(e);
++  return v !== null && v > EXCESO_KMH;
++}
++
++/** Del más nuevo al más viejo (a igual hora, por id, para que el orden no baile). */
++const masNuevoPrimero = (a: EventoEnMapa, b: EventoEnMapa) =>
++  (msDe(b.hora) ?? 0) - (msDe(a.hora) ?? 0) || b.id.localeCompare(a.id);
++
++/**
++ * Los que se pintan, del más nuevo al más viejo.
++ * - `dias`: solo los de los últimos N días.
++ * - `desde` / `hasta` (ISO o ms): una ventana de tiempo.
++ * - `vehiculoId`: solo los de esa unidad.
++ */
++export function eventosParaMapa(
++  lista: readonly EventoManejo[] | null | undefined,
++  {
++    dias = null,
++    desde = null,
++    hasta = null,
++    vehiculoId = null,
++    ahora = Date.now(),
++  }: {
++    dias?: number | null;
++    desde?: string | number | null;
++    hasta?: string | number | null;
++    vehiculoId?: string | null;
++    ahora?: number;
++  } = {},
++): EventoEnMapa[] {
++  const aMs = (v: string | number | null, siNo: number) =>
++    v === null ? siNo : typeof v === 'number' ? v : (msDe(v) ?? siNo);
++  const inicio = Math.max(dias ? ahora - Number(dias) * 86400000 : -Infinity, aMs(desde, -Infinity));
++  const fin = aMs(hasta, Infinity);
++  return (Array.isArray(lista) ? lista : [])
++    .filter(vaEnMapa)
++    .filter((e) => !vehiculoId || e.vehiculoId === vehiculoId)
++    .filter((e) => {
++      const t = msDe(e.hora)!;
++      return t >= inicio && t <= fin;
++    })
++    .sort(masNuevoPrimero);
++}
++
++export type CuentaEventos = Record<TipoEvento, number>;
++
++/** Cuántos hay de cada tipo. */
++export function contarPorTipo(lista: readonly EventoManejo[] | null | undefined): CuentaEventos {
++  const cuenta: CuentaEventos = { frenada: 0, aceleracion: 0, exceso: 0 };
++  for (const e of lista ?? []) if (e?.tipo && e.tipo in cuenta) cuenta[e.tipo] += 1;
++  return cuenta;
++}
++
++/** Solo los tipos encendidos. */
++export function filtrarPorTipos<T extends EventoManejo>(lista: readonly T[] | null | undefined, tipos: Iterable<TipoEvento>): T[] {
++  const activos = new Set(tipos);
++  return (lista ?? []).filter((e) => !!e.tipo && activos.has(e.tipo));
++}
++
++/** Excesos que no se pintan por ir a 120 km/h o menos (o sin velocidad registrada). */
++export function excesosBajoUmbral(lista: readonly EventoManejo[] | null | undefined, { dias = null as number | null, ahora = Date.now() } = {}): number {
++  const inicio = dias ? ahora - Number(dias) * 86400000 : -Infinity;
++  return (lista ?? []).filter((e) => e?.tipo === 'exceso' && !vaEnMapa(e) && (msDe(e.hora) ?? -Infinity) >= inicio).length;
++}
++
++// ── Filtros: período, tipos y «Ver 5 más» ───────────────────────────────────
++
++/** Cuántos de CADA tipo enseña cada tanda (Marco: 5 frenadas, 5 aceleraciones y 5 excesos). */
++export const ULTIMOS_N = 5;
++
++export type PeriodoEvento = 'ultimos' | 'hoy' | '7' | '30' | 'oculto';
++
++export const PERIODOS_EVENTO: readonly { v: PeriodoEvento; t: string }[] = [
++  { v: 'ultimos', t: `Últimos ${ULTIMOS_N}` },
++  { v: 'hoy', t: 'Hoy' },
++  { v: '7', t: '7 días' },
++  { v: '30', t: '30 días' },
++  { v: 'oculto', t: 'Ocultar' },
++];
++/** Las pastillas del mapa: Últimos 5 / Hoy / 7 días / Ocultar. */
++export const PERIODOS_MAPA = PERIODOS_EVENTO.filter((p) => p.v !== '30');
++/** Las de la lista del perfil: sin «Ocultar» (no hay mapa que despejar). */
++export const PERIODOS_LISTA = PERIODOS_EVENTO.filter((p) => p.v !== 'oculto');
++
++/**
++ * Qué período del servidor se pide para cada pastilla. «Últimos 5» mira el mes:
++ * en 7 días puede no haber 5 de cada tipo. «Ocultar» no cambia lo pedido.
++ */
++export function diasDePeriodo(periodo: PeriodoEvento): number {
++  return periodo === 'hoy' || periodo === '7' ? 7 : 30;
++}
++
++/** Medianoche (hora local) del día de `ahora`. */
++const inicioDelDia = (ahora: number) => {
++  const d = new Date(ahora);
++  d.setHours(0, 0, 0, 0);
++  return d.getTime();
++};
++
++/** Los del día de hoy (hora local), sin los que digan ser del futuro. */
++export function eventosDeHoy<T extends EventoManejo>(lista: readonly T[] | null | undefined, ahora = Date.now()): T[] {
++  const inicio = inicioDelDia(ahora);
++  const fin = inicio + 86400000;
++  return (lista ?? []).filter((e) => {
++    const t = msDe(e.hora);
++    return t !== null && t >= inicio && t < fin;
++  });
++}
++
++/** Cuántos de cada tipo se ven: por defecto `ULTIMOS_N`; «Ver 5 más» lo sube. */
++export type LimitesEvento = Partial<Record<TipoEvento, number>>;
++
++export interface VistaEventos {
++  /** Lo que se pinta y se lista, del más nuevo al más viejo. */
++  visibles: EventoEnMapa[];
++  /** Cuántos hay de cada tipo en el período (aunque el tipo esté apagado). */
++  cuenta: CuentaEventos;
++  /** Cuántos se ven de cada tipo (0 si está apagado o con «Ocultar»). */
++  mostrados: CuentaEventos;
++  /** Todos los del período, de los tres tipos. */
++  total: number;
++}
++
++/**
++ * Lo que muestran el mapa y la lista. `lista`: ya pasada por `eventosParaMapa`.
++ * - `periodo`: la ventana de tiempo («Últimos 5» = todo lo que llegó).
++ * - `tipos`: los encendidos (sin dar, los tres).
++ * - `limites`: cuántos de cada tipo; los que no se dan, `n` (5). Nunca se pintan
++ *   todos de golpe: de cada tipo, los más nuevos, y «Ver 5 más» trae otra tanda.
++ */
++export function filtrarEventosManejo(
++  lista: readonly EventoEnMapa[] | null | undefined,
++  {
++    periodo = 'ultimos',
++    tipos = null,
++    limites = {},
++    ahora = Date.now(),
++    n = ULTIMOS_N,
++  }: {
++    periodo?: PeriodoEvento;
++    tipos?: Iterable<TipoEvento> | null;
++    limites?: LimitesEvento;
++    ahora?: number;
++    n?: number;
++  } = {},
++): VistaEventos {
++  const todos = [...(lista ?? [])].sort(masNuevoPrimero);
++  const delPeriodo =
++    periodo === 'hoy'
++      ? eventosDeHoy(todos, ahora)
++      : periodo === '7' || periodo === '30'
++        ? todos.filter((e) => (msDe(e.hora) ?? -Infinity) >= ahora - Number(periodo) * 86400000)
++        : todos;
++  const cuenta = contarPorTipo(delPeriodo);
++  const mostrados: CuentaEventos = { frenada: 0, aceleracion: 0, exceso: 0 };
++  if (periodo === 'oculto') return { visibles: [], cuenta, mostrados, total: delPeriodo.length };
++  const activos = new Set(tipos ?? CLAVES_EVENTO);
++  const visibles = delPeriodo.filter((e) => {
++    if (!activos.has(e.tipo)) return false;
++    const tope = Math.max(0, limites[e.tipo] ?? n);
++    if (mostrados[e.tipo] >= tope) return false;
++    mostrados[e.tipo] += 1;
++    return true;
++  });
++  return { visibles, cuenta, mostrados, total: delPeriodo.length };
++}
++
++/**
++ * Cómo dejar a la vista un evento pedido por id (al llegar desde el perfil):
++ * «Últimos 5» con su tipo encendido y su tanda lo bastante larga. null si no está.
++ */
++export function vistaQueMuestra(
++  lista: readonly EventoEnMapa[] | null | undefined,
++  id: string,
++  n = ULTIMOS_N,
++): { periodo: PeriodoEvento; limites: LimitesEvento } | null {
++  const todos = [...(lista ?? [])].sort(masNuevoPrimero);
++  const e = todos.find((x) => x.id === id);
++  if (!e) return null;
++  const puesto = todos.filter((x) => x.tipo === e.tipo).findIndex((x) => x.id === id);
++  return { periodo: 'ultimos', limites: { [e.tipo]: Math.max(n, Math.ceil((puesto + 1) / n) * n) } };
++}
++
++/** «Frenadas 5 de 23»; «Frenadas 3» si se ven todos; «Frenadas 0». */
++export function etiquetaConteo(tipo: TipoEvento, mostrados: number, total: number): string {
++  const corto = POR_CLAVE[tipo].corto;
++  return mostrados < total ? `${corto} ${miles(mostrados)} de ${miles(total)}` : `${corto} ${miles(total)}`;
++}
++
++// ── Grupos: eventos casi en el mismo punto ──────────────────────────────────
++
++/** Eventos a menos de esto (metros) van juntos en un círculo con el número. */
++export const METROS_GRUPO = 30;
++
++export interface GrupoEventos {
++  /** `g:<id del más nuevo>`; un evento solo lleva su propio id. */
++  id: string;
++  lat: number;
++  lng: number;
++  /** Del más nuevo al más viejo. */
++  eventos: EventoEnMapa[];
++}
++
++const metrosEntre = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
++  const rad = Math.PI / 180;
++  const x = (b.lng - a.lng) * rad * Math.cos(((a.lat + b.lat) / 2) * rad);
++  const y = (b.lat - a.lat) * rad;
++  return Math.sqrt(x * x + y * y) * 6371000;
++};
++
++/**
++ * Junta los que caen casi en el mismo punto (a menos de `metros` del primero del
++ * grupo, que es el más nuevo). Mismo resultado en todos lados: no depende del zoom.
++ */
++export function agruparEventos(lista: readonly EventoEnMapa[] | null | undefined, metros = METROS_GRUPO): GrupoEventos[] {
++  const grupos: GrupoEventos[] = [];
++  for (const e of [...(lista ?? [])].sort(masNuevoPrimero)) {
++    const cerca = grupos.find((g) => metrosEntre(g, e) <= metros);
++    if (cerca) cerca.eventos.push(e);
++    else grupos.push({ id: e.id, lat: e.lat, lng: e.lng, eventos: [e] });
++  }
++  for (const g of grupos) if (g.eventos.length > 1) g.id = `g:${g.eventos[0].id}`;
++  return grupos;
++}
++
++/** El grupo donde está un evento (o el grupo con ese id). */
++export function grupoDe(grupos: readonly GrupoEventos[], id: string | null | undefined): GrupoEventos | null {
++  if (!id) return null;
++  return grupos.find((g) => g.id === id || g.eventos.some((e) => e.id === id)) ?? null;
++}
++
++/**
++ * La colección GeoJSON de la capa. Cada punto es un evento (`tipo`, su ícono) o
++ * un grupo (`n` > 1, el círculo con el número). `activo`: el elegido (evento o
++ * grupo) va más grande y encima.
++ */
++export function geojsonEventos(
++  grupos: readonly GrupoEventos[],
++  activo: string | null = null,
++): GeoJSON.FeatureCollection<GeoJSON.Point> {
++  return {
++    type: 'FeatureCollection',
++    features: grupos.map((g) => {
++      const elegido = !!activo && (g.id === activo || g.eventos.some((e) => e.id === activo));
++      const primero = g.eventos[0];
++      return {
++        type: 'Feature',
++        id: g.id,
++        properties: {
++          id: g.id,
++          tipo: primero.tipo,
++          n: g.eventos.length,
++          grupo: g.eventos.length > 1,
++          activo: elegido,
++          orden: elegido ? 10 : g.eventos.length > 1 ? 5 : POR_CLAVE[primero.tipo].orden,
++        },
++        geometry: { type: 'Point', coordinates: [g.lng, g.lat] },
++      };
++    }),
++  };
++}
++
++// ── Textos ──────────────────────────────────────────────────────────────────
++
++const kmh = (n: number) => miles(Math.round(n));
++
++/** «85 → 30 km/h» en frenadas y aceleraciones; «134 km/h» en excesos; '' sin velocidades. */
++export function velocidadesEvento(e: EventoManejo | null | undefined): string {
++  if (!e) return '';
++  if (e.tipo === 'exceso') {
++    const v = velocidadExceso(e);
++    return v === null ? '' : `${kmh(v)} km/h`;
++  }
++  if (e.antes !== null && e.despues !== null) return `${kmh(e.antes)} → ${kmh(e.despues)} km/h`;
++  const una = e.antes ?? e.despues;
++  return una === null ? '' : `${kmh(una)} km/h`;
++}
++
++/** «Unidad 01»; si el código ya dice «Unidad», no se repite. */
++export function unidadEvento(e: EventoManejo | null | undefined): string {
++  const u = String(e?.unidad ?? '').trim();
++  if (!u) return '';
++  return /^unidad\b/iu.test(u) ? u : `Unidad ${u}`;
++}
++
++/** «21 oct, 9:42 a. m.» */
++export function fechaHoraEvento(iso: string | null | undefined): string {
++  if (!iso || msDe(iso) === null) return '';
++  return `${formatFechaCorta(iso)}, ${formatHora(iso)}`;
++}
++
++/** Las partes del texto: nombre, velocidades, fecha y hora y (si se pide) la unidad. */
++export function partesEvento(e: EventoManejo | null | undefined, { conUnidad = true } = {}): string[] {
++  return [
++    tipoEvento(e?.tipo)?.nombre ?? 'Evento de manejo',
++    velocidadesEvento(e),
++    fechaHoraEvento(e?.hora),
++    conUnidad ? unidadEvento(e) : '',
++  ].filter(Boolean);
++}
++
++/** «Frenada brusca · 85 → 30 km/h · 21 oct, 9:42 a. m.» */
++export function textoEvento(e: EventoManejo | null | undefined, opciones: { conUnidad?: boolean } = {}): string {
++  return partesEvento(e, opciones).join(' · ');
++}
++
++/** «3 frenadas, 1 aceleración y 2 excesos»; «Sin eventos» si no hay ninguno. */
++export function resumenEventos(cuenta: Partial<CuentaEventos> | null | undefined): string {
++  const nombres: Record<TipoEvento, [string, string]> = {
++    frenada: ['frenada', 'frenadas'],
++    aceleracion: ['aceleración', 'aceleraciones'],
++    exceso: ['exceso', 'excesos'],
++  };
++  const partes = CLAVES_EVENTO.filter((c) => (cuenta?.[c] ?? 0) > 0).map(
++    (c) => `${miles(cuenta![c]!)} ${nombres[c][cuenta![c] === 1 ? 0 : 1]}`,
++  );
++  if (!partes.length) return 'Sin eventos';
++  return partes.length === 1 ? partes[0] : `${partes.slice(0, -1).join(', ')} y ${partes[partes.length - 1]}`;
++}
++
++/** La firma de una lista para no re-pintar lo mismo (el mapa se refresca cada 20 s). */
++export function firmaEventos(lista: readonly { id: string }[] | null | undefined): string {
++  return (lista ?? []).map((e) => e.id).join('|');
++}
++
++/**
++ * Lo que necesita un mapa para pintar los eventos (los tres proveedores lo
++ * aceptan igual). `eventosManejo` ya va filtrado (`filtrarEventosManejo`).
++ */
++export interface PropsEventosMapa {
++  eventosManejo?: readonly EventoEnMapa[] | null;
++  /** Id del evento (o grupo `g:…`) con su globo abierto. */
++  eventoActivo?: string | null;
++  /** Se tocó un evento o un grupo en el mapa (o se cerró su globo: null). */
++  alElegirEvento?: (id: string | null) => void;
++}
+diff --git a/src/services/fomEventosManejo.ts b/src/services/fomEventosManejo.ts
+new file mode 100644
+index 0000000..5640b5f
+--- /dev/null
++++ b/src/services/fomEventosManejo.ts
+@@ -0,0 +1,84 @@
++import { ErrorFom, generacionLecturas, pedir } from '@/lib/fom-api';
++import { comoEventoManejo, diasServidor, LIMITE_EVENTOS, type EventoManejo } from '@/lib/eventos-manejo';
++
++import { rutaDeEnte } from './fomRutas';
++import { enteActivoFom, usuarioActivoFom } from './fomSesion';
++
++/**
++ * EVENTOS DE MANEJO de un conductor: frenadas bruscas, aceleraciones bruscas y
++ * excesos, con dónde y cuándo pasaron.
++ *
++ * La web los lee de `/api/v1/console/drivers/{id}/driving-events`, que solo
++ * acepta la sesión de la consola. La superficie móvil todavía no los publica
++ * (pedido a Juan en fom-core#713). Esta es la ruta que se espera: si Juan la
++ * publica con otro nombre, se cambia SOLO aquí.
++ *
++ * El servidor no los da por unidad, solo por conductor (igual que en la web):
++ * el mapa de la flota pide los del conductor asignado y se queda con los de esa
++ * unidad.
++ */
++export const RUTA_EVENTOS_MANEJO = (conductorId: string) => `/drivers/${encodeURIComponent(conductorId)}/driving-events`;
++
++/** Lo que responde el servicio. */
++export type EventosManejoFom =
++  | {
++      estado: 'ok';
++      /** Del más nuevo al más viejo, tal como llegaron (sin filtrar). */
++      eventos: EventoManejo[];
++      /** Llegaron los 100 más recientes: puede haber más viejos en el período. */
++      tope: boolean;
++    }
++  /** La ruta no existe todavía en el servidor (404/403/405): no hay nada que pintar. */
++  | { estado: 'no-publicado' };
++
++/** Se guardan unos minutos por conductor + período: cambiar de pastilla no vuelve a pedir. */
++const VIGENTE_MS = 3 * 60_000;
++const TOPE_MEMORIA = 40;
++const memoria = new Map<string, { en: number; generacion: number; datos: Promise<EventosManejoFom> }>();
++
++function esSinPublicar(e: unknown): boolean {
++  return e instanceof ErrorFom && [403, 404, 405].includes(e.statusCode);
++}
++
++async function leer(conductorId: string, dias: number, companyId: string | null): Promise<EventosManejoFom> {
++  const ruta = rutaDeEnte(`${RUTA_EVENTOS_MANEJO(conductorId)}?days=${dias}&limit=${LIMITE_EVENTOS}`, companyId);
++  try {
++    const r = (await pedir(ruta, { fresco: true })) as unknown;
++    const filas: unknown[] = Array.isArray(r) ? r : Array.isArray((r as { items?: unknown[] })?.items) ? (r as { items: unknown[] }).items : [];
++    return { estado: 'ok', eventos: filas.map(comoEventoManejo), tope: filas.length >= LIMITE_EVENTOS };
++  } catch (e) {
++    if (esSinPublicar(e)) return { estado: 'no-publicado' };
++    throw e;
++  }
++}
++
++/**
++ * Los eventos de un conductor en los últimos `dias` (se pide el período del
++ * servidor que lo cubre: 7, 30 o 90). `fresco` salta lo guardado (Reintentar).
++ */
++export async function getEventosManejoFom(
++  conductorId: string,
++  dias: number,
++  { companyId, fresco = false }: { companyId?: string | null; fresco?: boolean } = {},
++): Promise<EventosManejoFom> {
++  const d = diasServidor(dias);
++  const ente = companyId || enteActivoFom();
++  const clave = `${usuarioActivoFom() ?? ''}|${ente ?? ''}|${conductorId}|${d}`;
++  const guardada = memoria.get(clave);
++  if (!fresco && guardada && guardada.generacion === generacionLecturas() && Date.now() - guardada.en < VIGENTE_MS) {
++    return guardada.datos;
++  }
++  const entrada = { en: Date.now(), generacion: generacionLecturas(), datos: leer(conductorId, d, ente) };
++  memoria.delete(clave);
++  memoria.set(clave, entrada);
++  while (memoria.size > TOPE_MEMORIA) {
++    const vieja = memoria.keys().next().value;
++    if (vieja === undefined) break;
++    memoria.delete(vieja);
++  }
++  // Un fallo no se guarda: la próxima vez se vuelve a preguntar.
++  entrada.datos.catch(() => {
++    if (memoria.get(clave) === entrada) memoria.delete(clave);
++  });
++  return entrada.datos;
++}
 -- 
 2.55.0.windows.3
 
