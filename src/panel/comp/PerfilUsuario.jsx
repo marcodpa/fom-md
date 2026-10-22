@@ -10,7 +10,8 @@ import { color, estadoDocumento, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import { etiquetaRolSesion, rolCanonico } from '../roles'
 import { useSesion } from '../useSesion'
-import EventosManejoMapa from './EventosManejoMapa'
+import EventosManejoPerfil from './ManejoBrusco'
+import { enlaceEventoEnMapa } from '../datos/eventosManejo'
 import { cambiosDatosUsuario, indiceDePersona, nombreDocumentoUsuario } from '../datos/perfilUsuario'
 import FotoUnidad from './FotoUnidad'
 import CredencialesPersona from './CredencialesPersona'
@@ -212,15 +213,15 @@ function UnidadAsignada({ persona: p, unidadActual, puedeEditar, unidades, carga
 }
 
 /**
- * Pestaña Conducción: el mapa y la lista de frenadas, aceleraciones y excesos de más de 120 km/h
- * del período. Mi perfil (el conductor en sesión) los lee por `me/`; la ficha que mira el
- * supervisor, por la persona. `porTipo` ya no se usa: los conteos van en la leyenda del mapa.
+ * Pestaña Conducción: la lista de frenadas, aceleraciones y excesos de más de 120 km/h (sin
+ * mapa: cada evento lleva al Centro de control con el mapa en él). Mi perfil (el conductor en
+ * sesión) los lee por `me/`; la ficha que mira el supervisor, por la persona.
  */
 function Conduccion({ persona: p }) {
   const sesion = useSesion()
   const id = p.userId ?? p.id
   const propio = Boolean(id) && sesion?.perfil?.id === id && rolCanonico(sesion?.perfil?.rol) === 'conductor'
-  return <EventosManejoMapa key={`${id}:${propio}`} userId={id} propio={propio} />
+  return <EventosManejoPerfil key={`${id}:${propio}`} userId={id} propio={propio} />
 }
 
 function Inspecciones({ inspecciones, error }) {
@@ -416,6 +417,8 @@ export function MetricasPerfil({ persona: p, propio = false }) {
     : p?.eventosDisponibles === false ? null : eventos.length
   // Lo que la ficha ya leyó (7 días) abre la tarjeta sin otra consulta. En la semilla solo existe el índice de la unidad.
   const inicial = score ?? (indice !== null ? { indice } : null)
+  // «Ver eventos →» lleva al mapa con su unidad elegida (sus eventos en el mapa); sin unidad, a la lista.
+  const enlaceEventos = p?.unidad?.id ? enlaceEventoEnMapa({ vehiculoId: p.unidad.id, conductorId: propio ? null : p.userId ?? p.id }) : '?vista=conduccion'
   return (
   <>
   {conduce && <ManejoConductor
@@ -427,7 +430,7 @@ export function MetricasPerfil({ persona: p, propio = false }) {
     empresa={p.empresaNombre || p.empresa}
     logoEmpresa={p.logoEmpresa}
     error={p.manejoError}
-    enlaceEventos="?vista=conduccion"
+    enlaceEventos={enlaceEventos}
     nota={p.indiceFuente !== 'conductor' && !p.manejo
       ? `Índice de la unidad asignada${p.unidad ? ` · ${p.unidad.alias} · ${p.unidad.placa}` : ''}`
       : undefined}
@@ -439,6 +442,7 @@ export function MetricasPerfil({ persona: p, propio = false }) {
       icono="alerta"
       tono={totalEventos > 8 ? 'aviso' : ''}
       nota={`en los últimos ${score?.dias ?? 7} días`}
+      a={conduce ? enlaceEventos : undefined}
     />
     <Kpi
       titulo="Inspecciones hechas"

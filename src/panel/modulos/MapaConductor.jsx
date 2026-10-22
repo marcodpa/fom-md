@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -9,6 +9,8 @@ import FichaUnidad from '../comp/FichaUnidad'
 import { Cargando, ErrorCarga, Vacio } from '../comp/ui'
 import { Icono } from '../Iconos'
 import { conPosicionFresca } from './MiUnidad'
+import { BloqueManejoBrusco, useManejoBrusco } from '../comp/ManejoBrusco'
+import { leerEnlaceEvento } from '../datos/eventosManejo'
 import '../../styles/control-map.css'
 
 const CINCO_MINUTOS = 5 * 60_000
@@ -61,10 +63,32 @@ export default function MapaConductor() {
   // Reintentar solo lo que falló: repetir el expediente entero sin necesidad gasta ~8 pedidos.
   const reintentar = () => partes.filter((p) => p.estado === 'error').forEach((p) => p.recargar())
 
+  // Un evento de manejo desde Mi perfil (`?evento=…`) abre la ficha y vuela a él. Para el
+  // conductor la unidad es siempre la suya: el enlace no elige otra.
+  const [parametros, setParametros] = useSearchParams()
+  const [pedidoEvento, setPedidoEvento] = useState(null)
+  useEffect(() => {
+    const enlace = leerEnlaceEvento(parametros)
+    if (!enlace || !vehiculoId) return
+    setFichaAbierta(true)
+    setPedidoEvento({ ...enlace, unidad: vehiculoId, conductor: null, clave: Date.now() })
+    setParametros({}, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parametros, vehiculoId])
+  // Sus frenadas, aceleraciones y excesos (por `me/`), solo con la ficha abierta.
+  const manejo = useManejoBrusco({
+    vehiculoId: fichaAbierta ? vehiculoId : null,
+    userId: fichaAbierta && vehiculoId ? perfil?.id ?? null : null,
+    propio: Boolean(fichaAbierta && vehiculoId),
+    pedido: pedidoEvento,
+    listoParaVolar: posicion.datos?.vehiculoId === vehiculoId,
+  })
+
   return <section className="control-map" aria-label="Mapa de mi unidad">
     <div className="control-map-canvas">
       <Mapa vehiculos={vehiculos} seleccionado={fichaAbierta ? unidad?.id : null}
-        alSeleccionar={() => setFichaAbierta(true)} alto="100%" ficha={false} leyenda={false} espacioFicha />
+        alSeleccionar={() => setFichaAbierta(true)} alto="100%" ficha={false} leyenda={false} espacioFicha
+        eventosManejo={fichaAbierta ? manejo.visibles : null} eventoActivo={manejo.elegido} alElegirEvento={manejo.elegir} encuadrarEventos={false} />
     </div>
     <div className="control-search">
       <div className="control-search-heading"><div><h1>Mi mapa</h1><p>{unidad ? `${unidad.placa || unidad.alias} · Tu unidad asignada` : 'Ubicación de tu unidad asignada'}</p></div>
@@ -77,7 +101,9 @@ export default function MapaConductor() {
         texto={unidad ? 'El mapa mostrará tu vehículo cuando llegue una posición válida del GPS.' : 'Pide a tu supervisor que te asigne un vehículo para verlo aquí.'} />}
     </div>}
     {fichaAbierta && unidad && <aside className="control-panel control-unit" aria-label="Mi vehículo">
-      <FichaUnidad unidad={unidad} conEnlace={false} alCerrar={() => setFichaAbierta(false)} />
+      <FichaUnidad unidad={unidad} conEnlace={false} alCerrar={() => setFichaAbierta(false)}>
+        <BloqueManejoBrusco m={manejo} sinConductor="Sin unidad asignada: no hay eventos que mostrar." />
+      </FichaUnidad>
     </aside>}
     <div className="control-live"><i />Actualización cada 15 s<span>Solo tu unidad asignada</span></div>
   </section>

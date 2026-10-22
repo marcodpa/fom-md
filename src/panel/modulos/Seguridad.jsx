@@ -6,6 +6,7 @@ import { Cabecera, Campo, Cargando, Chips, ErrorCarga, Kpi, Modal, Pestanas, Tag
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import { masNuevoPrimero } from '../datos/orden'
+import { enlaceEventoEnMapa, tipoDeAlerta } from '../datos/eventosManejo'
 
 // ============================================================
 // EVENTOS Y SOS
@@ -135,6 +136,8 @@ export default function Seguridad() {
                           {e.valor != null ? `Valor observado ${f.numero(e.valor)}${e.tipo === 'velocidad' ? ' km/h' : ''} · ` : ''}
                           {f.fechaHora(e.ocurrioEn)}
                           {e.odtId && <> · <Link to="/panel/mantenimiento" className="pnl-link">ODT vinculada</Link></>}
+                          {/* Al mapa con la unidad elegida y, si es de velocidad, el exceso más cercano a esa hora. */}
+                          {e.vehiculoId && <> · <Link to={enlaceEventoEnMapa({ vehiculoId: e.vehiculoId, hora: e.ocurrioEn, tipo: tipoDeAlerta(e.tipo) })} className="pnl-link">Ver en el mapa</Link></>}
                         </span>
                       </div>
                       <Tag color={sevC}>{sevT}</Tag>

@@ -6,7 +6,8 @@ import { textoSinSenal } from '../datos/sinSenal'
 import CapasMapa from './CapasMapa'
 import HerramientasRuta from './HerramientasRuta'
 import { limitesDe, mensajeLlegada, pintarEventosManejo, pintarLlegada } from './herramientasMapbox'
-import { TIPOS_EVENTO, geojsonEventos, partesEvento } from '../datos/eventosManejo'
+import { RADIO_GRUPO_PX, TIPOS_EVENTO, geojsonEventos, metrosPorPixel, partesEvento, tipoEvento, tituloGrupo, velocidadesEvento } from '../datos/eventosManejo'
+import * as fmt from '../datos/formato'
 import { emparejarPuntos, emparejarViajes, rutaConTrafico } from '../datos/mapboxApi'
 import { CLAVES_COLOR, coloresDe, configDe, estiloDe, guardarPrefs, leerPrefs, luzEfectiva, sin3d } from './mapaPrefs'
 import '../../styles/fleet-map.css'
@@ -781,7 +782,15 @@ export default function MapaMapbox({
   }, [cola, seleccionado, listo])
 
   // Eventos de manejo: una capa de símbolos que se crea una vez por estilo y en cada cambio
-  // (período, filtros, elegido) solo cambia sus datos.
+  // (período, filtros, elegido) solo cambia sus datos. Los que caen casi en el mismo punto van
+  // en un círculo con su número; al acercar o alejar se vuelven a juntar (ver agruparCercanos).
+  const eventosRef = useRef(eventosManejo)
+  eventosRef.current = eventosManejo
+  const elegidoRef = useRef(eventoElegido)
+  elegidoRef.current = eventoElegido
+  const coleccionEventos = (m) => geojsonEventos(eventosRef.current ?? [], elegidoRef.current, {
+    metros: RADIO_GRUPO_PX * metrosPorPixel(m.getZoom(), m.getCenter().lat),
+  })
   useEffect(() => {
     const m = mapa.current
     const mapboxgl = gl.current
@@ -792,7 +801,7 @@ export default function MapaMapbox({
       if (!lista.length) eventosEncuadrados.current = ''
       return
     }
-    const coleccion = geojsonEventos(lista, eventoElegido)
+    const coleccion = coleccionEventos(m)
     if (eventosCapa.current) eventosCapa.current.actualizar(coleccion)
     else {
       eventosCapa.current = pintarEventosManejo(m, {
@@ -803,6 +812,24 @@ export default function MapaMapbox({
           if (modoDestino.current) return
           toqueEnMapa.current = true
           elegirEventoRef.current?.(id)
+        },
+        alTocarGrupo: (ids, lngLat) => {
+          if (modoDestino.current) return
+          const filas = ids.map((id) => (eventosRef.current ?? []).find((x) => x.id === id)).filter(Boolean)
+          if (!filas.length) return
+          // Abrir un grupo suelta el evento elegido (su globo se cambia por el del grupo).
+          if (elegidoRef.current) {
+            toqueEnMapa.current = true
+            elegirEventoRef.current?.(null)
+          }
+          eventosCapa.current?.abrirGrupo(lngLat, tituloGrupo(filas.length), filas.map((x) => ({
+            id: x.id,
+            titulo: [tipoEvento(x.tipo)?.nombre, velocidadesEvento(x)].filter(Boolean).join(' · '),
+            detalle: x.hora ? fmt.fechaHora(x.hora) : '',
+          })), (id) => {
+            toqueEnMapa.current = true
+            elegirEventoRef.current?.(id)
+          })
         },
       })
     }
@@ -819,7 +846,20 @@ export default function MapaMapbox({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventosManejo, eventoElegido, listo])
 
-  // El evento elegido: su globo y, si se eligió en la lista, el mapa va hasta él.
+  // Al terminar de acercar o alejar, los grupos se rehacen con el radio de ese zoom.
+  useEffect(() => {
+    const m = mapa.current
+    if (!m || !listo) return undefined
+    const reagrupar = () => {
+      if (eventosCapa.current && estiloListo.current && eventosRef.current?.length) eventosCapa.current.actualizar(coleccionEventos(m))
+    }
+    m.on('zoomend', reagrupar)
+    return () => m.off('zoomend', reagrupar)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listo])
+
+  // El evento elegido: su globo y, si se eligió en la lista, el mapa va hasta él (corrido para
+  // que no quede debajo de la ficha, como al elegir una unidad).
   useEffect(() => {
     const capa = eventosCapa.current
     const m = mapa.current
@@ -827,11 +867,16 @@ export default function MapaMapbox({
     toqueEnMapa.current = false
     const e = (eventosManejo ?? []).find((x) => x.id === eventoElegido)
     if (!capa || !m || !e) {
-      capa?.cerrar?.()
+      // Si se soltó desde un grupo, su globo (el del grupo) se queda abierto.
+      if (!desdeMapa) capa?.cerrar?.()
       return
     }
     capa.abrir(e, partesEvento(e), () => elegirEventoRef.current?.(null))
-    if (!desdeMapa) m.flyTo({ center: [e.lng, e.lat], zoom: Math.max(m.getZoom(), 15), duration: sinMovimiento() ? 0 : 800 })
+    if (!desdeMapa) {
+      const lienzo = m.getContainer().getBoundingClientRect()
+      const offset = (ficha || espacioFicha) ? (lienzo.width > 600 ? [175, 0] : [0, -lienzo.height * 0.18]) : [0, 0]
+      m.flyTo({ center: [e.lng, e.lat], offset, zoom: Math.max(m.getZoom(), 15), duration: sinMovimiento() ? 0 : 800 })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventoElegido, listo])
 

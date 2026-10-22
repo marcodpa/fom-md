@@ -136,26 +136,70 @@ function imagenEvento(tipo) {
   return ctx.getImageData(0, 0, lado, lado)
 }
 
+/** El círculo de un grupo: azul FOM con aro y el número en oscuro (nunca blanco sobre azul). */
+function imagenGrupo(etiqueta) {
+  const px = ICONO_EVENTO_PX + 4
+  const lado = px * RATIO_ICONO
+  const lienzo = document.createElement('canvas')
+  lienzo.width = lado
+  lienzo.height = lado
+  const ctx = lienzo.getContext('2d')
+  ctx.scale(RATIO_ICONO, RATIO_ICONO)
+  const c = px / 2
+  ctx.beginPath()
+  ctx.arc(c, c, c - 1, 0, Math.PI * 2)
+  ctx.fillStyle = BORDE_OSCURO
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(c, c, c - 2.5, 0, Math.PI * 2)
+  ctx.fillStyle = BORDE_CLARO
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(c, c, c - 4.5, 0, Math.PI * 2)
+  ctx.fillStyle = AZUL_FOM
+  ctx.fill()
+  ctx.fillStyle = BORDE_OSCURO
+  ctx.font = `700 ${etiqueta.length > 2 ? 11 : 14}px system-ui, sans-serif`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(etiqueta, c, c + 0.5)
+  return ctx.getImageData(0, 0, lado, lado)
+}
+
+/** «2»…«99»; «99+» de ahí en adelante. */
+const etiquetaGrupo = (n) => (n > 99 ? '99+' : String(n))
+
 const escHtml = (t) => String(t).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch])
 
 /**
  * Pinta los eventos de manejo (`coleccion`, de `geojsonEventos`) y devuelve cómo actualizarlos,
- * cómo abrir el globo de uno y cómo quitarlos. `tipos`: TIPOS_EVENTO; `alTocar(id)`: al tocar un ícono.
+ * cómo abrir el globo de uno y cómo quitarlos. `tipos`: TIPOS_EVENTO; `alTocar(id)`: al tocar un ícono;
+ * `alTocarGrupo(ids, [lng, lat])`: al tocar un círculo de varios eventos casi en el mismo punto.
  */
-export function pintarEventosManejo(mapa, { coleccion, tipos, alTocar, gl }) {
+export function pintarEventosManejo(mapa, { coleccion, tipos, alTocar, alTocarGrupo, gl }) {
   const ID = `eventos-manejo-${Date.now().toString(36)}`
   for (const t of tipos) {
     const nombre = `evento-manejo-${t.clave}`
     if (!mapa.hasImage(nombre)) mapa.addImage(nombre, imagenEvento(t), { pixelRatio: RATIO_ICONO })
   }
-  mapa.addSource(ID, { type: 'geojson', data: coleccion })
+  // Los círculos de grupo se dibujan según los números que hagan falta.
+  const conGrupos = (c) => {
+    for (const ft of c.features) {
+      if (ft.properties.tipo !== 'grupo') continue
+      const etiqueta = etiquetaGrupo(ft.properties.cantidad)
+      ft.properties.imagen = `evento-grupo-${etiqueta}`
+      if (!mapa.hasImage(ft.properties.imagen)) mapa.addImage(ft.properties.imagen, imagenGrupo(etiqueta), { pixelRatio: RATIO_ICONO })
+    }
+    return c
+  }
+  mapa.addSource(ID, { type: 'geojson', data: conGrupos(coleccion) })
   mapa.addLayer({
     id: `${ID}-iconos`,
     type: 'symbol',
     source: ID,
     slot: 'top',
     layout: {
-      'icon-image': ['concat', 'evento-manejo-', ['get', 'tipo']],
+      'icon-image': ['case', ['==', ['get', 'tipo'], 'grupo'], ['get', 'imagen'], ['concat', 'evento-manejo-', ['get', 'tipo']]],
       'icon-size': ['case', ['get', 'activo'], 1.3, 1],
       'icon-allow-overlap': true,
       'icon-ignore-placement': true,
@@ -166,30 +210,51 @@ export function pintarEventosManejo(mapa, { coleccion, tipos, alTocar, gl }) {
   })
   let globo = null
   const alClic = (e) => {
-    const id = e.features?.[0]?.properties?.id
-    if (id != null) alTocar?.(String(id))
+    const p = e.features?.[0]?.properties
+    if (p?.id == null) return
+    if (p.tipo === 'grupo') alTocarGrupo?.(String(p.ids).split('|'), e.features[0].geometry.coordinates)
+    else alTocar?.(String(p.id))
   }
   const sobre = () => { mapa.getCanvas().style.cursor = 'pointer' }
   const fuera = () => { mapa.getCanvas().style.cursor = '' }
   mapa.on('click', `${ID}-iconos`, alClic)
   mapa.on('mouseenter', `${ID}-iconos`, sobre)
   mapa.on('mouseleave', `${ID}-iconos`, fuera)
+  // Un solo globo a la vez (de un evento o de un grupo): el de antes se suelta primero, así su
+  // «close» no cuenta como cerrar a mano.
+  const ponerGlobo = (lngLat, html, alCerrar) => {
+    const previo = globo
+    globo = null
+    previo?.remove()
+    globo = new gl.Popup({ className: 'ruta-popup', closeButton: true, closeOnClick: false, maxWidth: '280px', offset: 18 })
+      .setLngLat(lngLat)
+      .setHTML(html)
+      .addTo(mapa)
+    const este = globo
+    este.on('close', () => { if (globo === este) { globo = null; alCerrar?.() } })
+    return este
+  }
   return {
     capa: `${ID}-iconos`,
-    actualizar: (nueva) => { mapa.getSource(ID)?.setData(nueva) },
+    actualizar: (nueva) => { mapa.getSource(ID)?.setData(conGrupos(nueva)) },
     /** Abre el globo de un evento (`partes`: nombre, velocidades, hora, unidad). `alCerrar` al cerrarlo a mano. */
     abrir: (evento, partes, alCerrar) => {
-      // El de antes se suelta primero: así su «close» no cuenta como cerrar a mano.
-      const previo = globo
-      globo = null
-      previo?.remove()
       const [titulo, ...resto] = partes
-      globo = new gl.Popup({ className: 'ruta-popup', closeButton: true, closeOnClick: false, maxWidth: '260px', offset: 18 })
-        .setLngLat([evento.lng, evento.lat])
-        .setHTML(`<strong>${escHtml(titulo)}</strong>${resto.map((p) => `<span>${escHtml(p)}</span>`).join('')}`)
-        .addTo(mapa)
-      const este = globo
-      este.on('close', () => { if (globo === este) { globo = null; alCerrar?.() } })
+      ponerGlobo([evento.lng, evento.lat], `<strong>${escHtml(titulo)}</strong>${resto.map((p) => `<span>${escHtml(p)}</span>`).join('')}`, alCerrar)
+    },
+    /**
+     * El globo de un grupo: su título y un botón por evento (`filas`: { id, titulo, detalle }).
+     * Tocar uno llama a `alElegir(id)`; el foco va al primero para seguir con el teclado.
+     */
+    abrirGrupo: (lngLat, titulo, filas, alElegir) => {
+      const g = ponerGlobo(lngLat, `<strong>${escHtml(titulo)}</strong><ul class="em-globo-lista">${filas.map((x) =>
+        `<li><button type="button" data-evento="${escHtml(x.id)}"><b>${escHtml(x.titulo)}</b>${x.detalle ? `<small>${escHtml(x.detalle)}</small>` : ''}</button></li>`).join('')}</ul>`)
+      const el = g.getElement()
+      el.addEventListener('click', (ev) => {
+        const b = ev.target.closest?.('button[data-evento]')
+        if (b) alElegir?.(b.getAttribute('data-evento'))
+      })
+      el.querySelector('button[data-evento]')?.focus({ preventScroll: true })
     },
     cerrar: () => {
       const g = globo

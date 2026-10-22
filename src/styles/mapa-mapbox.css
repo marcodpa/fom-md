@@ -48,6 +48,13 @@
 .mapboxgl-popup.ruta-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-tip { border-bottom-color: #349bfa; }
 .mapboxgl-popup.ruta-popup.mapboxgl-popup-anchor-left .mapboxgl-popup-tip { border-right-color: #349bfa; }
 .mapboxgl-popup.ruta-popup.mapboxgl-popup-anchor-right .mapboxgl-popup-tip { border-left-color: #349bfa; }
+/* Globo de un grupo de eventos de manejo: un botón por evento (tocarlo abre el suyo). */
+.mapboxgl-popup.ruta-popup .em-globo-lista { list-style: none; margin: 8px 0 0; padding: 0; max-height: 220px; overflow: auto; }
+.mapboxgl-popup.ruta-popup .em-globo-lista button { width: 100%; display: flex; flex-direction: column; gap: 1px; min-height: 44px; padding: 6px 8px; border: 0; border-top: 1px solid #263b4d; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 8px; }
+.mapboxgl-popup.ruta-popup .em-globo-lista li:first-child button { border-top: 0; }
+.mapboxgl-popup.ruta-popup .em-globo-lista button:hover, .mapboxgl-popup.ruta-popup .em-globo-lista button:focus-visible { background: #173147; outline: 2px solid #3D9BF5; outline-offset: -2px; }
+.mapboxgl-popup.ruta-popup .em-globo-lista b { font-size: 13px; font-weight: 600; }
+.mapboxgl-popup.ruta-popup .em-globo-lista small { font-size: 12px; color: #b7c7d9; }
 
 /* Panel «Capas» */
 .mapa-capas { position: absolute; z-index: 460; right: 18px; top: 16px; font-family: var(--e-fuente, 'Spline Sans', sans-serif); }

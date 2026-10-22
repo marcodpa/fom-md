@@ -1894,6 +1894,7 @@ Object.assign(repoApi, {
       const lista = (r?.items ?? []).map((e) => ({
         id: e.id,
         tipo: e.ruleType,
+        vehiculoId: e.vehicleId ?? null,
         vehiculo: e.vehicleCode,
         placa: e.vehiclePlate ?? null,
         severidad: e.severity,

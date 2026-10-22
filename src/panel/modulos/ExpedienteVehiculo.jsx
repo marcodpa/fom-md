@@ -21,6 +21,7 @@ import FichaDatosUnidad from './FichaDatosUnidad'
 import UsuariosUnidad from './UsuariosUnidad'
 import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
+import { enlaceEventoEnMapa } from '../datos/eventosManejo'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
 import './expediente-unidad.css'
 import '../../styles/movil-modulos.css'
@@ -574,6 +575,7 @@ export default function ExpedienteVehiculo() {
                 icono="alerta"
                 tono={eventosRecientes.length > 6 ? 'malo' : ''}
                 nota={`Últimos ${DIAS_EVENTOS} días`}
+                a={enlaceEventoEnMapa({ vehiculoId: v.id })}
               />
             </div>
 
