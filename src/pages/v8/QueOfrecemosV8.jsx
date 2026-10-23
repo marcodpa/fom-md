@@ -120,7 +120,7 @@ export default function QueOfrecemosV8() {
           <FotoIntegradaV8 className="qo-insp-foto" nombre="camion-marca" marco="redondo" sizes="(min-width: 1240px) 620px, 52vw"
             alt="Cabina de un camión blanco con el logo FOM en el patio de noche." />
           <CapturaFlotanteV8 className="qo-insp-telefono" nombre="cap-movil-cond-mantenimiento" ancho={220}
-            alt="Mantenimiento de mi unidad en la app actual. Datos de demostración." />
+            alt="Mantenimiento en la app, vista del conductor: las órdenes de su unidad con su estado y el botón Reportar una falla. Datos de demostración." />
         </div>
       </ContenedorV8>
     </SeccionV8>

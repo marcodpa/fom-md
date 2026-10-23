@@ -26,13 +26,17 @@ const CIFRAS = [
 // Recorrido: cada beneficio con su vista del panel tal como es hoy.
 const BENEFICIOS = [
   { pestana: 'Vehículos', titulo: 'Visibilidad de la operación', texto: 'Ubicación, estado y responsable de cada unidad en una misma vista.', corto: 'Ubicación, estado y responsable de cada unidad.',
-    captura: 'cap-panel-flota', capturaMovil: 'cap-movil-sup-vehiculos', alt: 'Vehículos actuales del panel FOM: unidades, estado, conductor y documentos. Datos de demostración.' },
+    captura: 'cap-panel-flota', capturaMovil: 'cap-movil-sup-vehiculos', alt: 'Vehículos actuales del panel FOM: unidades, estado, conductor y documentos. Datos de demostración.',
+    altMovil: 'Vehículos en la app del supervisor: 26 unidades, 15 en marcha y 11 detenidas, en el mapa y con buscador. Datos de demostración.' },
   { pestana: 'Áreas', titulo: 'Organización por áreas', texto: 'Zona, sede o contrato: la parte de la flota que te corresponde.', corto: 'Zona, sede o contrato.',
-    captura: 'cap-panel-mapa', capturaMovil: 'cap-movil-sup-mapa', alt: 'Centro de control actual del panel FOM con el filtro de áreas. Datos de demostración.' },
+    captura: 'cap-panel-mapa', capturaMovil: 'cap-movil-sup-mapa', alt: 'Centro de control actual del panel FOM con el filtro de áreas. Datos de demostración.',
+    altMovil: 'Mapa de la flota en la app del supervisor: 26 unidades, 15 en marcha. Datos de demostración.' },
   { pestana: 'Alertas', titulo: 'Atención a las alertas', texto: 'Los avisos que requieren revisión, con el contexto del evento.', corto: 'Los avisos con su contexto.',
-    captura: 'cap-panel-alertas', capturaMovil: 'cap-movil-sup-alertas', alt: 'Alertas actuales del panel FOM. Datos de demostración.' },
+    captura: 'cap-panel-alertas', capturaMovil: 'cap-movil-sup-alertas', alt: 'Alertas actuales del panel FOM. Datos de demostración.',
+    altMovil: 'Alertas en la app del supervisor: excesos de velocidad sin leer, con la unidad, la velocidad y la hora. Datos de demostración.' },
   { pestana: 'Reportes', titulo: 'Información para decidir', texto: 'Reportes e historial para planificar los siguientes pasos.', corto: 'Reportes e historial.',
-    captura: 'cap-panel-reportes', capturaMovil: 'cap-movil-sup-reportes', alt: 'Reportes actuales del panel FOM. Datos de demostración.' },
+    captura: 'cap-panel-reportes', capturaMovil: 'cap-movil-sup-reportes', alt: 'Reportes actuales del panel FOM. Datos de demostración.',
+    altMovil: 'Reportes en la app del supervisor: de vehículos, usuarios o costos, del período que elijas, en PDF. Datos de demostración.' },
 ]
 const PESTANAS = BENEFICIOS.map(b => b.pestana)
 const PASOS = BENEFICIOS.map(b => ({
@@ -112,7 +116,7 @@ export default function BeneficiosV8() {
               <CapturaFlotanteV8 className="v8-solo-escritorio" nombre={b.captura} alt={b.alt}
                 sizes="(min-width: 1180px) 720px, (min-width: 900px) 62vw, calc(100vw - 56px)" />
               {/* T-118: en el teléfono, la misma vista en la app, entera y nítida (no el panel de escritorio encogido). */}
-              <CapturaFlotanteV8 className="v8-solo-movil" nombre={b.capturaMovil} alt={b.alt.replace('del panel FOM', 'en la app del supervisor')} ancho={280} />
+              <CapturaFlotanteV8 className="v8-solo-movil" nombre={b.capturaMovil} alt={b.altMovil} ancho={280} />
             </div>)}
           </div>
           <p className="v8-nota-demo"><span className="v8-solo-escritorio">Captura real del panel</span><span className="v8-solo-movil">Captura real de la app</span> · Datos de demostración</p>

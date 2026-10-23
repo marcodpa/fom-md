@@ -35,8 +35,9 @@ const LOCAL = [
 // ProgramaInspecciones.jsx, la hoja de la empresa (src/panel/comp/HojaEmpresa.jsx), la planilla
 // (src/panel/datos/planillaInspeccion.js) y la app FOM (fom-driver-juan,
 // src/app/(driver)/inspeccion.tsx). Capturas: panel en modo demostración, a 3x (scratchpad/t143,
-// cajas.json); los puntos van en fracciones de la captura, como en Mantenimiento.
-// No hay capturas de la inspección en la app FOM (vista del conductor): el paso 1 muestra cómo llega al panel.
+// cajas.json); los puntos van en fracciones de la captura, como en Mantenimiento. Teléfono (T-153 /
+// T-162): capturas de la app real; el resultado y la inspección bloqueada son la vista del
+// conductor, el resumen y el historial la del supervisor.
 const RESPUESTAS_INSP = [['ok', 'Conforme'], ['aviso', 'Observación'], ['peligro', 'Falla']]
 const PASOS_INSP = [
   {
@@ -52,7 +53,7 @@ const PASOS_INSP = [
       nombre: 'cap-insp-resultado', alt: 'Resultado de una inspección en el panel FOM: Unidad 05, aprobada con observaciones, con conductor, fecha, ubicación y cada punto revisado. Datos de demostración.',
       puntos: [{ x: 0.625, y: 0.206, t: 'Fallas y observaciones' }, { x: 0.805, y: 0.361, t: 'Lo que marcó el conductor', izq: true }, { x: 0.36, y: 0.506, t: 'Quién, cuándo y dónde' }, { x: 0.51, y: 0.799, t: 'Punto crítico' }],
     },
-    movil: { nombre: 'cap-movil-insp-resultado', alt: 'Resultado de una inspección en el teléfono del supervisor: Unidad 05, aprobada con observaciones, conductor, fecha y ubicación. Datos de demostración.' },
+    movil: { nombre: 'cap-movil-insp-resultado', alt: 'Resultado de la inspección en la app, vista del conductor: U-001 bloqueada, 2 fallas críticas y 1 observación, con conductor, fecha, hora y ubicación. Datos de demostración.' },
   },
   {
     estado: 'Resumen de hoy', corto: 'Resumen', tono: 'ok', titulo: 'El supervisor ve quién falta.',
@@ -67,10 +68,10 @@ const PASOS_INSP = [
       puntos: [{ x: 0.36, y: 0.462, t: 'Diarias hechas hoy' }, { x: 0.385, y: 0.588, t: 'Lo que requiere atención' }],
     },
     fono: {
-      nombre: 'cap-movil-sup-inspecciones', alt: 'Resumen de inspecciones en el teléfono del supervisor: 18 de 26 diarias hechas hoy. Datos de demostración.',
-      puntos: [{ x: 0.05, y: 0.417, t: '18 de 26 hoy', izq: true }, { x: 0.22, y: 0.892, t: 'Imprimir la planilla', izq: true }],
+      nombre: 'cap-movil-sup-inspecciones', alt: 'Resumen de inspecciones en la app del supervisor: 17 de 26 diarias hechas hoy y las unidades bloqueadas. Datos de demostración.',
+      puntos: [{ x: 0.07, y: 0.31, t: '17 de 26 hoy', izq: true }, { x: 0.875, y: 0.04, t: 'Imprimir las del día', izq: true }],
     },
-    movil: { nombre: 'cap-movil-sup-inspecciones', alt: 'Resumen de inspecciones en el teléfono del supervisor: 18 de 26 diarias hechas hoy, aprobadas, con observaciones y bloqueadas. Datos de demostración.' },
+    movil: { nombre: 'cap-movil-sup-inspecciones', alt: 'Resumen de inspecciones en la app del supervisor: 17 de 26 diarias hechas hoy, 10 aprobadas, 3 con observaciones y 4 bloqueadas. Datos de demostración.' },
   },
   {
     estado: 'Falla crítica', corto: 'Falla', tono: 'peligro', titulo: 'Si algo crítico falla, la unidad no sale.',
@@ -85,7 +86,7 @@ const PASOS_INSP = [
       nombre: 'cap-insp-bloqueada', alt: 'Inspección bloqueada en el panel FOM: Unidad 03 con una falla en luces delanteras y traseras, punto crítico, y una observación. Datos de demostración.',
       puntos: [{ x: 0.215, y: 0.324, t: 'Bloqueada: no sale' }, { x: 0.82, y: 0.851, t: 'Falla en punto crítico', izq: true }, { x: 0.79, y: 0.938, t: 'Observación', izq: true }],
     },
-    movil: { nombre: 'cap-movil-insp-bloqueada', alt: 'Inspección bloqueada en el teléfono del supervisor: falla en luces delanteras y traseras y una observación. Datos de demostración.' },
+    movil: { nombre: 'cap-movil-insp-bloqueada', alt: 'Inspección bloqueada en la app, vista del conductor: falla crítica, no puede salir; elige Pedir otra unidad o Esperar reparación. Datos de demostración.' },
   },
   {
     estado: 'Historial', tono: 'neutro', titulo: 'El mes de cada conductor.',
@@ -122,9 +123,9 @@ const PLANILLA_LISTA = [
 const PASOS_MNT = [
   {
     estado: 'Abierta', tono: 'aviso', titulo: 'El conductor reporta la falla.',
-    texto: 'Desde la app: qué le pasa a la unidad, el tipo de falla, la prioridad y las fotos. Llega al panel como orden abierta.',
+    texto: 'Desde la app: qué le pasa a la unidad, el tipo de falla, qué tan grave es y las fotos. Llega al panel como orden abierta.',
     detalle: [
-      ['phone', 'Conductor', 'Describe la falla, elige tipo y prioridad y adjunta fotos.'],
+      ['phone', 'Conductor', 'Describe la falla, elige el tipo y la gravedad y adjunta fotos.'],
       ['monitor', 'Supervisor', 'La ve en la lista, lo más nuevo primero, con su tarjeta por tipo de falla.'],
       ['clipboard', 'Queda registrado', 'Unidad, quién reportó, fecha, ubicación y fotos.'],
     ],
@@ -133,10 +134,10 @@ const PASOS_MNT = [
       puntos: [{ x: 0.5, y: 0.468, t: 'Cuántas hay en cada paso', abajo: true }, { x: 0.236, y: 0.683, t: 'Filtros por estado y tipo', izq: true }, { x: 0.37, y: 0.83, t: 'Tarjeta con el tipo de falla' }],
     },
     fono: {
-      nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app FOM, vista del conductor: descripción, tipo Frenos y prioridad Alta. Datos de demostración.',
-      puntos: [{ x: 0.62, y: 0.459, t: 'Tipo de falla', izq: true }, { x: 0.27, y: 0.718, t: 'Prioridad', izq: true }],
+      nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app FOM, vista del conductor: falla de Frenos, gravedad Alta y la descripción. Datos de demostración.',
+      puntos: [{ x: 0.37, y: 0.35, t: 'Tipo de falla', izq: true }, { x: 0.7, y: 0.6, t: 'Gravedad', izq: true }],
     },
-    movil: { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app FOM, vista del conductor: descripción, tipo Frenos y prioridad Alta. Datos de demostración.' },
+    movil: { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app FOM, vista del conductor: Toyota Hilux de la U-001, falla de Frenos, gravedad Alta y la descripción. Datos de demostración.' },
   },
   {
     estado: 'En revisión', tono: 'azul', titulo: 'El supervisor decide y asigna.',
@@ -151,10 +152,10 @@ const PASOS_MNT = [
       puntos: [{ x: 0.42, y: 0.207, t: 'Estado y tipo de orden' }, { x: 0.36, y: 0.46, t: 'Unidad y modelo' }, { x: 0.27, y: 0.68, t: 'Responsable' }, { x: 0.67, y: 0.348, t: 'Siguiente paso', izq: true }],
     },
     fono: {
-      nombre: 'cap-movil-mnt-asignadas', alt: 'Órdenes asignadas en la app: Falla de frenos en revisión, prioridad Alta, con «Iniciar trabajo». Datos de demostración.',
-      puntos: [{ x: 0.44, y: 0.466, t: 'Prioridad alta', izq: true }, { x: 0.14, y: 0.636, t: 'Tiempo trabajado', izq: true }, { x: 0.3, y: 0.71, t: 'Iniciar trabajo', izq: true }],
+      nombre: 'cap-movil-mnt-asignadas', alt: 'Asignadas a ti en la app: cambiar las pastillas de freno delanteras, en revisión, prioridad Alta, con el tiempo trabajado e «Iniciar trabajo». Datos de demostración.',
+      puntos: [{ x: 0.41, y: 0.429, t: 'Prioridad alta', izq: true }, { x: 0.09, y: 0.503, t: 'Tiempo trabajado', izq: true }, { x: 0.8, y: 0.555, t: 'Iniciar trabajo', abajo: true }],
     },
-    movil: { nombre: 'cap-movil-mnt-asignadas', alt: 'Órdenes asignadas en la app: Falla de frenos en revisión, prioridad Alta, con «Iniciar trabajo». Datos de demostración.' },
+    movil: { nombre: 'cap-movil-mnt-asignadas', alt: 'Asignadas a ti en la app: cambiar las pastillas de freno delanteras, en revisión, prioridad Alta, con el tiempo trabajado e «Iniciar trabajo». Datos de demostración.' },
   },
   {
     estado: 'Resuelta', tono: 'ok', titulo: 'Se cierra con costo y tiempo.',
@@ -168,7 +169,7 @@ const PASOS_MNT = [
       nombre: 'cap-mnt-resuelta', alt: 'Orden resuelta en el panel FOM: resultado del trabajo, cierre, costo de 155 dólares y 15 días hasta el cierre. Datos de demostración.',
       puntos: [{ x: 0.455, y: 0.637, t: 'Qué se hizo' }, { x: 0.31, y: 0.745, t: 'Costo registrado', abajo: true }, { x: 0.53, y: 0.745, t: 'Cuánto tardó' }, { x: 0.775, y: 0.375, t: '¿Volvió? Se reabre', abajo: true }],
     },
-    movil: { nombre: 'cap-movil-mnt-resuelta', alt: 'Orden resuelta en el teléfono: resultado, cierre, costo registrado y tiempo hasta el cierre. Datos de demostración.' },
+    movil: { nombre: 'cap-movil-mnt-resuelta', alt: 'Orden resuelta en la app del supervisor: qué se hizo, fecha de cierre, costo de 155 USD y el botón Reabrir. Datos de demostración.' },
   },
   {
     estado: 'Fotos e historial', corto: 'Historial', tono: 'neutro', titulo: 'Fotos e historial, siempre a mano.',
@@ -426,7 +427,7 @@ export default function PlataformaV8() {
           <CapturaFlotanteV8 className="plat-panel-captura plat-solo-escritorio" nombre="cap-panel-resumen" nota
             alt="Resumen actual del panel FOM: flota, vehículos en tiempo real y vehículo seleccionado. Datos de demostración." />
           <CapturaFlotanteV8 className="plat-panel-telefono plat-solo-movil" nombre="cap-movil-sup-resumen" ancho={280} nota
-            alt="Resumen actual en la app del supervisor: flota y vehículos en tiempo real. Datos de demostración." />
+            alt="Resumen en la app del supervisor: 26 vehículos, ODT por resolver, alertas nuevas y vehículos en tiempo real. Datos de demostración." />
         </ContenedorV8>
       </div>
       <ContenedorV8>
@@ -451,7 +452,7 @@ export default function PlataformaV8() {
           <FotoIntegradaV8 className="plat-webapp-foto" nombre="operadora-mapa" marco="redondo" sizes="(min-width: 1240px) 640px, 56vw"
             alt="Supervisor de FOM frente al Centro de control actual. Datos de demostración." />
           <CapturaFlotanteV8 className="plat-webapp-telefono" nombre="cap-movil-sup-mapa" ancho={200}
-            alt="Centro de control actual en el teléfono. Datos de demostración." />
+            alt="Mapa de la flota en la app del supervisor: 26 unidades, 15 en marcha. Datos de demostración." />
         </div>
       </ContenedorV8>
     </SeccionV8>
@@ -475,7 +476,7 @@ export default function PlataformaV8() {
         <FotoIntegradaV8 className="plat-mapa-foto" nombre="patio-monitor-mapa" marco="redondo" sizes="(min-width: 1240px) 1136px, calc(100vw - 40px)" posicion="62% 50%"
           alt="Monitor con el Centro de control actual frente al patio de la flota. Datos de demostración." />
         <CapturaFlotanteV8 className="plat-mapa-telefono plat-solo-movil" nombre="cap-movil-sup-mapa" ancho={280}
-          alt="Centro de control actual en la app del supervisor: toda la flota en el mapa. Datos de demostración." />
+          alt="Mapa de la flota en la app del supervisor: las 26 unidades, 15 en marcha. Datos de demostración." />
         <div className="plat-mapa-chips">
           {CHIPS_MAPA.map(c => <ChipV8 key={c.titulo} titulo={c.titulo} texto={c.texto} className={c.movil === false ? 'plat-sin-movil' : undefined} data-v8-aparece="" />)}
         </div>
@@ -567,7 +568,7 @@ export default function PlataformaV8() {
             <PuntosMnt puntos={PLAN_PUNTOS} />
           </div>
           <CapturaFlotanteV8 className="plat-solo-movil mnt-movil-captura" nombre="cap-movil-mnt-plan" ancho={260}
-            alt="Nuevo plan de mantenimiento en el teléfono: estrategia por km, cada 5000 km o cada 90 días. Datos de demostración." />
+            alt="Plan «Cambio de aceite y filtro» en la app del supervisor: cada 5.000 km, activo, con sus 26 unidades y los km que lleva cada una. Datos de demostración." />
         </div>
       </ContenedorV8>
       <ContenedorV8><BloqueCifrasV8 className="mnt-cifras" columnas={3} centro cifras={CIFRAS_MNT} /></ContenedorV8>

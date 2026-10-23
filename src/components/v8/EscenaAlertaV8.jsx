@@ -15,7 +15,7 @@ import './escena-alerta-v8.css'
 
 // Fila del primer aviso en cada captura (en % de la captura): panel 1280 × 800, app 750 × 1623.
 const FILA_PANEL = { left: '21.2%', top: '62.6%', width: '75.8%', height: '11.1%' }
-const FILA_APP = { left: '4.4%', top: '67.5%', width: '91.2%', height: '20.1%' }
+const FILA_APP = { left: '4.1%', top: '25.3%', width: '91.8%', height: '13.8%' }
 
 export default function EscenaAlertaV8({ nota = true, etiqueta = 'Un aviso de exceso de velocidad aparece en el panel y llega a la app del supervisor', className = '' }) {
   const raiz = useRef(null)

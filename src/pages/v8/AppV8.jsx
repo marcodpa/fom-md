@@ -23,10 +23,11 @@ const pie = (titulo, texto) => <><b className="v8-fuerte">{titulo}</b> {texto}</
 
 // Tres pantallas de la app actual (capturas reales, datos de demostración): dos del conductor y,
 // en el centro, el Resumen del supervisor. Cada una sigue con otra captura real debajo
-// (pantallasV8.js), así la pantalla se desplaza en la escena.
+// (pantallasV8.js), así la pantalla se desplaza en la escena: Mi unidad con su telemetría (la
+// misma hoja), Resumen con Vehículos y Mi perfil con las Alertas del supervisor.
 const PANTALLAS = [
-  { nombre: 'cap-movil-cond-inicio', pie: pie('Mi unidad.', 'El conductor ve dónde está y qué le toca hoy.'), corto: 'Mi unidad.',
-    alt: 'Mi unidad en la app actual, vista del conductor: unidad, estado de señal e índice de manejo. Datos de demostración.' },
+  { nombre: 'cap-movil-cond-inicio', pie: pie('Mi unidad.', 'El conductor ve su unidad, su velocidad y la telemetría.'), corto: 'Mi unidad.',
+    alt: 'Mi unidad en la app actual, vista del conductor: la Toyota Hilux 2022 de la U-001, en marcha a 61 km/h, con placa, año y telemetría en vivo. Datos de demostración.' },
   { nombre: 'cap-movil-sup-resumen', pie: pie('Resumen.', 'El supervisor ve la flota, las ODT y las alertas.'), corto: 'Resumen.',
     alt: 'Resumen en la app actual, vista del supervisor: flota de vehículos, ODT por resolver y alertas nuevas. Datos de demostración.' },
   { nombre: 'cap-movil-cond-perfil', pie: pie('Mi perfil.', 'Datos, índice de manejo y documentos.'), corto: 'Mi perfil.',
@@ -35,14 +36,14 @@ const PANTALLAS = [
 
 // Lo que el supervisor tiene en la app (capturas reales de la vista del supervisor).
 const SUPERVISOR = [
-  { nombre: 'cap-movil-sup-mapa-unidad', titulo: 'Centro de control', texto: 'El mapa de la flota y la unidad elegida, con su velocidad y su recorrido.',
-    alt: 'Centro de control en la app del supervisor: mapa con la unidad seleccionada, en marcha, con Ver expediente y Ver recorrido. Datos de demostración.' },
+  { nombre: 'cap-movil-sup-mapa-unidad', titulo: 'Mapa de la flota', texto: 'La unidad elegida en el mapa, con su velocidad, su recorrido y su manejo brusco.',
+    alt: 'Mapa de la flota en la app del supervisor: la U-001 en marcha a 61 km/h, con Ver recorrido, Ver manejo brusco, Llegada y Ficha. Datos de demostración.' },
   { nombre: 'cap-movil-sup-mantenimiento', titulo: 'Mantenimiento', texto: 'Órdenes de trabajo por estado, con filtros y nueva ODT.',
-    alt: 'Mantenimiento en la app del supervisor: órdenes abiertas, en revisión y resueltas, costo del mes y filtros. Datos de demostración.' },
+    alt: 'Mantenimiento en la app del supervisor: Nueva ODT, órdenes abiertas, en revisión y resueltas, y lo que necesita atención con sus filtros. Datos de demostración.' },
   { nombre: 'cap-movil-sup-inspecciones', titulo: 'Inspecciones', texto: 'Las diarias hechas hoy y las que requieren atención.',
-    alt: 'Inspecciones en la app del supervisor: diarias hechas hoy, aprobadas, con observaciones y bloqueadas. Datos de demostración.' },
-  { nombre: 'cap-movil-sup-alertas', titulo: 'Alertas', texto: 'Notificaciones y eventos de manejo, para marcar o descartar.',
-    alt: 'Alertas en la app del supervisor: excesos de velocidad sin leer, con Marcar leída y Descartar. Datos de demostración.' },
+    alt: 'Inspecciones en la app del supervisor: 17 de 26 diarias hechas hoy, 10 aprobadas, 3 con observaciones y 4 bloqueadas. Datos de demostración.' },
+  { nombre: 'cap-movil-sup-alertas', titulo: 'Alertas', texto: 'Avisos y órdenes nuevas, con lo que falta por leer arriba.',
+    alt: 'Alertas en la app del supervisor: filtros Todas, ODT y Alertas, y los excesos de velocidad sin leer, de lo más nuevo a lo más viejo. Datos de demostración.' },
 ]
 
 // Escala del puntaje (pages.js → seguridad) y los dos períodos que ofrece la app (7 y 30 días).
@@ -106,9 +107,9 @@ export default function AppV8() {
     <SeccionV8 id="cabina" className="app-cabina" aria-labelledby="app-cabina-titulo">
       <ContenedorV8>
         <EncabezadoV8 centro id="app-cabina-titulo" kicker="En la cabina" titulo={['La app va', 'con el conductor.']} anchoBajada={620}
-          bajada={<Dos e="En el soporte del tablero: su unidad, la señal, su índice de manejo y el mapa con la unidad asignada."
-            m="Su unidad, la señal, su índice y el mapa, en el tablero." />} />
-        <EscenaTableroV8 className="app-cabina-escena" etiqueta="Teléfono del conductor en el soporte del tablero con Mi unidad y el mapa de la app" />
+          bajada={<Dos e="En el soporte del tablero: su unidad, la velocidad y la telemetría en vivo."
+            m="Su unidad, la velocidad y la telemetría, en el tablero." />} />
+        <EscenaTableroV8 className="app-cabina-escena" etiqueta="Teléfono del conductor en el soporte del tablero con Mi unidad en la app" />
       </ContenedorV8>
     </SeccionV8>
 
@@ -152,13 +153,13 @@ export default function AppV8() {
           <FotoIntegradaV8 className="app-unidad-foto" nombre="camion-lateral-fom" marco="redondo" sizes="(min-width: 1240px) 640px, 56vw"
             alt="Camión blanco de FOM estacionado en el patio, con el lema de la marca." />
           <CapturaFlotanteV8 className="app-unidad-telefono" nombre="cap-movil-cond-mapa" ancho={210}
-            alt="Mi mapa en la app actual, con la unidad asignada. Datos de demostración." />
+            alt="Mi unidad en la app actual con el mapa abierto: la unidad asignada en marcha a 61 km/h y el botón SOS. Datos de demostración." />
         </div>
         <div className="app-unidad-texto">
           <p className="v8-kick" data-v8-aparece="">Mi unidad</p>
           <h2 id="app-unidad-titulo" className="v8-h2" data-v8-aparece="">El estado de tu unidad, a mano.</h2>
           <p className="v8-lead app-mt-lead" data-v8-aparece="">
-            <Dos e="Desde Inicio, el conductor consulta la información de su vehículo y encuentra accesos a inspecciones, mantenimiento y alertas."
+            <Dos e="Desde Mi unidad, el conductor consulta la información de su vehículo y encuentra accesos a inspecciones, mantenimiento y alertas."
               m="Información en tiempo real y accesos rápidos a las tareas. Aguanta sin señal." />
           </p>
           <ul className="app-lista v8-sm v8-t2 app-solo-escritorio">

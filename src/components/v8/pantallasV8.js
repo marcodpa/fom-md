@@ -10,24 +10,23 @@
 //  - desde:  desde qué fila sigue la segunda.
 //  - junta:  true = son pantallas distintas: se separan con un fundido al fondo de la app (sin
 //            junta, la segunda es la continuación exacta de la primera: medida con las capturas).
-//  - fondo:  color de fondo de la pantalla (app: #0a0d13; hojas de mantenimiento: #131b26).
+//  - fondo:  color de fondo de la pantalla (app: #0a0d13).
 // Medidas tomadas con scratchpad/tels-ver (filas vacías entre bloques y coincidencia de píxeles).
 export const ALTO_PANTALLA_V8 = 2532
 export const ANCHO_PANTALLA_V8 = 1170
 
 const APP = { cabeza: 220, pie: 2300, corte: 2300, junta: true, fondo: '#0a0d13' }
-const HOJA = { cabeza: 348, pie: ALTO_PANTALLA_V8, junta: false, fondo: '#131b26' }
 
 export const PANTALLAS_LARGAS_V8 = {
-  // Continuaciones reales (la misma pantalla, más abajo).
-  'cap-movil-mnt-reportar': { ...HOJA, sigue: 'cap-movil-mnt-reportar-fotos', corte: 2130, desde: 360 },
-  'cap-movil-mnt-resuelta': { ...HOJA, sigue: 'cap-movil-mnt-fotos', corte: 1767, desde: 360 },
   // Pantallas de pestañas: debajo asoma la siguiente parte del día, separada por un fundido.
-  'cap-movil-cond-inicio': { ...APP, sigue: 'cap-movil-cond-mapa', desde: 450 },
-  'cap-movil-cond-mantenimiento': { ...APP, sigue: 'cap-movil-sup-mantenimiento', desde: 1000 },
-  'cap-movil-mnt-asignadas': { ...APP, sigue: 'cap-movil-sup-mantenimiento', desde: 1000 },
-  'cap-movil-cond-perfil': { ...APP, sigue: 'cap-movil-sup-alertas', desde: 1150 },
-  'cap-movil-sup-resumen': { ...APP, sigue: 'cap-movil-sup-vehiculos', desde: 1020 },
+  // Capturas de la app real (T-153); `desde` = justo encima del primer bloque de la segunda.
+  'cap-movil-cond-mantenimiento': { ...APP, sigue: 'cap-movil-sup-mantenimiento', desde: 775 },
+  'cap-movil-mnt-asignadas': { ...APP, sigue: 'cap-movil-sup-mantenimiento', desde: 775 },
+  'cap-movil-cond-perfil': { ...APP, sigue: 'cap-movil-sup-alertas', desde: 535 },
+  'cap-movil-sup-resumen': { ...APP, sigue: 'cap-movil-sup-vehiculos', desde: 460 },
+  // Continuación real: Mi unidad sigue con su telemetría (la misma hoja, 690 filas más abajo;
+  // coincidencia exacta de píxeles entre la fila 2100 de la primera y la 1410 de la segunda).
+  'cap-movil-cond-inicio': { ...APP, sigue: 'cap-movil-cond-inicio-telemetria', junta: false, corte: 2100, desde: 1410 },
 }
 
 // Filas del fundido entre dos pantallas distintas.

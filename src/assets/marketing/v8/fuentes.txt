@@ -148,19 +148,8 @@ cap-panel-documentos             panel     comparativa/web-v8-fotos/capturas-pan
 cap-panel-personal               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-personal.png
 cap-panel-conductor              panel     comparativa/web-v8-fotos/capturas-panel/3x/w-conductor.png
 cap-panel-inventario-gps         panel     comparativa/web-v8-fotos/capturas-panel/3x/w-inventario-gps.png
-cap-movil-sup-resumen            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-resumen.png
-cap-movil-sup-alertas            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-alertas.png
-cap-movil-sup-mantenimiento      telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-mantenimiento.png
-cap-movil-sup-mapa               telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-centro-control.png
-cap-movil-sup-mapa-unidad        telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-centro-control-unidad.png
-cap-movil-sup-inspecciones       telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-inspecciones.png
-cap-movil-sup-reportes           telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-reportes.png
-cap-movil-sup-vehiculos          telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-vehiculos.png
-cap-movil-sup-conductor          telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-conductor.png
-cap-movil-cond-inicio            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-inicio.png
-cap-movil-cond-mantenimiento     telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-mantenimiento.png
-cap-movil-cond-mapa              telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-mapa.png
-cap-movil-cond-perfil            telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-perfil.png
+# Las cap-movil (teléfono) salen ahora de fuentes-t153.txt (capturas de la app real); aquí solo quedan
+# las que no tienen pareja en la app: cap-movil-mnt-reportar-fotos y cap-movil-mnt-fotos (T-162).
 
 # Mantenimiento en Plataforma (T-123): demo en modo «reducir movimiento», 3x. Fotos de la ODT de
 # demostración (odt-009) servidas en local al capturar (scratchpad/t123/cap3x.py); no se subió nada.
@@ -169,9 +158,5 @@ cap-mnt-revision                 panel     comparativa/web-v8-fotos/capturas-pan
 cap-mnt-resuelta                 panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-resuelta.png
 cap-mnt-fotos                    panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-fotos.png
 cap-mnt-plan                     panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-plan.png
-cap-movil-mnt-reportar           telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-reportar.png
 cap-movil-mnt-reportar-fotos     telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-reportar-fotos.png
-cap-movil-mnt-asignadas          telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-asignadas.png
-cap-movil-mnt-resuelta           telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-sup-resuelta.png
 cap-movil-mnt-fotos              telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-sup-fotos.png
-cap-movil-mnt-plan               telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-sup-plan.png

@@ -34,12 +34,12 @@ const RASGOS = [
 ]
 
 const FUNCIONES = [
-  { titulo: 'Rastreo GPS en tiempo real', texto: 'Posición cada 10 segundos con el vehículo en movimiento.', foto: { nombre: 'operadora-mapa', alt: 'Supervisor de FOM frente al Centro de control actual. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-mapa', alt: 'Centro de control actual en la app del supervisor. Datos de demostración.' } },
+  { titulo: 'Rastreo GPS en tiempo real', texto: 'Posición cada 10 segundos con el vehículo en movimiento.', foto: { nombre: 'operadora-mapa', alt: 'Supervisor de FOM frente al Centro de control actual. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-mapa', alt: 'Mapa de la flota en la app del supervisor: 26 unidades, 15 en marcha. Datos de demostración.' } },
   { titulo: 'Telemática y diagnóstico', texto: 'Batería, motor, kilometraje y códigos de falla de cada unidad.', foto: { nombre: 'telematica', alt: 'Camioneta FOM con el motor y el equipo de telemática a la vista.' } },
-  { titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha y órdenes de trabajo con historial.', captura: { nombre: 'cap-movil-cond-mantenimiento', alt: 'Mantenimiento de la unidad en la app actual. Datos de demostración.' } },
-  { titulo: 'Reportes y analítica', texto: 'Costo por kilómetro, uso y disponibilidad. En PDF o Excel.', foto: { nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-reportes', alt: 'Reportes actuales en la app del supervisor. Datos de demostración.' } },
+  { titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha y órdenes de trabajo con historial.', captura: { nombre: 'cap-movil-cond-mantenimiento', alt: 'Mantenimiento en la app, vista del conductor: las órdenes de su unidad con su estado y el botón Reportar una falla. Datos de demostración.' } },
+  { titulo: 'Reportes y analítica', texto: 'Costo por kilómetro, uso y disponibilidad. En PDF o Excel.', foto: { nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-reportes', alt: 'Reportes en la app del supervisor: de vehículos, usuarios o costos, del período que elijas, en PDF. Datos de demostración.' } },
   { titulo: 'Inspección en campo', texto: 'El conductor revisa su unidad con la app antes de salir.', foto: { nombre: 'tecnico-app-unidad', alt: 'Conductor de FOM con su unidad abierta en la app, junto al camión.', posicion: '40% 50%' } },
-  { titulo: 'Alertas operativas', texto: 'Exceso de velocidad, motor encendido detenido y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas actuales en la app del supervisor. Datos de demostración.' } },
+  { titulo: 'Alertas operativas', texto: 'Exceso de velocidad, motor encendido detenido y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas en la app del supervisor: excesos de velocidad sin leer, de lo más nuevo a lo más viejo. Datos de demostración.' } },
 ]
 
 const CHIPS_MAPA = [
@@ -65,10 +65,10 @@ const CIFRAS_MAPA = [
 
 // App en la calle: la falla que reporta el conductor y la orden ya resuelta (pantallas largas reales).
 const TELEFONOS = [
-  { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app, vista del conductor: descripción, tipo Frenos, prioridad Alta y fotos de la falla. Datos de demostración.',
-    pie: <><b className="v8-fuerte">Reporte de falla.</b> Con foto, desde la app.</>, corto: 'Reporte de falla con foto.' },
-  { nombre: 'cap-movil-mnt-resuelta', alt: 'Orden resuelta en la app: resultado del trabajo, costo, tiempo hasta el cierre, fotos e historial. Datos de demostración.',
-    pie: <><b className="v8-fuerte">Orden resuelta.</b> Con costo, fotos e historial.</>, corto: 'Orden resuelta, con su historial.' },
+  { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app, vista del conductor: Toyota Hilux de la U-001, falla de Frenos, gravedad Alta y la descripción. Datos de demostración.',
+    pie: <><b className="v8-fuerte">Reporte de falla.</b> Qué falló y qué tan grave, desde la app.</>, corto: 'Reporte de falla desde la app.' },
+  { nombre: 'cap-movil-mnt-resuelta', alt: 'Orden resuelta en la app del supervisor: Falla: Frenos, qué se hizo, fecha de cierre, costo de 155 USD y el botón Reabrir. Datos de demostración.',
+    pie: <><b className="v8-fuerte">Orden resuelta.</b> Qué se hizo, cuándo se cerró y cuánto costó.</>, corto: 'Orden resuelta, con su costo.' },
 ]
 
 // La frase se enciende palabra por palabra al bajar y ocupa sola la pantalla (estilo Apple).
@@ -140,7 +140,7 @@ export default function InicioV8() {
         <FotoIntegradaV8 className="inicio-duo-foto" nombre="oficina-monitor-resumen" marco="redondo" sizes="(min-width: 1240px) 1136px, calc(100vw - 40px)"
           alt="Oficina de FOM con el Resumen actual del panel en el monitor. Datos de demostración." />
         <CapturaFlotanteV8 className="inicio-duo-telefono" nombre="cap-movil-sup-resumen" ancho={230}
-          alt="Resumen actual en el teléfono del supervisor. Datos de demostración." />
+          alt="Resumen en la app del supervisor: 26 vehículos, ODT por resolver y alertas nuevas. Datos de demostración." />
         <p className="inicio-duo-pie v8-sm v8-t2">
           <span><b className="v8-fuerte">En la oficina.</b> Panel web del supervisor.</span>
           <span><b className="v8-fuerte">En el teléfono.</b> App del supervisor y del conductor.</span>

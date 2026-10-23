@@ -1,6 +1,6 @@
 // Escena «En la cabina» de la web v8 (T-142): la foto de la cabina en carretera y, en primer plano,
-// el teléfono del conductor en su soporte del tablero con la app REAL (Mi unidad, que sigue con el
-// mapa de su unidad: la misma pantalla larga de pantallasV8.js). Al bajar, la carretera «avanza»
+// el teléfono del conductor en su soporte del tablero con la app REAL (Mi unidad, que sigue con la
+// telemetría de su unidad: la misma pantalla larga de pantallasV8.js). Al bajar, la carretera «avanza»
 // despacio, el teléfono se asienta en su soporte con un vaivén leve y su pantalla se desplaza sola.
 // Sin escena fija en ningún tamaño (escena de paso, para que no todo detenga el scroll).
 // Movimiento: momentoTableroV8.js. Con «reducir movimiento»: quieto.
@@ -28,7 +28,7 @@ export default function EscenaTableroV8({ nota = true, etiqueta = 'Teléfono del
           <i className="v8-tab-pinza is-izq" aria-hidden="true" />
           <i className="v8-tab-pinza is-der" aria-hidden="true" />
           <PantallaTelefonoV8 nombre="cap-movil-cond-inicio" sizes="(max-width: 599px) 140px, 240px"
-            alt="Mi unidad en la app del conductor: unidad 01, señal reportando e índice de manejo seguro. Datos de demostración." />
+            alt="Mi unidad en la app del conductor: la Toyota Hilux de la U-001, en marcha a 61 km/h, con su telemetría en vivo. Datos de demostración." />
         </div>
       </div>
     </div>

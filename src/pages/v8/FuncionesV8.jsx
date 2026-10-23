@@ -69,8 +69,8 @@ const CAPTURAS = [
 ]
 // En el teléfono: dos teléfonos apilados (Mantenimiento y Alertas); Reportes es la sección siguiente.
 const MOVIL = [
-  { id: 'funciones-movil-mantenimiento', titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha y órdenes de trabajo con historial y costo.', captura: { nombre: 'cap-movil-sup-mantenimiento', alt: 'Mantenimiento actual del panel en el teléfono del supervisor. Datos de demostración.' } },
-  { id: 'funciones-movil-alertas', titulo: 'Alertas operativas', texto: 'Exceso de velocidad, ralentí, desconexión y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas actuales en el teléfono del supervisor. Datos de demostración.' } },
+  { id: 'funciones-movil-mantenimiento', titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha y órdenes de trabajo con historial y costo.', captura: { nombre: 'cap-movil-sup-mantenimiento', alt: 'Mantenimiento en la app del supervisor: Nueva ODT y órdenes abiertas, en revisión y resueltas. Datos de demostración.' } },
+  { id: 'funciones-movil-alertas', titulo: 'Alertas operativas', texto: 'Exceso de velocidad, ralentí, desconexión y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas en la app del supervisor: excesos de velocidad sin leer, de lo más nuevo a lo más viejo. Datos de demostración.' } },
 ]
 const SALTOS_MOVIL = [['#funciones-movil-mantenimiento', 'Mantenimiento'], ['#reportes', 'Reportes'], ['#funciones-movil-alertas', 'Alertas']]
 
@@ -244,7 +244,7 @@ export default function FuncionesV8() {
       {/* Teléfono: la captura REAL de Reportes, entera, y el texto debajo (la foto del monitor
           recortada cortaba «Reportes» y quedaba bajo el rótulo). En escritorio, la escena de siempre. */}
       <div className="funciones-reportes-movil">
-        <CapturaFlotanteV8 nombre="cap-movil-sup-reportes" alt="Reportes actuales en el teléfono del supervisor: vehículos, usuarios, costos y estadístico. Datos de demostración." ancho={240} />
+        <CapturaFlotanteV8 nombre="cap-movil-sup-reportes" alt="Reportes en la app del supervisor: de vehículos, usuarios o costos, del mes actual o de las fechas que elijas, para toda la empresa, un área o las unidades que elijas, en PDF. Datos de demostración." ancho={240} />
       </div>
       <EscenaV8 lado="izquierda" ancho="62%" anchoTexto={460} posicionMovil="70% 50%" altoMovil={360}
         foto={{ nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM en la oficina. Datos de demostración.' }}>
