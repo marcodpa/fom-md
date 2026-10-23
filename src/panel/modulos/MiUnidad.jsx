@@ -13,6 +13,8 @@ import { conSenalAlDia, tiempoSinSenal, transmitiendo, useMinuto } from '../dato
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
 import ManejoConductor from '../comp/ManejoConductor'
+import { useEsMovil } from '../comp/movil-navegacion'
+import MiUnidadMovil from './MiUnidadMovil'
 
 // ============================================================
 // MI UNIDAD — el inicio del conductor
@@ -173,6 +175,25 @@ export default function MiUnidad() {
   const reportando = unidad?.conexion === 'reportando'
   const kmHoy = useMemo(() => kmDeHoy(unidad?.recorrido, hoy), [unidad?.recorrido, hoy])
   const posicion = enMapa[0] ? `${enMapa[0].lat.toFixed(4)}, ${enMapa[0].lng.toFixed(4)}` : null
+
+  // En el teléfono, la pantalla «Mi unidad» de la app (MiUnidadMovil.jsx) con
+  // estos mismos datos; en la computadora, la de siempre.
+  const esMovil = useEsMovil()
+  if (esMovil) {
+    return (
+      <MiUnidadMovil
+        perfil={perfil}
+        unidad={unidad}
+        enMapa={enMapa}
+        cargando={cargando}
+        error={error}
+        alReintentar={() => { asignaciones.recargar(); vehiculos.recargar() }}
+        // La última lectura de la posición falló: lo que se ve es la anterior.
+        posicionVieja={vivo.estado === 'error'}
+        ahora={ahora}
+      />
+    )
+  }
 
   return (
     <>
