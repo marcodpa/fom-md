@@ -96,8 +96,10 @@ export function momentoTelevisorV8({ el, q, gsap, escritorio }) {
   // Con la pantalla viva: el mapa se mueve despacio (la captura es de 2880 px: nunca pasa de su
   // tamaño real) y al final se abre una unidad.
   tl.fromTo(mapa, { scale: 1, xPercent: 0, yPercent: 0 }, { scale: 1.06, xPercent: -1.5, yPercent: 1, duration: 1.5 }, 1.05)
-  tl.to(mapa, { opacity: 0, duration: 0.35 }, 2.35)
-  tl.fromTo(unidad, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' }, 2.35)
+  if (unidad) {
+    tl.to(mapa, { opacity: 0, duration: 0.35 }, 2.35)
+    tl.fromTo(unidad, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' }, 2.35)
+  }
   // Un giro muy leve mientras se mira, para que el televisor no quede «pegado».
   if (escritorio) {
     tl.fromTo(aparato, { rotationY: 0 }, { rotationY: -3, z: fondoV8(ancho, 0, 3, 0), duration: 1.9 }, 1.05)

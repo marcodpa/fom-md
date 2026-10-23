@@ -3,6 +3,7 @@
 // las dos vistas de la app, conductor y supervisor (sección «Supervisor» con capturas reales).
 // Animación (nota azul del tablero, solo 2 momentos):
 //   1) Hero: el titular entra escalonado y la foto entra suave desde la derecha.
+//   1b) (T-144) «En la cabina», tras los teléfonos: EscenaTableroV8 (sin escena fija; se mueve sola).
 //   2) «Todo lo del día, en tres pantallas»: escena de teléfonos (EscenaTelefonosV8) con Mi unidad
 //      (conductor), Resumen (supervisor) y Mi perfil (conductor). Escritorio ≥ 1024 px: fija; la pantalla de cada teléfono se
 //      desplaza sola y luego se inclinan en 3D y se separan. Tableta y teléfono: lo mismo, más
@@ -13,6 +14,7 @@ import {
   SitioV8, NavLocalV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8, EscenaV8,
   EscenaTelefonosV8, TarjetaVidrioV8, BotonV8, EnlaceV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
+import { EscenaTableroV8 } from '../../components/v8/escenasExtraV8'
 import './app-v8.css'
 
 const LOCAL = [['pantallas', 'Pantallas'], ['supervisor', 'Supervisor'], ['inspeccion', 'Inspección'], ['mi-unidad', 'Mi unidad'], ['indice', 'Índice de manejo']]
@@ -96,6 +98,17 @@ export default function AppV8() {
       </ContenedorV8>
       <ContenedorV8 className="app-pantallas-escena">
         <EscenaTelefonosV8 telefonos={PANTALLAS} etiqueta="Tres pantallas de la app: Mi unidad y Mi perfil del conductor, Resumen del supervisor" />
+      </ContenedorV8>
+    </SeccionV8>
+
+    {/* T-144 · En la cabina (EscenaTableroV8, se mueve sola y sin escena fija): justo después de
+        la escena de teléfonos, el teléfono del conductor en su soporte, con la app real. */}
+    <SeccionV8 id="cabina" className="app-cabina" aria-labelledby="app-cabina-titulo">
+      <ContenedorV8>
+        <EncabezadoV8 centro id="app-cabina-titulo" kicker="En la cabina" titulo={['La app va', 'con el conductor.']} anchoBajada={620}
+          bajada={<Dos e="En el soporte del tablero: su unidad, la señal, su índice de manejo y el mapa con la unidad asignada."
+            m="Su unidad, la señal, su índice y el mapa, en el tablero." />} />
+        <EscenaTableroV8 className="app-cabina-escena" etiqueta="Teléfono del conductor en el soporte del tablero con Mi unidad y el mapa de la app" />
       </ContenedorV8>
     </SeccionV8>
 

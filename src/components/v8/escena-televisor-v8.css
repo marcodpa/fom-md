@@ -117,7 +117,7 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 22px 34px -14px rgba(0, 0, 0, .85);
 }
 
-.v8-tv .v8-nota-demo { margin-top: 18px; }
+.v8-tv .v8-nota-demo { position: relative; margin-top: 18px; }
 
 @media (max-width: 1023px) {
   .v8-tv { --v8-tv-ancho: min(100%, 860px); }
@@ -129,6 +129,14 @@
   .v8-tv-pie i { width: 10%; }
   .v8-tv-pie b { width: 42%; }
   .v8-tv .v8-nota-demo { margin-top: 14px; }
+  /* En el teléfono la pantalla mide ~350 px: la carga va más grande y solo con lo que se lee
+     (flechas, «FOM» y la barra); el lema y «Cargando…» quedarían de 7 px. */
+  .v8-tv-carga { gap: 4cqw; }
+  .v8-tv-carga-marca { gap: 3cqw; }
+  .v8-tv-flechas { width: 15cqw; }
+  .v8-tv-nombre { font-size: 9.5cqw; }
+  .v8-tv-lema, .v8-tv-estado { display: none; }
+  .v8-tv-barra { width: 26cqw; height: 3px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .v8-tv-pulso { display: none; }

@@ -53,12 +53,17 @@ export function usarEscenaV8(raiz, momento) {
       if (!movimiento) return
       return momento({ el, q: gsap.utils.selector(el), gsap, ScrollTrigger, escritorio, telefono })
     })
+    // Orden de los tramos con todas las escenas de la página juntas: esta escena crea su tramo
+    // ANTES que los de la página (el efecto del hijo corre antes que useMomentoV8 del padre). En el
+    // cuadro siguiente, ya creados todos, se ordenan por posición y se recalculan de arriba abajo,
+    // así cada escena fija cuenta el alto que añaden las de arriba.
+    const cuadro = requestAnimationFrame(() => { ScrollTrigger.sort(); ScrollTrigger.refresh() })
     // La letra llega después del primer pintado y cambia alturas: recalcular los tramos.
     let espera = 0
     const recalcular = () => { clearTimeout(espera); espera = setTimeout(() => ScrollTrigger.refresh(), 150) }
     document.fonts?.ready.then(recalcular)
     window.addEventListener('load', recalcular)
-    return () => { clearTimeout(espera); window.removeEventListener('load', recalcular); mm.revert() }
+    return () => { cancelAnimationFrame(cuadro); clearTimeout(espera); window.removeEventListener('load', recalcular); mm.revert() }
   }, { scope: raiz })
 }
 

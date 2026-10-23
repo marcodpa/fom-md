@@ -18,27 +18,36 @@ import './escena-televisor-v8.css'
 const SIZES = '(max-width: 599px) 92vw, (max-width: 1023px) 88vw, 1000px'
 
 // Unidades del mapa real (cap-panel-mapa, 1280 × 800) sobre las que late un pulso suave.
-const PULSOS = [[38.05, 29], [31.4, 33.5], [49, 53.2], [59.15, 63.3], [65.2, 88.5]]
+const PULSOS_MAPA = [[38.05, 29], [31.4, 33.5], [49, 53.2], [59.15, 63.3], [65.2, 88.5]]
 
-export default function EscenaTelevisorV8({ nota = true, etiqueta = 'Televisor que se enciende con la pantalla de carga de FOM y muestra el Centro de control', className = '' }) {
+// Pantallas por defecto: el Centro de control y, al final, una unidad abierta. `pulsos` = puntos
+// (en % de la captura) donde late un anillo; solo donde de verdad hay una unidad en la captura.
+export const PANTALLAS_TV_MAPA = [
+  { nombre: 'cap-panel-mapa', pulsos: PULSOS_MAPA,
+    alt: 'Centro de control del panel FOM: 26 unidades en el mapa del Zulia, 15 en marcha. Datos de demostración.' },
+  { nombre: 'cap-panel-mapa-unidad', alt: 'Centro de control con la unidad Z69FC7W seleccionada. Datos de demostración.' },
+]
+
+// pantallas = [primera, segunda?]: capturas reales del panel. La segunda entra al final.
+export default function EscenaTelevisorV8({ pantallas = PANTALLAS_TV_MAPA, nota = true, etiqueta = 'Televisor que se enciende con la pantalla de carga de FOM y muestra el panel', className = '' }) {
   const raiz = useRef(null)
   usarEscenaV8(raiz, momentoTelevisorV8)
   const texto = nota === true ? 'Capturas reales del panel · Datos de demostración' : nota
+  const [primera, segunda] = pantallas
   return <figure ref={raiz} className={`v8-tv ${className}`} data-v8-tv="" aria-label={etiqueta}>
     <div className="v8-tv-escena">
       <div className="v8-tv-aparato">
         <div className="v8-tv-marco">
           <div className="v8-tv-pantalla">
-            {/* El panel real: Centro de control y, al final, una unidad abierta. */}
+            {/* El panel real: la primera pantalla y, al final, la segunda. */}
             <div className="v8-tv-panel">
               <div className="v8-tv-toma is-mapa">
-                <CapturaV8 nombre="cap-panel-mapa" sizes={SIZES}
-                  alt="Centro de control del panel FOM: 26 unidades en el mapa del Zulia, 15 en marcha. Datos de demostración." />
-                {PULSOS.map(([x, y]) => <i key={`${x}-${y}`} className="v8-tv-pulso" style={{ left: `${x}%`, top: `${y}%` }} aria-hidden="true" />)}
+                <CapturaV8 nombre={primera.nombre} sizes={SIZES} alt={primera.alt} />
+                {(primera.pulsos || []).map(([x, y]) => <i key={`${x}-${y}`} className="v8-tv-pulso" style={{ left: `${x}%`, top: `${y}%` }} aria-hidden="true" />)}
               </div>
-              <div className="v8-tv-toma is-unidad" aria-hidden="true">
-                <CapturaV8 nombre="cap-panel-mapa-unidad" sizes={SIZES} />
-              </div>
+              {segunda && <div className="v8-tv-toma is-unidad">
+                <CapturaV8 nombre={segunda.nombre} sizes={SIZES} alt={segunda.alt} />
+              </div>}
             </div>
             {/* La pantalla de carga de FOM (misma marca y orden que CargaFom.jsx). */}
             <div className="v8-tv-carga" aria-hidden="true">

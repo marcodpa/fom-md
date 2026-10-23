@@ -269,3 +269,7 @@
   .v8-site .insp-hoja-pasos { gap: 12px; margin-top: 22px; }
   .v8-site .insp-papel { width: min(100%, 340px); }
 }
+
+/* T-144 · Puesto de monitores (EscenaMonitoresV8). */
+.plat-puesto-escena { margin-top: 40px; }
+@media (max-width: 599px) { .plat-puesto-escena { margin-top: 24px; } }

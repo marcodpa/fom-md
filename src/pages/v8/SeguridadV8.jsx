@@ -2,15 +2,18 @@
 // y «Seguridad · teléfono» (Seguridad-movil.dc.html) del lienzo «Web FOM nueva».
 // Animación (nota azul del tablero, solo 2 momentos):
 //   1) Hero: entrada del titular y la foto (escalonada, al cargar).
+//   1b) (T-144) «El aviso llega» en Eventos: el exceso de velocidad marcado en el panel viaja al
+//      teléfono del supervisor (EscenaAlertaV8, escena fija solo ≥ 1024 px; se mueve sola).
 //   2) Escena fija SOS: sobre la foto aparece el aviso «SOS · Respuesta guiada» (solo escritorio
 //      ≥ 1024 px).
 // Todo lo demás: quieto o aparición suave. Teléfono: sin escena fija.
 import { useRef } from 'react'
 import { PAGES } from '../../content/pages'
 import {
-  SitioV8, NavLocalV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8,
+  SitioV8, NavLocalV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8,
   TarjetaVidrioV8, EscenaV8, PreguntasV8, BotonV8, EnlaceV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
+import { EscenaAlertaV8 } from '../../components/v8/escenasExtraV8'
 import './seguridad-v8.css'
 
 const S = PAGES.seguridad
@@ -113,11 +116,10 @@ export default function SeguridadV8() {
           anchoBajada={700} />
       </ContenedorV8>
 
+      {/* T-144 · El aviso llega (EscenaAlertaV8, se mueve sola): el mismo exceso de velocidad en
+          Alertas del panel y en la app del supervisor (antes eran dos capturas quietas). */}
       <ContenedorV8 className="seguridad-eventos-captura">
-        <CapturaFlotanteV8 className="is-panel-escritorio" nombre="cap-panel-alertas" nota
-          alt="Alertas actuales del panel FOM con excesos de velocidad. Datos de demostración." />
-        <CapturaFlotanteV8 className="is-telefono-movil" nombre="cap-movil-sup-alertas" ancho={240}
-          alt="Alertas actuales en el teléfono del supervisor. Datos de demostración." />
+        <EscenaAlertaV8 etiqueta="Un exceso de velocidad aparece en Alertas del panel y llega a la app del supervisor" />
       </ContenedorV8>
 
       <ContenedorV8 className="seguridad-eventos-cajas is-escritorio">

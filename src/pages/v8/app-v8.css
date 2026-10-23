@@ -88,3 +88,7 @@
   .v8-site .v8-pill.app-cta-boton { width: 100%; }
   .v8-site .app-cta .v8-acciones { align-items: stretch; margin-top: 24px; }
 }
+
+/* T-144 · En la cabina (EscenaTableroV8). */
+.app-cabina-escena { margin-top: 40px; }
+@media (max-width: 599px) { .app-cabina-escena { margin-top: 24px; } }

@@ -19,6 +19,7 @@ import {
   SitioV8, NavLocalV8, HeroV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8,
   RasgosV8, EscenaV8, BloqueCifrasV8, ChipV8, TarjetaVidrioV8, PreguntasV8, BotonV8, EnlaceV8, IconoV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
+import { EscenaMonitoresV8 } from '../../components/v8/escenasExtraV8'
 import './plataforma-v8.css'
 
 const P = PAGES.plataforma
@@ -453,6 +454,16 @@ export default function PlataformaV8() {
             alt="Centro de control actual en el teléfono. Datos de demostración." />
         </div>
       </ContenedorV8>
+    </SeccionV8>
+
+    {/* T-144 · Puesto de monitores (EscenaMonitoresV8, se mueve solo): entre «Web y app» y el mapa,
+        lejos de las escenas fijas de Inspecciones y Mantenimiento. */}
+    <SeccionV8 id="puesto" className="plat-puesto" aria-labelledby="plat-puesto-titulo">
+      <ContenedorV8>
+        <EncabezadoV8 centro id="plat-puesto-titulo" kicker="Oficina de operaciones" titulo={['Un puesto,', 'toda la operación.']} anchoBajada={620}
+          bajada="Resumen, Centro de control y Mantenimiento, cada uno en su pantalla." />
+      </ContenedorV8>
+      <EscenaMonitoresV8 className="plat-puesto-escena" etiqueta="Tres monitores de la oficina con el Centro de control, el Resumen y Mantenimiento del panel" />
     </SeccionV8>
 
     <SeccionV8 id="mapa" aria-labelledby="plat-mapa-titulo">
