@@ -156,7 +156,7 @@ function cloudinary(req, res, ruta) {
     res.writeHead(404, CORS)
     return res.end()
   }
-  const archivo = join(AQUI, 'fotos', foto.archivo)
+  const archivo = foto.archivo
   const tipo = archivo.endsWith('.png') ? 'image/png' : 'image/jpeg'
   res.writeHead(200, { ...CORS, 'Content-Type': tipo, 'Cache-Control': 'no-store' })
   if (req.method === 'HEAD') return res.end()
@@ -246,7 +246,7 @@ async function atender(req, res, url) {
 
   // Las rutas «de otro ente» con el ente propio son las mismas que las de la sesión.
   const deEnte = ruta.match(/^\/tenants\/([^/]+)(\/.*)$/)
-  if (deEnte && deEnte[1] === D.ENTE_ID && !/^\/(relationships|driver-metrics)/.test(deEnte[2])) ruta = deEnte[2]
+  if (deEnte && deEnte[1] === D.ENTE_ID && !/^\/(relationships|driver-metrics|vehicles$)/.test(deEnte[2])) ruta = deEnte[2]
   else if (deEnte && deEnte[1] !== D.ENTE_ID) {
     if (deEnte[2] === '/relationships') return json(res, 200, lista([], q))
     return error(res, 404, 'not_found', 'Tenant not found')
@@ -542,6 +542,14 @@ const servidor = createServer(async (req, res) => {
     if (url.pathname === '/__demo/modo') {
       if (url.searchParams.get('inspeccion')) modo.inspeccion = url.searchParams.get('inspeccion')
       return json(res, 200, modo)
+    }
+    // La foto de un vehículo por marca y modelo (capturar.mjs la pone en lugar del render
+    // del catálogo de la app). 404 si todavía no hay foto con licencia para él.
+    if (url.pathname === '/__demo/foto-vehiculo') {
+      const f = D.fotoDeVehiculo(url.searchParams.get('marca'), url.searchParams.get('modelo'))
+      if (!f) return noPublicada(res)
+      res.writeHead(200, { ...CORS, 'Content-Type': f.endsWith('.png') ? 'image/png' : 'image/jpeg', 'Cache-Control': 'no-store' })
+      return res.end(readFileSync(f))
     }
     if (url.pathname.startsWith('/__cloudinary/')) return cloudinary(req, res, url.pathname)
     if (!url.pathname.startsWith(VERSION)) return noPublicada(res)

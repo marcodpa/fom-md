@@ -6,7 +6,7 @@
 // La semilla usa imports sin extensión (estilo Vite), así que se empaqueta con el esbuild que ya
 // trae el repo y se importa el resultado.
 import { buildSync } from 'esbuild'
-import { mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -143,7 +143,7 @@ export const UNIDADES = s.VEHICULOS.map((v) => {
   return {
     semillaId: v.id,
     id: uuid('unidad', v.id),
-    code: v.numero.toLowerCase(),
+    code: v.numero.toUpperCase(),
     vehicleType: v.tipo,
     plate: v.placa,
     make: v.marca,
@@ -459,7 +459,9 @@ export const INSPECCIONES = s.INSPECCIONES.map((i) => {
     result: i.resultado,
     inspectionDate: i.fecha,
     location: i.ubicacion,
-    submittedAt: i.creadaEn,
+    // La semilla las pone a horas en punto, todas con los mismos minutos: aquí se reparten
+    // unos minutos antes (por clave), para que la lista no repita «12:10» cinco veces.
+    submittedAt: i.creadaEn ? new Date(Date.parse(i.creadaEn) - Math.floor(azar(`env-${i.id}`)() * 52) * 60000).toISOString() : i.creadaEn,
     vehicleId: u.id,
     vehicleCode: u.code,
     vehiclePlate: u.plate,
@@ -470,6 +472,33 @@ export const INSPECCIONES = s.INSPECCIONES.map((i) => {
     fallasCriticas: i.fallasCriticas,
   }
 })
+// La semilla trae pocos días de inspecciones: el historial por persona salía al 33 %. Se
+// completan los días hábiles de los últimos 40 (casi todas aprobadas, a primera hora), sin
+// pisar las que ya hay. El sábado, la mitad; el domingo no se trabaja.
+{
+  const hay = new Set(INSPECCIONES.map((i) => `${i.vehicleId}|${i.inspectionDate}`))
+  for (const u of UNIDADES) {
+    if (!u.conductorId) continue
+    const p = personaPorId[u.conductorId]
+    for (let k = 1; k <= 40; k++) {
+      const d = new Date(AHORA_SEMILLA - k * DIA)
+      const fecha = diaLocal(d)
+      if (hay.has(`${u.id}|${fecha}`) || d.getDay() === 0) continue
+      const r = azar(`gen-insp-${u.id}-${fecha}`)
+      if (r() < (d.getDay() === 6 ? 0.5 : 0.08)) continue
+      const t = r()
+      const result = t < 0.04 ? 'bloqueada' : t < 0.18 ? 'aprobada_con_observaciones' : 'aprobada'
+      const hora = new Date(`${fecha}T06:00:00`).getTime() + Math.floor(r() * 95) * 60000
+      INSPECCIONES.push({
+        id: uuid('insp', `gen-${u.semillaId}-${fecha}`), kind: 'daily', result, inspectionDate: fecha, location: u.ubicacion,
+        submittedAt: new Date(hora).toISOString(), vehicleId: u.id, vehicleCode: u.code, vehiclePlate: u.plate,
+        driverName: p.nombre, driverUserId: p.id, templateName: FORMATO_NOMBRE,
+        observaciones: result === 'aprobada' ? 0 : 1, fallasCriticas: result === 'bloqueada' ? 1 : 0,
+      })
+    }
+  }
+  INSPECCIONES.sort((a, b) => b.inspectionDate.localeCompare(a.inspectionDate) || (b.submittedAt ?? '').localeCompare(a.submittedAt ?? ''))
+}
 // La diaria de HOY de la Unidad 01 la decide el modo del servidor (pendiente, aprobada, bloqueada).
 export const HOY_SEMILLA = diaLocal(new Date(AHORA_SEMILLA))
 for (let k = INSPECCIONES.length - 1; k >= 0; k--) {
@@ -518,7 +547,8 @@ export const itemPorNombre = (nombre) => ITEMS.find((it) => it.name === nombre)
 const CODIGO_DOC = {
   'Póliza de seguro': 'poliza_seguro',
   'Certificado de circulación': 'carnet_circulacion',
-  'Revisión técnica': 'revision_tecnica',
+  // La app no tiene «Revisión técnica»: su papel de unidad equivalente son los trimestres.
+  'Revisión técnica': 'trimestres',
   RCV: 'rcv',
   'Licencia de conducir': 'licencia_conducir',
   'Certificado médico': 'carta_medica',
@@ -531,6 +561,11 @@ export const DOCUMENTOS = s.DOCUMENTOS.map((d) => {
   // La Unidad 01 sale «Documento vencido» en la lista del panel: se respeta con su RCV.
   if (u?.semillaId === 'veh-001' && d.tipo === 'RCV') vence = diaLocal(new Date(AHORA_SEMILLA - 6 * DIA))
   if (u?.semillaId === 'veh-001' && d.tipo !== 'RCV') vence = diaLocal(new Date(AHORA_SEMILLA + (120 + d.tipo.length * 9) * DIA))
+  // La semilla deja una docena de papeles de unidad vencidos: en la app eso llena «No pueden
+  // salir» con media flota. Se dejan vencidos tres (U-001 RCV, U-008 póliza, U-015) y el resto
+  // pasa a «por vencer» en las próximas semanas.
+  if (u && u.semillaId !== 'veh-001' && !['veh-008', 'veh-015'].includes(u.semillaId) && vence < diaLocal(new Date(AHORA_SEMILLA)))
+    vence = diaLocal(new Date(AHORA_SEMILLA + (6 + Math.floor(azar(`venc-${d.id}`)() * 40)) * DIA))
   if (p?.semillaId === 'usr-002') vence = d.tipo === 'Licencia de conducir' ? p.licenciaVence : d.tipo === 'Certificado médico' ? p.cartaMedicaVence : vence
   return {
     id: uuid('doc', d.id),
@@ -546,12 +581,14 @@ export const DOCUMENTOS = s.DOCUMENTOS.map((d) => {
 })
 
 // --- Avisos (buzón del panel) y alertas -------------------------------------------
+// La app nombra las unidades por su código («U-005»), no por el alias del panel («Unidad 05»).
+const codigoApp = (t) => (t ? t.replace(/\bUnidad (\d+)\b/g, (_, n) => `U-${n.padStart(3, '0')}`) : t)
 const odtPorSemilla = (id) => (id ? uuid('odt', id) : null)
 export const AVISOS = s.NOTIFICACIONES.map((n) => ({
   id: uuid('aviso', n.id),
   notificationType: n.tipo,
-  title: n.titulo.replace(/Vehículo (Unidad \d+) \(([A-Z0-9]+)\)/, (_, alias, placa) => `${alias} · ${placa}`),
-  detail: n.detalle,
+  title: codigoApp(n.titulo.replace(/Vehículo (Unidad \d+) \(([A-Z0-9]+)\)/, (_, alias, placa) => `${alias} · ${placa}`)),
+  detail: codigoApp(n.detalle),
   workOrderId: odtPorSemilla(n.odtId),
   readAt: n.leida ? n.creadaEn : null,
   dismissedAt: null,
@@ -606,9 +643,11 @@ export const PLANES = [
 
 export function coberturaDe(plan, u) {
   const r = azar(`cob-${plan.id}-${u.id}`)
-  const recorrido = Math.round(r() * plan.intervalKm * 1.02)
+  // Los frenos de la Unidad 01 se cambiaron hace 5 días (la orden resuelta de las capturas).
+  const frenosCarlos = u.semillaId === 'veh-001' && plan.clave === 'fre'
+  const recorrido = frenosCarlos ? 380 : Math.round(r() * plan.intervalKm * 1.02)
   const ultimo = u.km - recorrido
-  const dias = plan.intervalDays ? Math.round(r() * plan.intervalDays) : Math.round(20 + r() * 100)
+  const dias = frenosCarlos ? 5 : plan.intervalDays ? Math.round(r() * plan.intervalDays) : Math.round(20 + r() * 100)
   return {
     vehicleId: u.id,
     lastServiceOdometerKm: ultimo,
@@ -652,11 +691,41 @@ export const ACCIONES = (() => {
 })()
 
 // --- Fotos de demostración (servidas como si fueran Cloudinary) ----------------------
-// publicId → { archivo, titulo, etiqueta }. Recortes locales de fotos del propio repo.
+// publicId → { archivo, titulo, etiqueta }. Solo fotos de vehículos con LICENCIA LIBRE
+// (Marco: nada generado con IA ni sacado de las fotos de la web). Se registran solo si el
+// archivo está en fotos/ (ver preparar_fotos.py); si falta, la orden sale sin fotos, que es
+// mejor que con una mala.
 export const FOTOS = new Map()
+const DIR_FOTOS = join(AQUI, 'fotos')
+// Las fotos de vehículos con licencia libre que prepara otro agente (créditos en
+// comparativa/fotos-vehiculos/CREDITOS.md): <marca-modelo>-16x9.jpg y -4x3.jpg.
+const RECORTES = join(RAIZ, 'comparativa', 'fotos-vehiculos', 'recortes')
+/** Ruta completa de una foto de fotos/, o null si no está. */
+const enFotos = (archivo) => (existsSync(join(DIR_FOTOS, archivo)) ? join(DIR_FOTOS, archivo) : null)
 export function registrarFoto(publicId, archivo, titulo, etiqueta) {
-  FOTOS.set(publicId, { archivo, titulo, etiqueta })
+  const ruta = archivo && (archivo.includes(':') || archivo.startsWith('/') ? (existsSync(archivo) ? archivo : null) : enFotos(archivo))
+  if (!ruta) return
+  FOTOS.set(publicId, { archivo: ruta, titulo, etiqueta })
 }
+
+const claveFoto = (t) =>
+  String(t ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+/**
+ * La foto de un vehículo por marca y modelo («toyota-hilux»), o null. Primero la copia en
+ * fotos/, después la carpeta de recortes. La 16:9 va primero: es la forma de la tarjeta de la
+ * app (el render del catálogo mide 1024 × 559).
+ */
+export function fotoDeVehiculo(marca, modelo) {
+  const base = `${claveFoto(marca)}-${claveFoto(modelo)}`
+  for (const dir of [DIR_FOTOS, RECORTES]) {
+    for (const sufijo of ['-16x9.jpg', '-16x9.png', '-4x3.jpg', '.png', '.jpg']) {
+      const f = join(dir, base + sufijo)
+      if (existsSync(f)) return f
+    }
+  }
+  return null
+}
+
 for (const o of ORDENES) {
   if (!['frenos', 'neumaticos'].includes(o.failureType)) continue
   const base = `fom/work-orders/${o.id}`
@@ -665,8 +734,8 @@ for (const o of ORDENES) {
   registrarFoto(`${base}/work_order_opening/2`, 'falla-2.jpg', 'Caucho delantero', etiqueta)
   if (o.status === 'cerrada') registrarFoto(`${base}/work_order_closure/1`, 'taller.jpg', 'Trabajo terminado en el taller', etiqueta)
 }
-for (const u of UNIDADES) {
-  if (u.make === 'Toyota' && u.model === 'Hilux') registrarFoto(`fom/vehiculo/${u.id}/1`, 'hilux-2022.png', null, `fom_vehiculo_${u.id}`)
-}
+// Por si la app un día lee la foto propia de la unidad (hoy usa el render de su catálogo:
+// capturar.mjs lo cambia por fotoDeVehiculo vía /__demo/foto-vehiculo).
+for (const u of UNIDADES) registrarFoto(`fom/vehiculo/${u.id}/1`, fotoDeVehiculo(u.make, u.model), null, `fom_vehiculo_${u.id}`)
 
 export { s as semilla }

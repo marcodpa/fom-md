@@ -79,15 +79,22 @@ const enviar = (method, params = {}) =>
     ws.send(JSON.stringify({ id, method, params }))
   })
 
-/** Cloudinary de la demo → servidor falso; cualquier otra cosa de Cloudinary, cortada. */
-const HILUX_LIMPIA = join(dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1')), 'fotos', 'hilux-2022.png')
+// El render del catálogo de la app (assets/images/vehiculos/<marca>/<año>/<modelo>.png) NO
+// se usa: Marco quiere fotos reales con licencia libre. Se pide al servidor falso la de esa
+// marca y modelo (datos.mjs → fotoDeVehiculo); si aún no hay, un PNG transparente y la
+// tarjeta queda sin vehículo hasta que llegue la buena.
+const PNG_VACIO = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg=='
 
+/** Cloudinary de la demo → servidor falso; cualquier otra cosa de Cloudinary, cortada. */
 async function desviar({ requestId, request }) {
   const u = new URL(request.url)
-  // La Hilux 2022 que trae la app tiene el borde serruchado y un damero pegado tras los vidrios:
-  // en las capturas va la del panel, limpia (ver preparar_fotos.py).
-  if (/vehiculos\/toyota\/2022\/hilux/.test(decodeURIComponent(u.pathname + u.search))) {
-    return enviar('Fetch.fulfillRequest', { requestId, responseCode: 200, responseHeaders: [{ name: 'Content-Type', value: 'image/png' }, { name: 'Cache-Control', value: 'no-store' }], body: readFileSync(HILUX_LIMPIA).toString('base64') })
+  const arte = decodeURIComponent(u.pathname + u.search).match(/vehiculos\/([a-z0-9-]+)\/\d{4}\/([a-z0-9-]+)(?:\.[a-f0-9]+)?\.png/)
+  if (arte) {
+    const r = await fetch(`${API}/__demo/foto-vehiculo?marca=${arte[1]}&modelo=${arte[2]}`).catch(() => null)
+    const ok = r?.ok
+    const cuerpo = ok ? Buffer.from(await r.arrayBuffer()).toString('base64') : PNG_VACIO
+    const tipo = ok ? r.headers.get('content-type') : 'image/png'
+    return enviar('Fetch.fulfillRequest', { requestId, responseCode: 200, responseHeaders: [{ name: 'Content-Type', value: tipo }, { name: 'Cache-Control', value: 'no-store' }], body: cuerpo })
   }
   if (!u.hostname.endsWith('cloudinary.com')) return enviar('Fetch.continueRequest', { requestId })
   const demo = u.hostname === 'res.cloudinary.com' && u.pathname.startsWith('/fom-demo/')
@@ -120,7 +127,7 @@ await enviar('Emulation.setEmulatedMedia', {
 await enviar('Emulation.setTimezoneOverride', { timezoneId: 'America/Caracas' })
 await enviar('Emulation.setLocaleOverride', { locale: 'es-VE' }).catch(() => {})
 await enviar('Page.setInterceptFileChooserDialog', { enabled: true })
-await enviar('Fetch.enable', { patterns: [{ urlPattern: '*://res.cloudinary.com/*' }, { urlPattern: '*://api.cloudinary.com/*' }, { urlPattern: '*hilux*' }] })
+await enviar('Fetch.enable', { patterns: [{ urlPattern: '*://res.cloudinary.com/*' }, { urlPattern: '*://api.cloudinary.com/*' }, { urlPattern: '*vehiculos*' }] })
 
 async function evaluar(expr) {
   const r = await enviar('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true, userGesture: true })
