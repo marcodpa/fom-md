@@ -314,7 +314,7 @@ function FilaEvento({ icono, etiqueta, valor }) {
  * Como en la app, sin dato no hay tarjeta: un índice que no se pudo leer no se
  * pinta como un cero.
  */
-function ManejoAnillo() {
+export function ManejoAnillo() {
   const [dias, setDias] = useState(DIAS_MANEJO[0])
   const carga = useDatos(() => repo.manejo.miScore({ dias }), [dias])
   // Lo último que se enseñó: al cambiar de período la tarjeta no desaparece mientras carga.

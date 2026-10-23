@@ -136,3 +136,15 @@ export const MovilContexto = createContext(null)
 export function useMovil() {
   return useContext(MovilContexto)
 }
+
+/**
+ * «Estoy en la vista de teléfono»: LA condición para que un módulo pinte su
+ * versión de la app. Manda lo que decidió Consola —la misma que pinta la
+ * cápsula y la barra de pestañas—, así nunca sale la cápsula del teléfono con
+ * una pantalla de escritorio dentro. Fuera de Consola, el ancho de la ventana.
+ */
+export function useVistaTelefono() {
+  const marco = useContext(MovilContexto)
+  const ancho = useEsMovil()
+  return marco ? Boolean(marco.esMovil) : ancho
+}

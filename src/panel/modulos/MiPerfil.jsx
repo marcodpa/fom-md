@@ -18,6 +18,8 @@ import { claveDeTipo, huecosPersona } from '../comp/FotosIdentidad'
 import { ArchivosDeDocumento } from './Documentos'
 import './usuarios-perfil.css'
 import MovilAccesos from '../comp/movil-accesos'
+import { useVistaTelefono } from '../comp/movil-navegacion'
+import MiPerfilMovil from './MiPerfilMovil'
 
 const PESTANAS_PROPIAS = PESTANAS
 
@@ -101,6 +103,28 @@ function Perfil() {
     return [...cuenta].map(([etiqueta, valor]) => ({ etiqueta, valor })).sort((a, b) => b.valor - a.valor)
   }, [perfil, scorePropio.datos])
 
+  // El conductor en la vista de teléfono: la pestaña «Mi perfil» de la app, con
+  // estos mismos datos y los mismos diálogos (editar, documentos).
+  const esMovil = useVistaTelefono()
+  const [viendoDocumentos, setViendoDocumentos] = useState(false)
+  const dialogos = <>
+    <EditarMisDatos abierto={editando} perfil={perfil} borrador={borrador} setBorrador={setBorrador}
+      guardando={guardando} error={error} alGuardar={guardar} alCancelar={cancelar} />
+    <Modal abierto={Boolean(documento)} titulo="Información del documento" alCerrar={() => setDocumento(null)} ancho={760}><div className="pa-modal">{documento && <><h3 className="fp-modal-tipo"><Icono nombre="documento" tam={26} />{documento.tipo}</h3><Datos items={[{ etiqueta: 'Número', valor: documento.numero || 'Sin registrar' }, { etiqueta: 'Vencimiento', valor: documento.venceEn ? fecha(documento.venceEn) : 'Sin fecha registrada' }, { etiqueta: 'Estado', valor: ESTADOS[documento.estado]?.[0] || 'Sin estado disponible' }]} /><p className="pa-ayuda">{documento.declarado ? 'Dato declarado en tu perfil.' : 'Documento registrado en tu cuenta.'}</p>{claveDeTipo(documento.tipo) && perfil?.id ? <FotosDe huecos={huecosPersona(perfil.id, claveDeTipo(documento.tipo))} /> : documento.id && !documento.declarado ? <ArchivosDeDocumento documento={documento} /> : <p className="pa-nota">Este documento no admite fotos todavía.</p>}<div className="pa-modal-acciones"><button className="pnl-btn primario" onClick={() => setDocumento(null)}>Entendido</button></div></>}</div></Modal>
+  </>
+  if (esMovil && rolCanonico(sesion?.perfil.rol) === 'conductor') {
+    return <>
+      {cargando ? <div className="pnl-cuerpo"><Cargando filas={4} /></div>
+        : !perfil ? <div className="pnl-cuerpo"><ErrorCarga error={{ message: error }} onReintentar={() => setRevision(v => v + 1)} /></div>
+          : <MiPerfilMovil persona={persona} sesion={sesion?.perfil} aviso={aviso} alEditar={editar}
+            documentos={documentos} alVerDocumentos={() => setViendoDocumentos(true)} />}
+      <Modal abierto={viendoDocumentos && !documento} titulo="Documentos" alCerrar={() => setViendoDocumentos(false)} ancho={760}>
+        {viendoDocumentos && persona && <Documentos persona={persona} alActualizar={() => setRevision(v => v + 1)} documentos={documentos} error={perfil.documentosError} alVer={setDocumento} />}
+      </Modal>
+      {dialogos}
+    </>
+  }
+
   return <div className="usr-perfil usr-propio pa-superficie">
     <div className="usr-regreso"><Link className="pnl-volver" to="/panel"><Icono nombre="volver" tam={16} />Inicio</Link></div>
     <Cabecera titulo="Mi perfil" bajada="Tus datos, conducción, inspecciones y documentos.">
@@ -125,9 +149,7 @@ function Perfil() {
       {/* Solo en el teléfono: lo que no está en la barra de abajo, y cerrar sesión. */}
       <MovilAccesos />
     </div>
-    <EditarMisDatos abierto={editando} perfil={perfil} borrador={borrador} setBorrador={setBorrador}
-      guardando={guardando} error={error} alGuardar={guardar} alCancelar={cancelar} />
-    <Modal abierto={Boolean(documento)} titulo="Información del documento" alCerrar={() => setDocumento(null)} ancho={760}><div className="pa-modal">{documento && <><h3 className="fp-modal-tipo"><Icono nombre="documento" tam={26} />{documento.tipo}</h3><Datos items={[{ etiqueta: 'Número', valor: documento.numero || 'Sin registrar' }, { etiqueta: 'Vencimiento', valor: documento.venceEn ? fecha(documento.venceEn) : 'Sin fecha registrada' }, { etiqueta: 'Estado', valor: ESTADOS[documento.estado]?.[0] || 'Sin estado disponible' }]} /><p className="pa-ayuda">{documento.declarado ? 'Dato declarado en tu perfil.' : 'Documento registrado en tu cuenta.'}</p>{claveDeTipo(documento.tipo) && perfil?.id ? <FotosDe huecos={huecosPersona(perfil.id, claveDeTipo(documento.tipo))} /> : documento.id && !documento.declarado ? <ArchivosDeDocumento documento={documento} /> : <p className="pa-nota">Este documento no admite fotos todavía.</p>}<div className="pa-modal-acciones"><button className="pnl-btn primario" onClick={() => setDocumento(null)}>Entendido</button></div></>}</div></Modal>
+    {dialogos}
 
   </div>
 }

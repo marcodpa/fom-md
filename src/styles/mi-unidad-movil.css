@@ -20,10 +20,10 @@
   .pnl.fom-dark[data-movil] .pnl-main:has(> .mvu) { min-height: 0; padding-bottom: 0; }
 
   /* Tonos de la app: cada pieza pinta con --tono / --tono-sup. */
-  .mvu .exito { --tono: var(--e-exito); --tono-sup: var(--e-exito-sup); }
-  .mvu .aviso { --tono: var(--e-aviso); --tono-sup: var(--e-aviso-sup); }
-  .mvu .peligro { --tono: var(--e-peligro); --tono-sup: var(--e-peligro-sup); }
-  .mvu .apagado { --tono: var(--e-texto-3); --tono-sup: var(--e-sup-baja); }
+  :is(.mvu, .mvu-tonos) .exito { --tono: var(--e-exito); --tono-sup: var(--e-exito-sup); }
+  :is(.mvu, .mvu-tonos) .aviso { --tono: var(--e-aviso); --tono-sup: var(--e-aviso-sup); }
+  :is(.mvu, .mvu-tonos) .peligro { --tono: var(--e-peligro); --tono-sup: var(--e-peligro-sup); }
+  :is(.mvu, .mvu-tonos) .apagado { --tono: var(--e-texto-3); --tono-sup: var(--e-sup-baja); }
 
   /* ---- Mapa a pantalla completa ---- */
   .mvu-mapa { position: absolute; top: 0; left: 0; right: 0; bottom: var(--mvu-dock); }
@@ -321,7 +321,7 @@
   .mvu-evento-linea { display: flex; align-items: baseline; gap: 3px; }
   .mvu-evento-k { flex: 1; min-width: 0; margin-right: 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--e-texto-2); }
   .mvu-evento-linea b { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--e-texto-2); }
-  .mvu .mvu-evento:is(.aviso, .peligro) .mvu-evento-linea b { color: var(--tono); }
+  :is(.mvu, .mvu-tonos) .mvu-evento:is(.aviso, .peligro) .mvu-evento-linea b { color: var(--tono); }
   .mvu-evento-linea small { font-size: 10px; font-weight: 600; color: var(--e-texto-3); }
   .mvu-evento-pista { display: block; height: 6px; overflow: hidden; border-radius: 10px; background: var(--e-sup-alta); }
   .mvu-evento-pista i { display: block; height: 100%; border-radius: 10px; background: var(--tono); }

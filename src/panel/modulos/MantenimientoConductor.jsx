@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -14,6 +15,8 @@ import './mantenimiento.css'
 import { GaleriaArchivos } from '../comp/Archivos'
 import OdtAsignadas from '../comp/OdtAsignadas'
 import { ESTADOS_DE_TALLER, masNuevasPrimero } from '../datos/odtAsignadas'
+import { useVistaTelefono } from '../comp/movil-navegacion'
+import MantenimientoConductorMovil from './MantenimientoConductorMovil'
 
 // ============================================================
 // MANTENIMIENTO DEL CONDUCTOR
@@ -63,6 +66,9 @@ export default function MantenimientoConductor() {
   const [creando, setCreando] = useState(false)
   const [abierta, setAbierta] = useState(null)
   const [aviso, setAviso] = useState('')
+  // «Reportar falla» desde Mi perfil (`?reportar=1`): abre el diálogo en cuanto se sabe la unidad.
+  const [parametros, setParametros] = useSearchParams()
+  const pideReportar = parametros.get('reportar') === '1'
 
   const cargando = asignaciones.estado === 'cargando' || unidad.estado === 'cargando' || ordenes.estado === 'cargando' || (ordenes.estado === 'ok' && ordenes.datos == null)
   // Solo las órdenes de SU unidad. Se filtra aquí además de lo que ya limite el servidor.
@@ -83,10 +89,35 @@ export default function MantenimientoConductor() {
   const enRevision = enCurso.filter((o) => estadoVisible(o.estado).clave === 'revision')
   const v = unidad.datos
   // Una orden asignada puede ser de otra unidad: se busca en todo lo listado.
+  useEffect(() => {
+    if (!pideReportar || !v) return
+    setCreando(true)
+    setParametros({}, { replace: true })
+  }, [pideReportar, v, setParametros])
   const detalle = abierta ? (ordenes.datos ?? []).find((o) => o.id === abierta) ?? null : null
 
+  // En la vista de teléfono, la pestaña de la app con estos mismos datos y diálogos.
+  const esMovil = useVistaTelefono()
+  const errorCarga = asignaciones.estado === 'error' || ordenes.estado === 'error'
+
   return (
-    <div className="mnt-root">
+    <div className={esMovil ? undefined : 'mnt-root'}>
+      {esMovil ? (
+        <MantenimientoConductorMovil
+          cargando={cargando}
+          error={errorCarga}
+          alReintentar={() => { asignaciones.recargar(); ordenes.recargar() }}
+          asignacion={asignacion}
+          unidad={v}
+          lista={lista}
+          ordenes={ordenes.estado === 'ok' ? ordenes.datos : null}
+          perfil={perfil}
+          alCambiar={ordenes.recargar}
+          alAbrir={setAbierta}
+          alReportar={() => setCreando(true)}
+          aviso={aviso}
+        />
+      ) : (<>
       <div className="mnt-heading">
         <div>
           <span className="mnt-breadcrumb">Inicio › Mantenimiento</span>
@@ -167,6 +198,7 @@ export default function MantenimientoConductor() {
           </>
         )}
       </div>
+      </>)}
 
       <Modal titulo="Reportar una falla" abierto={creando} alCerrar={() => setCreando(false)} ancho={840}>
         {creando && v && (
