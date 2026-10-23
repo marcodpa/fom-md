@@ -1,5 +1,35 @@
+import { statSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+
+// ============================================================
+// QUÉ VIGILA EL SERVIDOR DE DESARROLLO
+// ------------------------------------------------------------
+// Por defecto Vite vigila TODA la carpeta del proyecto. Aquí conviven la web
+// con material ajeno: una caché de npm (`A/`, miles de carpetas), vídeos,
+// capturas, despliegues y otros proyectos. En Windows cada carpeta vigilada
+// es un manejador abierto: llegó a 17.000 carpetas y 56.000 manejadores, y el
+// servidor pasaba minutos recorriéndolas mientras la página «cargaba y
+// cargaba». La web solo vive en `src/` y `public/`, más los archivos sueltos de
+// la raíz (index.html, vite.config.js, .env); todo lo demás se ignora. Lista
+// blanca a propósito: la próxima carpeta pesada que aparezca ya queda fuera.
+// ============================================================
+const RAIZ = path.dirname(fileURLToPath(import.meta.url))
+const CARPETAS_DE_LA_WEB = new Set(['src', 'public'])
+
+function fueraDeLaWeb(ruta) {
+  const relativa = path.relative(RAIZ, ruta)
+  if (!relativa || relativa.startsWith('..') || path.isAbsolute(relativa)) return false
+  const primera = relativa.split(path.sep)[0]
+  if (CARPETAS_DE_LA_WEB.has(primera)) return false
+  // Un archivo suelto de la raíz se vigila; una carpeta que no es de la web, no.
+  if (relativa === primera) {
+    return statSync(ruta, { throwIfNoEntry: false })?.isDirectory() ?? false
+  }
+  return true
+}
 
 // ============================================================
 // PUENTE DE DESARROLLO HACIA LA API REAL DE FOM
@@ -209,7 +239,17 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     // MapLibre arranca su worker desde una URL relativa a su propio archivo; si Vite lo pre-empaqueta
     // en dev, esa URL se rompe y el mapa vectorial queda en blanco.
-    optimizeDeps: { exclude: ['maplibre-gl'] },
+    optimizeDeps: {
+      exclude: ['maplibre-gl'],
+      // Solo la página de la web. Sin esto Vite rastrea cada .html del proyecto
+      // (capturas, informes, despliegues viejos) recorriendo también la caché
+      // de npm, y puede tropezar con scripts que no son de la web.
+      entries: ['index.html'],
+      // Las de carga diferida (leer la hoja de la empresa) se preparan al
+      // arrancar: si Vite las descubre a mitad de uso, re-empaqueta y recarga
+      // la página entera.
+      include: ['pdfjs-dist', 'tesseract.js', 'xlsx'],
+    },
     // 5173 por defecto; si el entorno impone un PORT (varias sesiones a la vez),
     // se respeta para no chocar con otro servidor ya levantado.
     // `vite preview` sirve el panel COMPILADO (tres archivos en vez de ciento
@@ -220,6 +260,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: Number(process.env.PORT) || 5173,
       proxy: { '/fom-api': puenteFom(env) },
+      watch: { ignored: [fueraDeLaWeb, '**/*.{mp4,mov,zip,pdf,xlsx,csv,blend}'] },
     },
     build: {
       chunkSizeWarningLimit: 1600,
