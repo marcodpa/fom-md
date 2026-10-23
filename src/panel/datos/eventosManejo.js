@@ -59,12 +59,17 @@ export function diasServidor(dias) {
 
 const numeroONulo = (n) => (n === null || n === undefined || n === '' ? null : (Number.isFinite(Number(n)) ? Number(n) : null))
 
-/** Un evento de `GET …/driving-events` en la forma del panel. */
+/**
+ * Un evento de `GET …/driving-events` en la forma del panel. `t`: la hora en
+ * ms, leída una sola vez aquí (ordenar y filtrar decenas de miles de eventos
+ * no vuelve a leer el texto de la hora).
+ */
 export function comoEventoManejo(e) {
   return {
     id: String(e?.id ?? ''),
     tipo: POR_SERVIDOR[e?.type] ?? null,
     hora: e?.occurredAt ?? null,
+    t: msDe(e?.occurredAt),
     vehiculoId: e?.vehicleId ?? null,
     unidad: e?.vehicleCode ?? null,
     lat: numeroONulo(e?.lat),
@@ -90,10 +95,13 @@ export function vaEnMapa(e) {
   return v !== null && v > EXCESO_KMH
 }
 
-const msDe = (iso) => {
+function msDe(iso) {
   const t = Date.parse(iso ?? '')
   return Number.isFinite(t) ? t : null
 }
+
+/** La hora de un evento en ms: la ya leída (`t`) o, si no la trae, la de su texto. */
+const msEvento = (e) => (Number.isFinite(e?.t) ? e.t : msDe(e?.hora))
 
 /**
  * Los eventos que se pintan, del más nuevo al más viejo.
@@ -110,7 +118,7 @@ export function eventosParaMapa(lista, { dias = null, desde = null, hasta = null
   const filas = []
   for (const e of Array.isArray(lista) ? lista : []) {
     if (!vaEnMapa(e) || (vehiculoId && e.vehiculoId !== vehiculoId)) continue
-    const t = msDe(e.hora)
+    const t = msEvento(e)
     if (t !== null && t >= inicio && t <= fin) filas.push({ t, e })
   }
   return ordenarPorHora(filas)
@@ -120,10 +128,12 @@ export function eventosParaMapa(lista, { dias = null, desde = null, hasta = null
  * Del más nuevo al más viejo (a igual hora, por id). `filas`: [{ t (ms), e }]. La hora se lee una
  * vez por evento y no en cada comparación: con la flota entera son decenas de miles.
  */
+const antesQue = (a, b) => b.t - a.t || String(b.e?.id).localeCompare(String(a.e?.id))
 function ordenarPorHora(filas) {
-  return filas
-    .sort((a, b) => b.t - a.t || String(b.e?.id).localeCompare(String(a.e?.id)))
-    .map((x) => x.e)
+  // Lo que ya llega en orden (lo más común: listas ya ordenadas) no se vuelve a ordenar.
+  let ordenada = true
+  for (let i = 1; i < filas.length && ordenada; i += 1) ordenada = antesQue(filas[i - 1], filas[i]) <= 0
+  return (ordenada ? filas : filas.sort(antesQue)).map((x) => x.e)
 }
 
 /** Cuántos hay de cada tipo: { frenada, aceleracion, exceso }. */
@@ -208,7 +218,7 @@ export function resumenEventos(cuenta) {
 export function excesosBajoUmbral(lista, { dias = null, ahora = Date.now() } = {}) {
   const inicio = dias ? ahora - Number(dias) * 86400000 : -Infinity
   return (Array.isArray(lista) ? lista : []).filter((e) => e?.tipo === 'exceso' && !vaEnMapa(e)
-    && (msDe(e.hora) ?? -Infinity) >= inicio).length
+    && (msEvento(e) ?? -Infinity) >= inicio).length
 }
 
 // ============================================================
@@ -289,9 +299,7 @@ export function juntarEventos(listas) {
     }
     if (l.tope && l.length) {
       tope = true
-      let viejo = Infinity
-      for (const e of l) viejo = Math.min(viejo, msDe(e?.hora) ?? Infinity)
-      completoDesde = Math.max(completoDesde, viejo)
+      completoDesde = Math.max(completoDesde, masViejoDe(l))
     }
   }
   const salida = ultimosEventos([...porId.values(), ...sinId], Infinity)
@@ -302,10 +310,117 @@ export function juntarEventos(listas) {
   return salida
 }
 
+function masViejoDe(lista) {
+  let viejo = Infinity
+  for (const e of lista) viejo = Math.min(viejo, msEvento(e) ?? Infinity)
+  return viejo
+}
+
+/**
+ * Suma a `base` (salida anterior: ordenada y sin repetidos) los eventos de
+ * `listas` nuevas que no estaban. Solo se ordena lo nuevo y se intercala con
+ * lo que ya había: la vista de la flota repinta mientras van llegando
+ * conductores sin rehacer las decenas de miles que ya tenía. Si alguna de
+ * las nuevas vino cortada en 100 (`tope`), lo dice como `juntarEventos`.
+ */
+export function mezclarEventos(base, listas) {
+  const previa = Array.isArray(base) ? base : []
+  const vistos = new Set()
+  for (const e of previa) if (e?.id) vistos.add(e.id)
+  let tope = Boolean(previa.tope)
+  let completoDesde = Number.isFinite(previa.completoDesde) ? previa.completoDesde : -Infinity
+  const nuevos = []
+  for (const l of Array.isArray(listas) ? listas : []) {
+    if (!Array.isArray(l)) continue
+    for (const e of l) {
+      if (!e) continue
+      if (e.id) {
+        if (vistos.has(e.id)) continue
+        vistos.add(e.id)
+      }
+      nuevos.push({ t: msEvento(e) ?? -Infinity, e })
+    }
+    if (l.tope && l.length) {
+      tope = true
+      // Si la lista ya viene filtrada, quien la filtró guarda desde cuándo llegó completa.
+      completoDesde = Math.max(completoDesde, Number.isFinite(l.completoDesde) ? l.completoDesde : masViejoDe(l))
+    }
+  }
+  let salida = previa
+  if (nuevos.length) {
+    const agregar = ordenarPorHora(nuevos)
+    salida = []
+    let i = 0
+    let j = 0
+    while (i < previa.length || j < agregar.length) {
+      if (j >= agregar.length) salida.push(previa[i++])
+      else if (i >= previa.length) salida.push(agregar[j++])
+      else if (antesQue({ t: msEvento(previa[i]) ?? -Infinity, e: previa[i] }, { t: msEvento(agregar[j]) ?? -Infinity, e: agregar[j] }) <= 0) salida.push(previa[i++])
+      else salida.push(agregar[j++])
+    }
+  } else if (tope !== Boolean(previa.tope) || completoDesde !== previa.completoDesde) {
+    salida = [...previa]
+  }
+  if (tope) {
+    salida.tope = true
+    salida.completoDesde = completoDesde
+  }
+  return salida
+}
+
 /** Los N más nuevos (la lista puede venir en cualquier orden). */
 export function ultimosEventos(lista, n = PASO_EVENTOS) {
-  return ordenarPorHora((Array.isArray(lista) ? lista : []).map((e) => ({ t: msDe(e?.hora) ?? -Infinity, e })))
+  return ordenarPorHora((Array.isArray(lista) ? lista : []).map((e) => ({ t: msEvento(e) ?? -Infinity, e })))
     .slice(0, Math.max(0, n))
+}
+
+/**
+ * Lo pedido al servidor, guardado unos minutos (`vigenciaMs`), por persona y
+ * período. La llave lleva de quién es la sesión y en qué empresa se trabaja
+ * (`dueno()`): al cambiar cualquiera de los dos se vacía todo, para no
+ * enseñar los eventos de otra empresa. Lo vencido se borra al pasar.
+ * Un fallo no se guarda. `vencer()` marca todo como vencido sin borrarlo:
+ * la pantalla sigue con lo que tenía hasta que llega lo nuevo.
+ */
+export function crearCacheEventos({ pedir, dueno = () => '', vigenciaMs = 3 * 60000, ahora = () => Date.now() }) {
+  const guardados = new Map()
+  let duenoActual = null
+  const revisarDueno = () => {
+    const d = String(dueno() ?? '')
+    if (d !== duenoActual) {
+      guardados.clear()
+      duenoActual = d
+    }
+    return d
+  }
+  const borrarVencidos = () => {
+    const t = ahora()
+    for (const [llave, g] of guardados) if (t - g.desde >= vigenciaMs) guardados.delete(llave)
+  }
+  return {
+    pedir({ userId, propio, dias, fresco = false }) {
+      const d = revisarDueno()
+      borrarVencidos()
+      const llave = `${d}|${propio ? 'me' : 'u'}:${userId ?? ''}:${dias}`
+      const g = guardados.get(llave)
+      if (!fresco && g && !g.vencido) return g.peticion
+      const peticion = Promise.resolve().then(() => pedir({ userId, propio, dias }))
+      const nuevo = { desde: ahora(), peticion, vencido: false }
+      guardados.set(llave, nuevo)
+      peticion.catch(() => { if (guardados.get(llave) === nuevo) guardados.delete(llave) })
+      return peticion
+    },
+    /** «Actualizar»: lo guardado sigue sirviendo para pintar, pero el próximo pedido sale al servidor. */
+    vencer() {
+      for (const g of guardados.values()) g.vencido = true
+    },
+    vaciar() {
+      guardados.clear()
+    },
+    get tamano() {
+      return guardados.size
+    },
+  }
 }
 
 /** Los del día de hoy (hora local). */
@@ -313,7 +428,7 @@ export function eventosDeHoy(lista, ahora = Date.now()) {
   const inicio = inicioDelDia(ahora)
   const fin = inicio + 86400000
   return (Array.isArray(lista) ? lista : []).filter((e) => {
-    const t = msDe(e?.hora)
+    const t = msEvento(e)
     return t !== null && t >= inicio && t < fin
   })
 }
@@ -359,7 +474,7 @@ export function filtrarEventosManejo(lista, { periodo = 'ultimos', tipos = null,
 function eventosDelPeriodo(todos, periodo, ahora) {
   if (periodo === 'hoy') return eventosDeHoy(todos, ahora)
   const inicio = inicioPeriodo(periodo, ahora)
-  return todos.filter((e) => (msDe(e.hora) ?? -Infinity) >= inicio)
+  return todos.filter((e) => (msEvento(e) ?? -Infinity) >= inicio)
 }
 
 /**
@@ -407,7 +522,7 @@ export function periodoIncompleto(lista, periodo, ahora = Date.now()) {
   if (!lista?.tope || !lista.length) return false
   // De varios conductores (`juntarEventos`): desde cuándo llegó todo de todos.
   let masViejo = Number.isFinite(lista.completoDesde) ? lista.completoDesde : Infinity
-  if (!Number.isFinite(lista.completoDesde)) for (const e of lista) masViejo = Math.min(masViejo, msDe(e.hora) ?? Infinity)
+  if (!Number.isFinite(lista.completoDesde)) masViejo = masViejoDe(lista)
   return masViejo > inicioPeriodo(periodo, ahora)
 }
 
@@ -605,7 +720,7 @@ export function eventoDelEnlace(lista, pedido) {
   let distancia = Infinity
   for (const e of todos) {
     if (pedido.tipo && e.tipo !== pedido.tipo) continue
-    const d = Math.abs((msDe(e.hora) ?? Infinity) - t)
+    const d = Math.abs((msEvento(e) ?? Infinity) - t)
     if (d <= MARGEN_ENLACE_MS && d < distancia) {
       mejor = e
       distancia = d

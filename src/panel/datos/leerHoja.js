@@ -15,7 +15,7 @@
 // Cada página sale como { ancho, alto, imagen, palabras, reglas }: palabras
 // y reglas en píxeles de la imagen leída; `imagen` es la que se guarda.
 // ============================================================
-import { buscarReglas, maquetarTabla, palabrasDePdf } from './hojaEmpresa'
+import { TOPES_TABLA, buscarReglas, maquetarTabla, palabrasDePdf, rangoRecortado } from './hojaEmpresa'
 
 /** Ancho al que se lee cada página (OCR y rayas): A4 a unos 240 ppp. */
 const ANCHO_LECTURA = 2000
@@ -252,13 +252,19 @@ async function leerExcel(archivo, alAvanzar, avisos) {
   const hoja = libro.Sheets[nombre]
   if (!hoja?.['!ref']) throw new Error('El Excel no tiene datos.')
   if (libro.SheetNames.length > 1) avisos.add(`El Excel tiene varias hojas: se usa «${nombre}».`)
-  const rango = XLSX.utils.decode_range(hoja['!ref'])
-  const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '', raw: false, blankrows: true })
-  const anchos = (hoja['!cols'] ?? []).slice(rango.s.c).map((c) => c?.wch ?? (c?.wpx ? c.wpx / 7 : 0))
-  const combinadas = (hoja['!merges'] ?? []).map((m) => ({
-    s: { r: m.s.r - rango.s.r, c: m.s.c - rango.s.c },
-    e: { r: m.e.r - rango.s.r, c: m.e.c - rango.s.c },
-  }))
+  // Un rango inflado (formato hasta la fila un millón) colgaría la página: se lee solo una
+  // planilla de tamaño real desde la esquina de la tabla.
+  const rango = rangoRecortado(XLSX.utils.decode_range(hoja['!ref']))
+  if (rango.recortado) avisos.add(`El Excel es muy grande: se leen las primeras ${TOPES_TABLA.filas} filas y ${TOPES_TABLA.columnas} columnas.`)
+  const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '', raw: false, blankrows: true, range: { s: rango.s, e: rango.e } })
+  const anchos = (hoja['!cols'] ?? []).slice(rango.s.c, rango.e.c + 1).map((c) => c?.wch ?? (c?.wpx ? c.wpx / 7 : 0))
+  const combinadas = (hoja['!merges'] ?? [])
+    .filter((m) => m.s.r >= rango.s.r && m.s.r <= rango.e.r && m.s.c >= rango.s.c && m.s.c <= rango.e.c)
+    .slice(0, TOPES_TABLA.combinadas)
+    .map((m) => ({
+      s: { r: m.s.r - rango.s.r, c: m.s.c - rango.s.c },
+      e: { r: Math.min(m.e.r, rango.e.r) - rango.s.r, c: Math.min(m.e.c, rango.e.c) - rango.s.c },
+    }))
   const paginas = maquetarTabla(filas, { anchos, combinadas })
   if (!paginas.length) throw new Error('El Excel no tiene datos.')
   if (paginas.length > MAX_PAGINAS) avisos.add(`La tabla ocupa ${paginas.length} páginas: se usan las primeras ${MAX_PAGINAS}.`)

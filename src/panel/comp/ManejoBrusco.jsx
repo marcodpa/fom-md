@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
+import { empresaGestionActualId } from '../datos/api'
+import { sesionActual } from '../auth'
 import { useDatos } from '../useDatos'
 import { HAY_MAPBOX } from './MapaMapbox'
 import { Cargando, ErrorCarga, Tarjeta, Vacio } from './ui'
 import {
   CLAVES_EVENTO, DIAS_PEDIDO, EXCESO_KMH, PASO_EVENTOS, PERIODOS_LISTA, PERIODOS_MAPA, TIPOS_EVENTO,
-  alCambiarUnidad, conteoTipo, diasDelPeriodo, eleccionParaEvento, eleccionValida, enlaceEventoEnMapa, eventoDelEnlace,
-  eventosParaMapa, filtrarEventosFlota, filtrarEventosManejo, juntarEventos, mostrarInicial, periodoIncompleto, textoEvento,
+  alCambiarUnidad, conteoTipo, crearCacheEventos, diasDelPeriodo, eleccionParaEvento, eleccionValida, enlaceEventoEnMapa, eventoDelEnlace,
+  eventosParaMapa, filtrarEventosFlota, filtrarEventosManejo, juntarEventos, mezclarEventos, mostrarInicial, periodoIncompleto, textoEvento,
   tipoEvento, unidadEvento, velocidadesEvento, verMas,
 } from '../datos/eventosManejo'
 import * as f from '../datos/formato'
@@ -36,19 +38,20 @@ export function IconoEventoManejo({ tipo, tam = 28 }) {
 // --- Pedidos: uno por persona y período, guardado unos minutos --------------
 // Las pastillas filtran aquí; solo pasar de 30 a 7 días (o al revés) pide algo. El refresco de
 // 60 s de la pantalla vuelve a leer lo guardado hasta que vence; un fallo no se guarda.
-// La ficha de una unidad y la vista de la flota comparten lo guardado.
+// La ficha de una unidad y la vista de la flota comparten lo guardado. Va por sesión y empresa:
+// al entrar con otra cuenta o a otra empresa se vacía (ver crearCacheEventos).
 const VIGENCIA_MS = 3 * 60000
-const guardados = new Map()
+const cache = crearCacheEventos({
+  pedir: ({ userId, propio, dias }) => repo.manejo.eventos({ userId, propio, dias }),
+  dueno: () => {
+    const perfil = sesionActual()?.perfil
+    return `${perfil?.id ?? ''}|${perfil?.empresaId ?? ''}|${empresaGestionActualId() ?? ''}`
+  },
+  vigenciaMs: VIGENCIA_MS,
+})
 
 function pedirEventos({ userId, propio, dias = DIAS_PEDIDO, fresco = false }) {
-  const llave = `${propio ? 'me' : 'u'}:${userId ?? ''}:${dias}`
-  const g = guardados.get(llave)
-  if (!fresco && g && Date.now() - g.desde < VIGENCIA_MS) return g.peticion
-  const peticion = repo.manejo.eventos({ userId, propio, dias })
-  const nuevo = { desde: Date.now(), peticion }
-  guardados.set(llave, nuevo)
-  peticion.catch(() => { if (guardados.get(llave) === nuevo) guardados.delete(llave) })
-  return peticion
+  return cache.pedir({ userId, propio, dias, fresco })
 }
 
 /** Los de varios conductores (los de una unidad), juntos y sin repetidos. */
@@ -257,7 +260,7 @@ export function BloqueManejoBrusco({ m, sinConductor = 'Sin conductor asignado: 
 // Solo con el modo abierto y sin unidad elegida; lo leído se guarda y se reusa en la ficha.
 const A_LA_VEZ = 3
 /** Cada cuánto se repinta mientras van llegando (no en cada conductor: con 340 serían 340 repintados). */
-const REPINTAR_MS = 400
+const REPINTAR_MS = 1000
 
 /**
  * Manejo brusco de la flota. `vehiculos`: las unidades a la vista (con los filtros del Centro de
@@ -294,6 +297,8 @@ export function useManejoFlota({ vehiculos, activo }) {
   const leidos = useRef(new Map())
   const [version, setVersion] = useState(0)
   const [vuelta, setVuelta] = useState(0)
+  // La vuelta en la que se pidió «Actualizar»: solo esa sale al servidor saltándose lo guardado.
+  const vueltaFresca = useRef(-1)
   const [enCurso, setEnCurso] = useState(false)
   const firmaConductores = conductores.join('|')
   useEffect(() => {
@@ -306,11 +311,13 @@ export function useManejoFlota({ vehiculos, activo }) {
     }
     const faltan = conductores.filter((id) => {
       const r = leidos.current.get(`${dias}:${id}`)
-      return !r || r.error || Date.now() - r.en > VIGENCIA_MS
+      return !r || r.error || r.vencido || Date.now() - r.en > VIGENCIA_MS
     })
     if (!faltan.length) return undefined
     setEnCurso(true)
-    const fresco = vuelta > 0
+    // Se gasta al usarlo: otra vuelta (un reintento, otro período) vuelve a usar lo guardado.
+    const fresco = vuelta === vueltaFresca.current
+    if (fresco) vueltaFresca.current = -1
     const trabajar = async () => {
       while (vivo && faltan.length) {
         const id = faltan.shift()
@@ -338,25 +345,49 @@ export function useManejoFlota({ vehiculos, activo }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activo, oculto, asignacionesListas, dias, firmaConductores, vuelta])
 
-  const { crudos, leidosN, fallidos } = useMemo(() => {
-    const listas = []
+  // Lo de cada conductor se filtra (período y unidades a la vista) una sola vez, al llegar, y se
+  // intercala con lo que ya había: un repintado no rehace las decenas de miles de antes. Una
+  // lectura nueva de un conductor ya mezclado quita solo lo suyo de antes. Con otras unidades,
+  // otro período o un conductor que ya no está, se rehace desde cero.
+  const mezcla = useRef({ dias: null, unidades: null, de: new Map(), lista: [] })
+  const { lista, leidosN, fallidos } = useMemo(() => {
+    let m = mezcla.current
+    const vigentes = new Set(conductores)
+    if (m.dias !== dias || m.unidades !== unidades || [...m.de.keys()].some((id) => !vigentes.has(id))) {
+      m = mezcla.current = { dias, unidades, de: new Map(), lista: [] }
+    }
+    const quitar = new Set()
+    const nuevas = []
     let n = 0
     let malos = 0
     for (const id of conductores) {
       const r = leidos.current.get(`${dias}:${id}`)
       if (!r) continue
       n += 1
-      if (r.error) malos += 1
-      else listas.push(r.lista)
+      if (r.error) { malos += 1; continue }
+      const antes = m.de.get(id)
+      if (antes?.r === r) continue
+      for (const e of antes?.eventos ?? []) quitar.add(e.id)
+      const propia = eventosParaMapa(r.lista, { dias }).filter((e) => unidades.has(e.vehiculoId))
+      m.de.set(id, { r, eventos: propia })
+      // El aviso de corte en 100 mira lo que llegó entero, no solo lo filtrado.
+      if (r.lista?.tope && r.lista.length) {
+        propia.tope = true
+        propia.completoDesde = juntarEventos([r.lista]).completoDesde
+      }
+      nuevas.push(propia)
     }
-    return { crudos: juntarEventos(listas), leidosN: n, fallidos: malos }
+    if (quitar.size) {
+      const resto = m.lista.filter((e) => !quitar.has(e.id))
+      if (m.lista.tope) Object.assign(resto, { tope: true, completoDesde: m.lista.completoDesde })
+      m.lista = resto
+    }
+    if (nuevas.length) m.lista = mezclarEventos(m.lista, nuevas)
+    return { lista: m.lista, leidosN: n, fallidos: malos }
     // `version` cambia cuando llega algo nuevo a `leidos`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conductores, dias, version])
-  const lista = useMemo(
-    () => eventosParaMapa(crudos, { dias }).filter((e) => unidades.has(e.vehiculoId)),
-    [crudos, dias, unidades],
-  )
+  }, [conductores, dias, unidades, version])
+  const crudos = lista
   const filtro = useMemo(
     () => filtrarEventosFlota(lista, { periodo: eleccion.periodo, tipos: eleccion.tipos }),
     [lista, eleccion],
@@ -388,10 +419,21 @@ export function useManejoFlota({ vehiculos, activo }) {
       ...el,
       tipos: el.tipos.includes(tipo) ? el.tipos.filter((t) => t !== tipo) : CLAVES_EVENTO.filter((c) => c === tipo || el.tipos.includes(c)),
     })),
-    /** Vuelve a pedir los que fallaron (y, con `todo`, todos: «Actualizar»). */
+    /**
+     * Vuelve a pedir los que fallaron (y, con `todo`, todos: «Actualizar»). Lo leído no se borra:
+     * se marca vencido y se sigue viendo hasta que llega lo nuevo.
+     */
     recargar: (todo = false) => {
-      for (const [llave, r] of leidos.current) if (todo || r.error) leidos.current.delete(llave)
-      setVuelta((n) => n + 1)
+      for (const [llave, r] of leidos.current) {
+        if (r.error) leidos.current.delete(llave)
+        // Se marca en el mismo objeto: lo ya mezclado en el mapa no se rehace por esto.
+        else if (todo) r.vencido = true
+      }
+      if (todo) cache.vencer()
+      setVuelta((n) => {
+        if (todo) vueltaFresca.current = n + 1
+        return n + 1
+      })
     },
   }
 }

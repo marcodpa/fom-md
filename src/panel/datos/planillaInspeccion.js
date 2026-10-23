@@ -297,7 +297,8 @@ const ESTILO = `
  * siga sin importaciones.
  */
 export function htmlPlanillas(hojas, ayudas = new Map(), sobreHoja = null) {
-  const conHoja = (h) => Boolean(sobreHoja && h.hojaEmpresa)
+  // `admite` revisa la hoja guardada: si no sirve, esa inspección sale con la planilla de siempre.
+  const conHoja = (h) => Boolean(sobreHoja && h.hojaEmpresa && (!sobreHoja.admite || sobreHoja.admite(h.hojaEmpresa)))
   return `<!doctype html><html lang="es"><head><meta charset="utf-8" />
     <title>Verificaciones para el inicio del trabajo</title>
     <style>${ESTILO}${hojas.some(conHoja) ? sobreHoja.estilo : ''}</style></head><body>
@@ -346,10 +347,18 @@ export async function armarPlanillas(inspecciones, { leerRespuestas, leerAyudas,
   return htmlPlanillas(hojas, ayudas, sobreHoja)
 }
 
+/** Lo que se le permite al marco de impresión: nada de scripts (ver imprimirHtml). */
+export const SANDBOX_IMPRESION = 'allow-same-origin allow-modals'
+
 /**
  * Imprime el documento desde un marco invisible, no la página del panel (que
  * es oscura y trae menú). El diálogo del navegador deja «Guardar como PDF».
  * El marco se quita al cerrar el diálogo, o al minuto si el navegador no avisa.
+ *
+ * El marco va aislado (`sandbox` SIN allow-scripts): aunque algo del
+ * documento viniera tocado, dentro no corre ningún script. Se imprime desde
+ * aquí fuera (contentWindow.print()): para eso hacen falta allow-same-origin
+ * (llegar a su ventana) y allow-modals (que deje abrir el diálogo).
  */
 export function imprimirHtml(html, doc = typeof document === 'undefined' ? null : document) {
   return new Promise((resolve, reject) => {
@@ -358,6 +367,7 @@ export function imprimirHtml(html, doc = typeof document === 'undefined' ? null 
       return
     }
     const marco = doc.createElement('iframe')
+    marco.setAttribute('sandbox', SANDBOX_IMPRESION)
     marco.setAttribute('aria-hidden', 'true')
     marco.setAttribute('title', 'Planilla de inspección')
     marco.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none'
@@ -378,8 +388,14 @@ export function imprimirHtml(html, doc = typeof document === 'undefined' ? null 
       }
       w.addEventListener('afterprint', () => setTimeout(quitar, 500))
       reloj = setTimeout(quitar, 60_000)
-      w.focus()
-      w.print()
+      try {
+        w.focus()
+        w.print()
+      } catch {
+        quitar()
+        reject(new Error('El navegador no dejó abrir la impresión.'))
+        return
+      }
       resolve()
     }
     marco.srcdoc = html

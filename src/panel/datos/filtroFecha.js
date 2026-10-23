@@ -41,6 +41,14 @@ export function diaLocal(ms = Date.now()) {
 }
 
 /**
+ * Cuánto falta (ms) para las 00:00 locales del día siguiente a `ahora`: a esa
+ * hora «Hoy» y «7 días» cambian y la pantalla vuelve a filtrar.
+ */
+export function msHastaMedianoche(ahora = Date.now()) {
+  return Math.max(1, inicioDelDia(ahora, -1) - ahora)
+}
+
+/**
  * El tramo que deja pasar el filtro, en milisegundos: `desde` incluido y
  * `hasta` excluido; `null` = sin límite por ese lado. Un rango escrito al
  * revés se da la vuelta en vez de dejar la lista vacía.

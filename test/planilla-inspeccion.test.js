@@ -133,9 +133,10 @@ test('se imprime desde un marco aparte y el marco se quita al cerrar el diálogo
   const oyentes = {}
   let imprimio = false
   let quitado = false
+  const atributos = {}
   const marco = {
     style: {},
-    setAttribute() {},
+    setAttribute(k, v) { atributos[k] = v },
     remove() { quitado = true },
     contentWindow: { addEventListener: (t, fn) => { oyentes[t] = fn }, focus() {}, print() { imprimio = true } },
   }
@@ -145,6 +146,9 @@ test('se imprime desde un marco aparte y el marco se quita al cerrar el diálogo
   }
   await imprimirHtml(htmlPlanillas([hojaDe(inspeccion('i1'), respuestas)]), doc)
   assert.ok(imprimio, 'llama print() en el marco')
+  // Aislado: sin scripts dentro; se imprime desde fuera (same-origin) y el diálogo necesita allow-modals.
+  assert.equal(atributos.sandbox, 'allow-same-origin allow-modals')
+  assert.doesNotMatch(atributos.sandbox, /allow-scripts/u)
   oyentes.afterprint()
   await new Promise((r) => setTimeout(r, 600))
   assert.ok(quitado, 'quita el marco después de imprimir')

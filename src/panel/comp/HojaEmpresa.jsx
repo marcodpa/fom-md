@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import repo from '../datos/repo'
+import repo, { CONECTADO } from '../datos/repo'
+import { pedir } from '../datos/api'
 import { argumentosDeFormato } from '../datos/repoApi'
 import { Campo, Modal, Tag } from './ui'
 import { Icono } from '../Iconos'
 import { mensajePublicacion } from './FormatosListos'
 import { useSesion } from '../useSesion'
 import {
-  CAMPOS, NOMBRE_CAMPO, aFormato, analizarHoja, armarMapa, codigoDe, muestraDeInspeccion, problemasDeLaHoja, sobreHoja,
+  CAMPOS, NOMBRE_CAMPO, aFormato, analizarHoja, armarMapa, codigoDe, llavePregunta, muestraDeInspeccion, problemasDeLaHoja, sobreHoja, validarMapa,
 } from '../datos/hojaEmpresa'
-import { almacenHojas, empresaActual, guardaSoloAqui } from '../datos/hojasEmpresa'
+import { SIN_EMPRESA, almacenHojas, empresaActual } from '../datos/hojasEmpresa'
 import { htmlPlanillas, imprimirHtml } from '../datos/planillaInspeccion'
 import './hoja-empresa.css'
 
@@ -47,6 +48,28 @@ const limitar = (v) => Math.max(0, Math.min(1, Math.round(v * 10000) / 10000))
 function versionLibre(plantillas, codigo) {
   const usadas = (plantillas ?? []).filter((t) => t.codigo === codigoDe(codigo)).map((t) => Number(t.version) || 0)
   return usadas.length ? Math.max(...usadas) + 1 : 1
+}
+
+/**
+ * ¿La plantilla `t` que ya estaba en la empresa (misma versión) tiene las
+ * mismas preguntas que la hoja? Si no, la hoja no se le puede pegar: sus
+ * marcas caerían en preguntas ajenas. Conectado se lee su detalle; la
+ * demostración solo sabe cuántas tiene.
+ */
+async function mismasPreguntas(t, formato) {
+  if (!t) return false
+  if (!CONECTADO) return Number(t.puntos) === formato.items.length
+  const r = await pedir(`/api/v1/console/inspection-templates/${encodeURIComponent(t.id)}`)
+  const items = [...(r?.template?.items ?? r?.item?.items ?? r?.items ?? [])].sort((a, b) => a.displayOrder - b.displayOrder)
+  return items.length === formato.items.length && items.every((it, i) => llavePregunta(it.name) === llavePregunta(formato.items[i].name))
+}
+
+/** El error al guardar, diciendo en qué quedó cada cosa. */
+function errorAlGuardar(etapa, e, publicar) {
+  const motivo = e?.message || 'No se pudo guardar.'
+  if (etapa === 'imagenes') return `${motivo} No se creó ninguna plantilla: puedes volver a intentarlo.`
+  if (etapa === 'plantilla') return `${motivo} La hoja no quedó guardada.`
+  return `${motivo} Ojo: la plantilla ya quedó ${publicar ? 'creada (y publicada si se pudo)' : 'creada como borrador'}, pero su hoja no se guardó. Para pegarle la hoja, vuelve a crearla con otra versión.`
 }
 
 /** Imprime la hoja con una inspección de muestra encima. */
@@ -141,32 +164,45 @@ export default function HojaEmpresa({ plantillas = [], alCerrar, alGuardar }) {
     setError('')
     const formato = aFormato({ ...datos, preguntas: prop.preguntas })
     const mapa = armarMapa({ propuesta: prop, formato, marca })
+    const paginas = leido.paginas.map((p) => p.imagen)
+    const hoja = { empresa: empresaActual(), codigo: formato.code, version: formato.version, nombre: formato.name }
+    const almacen = almacenHojas()
     let mensaje = ''
+    let etapa = 'imagenes'
     try {
+      if (!hoja.empresa) throw new Error(SIN_EMPRESA)
+      if (!validarMapa(mapa)) throw new Error('La hoja tiene marcas fuera de lugar: vuelve a ubicar las respuestas.')
+      // Primero las imágenes: si fallan, no queda una plantilla sin su hoja.
+      const subidas = await almacen.subirPaginas({ ...hoja, paginas })
+      etapa = 'plantilla'
+      const buscarEsta = async () => (await repo.programaInspecciones.plantillas({}).catch(() => []))
+        ?.find((t) => t.codigo === formato.code && Number(t.version) === formato.version)
       if (datos.publicar) {
         try {
           const r = await repo.programaInspecciones.publicarFormato(formato)
           if (r?.resultado === 'archivada') throw new Error('Esa versión está archivada: elige otra versión.')
+          // Ya estaba (otro la creó a la vez): solo es la misma si tiene las mismas preguntas.
+          if (r?.resultado !== 'creada' && !(await mismasPreguntas(await buscarEsta(), formato).catch(() => false))) {
+            throw new Error('Ya había una plantilla con ese código y versión, con otras preguntas: la hoja no se le pegó. Usa otra versión.')
+          }
           mensaje = mensajePublicacion(r?.resultado, empresa)
         } catch (e) {
-          // Si quedó creada como borrador (otra versión ya está publicada), la hoja se guarda igual.
-          const ahora = await repo.programaInspecciones.plantillas({}).catch(() => [])
-          if (!ahora?.some((t) => t.codigo === formato.code && Number(t.version) === formato.version)) throw e
+          // Si quedó creada como borrador (otra versión ya está publicada), la hoja se guarda igual,
+          // pero solo si esa plantilla es ESTA: con las mismas preguntas.
+          if (!(await mismasPreguntas(await buscarEsta(), formato).catch(() => false))) throw e
           mensaje = e?.message || 'La plantilla quedó como borrador.'
         }
       } else {
         await repo.programaInspecciones.crearPlantilla(argumentosDeFormato(formato))
         mensaje = 'Plantilla creada como borrador. Publícala cuando quieras que los conductores la usen.'
       }
-      const g = await almacenHojas().guardar({
-        empresa: empresaActual(), codigo: formato.code, version: formato.version, nombre: formato.name,
-        paginas: leido.paginas.map((p) => p.imagen), mapa,
-      })
-      setResultado({ mensaje, mapa, paginas: leido.paginas.map((p) => p.imagen), guardado: g })
+      etapa = 'hoja'
+      const g = await almacen.guardar({ ...hoja, paginas, mapa, subidas })
+      setResultado({ mensaje, mapa, paginas, guardado: g })
       setPaso('listo')
       alGuardar?.(mensaje)
     } catch (e) {
-      setError(e?.message || 'No se pudo guardar.')
+      setError(errorAlGuardar(etapa, e, datos.publicar))
     } finally {
       setGuardando(false)
     }
@@ -223,8 +259,7 @@ export default function HojaEmpresa({ plantillas = [], alCerrar, alGuardar }) {
         <h3>Listo: la hoja de tu empresa ya está en FOM</h3>
         <p>{resultado.mensaje}</p>
         <p>Cuando imprimas una inspección hecha con «{resultado.mapa.nombre}», saldrá sobre esta misma hoja con las respuestas en su sitio.</p>
-        {resultado.guardado?.provisional && <p className="insp-ficha-aviso" role="status">La hoja quedó guardada solo en este navegador{resultado.guardado.motivo ? ` (${resultado.guardado.motivo})` : ''}. En otra computadora la inspección se imprimirá con la planilla de siempre hasta que el servidor tenga dónde guardarla.</p>}
-        {!resultado.guardado?.provisional && guardaSoloAqui() && <p className="insp-ficha-aviso" role="status">Esta web no tiene Cloudinary configurado: la hoja quedó guardada solo en este navegador.</p>}
+        {resultado.guardado?.provisional && <p className="insp-ficha-aviso" role="status">Provisional: la hoja quedó guardada solo en este navegador{resultado.guardado.motivo ? ` (${resultado.guardado.motivo})` : ''}. Aquí se imprime sobre tu hoja; en otra computadora la inspección saldrá con la planilla de siempre hasta que el servidor tenga dónde guardarla.</p>}
       </div>}
 
       <div className="insp-actions">

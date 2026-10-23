@@ -697,8 +697,13 @@ export function armarMapa({ propuesta, formato, marca = 'x' }) {
   const elegidas = propuesta.preguntas.filter((q) => q.esPregunta)
   const usados = new Set(elegidas.map((q) => q.grupo))
   const p0 = propuesta.paginas[0] ?? { ancho: 1, alto: 1.414 }
+  // Todo en 0–1: al leerlo se descarta el mapa que se sale (ver validarMapa); un arrastre al borde no debe tumbarlo.
   const campos = {}
-  for (const c of CAMPOS) if (propuesta.campos?.[c]) campos[c] = { ...propuesta.campos[c] }
+  for (const c of CAMPOS) {
+    const l = propuesta.campos?.[c]
+    if (l) campos[c] = { pagina: l.pagina, x: aFraccion(l.x), y: aFraccion(l.y), ancho: aFraccion(l.ancho), alto: aFraccion(l.alto) }
+  }
+  const xs = (x) => Object.fromEntries(Object.entries(x ?? {}).filter(([k, v]) => COLUMNAS.has(k) && v != null).map(([k, v]) => [k, aFraccion(v)]))
   return {
     formato: VERSION_MAPA,
     codigo: formato.code,
@@ -707,10 +712,117 @@ export function armarMapa({ propuesta, formato, marca = 'x' }) {
     ...papelDe(p0.ancho, p0.alto),
     marca: marca === 'check' ? 'check' : 'x',
     paginas: propuesta.paginas.map(({ ancho, alto }) => ({ ancho, alto })),
-    grupos: propuesta.grupos.filter((g) => usados.has(g.id)).map(({ id, pagina, modo, x, notas }) => ({ id, pagina, modo, x: { ...x }, notas: notas ? { ...notas } : null })),
-    preguntas: elegidas.map((q, i) => ({ codigo: formato.items[i]?.code, nombre: formato.items[i]?.name ?? q.texto, grupo: q.grupo, pagina: q.pagina, y: q.y })),
+    grupos: propuesta.grupos.filter((g) => usados.has(g.id)).map(({ id, pagina, modo, x, notas }) => ({
+      id, pagina, modo, x: xs(x), notas: notas ? { x0: aFraccion(notas.x0), x1: aFraccion(notas.x1) } : null,
+    })),
+    preguntas: elegidas.map((q, i) => ({ codigo: formato.items[i]?.code, nombre: formato.items[i]?.name ?? q.texto, grupo: q.grupo, pagina: q.pagina, y: aFraccion(q.y) })),
     campos,
   }
+}
+
+// --- El mapa guardado no es de fiar ----------------------------------------
+// Un mapa puede llegar tocado (almacenamiento del navegador, un archivo
+// cambiado por otro…). Antes de imprimir se revisa entero y se copia solo lo
+// que se conoce: si algo no cuadra, la hoja se descarta y la inspección sale
+// con la planilla de siempre. Nada de él llega al HTML sin pasar por aquí.
+
+const COLUMNAS = new Set(['conforme', 'falla', 'observacion', 'unica'])
+const MODOS = new Set(['columnas', 'unica'])
+/** Topes del mapa: holgados para una hoja real (se leen 6 páginas como mucho), cortos para uno inflado. */
+export const TOPES_MAPA = { paginas: 12, grupos: 60, preguntas: 400, texto: 500, codigo: 60, nombre: 120 }
+
+function aFraccion(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : v
+}
+const esFraccion = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1
+const esMedida = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0 && v <= 50000
+const esEntero = (v, min, max) => Number.isInteger(v) && v >= min && v <= max
+const esTexto = (t, max, min = 0) => typeof t === 'string' && t.length >= min && t.length <= max
+const esObjeto = (o) => Boolean(o) && typeof o === 'object' && !Array.isArray(o)
+const tiene = (o, k) => Object.prototype.hasOwnProperty.call(o, k)
+
+/**
+ * El mapa revisado: una copia con solo lo conocido, o null si algo no cuadra
+ * (papel u orientación desconocidos, números fuera de 0–1, listas o textos de
+ * más, páginas que no existen…).
+ */
+export function validarMapa(m) {
+  try {
+    if (!esObjeto(m) || m.formato !== VERSION_MAPA) return null
+    if (typeof m.papel !== 'string' || !tiene(PAPELES, m.papel)) return null
+    if (m.orientacion !== 'vertical' && m.orientacion !== 'horizontal') return null
+    if (m.marca !== 'x' && m.marca !== 'check') return null
+    if (!esTexto(m.codigo, TOPES_MAPA.codigo, 1) || !esTexto(m.nombre, TOPES_MAPA.nombre, 1) || !esEntero(m.version, 1, 1e6)) return null
+    if (!Array.isArray(m.paginas) || !m.paginas.length || m.paginas.length > TOPES_MAPA.paginas) return null
+    const paginas = []
+    for (const p of m.paginas) {
+      if (!esObjeto(p) || !esMedida(p.ancho) || !esMedida(p.alto)) return null
+      paginas.push({ ancho: p.ancho, alto: p.alto })
+    }
+    const esPagina = (n) => esEntero(n, 0, paginas.length - 1)
+    if (!Array.isArray(m.grupos) || m.grupos.length > TOPES_MAPA.grupos) return null
+    const grupos = []
+    for (const g of m.grupos) {
+      if (!esObjeto(g) || !esTexto(g.id, 40, 1) || !esPagina(g.pagina) || !MODOS.has(g.modo) || !esObjeto(g.x)) return null
+      const x = {}
+      for (const [k, v] of Object.entries(g.x)) {
+        if (!COLUMNAS.has(k) || !esFraccion(v)) return null
+        x[k] = v
+      }
+      let notas = null
+      if (g.notas != null) {
+        if (!esObjeto(g.notas) || !esFraccion(g.notas.x0) || !esFraccion(g.notas.x1) || g.notas.x0 > g.notas.x1) return null
+        notas = { x0: g.notas.x0, x1: g.notas.x1 }
+      }
+      grupos.push({ id: g.id, pagina: g.pagina, modo: g.modo, x, notas })
+    }
+    if (!Array.isArray(m.preguntas) || m.preguntas.length > TOPES_MAPA.preguntas) return null
+    const preguntas = []
+    for (const p of m.preguntas) {
+      // Sin grupo es posible (pregunta añadida a mano sin columnas): su respuesta va a «sin lugar».
+      if (!esObjeto(p) || !esTexto(p.nombre, TOPES_MAPA.texto, 1) || (p.grupo != null && !esTexto(p.grupo, 40)) || !esPagina(p.pagina) || !esFraccion(p.y)) return null
+      if (p.codigo != null && !esTexto(p.codigo, TOPES_MAPA.codigo)) return null
+      preguntas.push({ codigo: p.codigo ?? undefined, nombre: p.nombre, grupo: p.grupo ?? undefined, pagina: p.pagina, y: p.y })
+    }
+    const campos = {}
+    if (m.campos != null) {
+      if (!esObjeto(m.campos)) return null
+      for (const [c, l] of Object.entries(m.campos)) {
+        if (!CAMPOS.includes(c)) return null
+        if (!esObjeto(l) || !esPagina(l.pagina) || ![l.x, l.y, l.ancho].every(esFraccion) || (l.alto != null && !esFraccion(l.alto))) return null
+        campos[c] = { pagina: l.pagina, x: l.x, y: l.y, ancho: l.ancho, ...(l.alto != null ? { alto: l.alto } : {}) }
+      }
+    }
+    const limpio = { formato: VERSION_MAPA, codigo: m.codigo, version: m.version, nombre: m.nombre, papel: m.papel, orientacion: m.orientacion, marca: m.marca, paginas, grupos, preguntas, campos }
+    if (m.imagenes != null) {
+      // Las imágenes subidas a Cloudinary (public_id), una por página.
+      if (!Array.isArray(m.imagenes) || m.imagenes.length > paginas.length || !m.imagenes.every((i) => esTexto(i, 300, 1) && /^[\w./-]+$/u.test(i))) return null
+      limpio.imagenes = [...m.imagenes]
+    }
+    return limpio
+  } catch {
+    return null
+  }
+}
+
+/** Una imagen de página que se puede poner en la hoja: de Cloudinary o una imagen incrustada. Nada más. */
+export function esImagenDeHoja(url) {
+  return typeof url === 'string' && (
+    /^https:\/\/res\.cloudinary\.com\/[\w-]+\/image\/upload\/[\w,./:%?=-]+$/u.test(url)
+    || /^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/u.test(url))
+}
+
+/**
+ * La hoja guardada lista para imprimir ({ mapa, paginas, … } con el mapa
+ * revisado y una imagen válida por página), o null si no se puede usar.
+ */
+export function hojaValida(guardada) {
+  if (!esObjeto(guardada)) return null
+  const mapa = validarMapa(guardada.mapa)
+  const paginas = guardada.paginas
+  if (!mapa || !Array.isArray(paginas) || paginas.length !== mapa.paginas.length || !paginas.every(esImagenDeHoja)) return null
+  return { mapa, paginas: [...paginas], provisional: Boolean(guardada.provisional), ...(guardada.guardadaEn ? { guardadaEn: String(guardada.guardadaEn) } : {}) }
 }
 
 // --- De la inspección a la hoja impresa ----------------------------------
@@ -750,7 +862,7 @@ export function elementosDeHoja(mapa, h) {
       if (xMarca != null && PALABRA[r.estado]) els.push({ tipo: 'marca', pagina: p.pagina, x: xMarca, y: p.y, texto: PALABRA[r.estado], estado: r.estado, palabra: true })
     } else {
       // Sin columna de observación, la observación se marca en SÍ (la unidad sale) y la nota lo explica.
-      xMarca = g.x?.[r.estado] ?? (r.estado === 'observacion' ? g.x?.conforme : null)
+      xMarca = (g.x && COLUMNAS.has(r.estado) ? g.x[r.estado] : null) ?? (r.estado === 'observacion' ? g.x?.conforme : null)
       if (xMarca != null) els.push({ tipo: 'marca', pagina: p.pagina, x: xMarca, y: p.y, texto: mapa.marca === 'check' ? '✓' : 'X', estado: r.estado })
       else if (PALABRA[r.estado]) sinLugar.push(r)
     }
@@ -776,8 +888,12 @@ export function elementosDeHoja(mapa, h) {
 const escHtml = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 const pct = (v) => `${Math.round(v * 100000) / 1000}%`
 
-/** El nombre de la página de impresión para un papel y una orientación (cada uno su @page). */
-const nombrePagina = (papel, orientacion) => `he-${papel}-${orientacion === 'horizontal' ? 'h' : 'v'}`
+/**
+ * El nombre de la página de impresión para un papel y una orientación (cada
+ * uno su @page). Va dentro de un `style`: solo papeles conocidos, nunca el
+ * texto que traiga el mapa.
+ */
+const nombrePagina = (papel, orientacion) => `he-${tiene(PAPELES, papel) ? papel : 'a4'}-${orientacion === 'horizontal' ? 'h' : 'v'}`
 
 /** Medidas del papel en mm según la orientación. */
 function medidas(papel, orientacion) {
@@ -796,7 +912,10 @@ function letraQueCabe(texto, anchoMm, base = 3.2, minimo = 1.9) {
  * `guardada` = { mapa, paginas: [url de la imagen de cada página] }.
  */
 export function htmlHojaEmpresa(guardada, h) {
-  const { mapa } = guardada
+  // Se imprime solo la copia revisada: lo que traiga de más el mapa no llega al HTML.
+  const hoja = hojaValida(guardada)
+  if (!hoja) return ''
+  const { mapa } = hoja
   const [anchoMm, altoMm] = medidas(mapa.papel, mapa.orientacion)
   const els = elementosDeHoja(mapa, h)
   return (mapa.paginas ?? []).map((pag, n) => {
@@ -808,7 +927,7 @@ export function htmlHojaEmpresa(guardada, h) {
     const piezas = propios.map((e) => {
       if (e.tipo === 'marca') {
         const tam = e.palabra ? 3.4 : 4.6
-        return `<span class="he-marca he-${e.estado}${e.palabra ? ' he-palabra' : ''}" style="left:${pct(e.x)};top:${pct(e.y)};font-size:${tam}mm">${escHtml(e.texto)}</span>`
+        return `<span class="he-marca he-${escHtml(e.estado)}${e.palabra ? ' he-palabra' : ''}" style="left:${pct(e.x)};top:${pct(e.y)};font-size:${tam}mm">${escHtml(e.texto)}</span>`
       }
       if (e.tipo === 'firma') {
         return `<img class="he-firma" alt="" src="${escHtml(e.url)}" style="left:${pct(e.x)};top:${pct(e.y)};width:${pct(e.ancho)};height:${pct(e.alto ?? 0.04)}" />`
@@ -821,7 +940,7 @@ export function htmlHojaEmpresa(guardada, h) {
     }).join('')
     return `<section class="he-pagina" style="page:${nombrePagina(mapa.papel, mapa.orientacion)};width:${anchoMm}mm;height:${altoMm - 0.4}mm">
       <div class="he-lienzo" style="width:${w.toFixed(2)}mm;height:${hh.toFixed(2)}mm">
-        <img class="he-fondo" alt="" src="${escHtml(guardada.paginas?.[n] ?? '')}" />${piezas}
+        <img class="he-fondo" alt="" src="${escHtml(hoja.paginas[n])}" />${piezas}
       </div>
     </section>`
   }).join('')
@@ -903,6 +1022,21 @@ export function partirTexto(texto, max) {
   return renglones
 }
 
+/** Lo más que se lee de un Excel: una planilla real cabe de sobra. */
+export const TOPES_TABLA = { filas: 400, columnas: 40, combinadas: 2000 }
+
+/**
+ * El rango de la hoja de Excel que se lee (`!ref` decodificado: { s, e } con
+ * r y c desde 0), recortado a TOPES_TABLA desde su esquina. `recortado` dice
+ * si se dejó algo fuera.
+ */
+export function rangoRecortado(rango, topes = TOPES_TABLA) {
+  const s = { r: Math.max(0, Number(rango?.s?.r) || 0), c: Math.max(0, Number(rango?.s?.c) || 0) }
+  const e = { r: Math.max(s.r, Number(rango?.e?.r) || 0), c: Math.max(s.c, Number(rango?.e?.c) || 0) }
+  const corte = { r: Math.min(e.r, s.r + topes.filas - 1), c: Math.min(e.c, s.c + topes.columnas - 1) }
+  return { s, e: corte, recortado: corte.r < e.r || corte.c < e.c }
+}
+
 /**
  * Arma la hoja de impresión a partir de la tabla de un Excel: cada celda en
  * su sitio, con sus renglones, en páginas A4 a 200 ppp. Devuelve por página
@@ -910,22 +1044,40 @@ export function partirTexto(texto, max) {
  * que una foto, pero sin adivinar nada).
  * `filas`: matriz de textos; `anchos`: ancho de cada columna en caracteres.
  */
-export function maquetarTabla(filas, { anchos = [], combinadas = [], ancho = 1654, alto = 2339, margen = 90, letra = 24 } = {}) {
-  const limpias = (filas ?? []).map((f) => (f ?? []).map((c) => String(c ?? '').trim()))
+export function maquetarTabla(filas, { anchos = [], combinadas: todasCombinadas = [], ancho = 1654, alto = 2339, margen = 90, letra = 24 } = {}) {
+  // Un Excel con el rango inflado (formato aplicado hasta la fila un millón) no debe colgar la página.
+  const limpias = []
+  const origen = Array.isArray(filas) ? filas : []
+  for (let r = 0; r < Math.min(origen.length, TOPES_TABLA.filas); r += 1) {
+    const f = Array.isArray(origen[r]) ? origen[r] : []
+    const fila = []
+    for (let c = 0; c < Math.min(f.length, TOPES_TABLA.columnas); c += 1) fila.push(String(f[c] ?? '').trim())
+    limpias.push(fila)
+  }
   while (limpias.length && limpias.at(-1).every((c) => !c)) limpias.pop()
-  const nCols = Math.max(0, ...limpias.map((f) => {
+  // Con un bucle y no Math.max(...lista): con muchas filas, esparcirla revienta la pila.
+  let nCols = 0
+  for (const f of limpias) {
     let n = f.length
     while (n && !f[n - 1]) n -= 1
-    return n
-  }))
+    if (n > nCols) nCols = n
+  }
   if (!nCols) return []
+  const nFilas = limpias.length
+  // Las celdas combinadas, recortadas a la tabla que se dibuja.
+  const combinadas = []
+  for (const m of Array.isArray(todasCombinadas) ? todasCombinadas : []) {
+    if (combinadas.length >= TOPES_TABLA.combinadas) break
+    if (!(m?.s?.r < nFilas && m?.s?.c < nCols && m.s.r >= 0 && m.s.c >= 0)) continue
+    combinadas.push({ s: { r: m.s.r, c: m.s.c }, e: { r: Math.min(nFilas - 1, Math.max(m.s.r, m.e?.r ?? m.s.r)), c: Math.min(nCols - 1, Math.max(m.s.c, m.e?.c ?? m.s.c)) } })
+  }
   const combinadaEn = (r, c) => (combinadas ?? []).some((m) => r >= m.s.r && r <= m.e.r && c >= m.s.c && c <= m.e.c)
   const chars = Array.from({ length: nCols }, (_, c) => {
     const pedido = Number(anchos[c]) || 0
     // Sin ancho guardado, cuenta el texto que tiene que caber en la columna: no el de una celda
     // combinada ni el que en Excel se desborda sobre las celdas vacías de al lado.
     const propios = limpias.filter((f, r) => f[c] && !combinadaEn(r, c) && (c === nCols - 1 || f[c + 1])).map((f) => f[c].length)
-    const contenido = propios.length ? Math.max(2, ...propios) : 8
+    const contenido = propios.length ? propios.reduce((a, b) => Math.max(a, b), 2) : 8
     return Math.max(3, Math.min(60, pedido || contenido))
   })
   const util = ancho - margen * 2
@@ -1010,4 +1162,4 @@ export function muestraDeInspeccion(mapa, hoy = new Date()) {
 }
 
 /** Lo que necesita planillaInspeccion.htmlPlanillas para imprimir sobre la hoja. */
-export const sobreHoja = () => ({ pintar: htmlHojaEmpresa, estilo: estiloHojaEmpresa() })
+export const sobreHoja = () => ({ pintar: htmlHojaEmpresa, estilo: estiloHojaEmpresa(), admite: (g) => Boolean(hojaValida(g)) })

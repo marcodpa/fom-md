@@ -11,6 +11,7 @@ import {
   codigoDe,
   elementosDeHoja,
   estiloHojaEmpresa,
+  hojaValida,
   htmlHojaEmpresa,
   limpiarPregunta,
   maquetarTabla,
@@ -18,7 +19,9 @@ import {
   palabrasDePdf,
   papelDe,
   problemasDeLaHoja,
+  rangoRecortado,
   sobreHoja,
+  validarMapa,
 } from '../src/panel/datos/hojaEmpresa.js'
 import { armarPlanillas } from '../src/panel/datos/planillaInspeccion.js'
 
@@ -306,15 +309,18 @@ test('una sola columna: se escribe SÍ, OBS. o NO, y con ✓ si se eligió', () 
   assert.equal(elementosDeHoja(conCheck, inspeccion).find((e) => e.tipo === 'marca').texto, '✓')
 })
 
+/** Una imagen de página como las que se guardan (Cloudinary). */
+const IMG = 'https://res.cloudinary.com/nube/image/upload/f_auto,q_auto,w_2000,c_limit/fom/hoja/e/chequeo-v1/1?v=1'
+
 test('la página impresa: la hoja a página completa, las marcas encima y su @page sin márgenes', () => {
   const m = mapaCliente()
-  const html = htmlHojaEmpresa({ mapa: m, paginas: ['https://ejemplo/hoja-1.jpg'] }, inspeccion)
+  const html = htmlHojaEmpresa({ mapa: m, paginas: [IMG] }, inspeccion)
   assert.equal((html.match(/class="he-pagina"/gu) ?? []).length, 1)
   assert.match(html, /page:he-a4-v;width:210mm/u)
-  assert.match(html, /<img class="he-fondo" alt="" src="https:\/\/ejemplo\/hoja-1.jpg" \/>/u)
+  assert.ok(html.includes(`<img class="he-fondo" alt="" src="${IMG}" />`))
   assert.match(html, /left:62%;top:20%/u)
   assert.match(html, /Ana Pérez/u)
-  assert.doesNotMatch(htmlHojaEmpresa({ mapa: m, paginas: ['x'] }, { ...inspeccion, conductor: '<b>x</b>' }), /<b>x<\/b>/u)
+  assert.doesNotMatch(htmlHojaEmpresa({ mapa: m, paginas: [IMG] }, { ...inspeccion, conductor: '<b>x</b>' }), /<b>x<\/b>/u)
   assert.match(estiloHojaEmpresa(), /@page he-carta-v \{ size: 215.9mm 279.4mm; margin: 0; \}/u)
   // La muestra de «Imprimir una de prueba» trae una observación y una falla.
   const muestra = muestraDeInspeccion(m, new Date(2026, 9, 23))
@@ -332,7 +338,7 @@ test('imprimir varias: la que tiene hoja sale sobre ella, la otra con la planill
   const pedidas = []
   const html = await armarPlanillas(lista, {
     leerRespuestas: async () => respuestas.map((r) => ({ ...r, estadoItem: r.estado })),
-    leerHoja: async (formato) => { pedidas.push(formato); return formato === 'Chequeo' ? { mapa: m, paginas: ['hoja.jpg'] } : null },
+    leerHoja: async (formato) => { pedidas.push(formato); return formato === 'Chequeo' ? { mapa: m, paginas: [IMG] } : null },
     sobreHoja: sobreHoja(),
   })
   assert.deepEqual(pedidas, ['Chequeo', 'Otra'], 'una lectura por formato')
@@ -345,6 +351,78 @@ test('imprimir varias: la que tiene hoja sale sobre ella, la otra con la planill
   // Si leer la hoja falla, sale la planilla de siempre.
   const conError = await armarPlanillas(lista.slice(0, 1), { leerRespuestas: async () => [], leerHoja: async () => { throw new Error('sin red') }, sobreHoja: sobreHoja() })
   assert.match(conError, /<section class="hoja">/u)
+})
+
+// --- El mapa guardado no es de fiar (T-133) ------------------------------------
+
+test('mapa tocado: papel, orientación, números o listas fuera de lo conocido se descartan', () => {
+  const bueno = mapaCliente()
+  assert.deepEqual(validarMapa(bueno), bueno, 'el mapa que arma el panel pasa tal cual')
+  const malos = {
+    'papel inventado': { ...bueno, papel: 'a4;}</style><script>alert(1)</script>' },
+    'papel heredado': { ...bueno, papel: 'toString' },
+    'orientación rara': { ...bueno, orientacion: 'diagonal' },
+    'x fuera de 0–1': { ...bueno, grupos: [{ ...bueno.grupos[0], x: { ...bueno.grupos[0].x, conforme: 3 } }] },
+    'y no numérica': { ...bueno, preguntas: [{ ...bueno.preguntas[0], y: '0.2' }, ...bueno.preguntas.slice(1)] },
+    'columna desconocida': { ...bueno, grupos: [{ ...bueno.grupos[0], x: { ...bueno.grupos[0].x, '<img src=x>': 0.5 } }] },
+    'página que no existe': { ...bueno, preguntas: [{ ...bueno.preguntas[0], pagina: 4 }] },
+    'demasiadas preguntas': { ...bueno, preguntas: Array.from({ length: 5000 }, () => bueno.preguntas[0]) },
+    'texto enorme': { ...bueno, preguntas: [{ ...bueno.preguntas[0], nombre: 'a'.repeat(10000) }] },
+    'medida infinita': { ...bueno, paginas: [{ ancho: Infinity, alto: 10 }] },
+    'campo desconocido': { ...bueno, campos: { ...bueno.campos, script: { pagina: 0, x: 0, y: 0, ancho: 0.1 } } },
+    'otra versión del formato': { ...bueno, formato: 99 },
+  }
+  for (const [caso, m] of Object.entries(malos)) assert.equal(validarMapa(m), null, caso)
+  assert.equal(validarMapa(null), null)
+  assert.equal(validarMapa('{"formato":1}'), null)
+  // Lo que no se conoce no se copia.
+  assert.equal(validarMapa({ ...bueno, extra: '<script>' }).extra, undefined)
+})
+
+test('hoja tocada: imagen que no es de Cloudinary ni incrustada, o una de menos, se descarta', () => {
+  const m = mapaCliente()
+  assert.ok(hojaValida({ mapa: m, paginas: [IMG] }))
+  assert.ok(hojaValida({ mapa: m, paginas: ['data:image/jpeg;base64,AAAA'] }))
+  assert.equal(hojaValida({ mapa: m, paginas: ['javascript:alert(1)'] }), null)
+  assert.equal(hojaValida({ mapa: m, paginas: ['https://otro.sitio/x.jpg'] }), null)
+  assert.equal(hojaValida({ mapa: m, paginas: [`${IMG}" onerror="alert(1)`] }), null)
+  assert.equal(hojaValida({ mapa: m, paginas: [] }), null)
+  assert.equal(hojaValida({ mapa: { ...m, papel: 'x' }, paginas: [IMG] }), null)
+})
+
+test('al imprimir, el papel va escapado y un mapa malicioso no se pinta: sale la planilla de siempre', async () => {
+  const m = mapaCliente()
+  const malo = { ...m, papel: 'a4;}</style><script>alert(1)</script><style>', nombre: '<script>x</script>' }
+  // Pintar directo: no sale nada del mapa malo.
+  assert.equal(htmlHojaEmpresa({ mapa: malo, paginas: [IMG] }, inspeccion), '')
+  // Y la planilla entera: esa inspección sale con la planilla de siempre.
+  const lista = [{ id: 'a', plantilla: 'Chequeo', vehiculoNombre: 'Camión 12', conductorNombre: 'Ana', fecha: '2026-10-23' }]
+  const html = await armarPlanillas(lista, { leerRespuestas: async () => [], leerHoja: async () => ({ mapa: malo, paginas: [IMG] }), sobreHoja: sobreHoja() })
+  assert.doesNotMatch(html, /<script/u)
+  assert.doesNotMatch(html, /he-pagina/u)
+  assert.match(html, /<section class="hoja">/u)
+  // Aunque el texto del papel llegara a pintarse, en el style solo cabe un papel conocido.
+  const pintado = htmlHojaEmpresa({ mapa: m, paginas: [IMG] }, { ...inspeccion, respuestas: [{ nombre: m.preguntas[0].nombre, estado: '"><script>x</script>' }] })
+  assert.doesNotMatch(pintado, /<script/u)
+  assert.match(pintado, /style="page:he-a4-v;/u)
+})
+
+test('Excel con el rango inflado: se lee una planilla de tamaño real, sin colgarse', () => {
+  // `!ref` hasta XFD1048576 (formato aplicado a toda la hoja).
+  assert.deepEqual(rangoRecortado({ s: { r: 0, c: 0 }, e: { r: 1048575, c: 16383 } }), { s: { r: 0, c: 0 }, e: { r: 399, c: 39 }, recortado: true })
+  assert.deepEqual(rangoRecortado({ s: { r: 2, c: 1 }, e: { r: 30, c: 6 } }), { s: { r: 2, c: 1 }, e: { r: 30, c: 6 }, recortado: false })
+  // Aunque llegue la tabla entera: 200.000 filas (vacías salvo dos) y una fila de 20.000 columnas.
+  const filas = Array.from({ length: 200000 }, () => [])
+  filas[0] = ['N°', 'Pregunta', 'SÍ', 'NO']
+  filas[1] = ['1', 'Luces delanteras funcionan', '', '']
+  filas[2] = new Array(20000).fill('')
+  filas[2][19999] = 'lejos'
+  const t0 = Date.now()
+  const paginas = maquetarTabla(filas, { combinadas: [{ s: { r: 0, c: 0 }, e: { r: 1048575, c: 16383 } }] })
+  assert.ok(Date.now() - t0 < 2000, 'tarda menos de 2 s')
+  assert.ok(paginas.length >= 1)
+  const columnas = new Set(paginas.flatMap((p) => p.celdas.map((c) => c.columna)))
+  assert.ok(Math.max(...columnas) < 40, 'como mucho 40 columnas')
 })
 
 // --- Almacenes ---------------------------------------------------------------
@@ -368,72 +446,87 @@ async function cargarAlmacenes() {
   return modulo
 }
 
-test('almacén local (demo): guarda la hoja y la encuentra por código y versión', async () => {
+/** IndexedDB de mentira: las imágenes en memoria, con la misma forma que crearImagenesIdb. */
+function imagenesEnMemoria({ llena = false } = {}) {
+  const datos = new Map()
+  return {
+    datos,
+    guardar: async (k, v) => { if (llena) throw new Error('No cabe la hoja en el almacenamiento de este navegador.'); datos.set(k, v) },
+    leer: async (k) => datos.get(k) ?? null,
+  }
+}
+
+const IMG_INCRUSTADA = 'data:image/jpeg;base64,AAAA'
+
+test('almacén local (demo): el mapa en localStorage, las imágenes en IndexedDB', async () => {
   const { crearAlmacenLocal, plantillaDeNombre } = await cargarAlmacenes()
   const ls = localStorageEnMemoria()
-  const a = crearAlmacenLocal(ls)
+  const imgs = imagenesEnMemoria()
+  const a = crearAlmacenLocal(ls, imgs)
   const mapa = mapaCliente()
-  assert.deepEqual(await a.guardar({ empresa: 'emp-1', codigo: 'chequeo', version: 1, nombre: 'Chequeo', paginas: ['data:image/jpeg;base64,AAA'], mapa }), { donde: 'local', provisional: false })
+  assert.deepEqual(await a.guardar({ empresa: 'emp-1', codigo: 'chequeo', version: 1, nombre: 'Chequeo', paginas: [IMG_INCRUSTADA], mapa }), { donde: 'local', provisional: false })
+  // La imagen no va a localStorage (se llenaba): va a IndexedDB.
+  assert.ok(![...ls.datos.values()].some((v) => v.includes('base64')), 'localStorage sin imágenes')
+  assert.deepEqual([...imgs.datos.values()], [[IMG_INCRUSTADA]])
   const leida = await a.leer({ empresa: 'emp-1', codigo: 'chequeo', version: 1 })
   assert.deepEqual(leida.mapa, mapa)
+  assert.deepEqual(leida.paginas, [IMG_INCRUSTADA])
   assert.equal(await a.leer({ empresa: 'emp-2', codigo: 'chequeo', version: 1 }), null, 'cada empresa la suya')
   assert.deepEqual(a.indice('emp-1').map((e) => [e.codigo, e.version]), [['chequeo', 1]])
-  const lleno = crearAlmacenLocal({ getItem: () => null, setItem: () => { throw new Error('QuotaExceeded') } })
-  await assert.rejects(lleno.guardar({ empresa: 'e', codigo: 'c', version: 1, nombre: 'n', paginas: ['x'], mapa }), /No cabe la hoja/u)
+  const llena = crearAlmacenLocal(localStorageEnMemoria(), imagenesEnMemoria({ llena: true }))
+  await assert.rejects(llena.guardar({ empresa: 'e', codigo: 'c', version: 1, nombre: 'n', paginas: [IMG_INCRUSTADA], mapa }), /No cabe la hoja/u)
   // Para imprimir se elige la publicada y, entre iguales, la versión más alta.
   const lista = [{ nombre: 'Chequeo', codigo: 'chequeo', version: 3, estado: 'borrador' }, { nombre: 'Chequeo', codigo: 'chequeo', version: 2, estado: 'publicada' }, { nombre: 'Chequeo', codigo: 'chequeo', version: 1, estado: 'archivada' }]
   assert.equal(plantillaDeNombre(lista, 'Chequeo').version, 2)
 })
 
-/** Cloudinary simulado: imágenes por `subir`, mapa raw por `pedir`. Nada sale a la red. */
-function nubeSimulada({ rawPermitido = true } = {}) {
-  const raw = new Map()
-  const llamadas = []
-  const pedir = async (url, opts = {}) => {
-    llamadas.push([opts.method || 'GET', url])
-    if (opts.method === 'POST') {
-      if (!rawPermitido) return new Response(JSON.stringify({ error: { message: 'Upload preset does not allow raw' } }), { status: 400 })
-      const id = opts.body.get('public_id')
-      raw.set(`https://res.cloudinary.com/nube/raw/upload/${id}`, await opts.body.get('file').text())
-      return new Response(JSON.stringify({ public_id: id }), { status: 200 })
-    }
-    const hay = raw.get(url)
-    return new Response(hay ?? 'no', { status: hay ? 200 : 404 })
-  }
+test('almacén local: un mapa tocado en el navegador se descarta al leerlo; sin empresa no se guarda ni se lee', async () => {
+  const { crearAlmacenLocal } = await cargarAlmacenes()
+  const ls = localStorageEnMemoria()
+  const a = crearAlmacenLocal(ls, imagenesEnMemoria())
+  await a.guardar({ empresa: 'e', codigo: 'chequeo', version: 1, nombre: 'Chequeo', paginas: [IMG], mapa: mapaCliente() })
+  const clave = [...ls.datos.keys()].find((k) => k.startsWith('fom_hoja_'))
+  const registro = JSON.parse(ls.datos.get(clave))
+  ls.setItem(clave, JSON.stringify({ ...registro, mapa: { ...registro.mapa, papel: '"><script>x</script>' } }))
+  assert.equal(await a.leer({ empresa: 'e', codigo: 'chequeo', version: 1 }), null)
+  // Un mapa malo ni siquiera se guarda.
+  await assert.rejects(a.guardar({ empresa: 'e', codigo: 'c', version: 1, nombre: 'n', paginas: [IMG], mapa: { ...mapaCliente(), orientacion: 'x' } }), /fuera de lugar/u)
+  // Sin empresa: nada (no hay carpeta común).
+  await assert.rejects(a.guardar({ empresa: '', codigo: 'c', version: 1, nombre: 'n', paginas: [IMG], mapa: mapaCliente() }), /empresa/u)
+  assert.equal(await a.leer({ empresa: '', codigo: 'chequeo', version: 1 }), null)
+  assert.deepEqual(a.indice(''), [])
+})
+
+/** Cloudinary simulado: imágenes por `subir`. Nada sale a la red y nada se sube como raw. */
+function nubeSimulada() {
   let n = 0
   const subidas = []
   const subir = async (archivo, { publicId }) => { n += 1; subidas.push(publicId); return `https://res.cloudinary.com/nube/image/upload/${publicId}/${n}` }
   const vigente = async (base) => `${base}/${n}`
-  return { pedir, subir, vigente, raw, llamadas, subidas }
+  const urlImagen = (id) => `https://res.cloudinary.com/nube/image/upload/c_limit/${id}`
+  return { subir, vigente, urlImagen, subidas }
 }
 
-test('almacén Cloudinary: cada página en fom/hoja/<empresa>/<codigo>-v<version>/<n> y el mapa como raw', async () => {
+test('almacén Cloudinary: las páginas a fom/hoja/<empresa>/<codigo>-v<version>/<n>; el mapa NO se sube, queda aquí provisional', async () => {
   const { crearAlmacenCloudinary, crearAlmacenLocal } = await cargarAlmacenes()
   const s = nubeSimulada()
-  const local = crearAlmacenLocal(localStorageEnMemoria())
-  const a = crearAlmacenCloudinary({ nube: 'nube', preset: 'sin-firma', ...s, local, urlImagen: (id) => `img:${id}`, archivo: async (x) => x })
+  const ls = localStorageEnMemoria()
+  const local = crearAlmacenLocal(ls, imagenesEnMemoria())
+  const a = crearAlmacenCloudinary({ nube: 'nube', preset: 'sin-firma', ...s, local, archivo: async (x) => x })
   const mapa = mapaCliente()
-  const r = await a.guardar({ empresa: 'emp 1', codigo: 'chequeo', version: 1, nombre: 'Chequeo', paginas: ['p1', 'p2'], mapa })
-  assert.deepEqual(r, { donde: 'cloudinary', provisional: false })
-  assert.deepEqual(s.subidas, ['fom/hoja/emp-1/chequeo-v1', 'fom/hoja/emp-1/chequeo-v1'])
-  assert.deepEqual([...s.raw.keys()], ['https://res.cloudinary.com/nube/raw/upload/fom/hoja/emp-1/chequeo-v1/mapa/1.json'])
-  const leida = await a.leer({ empresa: 'emp 1', codigo: 'chequeo', version: 1 })
-  assert.deepEqual(leida.paginas, ['img:fom/hoja/emp-1/chequeo-v1/1', 'img:fom/hoja/emp-1/chequeo-v1/2'])
-  assert.equal(leida.mapa.preguntas.length, 4)
-  // Volver a guardar no pisa nada: el mapa siguiente es el 2.
-  await a.guardar({ empresa: 'emp 1', codigo: 'chequeo', version: 1, nombre: 'Chequeo', paginas: ['p1'], mapa })
-  assert.ok(s.raw.has('https://res.cloudinary.com/nube/raw/upload/fom/hoja/emp-1/chequeo-v1/mapa/2.json'))
-})
-
-test('almacén Cloudinary sin raw: las imágenes suben y el mapa queda aquí, provisional', async () => {
-  const { crearAlmacenCloudinary, crearAlmacenLocal } = await cargarAlmacenes()
-  const s = nubeSimulada({ rawPermitido: false })
-  const local = crearAlmacenLocal(localStorageEnMemoria())
-  const a = crearAlmacenCloudinary({ nube: 'nube', preset: 'sin-firma', ...s, local, urlImagen: (id) => `img:${id}`, archivo: async (x) => x })
-  const r = await a.guardar({ empresa: 'e', codigo: 'chequeo', version: 1, nombre: 'Chequeo', paginas: ['p1'], mapa: mapaCliente() })
+  // Las imágenes se suben primero (antes de crear la plantilla) y luego se guarda con lo subido.
+  const subidas = await a.subirPaginas({ empresa: 'emp 1', codigo: 'chequeo', version: 1, nombre: 'Chequeo', paginas: [IMG_INCRUSTADA] })
+  assert.deepEqual(subidas.imagenes, ['fom/hoja/emp-1/chequeo-v1/1'])
+  const r = await a.guardar({ empresa: 'emp 1', codigo: 'chequeo', version: 1, nombre: 'Chequeo', paginas: [IMG_INCRUSTADA], mapa, subidas })
   assert.equal(r.provisional, true)
-  assert.match(r.motivo, /does not allow raw/u)
-  const leida = await a.leer({ empresa: 'e', codigo: 'chequeo', version: 1 })
+  assert.match(r.motivo, /servidor/u)
+  assert.deepEqual(s.subidas, ['fom/hoja/emp-1/chequeo-v1'], 'no se volvió a subir')
+  const leida = await a.leer({ empresa: 'emp 1', codigo: 'chequeo', version: 1 })
+  assert.deepEqual(leida.paginas, ['https://res.cloudinary.com/nube/image/upload/c_limit/fom/hoja/emp-1/chequeo-v1/1'])
+  assert.deepEqual(leida.mapa.imagenes, ['fom/hoja/emp-1/chequeo-v1/1'])
   assert.equal(leida.provisional, true)
-  assert.deepEqual(leida.paginas, ['img:fom/hoja/e/chequeo-v1/1'])
+  assert.equal(leida.mapa.preguntas.length, 4)
+  // Sin empresa no se sube nada.
+  await assert.rejects(a.subirPaginas({ empresa: '', codigo: 'c', version: 1, nombre: 'n', paginas: [IMG_INCRUSTADA] }), /empresa/u)
+  assert.equal(s.subidas.length, 1)
 })

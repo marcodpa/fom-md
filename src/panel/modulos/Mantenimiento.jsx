@@ -28,7 +28,7 @@ import { Icono } from '../Iconos'
 import OdtAsignadas from '../comp/OdtAsignadas'
 import TarjetaMantenimiento, { GrupoTarjetas } from '../comp/TarjetaMantenimiento'
 import { masNuevasPrimero } from '../datos/odtAsignadas'
-import { ATAJOS_FECHA, SIN_FECHA, diaLocal, filtrarPorFecha, hayFiltroFecha, textoFiltroFecha } from '../datos/filtroFecha'
+import { ATAJOS_FECHA, SIN_FECHA, diaLocal, filtrarPorFecha, hayFiltroFecha, msHastaMedianoche, textoFiltroFecha } from '../datos/filtroFecha'
 import { esGestor } from '../roles'
 
 // ============================================================
@@ -180,6 +180,20 @@ export default function Mantenimiento() {
   </div>
 }
 
+/**
+ * El día de hoy (AAAA-MM-DD, hora local) que se renueva solo a la medianoche:
+ * con la pantalla abierta toda la noche, «Hoy» pasa a ser el día nuevo.
+ */
+function useDiaDeHoy() {
+  const [dia, setDia] = useState(() => diaLocal())
+  useEffect(() => {
+    // Un poco después de las 00:00, por si el reloj del navegador se adelanta.
+    const reloj = setTimeout(() => setDia(diaLocal()), msHastaMedianoche() + 1000)
+    return () => clearTimeout(reloj)
+  }, [dia])
+  return dia
+}
+
 function Ordenes({ enLista = false }) {
   const sesion = useSesion()
   const { datos, estado, error, recargar } = useDatos(cargarMantenimiento, [])
@@ -202,7 +216,10 @@ function Ordenes({ enLista = false }) {
     return [o.id, o.descripcion, o.vehiculoNombre, o.creadorNombre, etiqueta('tipo_falla', o.tipoFalla)].join(' ').toLowerCase().includes(q.trim().toLowerCase())
   })), [odts, q, tipo])
   // Y además la fecha de reporte: de aquí salen las cuentas del control de estado. Filtrar no reordena.
-  const sinEstado = useMemo(() => filtrarPorFecha(sinFecha, fecha), [sinFecha, fecha])
+  // `hoy` en las dependencias: a la medianoche «Hoy» y «7 días» se vuelven a contar.
+  const hoy = useDiaDeHoy()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sinEstado = useMemo(() => filtrarPorFecha(sinFecha, fecha), [sinFecha, fecha, hoy])
   const visibles = useMemo(() => (grupo ? sinEstado.filter(o => estadoVisible(o.estado).clave === grupo) : sinEstado), [sinEstado, grupo])
   const detalle = detalleId ? odts.find(o => o.id === detalleId) : null
   // Arriba de la lista, justo debajo del título y el buscador: el estado, la fecha y el tipo de orden.

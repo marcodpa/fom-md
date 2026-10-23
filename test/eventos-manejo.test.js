@@ -22,7 +22,7 @@ test('el umbral del mapa es 120 km/h y hay tres tipos, cada uno con su color', (
 
 test('el evento del servidor pasa a la forma del panel (números de texto incluidos)', () => {
   assert.deepEqual(ev(), {
-    id: 'e1', tipo: 'frenada', hora: servidor().occurredAt, vehiculoId: 'v1', unidad: '01',
+    id: 'e1', tipo: 'frenada', hora: servidor().occurredAt, t: Date.parse(servidor().occurredAt), vehiculoId: 'v1', unidad: '01',
     lat: 10.3907, lng: -71.4462, antes: 85.4, despues: 30,
   })
   assert.equal(ev({ type: 'harsh_acceleration' }).tipo, 'aceleracion')
