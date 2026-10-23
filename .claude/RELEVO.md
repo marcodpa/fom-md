@@ -90,3 +90,41 @@ turnos a menudo: continuarlos con SendMessage.
 - Respaldo: /var/backups/fom-web/20261022-web-nueva-r2-20261022T144007-3531984.
 - Comprobado desde la PC: /, /plataforma, /funciones, /contacto, /panel/mapa = 200 y sirven index-C80onGmk.js (el del paquete).
 - Sobrantes por limpiar SOLO con OK de Marco: releases/20261022-web-nueva (parcial, root), /home/fomadmin/deploy-20261022-web-nueva, subida-20261022-r2, subida-20261022-r3.
+
+## 23 oct noche — publicar todo junto
+- Marco: esperar a que terminen T-139 (frases, sin calle, camioneta, App con supervisor, capa Seguridad), T-140 (inicio panel en teléfono = Mi unidad), T-141 (laptop), T-142 (televisor y escenas, en /nuevo/laboratorio para que Marco elija), T-143 (inspecciones en Plataforma) y publicar TODO junto en un paquete nuevo (subida-20261023-r2, release 20261023-web-r2). El paquete r1 (subida-20261023-r1) quedó subido sin activar y se reemplaza.
+- Todo lo hace la oficina (también guardar y armar paquetes); el coordinador solo reparte y reporta en español.
+
+## 24 oct madrugada — RELEVO A SESIÓN NUEVA (leer esto primero)
+Marco pidió pasar a una conversación nueva (esta se hizo muy larga) con Remote Control allá.
+Reglas vigentes: hablarle SIEMPRE en español (también el cuadro final y los botones); lenguaje llano;
+cerrar con «Qué te toca a ti». TODO lo hace la oficina (agentes): código, pruebas, guardar (commit/push
+con un agente «encargado de guardar», modelo haiku, solo los archivos de la tarea), paquetes. El
+coordinador reparte, revisa capturas, actualiza la oficina (ArtifactData, colecciones tareas/agentes, con
+tokens/herramientas/duracionMs al cerrar) y reporta. Los fom-desarrollador NO hacen commit (su rol lo prohíbe).
+Web en formato teléfono = igual a la app (diseño y secciones). Nunca la manzana de Apple (logo FOM).
+
+Hecho y subido (rama codex/rediseno-v6-fiel, marcodpa/fom-md): T-126…T-149 salvo lo de abajo.
+Último commit conocido: 2809a4d (+ uno de respaldo general que estaba subiendo al cerrar).
+
+QUEDABA EN CURSO al cerrar (sus agentes eran de la sesión vieja; su trabajo queda en el árbol SIN commit —
+revisar `git status`, probar y guardar):
+- T-147: capturas de la APP real con servidor falso (tools/app-demo-api: servidor.mjs puerto 8790,
+  app-expo.mjs 8098, capturar.mjs 8791; cuentas conductor@fom.com.ve / supervisor@fom.com.ve). Tenía 16 del
+  conductor en comparativa/web-v8-fotos/capturas-app/3x; faltaban Mi perfil conductor, todo el supervisor,
+  pantallas para fotos con mano (lista en comparativa/web-v8-fotos/INDICE.md) y Marco pidió fotos de
+  vehículos REALES bien recortadas (sin generar con IA sin permiso). Después: un diseñador reemplaza TODAS
+  las capturas de teléfono de la web (src/assets/marketing/v8 cap-movil-*) por las de la app.
+- T-150/T-151 (desarrollador): quitar el botón «Manejo brusco» de la barra del Centro de control (queda
+  «Ver manejo brusco» en la tarjeta) y arreglar el 404: ManejoBrusco.jsx pedirDeVarios Promise.all→allSettled,
+  404 = sin eventos, nota gris «Una persona asignada ya no es conductor activo…»; igual en la app.
+- T-152 (diseñador): tokens de diseño de la app → src/styles/tokens-app.css + TOKENS-APP.md y usarlos en
+  todas las pantallas de teléfono del panel; comparativas app|web en scratchpad t152.
+Después de eso: revisión final (fom-revisor) de todo lo nuevo, paquete nuevo (como T-138: ops/deploy-YYYYMMDD-*,
+SHA256SUMS formato «hash  dist/…», release nuevo único, subida a /home/fomadmin/subida-…-rN sin rm -rf, PAQUETE_OK)
+y pasarle a Marco el comando único de activación (sudo es de Marco). El paquete subida-20261023-r1 quedó viejo.
+
+Preguntas abiertas a Marco: ¿tenía algo en C:\c? (un agente la borró por error); ¿OK que Áreas no prometa
+geocercas hasta que existan?; enlace/QR para descargar la app en la tarjeta «Hoy» del conductor.
+Para Juan (fom-core#713 ya tiene lo de eventos de flota/unidad, paginación y fechas de ODT): falta pedirle
+el campo printSheet de la plantilla (docs/HOJA-EMPRESA-PARA-JUAN.md) — Marco no lo ha confirmado.
