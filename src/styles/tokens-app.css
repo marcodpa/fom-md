@@ -1,0 +1,317 @@
+/* ============================================================
+   TOKENS DE LA APP (FOM-DRIVER) PARA EL PANEL EN EL TELÉFONO (T-152)
+   ------------------------------------------------------------
+   Copia de los valores de la app (C:\Users\home\Downloads\fom-driver-juan,
+   rama diseno-como-web): src/theme/tokens.ts, createTheme.ts, fuentes.ts y
+   los componentes base (card, themed-text, button, pill-button, app-tab-bar,
+   encabezado-fom, screen-header, pastilla, chip, pastilla-filtro, fila-menu,
+   kpi-fila, search-bar, text-field, segmented-control, avatar…).
+   De dónde sale cada valor: src/styles/TOKENS-APP.md.
+
+   Solo los usan las hojas del teléfono (≤ 767 px: movil-app, movil-modulos,
+   mi-unidad-movil, mantenimiento-movil, perfil-movil, supervisor-movil).
+   Definirlos no cambia nada en la computadora: ninguna hoja de escritorio
+   los lee.
+
+   El panel va siempre en oscuro (Consola pone data-tema="oscuro"), así que
+   la paleta por defecto es la OSCURA de la app; Glass gris la cambia con
+   `data-diseno="glass"`. La clara queda en `.app-claro`, para referencia y
+   por si un día el panel se abre en claro.
+   ============================================================ */
+
+:root {
+  /* ---------- Espaciado (tokens.ts · spacing, base 4) ---------- */
+  --app-esp-xs: 4px;
+  --app-esp-sm: 8px;
+  --app-esp-md: 12px;
+  --app-esp-lg: 16px;
+  --app-esp-xl: 24px;
+  --app-esp-xxl: 32px;
+  --app-esp-xxxl: 48px;
+
+  /* ---------- Radios (tokens.ts · radii) ---------- */
+  --app-r-sm: 10px;   /* piezas internas, pastillas, chips */
+  --app-r-md: 16px;   /* campos, buscador, cajas de ícono */
+  --app-r-lg: 24px;   /* tarjetas, cápsula del encabezado */
+  --app-r-xl: 28px;   /* hojas, barra de abajo, botones de acción del perfil */
+  --app-r-pill: 999px;
+
+  /* ---------- Bordes (tokens.ts · borderWidths) ---------- */
+  --app-borde-hairline: 1px; /* StyleSheet.hairlineWidth: en la web 1 px */
+  --app-borde-fino: 1px;
+  --app-borde-foco: 1.5px;
+
+  /* ---------- Opacidades (tokens.ts · opacity) ---------- */
+  --app-op-inactivo: 0.5;
+  --app-op-press: 0.08;
+
+  /* ---------- Tipografía (tokens.ts · typography + fuentes.ts) ---------- */
+  --app-fuente: 'Spline Sans', 'Segoe UI', system-ui, sans-serif;
+  --app-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --app-t-xs: 12px;
+  --app-t-sm: 14px;
+  --app-t-md: 16px;
+  --app-t-lg: 20px;
+  --app-t-xl: 24px;
+  --app-t-xxl: 32px;
+  --app-t-display: 40px;
+  --app-lh-xs: 16px;
+  --app-lh-sm: 20px;
+  --app-lh-md: 24px;
+  --app-lh-lg: 28px;
+  --app-lh-xl: 32px;
+  --app-lh-xxl: 40px;
+  --app-lh-display: 48px;
+  --app-peso-regular: 400;
+  --app-peso-medio: 500;
+  --app-peso-semi: 600;
+  --app-peso-negrita: 700;
+  --app-track-ajustado: -0.4px;
+  --app-track-normal: 0;
+  --app-track-amplio: 0.8px;
+
+  /* Variantes de ThemedText (themed-text.tsx): tamaño / interlineado / peso. */
+  --app-display: 700 40px/48px var(--app-fuente);
+  --app-title: 700 32px/40px var(--app-fuente);
+  --app-subtitle: 600 20px/28px var(--app-fuente);
+  --app-body: 400 16px/24px var(--app-fuente);
+  --app-caption: 500 14px/20px var(--app-fuente);
+  --app-overline: 600 12px/16px var(--app-fuente); /* + mayúsculas y --app-track-amplio */
+  --app-button: 600 16px/24px var(--app-fuente);
+
+  /* ---------- Movimiento (tokens.ts · motion) ---------- */
+  --app-d-micro: 100ms;
+  --app-d-rapido: 120ms;
+  --app-d-base: 220ms;
+  --app-d-lento: 360ms;
+  --app-curva: cubic-bezier(0.33, 1, 0.68, 1);        /* Easing.out(Easing.cubic) */
+  --app-curva-enfasis: cubic-bezier(0.65, 0, 0.35, 1); /* Easing.inOut(Easing.cubic) */
+  --app-escala-press: 0.97;
+
+  /* ---------- Encabezado (encabezado-fom.tsx, screen-header.tsx) ---------- */
+  --app-cab-arriba: 12px;          /* insets.top + spacing.md */
+  --app-cab-lado: 14px;
+  --app-cab-hueco: 8px;            /* spacing.sm entre cápsula, campana y avatar */
+  --app-cab-capsula-alto: 52px;
+  --app-cab-capsula-pad: 8px 14px;
+  --app-cab-capsula-hueco: 10px;
+  --app-cab-capsula-radio: 24px;   /* radii.lg */
+  --app-cab-divisor-alto: 22px;
+  --app-cab-logo-ancho: 67px;      /* LogoFomCompleto width 67 */
+  --app-cab-circulo: 44px;
+  --app-cab-icono: 20px;
+  --app-cab-ceja: 600 10px/13px var(--app-fuente);
+  --app-cab-ceja-track: 1.4px;
+  --app-cab-nombre: 600 14px/18px var(--app-fuente);
+  --app-cab-titulo-pila: 600 15px/20px var(--app-fuente);
+  --app-cab-insignia: 18px;
+  --app-cab-insignia-texto: 700 11px/14px var(--app-fuente);
+  --app-avatar-fondo: #194a74;
+  --app-avatar-aro: #31608b;
+  --app-avatar-texto: #eef7ff;
+  --app-avatar-letra: 600 14px/18px var(--app-fuente);
+  --app-sobre-mapa: rgb(20 26 34 / 0.94);
+
+  /* Título de la pantalla, dentro del scroll (TituloPantalla). */
+  --app-titulo-pantalla: 700 28px/32px var(--app-fuente);
+  --app-titulo-pantalla-track: -0.8px;
+  --app-bajada: 400 14px/20px var(--app-fuente);
+  --app-titulo-arriba: 14px;       /* aire bajo la barra flotante */
+
+  /* ---------- Barra de abajo, el dock (app-tab-bar.tsx) ---------- */
+  --app-dock-alto: 64px;
+  --app-dock-margen: 8px;
+  --app-dock-lado: 16px;           /* spacing.lg */
+  --app-dock-radio: 28px;          /* radii.xl */
+  --app-dock-zona: 80px;           /* 64 + 8 + 8, sin contar el borde del teléfono */
+  --app-dock-pildora-ancho: 48px;
+  --app-dock-pildora-alto: 26px;
+  --app-dock-hueco: 3px;
+  --app-dock-icono: 20px;
+  --app-dock-etiqueta: 600 11px/14px var(--app-fuente);
+
+  /* ---------- Tarjeta (card.tsx) ---------- */
+  --app-tarjeta-radio: 24px;
+  --app-tarjeta-pad: 16px;
+
+  /* ---------- Botones (button.tsx, pill-button.tsx) ---------- */
+  --app-boton-alto: 48px;
+  --app-boton-pad: 12px 24px;
+  --app-boton-icono: 18px;
+  --app-boton-pildora-pad: 8px 14px;
+  --app-boton-pildora-icono: 15px;
+  /* BotonNuevo (boton-nuevo.tsx): la acción al lado del título de la pantalla. */
+  --app-nuevo-alto: 40px;
+  --app-nuevo-pad: 0 14px;
+  --app-nuevo-hueco: 6px;
+  --app-nuevo-icono: 15px;
+  --app-nuevo-texto: 600 13px/20px var(--app-fuente);
+  --app-nuevo-sombra: 0 2px 10px rgb(61 155 245 / 0.3);
+
+  /* ---------- Pastillas y chips (pastilla.tsx, chip.tsx, pastilla-filtro.tsx) ---------- */
+  --app-pastilla-alto: 22px;
+  --app-pastilla-pad: 0 9px;
+  --app-pastilla-hueco: 5px;
+  --app-pastilla-tinte: 12%;
+  --app-pastilla-texto: 600 14px/20px var(--app-fuente);
+  --app-pastilla-punto: 6px;
+  --app-chip-pad: 3px 10px;
+  --app-chip-tinte: 14%;
+  --app-chip-texto: 600 12px/16px var(--app-fuente);
+  --app-filtro-alto: 36px;
+  --app-filtro-pad: 0 14px;
+  --app-filtro-hueco: 6px;
+  --app-filtro-texto: 600 13px/18px var(--app-fuente);
+  --app-filtro-icono: 14px;
+  --app-cuenta: 18px;
+  --app-cuenta-texto: 700 11px/18px var(--app-fuente);
+
+  /* ---------- Listas (fila-menu.tsx, panel/flota.tsx, panel/personal.tsx) ---------- */
+  --app-fila-menu-pad: 12px 16px;
+  --app-fila-menu-caja: 32px;
+  --app-fila-menu-icono: 20px;
+  --app-fila-chevron: 16px;
+  --app-fila-unidad-alto: 70px;
+  --app-fila-retrato: 60px 46px;
+  --app-fila-persona-alto: 64px;
+  --app-fila-persona-pad: 10px 16px;
+  --app-fila-avatar: 44px;
+  --app-fila-avatar-letra: 600 15px/44px var(--app-fuente); /* size * 0.35 */
+  --app-fila-titulo: var(--app-button);
+  --app-fila-detalle: var(--app-caption);
+
+  /* ---------- Cifras (kpi-fila.tsx) ---------- */
+  --app-kpi-pad: 14px;
+  --app-kpi-casilla-pad: 10px;
+  --app-kpi-casilla-radio: 14px;
+  --app-kpi-valor: 700 20px/26px var(--app-fuente);
+  --app-kpi-etiqueta: 400 11px/14px var(--app-fuente);
+
+  /* ---------- Campos (search-bar.tsx, text-field.tsx, segmented-control.tsx) ---------- */
+  --app-buscar-alto: 46px;
+  --app-buscar-pad: 0 12px;
+  --app-buscar-texto: 400 15px/20px var(--app-fuente);
+  --app-buscar-accion: 30px;
+  --app-buscar-accion-icono: 18px;
+  --app-campo-alto: 46px;
+  --app-campo-pad: 12px;
+  --app-segmento-alto: 44px;
+  --app-segmento-radio: 14px;     /* radii.sm + spacing.xs */
+
+  /* ---------- Rótulos (etiqueta-seccion.tsx, encabezado-grupo.tsx) ---------- */
+  --app-seccion: 600 15px/20px var(--app-fuente);
+  --app-seccion-tick: 3px 15px;
+  --app-seccion-asignadas: 600 17px/22px var(--app-fuente); /* odt-asignada-seccion.tsx */
+
+  /* ---------- Acciones del perfil (perfil-acciones.tsx) ---------- */
+  --app-accion-alto: 62px;
+  --app-accion-icono: 22px;
+  --app-accion-etiqueta: 500 11.5px/15px var(--app-fuente);
+
+  /* ---------- Hoja (bottom-sheet.tsx) ---------- */
+  --app-hoja-velo: #06080b;
+
+  /* ---------- Paleta OSCURA (tokens.ts · dark + createTheme.ts) ---------- */
+  --app-fondo: #0a0d12;
+  --app-sup: #141a22;
+  --app-sup-alta: #1d2530;
+  --app-sup-baja: #0f141b;
+  --app-texto: #f3f5f8;
+  --app-texto-2: #abb3bf;
+  --app-texto-3: #8c97a7;
+  --app-texto-inv: #0a0d12;
+  --app-borde: #262e39;
+  --app-borde-fuerte: #39424f;
+  --app-primario: #3d9bf5;        /* AZUL_FOM fijo (createTheme.ts) */
+  --app-sobre-primario: #08121c;  /* SOBRE_AZUL_FOM */
+  --app-activo-sup: #173553;
+  --app-activo-texto: #8bc6ff;
+  --app-activo-borde: #2d5d88;
+  --app-exito: #3dd68c;
+  --app-sobre-exito: #06210f;
+  --app-exito-sup: #13281d;
+  --app-aviso: #f5c242;
+  --app-sobre-aviso: #241b00;
+  --app-aviso-sup: #2a2410;
+  --app-peligro: #ff6369;
+  --app-sobre-peligro: #2a0a0b;
+  --app-peligro-sup: #2a1416;
+  --app-info: #3d9bf5;
+  --app-sobre-info: #08121c;
+  --app-info-sup: #10202e;
+  --app-acento: #b478ff;
+  --app-sobre-acento: #1a0b2e;
+  --app-acento-sup: #1e1630;
+
+  /* Sombras en oscuro (buildShadows): las tarjetas NO llevan sombra. */
+  --app-sombra-tarjeta: none;
+  --app-sombra-flotante: 0 6px 18px rgb(0 0 0 / 0.5);
+  --app-sombra-hoja: 0 -8px 24px rgb(0 0 0 / 0.55);
+
+  /* Fondo de pantalla en Azul FOM (screen-background.tsx · ScreenBackground):
+     lavado azul arriba y dos orbes difusos, quietos. */
+  --app-fondo-pantalla:
+    radial-gradient(circle 150px at calc(100% - 40px) 80px, rgb(61 155 245 / 0.126), transparent),
+    radial-gradient(circle 120px at 30px 42%, rgb(61 155 245 / 0.09), transparent),
+    radial-gradient(80% 80% at 50% 0%, rgb(61 155 245 / 0.08), rgb(61 155 245 / 0.02) 55%, transparent);
+}
+
+/* ---------- Glass gris (tokens.ts · paletaGlass + buildShadows) ---------- */
+.pnl.fom-dark[data-diseno='glass'] {
+  --app-fondo: #60656c;
+  --app-sup: rgb(39 42 48 / 0.88);
+  --app-sup-alta: rgb(53 56 63 / 0.94);
+  --app-sup-baja: rgb(32 35 41 / 0.78);
+  --app-texto: #f3f5f8;
+  --app-texto-2: #e6e9ee;
+  --app-texto-3: #e1e5ea;
+  --app-borde: rgb(255 255 255 / 0.13);
+  --app-borde-fuerte: rgb(255 255 255 / 0.24);
+  --app-activo-sup: #184573;
+  --app-activo-texto: #c6e5ff;
+  --app-activo-borde: #2d5d88;
+  --app-info-sup: #21374a;
+  --app-sombra-tarjeta: 0 6px 18px rgb(0 0 0 / 0.16);
+  --app-sombra-flotante: 0 6px 18px rgb(0 0 0 / 0.16);
+  /* FondoGlass: degradado gris a 150° con la luz arriba a la derecha. */
+  --app-fondo-pantalla:
+    radial-gradient(ellipse at 85% 0%, #62676e 0%, transparent 58%),
+    linear-gradient(150deg, #60656c, #52565e 70%, #60656c);
+}
+
+/* ---------- Paleta CLARA (tokens.ts · light), solo de referencia ---------- */
+.app-claro {
+  --app-fondo: #f6f7f9;
+  --app-sup: #ffffff;
+  --app-sup-alta: #ffffff;
+  --app-sup-baja: #eef1f4;
+  --app-texto: #111418;
+  --app-texto-2: #5a626e;
+  --app-texto-3: #8a919e;
+  --app-texto-inv: #ffffff;
+  --app-borde: #e2e5ea;
+  --app-borde-fuerte: #c7ccd4;
+  --app-primario: #3d9bf5;
+  --app-sobre-primario: #08121c;
+  --app-activo-sup: #e6f2fe;
+  --app-activo-texto: #0b5cad;
+  --app-activo-borde: #a9d0f7;
+  --app-exito: #1e9e5a;
+  --app-sobre-exito: #ffffff;
+  --app-exito-sup: #e6f6ec;
+  --app-aviso: #c98a00;
+  --app-sobre-aviso: #ffffff;
+  --app-aviso-sup: #fff6dc;
+  --app-peligro: #e5484d;
+  --app-sobre-peligro: #ffffff;
+  --app-peligro-sup: #fdeaea;
+  --app-info: #208aef;
+  --app-sobre-info: #ffffff;
+  --app-info-sup: #e6f2fe;
+  --app-acento: #7c4dff;
+  --app-sobre-acento: #ffffff;
+  --app-acento-sup: #f0eaff;
+  --app-sombra-tarjeta: 0 2px 8px rgb(16 24 40 / 0.06);
+  --app-sombra-flotante: 0 6px 16px rgb(16 24 40 / 0.12);
+  --app-sombra-hoja: 0 -6px 20px rgb(16 24 40 / 0.1);
+}

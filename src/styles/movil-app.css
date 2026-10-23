@@ -6,15 +6,66 @@
    de la barra de abajo y «pila» en las empujadas (fichas, Reportes…).
    Medidas de la app: encabezado-fom.tsx, screen-header.tsx y app-tab-bar.tsx.
    En la computadora nada de esto aplica.
+   Los valores salen de los tokens de la app (tokens-app.css, T-152).
    ============================================================ */
+@import './tokens-app.css';
+
 @media (max-width: 767px) {
   /* ---- Fuera la navegación de escritorio ---- */
   .pnl.fom-dark[data-movil] :is(.pnl-side, .pnl-topbar, .pnl-menu-btn, .pnl-velo) { display: none !important; }
   .pnl.fom-dark[data-movil] { display: block; padding: 0; }
   .pnl.fom-dark[data-movil] .pnl-main { min-height: 100dvh; }
+
+  /* ---- La paleta, los radios y la letra de la app en todo el teléfono ----
+     Las piezas que el teléfono comparte con la computadora (tarjetas, cifras,
+     etiquetas) leen las --e-*: en el teléfono pasan a valer lo de la app. */
+  .pnl.fom-dark[data-diseno][data-movil] {
+    --e-bg: var(--app-fondo);
+    --e-sup: var(--app-sup);
+    --e-sup-alta: var(--app-sup-alta);
+    --e-sup-baja: var(--app-sup-baja);
+    --e-texto: var(--app-texto);
+    --e-texto-2: var(--app-texto-2);
+    --e-texto-3: var(--app-texto-3);
+    --e-borde: var(--app-borde);
+    --e-borde-fuerte: var(--app-borde-fuerte);
+    --e-primario: var(--app-primario);
+    --e-sobre-primario: var(--app-sobre-primario);
+    --e-activo-sup: var(--app-activo-sup);
+    --e-activo-texto: var(--app-activo-texto);
+    --e-activo-borde: var(--app-activo-borde);
+    --e-exito: var(--app-exito);
+    --e-exito-sup: var(--app-exito-sup);
+    --e-aviso: var(--app-aviso);
+    --e-aviso-sup: var(--app-aviso-sup);
+    --e-peligro: var(--app-peligro);
+    --e-peligro-sup: var(--app-peligro-sup);
+    --e-info: var(--app-info);
+    --e-info-sup: var(--app-info-sup);
+    --e-r-sm: var(--app-r-sm);
+    --e-r-md: var(--app-r-md);
+    --e-r-lg: var(--app-r-lg);
+    --e-r-xl: var(--app-r-xl);
+    --e-d-micro: var(--app-d-micro);
+    --e-d-rapido: var(--app-d-rapido);
+    --e-d-base: var(--app-d-base);
+    --e-d-lento: var(--app-d-lento);
+    --e-curva: var(--app-curva);
+    --e-curva-enfasis: var(--app-curva-enfasis);
+    --e-escala-press: var(--app-escala-press);
+    --e-sombra-hoja: var(--app-sombra-hoja);
+    --apariencia-sombra: var(--app-sombra-tarjeta);
+    --e-fuente: var(--app-fuente);
+  }
+  /* El fondo de las pantallas de la app: en Azul FOM, el lavado azul con sus
+     dos orbes (ScreenBackground); Glass gris ya pinta su degradado. */
+  .pnl.fom-dark[data-diseno="azul"][data-movil] {
+    background: var(--app-fondo-pantalla), var(--app-fondo);
+    background-attachment: fixed;
+  }
   /* Que nada quede debajo de la barra de abajo (64 + aire + borde del teléfono). */
-  .pnl.fom-dark[data-movil="pestana"] .pnl-main { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
-  .pnl.fom-dark[data-movil="pila"] .pnl-main { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  .pnl.fom-dark[data-movil="pestana"] .pnl-main { padding-bottom: calc(var(--app-dock-zona) + 20px + env(safe-area-inset-bottom)); }
+  .pnl.fom-dark[data-movil="pila"] .pnl-main { padding-bottom: calc(var(--app-esp-xl) + env(safe-area-inset-bottom)); }
 
   /* ---- Encabezado: cápsula, campana y avatar ---- */
   .mv-barra {
@@ -23,69 +74,68 @@
     z-index: 30;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: calc(12px + env(safe-area-inset-top)) 14px 10px;
+    gap: var(--app-cab-hueco);
+    padding: calc(var(--app-cab-arriba) + env(safe-area-inset-top)) var(--app-cab-lado) 10px;
     /* El contenido pasa por detrás y se desvanece, como en la app. */
-    background: linear-gradient(180deg, var(--e-bg) 0%, color-mix(in srgb, var(--e-bg) 94%, transparent) 62%, transparent 100%);
+    background: linear-gradient(180deg, var(--app-fondo) 0%, color-mix(in srgb, var(--app-fondo) 94%, transparent) 62%, transparent 100%);
   }
   .pnl.fom-dark[data-diseno="glass"] .mv-barra { background: linear-gradient(180deg, #5d6269 0%, rgb(93 98 105 / .9) 62%, transparent 100%); }
   .mv-capsula {
     flex: 1;
     min-width: 0;
-    min-height: 52px;
+    min-height: var(--app-cab-capsula-alto);
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 14px;
-    border: 1px solid var(--e-borde);
-    border-radius: 24px;
-    background: var(--e-sup);
-    box-shadow: var(--apariencia-sombra);
+    gap: var(--app-cab-capsula-hueco);
+    padding: var(--app-cab-capsula-pad);
+    border: var(--app-borde-fino) solid var(--app-borde);
+    border-radius: var(--app-cab-capsula-radio);
+    background: var(--app-sup);
+    box-shadow: none;
     backdrop-filter: var(--apariencia-blur);
   }
-  .mv-capsula .fom-logo.mv-logo { width: 67px; height: auto; }
+  .mv-capsula .fom-logo.mv-logo { width: var(--app-cab-logo-ancho); height: auto; }
   .mv-pila .mv-capsula .fom-logo.mv-logo { margin-left: auto; }
-  .mv-divisor { width: 1px; height: 22px; flex: none; background: var(--e-borde-fuerte); }
+  .mv-divisor { width: 1px; height: var(--app-cab-divisor-alto); flex: none; background: var(--app-borde-fuerte); }
   .mv-textos { flex: 1; min-width: 0; display: grid; }
   .mv-ceja,
   .mv-nombre,
   .mv-titulo { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .mv-ceja { font-size: 10px; line-height: 13px; letter-spacing: 1.4px; font-weight: 600; text-transform: uppercase; color: var(--e-texto-2); }
-  .mv-nombre { font-size: 14px; line-height: 18px; font-weight: 600; color: var(--e-texto); }
-  .mv-titulo { flex: 1; min-width: 0; font-size: 15px; line-height: 20px; font-weight: 600; color: var(--e-texto); }
+  .mv-ceja { font: var(--app-cab-ceja); letter-spacing: var(--app-cab-ceja-track); text-transform: uppercase; color: var(--app-texto-2); }
+  .mv-nombre { font: var(--app-cab-nombre); color: var(--app-texto); }
+  .mv-titulo { flex: 1; min-width: 0; font: var(--app-cab-titulo-pila); color: var(--app-texto); }
   .mv-circulo {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: var(--app-cab-circulo);
+    height: var(--app-cab-circulo);
     flex: none;
     display: grid;
     place-items: center;
     padding: 0;
-    border: 1px solid var(--e-borde);
-    border-radius: 999px;
-    background: var(--e-sup);
-    color: var(--e-texto);
-    box-shadow: var(--apariencia-sombra);
+    border: var(--app-borde-fino) solid var(--app-borde);
+    border-radius: var(--app-r-pill);
+    background: var(--app-sup);
+    color: var(--app-texto);
+    box-shadow: none;
     backdrop-filter: var(--apariencia-blur);
     cursor: pointer;
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
   }
-  .mv-circulo:active { transform: scale(.96); }
-  .mv-avatar { background: #194a74; border-color: #31608b; color: #eef7ff; font-size: 14px; line-height: 18px; font-weight: 600; }
+  .mv-circulo:active { transform: scale(var(--app-escala-press)); }
+  .mv-avatar { background: var(--app-avatar-fondo); border-color: var(--app-avatar-aro); color: var(--app-avatar-texto); font: var(--app-avatar-letra); }
   .mv-insignia {
     position: absolute;
     top: -3px;
     right: -3px;
-    min-width: 18px;
-    height: 18px;
+    min-width: var(--app-cab-insignia);
+    height: var(--app-cab-insignia);
     padding: 0 5px;
     border-radius: 9px;
-    background: var(--e-peligro);
-    color: #20080b;
-    font-size: 11px;
-    line-height: 18px;
-    font-weight: 700;
+    background: var(--app-peligro);
+    color: var(--app-sobre-peligro);
+    font: var(--app-cab-insignia-texto);
+    line-height: var(--app-cab-insignia);
     text-align: center;
     font-variant-numeric: tabular-nums;
   }
@@ -97,20 +147,20 @@
     right: 0;
     bottom: 0;
     z-index: 30;
-    padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+    padding: var(--app-dock-margen) var(--app-dock-lado) calc(var(--app-dock-margen) + env(safe-area-inset-bottom));
     /* Mismo fondo que la pantalla: lo que flota es la barra, no la zona. */
-    background: var(--e-bg);
+    background: var(--app-fondo);
   }
   /* En Glass la zona es transparente y debajo sigue el degradado. */
   .pnl.fom-dark[data-diseno="glass"] .mv-dock-zona { background: transparent; }
   .mv-dock {
-    height: 64px;
+    height: var(--app-dock-alto);
     display: flex;
     align-items: stretch;
-    border: 1px solid var(--e-borde);
-    border-radius: 28px;
-    background: var(--e-sup);
-    box-shadow: 0 10px 28px rgb(0 0 0 / .32);
+    border: var(--app-borde-hairline) solid var(--app-borde);
+    border-radius: var(--app-dock-radio);
+    background: var(--app-sup);
+    box-shadow: var(--app-sombra-flotante);
     backdrop-filter: var(--apariencia-blur);
   }
   .mv-pestana {
@@ -120,35 +170,47 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: var(--app-dock-hueco);
     padding: 0 2px;
-    color: var(--e-texto-3);
+    color: var(--app-texto-3);
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
   }
   .mv-pildora {
-    width: 48px;
-    height: 26px;
-    border-radius: 13px;
+    width: var(--app-dock-pildora-ancho);
+    height: var(--app-dock-pildora-alto);
+    border-radius: calc(var(--app-dock-pildora-alto) / 2);
     display: grid;
     place-items: center;
-    transition: background-color .22s ease, transform .12s ease;
+    transition: background-color var(--app-d-base) var(--app-curva), transform var(--app-d-rapido) ease;
   }
   .mv-pestana:active .mv-pildora { transform: scale(.94); }
-  .mv-pestana.activa { color: var(--e-activo-texto); }
-  .mv-pestana.activa .mv-pildora { background: var(--e-activo-sup); }
-  .mv-etiqueta { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 11px; line-height: 14px; font-weight: 600; }
+  .mv-pildora > :is(svg, .ico) { width: var(--app-dock-icono); height: var(--app-dock-icono); }
+  .mv-pestana.activa { color: var(--app-activo-texto); }
+  .mv-pestana.activa .mv-pildora { background: var(--app-activo-sup); }
+  .mv-etiqueta { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: var(--app-dock-etiqueta); }
   .pnl.fom-dark[data-diseno] .mv-pestana:focus-visible { outline-offset: -4px; border-radius: 22px; }
 
   /* ---- Contenido: título, bajada, márgenes y botones de la app ---- */
-  .pnl.fom-dark[data-movil] .pnl-cab { padding: 6px 16px 16px; gap: 14px; }
+  /* El título arranca 14 px bajo la barra flotante (la barra ya trae 10 de aire abajo), con 4 px más a los lados (TituloPantalla). */
+  .pnl.fom-dark[data-movil] .pnl-cab { padding: calc(var(--app-titulo-arriba) - 10px) calc(var(--app-esp-lg) + 4px) var(--app-esp-lg); gap: 14px; }
   .pnl.fom-dark[data-movil] .pnl-cab-txt { min-width: 0; flex: 1 1 100%; }
-  .pnl.fom-dark[data-movil] .pnl-cab h1 { font-size: 28px; line-height: 32px; font-weight: 700; letter-spacing: -.8px; }
-  .pnl.fom-dark[data-movil] .pnl-cab p { margin-top: 6px; font-size: 14px; line-height: 20px; }
+  .pnl.fom-dark[data-movil] .pnl-cab h1 { font: var(--app-titulo-pantalla); letter-spacing: var(--app-titulo-pantalla-track); }
+  .pnl.fom-dark[data-movil] .pnl-cab p { margin-top: 6px; font: var(--app-bajada); color: var(--app-texto-2); }
   .pnl.fom-dark[data-movil] .pnl-cab-acciones { width: 100%; }
   .pnl.fom-dark[data-movil] .pnl-cab-acciones > .pnl-btn.primario { flex: 1 1 100%; justify-content: center; }
-  .pnl.fom-dark[data-movil] .pnl-btn.primario { min-height: 48px; font-size: 15px; }
-  .pnl.fom-dark[data-movil] .pnl-cuerpo { padding: 0 16px 24px; gap: 16px; }
+  /* El botón de la app: píldora de 48, relleno 12/24, texto 16/600 y sombra de flotante. */
+  .pnl.fom-dark[data-movil] .pnl-btn.primario { min-height: var(--app-boton-alto); padding: var(--app-boton-pad); border-radius: var(--app-r-pill); font: var(--app-button); box-shadow: var(--app-sombra-flotante); }
+  /* Con UNA sola acción, va a la derecha del título como el BotonNuevo de la app:
+     píldora de 40 con ícono de 15 y texto 13/600. */
+  .pnl.fom-dark[data-movil] .pnl-cab:has(> .pnl-cab-acciones > .pnl-btn.primario:only-child) { flex-wrap: nowrap; align-items: flex-end; }
+  .pnl.fom-dark[data-movil] .pnl-cab:has(> .pnl-cab-acciones > .pnl-btn.primario:only-child) > .pnl-cab-txt { flex: 1 1 0; }
+  .pnl.fom-dark[data-movil] .pnl-cab-acciones:has(> .pnl-btn.primario:only-child) { width: auto; flex: none; padding-bottom: 4px; }
+  .pnl.fom-dark[data-movil] .pnl-cab-acciones > .pnl-btn.primario:only-child { flex: none; min-height: var(--app-nuevo-alto); padding: var(--app-nuevo-pad); gap: var(--app-nuevo-hueco); font: var(--app-nuevo-texto); box-shadow: var(--app-nuevo-sombra); }
+  .pnl.fom-dark[data-movil] .pnl-cab-acciones > .pnl-btn.primario:only-child :is(svg, .ico) { width: var(--app-nuevo-icono); height: var(--app-nuevo-icono); }
+  .pnl.fom-dark[data-movil] .pnl-cuerpo { padding: 0 var(--app-esp-lg) var(--app-esp-xl); gap: var(--app-esp-lg); }
+  /* Tarjetas de la app: superficie, borde de 1 px y radio 24; en oscuro sin sombra. */
+  .pnl.fom-dark[data-movil] .pnl-card { border-radius: var(--app-tarjeta-radio); box-shadow: var(--app-sombra-tarjeta); }
   /* Tarjetas a todo el ancho: una columna. */
   .pnl.fom-dark[data-movil] .pnl-grid:is(.k2, .k3, .dos-tercios) { grid-template-columns: minmax(0, 1fr); }
   .pnl.fom-dark[data-movil] .pnl-card { width: 100%; }
@@ -168,7 +230,7 @@
   .pnl.fom-dark[data-movil][data-screen="/mapa"] .mv-barra { position: absolute; left: 0; right: 0; top: 0; background: none; pointer-events: none; }
   .pnl.fom-dark[data-movil][data-screen="/mapa"] .mv-barra > * { pointer-events: auto; }
   /* Sobre el mapa, una pieza casi opaca (en Glass, su propio cristal). */
-  .pnl.fom-dark[data-diseno="azul"][data-movil][data-screen="/mapa"] .mv-barra :is(.mv-capsula, .mv-circulo:not(.mv-avatar)) { background: rgb(20 26 34 / .94); }
+  .pnl.fom-dark[data-diseno="azul"][data-movil][data-screen="/mapa"] .mv-barra :is(.mv-capsula, .mv-circulo:not(.mv-avatar)) { background: var(--app-sobre-mapa); }
   /* La cabecera del mapa ya no deja hueco al botón del menú: va bajo la cápsula. */
   .pnl.fom-dark[data-diseno][data-movil][data-screen="/mapa"] .control-search { top: calc(74px + env(safe-area-inset-top)); left: 12px; right: 12px; }
   /* Los filtros bajan lo mismo que la cabecera (control-map.css los pone a 146 bajo 600 px). */
@@ -191,18 +253,19 @@
 /* ---- «Accesos» de Mi perfil (solo se dibuja en el teléfono) ---- */
 .mv-perfil-pie { display: grid; gap: 16px; }
 .pnl-card.mv-accesos { padding: 0 16px; }
-.mv-accesos-titulo { margin: 0; padding: 14px 0 4px; font-size: 11px; line-height: 14px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; color: var(--e-texto-3); }
+.mv-accesos-titulo { margin: 0; padding: 14px 0 4px; font: var(--app-overline); letter-spacing: var(--app-track-amplio); text-transform: uppercase; color: var(--app-texto-3); }
 .mv-accesos ul { list-style: none; margin: 0; padding: 0; }
-.mv-accesos li + li { border-top: 1px solid var(--e-borde); }
-.mv-acceso { display: flex; align-items: center; gap: 12px; min-height: 62px; padding: 13px 0; color: var(--e-texto); text-decoration: none; -webkit-tap-highlight-color: transparent; }
-.mv-acceso-ico { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 13px; background: var(--e-sup-baja); color: var(--e-primario); }
-.mv-acceso b { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14.5px; line-height: 20px; font-weight: 600; }
-.mv-acceso > .ico:last-child { color: var(--e-texto-3); }
+.mv-accesos li + li { border-top: var(--app-borde-hairline) solid var(--app-borde); }
+.mv-acceso { display: flex; align-items: center; gap: var(--app-esp-md); min-height: 62px; padding: calc(var(--app-esp-md) + 1px) 0; color: var(--app-texto); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+/* perfil-accesos.tsx: caja hundida de 36 con esquina 15 y el glifo en su color. */
+.mv-acceso-ico { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: calc(var(--app-r-sm) + 5px); background: var(--app-sup-baja); color: var(--app-primario); }
+.mv-acceso b { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: var(--app-button); font-size: 14.5px; }
+.mv-acceso > .ico:last-child { color: var(--app-texto-3); }
 .mv-acceso-globo { min-width: 20px; height: 20px; padding: 0 6px; display: grid; place-items: center; border-radius: 999px; background: color-mix(in srgb, var(--e-peligro) 16%, transparent); color: var(--e-peligro); font-size: 11.5px; font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; }
-.pnl-btn.mv-salir { width: 100%; min-height: 48px; justify-content: center; gap: 8px; margin-top: 4px; border: 1px solid color-mix(in srgb, var(--e-peligro) 32%, transparent); background: var(--e-peligro-sup); color: var(--e-peligro); font-weight: 600; }
-.mv-salir-texto { margin: 0 0 18px; font-size: 14px; line-height: 20px; color: var(--e-texto-2); }
+.pnl-btn.mv-salir { width: 100%; min-height: var(--app-boton-alto); justify-content: center; gap: 8px; margin-top: 4px; border: 1px solid color-mix(in srgb, var(--e-peligro) 32%, transparent); background: var(--e-peligro-sup); color: var(--e-peligro); font-weight: 600; }
+.mv-salir-texto { margin: 0 0 18px; font: var(--app-bajada); color: var(--app-texto-2); }
 .mv-salir-acciones { display: flex; gap: 12px; }
-.mv-salir-acciones .pnl-btn { flex: 1; min-height: 48px; margin: 0; justify-content: center; }
+.mv-salir-acciones .pnl-btn { flex: 1; min-height: var(--app-boton-alto); margin: 0; justify-content: center; }
 
 @media (prefers-reduced-motion: reduce) {
   .mv-pildora, .mv-circulo { transition: none; }

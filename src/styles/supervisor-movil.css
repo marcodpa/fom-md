@@ -7,42 +7,46 @@
    unidades al día) y panel/mas.tsx (tonos de las acciones).
    Solo se montan en la vista de teléfono; en la computadora no existen.
    ============================================================ */
-:is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .exito { --tono: var(--e-exito); }
-:is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .aviso { --tono: var(--e-aviso); }
-:is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .peligro { --tono: var(--e-peligro); }
-:is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .info { --tono: var(--e-info); }
+:is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .exito { --tono: var(--app-exito); }
+:is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .aviso { --tono: var(--app-aviso); }
+:is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .peligro { --tono: var(--app-peligro); }
+:is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .info { --tono: var(--app-info); }
 :is(.mvs-mapa, .mvs-kpis, .mvs-usuarios, .mvs-pasos, .mvs-aldia, .mvp) .acento { --tono: #b478ff; }
 /* Las acciones y cifras del perfil del supervisor son enlaces. */
 .mvp a.mvp-accion, .mvp a.mvp-cifra { text-decoration: none; color: inherit; }
-.mvp a.mvp-accion { color: var(--e-texto-3); }
+.mvp a.mvp-accion { color: var(--app-texto-3); }
 
 /* ---------- Vehículos: el mapa en su tarjeta ---------- */
-.mvs-mapa { position: relative; height: 240px; overflow: hidden; border: 1px solid var(--e-borde); border-radius: 24px; background: var(--e-sup-baja); }
+/* Medio alto de pantalla, como en la app (panel/flota.tsx: max(320, 50 % de la ventana)). */
+.mvs-mapa { position: relative; height: max(320px, 50dvh); overflow: hidden; border: 1px solid var(--app-borde); border-radius: var(--app-r-lg); background: var(--app-sup-baja); }
 .mvs-mapa > .pnl-mapa { border: 0; border-radius: 0; }
 .mvs-mapa .mapa-capas { display: none; }
 .mvs-mapa .pnl-mapa :is(.mapboxgl-ctrl-bottom-right, .leaflet-bottom.leaflet-right) { display: none; }
-.mvs-ampliar { position: absolute; top: 12px; right: 12px; z-index: 5; width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--e-borde); border-radius: 999px; background: rgb(20 26 34 / .94); color: var(--e-texto); }
-.mvs-mapa-nota { position: absolute; left: 14px; bottom: 12px; z-index: 5; padding: 7px 13px; border: 1px solid var(--e-borde); border-radius: 999px; background: var(--e-sup-baja); color: var(--e-texto-3); font-size: 13px; }
-.mvs-tocada { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 6; display: grid; gap: 8px; padding: 12px; border-radius: 24px; background: rgb(20 26 34 / .96); box-shadow: 0 6px 18px rgb(0 0 0 / .5); }
+.mvs-ampliar { position: absolute; top: 12px; right: 12px; z-index: 5; width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--app-borde); border-radius: var(--app-r-pill); background: rgb(20 26 34 / .94); color: var(--app-texto); }
+.mvs-mapa-nota { position: absolute; left: 14px; bottom: 12px; z-index: 5; padding: 7px 13px; border: 1px solid var(--app-borde); border-radius: var(--app-r-pill); background: var(--app-sup-baja); color: var(--app-texto-3); font-size: 13px; }
+.mvs-tocada { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 6; display: grid; gap: 8px; padding: 12px; border-radius: var(--app-r-lg); background: rgb(20 26 34 / .96); box-shadow: 0 6px 18px rgb(0 0 0 / .5); }
 .mvs-tocada-fila { display: flex; align-items: flex-start; gap: 8px; }
 .mvs-tocada-txt { flex: 1; min-width: 0; display: grid; }
-.mvs-tocada-txt b { font-size: 16px; line-height: 22px; font-weight: 600; color: var(--e-texto); }
-.mvs-tocada-txt small { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; line-height: 20px; color: var(--e-texto-2); }
-.mvs-tocada-txt small.chico { font-size: 13px; color: var(--e-texto-3); }
-.mvs-tocada-cerrar { width: 32px; height: 32px; flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 999px; background: var(--e-sup-alta); color: var(--e-texto-2); cursor: pointer; }
+.mvs-tocada-txt b { font-size: 16px; line-height: 22px; font-weight: 600; color: var(--app-texto); }
+.mvs-tocada-txt small { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; line-height: 20px; color: var(--app-texto-2); }
+.mvs-tocada-txt small.chico { font-size: 13px; color: var(--app-texto-3); }
+.mvs-tocada-cerrar { width: 32px; height: 32px; flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--app-r-pill); background: var(--app-sup-alta); color: var(--app-texto-2); cursor: pointer; }
 .mvs-tocada-botones { display: flex; gap: 8px; }
-.mvs-tocada-botones > * { flex: 1; min-height: 40px; display: grid; place-items: center; padding: 0 12px; border: 0; border-radius: 14px; background: var(--e-sup-baja); color: var(--e-texto); font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
-.mvs-tocada-botones > .primario { background: var(--e-primario); color: #fff; }
+.mvs-tocada-botones > * { flex: 1; min-height: 40px; display: grid; place-items: center; padding: 0 12px; border: 0; border-radius: 14px; background: var(--app-sup-baja); color: var(--app-texto); font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.mvs-tocada-botones > .primario { background: var(--app-primario); color: #fff; }
 
 /* ---------- Buscador con su botón de filtros (BuscadorFiltros) ---------- */
-.mvs-buscador { display: flex; align-items: center; gap: 8px; }
+/* El botón de filtros va DENTRO del buscador, pegado a su borde derecho (search-bar.tsx · accion). */
+.mvs-buscador { position: relative; display: flex; align-items: center; }
 .mvs-buscador > .pnl-buscar { flex: 1; min-width: 0; }
-.mvs-filtrar { position: relative; width: 46px; height: 46px; flex: none; display: grid; place-items: center; padding: 0; border: 1px solid var(--e-borde-fuerte); border-radius: 16px; background: var(--e-sup-alta); color: var(--e-texto); cursor: pointer; }
-.mvs-filtrar.on { border-color: #3d9bf5; background: #3d9bf5; color: #08121c; }
-.mvs-filtrar em { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; display: grid; place-items: center; border: 2px solid var(--e-bg); border-radius: 999px; background: #08121c; color: #8bc6ff; font-size: 11px; font-style: normal; font-weight: 700; }
+.mvs-buscador > .pnl-buscar input { padding-right: calc(var(--app-buscar-accion) + 14px); }
+.mvs-filtrar { position: absolute; top: 50%; right: 6px; z-index: 1; width: var(--app-buscar-accion); height: var(--app-buscar-accion); margin-top: calc(var(--app-buscar-accion) / -2); flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--app-r-sm); background: transparent; color: var(--app-texto-3); cursor: pointer; }
+.mvs-filtrar svg { width: var(--app-buscar-accion-icono); height: var(--app-buscar-accion-icono); }
+.mvs-filtrar.on { background: var(--app-activo-sup); color: var(--app-activo-texto); }
+.mvs-filtrar em { position: absolute; top: -3px; right: -3px; min-width: var(--app-cuenta); height: var(--app-cuenta); padding: 0 4px; display: grid; place-items: center; border: 2px solid var(--app-sup-baja); border-radius: var(--app-r-pill); background: var(--app-primario); color: var(--app-sobre-primario); font: 700 10.5px/13px var(--app-fuente); font-style: normal; }
 .mvs-hoja { display: grid; gap: 16px; }
 .mvs-hoja-grupo { display: grid; gap: 8px; }
-.mvs-overline { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--e-texto-3); }
+.mvs-overline { font: var(--app-overline); letter-spacing: var(--app-track-amplio); text-transform: uppercase; color: var(--app-texto-3); }
 .mvs-hoja-acciones { display: grid; gap: 8px; }
 .mvs-hoja-acciones .pnl-btn { justify-content: center; min-height: 44px; }
 .mvs-hoja-pie { display: flex; gap: 8px; }
@@ -50,54 +54,64 @@
 
 /* ---------- Usuarios ---------- */
 .mvs-usuarios { display: grid; gap: 12px; }
-.mvs-tira-centrada { display: flex; padding: 12px 6px; border: 1px solid var(--e-borde); border-radius: 24px; background: var(--e-sup); }
+.mvs-tira-centrada { display: flex; padding: 12px 6px; border: 1px solid var(--app-borde); border-radius: var(--app-r-lg); background: var(--app-sup); }
 .mvs-tira-centrada > div { flex: 1; min-width: 0; display: grid; justify-items: center; gap: 2px; }
-.mvs-tira-centrada > div + div { border-left: 1px solid var(--e-borde); }
-.mvs-tira-centrada b { font-size: 20px; line-height: 26px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--tono, var(--e-texto)); }
-.mvs-tira-centrada small { font-size: 13px; line-height: 16px; color: var(--e-texto-2); }
-.mvs-vacio { margin: 0; padding: 24px 0; text-align: center; color: var(--e-texto-2); font-size: 15px; }
-.mvs-personas { margin: 0; padding: 0; list-style: none; overflow: hidden; border: 1px solid var(--e-borde); border-radius: 24px; background: var(--e-sup); }
+.mvs-tira-centrada > div + div { border-left: 1px solid var(--app-borde); }
+.mvs-tira-centrada b { font: var(--app-kpi-valor); font-variant-numeric: tabular-nums; color: var(--tono, var(--app-texto)); }
+.mvs-tira-centrada small { font-size: 13px; line-height: 16px; color: var(--app-texto-2); }
+.mvs-vacio { margin: 0; padding: 24px 0; text-align: center; color: var(--app-texto-2); font-size: 15px; }
+.mvs-personas { margin: 0; padding: 0; list-style: none; overflow: hidden; border: 1px solid var(--app-borde); border-radius: var(--app-r-lg); background: var(--app-sup); }
 .mvs-personas li { display: flex; align-items: center; }
-.mvs-personas li + li { border-top: 1px solid var(--e-borde); }
-.mvs-persona { flex: 1; min-width: 0; min-height: 68px; display: flex; align-items: center; gap: 12px; padding: 10px 16px; color: var(--e-texto); text-decoration: none; -webkit-tap-highlight-color: transparent; }
-.mvs-persona > svg { flex: none; color: var(--e-texto-3); }
-.mvs-avatar { width: 44px; height: 44px; flex: none; display: grid; place-items: center; overflow: hidden; border-radius: 50%; background: #194a74; color: #eef7ff; font-style: normal; font-size: 15px; font-weight: 600; }
+.mvs-personas li + li { border-top: 1px solid var(--app-borde); }
+.mvs-persona { flex: 1; min-width: 0; min-height: var(--app-fila-persona-alto); display: flex; align-items: center; gap: var(--app-esp-md); padding: var(--app-fila-persona-pad); color: var(--app-texto); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.mvs-persona > svg { flex: none; color: var(--app-texto-3); }
+/* avatar.tsx (tono primary): las iniciales en azul FOM con el texto oscuro encima. */
+.mvs-avatar { width: var(--app-fila-avatar); height: var(--app-fila-avatar); flex: none; display: grid; place-items: center; overflow: hidden; border-radius: 50%; background: var(--app-primario); color: var(--app-sobre-primario); font: var(--app-fila-avatar-letra); font-style: normal; }
 .mvs-persona-txt { flex: 1; min-width: 0; display: grid; gap: 3px; }
-.mvs-persona-txt b { font-size: 16px; line-height: 22px; font-weight: 600; overflow-wrap: anywhere; }
-.mvs-persona-txt small { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 14px; line-height: 20px; color: var(--e-texto-2); }
-.mvs-persona-txt small i { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--e-texto-3); }
-.mvs-persona-txt small i.con { background: var(--e-exito); }
+.mvs-persona-txt b { font: var(--app-fila-titulo); overflow-wrap: anywhere; }
+.mvs-persona-txt small { display: flex; align-items: center; gap: 6px; min-width: 0; font: var(--app-fila-detalle); color: var(--app-texto-2); }
+.mvs-persona-txt small i { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--app-texto-3); }
+.mvs-persona-txt small i.con { background: var(--app-exito); }
 .mvs-persona-txt small .encoge { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.mvs-persona .pnl-tag { flex: none; }
+/* La pastilla de manejo de la app (pastilla.tsx): sin punto, esquina 10, alto 22 y tinte al 12 %. */
+.mvs-persona .pnl-tag { flex: none; height: var(--app-pastilla-alto); display: inline-flex; align-items: center; gap: var(--app-pastilla-hueco); padding: var(--app-pastilla-pad); border-radius: var(--app-r-sm); font: var(--app-pastilla-texto); white-space: nowrap; }
+.mvs-persona .pnl-tag::before { display: none; }
+.mvs-persona .pnl-tag.verde { background: color-mix(in srgb, var(--app-exito) var(--app-pastilla-tinte), transparent); }
+.mvs-persona .pnl-tag.ambar { background: color-mix(in srgb, var(--app-aviso) var(--app-pastilla-tinte), transparent); }
+.mvs-persona .pnl-tag.rojo { background: color-mix(in srgb, var(--app-peligro) var(--app-pastilla-tinte), transparent); }
+.mvs-persona .pnl-tag.azul { background: color-mix(in srgb, var(--app-info) var(--app-pastilla-tinte), transparent); }
+.mvs-persona .pnl-tag.gris { background: color-mix(in srgb, var(--app-texto-3) var(--app-pastilla-tinte), transparent); color: var(--app-texto-3); }
+.mvs-persona > svg:last-child { width: var(--app-fila-chevron); height: var(--app-fila-chevron); }
 .mvs-persona-acciones { flex: none; padding-right: 10px; }
 .mvs-persona-acciones .usr-mas { width: 36px; height: 36px; min-height: 36px; padding: 0; justify-content: center; }
-.mvs-insignia { width: 22px; height: 22px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--e-peligro-sup); color: var(--e-peligro); font-size: 13px; font-weight: 800; }
+/* insignia.tsx: el aviso rojo en un círculo de 28 teñido al 14 %. */
+.mvs-insignia { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--app-peligro) var(--app-chip-tinte), transparent); color: var(--app-peligro); font: 800 15px/1 var(--app-fuente); font-style: normal; }
 
 /* ---------- Mantenimiento ---------- */
-.mvs-kpis { display: flex; gap: 8px; padding: 14px; border: 1px solid var(--e-borde); border-radius: 24px; background: var(--e-sup); margin-bottom: 16px; }
-.mvs-kpi { flex: 1; min-width: 0; display: grid; gap: 2px; padding: 10px; border-radius: 14px; background: var(--e-sup-baja); }
-.mvs-kpi b { font-size: 20px; line-height: 26px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--tono, var(--e-texto)); }
-.mvs-kpi small { font-size: 13px; line-height: 16px; color: var(--e-texto-2); }
-.mvs-tarjeta { display: grid; gap: 12px; margin-top: 16px; padding: 16px; border: 1px solid var(--e-borde); border-radius: 24px; background: var(--e-sup); color: var(--e-texto); text-decoration: none; }
+.mvs-kpis { display: flex; gap: var(--app-esp-sm); padding: var(--app-kpi-pad); border: 1px solid var(--app-borde); border-radius: var(--app-r-lg); background: var(--app-sup); margin-bottom: 16px; }
+.mvs-kpi { flex: 1; min-width: 0; display: grid; gap: 2px; padding: var(--app-kpi-casilla-pad); border-radius: var(--app-kpi-casilla-radio); background: var(--app-sup-baja); }
+.mvs-kpi b { font: var(--app-kpi-valor); font-variant-numeric: tabular-nums; color: var(--tono, var(--app-texto)); }
+.mvs-kpi small { font: var(--app-kpi-etiqueta); color: var(--app-texto-2); }
+.mvs-tarjeta { display: grid; gap: 12px; margin-top: 16px; padding: 16px; border: 1px solid var(--app-borde); border-radius: var(--app-r-lg); background: var(--app-sup); color: var(--app-texto); text-decoration: none; }
 .mvs-tarjeta-titulo { margin: 0; font-size: 18px; line-height: 24px; font-weight: 700; }
-.mvs-tarjeta-bajada { margin: 2px 0 0; font-size: 14px; line-height: 20px; color: var(--e-texto-2); }
+.mvs-tarjeta-bajada { margin: 2px 0 0; font-size: 14px; line-height: 20px; color: var(--app-texto-2); }
 .mvs-pasos ol { margin: 0; padding: 0; list-style: none; }
 .mvs-pasos li { position: relative; display: flex; gap: 12px; padding-bottom: 12px; }
 .mvs-pasos li:last-child { padding-bottom: 0; }
-.mvs-pasos li:not(:last-child)::before { content: ''; position: absolute; left: 13px; top: 28px; bottom: 0; width: 1px; background: var(--e-borde); }
-.mvs-paso-num { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--e-primario); color: #fff; font-size: 13px; font-weight: 700; }
+.mvs-pasos li:not(:last-child)::before { content: ''; position: absolute; left: 13px; top: 28px; bottom: 0; width: 1px; background: var(--app-borde); }
+.mvs-paso-num { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--app-primario); color: #fff; font-size: 13px; font-weight: 700; }
 .mvs-pasos li > span { display: grid; gap: 4px; justify-items: start; }
-.mvs-pasos small { font-size: 14px; line-height: 20px; color: var(--e-texto-2); }
+.mvs-pasos small { font-size: 14px; line-height: 20px; color: var(--app-texto-2); }
 .mvs-aldia-fila { display: flex; align-items: center; gap: 12px; }
-.mvs-aldia-fila > svg { color: var(--e-texto-3); }
+.mvs-aldia-fila > svg { color: var(--app-texto-3); }
 .mvs-aldia-txt { flex: 1; min-width: 0; display: grid; }
 .mvs-aldia-cifras { display: flex; align-items: baseline; gap: 6px; }
 .mvs-aldia-cifras b { font-size: 32px; line-height: 40px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.mvs-aldia-cifras b.apagado { color: var(--e-texto-3); }
-.mvs-aldia-cifras span { font-size: 16px; color: var(--e-texto-2); }
-.mvs-aldia-txt small { font-size: 14px; line-height: 20px; color: var(--e-texto-2); }
-.mvs-aldia-pista { display: block; height: 6px; overflow: hidden; border-radius: 999px; background: var(--e-sup-baja); }
-.mvs-aldia-pista i { display: block; height: 100%; border-radius: 999px; background: var(--e-exito); }
-.mvs-aldia-aviso { font-size: 14px; line-height: 20px; color: var(--e-peligro); }
+.mvs-aldia-cifras b.apagado { color: var(--app-texto-3); }
+.mvs-aldia-cifras span { font-size: 16px; color: var(--app-texto-2); }
+.mvs-aldia-txt small { font-size: 14px; line-height: 20px; color: var(--app-texto-2); }
+.mvs-aldia-pista { display: block; height: 6px; overflow: hidden; border-radius: var(--app-r-pill); background: var(--app-sup-baja); }
+.mvs-aldia-pista i { display: block; height: 100%; border-radius: var(--app-r-pill); background: var(--app-exito); }
+.mvs-aldia-aviso { font-size: 14px; line-height: 20px; color: var(--app-peligro); }
 
-.pnl.fom-dark[data-diseno] :is(.mvs-ampliar, .mvs-filtrar, .mvs-persona, .mvs-aldia, .mvs-tocada-botones > *):focus-visible { outline: 2px solid var(--e-primario); outline-offset: 2px; }
+.pnl.fom-dark[data-diseno] :is(.mvs-ampliar, .mvs-filtrar, .mvs-persona, .mvs-aldia, .mvs-tocada-botones > *):focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
