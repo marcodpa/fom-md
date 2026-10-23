@@ -1,16 +1,61 @@
 diff --git a/src/app/panel/mantenimiento.tsx b/src/app/panel/mantenimiento.tsx
-index 448d6e6..4f719af 100644
+index 448d6e6..38c3d2f 100644
 --- a/src/app/panel/mantenimiento.tsx
 +++ b/src/app/panel/mantenimiento.tsx
-@@ -47,6 +47,7 @@ import { useTheme } from '@/theme';
+@@ -1,6 +1,6 @@
+ import { Redirect, useRouter } from 'expo-router';
+-import { useMemo, useState, type ReactNode } from 'react';
+-import { StyleSheet, View } from 'react-native';
++import { useEffect, useMemo, useState, type ReactNode } from 'react';
++import { AppState, StyleSheet, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { useAuth } from '@/auth';
+@@ -47,6 +47,14 @@ import { useTheme } from '@/theme';
  import type { WorkOrderListItem } from '@/types';
  import { identidadDeUnidad } from '@/lib/vehiculos';
  import { aplicarFiltros, type Filtro } from '@/utils/filtros';
-+import { filtrarPorFecha, hayFiltroFecha, SIN_FECHA, type FiltroFecha } from '@/utils/filtro-fecha';
++import {
++  diaLocal,
++  filtrarPorFecha,
++  hayFiltroFecha,
++  msHastaMedianoche,
++  SIN_FECHA,
++  type FiltroFecha,
++} from '@/utils/filtro-fecha';
  import { colorDeEnte } from '@/utils/paleta-flota';
  import { COLAS, tareasDe, unidadesPorAtender, type Tarea, type TipoTarea } from '@/utils/tareas-mantto';
  
-@@ -102,6 +103,8 @@ export default function AdminMantenimientoScreen() {
+@@ -90,6 +98,28 @@ const grupoDeOdt = (o: WorkOrderListItem): GrupoEstado =>
+  *
+  * Debajo, cómo avanza una ODT y cuántas unidades están al día.
+  */
++/**
++ * El día de hoy (AAAA-MM-DD, hora local) que se renueva solo a la medianoche:
++ * con la pantalla abierta toda la noche, «Hoy», «7 días» y «30 días» pasan a
++ * contar desde el día nuevo. Igual que la web (`useDiaDeHoy` en Mantenimiento).
++ */
++function useDiaDeHoy(): string {
++  const [dia, setDia] = useState(() => diaLocal());
++  useEffect(() => {
++    // Un poco después de las 00:00, por si el reloj del teléfono se adelanta.
++    const reloj = setTimeout(() => setDia(diaLocal()), msHastaMedianoche() + 1000);
++    // Con el teléfono dormido el reloj se atrasa: al volver a la app se mira otra vez.
++    const sub = AppState.addEventListener('change', (s) => {
++      if (s === 'active') setDia(diaLocal());
++    });
++    return () => {
++      clearTimeout(reloj);
++      sub.remove();
++    };
++  }, [dia]);
++  return dia;
++}
++
+ export default function AdminMantenimientoScreen() {
+   const { spacing, radii } = useTheme();
+   const { user, status } = useAuth();
+@@ -102,6 +132,8 @@ export default function AdminMantenimientoScreen() {
    /** Los filtros de arriba de la lista: el estado (los 3 de la ODT) y el tipo ('' = todos). */
    const [grupo, setGrupo] = useState<GrupoEstado>('todas');
    const [tipo, setTipo] = useState<'' | TipoTarea>('');
@@ -19,7 +64,7 @@ index 448d6e6..4f719af 100644
    /** Cuántas filas de la Lista se pintan: el historial entero son cientos. */
    const [tope, setTope] = useState(TANDA);
    // Al cambiar de empresa (la pantalla se reutiliza) se limpia lo que se
-@@ -113,6 +116,7 @@ export default function AdminMantenimientoScreen() {
+@@ -113,6 +145,7 @@ export default function AdminMantenimientoScreen() {
      setFiltro([]);
      setGrupo('todas');
      setTipo('');
@@ -27,7 +72,17 @@ index 448d6e6..4f719af 100644
      setTope(TANDA);
    }
  
-@@ -200,8 +204,13 @@ export default function AdminMantenimientoScreen() {
+@@ -154,6 +187,9 @@ export default function AdminMantenimientoScreen() {
+   // El hook ya sabe que un refresco no es una carga; aquí solo queda cuándo
+   // se enciende la barra: si la espera no se nota, no se enciende.
+   const refrescando = useTardando(pidiendo || historial.refrescando);
++  // El filtro de fecha se calcula en cada pintada con la hora de ese momento:
++  // al cambiar el día, esto vuelve a pintar y «Hoy» ya es el día nuevo.
++  useDiaDeHoy();
+ 
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+ 
+@@ -200,8 +236,13 @@ export default function AdminMantenimientoScreen() {
      const f = unidadDe.get(vehicleId);
      return normalizar(`${texto} ${f?.vehicle.numero ?? ''} ${f?.vehicle.placa ?? ''}`).includes(nq);
    };
@@ -42,7 +97,7 @@ index 448d6e6..4f719af 100644
    // La cuenta de cada opción, sobre lo que la búsqueda ya dejó pasar.
    const opciones = filtros.map((f) => ({
      id: f.id,
-@@ -210,9 +219,6 @@ export default function AdminMantenimientoScreen() {
+@@ -210,9 +251,6 @@ export default function AdminMantenimientoScreen() {
      ...(f.color ? { color: f.color } : {}),
    }));
  
@@ -52,7 +107,7 @@ index 448d6e6..4f719af 100644
    /** Una tarea en los 3 estados: la ODT por el suyo; la alerta, en revisión si ya está en proceso. */
    const grupoDe = (t: Tarea): GrupoEstado => {
      const o = t.destino.pathname === '/orden' ? ordenDe.get(t.destino.id) : undefined;
-@@ -227,8 +233,8 @@ export default function AdminMantenimientoScreen() {
+@@ -227,8 +265,8 @@ export default function AdminMantenimientoScreen() {
    );
    const colas = COLAS.map((c) => ({ ...c, items: visibles.filter((t) => t.cola === c.id) }));
  
@@ -63,7 +118,7 @@ index 448d6e6..4f719af 100644
      aplicarFiltros(
        (historial.data ?? []).filter((o) => coincide(`${o.descripcion} ${o.driverName}`, o.vehicleId)),
        filtrosDe<WorkOrderListItem>((o) => o.vehicleId),
-@@ -236,6 +242,7 @@ export default function AdminMantenimientoScreen() {
+@@ -236,6 +274,7 @@ export default function AdminMantenimientoScreen() {
      ),
      (o) => o.creadaEn,
    );
@@ -71,7 +126,7 @@ index 448d6e6..4f719af 100644
    const resueltas = historialFiltrado.filter((o) => o.estado === 'cerrada' && (!tipo || tipoDeOdt(o) === tipo));
  
    // La Lista con «Todas»: las pendientes y las resueltas juntas, de la más
-@@ -304,8 +311,12 @@ export default function AdminMantenimientoScreen() {
+@@ -304,8 +343,12 @@ export default function AdminMantenimientoScreen() {
        <SearchBar value={q} onChangeText={setQ} placeholder="Buscar orden o unidad…" />
      );
  
@@ -86,7 +141,7 @@ index 448d6e6..4f719af 100644
      <FiltroEstadoMantenimiento
        valor={grupo}
        onCambiar={setGrupo}
-@@ -313,6 +324,14 @@ export default function AdminMantenimientoScreen() {
+@@ -313,6 +356,14 @@ export default function AdminMantenimientoScreen() {
        tipos={TIPOS.map((t) => ({ ...t, cuenta: cuentaTipo(t.id) }))}
        tipo={tipo}
        onTipo={(id) => setTipo(id as '' | TipoTarea)}
@@ -101,7 +156,7 @@ index 448d6e6..4f719af 100644
      />
    );
  
-@@ -360,7 +379,13 @@ export default function AdminMantenimientoScreen() {
+@@ -360,7 +411,13 @@ export default function AdminMantenimientoScreen() {
        {filasLista.length > 0 ? (
          conVerMas(filasLista, pintarFila)
        ) : faltanResueltas && historial.estado !== 'error' ? null : (
@@ -116,7 +171,7 @@ index 448d6e6..4f719af 100644
        )}
        {/* Las pendientes se ven ya; las resueltas llegan después, debajo. */}
        {faltanResueltas ? (
-@@ -395,6 +420,16 @@ export default function AdminMantenimientoScreen() {
+@@ -395,6 +452,16 @@ export default function AdminMantenimientoScreen() {
            (cuentaResueltas
              ? historialFiltrado.filter((o) => o.estado === 'cerrada' && tipoDeOdt(o) === tp).length
              : 0),
@@ -432,10 +487,107 @@ index e15f3e4..dde5200 100644
 +  tipo: { height: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 14 },
  });
 diff --git a/src/lib/eventos-manejo.ts b/src/lib/eventos-manejo.ts
-index 49c0fa9..899eff8 100644
+index 49c0fa9..20ac17c 100644
 --- a/src/lib/eventos-manejo.ts
 +++ b/src/lib/eventos-manejo.ts
-@@ -286,8 +286,10 @@ export interface VistaEventos {
+@@ -101,6 +101,11 @@ export interface EventoManejo {
+   id: string;
+   tipo: TipoEvento | null;
+   hora: string | null;
++  /**
++   * La hora en ms, leída una sola vez al llegar (ordenar y filtrar cientos de
++   * eventos no vuelve a leer el texto de la hora). Igual que la web.
++   */
++  t: number | null;
+   vehiculoId: string | null;
+   unidad: string | null;
+   lat: number | null;
+@@ -119,14 +124,25 @@ const numeroONulo = (n: unknown): number | null => {
+   return Number.isFinite(v) ? v : null;
+ };
+ 
+-/** Un evento de `GET …/driving-events` en la forma de la app. */
++const msDe = (iso: string | null | undefined): number | null => {
++  const t = Date.parse(iso ?? '');
++  return Number.isFinite(t) ? t : null;
++};
++
++/** La hora de un evento en ms: la ya leída (`t`) o, si no la trae, la de su texto. */
++const msEvento = (e: Pick<EventoManejo, 'hora'> & { t?: number | null }): number | null =>
++  typeof e.t === 'number' && Number.isFinite(e.t) ? e.t : msDe(e.hora);
++
++/** Un evento de `GET …/driving-events` en la forma de la app (con su hora ya leída en `t`). */
+ export function comoEventoManejo(crudo: unknown): EventoManejo {
+   const e = (crudo ?? {}) as Record<string, unknown>;
+   const texto = (v: unknown) => (typeof v === 'string' && v ? v : null);
++  const hora = texto(e.occurredAt);
+   return {
+     id: String(e.id ?? ''),
+     tipo: POR_SERVIDOR[String(e.type ?? '')] ?? null,
+-    hora: texto(e.occurredAt),
++    hora,
++    t: msDe(hora),
+     vehiculoId: texto(e.vehicleId),
+     unidad: texto(e.vehicleCode),
+     lat: numeroONulo(e.lat),
+@@ -141,11 +157,6 @@ export function velocidadExceso(e: Pick<EventoManejo, 'antes' | 'despues'> | nul
+   return e?.antes ?? e?.despues ?? null;
+ }
+ 
+-const msDe = (iso: string | null | undefined): number | null => {
+-  const t = Date.parse(iso ?? '');
+-  return Number.isFinite(t) ? t : null;
+-};
+-
+ const conPosicion = (e: EventoManejo) =>
+   typeof e.lat === 'number' &&
+   typeof e.lng === 'number' &&
+@@ -157,7 +168,7 @@ const conPosicion = (e: EventoManejo) =>
+ 
+ /** ¿Va en el mapa? De los tres tipos, con hora y posición, y si es exceso, de MÁS de 120. */
+ export function vaEnMapa(e: EventoManejo | null | undefined): e is EventoEnMapa {
+-  if (!e || !e.tipo || !(e.tipo in POR_CLAVE) || !conPosicion(e) || msDe(e.hora) === null) return false;
++  if (!e || !e.tipo || !(e.tipo in POR_CLAVE) || !conPosicion(e) || msEvento(e) === null) return false;
+   if (e.tipo !== 'exceso') return true;
+   const v = velocidadExceso(e);
+   return v !== null && v > EXCESO_KMH;
+@@ -165,7 +176,7 @@ export function vaEnMapa(e: EventoManejo | null | undefined): e is EventoEnMapa
+ 
+ /** Del más nuevo al más viejo (a igual hora, por id, para que el orden no baile). */
+ const masNuevoPrimero = (a: EventoEnMapa, b: EventoEnMapa) =>
+-  (msDe(b.hora) ?? 0) - (msDe(a.hora) ?? 0) || b.id.localeCompare(a.id);
++  (msEvento(b) ?? 0) - (msEvento(a) ?? 0) || b.id.localeCompare(a.id);
+ 
+ /**
+  * Los que se pintan, del más nuevo al más viejo.
+@@ -197,7 +208,7 @@ export function eventosParaMapa(
+     .filter(vaEnMapa)
+     .filter((e) => !vehiculoId || e.vehiculoId === vehiculoId)
+     .filter((e) => {
+-      const t = msDe(e.hora)!;
++      const t = msEvento(e)!;
+       return t >= inicio && t <= fin;
+     })
+     .sort(masNuevoPrimero);
+@@ -221,7 +232,7 @@ export function filtrarPorTipos<T extends EventoManejo>(lista: readonly T[] | nu
+ /** Excesos que no se pintan por ir a 120 km/h o menos (o sin velocidad registrada). */
+ export function excesosBajoUmbral(lista: readonly EventoManejo[] | null | undefined, { dias = null as number | null, ahora = Date.now() } = {}): number {
+   const inicio = dias ? ahora - Number(dias) * 86400000 : -Infinity;
+-  return (lista ?? []).filter((e) => e?.tipo === 'exceso' && !vaEnMapa(e) && (msDe(e.hora) ?? -Infinity) >= inicio).length;
++  return (lista ?? []).filter((e) => e?.tipo === 'exceso' && !vaEnMapa(e) && (msEvento(e) ?? -Infinity) >= inicio).length;
+ }
+ 
+ // ── Filtros: período, tipos y «Ver 5 más» ───────────────────────────────────
+@@ -263,7 +274,7 @@ export function eventosDeHoy<T extends EventoManejo>(lista: readonly T[] | null
+   const inicio = inicioDelDia(ahora);
+   const fin = inicio + 86400000;
+   return (lista ?? []).filter((e) => {
+-    const t = msDe(e.hora);
++    const t = msEvento(e);
+     return t !== null && t >= inicio && t < fin;
+   });
+ }
+@@ -286,8 +297,10 @@ export interface VistaEventos {
   * Lo que muestran el mapa y la lista. `lista`: ya pasada por `eventosParaMapa`.
   * - `periodo`: la ventana de tiempo («Últimos 5» = todo lo que llegó).
   * - `tipos`: los encendidos (sin dar, los tres).
@@ -448,7 +600,7 @@ index 49c0fa9..899eff8 100644
   */
  export function filtrarEventosManejo(
    lista: readonly EventoEnMapa[] | null | undefined,
-@@ -297,12 +299,14 @@ export function filtrarEventosManejo(
+@@ -297,12 +310,14 @@ export function filtrarEventosManejo(
      limites = {},
      ahora = Date.now(),
      n = ULTIMOS_N,
@@ -463,7 +615,16 @@ index 49c0fa9..899eff8 100644
    } = {},
  ): VistaEventos {
    const todos = [...(lista ?? [])].sort(masNuevoPrimero);
-@@ -318,7 +322,7 @@ export function filtrarEventosManejo(
+@@ -310,7 +325,7 @@ export function filtrarEventosManejo(
+     periodo === 'hoy'
+       ? eventosDeHoy(todos, ahora)
+       : periodo === '7' || periodo === '30'
+-        ? todos.filter((e) => (msDe(e.hora) ?? -Infinity) >= ahora - Number(periodo) * 86400000)
++        ? todos.filter((e) => (msEvento(e) ?? -Infinity) >= ahora - Number(periodo) * 86400000)
+         : todos;
+   const cuenta = contarPorTipo(delPeriodo);
+   const mostrados: CuentaEventos = { frenada: 0, aceleracion: 0, exceso: 0 };
+@@ -318,7 +333,7 @@ export function filtrarEventosManejo(
    const activos = new Set(tipos ?? CLAVES_EVENTO);
    const visibles = delPeriodo.filter((e) => {
      if (!activos.has(e.tipo)) return false;
@@ -472,12 +633,69 @@ index 49c0fa9..899eff8 100644
      if (mostrados[e.tipo] >= tope) return false;
      mostrados[e.tipo] += 1;
      return true;
+diff --git a/src/services/fomEventosManejo.ts b/src/services/fomEventosManejo.ts
+index 5640b5f..6354be7 100644
+--- a/src/services/fomEventosManejo.ts
++++ b/src/services/fomEventosManejo.ts
+@@ -31,10 +31,31 @@ export type EventosManejoFom =
+   /** La ruta no existe todavía en el servidor (404/403/405): no hay nada que pintar. */
+   | { estado: 'no-publicado' };
+ 
+-/** Se guardan unos minutos por conductor + período: cambiar de pastilla no vuelve a pedir. */
++/**
++ * Se guardan unos minutos por conductor + período: cambiar de pastilla no
++ * vuelve a pedir. La llave lleva de quién es la sesión y en qué empresa se
++ * trabaja: al cambiar cualquiera de los dos se vacía todo, para no tener a
++ * mano los eventos de otra empresa. Lo vencido se borra al pasar (igual que
++ * `crearCacheEventos` en la web).
++ */
+ const VIGENTE_MS = 3 * 60_000;
+ const TOPE_MEMORIA = 40;
+ const memoria = new Map<string, { en: number; generacion: number; datos: Promise<EventosManejoFom> }>();
++/** Usuario y empresa de lo que hay guardado. */
++let duenoMemoria: string | null = null;
++
++/** Vacía la memoria si cambió la sesión o la empresa, y borra lo vencido o de otra generación. */
++function limpiarMemoria(dueno: string, ahora: number): void {
++  if (dueno !== duenoMemoria) {
++    memoria.clear();
++    duenoMemoria = dueno;
++    return;
++  }
++  const generacion = generacionLecturas();
++  for (const [clave, g] of memoria) {
++    if (g.generacion !== generacion || ahora - g.en >= VIGENTE_MS) memoria.delete(clave);
++  }
++}
+ 
+ function esSinPublicar(e: unknown): boolean {
+   return e instanceof ErrorFom && [403, 404, 405].includes(e.statusCode);
+@@ -63,12 +84,14 @@ export async function getEventosManejoFom(
+ ): Promise<EventosManejoFom> {
+   const d = diasServidor(dias);
+   const ente = companyId || enteActivoFom();
+-  const clave = `${usuarioActivoFom() ?? ''}|${ente ?? ''}|${conductorId}|${d}`;
++  // Quién mira y en qué empresa (la de la sesión y la que se está viendo, como la web).
++  const dueno = `${usuarioActivoFom() ?? ''}|${enteActivoFom() ?? ''}|${ente ?? ''}`;
++  const clave = `${dueno}|${conductorId}|${d}`;
++  const ahora = Date.now();
++  limpiarMemoria(dueno, ahora);
+   const guardada = memoria.get(clave);
+-  if (!fresco && guardada && guardada.generacion === generacionLecturas() && Date.now() - guardada.en < VIGENTE_MS) {
+-    return guardada.datos;
+-  }
+-  const entrada = { en: Date.now(), generacion: generacionLecturas(), datos: leer(conductorId, d, ente) };
++  if (!fresco && guardada) return guardada.datos;
++  const entrada = { en: ahora, generacion: generacionLecturas(), datos: leer(conductorId, d, ente) };
+   memoria.delete(clave);
+   memoria.set(clave, entrada);
+   while (memoria.size > TOPE_MEMORIA) {
 diff --git a/src/utils/filtro-fecha.ts b/src/utils/filtro-fecha.ts
 new file mode 100644
-index 0000000..3bace7b
+index 0000000..5f74d72
 --- /dev/null
 +++ b/src/utils/filtro-fecha.ts
-@@ -0,0 +1,91 @@
+@@ -0,0 +1,105 @@
 +import { instanteOrden, type FechaOrden } from '@/lib/orden';
 +import { formatFechaCorta } from '@/utils/date';
 +
@@ -517,6 +735,20 @@ index 0000000..3bace7b
 +function inicioDelDia(ms: number, atras = 0): number {
 +  const d = new Date(ms);
 +  return new Date(d.getFullYear(), d.getMonth(), d.getDate() - atras).getTime();
++}
++
++/** `AAAA-MM-DD` de un día en hora local. */
++export function diaLocal(ms = Date.now()): string {
++  const d = new Date(ms);
++  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
++}
++
++/**
++ * Cuánto falta (ms) para las 00:00 locales del día siguiente a `ahora`: a esa
++ * hora «Hoy», «7 días» y «30 días» cambian y la pantalla vuelve a filtrar.
++ */
++export function msHastaMedianoche(ahora = Date.now()): number {
++  return Math.max(1, inicioDelDia(ahora, -1) - ahora);
 +}
 +
 +/** El tramo en ms: `desde` incluido, `hasta` excluido; `null` = sin límite por ese lado. */
