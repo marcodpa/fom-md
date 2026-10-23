@@ -63,3 +63,8 @@
   .inicio-mapa-telefono { margin: 0 auto; }
   .inicio-mapa-chips { margin-top: 24px; }
 }
+
+/* Escena de teléfonos (EscenaTelefonosV8): la app del conductor, bajo el panel. */
+.inicio-telefonos { margin-top: 96px; }
+@media (max-width: 899px) { .inicio-telefonos { margin-top: 56px; } }
+@media (max-width: 599px) { .inicio-telefonos { margin-top: 40px; } }

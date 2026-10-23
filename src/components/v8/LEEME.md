@@ -174,6 +174,17 @@ está en
   prioridad? }` — captura real plana en marco de vidrio (panel) o de teléfono. `ancho` en px
   (número) calcula `sizes` solo. `nota` = `true` pone «Captura real del panel · Datos de
   demostración» (o el texto que pases). Nunca más ancha que la captura real.
+- **`EscenaTelefonosV8`** `{ telefonos: [{ nombre, alt, pie?, corto? }], nota?, etiqueta? }` — (T-130,
+  efecto tipo slush.app con estilo FOM) tarjeta de vidrio de 40 px con una cinta azul FOM en 3D
+  detrás y 2 o 3 teléfonos de marco realista con capturas reales. Escritorio ≥ 1024 px: fija; la
+  pantalla de cada teléfono se desplaza y luego se inclinan en 3D hacia lados opuestos. Tableta y
+  teléfono: sin fijar, más suave (con tres, en abanico). La mueve `useMomentoV8` sola
+  (`data-v8-tels`). En uso: Inicio (bajo «Panel en la oficina») y App («Todo lo del día»).
+- **`PantallaTelefonoV8`** `{ nombre, alt, sizes?, largo? }` — la pantalla de un teléfono. Si la
+  captura tiene continuación en `pantallasV8.js`, es «larga»: dos capturas reales encadenadas con
+  las barras de la app fijas; quieta se ve igual que la captura sola. `CapturaFlotanteV8` de la app
+  la usa sola (`largo={false}` la apaga): los teléfonos sueltos se inclinan suave al pasar y su
+  pantalla se desplaza (los de mapas, alertas y reportes solo se inclinan: no hay continuación).
 - **`fotoV8(nombre)`** → `{ src, srcSet, width, height }` para casos especiales.
 
 ### Listas y datos

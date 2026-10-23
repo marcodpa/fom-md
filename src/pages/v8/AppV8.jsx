@@ -2,30 +2,32 @@
 // «App · teléfono» (App-movil.dc.html) del lienzo «Web FOM nueva».
 // Animación (nota azul del tablero, solo 2 momentos):
 //   1) Hero: el titular entra escalonado y la foto entra suave desde la derecha.
-//   2) Escena fija «Todo lo del día, en tres pantallas»: los tres teléfonos (Mi unidad,
-//      Mantenimiento, Mi perfil) entran uno tras otro (solo escritorio ≥ 1024 px).
-// Todo lo demás: quieto o aparición suave. Teléfono: las pantallas en carrusel con el dedo, sin
-// animación.
+//   2) «Todo lo del día, en tres pantallas»: escena de teléfonos (EscenaTelefonosV8) con Mi unidad,
+//      Mantenimiento y Mi perfil. Escritorio ≥ 1024 px: fija; la pantalla de cada teléfono se
+//      desplaza sola y luego se inclinan en 3D y se separan. Tableta y teléfono: lo mismo, más
+//      suave y sin escena fija (en el teléfono, en abanico).
+// Todo lo demás: quieto o aparición suave; los teléfonos sueltos se inclinan levemente al pasar.
 import { useRef } from 'react'
 import {
   SitioV8, NavLocalV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8, EscenaV8,
-  TarjetaVidrioV8, CarruselV8, BotonV8, EnlaceV8, useMomentoV8, rutaV8,
+  EscenaTelefonosV8, TarjetaVidrioV8, BotonV8, EnlaceV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
 import './app-v8.css'
 
 const LOCAL = [['pantallas', 'Pantallas'], ['inspeccion', 'Inspección'], ['mi-unidad', 'Mi unidad'], ['indice', 'Índice de manejo']]
 
-// Las tres pantallas de la app actual (capturas reales, datos de demostración).
+const pie = (titulo, texto) => <><b className="v8-fuerte">{titulo}</b> {texto}</>
+
+// Las tres pantallas de la app actual (capturas reales, datos de demostración). Cada una sigue
+// con otra captura real debajo (pantallasV8.js), así la pantalla se desplaza en la escena.
 const PANTALLAS = [
-  { nombre: 'cap-movil-cond-inicio', titulo: 'Mi unidad.', texto: 'Dónde está y qué te toca hoy.', corto: 'Qué te toca hoy.', ancho: 280,
+  { nombre: 'cap-movil-cond-inicio', pie: pie('Mi unidad.', 'Dónde está y qué te toca hoy.'), corto: 'Mi unidad.',
     alt: 'Mi unidad en la app actual: unidad, estado de señal e índice de manejo. Datos de demostración.' },
-  { nombre: 'cap-movil-cond-mantenimiento', titulo: 'Mantenimiento.', texto: 'Las órdenes asignadas a ti.', corto: 'Tus órdenes.', ancho: 300,
+  { nombre: 'cap-movil-cond-mantenimiento', pie: pie('Mantenimiento.', 'Las órdenes asignadas a ti.'), corto: 'Mantenimiento.',
     alt: 'Mantenimiento de mi unidad en la app actual, con órdenes asignadas. Datos de demostración.' },
-  { nombre: 'cap-movil-cond-perfil', titulo: 'Mi perfil.', texto: 'Tus datos, tu manejo y tus documentos.', corto: 'Tu manejo y tus documentos.', ancho: 280,
+  { nombre: 'cap-movil-cond-perfil', pie: pie('Mi perfil.', 'Tus datos, tu manejo y tus documentos.'), corto: 'Mi perfil.',
     alt: 'Mi perfil en la app actual, con el índice de manejo seguro. Datos de demostración.' },
 ]
-
-const pie = (titulo, texto) => <><b className="v8-fuerte">{titulo}</b> {texto}</>
 
 // Escala del puntaje (pages.js → seguridad) y los dos períodos que ofrece la app (7 y 30 días).
 // El tablero del teléfono acorta las etiquetas.
@@ -45,24 +47,7 @@ export default function AppV8() {
     const foto = q('.app-hero-foto')
     if (foto.length) gsap.from(foto, { opacity: 0, xPercent: escritorio ? 4 : 0, y: escritorio ? 0 : 20, duration: 1.2, ease: 'power2.out', delay: 0.15, clearProps: 'transform,opacity' })
 
-    if (!escritorio) return
-    // 2 · Escena fija: los tres teléfonos entran uno tras otro. Solo traslación y opacidad.
-    const escena = q('.app-pantallas-escena')[0]
-    if (!escena) return
-    const barras = 96 // navegación global (44) + local (52)
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: escena, pin: true, scrub: 0.6, end: '+=110%', invalidateOnRefresh: true,
-        start: () => {
-          const libre = window.innerHeight - barras
-          const alto = escena.offsetHeight
-          return alto < libre ? `top ${barras + (libre - alto) / 2}px` : 'bottom bottom'
-        },
-      },
-    })
-    q('.app-pantalla').forEach((tel, i) => {
-      tl.fromTo(tel, { yPercent: 28, opacity: 0 }, { yPercent: 0, opacity: 1, ease: 'none', duration: 1 }, i * 0.75)
-    })
+    // 2 · La escena de teléfonos la mueve la base (EscenaTelefonosV8 + useMomentoV8).
   })
 
   return <SitioV8 raiz={raiz} titulo="App del conductor — FOM" descripcion="Consulta el estado del vehículo, realiza la inspección y revisa tu perfil desde la app que acompaña al conductor.">
@@ -93,19 +78,11 @@ export default function AppV8() {
       <div className="v8-glow app-pantallas-glow" aria-hidden="true" />
       <ContenedorV8>
         <EncabezadoV8 centro id="app-pantallas-titulo" titulo={['Todo lo del día,', 'en tres pantallas.']} anchoBajada={640}
-          bajada={<Dos e="Mi unidad, mantenimiento y mi perfil. Las mismas que ve el conductor hoy." m="Desliza para verlas." />} />
+          bajada={<Dos e="Mi unidad, mantenimiento y mi perfil. Las mismas que ve el conductor hoy." m="Las mismas que ve el conductor hoy." />} />
       </ContenedorV8>
-      <div className="app-pantallas-escena">
-        <ContenedorV8 className="app-pantallas-fila">
-          {PANTALLAS.map(p => <CapturaFlotanteV8 key={p.nombre} className="app-pantalla" nombre={p.nombre} alt={p.alt} ancho={p.ancho}
-            nota={pie(p.titulo, p.texto)} />)}
-        </ContenedorV8>
-      </div>
-      <CarruselV8 className="app-pantallas-carrusel" etiqueta="Pantallas de la app del conductor, desliza para ver más">
-        {PANTALLAS.map(p => <CapturaFlotanteV8 key={p.nombre} className="app-pantalla-movil" nombre={p.nombre} alt={p.alt} ancho={250}
-          nota={pie(p.titulo, p.corto)} />)}
-      </CarruselV8>
-      <p className="v8-nota-demo">Capturas reales de la app · Datos de demostración</p>
+      <ContenedorV8 className="app-pantallas-escena">
+        <EscenaTelefonosV8 telefonos={PANTALLAS} etiqueta="Tres pantallas de la app del conductor" />
+      </ContenedorV8>
     </SeccionV8>
 
     <SeccionV8 id="inspeccion" banda aria-labelledby="app-inspeccion-titulo">

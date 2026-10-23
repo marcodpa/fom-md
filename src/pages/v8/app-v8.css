@@ -14,15 +14,10 @@
 .v8-site .app-hero-titulo { font-size: clamp(42px, 4.72vw, 68px); }
 .v8-site .app-hero-lead { margin-top: 20px; }
 
-/* Todo lo del día, en tres pantallas */
+/* Todo lo del día, en tres pantallas (EscenaTelefonosV8) */
 .v8-site .v8-sec.app-pantallas { padding-top: 120px; }
 .v8-site .v8-glow.app-pantallas-glow { top: 120px; height: 900px; }
 .v8-site .app-pantallas-escena { margin-top: 64px; }
-.v8-site .v8-c.app-pantallas-fila { display: flex; justify-content: center; align-items: flex-end; gap: 48px; }
-.v8-site .app-pantallas-fila .app-pantalla { margin: 0; flex: none; }
-.v8-site .app-pantallas-fila .app-pantalla:nth-child(2) { margin-bottom: 40px; }
-.v8-site :is(.app-pantalla, .app-pantalla-movil) .v8-nota-demo { margin-top: 18px; font-size: 15px; line-height: 1.45; letter-spacing: -0.2px; color: var(--v8-texto-2); }
-.v8-site .app-pantallas-carrusel { display: none; }
 
 /* Mi unidad */
 .v8-site .app-unidad-medio { position: relative; }
@@ -56,9 +51,7 @@
     mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
   }
   .v8-site .v8-sec.app-pantallas { padding-top: 64px; }
-  .v8-site .app-pantallas-escena { display: none; }
-  .v8-site .app-pantallas-carrusel { display: block; margin-top: 28px; }
-  .v8-site .app-pantalla-movil { width: 250px; margin: 0; }
+  .v8-site .app-pantallas-escena { margin-top: 40px; }
   .v8-site .app-unidad-texto { order: -1; }
   .v8-site .app-unidad-telefono { width: 190px !important; }
 }
@@ -72,7 +65,7 @@
   .v8-site .app-hero-foto { width: 100%; height: 480px; }
   .v8-site .v8-sec.app-pantallas { padding-top: 24px; }
   .v8-site .v8-glow.app-pantallas-glow { display: none; }
-  .v8-site .app-pantalla-movil .v8-nota-demo { margin-top: 14px; }
+  .v8-site .app-pantallas-escena { margin-top: 28px; }
   .v8-site .app-unidad-foto { display: none; }
   .v8-site .app-unidad-telefono { position: relative; left: auto; bottom: auto; width: 240px !important; }
   .v8-site .app-indice-cifras { margin-top: 24px; gap: 26px 16px; }

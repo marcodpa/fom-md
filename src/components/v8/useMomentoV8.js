@@ -9,7 +9,11 @@
 //   data-v8-3d="tarjeta"  → (TarjetaVidrioV8, TarjetaCarruselV8) entran una tras otra con giro 3D
 //                           (en el carrusel, como páginas que se abren desde la derecha). Con
 //                           ratón: inclinación 3D y brillo que sigue al cursor.
-//   data-v8-3d="captura"  → (CapturaFlotanteV8) gira levemente a su sitio mientras entra.
+//   data-v8-3d="captura"  → (CapturaFlotanteV8) gira levemente a su sitio mientras entra. Si es un
+//                           teléfono: inclinación 3D suave atada al scroll mientras pasa y, si la
+//                           captura tiene continuación (pantallasV8.js), la pantalla se desplaza.
+//   data-v8-tels          → (EscenaTelefonosV8) escena de teléfonos: fija en escritorio, la pantalla
+//                           de cada teléfono se desplaza y luego se inclinan en 3D y se separan.
 //   data-v8-3d="cifra"    → (BloqueCifrasV8) la cifra sube girando como una paleta.
 //   data-v8-3d="seccion"  → (SeccionV8) su contenido «se acerca» desde atrás al entrar.
 //   data-v8-entra         → entrada escalonada al cargar (fuera de un hero 3D: subida plana).
@@ -26,6 +30,7 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
+import { escenasTelefonosV8, telefonoSueltoV8 } from './momentoTelefonosV8'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
@@ -120,6 +125,10 @@ export default function useMomentoV8(raiz, momentos) {
 
       // 4 · Momentos propios de la página (antes del 3D, para saber qué escenas quedan fijas).
       const limpiarPagina = momentos?.({ q, gsap, ScrollTrigger, escritorio })
+
+      // 4a · Escenas de teléfonos (EscenaTelefonosV8), antes que los carruseles: las escenas fijas
+      //      se crean de arriba abajo para que cada una cuente el alto que añaden las anteriores.
+      escenasTelefonosV8({ q, gsap, escritorio, f })
 
       // 4b · Carruseles de tarjetas sincronizados con el scroll (T-122).
       //      Escritorio: la sección queda fija, el scroll vertical mueve la pista de derecha a
@@ -273,11 +282,10 @@ export default function useMomentoV8(raiz, momentos) {
 
       // 7 · Capturas: giran levemente a su sitio mientras entran (atadas al desplazamiento).
       //     Las de dentro de una tarjeta o del hero ya se mueven con su contenedor.
+      //     Los teléfonos: inclinación suave mientras pasan y la pantalla que se desplaza.
       q('[data-v8-3d="captura"]').filter(el => !enFija(el) && !el.closest('[data-v8-3d="tarjeta"], [data-v8-3d="hero"]')).forEach(el => {
-        const telefono = el.classList.contains('is-telefono')
-        const desde = telefono
-          ? { rotationY: -22 * f, rotationX: 8 * f, y: 70 * f, z: -170 * f, transformOrigin: '50% 50%' }
-          : { rotationX: 18 * f, y: 90 * f, z: -150 * f, transformOrigin: '50% 100%' }
+        if (el.classList.contains('is-telefono')) { telefonoSueltoV8({ gsap, el, f }); return }
+        const desde = { rotationX: 18 * f, y: 90 * f, z: -150 * f, transformOrigin: '50% 100%' }
         gsap.fromTo(el, { ...desde, transformPerspective: 1800 }, {
           rotationX: 0, rotationY: 0, y: 0, z: 0, ease: 'none',
           scrollTrigger: { trigger: el, start: 'top bottom', end: 'clamp(top 55%)', scrub: 0.9 },
@@ -366,6 +374,10 @@ export default function useMomentoV8(raiz, momentos) {
           if (actual) { actual.classList.remove('is-brillo'); actual = null }
         }
       }
+
+      // Los tramos se recalculan en orden de página (por si una página creó una escena fija más
+      // abajo antes que otra más arriba).
+      ScrollTrigger.sort()
 
       return () => {
         quitarInclinacion?.()

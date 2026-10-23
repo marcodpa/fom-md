@@ -13,6 +13,7 @@
 // <picture> va con display: contents: el <img> sigue siendo la caja que maquetan las páginas
 // (className, alto, object-position y data-* van al <img>).
 import { fotoV8, hayFotoV8, MEDIA_MOVIL_V8 } from './fotosV8'
+import { pantallaLargaV8, ANCHO_PANTALLA_V8, ALTO_PANTALLA_V8 } from './pantallasV8'
 
 const FUNDIDOS = { y: 'v8-funde-y', b: 'v8-funde-b', o: 'v8-funde-o', l: 'v8-funde-l', r: 'v8-funde-r' }
 const PICTURE = { display: 'contents' }
@@ -69,7 +70,46 @@ const DENSIDAD_MINIMA = 2
 // tipo: 'panel' (captura del panel web) o 'telefono' (captura de la app); si no se indica, se
 // deduce del nombre (cap-movil-* = teléfono). `ancho` = ancho en CSS del marco (número en px o
 // cualquier medida CSS); con número, `sizes` se calcula solo.
-export function CapturaFlotanteV8({ nombre, alt, tipo, ancho, sizes, nota = false, prioridad = false, className = '', style }) {
+// Pantalla de teléfono con la captura real. Si la captura tiene continuación (pantallasV8.js),
+// arma una pantalla «larga»: un rollo con las dos capturas que useMomentoV8 hace subir con el
+// scroll (.v8-pantalla-rollo, data-v8-recorrido = % de su alto) y, encima, la barra de arriba y
+// la de pestañas de la primera, fijas como en la app. Quieta, se ve igual que la captura sola.
+// largo={false}: solo la captura, sin rollo.
+export function PantallaTelefonoV8({ nombre, alt, sizes = '280px', prioridad = false, largo = true, className = '' }) {
+  const f = fotoV8(nombre)
+  const l = largo ? pantallaLargaV8(nombre) : null
+  const s = l && fotoV8(l.sigue)
+  if (!f) return null
+  const carga = { loading: prioridad ? 'eager' : 'lazy', decoding: 'async', ...(prioridad ? { fetchpriority: 'high' } : null) }
+  const imagen = (foto, propio) => <picture style={PICTURE}>
+    <Fuentes f={foto} sizes={sizes} movil={false} />
+    <img src={foto.src} srcSet={foto.srcSet} sizes={sizes} width={foto.width} height={foto.height} {...carga} {...propio} />
+  </picture>
+  if (!s) return <div className={`v8-pantalla ${className}`}>{imagen(f, { alt })}</div>
+  // Alturas con aspect-ratio y desplazamientos con margin-top en % (relativo al ancho): todo
+  // escala con el teléfono sin medir nada.
+  const filas = n => ({ aspectRatio: `${ANCHO_PANTALLA_V8} / ${n}` })
+  const subir = n => ({ marginTop: `${(-n / ANCHO_PANTALLA_V8) * 100}%` })
+  return <div className={`v8-pantalla is-larga ${className}`} style={{ '--v8-pantalla-fondo': l.fondo }}>
+    <div className="v8-pantalla-rollo" data-v8-recorrido={l.recorrido.toFixed(3)}>
+      <div className="v8-pantalla-parte" style={filas(l.corte)}>
+        {imagen(f, { alt })}
+        {l.junta > 0 && <i className="v8-pantalla-funde" aria-hidden="true" />}
+      </div>
+      {l.junta > 0 && <div className="v8-pantalla-junta" style={filas(l.junta)} aria-hidden="true" />}
+      <div className="v8-pantalla-parte" style={filas(ALTO_PANTALLA_V8 - l.desde)} aria-hidden="true">
+        {imagen(s, { alt: '', style: subir(l.desde) })}
+      </div>
+    </div>
+    <div className="v8-pantalla-fija is-cabeza" style={filas(l.cabeza)} aria-hidden="true">{imagen(f, { alt: '' })}</div>
+    {l.pie < ALTO_PANTALLA_V8 && <div className="v8-pantalla-fija is-pie" style={filas(ALTO_PANTALLA_V8 - l.pie)} aria-hidden="true">
+      {imagen(f, { alt: '', style: subir(l.pie) })}
+    </div>}
+  </div>
+}
+
+// largo={false} en un teléfono: solo la captura (sin pantalla que se desplaza).
+export function CapturaFlotanteV8({ nombre, alt, tipo, ancho, sizes, nota = false, prioridad = false, largo = true, className = '', style }) {
   const f = fotoV8(nombre)
   if (!f) return null
   const t = tipo || (nombre.startsWith('cap-movil') ? 'telefono' : 'panel')
@@ -80,11 +120,13 @@ export function CapturaFlotanteV8({ nombre, alt, tipo, ancho, sizes, nota = fals
   const etiqueta = nota === true ? (t === 'telefono' ? 'Captura real de la app · Datos de demostración' : 'Captura real del panel · Datos de demostración') : nota
   return <figure className={`v8-captura-figura ${className}`} style={{ width: anchoCss, maxWidth: `min(100%, ${tope + marco}px)`, ...style }}>
     <div className={`v8-captura is-${t}`} data-v8-3d="captura">
-      <picture style={PICTURE}>
-        <Fuentes f={f} sizes={medida} movil={false} />
-        <img src={f.src} srcSet={f.srcSet} sizes={medida} width={f.width} height={f.height} alt={alt}
-          loading={prioridad ? 'eager' : 'lazy'} fetchpriority={prioridad ? 'high' : undefined} decoding="async" />
-      </picture>
+      {t === 'telefono' && largo && pantallaLargaV8(nombre)
+        ? <PantallaTelefonoV8 nombre={nombre} alt={alt} sizes={medida} prioridad={prioridad} />
+        : <picture style={PICTURE}>
+          <Fuentes f={f} sizes={medida} movil={false} />
+          <img src={f.src} srcSet={f.srcSet} sizes={medida} width={f.width} height={f.height} alt={alt}
+            loading={prioridad ? 'eager' : 'lazy'} fetchpriority={prioridad ? 'high' : undefined} decoding="async" />
+        </picture>}
     </div>
     {etiqueta && <figcaption className="v8-nota-demo">{etiqueta}</figcaption>}
   </figure>

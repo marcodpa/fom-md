@@ -2,15 +2,16 @@
 // «Inicio · teléfono» (Inicio-movil.dc.html) del lienzo «Web FOM nueva».
 // Animación (nota azul del tablero, solo 2 momentos):
 //   1) Hero: el titular entra escalonado y la foto pasa de 92 % a 100 % al bajar (base: HeroV8).
-//   2) Escena fija «Panel en la oficina. App en la calle.»: el panel se aparta y entra el teléfono
-//      (solo escritorio ≥ 1024 px).
+//   2) Escena fija «Panel en la oficina. App en la calle.»: el panel se aparta y entra el teléfono,
+//      cuya pantalla se desplaza (solo escritorio ≥ 1024 px). Debajo, la escena de teléfonos
+//      (EscenaTelefonosV8): la app del conductor en dos pantallas que se desplazan y se inclinan.
 // Todo lo demás: quieto o aparición suave. Teléfono: sin escenas fijas, mismas piezas apiladas.
 import { useRef } from 'react'
 import { PAGES } from '../../content/pages'
 import {
   SitioV8, NavLocalV8, HeroV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8,
   RasgosV8, CarruselV8, TarjetaCarruselV8, EscenaV8, BloqueCifrasV8, ChipV8, PreguntasV8, CtaFinalV8,
-  EnlaceV8, useMomentoV8, rutaV8,
+  EnlaceV8, EscenaTelefonosV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
 import './inicio-v8.css'
 
@@ -53,6 +54,14 @@ const CIFRAS_MAPA = [
   cifra(stat('plataforma', 'Seguridad de datos y escalabilidad')),
 ]
 
+// App en la calle: la falla que reporta el conductor y la orden ya resuelta (pantallas largas reales).
+const TELEFONOS = [
+  { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app del conductor: descripción, tipo Frenos, prioridad Alta y fotos de la falla. Datos de demostración.',
+    pie: <><b className="v8-fuerte">Reporte de falla.</b> Con foto, desde la app.</>, corto: 'Reporte de falla con foto.' },
+  { nombre: 'cap-movil-mnt-resuelta', alt: 'Orden resuelta en la app: resultado del trabajo, costo, tiempo hasta el cierre, fotos e historial. Datos de demostración.',
+    pie: <><b className="v8-fuerte">Orden resuelta.</b> Con costo, fotos e historial.</>, corto: 'Orden resuelta, con su historial.' },
+]
+
 // La frase se enciende palabra por palabra al bajar y ocupa sola la pantalla (estilo Apple).
 const FRASE = [
   'FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas.',
@@ -80,11 +89,17 @@ export default function InicioV8() {
     //     Solo traslación y opacidad: la foto nunca se reescala.
     const escena = q('.inicio-duo-escena')[0]
     if (!escena) return
-    const tl = gsap.timeline({ scrollTrigger: { trigger: escena, start: 'center center', end: '+=90%', pin: true, scrub: 0.6 } })
+    const tl = gsap.timeline({ scrollTrigger: { trigger: escena, start: 'center center', end: '+=110%', pin: true, scrub: 0.6 } })
     tl.fromTo(q('.inicio-duo-foto'), { xPercent: -3 }, { xPercent: 5, ease: 'none' }, 0)
       .fromTo(q('.inicio-duo-telefono'), { yPercent: 45, opacity: 0 }, { yPercent: 0, opacity: 1, ease: 'none' }, 0.15)
       .fromTo(q('.inicio-duo-pie span:first-child'), { opacity: 1 }, { opacity: 0.45, ease: 'none' }, 0.4)
       .fromTo(q('.inicio-duo-pie span:last-child'), { opacity: 0.45 }, { opacity: 1, ease: 'none' }, 0.4)
+    // Ya en su sitio, la pantalla del teléfono se desplaza sola (pantalla larga real de la app).
+    const rollo = q('.inicio-duo-telefono .v8-pantalla-rollo')[0]
+    if (rollo) {
+      tl.fromTo(rollo, { yPercent: 0 }, { yPercent: -(parseFloat(rollo.dataset.v8Recorrido) || 0), ease: 'none', duration: 0.5 }, 0.62)
+        .fromTo(q('.inicio-duo-telefono .v8-pantalla-funde'), { opacity: 0 }, { opacity: 1, ease: 'none', duration: 0.05 }, 0.62)
+    }
   })
 
   return <SitioV8 raiz={raiz} titulo="FOM — Tu flota conectada. Tu operación, bajo control." descripcion="FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas: panel web para el supervisor y app para el conductor.">
@@ -121,6 +136,9 @@ export default function InicioV8() {
           <span><b className="v8-fuerte">En la oficina.</b> Panel web del supervisor.</span>
           <span><b className="v8-fuerte">En la carretera.</b> App del conductor.</span>
         </p>
+      </ContenedorV8>
+      <ContenedorV8 className="inicio-telefonos">
+        <EscenaTelefonosV8 telefonos={TELEFONOS} etiqueta="La app del conductor: reporte de falla y orden resuelta" />
       </ContenedorV8>
       <ContenedorV8><RasgosV8 className="inicio-rasgos" items={RASGOS} /></ContenedorV8>
     </SeccionV8>

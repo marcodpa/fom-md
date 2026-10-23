@@ -1,0 +1,82 @@
+/* Escena de teléfonos (EscenaTelefonosV8): tarjeta de vidrio oscuro de 40 px de radio, la cinta
+   azul FOM detrás y los teléfonos de frente, con marco realista. Solo transform y opacidad se
+   animan (useMomentoV8). Ancho del teléfono: --v8-tel-ancho (se ajusta al alto de la ventana en
+   escritorio para que la escena fija quepa entera bajo la barra). */
+
+.v8-tels {
+  --v8-tel-ancho: clamp(210px, calc((100svh - 400px) * .55), 290px);
+  --v8-tel-hueco: clamp(40px, 6vw, 88px);
+  margin: 0 auto;
+}
+.v8-tels.is-3 { --v8-tel-hueco: clamp(28px, 4.4vw, 64px); }
+
+.v8-tels-tarjeta {
+  position: relative; overflow: hidden; isolation: isolate;
+  border-radius: 40px;
+  padding: clamp(36px, 5.5svh, 56px) 24px;
+  background:
+    radial-gradient(60% 70% at 50% 45%, rgba(61, 155, 245, .10), transparent 70%),
+    linear-gradient(180deg, rgba(20, 26, 34, .78), rgba(13, 17, 23, .86));
+  border: 1px solid var(--v8-borde-vidrio, rgba(255, 255, 255, .11));
+  box-shadow: 0 60px 120px -60px rgba(3, 8, 20, .95), inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+
+/* La cinta va detrás, algo más grande que la tarjeta: al moverse con el scroll no asoma su borde. */
+.v8-tels-cinta { position: absolute; inset: -8% -6%; z-index: 0; pointer-events: none; will-change: transform; }
+.v8-tels-cinta svg { display: block; width: 100%; height: 100%; }
+
+.v8-tels-fila { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; gap: var(--v8-tel-hueco); }
+.v8-tels-col { flex: none; width: var(--v8-tel-ancho); }
+.v8-tels-tel { will-change: transform; }
+
+/* Marco del teléfono: canto de titanio oscuro, bisel negro, botones laterales y la isla. */
+.v8-tels-marco {
+  --v8-tel-bisel: calc(var(--v8-tel-ancho) * .034);
+  position: relative;
+  padding: var(--v8-tel-bisel);
+  border-radius: calc(var(--v8-tel-ancho) * .17);
+  background: linear-gradient(145deg, #3a4350 0%, #161b22 18%, #0b0e13 50%, #1a2029 82%, #444d5a 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .16),
+    inset 0 0 0 calc(var(--v8-tel-bisel) * .45) #05070a,
+    0 50px 90px -34px rgba(3, 8, 20, .95),
+    0 0 70px -22px rgba(61, 155, 245, .28);
+}
+.v8-tels-marco::before, .v8-tels-marco::after {
+  content: ''; position: absolute; width: 3px; border-radius: 3px;
+  background: linear-gradient(180deg, #4a5462, #1b2129);
+}
+.v8-tels-marco::before { left: -2px; top: 19%; height: 13%; box-shadow: 0 calc(var(--v8-tel-ancho) * .2) 0 #2a313b; }
+.v8-tels-marco::after { right: -2px; top: 25%; height: 17%; }
+.v8-tels-marco > .v8-pantalla {
+  border-radius: calc(var(--v8-tel-ancho) * .135);
+  aspect-ratio: 1170 / 2532;
+  background: var(--v8-pantalla-fondo, #0a0d13);
+}
+
+/* Pies bajo cada teléfono, alineados con su columna. */
+.v8-tels-pies { display: flex; justify-content: center; margin-top: 22px; text-align: center; }
+.v8-tels-pies li { width: calc(var(--v8-tel-ancho) + var(--v8-tel-hueco)); padding: 0 8px; }
+.v8-tels-corto { display: none; }
+.v8-tels .v8-nota-demo { margin-top: 14px; }
+
+/* Tableta: sin escena fija; teléfonos de ancho fijo. */
+@media (max-width: 1023px) {
+  .v8-tels { --v8-tel-ancho: clamp(190px, 26vw, 250px); }
+}
+
+/* Teléfono: los dos teléfonos lado a lado dentro de la tarjeta (con tres, en abanico: el del
+   centro delante). Sin desplazamiento lateral: todo cabe en el ancho del contenedor. */
+@media (max-width: 599px) {
+  .v8-tels { --v8-tel-ancho: min(160px, calc((100vw - 40px - 28px - 14px) / 2)); --v8-tel-hueco: 14px; }
+  .v8-tels-tarjeta { border-radius: 32px; padding: 34px 14px; }
+  .v8-tels-cinta { inset: -6% -58%; }
+  .v8-tels-marco::before, .v8-tels-marco::after { width: 2px; }
+  .v8-tels.is-3 { --v8-tel-ancho: min(124px, calc((100vw - 40px - 28px) / 2.7)); --v8-tel-hueco: 0px; }
+  .v8-tels.is-3 .v8-tels-col:nth-child(2) { position: relative; z-index: 2; margin: 0 -18px; }
+  .v8-tels.is-3 .v8-tels-col:nth-child(odd) { margin-top: 36px; }
+  .v8-tels-pies { margin-top: 18px; font-size: 13px; line-height: 1.4; }
+  .v8-tels-pies li { flex: 1 1 0; width: auto; padding: 0 4px; }
+  .v8-tels-largo { display: none; }
+  .v8-tels-corto { display: inline; }
+}
