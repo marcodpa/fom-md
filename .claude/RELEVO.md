@@ -128,3 +128,10 @@ Preguntas abiertas a Marco: ¿tenía algo en C:\c? (un agente la borró por erro
 geocercas hasta que existan?; enlace/QR para descargar la app en la tarjeta «Hoy» del conductor.
 Para Juan (fom-core#713 ya tiene lo de eventos de flota/unidad, paginación y fechas de ODT): falta pedirle
 el campo printSheet de la plantilla (docs/HOJA-EMPRESA-PARA-JUAN.md) — Marco no lo ha confirmado.
+
+## 24 oct — web publicada (sesión nueva)
+- Marco activó el paquete del 24 oct: FOM_WEB_PUBLISHED. Activa: /var/www/fom-web/releases/20261024-web (antes 20261022-web-nueva-r2).
+  Respaldo: /var/backups/fom-web/20261024-web-20261023T145910-425304. Comprobado desde la PC: /, /plataforma, /panel/mapa = 200 con index-D3qdR9BK.js.
+- Lleva hasta 02c6030 (T-133…T-158). El paquete subida-20261023-r1 nunca se activó (sobrante, limpiar solo con OK de Marco).
+- En curso: T-159 (fallos de la app vistos en capturas), T-160 (arreglos de la revisión T-154). Después: repetir capturas afectadas y T-153 (capturas de teléfono de la web = app), paquete nuevo.
+- Preguntas abiertas a Marco: letrero del Foton y modelos viejos (T-157); hacer en la web Inspección del conductor, SOS, Otra unidad y campana como la app; fotos de órdenes (con licencia o sin fotos).

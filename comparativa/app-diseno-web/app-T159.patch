@@ -1,0 +1,431 @@
+From 33415ae73318470d8b177be655de12f7c4bd7311 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Fri, 23 Oct 2026 15:09:26 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20licencia=20sin=20dato=20no=20es=20falta,?=
+ =?UTF-8?q?=20fallas=20reportadas=20por=20id,=20c=C3=B3digo=20de=20la=20un?=
+ =?UTF-8?q?idad=20siempre=20visible,=20textos=20que=20caben,=20resaltado?=
+ =?UTF-8?q?=20de=20Mi=20perfil=20entero=20y=20ventanas=20de=20abajo=20dent?=
+ =?UTF-8?q?ro=20de=20la=20pantalla=20(T-159)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/mas.tsx             |  5 ++++-
+ src/app/mapa-flota.tsx               | 11 ++++++++---
+ src/app/orden.tsx                    |  4 +++-
+ src/app/panel/flota.tsx              |  9 +++++++--
+ src/app/ver-perfil.tsx               | 14 ++++++++++----
+ src/components/app-tab-bar.tsx       |  5 ++++-
+ src/components/pastilla.tsx          | 11 +++++++++--
+ src/components/perfil-acciones.tsx   | 15 +++++++++++++--
+ src/components/screen-background.tsx | 12 +++++++++---
+ src/components/screen-header.tsx     |  9 ++++++---
+ src/services/fomOrdenes.ts           |  9 ++++++---
+ src/utils/requisitos.ts              | 18 +++++++++++++-----
+ 12 files changed, 92 insertions(+), 30 deletions(-)
+
+diff --git a/src/app/(driver)/mas.tsx b/src/app/(driver)/mas.tsx
+index 8658da3..b76a45f 100644
+--- a/src/app/(driver)/mas.tsx
++++ b/src/app/(driver)/mas.tsx
+@@ -95,7 +95,10 @@ export default function PerfilScreen() {
+         vehicle ? getOrdenesDeUnidad(vehicle.id) : Promise.resolve([]),
+       ]);
+       // Las que reportó ÉL, no las de su unidad: es su hoja, no la del carro.
+-      const reportadas = odts.filter((o) => o.driverId === user.id).length;
++      // Por su id si FOM lo manda; si no, FOM solo da el NOMBRE del autor y se
++      // compara con el suyo (como «soyAutor» en la orden). Comparar el nombre
++      // con el id dejaba siempre «0 fallas reportadas».
++      const reportadas = odts.filter((o) => o.driverId === user.id || o.driverName === user.name).length;
+       return { docs, docsVehiculo, telemetria, ente: marca?.name, reportadas };
+     },
+     [user?.id, vehicle?.id],
+diff --git a/src/app/mapa-flota.tsx b/src/app/mapa-flota.tsx
+index e3e15f3..76acb87 100644
+--- a/src/app/mapa-flota.tsx
++++ b/src/app/mapa-flota.tsx
+@@ -324,9 +324,11 @@ export default function MapaFlotaScreen() {
+                 },
+               ]}>
+               <IconoBoton trazos={TRAZOS_BOTON.manejo} color={verManejo ? colors.onActive : colors.text} />
++              {/* Hasta dos líneas: «Ocultar manejo brusco» no cabe en una en un
++                  teléfono, y cortado («Ver manejo br…») no se entiende. */}
+               <ThemedText
+-                style={[styles.botonTexto, styles.encoge, { color: verManejo ? colors.onActive : colors.text }]}
+-                numberOfLines={1}>
++                style={[styles.botonTexto, styles.encoge, styles.centrado, { color: verManejo ? colors.onActive : colors.text }]}
++                numberOfLines={2}>
+                 {verManejo ? 'Ocultar manejo brusco' : 'Ver manejo brusco'}
+               </ThemedText>
+             </PressableScale>
+@@ -409,12 +411,15 @@ const styles = StyleSheet.create({
+   eyebrow: { fontSize: 10, lineHeight: 13, letterSpacing: 1.4, fontWeight: '600' },
+   nombre: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
+   abajo: { position: 'absolute', left: 8, right: 8 },
+-  ficha: { position: 'absolute', left: 10, right: 62, padding: 14 },
++  // De lado a lado: los controles del mapa suben por encima de la ficha
++  // (`margenAbajo`), así que no hace falta dejarles un hueco a la derecha.
++  ficha: { position: 'absolute', left: 10, right: 10, padding: 14 },
+   fila: { flexDirection: 'row' },
+   boton: { flex: 1, minHeight: 42, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+   botonChico: { minHeight: 36 },
+   conIcono: { flexDirection: 'row', gap: 6, paddingHorizontal: 10 },
+   encoge: { flexShrink: 1 },
++  centrado: { textAlign: 'center' },
+   botonTexto: { fontSize: 13, lineHeight: 17, fontWeight: '600' },
+   chico: { fontSize: 11, lineHeight: 15 },
+   eventos: { borderTopWidth: StyleSheet.hairlineWidth },
+diff --git a/src/app/orden.tsx b/src/app/orden.tsx
+index e7e4a33..5b6e222 100644
+--- a/src/app/orden.tsx
++++ b/src/app/orden.tsx
+@@ -308,7 +308,9 @@ export default function OrdenScreen() {
+     <ThemedView style={styles.root} ambient>
+       <SafeAreaView style={styles.safeArea} edges={['top']}>
+         <ScreenHeader
+-          overline={orden ? `Orden de trabajo · ${odtCorto(orden.id)}` : 'Orden de trabajo'}
++          // Solo el código: «ORDEN DE TRABAJO · ODT-…» no cabía junto al logo y
++          // se comía el número, que es lo que se busca. «ODT» ya dice qué es.
++          overline={orden ? odtCorto(orden.id) : 'Orden de trabajo'}
+           title={orden ? tituloDeTarea(orden, alerta?.titulo ?? null) : undefined}
+           right={
+             orden ? (
+diff --git a/src/app/panel/flota.tsx b/src/app/panel/flota.tsx
+index eb6fd10..4229f59 100644
+--- a/src/app/panel/flota.tsx
++++ b/src/app/panel/flota.tsx
+@@ -896,12 +896,14 @@ const FilaUnidad = memo(function FilaUnidad({
+         </View>
+ 
+         <View style={styles.flex1}>
++          {/* El código manda: nunca cede. Si el aviso es largo («Responsabilidad
++              civil (RCV) vencido»), el que se recorta es el aviso. */}
+           <View style={[styles.row, { gap: spacing.sm }]}>
+-            <ThemedText variant="button" numberOfLines={1} style={styles.flex1}>
++            <ThemedText variant="button" numberOfLines={1} style={styles.codigo}>
+               {alias}
+             </ThemedText>
+             {novedadTono && novedadLabel ? (
+-              <Pastilla tono={novedadTono} label={novedadLabel} conPunto latiendo={novedadLatiendo} />
++              <Pastilla tono={novedadTono} label={novedadLabel} conPunto latiendo={novedadLatiendo} encoge />
+             ) : null}
+           </View>
+           {/* EL CONDUCTOR ASIGNADO, delante y con su ícono: es lo primero que
+@@ -934,6 +936,9 @@ const styles = StyleSheet.create({
+   retrato: { width: 60, height: 46, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+   detalle: { marginTop: 3 },
+   flex1: { flex: 1, minWidth: 0 },
++  // Crece para empujar la pastilla a la derecha y no se encoge por ella; un
++  // alias muy largo se corta en su tope, no se come la fila.
++  codigo: { flexGrow: 1, flexShrink: 0, maxWidth: '65%' },
+ 
+   // ── Mapa ──
+   // Una tarjeta grande y redonda, como el mapa del panel web.
+diff --git a/src/app/ver-perfil.tsx b/src/app/ver-perfil.tsx
+index ae7c265..a9f7f0f 100644
+--- a/src/app/ver-perfil.tsx
++++ b/src/app/ver-perfil.tsx
+@@ -92,13 +92,16 @@ export default function VerPerfilScreen() {
+   const perfil = data?.perfil ?? null;
+   const documentos = data?.documentos ?? [];
+   // Los requisitos se leen del perfil con la MISMA regla que usa la lista de
+-  // Personal para encender su aviso rojo: los dos no pueden discrepar.
++  // Personal para encender su aviso rojo: los dos no pueden discrepar. El
++  // directorio no trae la licencia ni la carta médica: si la persona subió
++  // ese papel, su vencimiento sale de ahí (como en la web); si no, «Sin dato».
++  const venceDe = (patron: RegExp) => documentos.find((d) => patron.test(d.tipo))?.venceEn;
+   const requisitos = perfil
+     ? requisitosDe({
+         role: rol,
+         cedula: perfil.cedula,
+-        licenciaVence: perfil.licenciaVence,
+-        cartaMedicaVence: perfil.cartaMedicaVence,
++        licenciaVence: perfil.licenciaVence ?? venceDe(/licencia|license/i),
++        cartaMedicaVence: perfil.cartaMedicaVence ?? venceDe(/m[eé]dic/i),
+       })
+     : [];
+ 
+@@ -238,6 +241,7 @@ const REQUISITO_VISTA: Record<EstadoRequisito, { tono: keyof ColorTokens; icono:
+   por_vencer: { tono: 'warning', icono: 'calendario' },
+   vencido: { tono: 'danger', icono: 'aviso' },
+   falta: { tono: 'danger', icono: 'aviso' },
++  sin_dato: { tono: 'textMuted', icono: 'otro' },
+   no_aplica: { tono: 'textMuted', icono: 'check' },
+ };
+ 
+@@ -246,6 +250,8 @@ function textoDe(r: Requisito): string {
+   switch (r.estado) {
+     case 'falta':
+       return 'Falta';
++    case 'sin_dato':
++      return 'Sin dato';
+     case 'no_aplica':
+       return 'No aplica';
+     case 'vencido':
+@@ -268,7 +274,7 @@ function FilaRequisito({ r }: { r: Requisito }) {
+   const colorTexto =
+     r.estado === 'vigente'
+       ? colors.text
+-      : r.estado === 'no_aplica'
++      : r.estado === 'no_aplica' || r.estado === 'sin_dato'
+         ? colors.textSecondary
+         : colors[v.tono];
+   return (
+diff --git a/src/components/app-tab-bar.tsx b/src/components/app-tab-bar.tsx
+index 90d8cfc..68f3758 100644
+--- a/src/components/app-tab-bar.tsx
++++ b/src/components/app-tab-bar.tsx
+@@ -234,7 +234,10 @@ export function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps)
+         ]}
+         onLayout={(e) => setAncho(e.nativeEvent.layout.width)}>
+         {anchoTab > 0 ? (
+-          <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
++          // Con su ancho y alto de verdad: sin ellos, en la web el lienzo mide
++          // 300 × 150 (lo de un <svg> sin tamaño) y la píldora de la última
++          // pestaña («Mi perfil») salía cortada.
++          <Svg width={ancho} height={ALTO} style={StyleSheet.absoluteFill} pointerEvents="none">
+             <RectAnimado
+               y={PILDORA_Y}
+               height={PILDORA_ALTO}
+diff --git a/src/components/pastilla.tsx b/src/components/pastilla.tsx
+index 168bf6a..375eee4 100644
+--- a/src/components/pastilla.tsx
++++ b/src/components/pastilla.tsx
+@@ -23,6 +23,7 @@ export function Pastilla({
+   label,
+   conPunto,
+   latiendo,
++  encoge,
+ }: {
+   tono: keyof ColorTokens;
+   label: string;
+@@ -34,12 +35,17 @@ export function Pastilla({
+    * movimiento» por el propio `PulseDot`.
+    */
+   latiendo?: boolean;
++  /**
++   * Cede ancho y recorta la palabra con «…» si no cabe. Para filas donde lo que
++   * manda es lo de al lado (el código de la unidad), no el aviso.
++   */
++  encoge?: boolean;
+ }) {
+   const { colors, radii } = useTheme();
+   const color = colors[tono];
+   // Esquina 10, como las etiquetas de la web (la píldora queda para los botones).
+   return (
+-    <View style={[styles.pastilla, { borderRadius: radii.sm }]}>
++    <View style={[styles.pastilla, encoge && styles.encoge, { borderRadius: radii.sm }]}>
+       <View
+         style={[
+           StyleSheet.absoluteFill,
+@@ -51,7 +57,7 @@ export function Pastilla({
+       ) : conPunto ? (
+         <View style={[styles.punto, { backgroundColor: color }]} />
+       ) : null}
+-      <ThemedText variant="caption" style={[styles.texto, { color }]} numberOfLines={1}>
++      <ThemedText variant="caption" style={[styles.texto, encoge && styles.encoge, { color }]} numberOfLines={1}>
+         {label}
+       </ThemedText>
+     </View>
+@@ -69,4 +75,5 @@ const styles = StyleSheet.create({
+   },
+   punto: { width: 6, height: 6, borderRadius: 3 },
+   texto: { fontWeight: '600' },
++  encoge: { flexShrink: 1, minWidth: 0 },
+ });
+diff --git a/src/components/perfil-acciones.tsx b/src/components/perfil-acciones.tsx
+index b31a48e..bc585e3 100644
+--- a/src/components/perfil-acciones.tsx
++++ b/src/components/perfil-acciones.tsx
+@@ -30,9 +30,13 @@ export type AccionPerfil = {
+  */
+ export function PerfilAcciones({ acciones }: { acciones: AccionPerfil[] }) {
+   const { colors, radii, spacing, borderWidths } = useTheme();
++  // Con cinco, cada celda mide ~65 px y «Inspecciones» no cabía: se partía
++  // a media palabra («Inspeccione / s»). Menos aire entre botones y la letra
++  // un punto más chica, y el nombre va en UNA línea.
++  const apretada = acciones.length > 4;
+ 
+   return (
+-    <View style={[styles.fila, { gap: spacing.sm }]}>
++    <View style={[styles.fila, { gap: apretada ? spacing.xs + 2 : spacing.sm }]}>
+       {acciones.map((a) => {
+         const color = colors[a.tono];
+         return (
+@@ -74,7 +78,13 @@ export function PerfilAcciones({ acciones }: { acciones: AccionPerfil[] }) {
+                 </View>
+               ) : null}
+             </View>
+-            <ThemedText variant="caption" color="textMuted" numberOfLines={2} style={styles.label}>
++            <ThemedText
++              variant="caption"
++              color="textMuted"
++              numberOfLines={apretada ? 1 : 2}
++              adjustsFontSizeToFit={apretada}
++              minimumFontScale={0.85}
++              style={[styles.label, apretada && styles.labelApretada]}>
+               {a.label}
+             </ThemedText>
+           </PressableScale>
+@@ -101,4 +111,5 @@ const styles = StyleSheet.create({
+   },
+   badgeTexto: { fontSize: 11.5, fontWeight: '700' },
+   label: { fontSize: 11.5, lineHeight: 15, textAlign: 'center' },
++  labelApretada: { fontSize: 10.5, lineHeight: 14, letterSpacing: -0.1, alignSelf: 'stretch' },
+ });
+diff --git a/src/components/screen-background.tsx b/src/components/screen-background.tsx
+index 949c835..e378c7b 100644
+--- a/src/components/screen-background.tsx
++++ b/src/components/screen-background.tsx
+@@ -1,6 +1,6 @@
+ import { LinearGradient } from 'expo-linear-gradient';
+ import { useIsFocused } from 'expo-router';
+-import { useEffect, useRef, useState } from 'react';
++import { useEffect, useState } from 'react';
+ import { Animated, AppState, Easing, StyleSheet, useWindowDimensions, View } from 'react-native';
+ import Svg, { Circle, Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+ 
+@@ -20,7 +20,9 @@ type OrbConfig = {
+ 
+ /** Orbe de luz difusa que deriva muy lento (adorno de fondo, no distrae). */
+ function Orb({ cfg, animate }: { cfg: OrbConfig; animate: boolean }) {
+-  const t = useRef(new Animated.Value(0)).current;
++  // En el estado y no en una ref: leer `ref.current` al pintar rompe la regla
++  // del React Compiler (el mismo arreglo que ya lleva `hoja-modal`).
++  const [t] = useState(() => new Animated.Value(0));
+ 
+   useEffect(() => {
+     if (!animate) return;
+@@ -111,7 +113,10 @@ export function ScreenBackground() {
+   ];
+ 
+   return (
+-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
++    // Recortado: el primer orbe asoma 110 px por la derecha. Sin recorte, en la
++    // web la página medía 500 px de ancho y las ventanas que suben desde abajo
++    // (el color de un área, la vista previa del reporte) se salían de la pantalla.
++    <View style={[StyleSheet.absoluteFill, styles.recorte]} pointerEvents="none">
+       <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
+         <Defs>
+           <RadialGradient id="sb-wash" cx="50%" cy="0%" r="80%">
+@@ -141,4 +146,5 @@ function useAppActiva() {
+ 
+ const styles = StyleSheet.create({
+   orb: { position: 'absolute' },
++  recorte: { overflow: 'hidden' },
+ });
+diff --git a/src/components/screen-header.tsx b/src/components/screen-header.tsx
+index 6c2c458..1484bd2 100644
+--- a/src/components/screen-header.tsx
++++ b/src/components/screen-header.tsx
+@@ -12,7 +12,7 @@ import { useTheme } from '@/theme';
+ type ScreenHeaderProps = {
+   /** Título de la pantalla. */
+   title?: string;
+-  /** Una línea chica encima del título (ej. "Orden de trabajo · ODT-55E1A962"). */
++  /** Una línea chica encima del título (ej. "ODT-55E1A962"). */
+   overline?: string;
+   /** Acción(es) a la derecha (opcional). */
+   right?: ReactNode;
+@@ -62,7 +62,10 @@ export function ScreenHeader({ title, overline, right, showBack = true, cargando
+               </ThemedText>
+             ) : null}
+             {title ? (
+-              <ThemedText style={styles.titulo} numberOfLines={1}>
++              // Hasta dos líneas: con el logo y una acción a la derecha, un título
++              // como «Control de la flota» o «Áreas de la empresa» no cabe en
++              // una y cortado («Control de la …») no dice dónde estás.
++              <ThemedText style={styles.titulo} numberOfLines={2}>
+                 {title}
+               </ThemedText>
+             ) : null}
+@@ -87,7 +90,7 @@ const styles = StyleSheet.create({
+   bar: { flexDirection: 'row', alignItems: 'center' },
+   backBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+   // El título ocupa el espacio libre (alineado a la izquierda) y se trunca en
+-  // una línea: nunca se monta sobre la acción derecha.
++  // dos líneas: nunca se monta sobre la acción derecha.
+   title: { flex: 1, minWidth: 0 },
+   capsula: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingHorizontal: 14 },
+   textos: { flex: 1, minWidth: 0, justifyContent: 'center', gap: 2 },
+diff --git a/src/services/fomOrdenes.ts b/src/services/fomOrdenes.ts
+index 2b0d3a6..87a93e4 100644
+--- a/src/services/fomOrdenes.ts
++++ b/src/services/fomOrdenes.ts
+@@ -39,6 +39,8 @@ interface OrdenFom {
+   vehicleCode: string;
+   vehiclePlate: string | null;
+   createdByName: string | null;
++  /** El id de quien la creó, si FOM lo manda (la web lo lee así). */
++  createdByUserId?: string | null;
+   maintenanceActionId?: string | null;
+ }
+ 
+@@ -107,14 +109,15 @@ export function etiquetaCierreOrden(id: string): DestinoFoto {
+ /**
+  * Una orden de FOM con la forma de la app.
+  *
+- * FOM da el NOMBRE de quien la creó, no su id: se usa en los dos sitios. Sin
+- * autor, la generó el sistema.
++ * Quien la creó va por su id cuando FOM lo manda (`createdByUserId`, el mismo
++ * que lee la web); si solo llega el NOMBRE, el nombre hace de id. Sin autor, la
++ * generó el sistema.
+  */
+ function aOrden(o: OrdenFom): WorkOrderListItem {
+   return {
+     id: o.id,
+     vehicleId: o.vehicleId,
+-    driverId: o.createdByName ?? 'sistema',
++    driverId: o.createdByUserId ?? o.createdByName ?? 'sistema',
+     driverName: o.createdByName ?? 'Sistema',
+     descripcion: o.description,
+     tipoFalla: o.failureType && FALLAS.includes(o.failureType) ? (o.failureType as FaultType) : undefined,
+diff --git a/src/utils/requisitos.ts b/src/utils/requisitos.ts
+index 3cfc53b..7d64351 100644
+--- a/src/utils/requisitos.ts
++++ b/src/utils/requisitos.ts
+@@ -16,8 +16,12 @@ import { exigePerfilObligatorio } from '@/auth/permissions';
+ import { estadoDeDocumento } from '@/lib/validate';
+ import type { Role } from '@/types';
+ 
+-/** Cómo está un requisito. `no_aplica`: su rol no lo exige. */
+-export type EstadoRequisito = 'vigente' | 'por_vencer' | 'vencido' | 'falta' | 'no_aplica';
++/**
++ * Cómo está un requisito. `no_aplica`: su rol no lo exige. `sin_dato`: no se
++ * sabe —el directorio de FOM no trae la licencia ni la carta médica de la
++ * gente—, y no saber NO es que falte.
++ */
++export type EstadoRequisito = 'vigente' | 'por_vencer' | 'vencido' | 'falta' | 'sin_dato' | 'no_aplica';
+ 
+ export type Requisito = {
+   clave: 'cedula' | 'licencia' | 'carta';
+@@ -50,9 +54,12 @@ export function requisitosDe(d: DatosRequisitos): Requisito[] {
+   // Sin rol, el perfil antiguo del mock era de conductor: se le exige lo mismo.
+   const exige = exigePerfilObligatorio(d.role ?? 'conductor');
+   const cedula = cedulaRegistrada(d.cedula);
+-  // Un papel que el rol no exige no "falta": no aplica.
++  // Un papel que el rol no exige no "falta": no aplica. Y uno sin fecha es uno
++  // que no se sabe: la lista y la ficha lo leen del directorio, que no trae los
++  // papeles. Contarlo como falta encendía el rojo a toda la empresa (la web
++  // tampoco lo cuenta: solo un papel que se sabe vencido).
+   const papel = (vence?: string): EstadoRequisito =>
+-    !exige ? 'no_aplica' : vence ? estadoDeDocumento(vence) : 'falta';
++    !exige ? 'no_aplica' : vence ? estadoDeDocumento(vence) : 'sin_dato';
+ 
+   return [
+     {
+@@ -77,7 +84,8 @@ export function requisitosDe(d: DatosRequisitos): Requisito[] {
+ }
+ 
+ /**
+- * ¿Le falta algo? Un requisito sin registrar o vencido. Lo que está por vencer
++ * ¿Le falta algo? Un requisito sin registrar o vencido. Lo que no se sabe
++ * (`sin_dato`) no cuenta. Lo que está por vencer
+  * NO cuenta: todavía no falta, y encender el rojo por eso gastaría el aviso en
+  * algo que no pide actuar hoy. Eso se ve dentro de su perfil.
+  */
+-- 
+2.55.0.windows.3
+
