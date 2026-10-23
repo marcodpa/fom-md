@@ -152,6 +152,24 @@
         "scripts/app-demo.mjs"
       ],
       "port": 8097
+    },
+    {
+      "name": "fom-frase",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--mode",
+        "demo",
+        "--outDir",
+        "C:/Users/home/AppData/Local/Temp/claude/C--Users-home-Downloads-fom/940a35f0-e617-4c23-a5b1-dc5f12930682/scratchpad/dist-frase",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5197",
+        "--strictPort"
+      ],
+      "port": 5197
     }
   ]
 }
