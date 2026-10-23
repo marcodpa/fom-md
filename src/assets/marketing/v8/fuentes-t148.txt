@@ -1,0 +1,8 @@
+# T-148 · Áreas. Capturas reales del panel en modo demostración (3x, oscuro, reducir movimiento).
+# Uso: python src/assets/marketing/v8/preparar_fotos.py --lista src/assets/marketing/v8/fuentes-t148.txt
+cap-areas-empresas               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-areas-empresas.png
+cap-areas-vehiculos              panel     comparativa/web-v8-fotos/capturas-panel/3x/w-areas-vehiculos-arriba.png
+cap-areas-asignar                panel     comparativa/web-v8-fotos/capturas-panel/3x/w-areas-asignar.png
+cap-areas-mapa                   panel     comparativa/web-v8-fotos/capturas-panel/3x/w-areas-mapa.png
+cap-areas-usuarios               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-areas-usuarios.png
+cap-movil-areas-vehiculos        telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-areas-vehiculos.png

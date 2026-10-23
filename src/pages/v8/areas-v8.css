@@ -1,71 +1,182 @@
-/* Áreas v8 (T-107): solo lo propio de esta página; lo común vive en components/v8/v8-base.css. */
+/* Áreas v8 (T-148): solo lo propio de esta página; lo común vive en components/v8/v8-base.css.
+   Todo va sobre el fondo de la página: sin cajas propias ni velos. Movimiento: solo transform y
+   opacidad; con «reducir movimiento», quieto (al final del archivo). */
 
-/* Hero: la foto aérea queda más cerca del botón, como en el tablero. */
-.areas-hero .v8-hero-medio { margin-top: 16px; }
+/* Hero: la foto aérea queda más cerca de los botones. */
+.v8-site .areas-hero .v8-hero-medio { margin-top: 16px; }
 
-/* Agrupa la flota: texto a la izquierda, foto fundida a la derecha. */
-.v8-sec.areas-grupos { padding-top: 120px; }
-.areas-grupos-split { align-items: center; }
-.areas-grupos-lista { display: grid; gap: 14px; margin-top: 28px; }
+/* Solo escritorio y tableta / solo teléfono (con clase doble: gana a las rejillas). */
+@media (max-width: 599px) { .v8-site .ar-solo-escritorio.ar-solo-escritorio { display: none; } }
+@media (min-width: 600px) { .v8-site .ar-solo-movil.ar-solo-movil { display: none; } }
 
-/* Geocercas: foto aérea al 90 % con las tres etiquetas de vidrio encima. */
-.v8-sec.areas-geo { padding-bottom: 60px; }
-.areas-geo-cab .v8-lead { max-width: 720px; }
-.areas-geo-escena { position: relative; margin-top: 32px; }
-.areas-geo-foto { width: 100%; }
-.areas-geo-etiqueta { position: absolute; z-index: 1; }
-.areas-geo-etiqueta p { margin-top: 3px; }
-.areas-geo-etiqueta.is-entrada { left: 18%; top: 26%; width: 260px; }
-.areas-geo-etiqueta.is-salida { right: 16%; top: 44%; width: 270px; }
-.areas-geo-etiqueta.is-horario { left: 30%; bottom: 14%; width: 270px; }
+/* ── El mapa de tu operación ──────────────────────────────────────────────────────────────── */
+.v8-site .v8-c.ar-marco { max-width: 1260px; margin-top: 56px; }
+.v8-site .ar-escena { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 56px; align-items: center; padding: 8px 0 24px; }
 
-/* Operación multi-sitio. */
-.areas-multi-captura { margin-top: 48px; }
-.areas-multi-rasgos { margin-top: 48px; --v8-cols: 4; }
+/* Riel: cinco botones en píldora y una barra que avanza con el scroll (o con el paso elegido). */
+.v8-site .ar-riel { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 6px; border-radius: 999px;
+  background: rgba(20, 26, 34, .55); border: 1px solid var(--v8-borde-vidrio); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.v8-site .ar-riel-barra { position: absolute; left: 22px; right: 22px; bottom: -14px; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.v8-site .ar-riel-barra i { position: absolute; inset: 0; background: var(--v8-azul); transform-origin: 0 50%;
+  transform: scaleX(calc((var(--ar-paso) + 1) / 5)); transition: transform .5s var(--v8-ease); }
+.v8-site .ar-escena[data-ar-modo] .ar-riel-barra i { transform: scaleX(var(--ar-avance, 0)); transition: none; }
+.v8-site .ar-riel-boton { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 8px 2px 7px; border-radius: 999px;
+  color: var(--v8-tenue); font-size: 13px; line-height: 1.2; text-align: center; transition: background-color .35s var(--v8-ease), color .35s var(--v8-ease); }
+.v8-site .ar-riel-boton b { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-size: 13px; font-weight: 600;
+  color: var(--v8-texto-2); background: rgba(255, 255, 255, .06); transition: background-color .35s var(--v8-ease), color .35s var(--v8-ease); }
+.v8-site .ar-riel-boton span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v8-site .ar-riel-boton:hover { color: var(--v8-texto); }
+.v8-site .ar-riel-boton[aria-pressed='true'] { color: var(--v8-texto); background: rgba(255, 255, 255, .06); }
+.v8-site .ar-riel-boton[aria-pressed='true'] b { background: var(--v8-azul); color: var(--v8-sobre-azul); }
+.v8-site .ar-riel-boton:focus-visible { outline: 2px solid var(--v8-azul-claro); outline-offset: 2px; }
 
-/* Control de acceso por área. */
-.areas-acceso-cab { max-width: 720px; }
-.areas-acceso-cajas { margin-top: 48px; gap: 20px; }
-.areas-acceso-cajas .v8-h4 + p { margin-top: 8px; }
+/* Texto de cada paso: apilados en la misma celda; entra el activo con un giro corto. */
+.v8-site .ar-pasos { display: grid; margin-top: 44px; }
+.v8-site .ar-paso { grid-area: 1 / 1; opacity: 0; visibility: hidden; transform: perspective(900px) translate3d(0, 18px, -40px) rotateX(-8deg); transform-origin: 50% 0;
+  transition: opacity .45s var(--v8-ease), transform .7s var(--v8-ease), visibility 0s linear .7s; }
+.v8-site .ar-paso.is-activo { opacity: 1; visibility: visible; transform: none; transition: opacity .6s var(--v8-ease) .12s, transform .8s var(--v8-ease) .12s, visibility 0s; }
+.v8-site .ar-paso-texto { margin-top: 14px; font-size: 16px; line-height: 1.55; }
+.v8-site .ar-roles { display: grid; gap: 14px; margin-top: 22px; }
+.v8-site .ar-roles dt { font-size: 14px; font-weight: 600; color: var(--v8-texto); }
+.v8-site .ar-roles dd { margin: 2px 0 0; font-size: 14px; line-height: 1.45; color: var(--v8-texto-2); }
 
-/* Cierre: «Ordena tu flota como trabajas.» */
-.v8-sec.areas-cierre { padding-top: 20px; }
+/* Escenario: el organigrama arriba y la pantalla real del paso debajo. */
+.v8-site .ar-escenario { display: grid; gap: 22px; min-width: 0; }
+.v8-site .ar-capturas { position: relative; display: grid; perspective: 1800px; }
+.v8-site .ar-cuadro { position: relative; grid-area: 1 / 1; opacity: 0; visibility: hidden;
+  transform: translate3d(60px, 0, -220px) rotateY(-14deg); transform-origin: 50% 50%;
+  transition: opacity .55s var(--v8-ease), transform 1s var(--v8-ease), visibility 0s linear 1s; }
+.v8-site .ar-cuadro.is-pasado { transform: translate3d(-60px, 0, -220px) rotateY(14deg); }
+.v8-site .ar-cuadro.is-activo { opacity: 1; visibility: visible; transform: none; transition: opacity .7s var(--v8-ease) .1s, transform 1.1s var(--v8-ease) .05s, visibility 0s; }
+.v8-site .ar-cuadro .v8-captura-figura { width: 100%; }
+.v8-site .ar-nota { margin-top: 0; }
 
-/* Tableta y teléfono: piezas apiladas, sin escena fija. */
+/* Puntos sobre la captura: el punto azul y su etiqueta salen uno tras otro (una sola vez). */
+.v8-site .ar-puntos { position: absolute; inset: 11px; pointer-events: none; }
+.v8-site .ar-punto { position: absolute; display: flex; align-items: center; gap: 10px; transform: translate(-9px, -50%); }
+.v8-site .ar-punto.is-izq { flex-direction: row-reverse; transform: translate(calc(-100% + 9px), -50%); }
+.v8-site .ar-punto.is-abajo { flex-direction: column; gap: 8px; transform: translate(-50%, -9px); }
+.v8-site .ar-punto i { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--v8-azul);
+  box-shadow: 0 0 0 4px rgba(61, 155, 245, .28), 0 6px 18px rgba(3, 8, 20, .6); opacity: 0; transform: scale(.4);
+  transition: opacity .35s var(--v8-ease), transform .5s cubic-bezier(.34, 1.56, .64, 1); }
+.v8-site .ar-punto span { padding: 7px 12px; border-radius: 999px; white-space: nowrap; font-size: 13px; font-weight: 600; color: var(--v8-texto);
+  background: rgba(10, 13, 18, .84); border: 1px solid rgba(255, 255, 255, .14); box-shadow: 0 10px 30px -8px rgba(3, 8, 20, .9);
+  opacity: 0; transform: translateX(-8px); transition: opacity .4s var(--v8-ease), transform .6s var(--v8-ease); }
+.v8-site .ar-punto.is-izq span { transform: translateX(8px); }
+.v8-site .ar-punto.is-abajo span { transform: translateY(-6px); }
+.v8-site .ar-escena.is-visto .is-activo .ar-punto i { opacity: 1; transform: none; transition-delay: calc(.75s + var(--i) * .35s); }
+.v8-site .ar-escena.is-visto .is-activo .ar-punto span { opacity: 1; transform: none; transition-delay: calc(.9s + var(--i) * .35s); }
+
+/* ── Organigrama ─────────────────────────────────────────────────────────────────────────────
+   [data-paso]: 0 la empresa · 1 sus áreas · 2 las unidades viajan al contrato · 3 un área ·
+   4 quién ve qué. Las líneas son las ramas del organigrama: llevan la estructura. */
+.v8-site .ar-org { --ar-linea: rgba(139, 198, 255, .38); position: relative; display: grid; justify-items: center; }
+.v8-site .ar-raiz { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 10px; border-radius: var(--v8-r-campo);
+  background: rgba(20, 26, 34, .72); border: 1px solid var(--v8-borde-vidrio); box-shadow: 0 18px 40px -22px rgba(3, 8, 20, .9); }
+.v8-site .ar-raiz-icono { display: grid; place-items: center; width: 38px; height: 38px; border-radius: var(--v8-r-pieza); color: var(--v8-azul-claro); background: rgba(61, 155, 245, .14); }
+.v8-site .ar-raiz-icono svg { width: 21px; height: 21px; }
+.v8-site .ar-raiz b { display: block; font-size: 16px; font-weight: 600; color: var(--v8-texto); }
+.v8-site .ar-raiz small { display: block; margin-top: 2px; font-size: 13px; color: var(--v8-tenue); }
+.v8-site .ar-tronco { width: 2px; height: 22px; background: var(--ar-linea); transform-origin: 50% 0; }
+.v8-site .ar-bus { width: 75%; height: 2px; background: var(--ar-linea); transform-origin: 50% 50%; }
+.v8-site .ar-areas { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; list-style: none; }
+.v8-site .ar-area { position: relative; display: grid; justify-items: center; align-content: start; gap: 10px; padding: 0 4px 6px; border-radius: var(--v8-r-campo); text-align: center;
+  transition: opacity .6s var(--v8-ease), transform .7s var(--v8-ease) calc(var(--i) * 70ms); }
+.v8-site .ar-rama { width: 2px; height: 16px; background: var(--ar-linea); transform-origin: 50% 0; transition: transform .45s var(--v8-ease) calc(.2s + var(--i) * 70ms); }
+.v8-site .ar-area-cab b { display: block; font-size: 15px; font-weight: 600; line-height: 1.25; color: var(--v8-texto); text-wrap: balance; }
+.v8-site .ar-area-cab small { display: block; margin-top: 3px; font-size: 13px; color: var(--v8-tenue); }
+.v8-site .ar-unidades { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; width: 113px; min-height: 14px; }
+.v8-site .ar-u { width: 14px; height: 14px; border-radius: 4px; background: var(--v8-azul); opacity: .82;
+  transition: opacity .4s var(--v8-ease) calc(.35s + var(--i, 0) * 25ms), transform .9s var(--v8-ease), box-shadow .4s var(--v8-ease); }
+.v8-site .ar-u.is-hueco { visibility: hidden; }
+.v8-site .ar-u.is-viajero { position: relative; z-index: 1; background: var(--v8-azul-claro); transform: translate(var(--dx, 0), var(--dy, 0)); }
+.v8-site .ar-cuenta.is-despues { display: none; }
+.v8-site .ar-rol { position: absolute; z-index: 2; padding: 5px 10px; border-radius: 999px; font-style: normal; font-size: 13px; font-weight: 600; white-space: nowrap;
+  color: var(--v8-sobre-azul); background: var(--v8-azul-claro); opacity: 0; transform: translateY(6px); transition: opacity .45s var(--v8-ease), transform .6s var(--v8-ease); pointer-events: none; }
+.v8-site .ar-rol.is-admin { left: calc(100% + 12px); top: 50%; transform: translate(6px, -50%); }
+.v8-site .ar-rol.is-conductor { right: 0; top: calc(100% + 6px); }
+
+/* 0 · solo la empresa */
+.v8-site .ar-org[data-paso='0'] .ar-tronco { transform: scaleY(0); }
+.v8-site .ar-org[data-paso='0'] .ar-bus { transform: scaleX(0); }
+.v8-site .ar-tronco { transition: transform .4s var(--v8-ease); }
+.v8-site .ar-bus { transition: transform .5s var(--v8-ease) .15s; }
+.v8-site .ar-org[data-paso='0'] .ar-area { opacity: 0; transform: translateY(14px); }
+.v8-site .ar-org[data-paso='0'] .ar-rama { transform: scaleY(0); }
+.v8-site .ar-org[data-paso='0'] .ar-u { opacity: 0; transition-delay: 0s; }
+/* 2, 3 y 4 · las tres unidades ya están en el contrato */
+.v8-site .ar-org:is([data-paso='2'], [data-paso='3'], [data-paso='4']) .ar-u.is-viajero { transform: none; }
+.v8-site .ar-org:is([data-paso='2'], [data-paso='3'], [data-paso='4']) .ar-cuenta.is-antes { display: none; }
+.v8-site .ar-org:is([data-paso='2'], [data-paso='3'], [data-paso='4']) .ar-cuenta.is-despues { display: inline; }
+/* 3 · un área a la vez */
+.v8-site .ar-org[data-paso='3'] .ar-area:not(.is-cos) { opacity: .28; }
+/* 4 · quién ve qué: el supervisor, toda la empresa; el conductor, su unidad */
+.v8-site .ar-org[data-paso='4'] .ar-rol { opacity: 1; transform: none; }
+.v8-site .ar-org[data-paso='4'] .ar-rol.is-admin { transform: translate(0, -50%); }
+.v8-site .ar-org[data-paso='4'] .ar-u.is-suya { box-shadow: 0 0 0 3px var(--v8-noche), 0 0 0 5px var(--v8-azul-claro); }
+
+/* ── Teléfono: el organigrama armado, las áreas en dos columnas, y los pasos apilados ───────── */
+.v8-site .ar-movil { margin-top: 32px; }
+.v8-site .ar-org.is-movil .ar-bus, .v8-site .ar-org.is-movil .ar-rama { display: none; }
+.v8-site .ar-org.is-movil .ar-areas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; margin-top: 6px; }
+.v8-site .ar-org.is-movil .ar-raiz { max-width: 100%; }
+.v8-site .ar-movil .v8-nota-demo { margin-top: 18px; }
+.v8-site .ar-movil-pasos { display: grid; gap: 28px; margin-top: 40px; list-style: none; }
+.v8-site .ar-movil-pasos li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 14px; align-items: start; }
+.v8-site .ar-movil-num { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 600;
+  color: var(--v8-azul-claro); background: rgba(61, 155, 245, .14); }
+.v8-site .ar-movil-pasos .v8-sm { margin-top: 6px; }
+.v8-site .ar-movil-pasos .ar-roles { margin-top: 16px; gap: 12px; }
+.v8-site .ar-movil-captura { margin: 40px auto 0; }
+
+/* ── Tipos de empresa ─────────────────────────────────────────────────────────────────────── */
+.v8-site .v8-split.ar-empresas-split { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 64px; }
+.v8-site .ar-empresas-foto { aspect-ratio: 4 / 5; height: auto; object-position: 62% 50%; }
+.v8-site .ar-tipos { display: grid; gap: 26px; margin-top: 36px; }
+.v8-site .ar-tipos dt { font-size: clamp(22px, 2vw, 26px); font-weight: 600; letter-spacing: -0.018em; color: var(--v8-texto); }
+.v8-site .ar-tipos dd { margin: 6px 0 0; font-size: 16px; line-height: 1.5; max-width: 46ch; }
+.v8-site .ar-tipos-nota { margin-top: 30px; max-width: 52ch; }
+
+/* ── Jerarquía de mando: una escalera que baja ───────────────────────────────────────────── */
+.v8-site .v8-c.ar-jerarquia-c { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 64px; align-items: center; }
+.v8-site .ar-mt { margin-top: 20px; }
+.v8-site .ar-mt-sm { margin-top: 18px; max-width: 46ch; }
+.v8-site .ar-escalera { position: relative; display: grid; gap: 40px; list-style: none; }
+.v8-site .ar-escalera li { position: relative; display: grid; gap: 8px; margin-left: calc(var(--i) * 64px); padding-left: 30px; }
+.v8-site .ar-escalera li::before { content: ""; position: absolute; left: 0; top: 9px; width: 12px; height: 12px; border-radius: 50%; background: var(--v8-azul); box-shadow: 0 0 0 4px rgba(61, 155, 245, .2); }
+.v8-site .ar-escalera li + li::after { content: ""; position: absolute; left: -58px; top: -32px; width: 64px; height: 38px; border-left: 2px solid rgba(139, 198, 255, .38);
+  border-bottom: 2px solid rgba(139, 198, 255, .38); border-bottom-left-radius: 14px; }
+.v8-site .ar-escalera .v8-sm { font-size: 16px; max-width: 40ch; }
+.v8-site .ar-escalera b { font-size: clamp(19px, 1.9vw, 24px); font-weight: 600; letter-spacing: -0.012em; color: var(--v8-texto); }
+
+/* Cierre */
+.v8-site .v8-sec.areas-cierre { padding-top: 20px; }
+
+/* Tableta: texto arriba y escenario debajo, a todo el ancho; el paso se elige con el riel. */
+@media (max-width: 1023px) {
+  .v8-site .ar-escena { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .v8-site .ar-texto { max-width: 640px; }
+  .v8-site .ar-pasos { margin-top: 36px; }
+}
 @media (max-width: 899px) {
-  .areas-grupos-split { gap: 0; }
-  .v8-site .areas-grupos-foto {
-    margin-top: 16px; height: auto;
-    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
-    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
-  }
-  .areas-grupos-lista { margin-top: 24px; }
-  .areas-grupos-movil { display: grid; gap: 22px; margin-top: 8px; }
-  .areas-grupos-movil .v8-h4 + p { margin-top: 2px; }
-
-  .areas-geo-escena { margin-top: 16px; }
-  .v8-site .areas-geo-foto {
-    width: 100%; height: auto;
-    -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
-    mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.05) 3%, rgba(0,0,0,.2) 6.5%, rgba(0,0,0,.45) 10%, rgba(0,0,0,.72) 13.5%, rgba(0,0,0,.92) 17%, #000 20%, #000 64%, rgba(0,0,0,.92) 69%, rgba(0,0,0,.72) 75%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.2) 89%, rgba(0,0,0,.05) 95%, transparent);
-  }
-  .areas-geo-etiquetas { position: relative; display: grid; gap: 12px; margin: 16px 0 0; }
-  .areas-geo-etiqueta { position: static; width: auto !important; }
+  .v8-site .v8-split.ar-empresas-split, .v8-site .v8-c.ar-jerarquia-c { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .v8-site .ar-empresas-foto { aspect-ratio: 4 / 3; }
 }
 @media (max-width: 599px) {
-  .v8-sec.areas-grupos { padding-top: 24px; }
-  .areas-geo-etiqueta .v8-ico, .areas-geo-etiqueta.is-horario { display: none; }
-  .areas-geo-etiqueta { padding: 16px; border-radius: 22px; }
-  .areas-geo-etiqueta p { margin-top: 0; }
-  .areas-multi-telefono { margin-top: 24px; }
-  .areas-acceso-cajas { margin-top: 24px; gap: 12px; }
-  .areas-acceso-cajas .v8-h4 + p { margin-top: 2px; }
-  .areas-acceso-cajas .v8-sm { font-size: 17px; line-height: 1.47; }
-  /* En el teléfono el cierre es solo el botón a lo ancho, bajo las preguntas. */
-  .v8-sec.areas-preguntas { padding-bottom: 0; }
-  .v8-sec.areas-cierre { padding-top: 32px; padding-bottom: 0; }
-  .v8-encabezado.areas-geo-cab, .v8-encabezado.areas-multi-cab { text-align: left; }
-  .areas-cierre .v8-h2 { display: none; }
-  .areas-cierre .v8-acciones { margin-top: 0; }
-  .v8-site .areas-cierre-boton { display: flex; width: 100%; }
+  .v8-site .ar-tipos { gap: 22px; margin-top: 28px; }
+  .v8-site .ar-tipos dd { font-size: 15px; }
+  .v8-site .ar-escalera { gap: 26px; }
+  .v8-site .ar-escalera li { margin-left: calc(var(--i) * 28px); }
+  .v8-site .ar-escalera li + li::after { left: -22px; width: 28px; }
+  .v8-site .ar-escalera b { font-size: 17px; }
+  .v8-site .v8-sec.areas-cierre { padding-top: 8px; }
+  .v8-site .areas-cierre .v8-h2 { font-size: 30px; }
+}
+
+/* «Reducir movimiento»: todo quieto; el paso cambia sin giro y los puntos están a la vista. */
+@media (prefers-reduced-motion: reduce) {
+  .v8-site .ar-paso, .v8-site .ar-cuadro, .v8-site .ar-riel-barra i, .v8-site .ar-area, .v8-site .ar-rama, .v8-site .ar-tronco, .v8-site .ar-bus,
+  .v8-site .ar-u, .v8-site .ar-rol, .v8-site .ar-punto i, .v8-site .ar-punto span { transition: none !important; }
+  .v8-site .ar-paso.is-activo, .v8-site .ar-cuadro.is-activo { transform: none; }
+  .v8-site .is-activo .ar-punto i, .v8-site .is-activo .ar-punto span { opacity: 1; transform: none; }
 }
