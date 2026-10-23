@@ -1,11 +1,13 @@
 // Quiénes somos de la web v8 (T-107), fiel a los tableros «Quiénes somos · escritorio»
 // (Quienes-somos.dc.html) y «Quiénes somos · teléfono» (Quienes-somos-movil.dc.html).
 // Animación (nota azul del tablero, 1 momento): entrada del titular del hero. Página tranquila:
-// sin escenas fijas y sin crecimiento de la foto del hero (por eso el hero usa `medio`); el resto,
-// quieto o con aparición suave.
+// sin escenas fijas y sin crecimiento de la foto del hero; el resto, quieto o con aparición suave.
+// T-145 (Marco): la foto del atardecer es el hero, a pantalla completa y con el texto encima (como
+// Seguridad), sin capa oscura: el texto va sobre los cerros oscuros de la izquierda con una sombra
+// de texto suave, y la foto se funde con el fondo solo por abajo.
 import { useRef } from 'react'
 import {
-  SitioV8, HeroV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, TarjetaVidrioV8,
+  SitioV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, TarjetaVidrioV8,
   BotonV8, EnlaceV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
 import './quienes-somos-v8.css'
@@ -24,19 +26,27 @@ export default function QuienesSomosV8() {
   useMomentoV8(raiz)
 
   return <SitioV8 raiz={raiz} titulo="Quiénes somos — FOM" descripcion="FOM es una plataforma para conectar a las personas, los vehículos y la información de una operación en movimiento.">
-    <HeroV8
-      className="qs-hero"
-      kicker="Quiénes somos"
-      titulo="Una forma más clara de cuidar y coordinar tu flota."
-      bajada={<>
-        <span className="v8-solo-escritorio">FOM es una plataforma para conectar a las personas, los vehículos y la información de una operación en movimiento.</span>
-        <span className="v8-solo-movil">Conectamos a las personas, los vehículos y la información de una operación en movimiento.</span>
-      </>}
-      medio={<div className="v8-hero-medio qs-hero-medio">
-        <FotoIntegradaV8 prioridad fundido="y" sizes="100vw" nombre="autopista-atardecer" posicion="70% 50%"
+    <section className="qs-hero" aria-labelledby="qs-titulo">
+      <div className="qs-hero-foto" data-v8-entra="">
+        {/* marco="plano": la versión -plena (sin bordes transparentes); el fundido de abajo lo
+            pone la hoja de la página. En el teléfono, su recorte vertical -plena-movil. */}
+        <FotoIntegradaV8 prioridad marco="plano" sizes="100vw" nombre="autopista-atardecer" className="qs-hero-img"
           alt="Camión de la flota en la autopista al atardecer, entre montañas." />
-      </div>}
-    />
+      </div>
+      <ContenedorV8 className="qs-hero-texto">
+        <div className="qs-hero-caja">
+          <p className="v8-kick" data-v8-entra="">Quiénes somos</p>
+          <h1 id="qs-titulo" className="v8-h1">
+            <span className="v8-linea" data-v8-entra="">Una forma más clara de </span>
+            <span className="v8-linea" data-v8-entra="">cuidar y coordinar tu flota.</span>
+          </h1>
+          <p className="v8-lead" data-v8-entra="">
+            <span className="v8-solo-escritorio">FOM es una plataforma para conectar a las personas, los vehículos y la información de una operación en movimiento.</span>
+            <span className="v8-solo-movil">Conectamos a las personas, los vehículos y la información de una operación en movimiento.</span>
+          </p>
+        </div>
+      </ContenedorV8>
+    </section>
 
     <SeccionV8 className="qs-forma" aria-labelledby="qs-forma-titulo">
       <ContenedorV8 className="qs-forma-rejilla">

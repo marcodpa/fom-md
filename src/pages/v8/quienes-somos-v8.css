@@ -1,9 +1,23 @@
 /* Quiénes somos v8 (T-107): solo lo propio de esta página; lo común vive en components/v8/v8-base.css. */
 
-/* Hero: titular a 1000 px y bajada a 720 px, foto a sangre (sin crecimiento: página tranquila). */
-.qs-hero .v8-h1 { max-width: 1000px; margin-left: auto; margin-right: auto; }
-.qs-hero .v8-lead { max-width: 720px; margin-left: auto; margin-right: auto; }
-.qs-hero .v8-hero-medio { margin-top: 24px; }
+/* Hero (T-145): la foto del atardecer a pantalla completa y el texto encima, a la izquierda,
+   sobre los cerros oscuros y el cielo (el camión y el sol quedan a la derecha). Sin capa: el texto
+   se lee con una sombra suave; la foto se funde con el fondo de la página solo por abajo. */
+.qs-hero { position: relative; }
+/* La foto empieza en el borde de arriba de la ventana, detrás de la barra flotante (que ocupa
+   14 + 64 px en escritorio y 10 + 58 px en el teléfono): así no queda un corte recto bajo la barra. */
+.qs-hero { margin-top: -78px; }
+.v8-site .v8-foto.is-plana.qs-hero-img {
+  width: 100%; height: clamp(640px, 100svh, 940px); object-fit: cover; object-position: 50% 42%;
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 78%, rgba(0,0,0,.85) 84%, rgba(0,0,0,.5) 91%, rgba(0,0,0,.18) 96.5%, transparent);
+  mask-image: linear-gradient(180deg, #000 0, #000 78%, rgba(0,0,0,.85) 84%, rgba(0,0,0,.5) 91%, rgba(0,0,0,.18) 96.5%, transparent);
+}
+.v8-c.qs-hero-texto { position: absolute; inset: 0; display: flex; align-items: center; padding-top: 120px; }
+.qs-hero-caja { max-width: 620px; }
+.qs-hero .v8-lead { margin-top: 20px; max-width: 520px; color: var(--v8-texto); }
+.qs-hero-caja :is(.v8-kick, .v8-h1, .v8-lead) {
+  text-shadow: 0 1px 2px rgba(4, 7, 11, .6), 0 2px 14px rgba(4, 7, 11, .5), 0 0 34px rgba(4, 7, 11, .35);
+}
 
 /* Nuestra forma de trabajar: titular a la izquierda, tres párrafos a la derecha. */
 .v8-sec.qs-forma { padding-top: 60px; }
@@ -25,6 +39,14 @@
 .qs-cierre-frase { font-size: clamp(34px, 4.45vw, 64px); font-weight: 600; line-height: 1.06; letter-spacing: -1px; }
 
 @media (max-width: 899px) {
+  /* Tableta y teléfono: la foto arriba y el texto entra sobre su borde de abajo (el asfalto
+     oscuro), que se funde más largo con el fondo. */
+  .v8-site .v8-foto.is-plana.qs-hero-img {
+    height: 560px; object-position: 50% 40%;
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 58%, rgba(0,0,0,.8) 68%, rgba(0,0,0,.45) 80%, rgba(0,0,0,.15) 91%, transparent);
+    mask-image: linear-gradient(180deg, #000 0, #000 58%, rgba(0,0,0,.8) 68%, rgba(0,0,0,.45) 80%, rgba(0,0,0,.15) 91%, transparent);
+  }
+  .v8-c.qs-hero-texto { position: relative; inset: auto; display: block; padding-top: 0; margin-top: -150px; }
   .qs-forma-rejilla { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .qs-forma-texto { padding-top: 20px; }
   .qs-fila { padding-bottom: 64px; }
@@ -32,8 +54,10 @@
   .qs-principios-lista { grid-template-columns: minmax(0, 1fr); gap: 12px; }
 }
 @media (max-width: 599px) {
-  .qs-hero .v8-hero-medio { margin-top: 16px; }
-  .qs-hero .v8-hero-medio .v8-foto { height: 440px; }
+  .qs-hero { margin-top: -68px; }
+  .v8-site .v8-foto.is-plana.qs-hero-img { height: 560px; object-position: 50% 30%; }
+  .v8-c.qs-hero-texto { margin-top: -120px; }
+  .qs-hero .v8-lead { margin-top: 14px; }
   .v8-sec.qs-forma { padding-top: 24px; }
   .qs-forma-texto { padding-top: 16px; }
   .qs-fila { padding-bottom: 0; margin-top: 0; }

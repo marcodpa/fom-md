@@ -38,6 +38,8 @@ furgoneta-ruta                   foto      comparativa/web-v8-fotos/maestros/fur
 furgoneta-ruta-movil             foto      comparativa/web-v8-fotos/maestros/furgoneta-ruta-movil.webp
 autopista-atardecer              foto      comparativa/web-v8-fotos/maestros/autopista-atardecer.webp
 autopista-atardecer-movil        foto      comparativa/web-v8-fotos/maestros/autopista-atardecer-movil.webp
+autopista-atardecer-plena        foto      comparativa/web-v8-fotos-plenas-t145/autopista-atardecer-plena.jpg
+autopista-atardecer-plena-movil  foto      comparativa/web-v8-fotos-plenas-t145/autopista-atardecer-plena-movil.jpg
 camion-noche                     foto      comparativa/web-v8-fotos/maestros/camion-noche.webp
 camion-noche-movil               foto      comparativa/web-v8-fotos/maestros/camion-noche-movil.webp
 fila-flota                       foto      comparativa/web-v8-fotos/maestros/fila-flota.webp
