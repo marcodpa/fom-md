@@ -768,6 +768,9 @@ export const repo = {
         .sort((a, b) => new Date(b.creadaEn) - new Date(a.creadaEn))
       return responder({
         ...p,
+        // Como la fila de Usuarios: las acciones de la cuenta en el perfil del teléfono usan esta ficha.
+        empresaNombre: todasEmpresas().find((e) => e.id === p.empresaId)?.nombre ?? '—',
+        esDesempleado: p.empresaId === DESEMPLEADOS_ID,
         unidad,
         eventos: misEventos,
         inspecciones: misInsp,
@@ -1587,6 +1590,7 @@ export const repo = {
       async eliminarDefinitivo(id, actor) {
         const p = todosPerfiles().find((x) => x.id === id)
         if (!p) return fallo('Ese usuario no existe.')
+        if (!puedeGestionarA(actor, p)) return fallo('No puedes gestionar a ese usuario: su rango no es menor que el tuyo.')
         if (p.empresaId !== DESEMPLEADOS_ID)
           return fallo('Solo se elimina definitivamente desde Desempleados C.A.: envíalo allí primero.')
         guardarParche('perfiles', id, { eliminado: true })
@@ -1600,6 +1604,7 @@ export const repo = {
         if (!p) return fallo('Ese usuario no existe.')
         if (p.rol === 'admin') return fallo('La clave de un Administrador FOM no se restablece desde el panel.')
         if (actor?.id === id) return fallo('Tu propia clave se cambia desde tu perfil, no desde aquí.')
+        if (!puedeGestionarA(actor, p)) return fallo('No puedes gestionar a ese usuario: su rango no es menor que el tuyo.')
         guardarParche('perfiles', id, { claveTemporal: true })
         auditar('cambiar_clave', { actor, empresaId: p.empresaId, objetivo: p.nombre, detalle: 'Clave restablecida a la por defecto' })
         return responder({ clave: CLAVE_POR_DEFECTO }, 280)

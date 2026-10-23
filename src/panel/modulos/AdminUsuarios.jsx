@@ -8,7 +8,7 @@ import {
   Buscador, Cabecera, Campo, Cargando, Chips, ErrorCarga, Kpi, Modal, Tag, Tarjeta, Vacio,
 } from '../comp/ui'
 import * as f from '../datos/formato'
-import { ROLES_ASIGNABLES, etiquetaRol } from '../datos/catalogos'
+import { ROLES_ASIGNABLES, etiquetaRol, puedeGestionarA } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import AccionesUsuario from '../comp/AccionesUsuario'
 import { useVistaTelefono } from '../comp/movil-navegacion'
@@ -173,9 +173,6 @@ export default function AdminUsuarios() {
             alGuardar={recargar}
             directorioReal={DIRECTORIO_REAL}
             actor={actor}
-            suspender={suspender}
-            reactivar={reactivar}
-            revocarAcceso={revocarAcceso}
           />
           {cuenta.modalMover(datos.empresas)}
         </>
@@ -255,7 +252,7 @@ function useAccionesCuenta({ actor, alCambiar }) {
   }
 
   const modalMover = (empresas) => !DIRECTORIO_REAL && (
-    <ModalMover usuario={moviendo} empresas={empresas ?? []} alCerrar={() => setMoviendo(null)} alGuardar={alCambiar} />
+    <ModalMover usuario={moviendo} empresas={empresas ?? []} alCerrar={() => setMoviendo(null)} alGuardar={alCambiar} actor={actor} />
   )
 
   const modalClave = (
@@ -293,7 +290,7 @@ const TEXTO_ACCION = {
  * rango del actor puede administrar: ofrecer un botón que va a devolver 403 es
  * peor que no ofrecerlo. `lista` es la lectura de Usuarios (trae el alcance).
  */
-function accionesDeCuenta(p, { lista, actor, directorioReal }) {
+export function accionesDeCuenta(p, { lista, actor, directorioReal }) {
   if (directorioReal && (lista?.alcance?.administrable ?? true) && puedeAdministrar(actor, p)) {
     return [
       'clave',
@@ -301,26 +298,43 @@ function accionesDeCuenta(p, { lista, actor, directorioReal }) {
       p.estado !== 'revoked' ? 'revocar' : null,
     ].filter(Boolean)
   }
-  if (!directorioReal && p.rol !== 'admin') return ['mover', 'clave', p.esDesempleado ? 'eliminar' : 'salida']
+  // En la demo, la misma regla de rango que el repositorio (puedeGestionarA): nadie se administra
+  // a sí mismo ni a alguien de su rango o mayor.
+  if (!directorioReal && p.rol !== 'admin' && puedeGestionarA(actor, p)) return ['mover', 'clave', p.esDesempleado ? 'eliminar' : 'salida']
   return []
 }
 
 /**
  * Las acciones de la cuenta en el PERFIL de la persona, en el teléfono: la app
- * no tiene el menú «⋮» en la lista y las pone aquí. Se lee la misma lista que
- * Usuarios para usar la misma fila (ids, estado y alcance) y los mismos permisos.
+ * no tiene el menú «⋮» en la lista y las pone aquí. `persona` es la ficha que ya
+ * leyó el perfil (id, userId, email, rol, estado, administrable): sirve de fila
+ * y de alcance, sin volver a pedir el directorio. Mismos permisos que la lista.
  * Si no se le puede hacer nada, no aparece.
  */
-export function AccionesCuentaMovil({ personaId, alCambiar }) {
+export function AccionesCuentaMovil({ persona, alCambiar }) {
   const sesion = useSesion()
   const actor = sesion?.perfil
-  const lectura = useDatos(() => cargar('', actor?.empresaId, ''), [actor?.empresaId])
-  // Tras cada cambio se relee la fila (sus acciones) y el perfil que la rodea.
-  const cuenta = useAccionesCuenta({ actor, alCambiar: () => Promise.all([lectura.recargar(), alCambiar?.()]) })
-  const lista = lectura.datos?.lista ?? []
-  const fila = lista.find((x) => String(x.userId ?? x.id) === String(personaId) || String(x.id) === String(personaId)) ?? null
-  const acciones = fila ? accionesDeCuenta(fila, { lista, actor, directorioReal: DIRECTORIO_REAL }) : []
-  if (!fila || acciones.length === 0) return null
+  const cuenta = useAccionesCuenta({ actor, alCambiar })
+  // Las empresas solo hacen falta para «Mover» (solo en la demo): se piden al abrirlo.
+  const [empresas, setEmpresas] = useState(null)
+  const acciones = persona
+    ? accionesDeCuenta(persona, { lista: { alcance: { administrable: persona.administrable } }, actor, directorioReal: DIRECTORIO_REAL })
+    : []
+  if (acciones.length === 0) return null
+
+  const hacer = async (a) => {
+    if (a === 'mover' && !DIRECTORIO_REAL && !empresas) {
+      cuenta.setAviso('')
+      try {
+        setEmpresas(await repo.admin.empresas.listar({}))
+      } catch (e) {
+        cuenta.setAviso(e.message)
+        return
+      }
+    }
+    cuenta.hacer[a](persona)
+  }
+
   return (
     <section className="pnl-card usr-cuenta-movil" aria-labelledby="usr-cuenta-titulo">
       <div className="pnl-card-cab"><h2 id="usr-cuenta-titulo">Cuenta</h2></div>
@@ -329,13 +343,13 @@ export function AccionesCuentaMovil({ personaId, alCambiar }) {
         <div className="pnl-chips">
           {acciones.map((a) => (
             <button key={a} type="button" className={`pnl-btn sutil${['revocar', 'eliminar', 'salida', 'suspender'].includes(a) ? ' peligro' : ''}`}
-              onClick={() => cuenta.hacer[a](fila)}>
+              onClick={() => hacer(a)}>
               {TEXTO_ACCION[a]}
             </button>
           ))}
         </div>
       </div>
-      {cuenta.modalMover(lectura.datos?.empresas)}
+      {cuenta.modalMover(empresas)}
       {cuenta.modalClave}
     </section>
   )

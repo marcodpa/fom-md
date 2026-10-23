@@ -37,7 +37,8 @@ export function IconoEventoManejo({ tipo, tam = 28 }) {
 
 // --- Pedidos: uno por persona y período, guardado unos minutos --------------
 // Las pastillas filtran aquí; solo pasar de 30 a 7 días (o al revés) pide algo. El refresco de
-// 60 s de la pantalla vuelve a leer lo guardado hasta que vence; un fallo no se guarda.
+// 60 s de la pantalla vuelve a leer lo guardado hasta que vence; un fallo no se guarda, salvo el
+// 404 de quien ya no es conductor activo, que vale lo mismo que lo demás (crearCacheEventos).
 // La ficha de una unidad y el perfil comparten lo guardado. Va por sesión y empresa:
 // al entrar con otra cuenta o a otra empresa se vacía (ver crearCacheEventos).
 const VIGENCIA_MS = 3 * 60000

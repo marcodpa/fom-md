@@ -141,7 +141,8 @@ export default function ExpedienteConductor() {
             {pestana === 'inspecciones' && <Inspecciones inspecciones={inspecciones} error={p.inspeccionesError} />}
             {pestana === 'documentos' && <Documentos persona={p} alActualizar={ficha.recargar} documentos={p.documentos ?? []} error={p.documentosError} />}
             </section>
-            {esMovil && <AccionesCuentaMovil personaId={id} alCambiar={ficha.recargar} />}
+            {/* Solo quien puede editar a la persona; la regla fina por acción es `accionesDeCuenta`. */}
+            {esMovil && puedeEditar && <AccionesCuentaMovil persona={p} alCambiar={ficha.recargar} />}
           </>
         )}
       </div>

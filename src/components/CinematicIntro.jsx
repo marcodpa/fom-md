@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import VehicleCard from './VehicleCard'
 import Telemetry, { TELEMETRY_ITEMS } from './Telemetry'
 import { ScrollTrigger, useScrollProgress } from '../hooks/useScrollProgress'
 
@@ -244,13 +243,6 @@ export default function CinematicIntro({ reduced }) {
     }
   }, [reduced])
 
-  const scrollToProgress = useCallback((p, behavior = 'smooth') => {
-    const wrap = wrapRef.current
-    if (!wrap) return
-    const y = wrap.offsetTop + p * (wrap.offsetHeight - window.innerHeight)
-    window.scrollTo({ top: y, behavior })
-  }, [])
-
   const skipIntro = useCallback(() => {
     const wrap = wrapRef.current
     if (!wrap) return
@@ -320,9 +312,6 @@ export default function CinematicIntro({ reduced }) {
               <b>6</b> unidades en marcha
             </div>
           </div>
-
-          {/* Etapa 4 */}
-          <VehicleCard ref={reg('vehicle')} onView={() => scrollToProgress(0.66)} />
 
           {/* Etapa 6 */}
           <Telemetry ref={teleRefs} />

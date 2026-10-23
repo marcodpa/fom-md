@@ -210,6 +210,10 @@ export const RANGO = {
   supervisor_personal: 3,
   conductor: 1,
   usuario_personal: 1,
+  // La sesión de la demo usa los nombres de roles.js (admin_fom, supervisor), no los
+  // de la semilla: sin estos dos, un supervisor quedaba con rango 1 y no podía con nadie.
+  admin_fom: 4,
+  supervisor: 3,
 }
 export function puedeGestionarA(actor, objetivo) {
   if (!actor || !objetivo || actor.id === objetivo.id) return false

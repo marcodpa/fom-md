@@ -176,8 +176,9 @@
 .mvm .mnt-asig-tiempo dt > svg { flex: none; color: var(--app-texto-3); }
 .mvm .mnt-asig-tiempo dd { margin: 0; font: var(--app-button); color: var(--app-texto-2); font-variant-numeric: tabular-nums; }
 .mvm .mnt-asig-tiempo.corre dd { color: var(--app-texto); }
-.mvm .mnt-asig-latido { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--app-exito); animation: mnt-asig-latido 1.4s ease-in-out infinite; }
+/* El punto que late va sin .mvm: el supervisor en el teléfono (Mantenimiento) también lo pinta. */
+.mnt-asig-latido { display: inline-block; width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--app-exito); animation: mnt-asig-latido 1.4s ease-in-out infinite; }
 @keyframes mnt-asig-latido { 50% { opacity: .35; } }
-@media (prefers-reduced-motion: reduce) { .mvm .mnt-asig-latido { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .mnt-asig-latido { animation: none; } }
 /* En qué va el trabajo: texto suelto en gris, no una etiqueta (odt-asignada-seccion.tsx · momento). */
 .mvm .mnt-asig-tags .pnl-tag { height: auto; padding: 0; border-radius: 0; background: none; font: var(--app-caption); color: var(--app-texto-2); }

@@ -434,7 +434,9 @@ export function crearCacheEventos({ pedir, dueno = () => '', vigenciaMs = 3 * 60
       const peticion = Promise.resolve().then(() => pedir({ userId, propio, dias }))
       const nuevo = { desde: ahora(), peticion, vencido: false }
       guardados.set(llave, nuevo)
-      peticion.catch(() => { if (guardados.get(llave) === nuevo) guardados.delete(llave) })
+      // Un fallo no se guarda, salvo el 404 («ya no es conductor activo»): es una respuesta, no
+      // un error de red, y se guarda con la misma vigencia para no repreguntar en cada refresco.
+      peticion.catch((e) => { if (e?.estado !== 404 && guardados.get(llave) === nuevo) guardados.delete(llave) })
       return peticion
     },
     /** «Actualizar»: lo guardado sigue sirviendo para pintar, pero el próximo pedido sale al servidor. */

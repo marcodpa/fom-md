@@ -4,8 +4,11 @@ import { Campo, ErrorCarga, Tag, Tarjeta } from './ui'
 import { Icono } from '../Iconos'
 import { etiqueta } from '../datos/catalogos'
 import TarjetaMantenimiento from './TarjetaMantenimiento'
+import { rolCanonico } from '../roles'
 import { ESTADOS_DE_TALLER, MOMENTOS, accionesDe, listarAsignadas, registrarEvento, textoTiempo } from '../datos/odtAsignadas'
 import { useVistaTelefono } from './movil-navegacion'
+// El punto que late del reloj vive aquí: el supervisor en el teléfono también lo ve.
+import '../../styles/mantenimiento-movil.css'
 
 // ============================================================
 // «ASIGNADAS A TI» — las ODT que la persona de la sesión tiene a su cargo.
@@ -15,6 +18,8 @@ import { useVistaTelefono } from './movil-navegacion'
 // ============================================================
 
 const COLOR_MOMENTO = { asignada: 'gris', en_ejecucion: 'verde', pausada: 'ambar', en_calidad: 'azul' }
+// El aviso «Trabajo iniciado…» se va solo, como el «Guardado» del perfil.
+const AVISO_MS = 4000
 
 /** «1:05:23», como `formatoReloj` de la app: horas sin tope, minutos y segundos con dos cifras. */
 export function formatoReloj(segundos) {
@@ -36,6 +41,7 @@ function identidadDe(unidad) {
  *   una orden de esa unidad la nombra «U-001 · placa», como la app.
  */
 export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir, unidad = null }) {
+  const esConductor = rolCanonico(perfil?.rol) === 'conductor'
   // En el teléfono, la sección de la app (odt-asignada-seccion.tsx): su bajada,
   // el título de la orden, «Sin iniciar» y el reloj «0:00:00».
   const movil = useVistaTelefono()
@@ -47,20 +53,16 @@ export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir, unidad 
   const odtsRef = useRef(odts)
   odtsRef.current = odts
   const lectura = useDatos(() => listarAsignadas({ odts: odtsRef.current ?? [], perfil }), [clave, perfil?.id, perfil?.correo])
-  const [ahora, setAhora] = useState(() => Date.now())
   const [aviso, setAviso] = useState('')
   const items = lectura.datos ?? []
   // La tarjeta se abre solo si la orden está en la lista de la pantalla (el detalle se abre desde ahí).
   const conocidas = useMemo(() => new Set((odts ?? []).map((o) => o.id)), [odts])
-  const corriendo = items.some((o) => o.estado === 'en_ejecucion')
 
-  // Mientras alguien trabaja, el tiempo sigue contando en pantalla sin pedir nada al servidor.
-  // En el teléfono el reloj lleva segundos: avanza cada segundo, como en la app.
   useEffect(() => {
-    if (!corriendo) return undefined
-    const id = setInterval(() => setAhora(Date.now()), movil ? 1000 : 30_000)
-    return () => clearInterval(id)
-  }, [corriendo, movil])
+    if (!aviso) return undefined
+    const t = setTimeout(() => setAviso(''), AVISO_MS)
+    return () => clearTimeout(t)
+  }, [aviso])
 
   if (lectura.estado === 'error') {
     return (
@@ -74,7 +76,6 @@ export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir, unidad 
 
   async function despues(texto) {
     setAviso(texto)
-    setAhora(Date.now())
     await Promise.all([lectura.recargar(), alCambiar?.()])
   }
 
@@ -83,20 +84,65 @@ export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir, unidad 
       <div className="pnl-card-cab">
         <h2 id="mnt-asig-titulo">Asignadas a ti</h2>
         <span className="mnt-asig-cuenta">
-          {movil ? 'El supervisor te asignó estas ODT. Inicia, pausa y entrega desde aquí.'
+          {movil && esConductor ? 'El supervisor te asignó estas ODT. Inicia, pausa y entrega desde aquí.'
             : `${items.length} ${items.length === 1 ? 'orden a tu cargo' : 'órdenes a tu cargo'}`}
         </span>
       </div>
       {aviso && <div className="mnt-success mnt-asig-aviso" role="status"><Icono nombre="check" tam={20} />{aviso}</div>}
       <div className="mnt-asig-lista mnt-tarjetas">
-        {items.map((o) => <Asignada key={o.id} item={o} ahora={ahora} alHacer={despues} alAbrir={alAbrir && conocidas.has(o.id) ? alAbrir : null}
+        {items.map((o) => <Asignada key={o.id} item={o} alHacer={despues} alAbrir={alAbrir && conocidas.has(o.id) ? alAbrir : null}
           movil={movil} nombreUnidad={unidad && o.vehiculoId === unidad.id ? identidadDe(unidad) : ''} />)}
       </div>
     </section>
   )
 }
 
-function Asignada({ item, ahora, alHacer, alAbrir, movil = false, nombreUnidad = '' }) {
+/**
+ * El tiempo trabajado de una orden. Lleva su propio reloj para que cada segundo se repinte
+ * solo esto y no toda la sección; con la pestaña oculta no avanza (al volver, se pone al día).
+ * Lo que el servidor midió, más lo que pasó desde entonces si sigue corriendo.
+ */
+function RelojTrabajo({ item, movil }) {
+  const corre = item.estado === 'en_ejecucion'
+  const [ahora, setAhora] = useState(() => Date.now())
+
+  // En el teléfono el reloj lleva segundos: avanza cada segundo, como en la app.
+  useEffect(() => {
+    if (!corre) return undefined
+    const id = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return
+      setAhora(Date.now())
+    }, movil ? 1000 : 30_000)
+    return () => clearInterval(id)
+  }, [corre, movil])
+
+  // Tras recargar, `medidoEn` puede ser más nuevo que el último tic: nunca se resta.
+  const segundos = item.segundos + (corre ? Math.max(0, (ahora - item.medidoEn) / 1000) : 0)
+
+  if (!movil) {
+    return (
+      <dl className="mnt-asig-tiempo">
+        <dt><Icono nombre="reloj" tam={16} />Tiempo trabajado</dt>
+        <dd>{textoTiempo(segundos)}</dd>
+      </dl>
+    )
+  }
+  return (
+    <dl className={`mnt-asig-tiempo${corre ? ' corre' : ''}`} aria-label={`Tiempo trabajado ${formatoReloj(segundos)}${corre ? ', corriendo' : ''}`}>
+      <dt>
+        {corre ? <i className="mnt-asig-latido" aria-hidden="true" /> : (
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 4h16v16H4z" /><path d="M9 9v6" /><path d="M15 9v6" />
+          </svg>
+        )}
+        Tiempo trabajado
+      </dt>
+      <dd>{formatoReloj(segundos)}</dd>
+    </dl>
+  )
+}
+
+function Asignada({ item, alHacer, alAbrir, movil = false, nombreUnidad = '' }) {
   // El paso que pide nota (Pausar o Entregar) mientras se escribe; null si no hay ninguno abierto.
   const [pidiendo, setPidiendo] = useState(null)
   const [nota, setNota] = useState('')
@@ -105,8 +151,6 @@ function Asignada({ item, ahora, alHacer, alAbrir, movil = false, nombreUnidad =
   const notaRef = useRef(null)
   const momento = MOMENTOS[item.estado] ?? { t: etiqueta('odt_estado', item.estado), ayuda: '' }
   const acciones = accionesDe(item.estado)
-  // Lo que el servidor midió, más lo que pasó desde entonces si el reloj sigue corriendo.
-  const segundos = item.segundos + (item.estado === 'en_ejecucion' ? Math.max(0, (ahora - item.medidoEn) / 1000) : 0)
 
   useEffect(() => {
     if (pidiendo) notaRef.current?.focus()
@@ -148,7 +192,6 @@ function Asignada({ item, ahora, alHacer, alAbrir, movil = false, nombreUnidad =
   const odt = movil
     ? { id: item.id, estado: item.estado, descripcion: item.titulo, tipoFalla: null, tipo: item.tipo === 'preventiva' ? 'preventiva' : 'correctiva', prioridad: item.prioridad, creadaEn: item.creadaEn, vehiculoNombre: nombreUnidad || item.vehiculoNombre }
     : { id: item.id, estado: item.estado, descripcion: item.titulo, tipoFalla: item.tipoFalla, prioridad: item.prioridad, creadaEn: item.creadaEn, vehiculoNombre: item.vehiculoNombre }
-  const corre = item.estado === 'en_ejecucion'
   return (
     <TarjetaMantenimiento odt={odt} alAbrir={alAbrir}>
       <div className="mnt-asig-fila">
@@ -159,24 +202,7 @@ function Asignada({ item, ahora, alHacer, alAbrir, movil = false, nombreUnidad =
           {/* La app dice solo el momento; la ayuda larga queda para la computadora. */}
           {!movil && momento.ayuda && <p>{momento.ayuda}</p>}
         </div>
-        {movil ? (
-          <dl className={`mnt-asig-tiempo${corre ? ' corre' : ''}`} aria-label={`Tiempo trabajado ${formatoReloj(segundos)}${corre ? ', corriendo' : ''}`}>
-            <dt>
-              {corre ? <i className="mnt-asig-latido" aria-hidden="true" /> : (
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M4 4h16v16H4z" /><path d="M9 9v6" /><path d="M15 9v6" />
-                </svg>
-              )}
-              Tiempo trabajado
-            </dt>
-            <dd>{formatoReloj(segundos)}</dd>
-          </dl>
-        ) : (
-          <dl className="mnt-asig-tiempo">
-            <dt><Icono nombre="reloj" tam={16} />Tiempo trabajado</dt>
-            <dd>{textoTiempo(segundos)}</dd>
-          </dl>
-        )}
+        <RelojTrabajo item={item} movil={movil} />
       </div>
 
       {!pidiendo && acciones.length > 0 && (
