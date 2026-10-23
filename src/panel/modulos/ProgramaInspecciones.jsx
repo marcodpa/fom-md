@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -6,6 +6,11 @@ import { Buscador, Campo, Cargando, Chips, ErrorCarga, Modal, Tag, Tarjeta, Vaci
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
 import FormatosListos from '../comp/FormatosListos'
+import { hojaDePlantilla, hojasConocidas } from '../datos/hojasEmpresa'
+
+// «La hoja de tu empresa» trae el lector de PDF, el de fotos y el de Excel: se carga solo al abrirla.
+const HojaEmpresa = lazy(() => import('../comp/HojaEmpresa'))
+const imprimirPrueba = (...a) => import('../comp/HojaEmpresa').then((m) => m.imprimirPrueba(...a))
 
 const HALLAZGOS = {pendiente:['Pendiente','ambar'],en_seguimiento:['En seguimiento','azul'],resuelto:['Resuelto','verde'],descartado:['Descartado','gris']}
 const PLANTILLAS = {borrador:['Borrador','gris'],publicada:['Publicada','verde'],archivada:['Archivada','gris']}
@@ -23,6 +28,9 @@ export default function ProgramaInspecciones({vista='hallazgos'}) {
   const [seleccionId,setSeleccionId]=useState(null)
   const [confirmacion,setConfirmacion]=useState(null)
   const [creando,setCreando]=useState(false)
+  const [desdeHoja,setDesdeHoja]=useState(false)
+  const conHoja=new Set(vista==='plantillas'?hojasConocidas().map(h=>h.codigo+'@'+h.version):[])
+  const probarHoja=async t=>{setAviso('');const h=await hojaDePlantilla({codigo:t.codigo,version:t.version});if(!h)return setAviso('No encontramos la hoja de esta plantilla en este navegador.');imprimirPrueba(h.mapa,h.paginas)}
   const [aviso,setAviso]=useState('')
   const carga=useDatos(()=>vista==='hallazgos'?repo.programaInspecciones.hallazgos({estado:filtro}):repo.programaInspecciones.plantillas({}),[vista,filtro])
   const lista=(carga.datos??[]).filter(x=>(vista!=='plantillas'||!filtro||x.estado===filtro)&&[x.vehiculo,x.placa,x.nombre,x.codigo,x.punto,x.asignadoA,x.plantilla].some(v=>String(v||'').toLocaleLowerCase().includes(q.toLocaleLowerCase())))
@@ -33,7 +41,7 @@ export default function ProgramaInspecciones({vista='hallazgos'}) {
   const hallazgoBotones=h=><div className="insp-context-actions">{h.estado==='pendiente'&&<button className="pnl-btn primario" type="button" onClick={()=>accion(h,'en_seguimiento','hallazgo')}>Dar seguimiento →</button>}{['pendiente','en_seguimiento'].includes(h.estado)&&<><button className="pnl-btn" type="button" onClick={()=>accion(h,'resuelto','hallazgo')}>Resolver</button><button className="pnl-btn sutil" type="button" onClick={()=>accion(h,'descartado','hallazgo')}>Descartar</button></>}</div>
   return <>
     {aviso&&<p className="insp-success" role="status">{aviso}</p>}
-    <div className="insp-toolbar"><div><h2>{vista==='hallazgos'?'Atiende lo que salió mal':'Listas claras para cada revisión'}</h2><p>{vista==='hallazgos'?'Hallazgos registrados desde la app y su seguimiento.':'Crea un borrador, añade puntos y publícalo para que los conductores lo usen en la app.'}</p></div>{vista==='plantillas'&&<button className="pnl-btn primario" type="button" onClick={()=>setCreando(true)}><Icono nombre="mas" tam={18}/>Nueva plantilla</button>}</div>
+    <div className="insp-toolbar"><div><h2>{vista==='hallazgos'?'Atiende lo que salió mal':'Listas claras para cada revisión'}</h2><p>{vista==='hallazgos'?'Hallazgos registrados desde la app y su seguimiento.':'Crea un borrador, añade puntos y publícalo para que los conductores lo usen en la app.'}</p></div>{vista==='plantillas'&&<div className="insp-cab-acciones"><button className="pnl-btn sutil" type="button" onClick={()=>setDesdeHoja(true)}><Icono nombre="documento" tam={18}/>Crear desde la hoja de tu empresa</button><button className="pnl-btn primario" type="button" onClick={()=>setCreando(true)}><Icono nombre="mas" tam={18}/>Nueva plantilla</button></div>}</div>
     {vista==='plantillas'&&<FormatosListos plantillas={carga.datos} alPublicar={m=>{carga.recargar();setAviso(m)}}/>}
     <div className="insp-filters"><Chips opciones={opciones} valor={filtro} alCambiar={setFiltro}/><Buscador valor={q} alCambiar={setQ} placeholder={vista==='plantillas'?'Buscar plantilla…':'Buscar unidad, responsable o punto…'}/></div>
     <div className={vista==='plantillas'?'':'insp-split'}>
@@ -41,11 +49,12 @@ export default function ProgramaInspecciones({vista='hallazgos'}) {
         <Feedback carga={carga} vacio={vista==='plantillas'?'Sin plantillas todavía':'Sin registros con este filtro'}>
           {!lista.length&&<Vacio icono="buscar" titulo="Sin coincidencias" texto="Cambia la búsqueda o el estado."/>}
           {vista==='hallazgos'&&[...lista].sort((a,b)=>Number(b.critico)-Number(a.critico)).map(h=><article className={'insp-list-row'+(seleccion?.id===h.id?' selected':'')} key={h.id}><Icono nombre={h.critico?'alerta':'inspeccion'} tam={24}/><div><button type="button" className="pnl-table-action" aria-pressed={seleccion?.id===h.id} onClick={()=>setSeleccionId(h.id)}>{h.vehiculo} · {h.punto}</button><p>{h.nota||etiquetaPunto(h.estadoPunto)}</p>{h.critico&&<Tag color="rojo">Crítico</Tag>}</div>{estado(HALLAZGOS,h.estado)}</article>)}
-          {vista==='plantillas'&&lista.map(t=><article className="insp-template-row" key={t.id}><Icono nombre="documento" tam={24}/><div><h3>{t.nombre}</h3><p>{t.codigo} · v{t.version}</p></div><span>{f.cantidad(t.puntos, 'punto', 'puntos')}</span>{estado(PLANTILLAS,t.estado)}<div className="insp-inline-actions">{t.estado==='borrador'&&<button className="pnl-btn primario" type="button" onClick={()=>accion(t,'publicada','plantilla')}>Publicar</button>}{t.estado!=='archivada'&&<button className="pnl-btn sutil" type="button" onClick={()=>accion(t,'archivada','plantilla')}>Archivar</button>}</div></article>)}
+          {vista==='plantillas'&&lista.map(t=><article className="insp-template-row" key={t.id}><Icono nombre="documento" tam={24}/><div><h3>{t.nombre}</h3><p>{t.codigo} · v{t.version}</p></div><span>{f.cantidad(t.puntos, 'punto', 'puntos')}</span>{conHoja.has(t.codigo+'@'+t.version)&&<Tag color="azul">Con hoja de la empresa</Tag>}{estado(PLANTILLAS,t.estado)}<div className="insp-inline-actions">{conHoja.has(t.codigo+'@'+t.version)&&<button className="pnl-btn sutil" type="button" onClick={()=>probarHoja(t)}>Imprimir prueba</button>}{t.estado==='borrador'&&<button className="pnl-btn primario" type="button" onClick={()=>accion(t,'publicada','plantilla')}>Publicar</button>}{t.estado!=='archivada'&&<button className="pnl-btn sutil" type="button" onClick={()=>accion(t,'archivada','plantilla')}>Archivar</button>}</div></article>)}
         </Feedback>
       </Tarjeta>
       {vista!=='plantillas'&&<aside className="insp-side"><h2>Detalle del hallazgo</h2>{seleccion?<><h3>{seleccion.vehiculo}</h3>{estado(HALLAZGOS,seleccion.estado)}<h3 className="insp-category">{seleccion.punto}</h3>{seleccion.critico&&<Tag color="rojo">Falla crítica</Tag>}<p className="insp-info">{seleccion.nota||'Sin nota registrada'}</p><Link className="pnl-link" to={inspeccionUrl(seleccion.inspeccionId)}>Ver inspección →</Link>{seleccion.odtId&&<Link className="pnl-link" to={'/panel/mantenimiento?orden='+encodeURIComponent(seleccion.odtId)}>Ver ODT vinculada →</Link>}{hallazgoBotones(seleccion)}</>:<p>Elige un registro para consultar su contexto.</p>}</aside>}
     </div>
+    {desdeHoja&&<Suspense fallback={<Modal titulo="Crear desde la hoja de tu empresa" abierto alCerrar={()=>setDesdeHoja(false)}><Cargando filas={3}/></Modal>}><HojaEmpresa plantillas={carga.datos??[]} alCerrar={()=>setDesdeHoja(false)} alGuardar={m=>{carga.recargar();setAviso(m)}}/></Suspense>}
     {creando&&<NuevaPlantilla alCerrar={()=>setCreando(false)} alGuardar={()=>{setCreando(false);carga.recargar();setAviso('Plantilla creada como borrador.')}}/>}
     {confirmacion&&<Confirmacion key={confirmacion.obj.id+confirmacion.destino} {...confirmacion} alCerrar={()=>setConfirmacion(null)} alGuardar={actualizada}/>}
   </>

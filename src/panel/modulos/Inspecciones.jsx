@@ -12,6 +12,8 @@ import InspeccionesPorPersona from './InspeccionesPorPersona'
 import { diaDe, limitesDelMes, mesDe, moverMes, nombreDelMes } from '../comp/CalendarioInspecciones'
 import { AVISO_LOTE, armarPlanillas, imprimirHtml } from '../datos/planillaInspeccion'
 import { leerAyudasDelFormato } from '../datos/ayudasFormato'
+import { sobreHoja } from '../datos/hojaEmpresa'
+import { hojaDeFormato } from '../datos/hojasEmpresa'
 import './inspecciones.css'
 import '../../styles/movil-modulos.css'
 
@@ -93,6 +95,19 @@ const CUANDO = ['creadaEn', 'fecha']
 const leerRespuestas = i => CONECTADO ? repo.inspecciones.obtener(i.id) : Promise.resolve(checklistDe(i))
 
 /**
+ * La hoja de la empresa del formato de una inspección, si su plantilla la
+ * tiene: entonces se imprime sobre esa hoja. La lista de plantillas se lee
+ * una vez por impresión.
+ */
+function lectorDeHojas() {
+  let plantillas = null
+  return async (nombre) => {
+    plantillas ??= repo.programaInspecciones?.plantillas ? repo.programaInspecciones.plantillas({}).catch(() => []) : Promise.resolve([])
+    return hojaDeFormato(nombre, await plantillas)
+  }
+}
+
+/**
  * Imprimir la planilla, como la app (T-79): una hoja A4 por inspección, con lo
  * respondido y las viñetas del formato. Los detalles se piden en tandas y, si
  * son muchas hojas, se avisa antes de que tarde. `leidas` (id → respuestas)
@@ -106,7 +121,7 @@ function useImpresion() {
     setOcupado(true)
     setAviso(lista.length > AVISO_LOTE ? { texto: `Son ${f.numero(lista.length)} hojas: puede tardar un poco.`, tono: 'info' } : null)
     try {
-      await imprimirHtml(await armarPlanillas(lista, { leerRespuestas, leerAyudas: leerAyudasDelFormato, leidas }))
+      await imprimirHtml(await armarPlanillas(lista, { leerRespuestas, leerAyudas: leerAyudasDelFormato, leidas, leerHoja: lectorDeHojas(), sobreHoja: sobreHoja() }))
       setAviso(null)
       return true
     } catch (e) {

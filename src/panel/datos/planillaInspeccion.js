@@ -290,12 +290,18 @@ const ESTILO = `
 /**
  * El documento con una o varias hojas, cada una en su página.
  * `ayudas` cruza el ítem del formato con sus sub-puntos (ver ayudasDeItems).
+ *
+ * `sobreHoja` ({ pintar, estilo }) imprime sobre la hoja de la empresa las
+ * inspecciones que la traen (`h.hojaEmpresa`, ver hojaEmpresa.js); las demás
+ * salen con la planilla de siempre. Llega de fuera para que este archivo
+ * siga sin importaciones.
  */
-export function htmlPlanillas(hojas, ayudas = new Map()) {
+export function htmlPlanillas(hojas, ayudas = new Map(), sobreHoja = null) {
+  const conHoja = (h) => Boolean(sobreHoja && h.hojaEmpresa)
   return `<!doctype html><html lang="es"><head><meta charset="utf-8" />
     <title>Verificaciones para el inicio del trabajo</title>
-    <style>${ESTILO}</style></head><body>
-    ${hojas.map((h) => hoja(h, ayudas)).join('')}
+    <style>${ESTILO}${hojas.some(conHoja) ? sobreHoja.estilo : ''}</style></head><body>
+    ${hojas.map((h) => (conHoja(h) ? sobreHoja.pintar(h.hojaEmpresa, h) : hoja(h, ayudas))).join('')}
   </body></html>`
 }
 
@@ -307,22 +313,37 @@ export function htmlPlanillas(hojas, ayudas = new Map()) {
  *
  * `leerRespuestas(insp)` y `leerAyudas(nombreDelFormato)` los pone quien llama
  * (demostración o servidor). Si la ayuda falla, la hoja sale sin viñetas.
+ *
+ * Con `leerHoja(nombreDelFormato)` y `sobreHoja`, la inspección cuya
+ * plantilla tiene hoja de la empresa se imprime sobre esa hoja (una lectura
+ * por formato). Si la hoja no se puede leer, sale la planilla de siempre.
  */
-export async function armarPlanillas(inspecciones, { leerRespuestas, leerAyudas, leidas = new Map(), tanda = TANDA }) {
+export async function armarPlanillas(inspecciones, { leerRespuestas, leerAyudas, leidas = new Map(), tanda = TANDA, leerHoja = null, sobreHoja = null }) {
   const hojas = []
   for (let n = 0; n < inspecciones.length; n += tanda) {
     const grupo = inspecciones.slice(n, n + tanda)
     const respuestas = await Promise.all(grupo.map((i) => leidas.get(i.id) ?? leerRespuestas(i)))
     grupo.forEach((i, k) => hojas.push(hojaDe(i, respuestas[k])))
   }
+  const formatos = new Set(inspecciones.map((i) => i.plantilla || ''))
   const ayudas = new Map()
   if (leerAyudas) {
-    for (const formato of new Set(inspecciones.map((i) => i.plantilla || ''))) {
+    for (const formato of formatos) {
       const m = await Promise.resolve().then(() => leerAyudas(formato)).catch(() => null)
       m?.forEach((v, k) => { if (!ayudas.has(k)) ayudas.set(k, v) })
     }
   }
-  return htmlPlanillas(hojas, ayudas)
+  if (leerHoja && sobreHoja) {
+    const hojaDelFormato = new Map()
+    for (const formato of formatos) {
+      if (formato) hojaDelFormato.set(formato, await Promise.resolve().then(() => leerHoja(formato)).catch(() => null))
+    }
+    inspecciones.forEach((i, k) => {
+      const guardada = hojaDelFormato.get(i.plantilla || '')
+      if (guardada) hojas[k].hojaEmpresa = guardada
+    })
+  }
+  return htmlPlanillas(hojas, ayudas, sobreHoja)
 }
 
 /**
