@@ -1,0 +1,11 @@
+# T-143 · Inspecciones en Plataforma. Capturas reales del panel en modo demostración (3x, oscuro).
+# Uso: python src/assets/marketing/v8/preparar_fotos.py --lista src/assets/marketing/v8/fuentes-t143.txt
+cap-insp-resultado               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-insp-resultado-arriba.png
+cap-insp-bloqueada               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-insp-bloqueada.png
+cap-insp-historial               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-insp-historial.png
+cap-insp-hoja                    panel     comparativa/web-v8-fotos/capturas-panel/3x/w-hoja-preguntas.png
+cap-movil-insp-resultado         telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-insp-resultado.png
+cap-movil-insp-bloqueada         telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-insp-bloqueada.png
+cap-movil-insp-historial         telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-insp-historial.png
+# La planilla impresa de una inspección de la demo (Unidad 03, bloqueada), A4 a 150 ppp, recortada al contenido.
+planilla-inspeccion              panel     comparativa/web-v8-fotos/capturas-panel/3x/planilla-inspeccion.png

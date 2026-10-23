@@ -2,7 +2,7 @@ export const PAGES = {
   "plataforma": {
     "eyebrow": "La plataforma FOM",
     "title": "Toda tu flota en un solo panel",
-    "subtitle": "Un panel web para supervisar desde la computadora y una app para el conductor en la calle, sobre los mismos datos. Para 10 o cientos de unidades, con la misma sencillez.",
+    "subtitle": "Un panel web para supervisar desde la computadora y una app para el conductor y el supervisor, sobre los mismos datos. Para 10 o cientos de unidades, con la misma sencillez.",
     "sections": [
       {
         "heading": "Un panel único para toda la flota",
@@ -39,7 +39,7 @@ export const PAGES = {
             "text": "Mapa en vivo, órdenes de trabajo, inspecciones, documentos, personal y reportes desde el navegador."
           },
           {
-            "label": "App del conductor",
+            "label": "App para conductor y supervisor",
             "text": "Inspección antes de salir, reporte de falla con foto y botón de emergencia, en el teléfono."
           },
           {

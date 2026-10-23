@@ -188,9 +188,9 @@
 .v8-site .mnt-punto.is-izq span { transform: translateX(8px); }
 .v8-site .mnt-punto.is-abajo { flex-direction: column; gap: 8px; transform: translate(-50%, -9px); }
 .v8-site .mnt-punto.is-abajo span { transform: translateY(-6px); }
-.v8-site :is(.mnt-escena, .mnt-plan-medio).is-visto .is-activo .mnt-punto i { opacity: 1; transform: none; transition-delay: calc(.75s + var(--i) * .38s); }
-.v8-site :is(.mnt-escena, .mnt-plan-medio).is-visto .is-activo .mnt-punto span { opacity: 1; transform: none; transition-delay: calc(.9s + var(--i) * .38s); }
-.v8-site :is(.mnt-escena, .mnt-plan-medio).is-visto .is-activo .mnt-punto i::after { animation: mnt-late 2.4s ease-out infinite; animation-delay: calc(1.2s + var(--i) * .38s); }
+.v8-site :is(.mnt-escena, .mnt-plan-medio, .insp-hoja-medio).is-visto .is-activo .mnt-punto i { opacity: 1; transform: none; transition-delay: calc(.75s + var(--i) * .38s); }
+.v8-site :is(.mnt-escena, .mnt-plan-medio, .insp-hoja-medio).is-visto .is-activo .mnt-punto span { opacity: 1; transform: none; transition-delay: calc(.9s + var(--i) * .38s); }
+.v8-site :is(.mnt-escena, .mnt-plan-medio, .insp-hoja-medio).is-visto .is-activo .mnt-punto i::after { animation: mnt-late 2.4s ease-out infinite; animation-delay: calc(1.2s + var(--i) * .38s); }
 @keyframes mnt-late { 0% { opacity: .7; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(2.1); } }
 .v8-site .mnt-nota { margin-top: 8px; }
 
@@ -229,4 +229,43 @@
   .v8-site .mnt-punto i, .v8-site .mnt-punto span { transition: none !important; }
   .v8-site .is-activo .mnt-punto i, .v8-site .is-activo .mnt-punto span { opacity: 1; transform: none; }
   .v8-site .mnt-punto i::after { animation: none !important; }
+}
+
+/* ── Inspecciones (T-143) ───────────────────────────────────────────────────────────────────
+   El recorrido por pasos usa las piezas de Mantenimiento (.mnt-*): la sección lleva las dos
+   clases. Aquí solo lo propio: el tono de la falla, las tres respuestas, el enlace a
+   Mantenimiento, la hoja de la empresa y la planilla impresa (papel). */
+.v8-site .mnt .is-peligro { --mnt-tono: var(--v8-peligro); }
+.v8-site .insp-respuestas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; list-style: none; }
+.v8-site .insp-respuestas .mnt-estado { padding: 5px 11px; }
+.v8-site .insp-paso-enlace { margin-top: 20px; }
+
+/* La hoja de tu empresa */
+.v8-site .v8-c.insp-hoja { margin-top: 120px; }
+.v8-site .insp-hoja-medio { position: relative; }
+.v8-site .insp-nuevo { display: inline-block; vertical-align: .08em; margin-right: 10px; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  line-height: 1.2; letter-spacing: 0; color: var(--v8-sobre-azul); background: var(--v8-azul); }
+.v8-site .insp-hoja-pasos { display: grid; gap: 14px; margin-top: 28px; list-style: none; }
+.v8-site .insp-hoja-pasos li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: start; }
+.v8-site .insp-hoja-pasos li > span { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 13px; font-weight: 600;
+  color: var(--v8-azul-claro); background: rgba(61, 155, 245, .14); }
+.v8-site .insp-hoja-pasos p { padding-top: 2px; }
+.v8-site .insp-hoja-otras { margin-top: 24px; }
+.v8-site .insp-hoja-aviso { margin-top: 12px; text-align: center; }
+
+/* Planilla impresa: una hoja de papel real (blanca) apoyada sobre el fondo, con su sombra. */
+.v8-site .v8-c.insp-planilla { margin-top: 120px; }
+.v8-site .insp-papel { margin: 0; justify-self: center; width: min(100%, 460px); }
+.v8-site .insp-papel .v8-foto { width: 100%; height: auto; border-radius: 10px;
+  box-shadow: 0 2px 0 rgba(255, 255, 255, .06), 0 30px 60px -24px rgba(3, 8, 20, .9), 0 12px 24px -12px rgba(3, 8, 20, .7); }
+.v8-site .insp-papel .v8-nota-demo { margin-top: 16px; }
+
+@media (max-width: 899px) {
+  .v8-site .v8-c.insp-hoja, .v8-site .v8-c.insp-planilla { margin-top: 80px; }
+  .v8-site .insp-planilla-texto { order: -1; }
+}
+@media (max-width: 599px) {
+  .v8-site .v8-c.insp-hoja, .v8-site .v8-c.insp-planilla { margin-top: 72px; }
+  .v8-site .insp-hoja-pasos { gap: 12px; margin-top: 22px; }
+  .v8-site .insp-papel { width: min(100%, 340px); }
 }
