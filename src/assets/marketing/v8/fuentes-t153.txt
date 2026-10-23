@@ -1,0 +1,27 @@
+# T-153 (23 oct 2026): capturas de teléfono de la web = capturas de la APP real (fom-driver-juan,
+# demo de tools/app-demo-api, repetidas en T-161). Tabla de parejas: comparativa/web-v8-fotos/capturas-app/INDICE-APP.md
+# Uso: python src/assets/marketing/v8/preparar_fotos.py --lista src/assets/marketing/v8/fuentes-t153.txt
+# Quedan con la captura vieja (sin pareja usable): cap-movil-areas-vehiculos (la app no lista las unidades
+# de cada área), cap-movil-mnt-fotos y cap-movil-mnt-reportar-fotos (las órdenes de la demo van sin fotos).
+# En espera: cap-movil-mnt-reportar y cap-movil-mnt-resuelta son el arranque de dos pantallas largas de
+# pantallasV8.js que siguen con mnt-reportar-fotos y mnt-fotos (viejas); se activan junto con ese cambio.
+cap-movil-cond-inicio            telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-inicio.png
+cap-movil-cond-mantenimiento     telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-mantenimiento.png
+cap-movil-cond-mapa              telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-mapa.png
+cap-movil-cond-perfil            telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-perfil.png
+cap-movil-insp-bloqueada         telefono  comparativa/web-v8-fotos/capturas-app/3x/m-insp-bloqueada.png
+cap-movil-insp-historial         telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-insp-historial.png
+cap-movil-insp-resultado         telefono  comparativa/web-v8-fotos/capturas-app/3x/m-insp-resultado.png
+cap-movil-mnt-asignadas          telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-asignadas.png
+cap-movil-mnt-plan               telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-plan.png
+# cap-movil-mnt-reportar         telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-reportar.png
+# cap-movil-mnt-resuelta         telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-resuelta.png
+cap-movil-sup-alertas            telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-alertas.png
+cap-movil-sup-conductor          telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-conductor.png
+cap-movil-sup-inspecciones       telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-inspecciones.png
+cap-movil-sup-mantenimiento      telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-mantenimiento.png
+cap-movil-sup-mapa               telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-mapa.png
+cap-movil-sup-mapa-unidad        telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-mapa-unidad.png
+cap-movil-sup-reportes           telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-reportes.png
+cap-movil-sup-resumen            telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-resumen.png
+cap-movil-sup-vehiculos          telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-vehiculos.png

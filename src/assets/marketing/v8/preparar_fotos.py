@@ -17,7 +17,7 @@ Reglas de calidad (pedido de Marco: fotos nítidas y fondo compartido):
     dos anchos, su ancho real es la copia mayor.
   - Sin recomprimir de más: si junto a la fuente hay una carpeta «web/» con las copias ya
     optimizadas del paquete (<nombre>-<ancho>.avif|webp), se copian tal cual. Solo se codifica
-    desde la fuente cuando no existen.
+    desde la fuente cuando no existen o cuando la fuente es más nueva que ellas.
   - Anchos: fotos 640, 1280, 1920 y 2880 (2880 solo si la fuente lo tiene); fotos «-movil»
     750 y 1170; capturas del panel 1280, 1920, 2880; capturas de la app 750 y 1170.
   - Capturas (panel / telefono): calidad alta para que el texto de la interfaz se lea limpio.
@@ -84,10 +84,15 @@ def copias_listas(nombre, fuente, W, H):
         m = patron.fullmatch(f)
         if m:
             listas.setdefault(int(m.group(1)), {})[m.group(2)] = os.path.join(web, f)
-    # Solo sirven si son la misma foto (misma proporción) y traen los dos formatos.
+    # Solo sirven si son la misma foto (misma proporción), traen los dos formatos y no son más
+    # viejas que la fuente (si la fuente cambió después, p. ej. una captura repetida con el mismo
+    # nombre, las copias de web/ son de la imagen anterior y hay que codificar la nueva).
     buenas = {}
+    hecha = os.path.getmtime(fuente)
     for a, fmts in listas.items():
         if set(fmts) != set(FORMATOS) or a > W:
+            continue
+        if min(os.path.getmtime(r) for r in fmts.values()) < hecha:
             continue
         w, h = Image.open(fmts['webp']).size
         if w == a and abs(h - H * a / W) <= 2:
