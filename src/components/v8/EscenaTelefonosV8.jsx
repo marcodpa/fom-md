@@ -1,6 +1,7 @@
 // Escena de teléfonos de la web v8 (pedido de Marco, a partir del efecto de slush.app, con el
-// estilo de FOM): una tarjeta de vidrio oscuro con una cinta azul FOM en 3D detrás, como una
-// ruta que cruza la tarjeta, y dos o tres teléfonos de frente con capturas REALES de la app.
+// estilo de FOM): una cinta azul FOM en 3D, como una ruta que cruza la escena, y dos o tres
+// teléfonos de frente con capturas REALES de la app. Sin caja propia (T-134): todo va sobre el
+// fondo de la página y la cinta se funde en él por los bordes.
 // El movimiento lo hace useMomentoV8 (momentoTelefonosV8.js), atado al scroll:
 //   escritorio ≥ 1024 px: la escena se queda fija; primero la pantalla de cada teléfono se
 //   desplaza sola (como si alguien hiciera scroll en la app), luego los teléfonos se inclinan en

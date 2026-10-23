@@ -242,9 +242,10 @@ export default function useMomentoV8(raiz, momentos) {
             // Rejilla: suben inclinadas hacia atrás y miran hacia el centro de la pantalla.
             const r = el.getBoundingClientRect()
             const lado = Math.abs(r.left + r.width / 2 - centro) < 60 ? 0 : Math.sign(r.left + r.width / 2 - centro)
-            const giroY = -lado * 14 * f
-            const z = -((r.width / 2) * Math.sin(Math.abs(giroY) * RAD) + 140 * f)
-            gsap.set(el, { opacity: 0, y: 70 * f, z, rotationX: 20 * f, rotationY: giroY, transformOrigin: '50% 100%', transformPerspective: 1200 })
+            // T-134: menos giro y menos recorrido; la tarjeta llega, no aterriza.
+            const giroY = -lado * 9 * f
+            const z = -((r.width / 2) * Math.sin(Math.abs(giroY) * RAD) + 90 * f)
+            gsap.set(el, { opacity: 0, y: 48 * f, z, rotationX: 12 * f, rotationY: giroY, transformOrigin: '50% 100%', transformPerspective: 1200 })
           }
         })
         ScrollTrigger.batch(tarjetas, {
@@ -252,8 +253,8 @@ export default function useMomentoV8(raiz, momentos) {
           onEnter: lote => {
             const base = espera()
             lote.forEach((el, i) => gsap.to(el, {
-              opacity: 1, x: 0, y: 0, z: 0, rotationX: 0, rotationY: 0, duration: 1.5, ease: 'power3.out',
-              delay: base + i * 0.16, overwrite: true, clearProps: 'transform,opacity',
+              opacity: 1, x: 0, y: 0, z: 0, rotationX: 0, rotationY: 0, duration: 1.1, ease: 'power3.out',
+              delay: base + i * 0.1, overwrite: true, clearProps: 'transform,opacity',
               onComplete: () => listas.add(el),
             }))
           },
@@ -299,10 +300,10 @@ export default function useMomentoV8(raiz, momentos) {
         bloques.forEach(el => {
           const alto = el.offsetHeight
           const giro = anguloSeguro(alto, 110 * f, 6 * f)
-          gsap.set(el, { y: 44 * f, z: -(alto * Math.sin(giro * RAD) + 40 * f), rotationX: giro, transformOrigin: '50% 0%', transformPerspective: 1600 })
+          gsap.set(el, { y: 32 * f, z: -(alto * Math.sin(giro * RAD) + 40 * f), rotationX: giro, transformOrigin: '50% 0%', transformPerspective: 1600 })
           ScrollTrigger.create({
             trigger: el, start: 'top 92%', once: true,
-            onEnter: () => gsap.to(el, { y: 0, z: 0, rotationX: 0, duration: 1.5, ease: 'power3.out', delay: espera(), overwrite: true, clearProps: 'transform' }),
+            onEnter: () => gsap.to(el, { y: 0, z: 0, rotationX: 0, duration: 1.1, ease: 'power3.out', delay: espera(), overwrite: true, clearProps: 'transform' }),
           })
         })
       })
