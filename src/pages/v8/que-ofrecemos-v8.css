@@ -24,6 +24,8 @@
 .qo-hero-accion { margin-top: 32px; }
 .qo-hero-puntos { display: flex; gap: 28px; margin-top: 36px; }
 .qo-hero-puntos li { flex: 1 1 0; min-width: 0; }
+.qo-hero-puntos b { display: block; }
+.qo-hero-puntos .v8-xs { display: block; margin-top: 4px; }
 
 /* ── Qué ofrecemos: tres tarjetas de vidrio ──────────────────────────── */
 .qo-oferta-titulo { text-align: center; }

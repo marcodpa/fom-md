@@ -4,7 +4,7 @@
 //   1) Hero: el titular entra escalonado y la foto pasa de 92 % a 100 % al bajar (base: HeroV8).
 //   2) Escena fija «Panel en la oficina. App en la calle.»: el panel se aparta y entra el teléfono,
 //      cuya pantalla se desplaza (solo escritorio ≥ 1024 px). Debajo, la escena de teléfonos
-//      (EscenaTelefonosV8): la app del conductor en dos pantallas que se desplazan y se inclinan.
+//      (EscenaTelefonosV8): la app (vista del conductor) en dos pantallas que se desplazan y se inclinan.
 // Todo lo demás: quieto o aparición suave. Teléfono: sin escenas fijas, mismas piezas apiladas.
 import { useRef } from 'react'
 import { PAGES } from '../../content/pages'
@@ -26,7 +26,7 @@ const LOCAL = [
 
 const RASGOS = [
   { icono: 'monitor', titulo: 'Panel del supervisor', texto: 'Mapa en vivo, órdenes de trabajo, inspecciones, documentos, personal y reportes desde el navegador.' },
-  { icono: 'phone', titulo: 'App del conductor', texto: 'Inspección antes de salir, reporte de falla con foto y botón de emergencia, en el teléfono.' },
+  { icono: 'phone', titulo: 'La app', texto: 'El conductor hace la inspección y reporta fallas con foto; el supervisor sigue la flota en el teléfono.' },
   { icono: 'database', titulo: 'Una sola base de datos', texto: 'Nadie pasa información de un lado a otro ni exporta archivos entre sistemas.' },
   { icono: 'cloud', titulo: 'Aguanta sin señal', texto: 'La app guarda lo que el conductor registra y lo sincroniza al volver la cobertura.' },
 ]
@@ -56,7 +56,7 @@ const CIFRAS_MAPA = [
 
 // App en la calle: la falla que reporta el conductor y la orden ya resuelta (pantallas largas reales).
 const TELEFONOS = [
-  { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app del conductor: descripción, tipo Frenos, prioridad Alta y fotos de la falla. Datos de demostración.',
+  { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app, vista del conductor: descripción, tipo Frenos, prioridad Alta y fotos de la falla. Datos de demostración.',
     pie: <><b className="v8-fuerte">Reporte de falla.</b> Con foto, desde la app.</>, corto: 'Reporte de falla con foto.' },
   { nombre: 'cap-movil-mnt-resuelta', alt: 'Orden resuelta en la app: resultado del trabajo, costo, tiempo hasta el cierre, fotos e historial. Datos de demostración.',
     pie: <><b className="v8-fuerte">Orden resuelta.</b> Con costo, fotos e historial.</>, corto: 'Orden resuelta, con su historial.' },
@@ -102,7 +102,7 @@ export default function InicioV8() {
     }
   })
 
-  return <SitioV8 raiz={raiz} titulo="FOM — Tu flota conectada. Tu operación, bajo control." descripcion="FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas: panel web para el supervisor y app para el conductor.">
+  return <SitioV8 raiz={raiz} titulo="FOM — Tu flota conectada. Tu operación, bajo control." descripcion="FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas: panel web y una app para el conductor y el supervisor.">
     <HeroV8 className="inicio-hero"
       kicker="Flotas que mantienen el mundo en movimiento" kickerTinta
       titulo={['Tu flota conectada.', 'Tu operación, bajo control.']}
@@ -110,7 +110,7 @@ export default function InicioV8() {
       primaria={{ to: rutaV8('contacto'), texto: 'Solicitar demostración' }}
       secundaria={{ to: rutaV8('plataforma'), texto: 'Ver cómo funciona' }}
       foto={{ nombre: 'hero-monitor-carretera', movilNombre: 'inicio-hero-movil-v', alt: 'Monitor con el Resumen actual del panel FOM frente a la autopista al atardecer. Datos de demostración.', posicion: '70% 50%' }}
-      nota={{ titulo: 'Panel web y app del conductor', texto: 'Sobre los mismos datos · Datos de demostración', accion: { to: rutaV8('plataforma'), texto: 'Conocer la plataforma' } }}
+      nota={{ titulo: 'Panel web y app', texto: 'Sobre los mismos datos · Datos de demostración', accion: { to: rutaV8('plataforma'), texto: 'Conocer la plataforma' } }}
     />
 
     <NavLocalV8 titulo="Inicio" enlaces={LOCAL} />
@@ -134,11 +134,11 @@ export default function InicioV8() {
           alt="Resumen actual en el teléfono del supervisor. Datos de demostración." />
         <p className="inicio-duo-pie v8-sm v8-t2">
           <span><b className="v8-fuerte">En la oficina.</b> Panel web del supervisor.</span>
-          <span><b className="v8-fuerte">En la carretera.</b> App del conductor.</span>
+          <span><b className="v8-fuerte">En el teléfono.</b> App del supervisor y del conductor.</span>
         </p>
       </ContenedorV8>
       <ContenedorV8 className="inicio-telefonos">
-        <EscenaTelefonosV8 telefonos={TELEFONOS} etiqueta="La app del conductor: reporte de falla y orden resuelta" />
+        <EscenaTelefonosV8 telefonos={TELEFONOS} etiqueta="La app: reporte de falla y orden resuelta" />
       </ContenedorV8>
       <ContenedorV8><RasgosV8 className="inicio-rasgos" items={RASGOS} /></ContenedorV8>
     </SeccionV8>

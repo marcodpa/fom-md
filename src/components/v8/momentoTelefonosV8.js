@@ -2,7 +2,7 @@
 // movimiento» y limpia todo al desmontar). Solo transform y opacidad.
 //  - escenasTelefonosV8: EscenaTelefonosV8 ([data-v8-tels]). Escritorio: escena fija; primero se
 //    desplaza la pantalla de cada teléfono, luego se inclinan en 3D hacia lados opuestos y se
-//    separan; la cinta se mueve despacio detrás. Tableta y teléfono: lo mismo, más suave y sin
+//    separan. Tableta y teléfono: lo mismo, más suave y sin
 //    escena fija, mientras la escena cruza la pantalla.
 //  - telefonoSueltoV8: los teléfonos sueltos (CapturaFlotanteV8 de la app): inclinación 3D suave
 //    atada al scroll y, si la captura tiene continuación, la pantalla que se desplaza.
@@ -32,7 +32,6 @@ export function escenasTelefonosV8({ q, gsap, escritorio, f }) {
     const tels = [...escena.querySelectorAll('.v8-tels-tel')]
     if (!tels.length) return
     const n = tels.length
-    const cinta = escena.querySelector('.v8-tels-cinta')
     const barra = 90 // barra global flotante (14 + 64) y un respiro
 
     const tl = gsap.timeline({
@@ -76,8 +75,9 @@ export function escenasTelefonosV8({ q, gsap, escritorio, f }) {
       }, desde + Math.abs(lado) * 0.05)
     })
 
-    // La cinta se mueve despacio detrás (capas a distinta velocidad).
-    if (cinta) tl.fromTo(cinta, { xPercent: 2.5 * f, yPercent: 3 * f }, { xPercent: -2.5 * f, yPercent: -3 * f, duration: desde + 1.15 }, 0)
+    // Tramo vacío con la duración que tenía la cinta (T-139, ya no está): el reparto del scroll y
+    // el movimiento de los teléfonos quedan exactamente como antes.
+    tl.to({}, { duration: desde + 1.15 }, 0)
     // Pausa corta al final, antes de soltar la escena.
     if (escritorio) tl.to({}, { duration: 0.25 })
   })

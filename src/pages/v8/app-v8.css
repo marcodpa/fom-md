@@ -1,4 +1,4 @@
-/* App del conductor v8 (T-105): solo lo propio de esta página; lo común vive en
+/* App v8 (T-105; conductor y supervisor desde T-139): solo lo propio de esta página; lo común vive en
    components/v8/v8-base.css. Todo con .v8-site delante para ganar a la base sin depender del
    orden en que se cargan las hojas. */
 
@@ -18,6 +18,14 @@
 .v8-site .v8-sec.app-pantallas { padding-top: 120px; }
 .v8-site .v8-glow.app-pantallas-glow { top: 120px; height: 900px; }
 .v8-site .app-pantallas-escena { margin-top: 64px; }
+
+/* Supervisor (T-139): cuatro teléfonos con capturas reales de la vista del supervisor. */
+.v8-site .app-sup-rejilla { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; margin-top: 56px; text-align: center; }
+.v8-site .app-sup-item { display: flex; flex-direction: column; align-items: center; }
+.v8-site .app-sup-telefono { width: min(230px, 100%) !important; }
+.v8-site .app-sup-item .v8-h4 { margin-top: 20px; }
+.v8-site .app-sup-item .v8-sm { margin-top: 6px; max-width: 240px; }
+.v8-site .v8-nota-demo.app-sup-nota { margin-top: 28px; text-align: center; }
 
 /* Mi unidad */
 .v8-site .app-unidad-medio { position: relative; }
@@ -54,6 +62,7 @@
   .v8-site .app-pantallas-escena { margin-top: 40px; }
   .v8-site .app-unidad-texto { order: -1; }
   .v8-site .app-unidad-telefono { width: 190px !important; }
+  .v8-site .app-sup-rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 24px; }
 }
 
 /* Teléfono (tablero «App · teléfono»). */
@@ -67,6 +76,9 @@
   .v8-site .v8-glow.app-pantallas-glow { display: none; }
   .v8-site .app-pantallas-escena { margin-top: 28px; }
   .v8-site .app-unidad-foto { display: none; }
+  .v8-site .app-sup-rejilla { gap: 28px 14px; margin-top: 28px; }
+  .v8-site .app-sup-item .v8-h4 { margin-top: 12px; }
+  .v8-site .v8-nota-demo.app-sup-nota { margin-top: 20px; }
   .v8-site .app-unidad-telefono { position: relative; left: auto; bottom: auto; width: 240px !important; }
   .v8-site .app-indice-cifras { margin-top: 24px; gap: 26px 16px; }
   .v8-site .app-indice-foto, .v8-site .v8-vidrio.app-indice-caja { display: none; }

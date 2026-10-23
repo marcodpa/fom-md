@@ -7,6 +7,33 @@
 .seguridad-hero-caja { max-width: 600px; }
 .seguridad-hero .v8-lead { margin-top: 20px; }
 .seguridad-hero .v8-acciones { margin-top: 32px; }
+/* T-139 (Marco: fotos sin velos ni capas): la foto va con su brillo natural (cabina-carretera
+   regraduada sin el oscurecido horneado). El texto blanco se lee con una sombra de texto suave y,
+   en escritorio, un fundido corto SOLO en el borde izquierdo, donde empieza el texto; arriba y
+   abajo, el fundido de siempre con el fondo de la sección. Nada cubre la foto entera. */
+.seguridad-hero-caja :is(.v8-kick, .v8-h1, .v8-lead) {
+  text-shadow: 0 1px 2px rgba(4, 7, 11, .55), 0 2px 14px rgba(4, 7, 11, .5), 0 0 34px rgba(4, 7, 11, .35);
+}
+/* Sobre una foto clara, el gris secundario se pierde: la bajada va en blanco y el antetítulo con
+   una sombra algo más firme (letra pequeña). */
+.seguridad-hero-caja .v8-lead { color: var(--v8-texto); }
+.seguridad-hero-caja :is(.v8-kick, .v8-lead) {
+  text-shadow: 0 1px 2px rgba(4, 7, 11, .8), 0 1px 10px rgba(4, 7, 11, .7), 0 0 26px rgba(4, 7, 11, .5);
+}
+@media (max-width: 899px) {
+  /* En teléfono y tableta el texto va bajo la foto, sobre el fondo liso: color de siempre. */
+  .seguridad-hero-caja .v8-lead { color: var(--v8-texto-2); }
+}
+@media (min-width: 900px) {
+  .seguridad-hero-foto .v8-foto {
+    --seg-funde-y: linear-gradient(180deg, transparent, rgba(0,0,0,.2) 1.5%, rgba(0,0,0,.55) 3.5%, rgba(0,0,0,.85) 5.5%, #000 8%, #000 86%, rgba(0,0,0,.85) 90%, rgba(0,0,0,.55) 94%, rgba(0,0,0,.2) 97.5%, transparent);
+    --seg-funde-l: linear-gradient(90deg, rgba(0,0,0,.35), rgba(0,0,0,.6) 4%, rgba(0,0,0,.85) 9%, #000 15%);
+    -webkit-mask-image: var(--seg-funde-y), var(--seg-funde-l);
+    mask-image: var(--seg-funde-y), var(--seg-funde-l);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+}
 
 /* Detección de eventos */
 .v8-sec.seguridad-eventos { padding-top: 120px; }

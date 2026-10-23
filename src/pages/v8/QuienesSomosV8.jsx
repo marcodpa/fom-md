@@ -43,9 +43,9 @@ export default function QuienesSomosV8() {
         <EncabezadoV8 kicker="Nuestra forma de trabajar" id="qs-forma-titulo" titulo="La oficina y la carretera, conectadas." />
         <div className="qs-forma-texto v8-lead" data-v8-aparece="">
           <p className="v8-solo-escritorio">Una flota genera decisiones a cada momento: dónde está una unidad, qué necesita para salir y qué ocurrió en el camino.</p>
-          <p className="v8-solo-escritorio qs-forma-tinta">FOM reúne esas respuestas en el panel web y en la app del conductor.</p>
+          <p className="v8-solo-escritorio qs-forma-tinta">FOM reúne esas respuestas en el panel web y en la app, para el supervisor y el conductor.</p>
           <p className="v8-solo-escritorio">El objetivo es que cada persona encuentre la información que necesita para actuar: supervisores desde la consola y conductores desde su teléfono.</p>
-          <p className="v8-solo-movil">Una flota genera decisiones a cada momento. FOM reúne esas respuestas en el panel web y en la app del conductor.</p>
+          <p className="v8-solo-movil">Una flota genera decisiones a cada momento. FOM reúne esas respuestas en el panel web y en la app, para el supervisor y el conductor.</p>
         </div>
       </ContenedorV8>
     </SeccionV8>

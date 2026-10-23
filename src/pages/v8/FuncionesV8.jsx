@@ -168,8 +168,9 @@ export default function FuncionesV8() {
           </>} />
       </ContenedorV8>
       <div className="funciones-tele-medio">
-        {/* Foto completa con su brillo natural (versión -plena, marco redondo), sin velo ni degradado. */}
-        <FotoIntegradaV8 className="funciones-telematica-foto" nombre="telematica" marco="redondo" sizes="(min-width: 900px) 82vw, 100vw"
+        {/* T-139 (Marco): foto a sangre, a todo el ancho, sin radio ni marco; la versión -plena
+            (sin alfa horneado) y solo un fundido arriba y abajo con el fondo de la sección. */}
+        <FotoIntegradaV8 className="funciones-telematica-foto" nombre="telematica" marco="plano" sizes="100vw"
           alt="Camioneta FOM con el motor a la vista y las señales que toma el equipo: ubicación GPS, kilómetros, voltaje de batería, RPM y temperatura, frenada brusca y combustible." />
         <SenalesTelematicaV8 />
       </div>

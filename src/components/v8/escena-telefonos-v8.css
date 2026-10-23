@@ -1,6 +1,6 @@
-/* Escena de teléfonos (EscenaTelefonosV8): sin caja propia (T-134, pedido de Marco): los
-   teléfonos y la cinta azul FOM van directo sobre el fondo de la página (noche o banda) y la cinta
-   se funde en ese fondo por los cuatro bordes, sin cortes rectos. Solo transform y opacidad se
+/* Escena de teléfonos (EscenaTelefonosV8): sin caja propia (T-134) y sin cinta azul de fondo
+   (T-139), pedidos de Marco: los teléfonos van solos, directo sobre el fondo de la página (noche o
+   banda). Solo transform y opacidad se
    animan (useMomentoV8). Ancho del teléfono: --v8-tel-ancho (se ajusta al alto de la ventana en
    escritorio para que la escena fija quepa entera bajo la barra). */
 
@@ -12,24 +12,10 @@
 .v8-tels.is-3 { --v8-tel-hueco: clamp(28px, 4.4vw, 64px); }
 
 .v8-tels-tarjeta {
-  /* Sin fondo, borde, sombra ni radio: el espacio que deja es solo aire para la cinta. */
+  /* Sin fondo, borde, sombra ni radio: solo el aire alrededor de los teléfonos. */
   position: relative; isolation: isolate;
   padding: clamp(36px, 5.5svh, 56px) 24px;
 }
-
-/* La cinta va detrás, algo más grande que la escena (al moverse con el scroll no asoma su borde) y
-   se desvanece hacia el fondo de la página: fundido largo arriba y abajo, más corto a los lados.
-   La máscara viaja con la cinta, así el borde fundido nunca deja ver un corte. */
-.v8-tels-cinta {
-  position: absolute; inset: -8% -6%; z-index: 0; pointer-events: none; will-change: transform;
-  --v8-tels-funde-y: linear-gradient(180deg, transparent 0, rgba(0,0,0,.25) 7%, rgba(0,0,0,.7) 15%, #000 24%, #000 74%, rgba(0,0,0,.7) 84%, rgba(0,0,0,.25) 93%, transparent 100%);
-  --v8-tels-funde-x: linear-gradient(90deg, transparent 0, rgba(0,0,0,.35) 5%, rgba(0,0,0,.8) 11%, #000 17%, #000 83%, rgba(0,0,0,.8) 89%, rgba(0,0,0,.35) 95%, transparent 100%);
-  -webkit-mask-image: var(--v8-tels-funde-y), var(--v8-tels-funde-x);
-  mask-image: var(--v8-tels-funde-y), var(--v8-tels-funde-x);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-}
-.v8-tels-cinta svg { display: block; width: 100%; height: 100%; }
 
 .v8-tels-fila { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; gap: var(--v8-tel-hueco); }
 .v8-tels-col { flex: none; width: var(--v8-tel-ancho); }
@@ -76,12 +62,6 @@
 @media (max-width: 599px) {
   .v8-tels { --v8-tel-ancho: min(160px, calc((100vw - 40px - 28px - 14px) / 2)); --v8-tel-hueco: 14px; }
   .v8-tels-tarjeta { padding: 34px 14px; }
-  /* La cinta es más ancha que la pantalla: el fundido lateral cae justo dentro de los bordes de la
-     ventana (24–76 % de la cinta), para que la carretera se pierda en el fondo y no en el canto. */
-  .v8-tels-cinta {
-    inset: -6% -58%;
-    --v8-tels-funde-x: linear-gradient(90deg, transparent 23%, rgba(0,0,0,.6) 28%, #000 33%, #000 67%, rgba(0,0,0,.6) 72%, transparent 77%);
-  }
   .v8-tels-marco::before, .v8-tels-marco::after { width: 2px; }
   .v8-tels.is-3 { --v8-tel-ancho: min(124px, calc((100vw - 40px - 28px) / 2.7)); --v8-tel-hueco: 0px; }
   .v8-tels.is-3 .v8-tels-col:nth-child(2) { position: relative; z-index: 2; margin: 0 -18px; }

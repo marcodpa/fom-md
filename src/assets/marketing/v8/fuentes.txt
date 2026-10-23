@@ -28,8 +28,8 @@ conductor-cabina                 foto      comparativa/web-v8-fotos/maestros/con
 conductor-cabina-movil           foto      comparativa/web-v8-fotos/maestros/conductor-cabina-movil.webp
 costa-ruta                       foto      comparativa/web-v8-fotos/maestros/costa-ruta.webp
 costa-ruta-movil                 foto      comparativa/web-v8-fotos/maestros/costa-ruta-movil.webp
-cabina-carretera                 foto      comparativa/web-v8-fotos/maestros/cabina-carretera.webp
-cabina-carretera-movil           foto      comparativa/web-v8-fotos/maestros/cabina-carretera-movil.webp
+cabina-carretera                 foto      comparativa/web-v8-fotos-naturales/cabina-carretera.webp
+cabina-carretera-movil           foto      comparativa/web-v8-fotos-naturales/cabina-carretera-movil.webp
 aerea-terminal                   foto      comparativa/web-v8-fotos/maestros/aerea-terminal.webp
 aerea-terminal-movil             foto      comparativa/web-v8-fotos/maestros/aerea-terminal-movil.webp
 camioneta-noche                  foto      comparativa/web-v8-fotos/maestros/camioneta-noche.webp

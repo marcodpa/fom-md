@@ -1,9 +1,10 @@
-// App del conductor de la web v8 (T-105), fiel a los tableros «App · escritorio» (App.dc.html) y
-// «App · teléfono» (App-movil.dc.html) del lienzo «Web FOM nueva».
+// App de la web v8 (T-105), fiel a los tableros «App · escritorio» (App.dc.html) y «App · teléfono»
+// (App-movil.dc.html) del lienzo «Web FOM nueva». T-139 (Marco): la página se llama «App» y muestra
+// las dos vistas de la app, conductor y supervisor (sección «Supervisor» con capturas reales).
 // Animación (nota azul del tablero, solo 2 momentos):
 //   1) Hero: el titular entra escalonado y la foto entra suave desde la derecha.
-//   2) «Todo lo del día, en tres pantallas»: escena de teléfonos (EscenaTelefonosV8) con Mi unidad,
-//      Mantenimiento y Mi perfil. Escritorio ≥ 1024 px: fija; la pantalla de cada teléfono se
+//   2) «Todo lo del día, en tres pantallas»: escena de teléfonos (EscenaTelefonosV8) con Mi unidad
+//      (conductor), Resumen (supervisor) y Mi perfil (conductor). Escritorio ≥ 1024 px: fija; la pantalla de cada teléfono se
 //      desplaza sola y luego se inclinan en 3D y se separan. Tableta y teléfono: lo mismo, más
 //      suave y sin escena fija (en el teléfono, en abanico).
 // Todo lo demás: quieto o aparición suave; los teléfonos sueltos se inclinan levemente al pasar.
@@ -14,19 +15,32 @@ import {
 } from '../../components/v8'
 import './app-v8.css'
 
-const LOCAL = [['pantallas', 'Pantallas'], ['inspeccion', 'Inspección'], ['mi-unidad', 'Mi unidad'], ['indice', 'Índice de manejo']]
+const LOCAL = [['pantallas', 'Pantallas'], ['supervisor', 'Supervisor'], ['inspeccion', 'Inspección'], ['mi-unidad', 'Mi unidad'], ['indice', 'Índice de manejo']]
 
 const pie = (titulo, texto) => <><b className="v8-fuerte">{titulo}</b> {texto}</>
 
-// Las tres pantallas de la app actual (capturas reales, datos de demostración). Cada una sigue
-// con otra captura real debajo (pantallasV8.js), así la pantalla se desplaza en la escena.
+// Tres pantallas de la app actual (capturas reales, datos de demostración): dos del conductor y,
+// en el centro, el Resumen del supervisor. Cada una sigue con otra captura real debajo
+// (pantallasV8.js), así la pantalla se desplaza en la escena.
 const PANTALLAS = [
-  { nombre: 'cap-movil-cond-inicio', pie: pie('Mi unidad.', 'Dónde está y qué te toca hoy.'), corto: 'Mi unidad.',
-    alt: 'Mi unidad en la app actual: unidad, estado de señal e índice de manejo. Datos de demostración.' },
-  { nombre: 'cap-movil-cond-mantenimiento', pie: pie('Mantenimiento.', 'Las órdenes asignadas a ti.'), corto: 'Mantenimiento.',
-    alt: 'Mantenimiento de mi unidad en la app actual, con órdenes asignadas. Datos de demostración.' },
-  { nombre: 'cap-movil-cond-perfil', pie: pie('Mi perfil.', 'Tus datos, tu manejo y tus documentos.'), corto: 'Mi perfil.',
-    alt: 'Mi perfil en la app actual, con el índice de manejo seguro. Datos de demostración.' },
+  { nombre: 'cap-movil-cond-inicio', pie: pie('Mi unidad.', 'El conductor ve dónde está y qué le toca hoy.'), corto: 'Mi unidad.',
+    alt: 'Mi unidad en la app actual, vista del conductor: unidad, estado de señal e índice de manejo. Datos de demostración.' },
+  { nombre: 'cap-movil-sup-resumen', pie: pie('Resumen.', 'El supervisor ve la flota, las ODT y las alertas.'), corto: 'Resumen.',
+    alt: 'Resumen en la app actual, vista del supervisor: flota de vehículos, ODT por resolver y alertas nuevas. Datos de demostración.' },
+  { nombre: 'cap-movil-cond-perfil', pie: pie('Mi perfil.', 'Datos, índice de manejo y documentos.'), corto: 'Mi perfil.',
+    alt: 'Mi perfil en la app actual, vista del conductor, con el índice de manejo seguro. Datos de demostración.' },
+]
+
+// Lo que el supervisor tiene en la app (capturas reales de la vista del supervisor).
+const SUPERVISOR = [
+  { nombre: 'cap-movil-sup-mapa-unidad', titulo: 'Centro de control', texto: 'El mapa de la flota y la unidad elegida, con su velocidad y su recorrido.',
+    alt: 'Centro de control en la app del supervisor: mapa con la unidad seleccionada, en marcha, con Ver expediente y Ver recorrido. Datos de demostración.' },
+  { nombre: 'cap-movil-sup-mantenimiento', titulo: 'Mantenimiento', texto: 'Órdenes de trabajo por estado, con filtros y nueva ODT.',
+    alt: 'Mantenimiento en la app del supervisor: órdenes abiertas, en revisión y resueltas, costo del mes y filtros. Datos de demostración.' },
+  { nombre: 'cap-movil-sup-inspecciones', titulo: 'Inspecciones', texto: 'Las diarias hechas hoy y las que requieren atención.',
+    alt: 'Inspecciones en la app del supervisor: diarias hechas hoy, aprobadas, con observaciones y bloqueadas. Datos de demostración.' },
+  { nombre: 'cap-movil-sup-alertas', titulo: 'Alertas', texto: 'Notificaciones y eventos de manejo, para marcar o descartar.',
+    alt: 'Alertas en la app del supervisor: excesos de velocidad sin leer, con Marcar leída y Descartar. Datos de demostración.' },
 ]
 
 // Escala del puntaje (pages.js → seguridad) y los dos períodos que ofrece la app (7 y 30 días).
@@ -50,18 +64,18 @@ export default function AppV8() {
     // 2 · La escena de teléfonos la mueve la base (EscenaTelefonosV8 + useMomentoV8).
   })
 
-  return <SitioV8 raiz={raiz} titulo="App del conductor — FOM" descripcion="Consulta el estado del vehículo, realiza la inspección y revisa tu perfil desde la app que acompaña al conductor.">
+  return <SitioV8 raiz={raiz} titulo="App — FOM" descripcion="La app de FOM tiene dos vistas: el conductor consulta su unidad, hace la inspección y revisa su perfil; el supervisor sigue la flota, el mantenimiento, las inspecciones y las alertas desde el teléfono.">
     <section className="v8-hero app-hero" aria-labelledby="v8-titulo">
       <div className="app-hero-escena">
         <FotoIntegradaV8 className="app-hero-foto" nombre="mano-app-perfil" fundido="l" prioridad sizes="(min-width: 900px) 62vw, 100vw" posicion="28% 50%"
           alt="Mano sosteniendo un teléfono con el perfil actual de la app FOM frente a la flota. Datos de demostración." />
         <div className="v8-c app-hero-texto">
           <div className="app-hero-caja">
-            <p className="v8-kick" data-v8-entra="">App del conductor</p>
-            <h1 id="v8-titulo" className="v8-h1 app-hero-titulo"><span data-v8-entra="" className="app-hero-linea">Tu unidad y tu jornada, en tu teléfono.</span></h1>
+            <p className="v8-kick" data-v8-entra="">App</p>
+            <h1 id="v8-titulo" className="v8-h1 app-hero-titulo"><span data-v8-entra="" className="app-hero-linea">La unidad y la flota, en tu teléfono.</span></h1>
             <p className="v8-lead app-hero-lead" data-v8-entra="">
-              <Dos e="Consulta el estado del vehículo, realiza la inspección y revisa tu perfil desde la app que acompaña al conductor."
-                m="Estado del vehículo, inspección y tu perfil, en la app que acompaña al conductor." />
+              <Dos e="Una app con dos vistas: el conductor consulta su unidad, hace la inspección y revisa su perfil; el supervisor sigue la flota, el mantenimiento y las alertas."
+                m="Una app, dos vistas: conductor y supervisor." />
             </p>
             <div className="v8-acciones is-izquierda" data-v8-entra="">
               <BotonV8 to={rutaV8('contacto')} tamano="lg">Solicitar demostración</BotonV8>
@@ -72,16 +86,33 @@ export default function AppV8() {
       </div>
     </section>
 
-    <NavLocalV8 titulo="App del conductor" enlaces={LOCAL} />
+    <NavLocalV8 titulo="App" enlaces={LOCAL} />
 
     <SeccionV8 id="pantallas" className="app-pantallas" aria-labelledby="app-pantallas-titulo">
       <div className="v8-glow app-pantallas-glow" aria-hidden="true" />
       <ContenedorV8>
         <EncabezadoV8 centro id="app-pantallas-titulo" titulo={['Todo lo del día,', 'en tres pantallas.']} anchoBajada={640}
-          bajada={<Dos e="Mi unidad, mantenimiento y mi perfil. Las mismas que ve el conductor hoy." m="Las mismas que ve el conductor hoy." />} />
+          bajada={<Dos e="Mi unidad y Mi perfil del conductor; el Resumen del supervisor. Las mismas pantallas de la app de hoy." m="Conductor y supervisor, en la app de hoy." />} />
       </ContenedorV8>
       <ContenedorV8 className="app-pantallas-escena">
-        <EscenaTelefonosV8 telefonos={PANTALLAS} etiqueta="Tres pantallas de la app del conductor" />
+        <EscenaTelefonosV8 telefonos={PANTALLAS} etiqueta="Tres pantallas de la app: Mi unidad y Mi perfil del conductor, Resumen del supervisor" />
+      </ContenedorV8>
+    </SeccionV8>
+
+    {/* T-139: la vista del supervisor en la app (capturas reales). */}
+    <SeccionV8 id="supervisor" banda className="app-sup" aria-labelledby="app-sup-titulo">
+      <ContenedorV8>
+        <EncabezadoV8 centro id="app-sup-titulo" kicker="Para el supervisor" titulo={['La flota también', 'cabe en el bolsillo.']} anchoBajada={640}
+          bajada={<Dos e="Con su usuario, el supervisor tiene en el teléfono el mapa, el mantenimiento, las inspecciones y las alertas, sobre los mismos datos del panel web."
+            m="Mapa, mantenimiento, inspecciones y alertas, sobre los mismos datos del panel." />} />
+        <ul className="app-sup-rejilla">
+          {SUPERVISOR.map(t => <li key={t.nombre} className="app-sup-item" data-v8-aparece="">
+            <CapturaFlotanteV8 className="app-sup-telefono" nombre={t.nombre} ancho={230} largo={false} sizes="(max-width: 599px) 150px, 214px" alt={t.alt} />
+            <h3 className="v8-h4">{t.titulo}</h3>
+            <p className="v8-sm v8-t2 app-solo-escritorio">{t.texto}</p>
+          </li>)}
+        </ul>
+        <p className="v8-nota-demo app-sup-nota">Capturas reales de la app · Datos de demostración</p>
       </ContenedorV8>
     </SeccionV8>
 
@@ -153,7 +184,7 @@ export default function AppV8() {
 
     <SeccionV8 className="app-cta v8-centro" aria-labelledby="app-cta-titulo">
       <ContenedorV8>
-        <h2 id="app-cta-titulo" className="v8-h2" data-v8-aparece="">La oficina y el conductor, conectados.</h2>
+        <h2 id="app-cta-titulo" className="v8-h2" data-v8-aparece="">La oficina, el supervisor y el conductor, conectados.</h2>
         <p className="v8-lead app-cta-texto v8-solo-escritorio" data-v8-aparece="">Conoce el panel web y la app con una demostración de FOM.</p>
         <div className="v8-acciones" data-v8-aparece="">
           <BotonV8 to={rutaV8('contacto')} tamano="lg" className="app-cta-boton">Solicitar demostración</BotonV8>

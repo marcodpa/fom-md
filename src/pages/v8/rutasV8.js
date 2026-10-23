@@ -17,7 +17,7 @@ export const BASE_V8 = '/nuevo'
 export const PAGINAS_V8 = [
   { clave: 'inicio', nombre: 'Inicio', archivo: 'InicioV8', nueva: '/nuevo', real: '/' },
   { clave: 'plataforma', nombre: 'Plataforma web', archivo: 'PlataformaV8', nueva: '/nuevo/plataforma', real: '/plataforma' },
-  { clave: 'app', nombre: 'App del conductor', archivo: 'AppV8', nueva: '/nuevo/app', real: '/app' },
+  { clave: 'app', nombre: 'App', archivo: 'AppV8', nueva: '/nuevo/app', real: '/app' },
   { clave: 'funciones', nombre: 'Funciones', archivo: 'FuncionesV8', nueva: '/nuevo/funciones', real: '/funciones' },
   { clave: 'seguridad', nombre: 'Seguridad', archivo: 'SeguridadV8', nueva: '/nuevo/seguridad', real: '/seguridad' },
   { clave: 'areas', nombre: 'Áreas', archivo: 'AreasV8', nueva: '/nuevo/areas', real: '/areas' },

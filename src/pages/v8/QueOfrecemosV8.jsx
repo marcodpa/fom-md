@@ -15,6 +15,15 @@ import './que-ofrecemos-v8.css'
 const INSTALACION = PAGES.contacto.sections.find(s => s.heading === 'Instalación e implementación').stat
 const etiquetaInstalacion = INSTALACION.label.charAt(0).toLowerCase() + INSTALACION.label.slice(1)
 
+// Bajo el hero (T-139, Marco: las frases de antes decían poco). Hechos de src/content/pages.js:
+// GPS cada 10 s con la unidad en movimiento (ubicación, rumbo y velocidad), inspección y reporte de
+// falla con foto desde la app, servicio por kilometraje o fecha con aviso y orden de trabajo.
+const PUNTOS_HERO = [
+  ['GPS cada 10 segundos', 'Ubicación, rumbo y velocidad en marcha.'],
+  ['Inspección diaria con foto', 'Desde la app, antes de salir.'],
+  ['Mantenimiento por km o fecha', 'Con aviso y orden de trabajo.'],
+]
+
 const OFERTA = [
   {
     kicker: 'Ubicación y recorridos', titulo: 'Plataforma web', clave: 'plataforma', enlace: 'Plataforma web',
@@ -23,9 +32,9 @@ const OFERTA = [
     foto: { nombre: 'patio-monitor-mapa', alt: 'Monitor con el Centro de control actual frente al patio. Datos de demostración.', posicion: '62% 50%' },
   },
   {
-    kicker: 'Inspecciones y mantenimiento', titulo: 'App del conductor', clave: 'app', enlace: 'App',
-    texto: 'El conductor revisa la unidad; la oficina consulta hallazgos y da seguimiento al servicio.',
-    textoMovil: 'El conductor revisa; la oficina da seguimiento.',
+    kicker: 'Inspecciones y mantenimiento', titulo: 'App', clave: 'app', enlace: 'App',
+    texto: 'El conductor revisa la unidad; el supervisor consulta los hallazgos y da seguimiento al servicio, desde la oficina o el teléfono.',
+    textoMovil: 'El conductor revisa; el supervisor da seguimiento.',
     foto: { nombre: 'tecnico-app-unidad', alt: 'Técnico de FOM con Mi unidad abierta en el teléfono. Datos de demostración.', posicion: '72% 50%', className: 'qo-tarjeta-foto' },
   },
   {
@@ -49,7 +58,7 @@ export default function QueOfrecemosV8() {
   const raiz = useRef(null)
   useMomentoV8(raiz) // solo el momento 1 (hero) y las apariciones suaves de la base
 
-  return <SitioV8 raiz={raiz} titulo="Qué ofrecemos — FOM" descripcion="Una plataforma para seguir, cuidar y entender tu flota: panel web, app del conductor, alertas, reportes e instalación de los equipos GPS.">
+  return <SitioV8 raiz={raiz} titulo="Qué ofrecemos — FOM" descripcion="Una plataforma para seguir, cuidar y entender tu flota: panel web, app para conductor y supervisor, alertas, reportes e instalación de los equipos GPS.">
     {/* Hero: la laptop con Vehículos a la izquierda, fundida; el texto a la derecha. */}
     <section className="qo-hero" aria-labelledby="qo-titulo">
       <div className="qo-hero-foto" data-v8-crece="">
@@ -63,12 +72,12 @@ export default function QueOfrecemosV8() {
             <span className="v8-linea" data-v8-entra="">Una plataforma para seguir, cuidar y entender tu flota.</span>
           </h1>
           <p className="v8-lead qo-hero-bajada" data-v8-entra="">
-            <span className="v8-solo-escritorio">Herramientas conectadas para el trabajo diario, desde el panel de control hasta la app del conductor.</span>
-            <span className="v8-solo-movil">Del panel de control a la app del conductor.</span>
+            <span className="v8-solo-escritorio">Herramientas conectadas para el trabajo diario, desde el panel de control hasta la app del conductor y del supervisor.</span>
+            <span className="v8-solo-movil">Del panel de control a la app.</span>
           </p>
           <div className="qo-hero-accion" data-v8-entra=""><BotonV8 to={rutaV8('contacto')} tamano="lg">Solicitar demostración</BotonV8></div>
           <ul className="qo-hero-puntos v8-sm v8-t2" data-v8-entra="">
-            <li>Más control en tu operación</li><li>Información para decidir</li><li>Flotas más eficientes</li>
+            {PUNTOS_HERO.map(([titulo, apoyo]) => <li key={titulo}><b className="v8-fuerte">{titulo}</b><span className="v8-xs">{apoyo}</span></li>)}
           </ul>
         </div>
       </ContenedorV8>
@@ -105,7 +114,7 @@ export default function QueOfrecemosV8() {
           <p className="v8-kick" data-v8-aparece="">Inspecciones y mantenimiento</p>
           <h2 id="qo-insp-titulo" className="v8-h2" data-v8-aparece="">Menos imprevistos, más tiempo en movimiento.</h2>
           <p className="v8-lead qo-mt20 v8-solo-escritorio" data-v8-aparece="">La revisión diaria, los hallazgos y las órdenes de trabajo, en un mismo seguimiento.</p>
-          <p className="qo-mt24 v8-solo-escritorio"><EnlaceV8 to={rutaV8('app')}>App del conductor</EnlaceV8></p>
+          <p className="qo-mt24 v8-solo-escritorio"><EnlaceV8 to={rutaV8('app')}>La app</EnlaceV8></p>
         </div>
         <div className="qo-insp-medio">
           <FotoIntegradaV8 className="qo-insp-foto" nombre="camion-marca" marco="redondo" sizes="(min-width: 1240px) 620px, 52vw"
