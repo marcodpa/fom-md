@@ -1,0 +1,2807 @@
+From 8be7ff74a4f2b3007c3376c34be5539a3ecb8173 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Fri, 23 Oct 2026 13:55:24 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20Resumen=20del=20supervisor=20igual=20al?=
+ =?UTF-8?q?=20de=20la=20web=20en=20tel=C3=A9fono,=20accesos=20que=20sal?=
+ =?UTF-8?q?=C3=ADan=20del=20Resumen=20viejo=20ahora=20en=20M=C3=A1s,=20cac?=
+ =?UTF-8?q?h=C3=A9=20de=20eventos=20por=20usuario=20y=20empresa=20y=20filt?=
+ =?UTF-8?q?ro=20de=20fecha=20a=20medianoche=20(T-135,=20T-137)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/panel/index.tsx                       | 1302 +++++++++--------
+ src/app/panel/mantenimiento.tsx               |   89 +-
+ src/app/panel/mas.tsx                         |   20 +
+ src/components/eventos-manejo.tsx             |    8 +-
+ .../filtro-estado-mantenimiento.tsx           |  200 ++-
+ src/components/resumen-piezas.tsx             |  533 +++++++
+ src/lib/eventos-manejo.ts                     |   47 +-
+ src/services/fomEventosManejo.ts              |   35 +-
+ src/utils/filtro-fecha.ts                     |  105 ++
+ 9 files changed, 1690 insertions(+), 649 deletions(-)
+ create mode 100644 src/components/resumen-piezas.tsx
+ create mode 100644 src/utils/filtro-fecha.ts
+
+diff --git a/src/app/panel/index.tsx b/src/app/panel/index.tsx
+index 5e1675c..6c8cabc 100644
+--- a/src/app/panel/index.tsx
++++ b/src/app/panel/index.tsx
+@@ -1,384 +1,191 @@
+ import { Redirect, useRouter } from 'expo-router';
+-import { useCallback, useState } from 'react';
+-import { StyleSheet, View } from 'react-native';
++import { useCallback, useMemo, useState, type ReactNode } from 'react';
++import { StyleSheet, useWindowDimensions, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { esMultiempresa, useAuth } from '@/auth';
+ import { AdminHeader } from '@/components/admin-header';
+ import { AvisoEmergencia } from '@/components/aviso-emergencia';
+ import { BotonNuevo } from '@/components/boton-nuevo';
++import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
+ import { CargandoPantalla } from '@/components/cargando-pantalla';
+ import { TituloPantalla } from '@/components/encabezado-fom';
+-import { Escalonado } from '@/components/escalonado';
+ import { ErrorState } from '@/components/error-state';
+-import { EtiquetaSeccion } from '@/components/etiqueta-seccion';
+-import { TablaManejo } from '@/components/manejo-conductor';
+-import { tonoRango } from '@/components/perfil-piezas';
++import { Escalonado } from '@/components/escalonado';
++import { PastillaConductor } from '@/components/manejo-conductor';
++import { MapaVehiculo } from '@/components/map-vehiculo';
++import { OptionPickerModal, type PickerOption } from '@/components/option-picker';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { Relevo } from '@/components/relevo';
++import {
++  ChipVivo,
++  Glifo,
++  KpiResumen,
++  ListaHoy,
++  MasInformacion,
++  numeroWeb,
++  TarjetaFlota,
++  TarjetaManejo,
++  TarjetaResumen,
++  TarjetaResumenEnLinea,
++  VacioResumen,
++  type EventoHoy,
++} from '@/components/resumen-piezas';
+ import { ScrollVisible } from '@/components/scroll-visible';
+-import { TabIcon, type TabIconName } from '@/components/tab-icon';
++import { TabIcon } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+-import { TiraEstado } from '@/components/tira-estado';
++import { VehiculoRetrato } from '@/components/vehiculo-retrato';
+ import { useAsyncData } from '@/hooks/use-async-data';
++import { estadoDeUnidad, transmitiendo, useFlotaFom, type EstadoUnidad, type UnidadFom } from '@/hooks/use-flota-fom';
+ import { GRACIA_ESQUELETO, useRefrescoVivo, useTardando } from '@/hooks/use-refresco';
+-import { periodoDelMes } from '@/lib/periodo';
+-import { tinte } from '@/lib/color';
+-import { useAdmin } from '@/session';
++import { useReloj } from '@/hooks/use-reloj';
++import { coordsEnTexto } from '@/lib/geo';
++import { DIAS_MANEJO } from '@/lib/manejo';
++import { masNuevoPrimero } from '@/lib/orden';
++import { msSinReportar, textoSinSenal, textoUltimoReporte } from '@/lib/sin-senal';
++import { identidadDeUnidad } from '@/lib/vehiculos';
+ import {
++  enteActivoFom,
++  getBuzonesPanel,
+   getEmergenciasActivas,
+-  getUnidadesFlota,
+-  getInspeccionesDeHoy,
+-  getMantenimientoResumen,
++  getInspeccionesFom,
+   getOrdenesAbiertas,
+-  getReporte,
+-  getResumenCostos,
+-  getVencimientosDeEmpresa,
+-  rangoDeMes,
+-  type DocumentoVencimiento,
+-  type MantenimientoResumen,
+-  type ResumenCostos,
++  getResumenFom,
++  getUnidadesFlota,
++  type InspeccionResumen,
++  type ResumenFom,
+ } from '@/services';
++import { useAdmin } from '@/session';
+ import { useTheme, type ColorTokens } from '@/theme';
+-import type { Emergencia, UnidadFlota, InspeccionEstado, ReportMetrics } from '@/types';
+-import { miles } from '@/utils/numero';
++import type { Emergencia, MapMarker, NotificacionPanel, UnidadFlota, WorkOrderListItem } from '@/types';
++import { formatHora, haceCuanto } from '@/utils/date';
+ 
+ /**
+- * RESUMEN del panel de la empresa: el control de la flota en TRES HORIZONTES,
+- * del más urgente al más lento.
+- *
+- *   1 · HOY            ¿cuáles pueden salir y cuáles no, y por qué?
+- *   2 · CONTROL        ¿qué se vence esta semana?
+- *   3 · EL PERÍODO     ¿cómo se está manejando?
++ * RESUMEN del panel de la empresa: el MISMO Resumen que la web en el teléfono
++ * (`src/panel/modulos/Resumen.jsx` a 390 px), sección por sección y en su orden:
+  *
+- * El orden no es estético: es CUÁNDO hay que actuar. Y da la regla de qué entra
+- * aquí — si un dato no cae en uno de los tres, no es de esta pantalla.
++ *   · la flota (cuántas, cuántas en marcha) y las dos cifras de arriba
++ *     (ODT por resolver, alertas nuevas);
++ *   · el mapa en tiempo real y la ficha del vehículo seleccionado;
++ *   · las tres cifras del día (inspecciones, mantenimiento, documentos);
++ *   · el manejo de los conductores de los últimos 7 días;
++ *   · «Hoy, en orden»: lo que pasó hoy, de lo más nuevo a lo más viejo.
+  *
+- * DÓNDE ESTÁ la flota ahora mismo no se responde aquí: eso es el mapa, y el
+- * mapa vive en la pestaña Flota junto a las unidades que pinta. Aquí solo
+- * queda lo que no se puede ver en un mapa.
++ * Como en la web, el tablero es UNO: espera a tener sus tres partes (unidades,
++ * contadores y eventos) y, si una falla, enseña el error con «Reintentar», que
++ * vuelve a pedir solo lo que falló. Lo ya cargado se queda mientras se refresca.
+  *
+- * Ninguna cifra es decorativa: todas abren donde eso se resuelve. Lo que aún
+- * no llega sale en 0, en neutro; lo que llega en 0 lleva su color solo si ese 0
+- * es un estado (el índice). Pero si una carga FALLA, su bloque muestra el
+- * error con «Reintentar» y no ceros: un cero inventado se lee como "todo bien".
+- * Lo único que aparece y desaparece son los avisos, como el SOS.
++ * Fuera de la web y a propósito: el aviso de SOS arriba (una emergencia no
++ * puede esperar a que alguien abra otra pantalla) y el botón «Reporte», que es
++ * la única entrada de la app a Reportes.
+  */
+ 
+-/** Cuántos días antes se considera que un papel "está por vencer". */
+-const DIAS_AVISO = 30;
+-
+-/** Cada cuánto se refresca solo «El período» mientras se mira. */
+-const REFRESCO_PERIODO = 10 * 60_000;
+-
+-/** Una unidad que hoy NO puede salir, y por qué. */
+-type Impedimento = 'inspeccion' | 'papeles' | 'odt';
+-
+-const IMPEDIMENTO_VISTA: Record<Impedimento, { label: string; tono: keyof ColorTokens }> = {
+-  inspeccion: { label: 'sin inspección', tono: 'warning' },
+-  papeles: { label: 'documentos vencidos', tono: 'danger' },
+-  odt: { label: 'ODT abierta', tono: 'warning' },
+-};
+-
+-/** Una fila de Control: cuántos, de qué, y a dónde lleva. */
+-type Aviso = { icon: TabIconName; label: string; cuenta: number; tono: keyof ColorTokens; onPress: () => void };
+-
+-/** Lo que decide HOY quién puede salir: es lo primero que se pinta. */
+-type DatosHoy = {
+-  flota: UnidadFlota[];
+-  emergencias: Emergencia[];
+-  papeles: DocumentoVencimiento[];
+-  inspecciones: Record<string, InspeccionEstado>;
+-  /** Ids de vehículo con al menos una ODT sin cerrar. */
+-  conOdt: Set<string>;
+-};
++/** Una unidad cuenta como «reportando» con señal de hace menos de 5 min (la regla de siempre). */
++const MEDIO_MINUTO = 30_000; // la lista de unidades (las posiciones van cada 20 s con su motor)
++const UN_MINUTO = 60_000; // los contadores del día
++const TRES_MINUTOS = 3 * 60_000; // «Hoy, en orden»: solo enseña los últimos 12
++
++/** Las unidades de la empresa y, si hay, quién pidió ayuda. */
++type DatosUnidades = { unidades: UnidadFlota[]; emergencias: Emergencia[] };
++/** Los contadores del servidor; `null` = no se pueden saber (otra empresa que la de la sesión). */
++type DatosContadores = { r: ResumenFom | null };
++/** Lo que alimenta «Hoy, en orden». */
++type DatosEventos = { odts: WorkOrderListItem[]; alertas: NotificacionPanel[]; inspecciones: InspeccionResumen[] };
++
++/** El día de hoy, AAAA-MM-DD en la hora del teléfono. */
++function hoyISO(): string {
++  const d = new Date();
++  return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, '0')}-${`${d.getDate()}`.padStart(2, '0')}`;
++}
+ 
+-/** Todo lo que el Resumen pinta. Lo que aún no llega queda sin poner y sale en 0. */
+-type Datos = DatosHoy & {
+-  metricas?: ReportMetrics;
+-  mantenimiento?: MantenimientoResumen;
+-  costos: Pick<ResumenCostos, 'total'>;
+-  periodo: string;
++/** Una unidad del tablero, con su señal ya juzgada. */
++type Unidad = {
++  u: UnidadFlota;
++  viva: UnidadFom | undefined;
++  estado: EstadoUnidad;
++  /** Con señal de hace menos de 5 min. */
++  conSenal: boolean;
++  /** Cuándo llegó su último reporte; `null` si nunca. */
++  reporte: string | null;
++  nombre: string;
+ };
+ 
+-/** Los costos mientras no llegan: 0, en neutro, como cualquier cifra sin dato. */
+-const SIN_COSTOS: Pick<ResumenCostos, 'total'> = { total: 0 };
+-
+-/**
+- * Un dato del bloque del período: la cifra manda, el rótulo la nombra.
+- *
+- * `sufijo` va aparte y más pequeño para que la unidad no compita con el número
+- * —"1.240 km" se lee como una cifra, no como dos.
+- */
+-/**
+- * Un dato del período: su nombre a la izquierda, su cifra a la derecha.
+- *
+- * En LÍNEA y no en columna de tres: apilados se leen de un vistazo de arriba
+- * abajo, cada uno con su nombre entero al lado —en tres columnas el rótulo se
+- * cortaba— y la tarjeta puede crecer sin apretar nada. Van sin línea entre
+- * ellos a propósito: son tres caras del mismo período, no tres secciones.
+- */
+-function Dato({
+-  valor,
+-  sufijo,
+-  label,
+-  tono,
+-  onPress,
+-}: {
+-  valor: string;
+-  sufijo?: string;
+-  label: string;
+-  /** Tiñe la cifra. Solo cuando el número ES un estado (el índice). */
+-  tono?: keyof ColorTokens;
+-  /** A dónde lleva. Con destino, la línea lleva su chevron. */
+-  onPress?: () => void;
+-}) {
+-  const { colors, spacing } = useTheme();
+-  const cuerpo = (
+-    <View style={[styles.fila, { gap: spacing.md, paddingVertical: spacing.sm }]}>
+-      <ThemedText variant="body" color="textSecondary" numberOfLines={1} style={[styles.flex1, styles.datoRotulo]}>
+-        {label}
+-      </ThemedText>
+-      <View style={styles.datoCifra}>
+-        <ThemedText variant="button" tabular style={[styles.datoValor, tono ? { color: colors[tono] } : null]}>
+-          {valor}
+-        </ThemedText>
+-        {/* La unidad —"km", "$"— en su propia columna, de ancho fijo y presente
+-            en las tres filas aunque esté vacía: así las cifras terminan en el
+-            mismo borde y se leen en columna. Pegada a la cifra, empujaba el
+-            número de su fila hacia la izquierda y las tres se descuadraban. Y
+-            todas al MISMO lado: el símbolo delante en una y detrás en otra se
+-            lee como un descuido. */}
+-        {sufijo ? (
+-          <ThemedText variant="caption" style={[styles.datoSufijo, styles.datoUnidad, { color: colors.textMuted }]}>
+-            {sufijo}
+-          </ThemedText>
+-        ) : (
+-          <View style={styles.datoUnidad} />
+-        )}
+-      </View>
+-      {onPress ? <TabIcon name="chevron" color={colors.textMuted} size={15} /> : null}
+-    </View>
+-  );
+-
+-  if (!onPress) return cuerpo;
+-  return (
+-    <PressableScale
+-      onPress={onPress}
+-      accessibilityRole="button"
+-      accessibilityLabel={`${label}: ${valor}${sufijo ? ` ${sufijo}` : ''}`}>
+-      {cuerpo}
+-    </PressableScale>
+-  );
++/** Cómo se nombra una unidad en el Resumen: «ID · placa», como la web («alias · placa»). */
++function nombreDe(u: UnidadFlota): string {
++  return identidadDeUnidad(u.vehicle) || `${u.vehicle.marca} ${u.vehicle.modelo}`.trim() || 'Unidad';
+ }
+ 
+ export default function AdminResumenScreen() {
+-  const { colors, spacing, radii, borderWidths } = useTheme();
++  const { spacing } = useTheme();
+   const { user, status } = useAuth();
+   const { empresaId } = useAdmin();
+   const router = useRouter();
+-
+-  /** Cuántos meses atrás se está mirando. 0 = el mes en curso. */
+-  const [mesAtras, setMesAtras] = useState(0);
+-
+   const uid = user?.id;
+ 
+-  /**
+-   * EL TABLERO en tres cargas, y en vivo.
+-   *
+-   * Antes era UNA sola carga y la pantalla esperaba a la más lenta: el índice
+-   * y los km piden una lectura por unidad, y el mantenimiento el odómetro de
+-   * cada una. Con un servidor lejos y el cupo de FOM, "Hoy" —que es lo que se
+-   * viene a mirar— salía cuando terminaba lo último. Ahora "Hoy" se pinta en
+-   * cuanto llega, y Control y El período se completan después, cada uno con su
+-   * carga: lo que aún no llega sale en 0, como cualquier cifra sin dato.
+-   *
+-   * Lo cargado se queda mientras se refresca: el esqueleto sale solo cuando no
+-   * hay nada todavía —y ni siquiera entonces si el dato llega enseguida—.
+-   * Repintarlo en cada entrada era lo que hacía que este tab pareciera el
+-   * lento del panel.
+-   */
+-  const {
+-    data: hoy,
+-    estado,
+-    refrescando: pidiendoHoy,
+-    recargar: recargarHoy,
+-  } = useAsyncData<DatosHoy | null>(
++  // ── Las tres partes del tablero, cada una a su ritmo (como la web) ────────
++  const vehiculos = useAsyncData<DatosUnidades | null>(
+     async () => {
+       if (!empresaId || !uid) return null;
+-      // La inspección del día va A LA VEZ que las unidades: es una sola
+-      // consulta para toda la flota, y las unidades solo sirven para quedarse
+-      // con las suyas. Esperarlas para preguntar era un viaje entero de más.
+-      const [flotaEmpresa, sos, papeles, odts, inspeccionesHoy] = await Promise.all([
++      const [unidades, emergencias] = await Promise.all([
+         getUnidadesFlota(empresaId),
+         // El aviso de ayuda solo lo pinta quien opera esta empresa.
+         esMultiempresa(user) ? Promise.resolve([] as Emergencia[]) : getEmergenciasActivas(empresaId),
+-        getVencimientosDeEmpresa(empresaId),
+-        getOrdenesAbiertas(empresaId),
+-        getInspeccionesDeHoy(empresaId).catch(() => ({}) as Record<string, InspeccionEstado>),
+       ]);
+-      const ids = new Set(flotaEmpresa.map((f) => f.vehicle.id));
+-      return {
+-        flota: flotaEmpresa,
+-        emergencias: sos,
+-        papeles,
+-        inspecciones: Object.fromEntries(Object.entries(inspeccionesHoy).filter(([id]) => ids.has(id))),
+-        conOdt: new Set(odts.map((o) => o.vehicleId)),
+-      };
++      return { unidades, emergencias };
+     },
+     [empresaId, uid],
+     { onFocus: true },
+   );
+-
+-  /** Control: las alertas de mantenimiento, que cuestan el odómetro de cada unidad. */
+-  const {
+-    data: mantenimiento,
+-    estado: estadoControl,
+-    refrescando: pidiendoControl,
+-    recargar: recargarControl,
+-  } = useAsyncData<MantenimientoResumen | null>(
+-    async () => (empresaId && uid ? getMantenimientoResumen(empresaId) : null),
++  const contadores = useAsyncData<DatosContadores | null>(
++    // `/summary` es de la empresa de la SESIÓN: de otra no se sabe, y sus
++    // cifras salen con guion —nunca con un cero, que afirma algo—.
++    async () => (empresaId && uid ? { r: empresaId === enteActivoFom() ? await getResumenFom() : null } : null),
+     [empresaId, uid],
+     { onFocus: true },
+   );
+-
+-  /**
+-   * El período: el índice y los km —una lectura por unidad— y los costos. Es
+-   * lo único que depende del mes elegido: cambiar de mes ya no vuelve a pedir
+-   * el resto del tablero.
+-   */
+-  const {
+-    data: delPeriodo,
+-    estado: estadoPeriodo,
+-    refrescando: pidiendoPeriodo,
+-    recargar: recargarPeriodo,
+-  } = useAsyncData<{ metricas: ReportMetrics; costos: ResumenCostos } | null>(
++  const eventos = useAsyncData<DatosEventos | null>(
+     async () => {
+       if (!empresaId || !uid) return null;
+-      const per = periodoDelMes(mesAtras);
+-      // Los costos, del MISMO mes que el índice y los km: antes salían siempre
+-      // del mes en curso aunque se mirara otro. Se arma con `rangoDeMes`
+-      // porque sus límites son texto comparable con la fecha de cada gasto.
+-      const hoyMes = new Date();
+-      const m = new Date(hoyMes.getFullYear(), hoyMes.getMonth() - mesAtras, 1);
+-      const rango = rangoDeMes(`${m.getFullYear()}-${`${m.getMonth() + 1}`.padStart(2, '0')}`);
+-      const [reporte, costos] = await Promise.all([
+-        // Sin inspecciones: aquí solo se pintan las cifras, no el desglose por unidad.
+-        getReporte({ companyId: empresaId, tipo: 'general', periodo: per }, { inspecciones: false }),
+-        getResumenCostos(empresaId, rango),
++      const propia = empresaId === enteActivoFom();
++      const hoy = hoyISO();
++      const [odts, buzones, inspecciones] = await Promise.all([
++        // Solo las SIN CERRAR: la de hoy casi siempre lo está, y así no se lee
++        // el historial entero de la empresa.
++        getOrdenesAbiertas(empresaId),
++        getBuzonesPanel(empresaId),
++        // Las inspecciones se leen de la empresa de la sesión.
++        propia ? getInspeccionesFom({ desde: hoy, hasta: hoy }) : Promise.resolve([] as InspeccionResumen[]),
+       ]);
+-      return { metricas: reporte.metrics, costos };
++      return { odts, alertas: [...buzones.odt, ...buzones.alerta, ...buzones.sos], inspecciones };
+     },
+-    [empresaId, uid, mesAtras],
++    [empresaId, uid],
+     { onFocus: true },
+   );
++  useRefrescoVivo(vehiculos.recargar, MEDIO_MINUTO);
++  useRefrescoVivo(contadores.recargar, UN_MINUTO);
++  useRefrescoVivo(eventos.recargar, TRES_MINUTOS);
++
++  /** Dónde está cada unidad y si se mueve: el mismo motor que la pestaña Vehículos. */
++  const { unidades: vivas, sello } = useFlotaFom();
++
++  // Un solo tablero: carga hasta tener las tres partes y, si una falla, se avisa.
++  const partes = [vehiculos, contadores, eventos];
++  const fallida = partes.find((p) => p.estado === 'error');
++  const estado = fallida ? 'error' : partes.some((p) => p.estado === 'cargando') ? 'cargando' : 'ok';
++  const recargarFallidas = () => partes.filter((p) => p.estado === 'error').forEach((p) => p.recargar());
++  const motivo =
++    fallida?.error instanceof Error && fallida.error.message
++      ? fallida.error.message
++      : 'Revisa tu conexión e inténtalo de nuevo.';
+ 
+-  const datos: Datos | null = hoy
+-    ? {
+-        ...hoy,
+-        metricas: delPeriodo?.metricas,
+-        mantenimiento: mantenimiento ?? undefined,
+-        costos: delPeriodo?.costos ?? SIN_COSTOS,
+-        periodo: periodoDelMes(mesAtras).label,
+-      }
+-    : null;
+-
+-  const recargar = useCallback(() => {
+-    recargarHoy();
+-    recargarControl();
+-  }, [recargarHoy, recargarControl]);
+-
+-  // El tablero de una empresa no se mira una vez: se vigila.
+-  useRefrescoVivo(recargar);
+-  // El período no cambia de un minuto a otro y cuesta una lectura por unidad:
+-  // se pide al entrar, al cambiar de mes y, mirando, cada 10 minutos.
+-  useRefrescoVivo(recargarPeriodo, REFRESCO_PERIODO);
+   /** El esqueleto, solo si la espera se hace notar. */
+-  const esperaLarga = useTardando(!datos, GRACIA_ESQUELETO);
+-  /**
+-   * La barra fina: refrescando con el tablero ya puesto, o con "Hoy" puesto y
+-   * Control o El período todavía en camino —sus ceros aún no son datos—.
+-   */
+-  const pidiendo =
+-    pidiendoHoy ||
+-    pidiendoControl ||
+-    pidiendoPeriodo ||
+-    (!!hoy && (estadoControl === 'cargando' || estadoPeriodo === 'cargando'));
+-  // El hook ya sabe que un refresco no es una carga; aquí solo queda cuándo
+-  // se enciende la barra: si la espera no se nota, no se enciende.
+-  const refrescando = useTardando(pidiendo);
+-
+-  // Una carga FALLÓ y no hay nada que enseñar de antes: su bloque pinta el
+-  // error, no ceros. Si había datos, se quedan (el hook solo marca error sin datos).
+-  const falloHoy = estado === 'error' && !hoy;
+-  const falloControl = estadoControl === 'error' && !mantenimiento;
+-  const falloPeriodo = estadoPeriodo === 'error' && !delPeriodo;
++  const esperaLarga = useTardando(estado === 'cargando', GRACIA_ESQUELETO);
++  const refrescando = useTardando(partes.some((p) => p.refrescando));
+ 
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+ 
+-  const flota = datos?.flota ?? [];
+-  // El período tiene su propia carga: no espera a que llegue Hoy.
+-  const m = delPeriodo?.metricas;
+-
+-  // ── 1 · HOY: quién puede salir ───────────────────────────────────────────
+-  const papelesVencidosDe = new Set(
+-    (datos?.papeles ?? []).filter((d) => d.estado === 'vencido').map((d) => d.duenioId),
+-  );
+-  const impedidas = new Map<string, Impedimento>();
+-  for (const f of flota) {
+-    const id = f.vehicle.id;
+-    const insp = datos?.inspecciones[id];
+-    // Se queda con el PRIMER motivo de la escala: una unidad no puede salir por
+-    // tres razones a la vez en pantalla, y así los números suman lo que hay.
+-    if (papelesVencidosDe.has(id)) impedidas.set(id, 'papeles');
+-    else if (insp === 'bloqueada' || insp === 'pendiente' || insp === undefined) impedidas.set(id, 'inspeccion');
+-    else if (datos?.conOdt.has(id)) impedidas.set(id, 'odt');
+-  }
+-  const listas = flota.length - impedidas.size;
+-  // Los tres motivos, SIEMPRE y en el orden de la escala: con la flota vacía
+-  // o entera lista, cada uno dice su 0.
+-  const motivos = (['papeles', 'inspeccion', 'odt'] as Impedimento[]).map((k) => ({
+-    k,
+-    n: [...impedidas.values()].filter((v) => v === k).length,
+-  }));
+-
+-  // ── 2 · CONTROL ──────────────────────────────────────────────────────────
+-  const mant = datos?.mantenimiento;
+-  const porVencer = (datos?.papeles ?? []).filter((d) => d.estado === 'por_vencer');
+-  // Las cuatro, SIEMPRE. Sin datos, o con todo resuelto, cada una dice 0: la
+-  // sección no se va, porque "no queda nada pendiente" también hay que verlo.
+-  const avisos: Aviso[] = [
+-    { icon: 'ot', label: 'Preventivos vencidos', cuenta: mant?.preventivosVencidos ?? 0, tono: 'danger', onPress: () => router.navigate('/panel/mantenimiento') },
+-    { icon: 'calendario', label: 'Preventivos próximos', cuenta: mant?.preventivosProximos ?? 0, tono: 'warning', onPress: () => router.navigate('/panel/mantenimiento') },
+-    { icon: 'tendencia', label: 'Alertas predictivas', cuenta: mant?.predictivas ?? 0, tono: 'info', onPress: () => router.navigate('/panel/mantenimiento') },
+-    {
+-      icon: 'inspeccion',
+-      label: `Documentos por vencer (${DIAS_AVISO} días)`,
+-      cuenta: porVencer.length,
+-      tono: 'warning',
+-      onPress: () => router.navigate({ pathname: '/documentos', params: { companyId: empresaId ?? '' } }),
+-    },
+-  ];
+-
+-  // ── 3 · EL PERÍODO ───────────────────────────────────────────────────────
+-  // Los eventos, por cada 100 km: en bruto no se pueden comparar dos meses ni
+-  // dos flotas — una que recorre el doble "empeora" sin haber empeorado.
+-  const km = m?.kmRecorridos ?? 0;
+-  /**
+-   * El índice distingue "no hay dato" de "el dato es 0".
+-   *
+-   * Las métricas llegan aunque no se haya medido ninguna unidad, y entonces su
+-   * promedio es un 0 que no mide nada: sale 0, en neutro. Con alguna unidad
+-   * medida, la cifra lleva el color de su rango aunque valga 0, porque ese 0
+-   * sí es un estado.
+-   */
+-  const medido = !!m && m.vehiculos > 0;
+-  const indice = medido && m ? Math.round(m.indiceSeguroPromedio) : 0;
+-  const tonoIndice = medido && m ? tonoRango(m.rango) : undefined;
+-
+-  /** El título con la acción principal: se va con el scroll. */
+   const titulo = (
+     <TituloPantalla
+       titulo="Resumen"
+@@ -394,264 +201,41 @@ export default function AdminResumenScreen() {
+     />
+   );
+ 
+-  /** El detalle de por qué unas pueden salir y otras no. */
+-  const irAAptitud = () =>
+-    router.navigate({ pathname: '/aptitud', params: { companyId: empresaId ?? '' } });
+-
+   return (
+     <ThemedView style={styles.root} ambient>
+       <SafeAreaView style={styles.safeArea} edges={[]}>
+-        {/* La barra fija: lo demás se va con el scroll. */}
+         <AdminHeader seccion="Resumen" cargando={refrescando} />
+-
+-        {/* Si algo falla y no hay nada cargado, la pantalla sale igual con el
+-            error en cada bloque que no llegó: un esqueleto eterno esconde la
+-            estructura entera. La espera lleva el mismo título, en el mismo
+-            sitio: no salta. */}
+         <Relevo
+-          cargando={!datos && esperaLarga && estado !== 'error'}
++          cargando={estado === 'cargando' && esperaLarga}
+           esqueleto={
+             <View style={styles.flex1}>
+-              <View style={[styles.content, { paddingHorizontal: spacing.lg }]}>
+-                {titulo}
+-              </View>
++              <View style={[styles.content, { paddingHorizontal: spacing.lg }]}>{titulo}</View>
+               <CargandoPantalla />
+             </View>
+           }>
+-          <ScrollVisible llenar contentContainerStyle={[styles.content, { paddingHorizontal: spacing.lg, gap: spacing.lg + spacing.xs }]}>
+-            <Escalonado indice={0}>{titulo}</Escalonado>
+-
+-            {/* Alguien pidió AYUDA. Va antes que todo, y solo para quien opera
+-                esta empresa: el admin FOM la ve como punto rojo en el mapa. */}
+-            {!esMultiempresa(user) &&
+-              (datos?.emergencias ?? []).map((e) => (
+-                <AvisoEmergencia
+-                  key={e.id}
+-                  emergencia={e}
+-                  onPress={() =>
+-                    router.navigate({ pathname: '/sos', params: { id: e.id, companyId: empresaId ?? '' } })
+-                  }
+-                />
+-              ))}
+-
+-            {/* ── 1 · HOY: quién puede salir ─────────────────────────────── */}
+-            <Escalonado indice={1} style={{ gap: spacing.sm + 2 }}>
+-              <EtiquetaSeccion
+-                label="Hoy"
+-                onPress={irAAptitud}
+-                etiqueta="Hoy: ver qué unidades pueden salir"
+-              />
+-              {falloHoy ? (
+-                <Card>
+-                  <ErrorState compacto description="No pudimos cargar el resumen de hoy." onRetry={recargarHoy} />
+-                </Card>
+-              ) : (
+-                <PressableScale
+-                  onPress={irAAptitud}
+-                  accessibilityRole="button"
+-                  accessibilityLabel={`${listas} de ${flota.length} unidades listas para salir. Ver el detalle`}>
+-                  <Card style={{ gap: spacing.sm + 2 }}>
+-                    <View style={[styles.filaCifra, { gap: spacing.sm }]}>
+-                      <ThemedText variant="title" tabular style={styles.cifraGrande}>
+-                        {`${listas}`}
+-                      </ThemedText>
+-                      <View style={styles.cifraTexto}>
+-                        <ThemedText variant="body" style={styles.cifraTitulo}>
+-                          listas para salir
+-                        </ThemedText>
+-                        <ThemedText variant="caption" color="textMuted" tabular style={styles.cifraTotal}>
+-                          {`de ${flota.length} ${flota.length === 1 ? 'unidad' : 'unidades'}`}
+-                        </ThemedText>
+-                      </View>
+-                    </View>
+-
+-                    {/* LAS UNIDADES REPARTIDAS: el tramo verde son las que salen,
+-                        y detrás uno por cada impedimento en el color de su motivo
+-                        y en el mismo orden que los puntos de abajo.
+-
+-                        Los `flex` son las CUENTAS reales, no porcentajes: la
+-                        barra se reparte sola y siempre suma el total. Se dibuja
+-                        SIEMPRE: sin unidades queda la pista vacía, que es lo que
+-                        hay. Solo se pintan los tramos con cuenta — uno de ancho
+-                        cero seguiría ocupando su hueco entre los demás. */}
+-                    <View style={[styles.pista, { backgroundColor: colors.surfaceElevated, borderRadius: radii.sm }]}>
+-                      {listas > 0 ? <View style={{ flex: listas, backgroundColor: colors.success }} /> : null}
+-                      {motivos
+-                        .filter(({ n }) => n > 0)
+-                        .map(({ k, n }) => (
+-                          <View key={k} style={{ flex: n, backgroundColor: colors[IMPEDIMENTO_VISTA[k].tono] }} />
+-                        ))}
+-                    </View>
+-
+-                    {/* Los tres motivos, siempre, en la misma tira de cifras que
+-                        la cabecera de Flota: una fila, tres columnas iguales, sin
+-                        saltar a dos líneas. Punto y cifra llevan el color del
+-                        motivo solo cuando hay alguna unidad en él — un cero no es
+-                        un estado. */}
+-                    <View
+-                      style={{
+-                        paddingTop: spacing.sm + 2,
+-                        borderTopWidth: borderWidths.hairline,
+-                        borderTopColor: colors.border,
+-                      }}>
+-                      <TiraEstado
+-                        sinTarjeta
+-                        cifras={motivos.map(({ k, n }) => ({
+-                          valor: n,
+-                          label: IMPEDIMENTO_VISTA[k].label,
+-                          tono: n > 0 ? IMPEDIMENTO_VISTA[k].tono : 'textMuted',
+-                        }))}
+-                      />
+-                    </View>
+-                  </Card>
+-                </PressableScale>
+-              )}
++          <ScrollVisible llenar contentContainerStyle={[styles.content, { paddingHorizontal: spacing.lg, gap: 18 }]}>
++            <Escalonado indice={0} style={{ gap: 14 }}>
++              {titulo}
++              {estado === 'ok' ? <ChipVivo texto="Se actualiza solo cada 30 s" /> : null}
+             </Escalonado>
+ 
+-            {/* ── 2 · CONTROL ────────────────────────────────────────────── */}
+-            {/* Siempre, con sus cuatro filas: cuando todo está resuelto las
+-                cuatro dicen 0, y eso es lo que el supervisor quiere ver —que
+-                no queda nada—, no un hueco donde antes había una sección. Si
+-                no llegó (ni el mantenimiento ni los documentos, que vienen con
+-                Hoy), el error en su lugar: esos ceros no serían ciertos. */}
+-            <Escalonado indice={2} style={{ gap: spacing.sm + 2 }}>
+-              <EtiquetaSeccion label="Control" />
+-              <Card style={falloControl || falloHoy ? undefined : styles.lista}>
+-                {falloControl || falloHoy ? (
+-                  <ErrorState compacto description="No pudimos cargar el control." onRetry={recargar} />
+-                ) : avisos.map((a, i) => {
+-                  // El color es del estado, y una cuenta en cero no es un estado.
+-                  const tono = a.cuenta > 0 ? a.tono : 'textMuted';
+-                  return (
+-                    <PressableScale
+-                      key={a.label}
+-                      onPress={a.onPress}
+-                      accessibilityRole="button"
+-                      accessibilityLabel={`${a.cuenta} ${a.label}`}
+-                      style={[
+-                        styles.fila,
+-                        {
+-                          gap: spacing.md,
+-                          paddingHorizontal: spacing.lg,
+-                          paddingVertical: spacing.sm,
+-                          borderTopWidth: i === 0 ? 0 : borderWidths.hairline,
+-                          borderTopColor: colors.border,
+-                        },
+-                      ]}>
+-                      <View style={[styles.avisoIcono, { backgroundColor: tinte(colors[tono], 0.14), borderRadius: radii.sm + 4 }]}>
+-                        <TabIcon name={a.icon} color={colors[tono]} size={15} />
+-                      </View>
+-                      <ThemedText variant="button" numberOfLines={1} style={[styles.flex1, styles.avisoLabel]}>
+-                        {a.label}
+-                      </ThemedText>
+-                      {/* El tenue no llega al piso de contraste para un DATO: la
+-                          cifra en cero se lee en secundario. */}
+-                      <ThemedText
+-                        variant="button"
+-                        tabular
+-                        style={{ color: a.cuenta > 0 ? colors[a.tono] : colors.textSecondary }}>
+-                        {`${a.cuenta}`}
+-                      </ThemedText>
+-                      <TabIcon name="chevron" color={colors.textMuted} size={15} />
+-                    </PressableScale>
+-                  );
+-                })}
++            {estado === 'error' ? (
++              <Card>
++                <ErrorState description={motivo} onRetry={recargarFallidas} />
+               </Card>
+-            </Escalonado>
+-
+-            {/* ── 3 · EL PERÍODO ─────────────────────────────────────────── */}
+-            <Escalonado indice={3} style={{ gap: spacing.sm + 2 }}>
+-              {/* El mes se recorre hacia atrás; hacia delante solo hasta el
+-                  actual, que es hasta donde hay datos. */}
+-              <View style={[styles.fila, { gap: spacing.sm }]}>
+-                <View style={styles.flex1}>
+-                  <EtiquetaSeccion label={periodoDelMes(mesAtras).label} />
+-                </View>
+-                <PressableScale
+-                  onPress={() => setMesAtras((n) => n + 1)}
+-                  hitSlop={8}
+-                  accessibilityRole="button"
+-                  accessibilityLabel="Mes anterior"
+-                  style={[styles.flecha, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.sm, borderWidth: borderWidths.hairline }]}>
+-                  <View style={styles.flechaIzq}>
+-                    <TabIcon name="chevron" color={colors.textSecondary} size={14} />
+-                  </View>
+-                </PressableScale>
+-                <PressableScale
+-                  onPress={() => setMesAtras((n) => Math.max(0, n - 1))}
+-                  disabled={mesAtras === 0}
+-                  hitSlop={8}
+-                  accessibilityRole="button"
+-                  accessibilityLabel="Mes siguiente"
+-                  accessibilityState={{ disabled: mesAtras === 0 }}
+-                  style={[
+-                    styles.flecha,
+-                    {
+-                      backgroundColor: colors.surface,
+-                      borderColor: colors.border,
+-                      borderRadius: radii.sm,
+-                      borderWidth: borderWidths.hairline,
+-                      opacity: mesAtras === 0 ? 0.35 : 1,
+-                    },
+-                  ]}>
+-                  <TabIcon name="chevron" color={colors.textSecondary} size={14} />
+-                </PressableScale>
+-              </View>
+-              {/* Las tres, una por línea y sin raya entre ellas: son tres caras
+-                  del mismo período, no tres secciones. La tarjeta mide lo que
+-                  sus filas: estirada para llenar la pantalla, en tableta
+-                  dejaba huecos enormes entre ellas. */}
+-              {falloPeriodo ? (
+-                <Card>
+-                  <ErrorState compacto description="No pudimos cargar el período." onRetry={recargarPeriodo} />
+-                </Card>
+-              ) : (
+-                <Card style={[styles.alNatural, { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg }]}>
+-                  <View>
+-                    {/* El índice, en el color de su rango: la misma escala que ve
+-                        cada conductor en su perfil. Abre la lista de índices, que
+-                        es donde están los eventos por 100 km y de qué unidades
+-                        sale cada nota — por eso no se repiten aquí. */}
+-                    <Dato
+-                      valor={`${indice}`}
+-                      label="Índice de manejo"
+-                      tono={tonoIndice}
+-                      onPress={() =>
+-                        router.navigate({ pathname: '/indices', params: { companyId: empresaId ?? '' } })
+-                      }
+-                    />
+-                    {/* Cero kilómetros es un DATO —la flota no salió—, así que
+-                        se escribe. El guion se reserva para lo que no sabemos. */}
+-                    <Dato
+-                      valor={miles(km)}
+-                      sufijo="km"
+-                      label="Kilómetros recorridos"
+-                      onPress={() =>
+-                        router.navigate({
+-                          pathname: '/kilometros',
+-                          params: { companyId: empresaId ?? '', mes: `${mesAtras}` },
+-                        })
+-                      }
+-                    />
+-                    <Dato
+-                      valor={miles(Math.round(delPeriodo?.costos.total ?? 0))}
+-                      sufijo="$"
+-                      label="Costos del período"
+-                      onPress={() =>
+-                        router.navigate({ pathname: '/costos', params: { companyId: empresaId ?? '' } })
+-                      }
+-                    />
+-                  </View>
+-                </Card>
+-              )}
+-            </Escalonado>
+-
+-            {/* ── MANEJO de los conductores: la misma tabla del Resumen web
+-                (título, columnas y orden). Sin datos, no aparece. ── */}
+-            <Escalonado indice={4}>
+-              <TablaManejo empresaId={empresaId} />
+-            </Escalonado>
+-
++            ) : null}
++
++            {estado === 'ok' && vehiculos.data && contadores.data && eventos.data ? (
++              <Tablero
++                empresaId={empresaId ?? ''}
++                unidadesBase={vehiculos.data.unidades}
++                emergencias={esMultiempresa(user) ? [] : vehiculos.data.emergencias}
++                r={contadores.data.r}
++                eventos={eventos.data}
++                vivas={vivas}
++                sello={sello}
++              />
++            ) : null}
+           </ScrollVisible>
+         </Relevo>
+       </SafeAreaView>
+@@ -659,39 +243,573 @@ export default function AdminResumenScreen() {
+   );
+ }
+ 
++function Tablero({
++  empresaId,
++  unidadesBase,
++  emergencias,
++  r,
++  eventos: ev,
++  vivas,
++  sello,
++}: {
++  empresaId: string;
++  unidadesBase: UnidadFlota[];
++  emergencias: Emergencia[];
++  r: ResumenFom | null;
++  eventos: DatosEventos;
++  vivas: UnidadFom[];
++  sello: number | null;
++}) {
++  const router = useRouter();
++  const { height } = useWindowDimensions();
++  const { radii } = useTheme();
++  // La hora se renueva cada minuto: el «hace …» de las calladas corre solo sin pedir nada.
++  const ahora = useReloj(60_000);
++  const [seleccionado, setSeleccionado] = useState<string | null>(null);
++  const [eligiendo, setEligiendo] = useState(false);
++
++  const vivaDe = useMemo(() => new Map(vivas.map((v) => [v.vehicle.id, v])), [vivas]);
++  // Se juzga con la hora más nueva de las dos: la del reloj y la de la última lectura.
++  const juicio = Math.max(ahora, sello ?? 0);
++
++  const unidades = useMemo<Unidad[]>(
++    () =>
++      unidadesBase
++        .map((u) => {
++          const viva = vivaDe.get(u.vehicle.id);
++          const reporte = viva?.pos?.recibidaEn ?? null;
++          return {
++            u,
++            viva,
++            estado: viva ? estadoDeUnidad(viva, juicio) : ('sin-senal' as const),
++            conSenal: transmitiendo(viva?.pos ?? null, juicio),
++            reporte,
++            nombre: nombreDe(u),
++          };
++        })
++        // Las calladas primero, la de más tiempo sin señal arriba: son las que hay que mirar.
++        .sort(
++          (a, b) =>
++            Number(a.conSenal) - Number(b.conSenal) ||
++            (a.conSenal ? 0 : msSinReportar(b.reporte, juicio) - msSinReportar(a.reporte, juicio) || 0) ||
++            a.nombre.localeCompare(b.nombre, 'es', { numeric: true }),
++        ),
++    [unidadesBase, vivaDe, juicio],
++  );
++
++  const total = unidades.length;
++  const sabeMarcha = vivas.length > 0;
++  const activas = sabeMarcha
++    ? unidades.filter((x) => x.estado === 'marcha').length
++    : unidades.filter((x) => x.conSenal).length;
++
++  // Contadores del servidor. Sin ellos, guion: un cero afirmaría algo.
++  const num = (n: number | undefined) => (r == null || n == null ? '—' : n);
++  const odtAbiertas = r ? r.odtAbiertas + r.odtEnRevision : '—';
++  const sinInspeccion = r == null ? null : Math.max(0, total - r.inspeccionesHoy);
++
++  const irA = useCallback(
++    (pathname: string, params: Record<string, string> = {}) =>
++      router.navigate({ pathname: pathname as never, params } as never),
++    [router],
++  );
++
++  const eventosHoy = useMemo(
++    () => eventosDeHoy({ unidades, ...ev }, juicio, irA, empresaId),
++    [unidades, ev, juicio, irA, empresaId],
++  );
++
++  const seleccion =
++    unidades.find((x) => x.u.vehicle.id === seleccionado) ?? unidades.find((x) => x.viva?.pos) ?? unidades[0];
++
++  const markers = useMemo<MapMarker[]>(
++    () =>
++      unidades
++        .filter((x) => x.viva?.pos)
++        .map((x) => ({
++          id: x.u.vehicle.id,
++          label: x.nombre,
++          detalle: x.u.conductorActual ?? 'Sin conductor',
++          coords: { lat: x.viva!.pos!.lat, lng: x.viva!.pos!.lng },
++          live: x.estado !== 'sin-senal',
++          estado: x.estado,
++          rumbo: x.viva?.pos?.rumbo ?? null,
++          placa: x.u.vehicle.placa,
++          ultimoReporte: x.reporte,
++        })),
++    [unidades],
++  );
++  const encuadreClave = useMemo(() => markers.map((m) => m.id).sort().join('|'), [markers]);
++  const altoMapa = Math.round(Math.min(570, Math.max(360, height * 0.48)));
++
++  const opciones = useMemo<PickerOption[]>(
++    () =>
++      unidades.map((x) => ({
++        id: x.u.vehicle.id,
++        label: x.nombre,
++        ...(x.conSenal ? {} : { helper: textoSinSenal(x.reporte, juicio) }),
++      })),
++    [unidades, juicio],
++  );
++
++  return (
++    <>
++      {/* Alguien pidió AYUDA: antes que todo (la web lo pinta en el mapa). */}
++      {emergencias.map((e) => (
++        <AvisoEmergencia
++          key={e.id}
++          emergencia={e}
++          onPress={() => irA('/sos', { id: e.id, companyId: empresaId })}
++        />
++      ))}
++
++      {/* ── La flota y las dos cifras de arriba ── */}
++      <Escalonado indice={1} style={{ gap: 12 }}>
++        <TarjetaFlota total={total} activas={activas} sabeMarcha={sabeMarcha} onPress={() => irA('/panel/flota')} />
++        <View style={styles.par}>
++          <KpiResumen
++            forma="arriba"
++            titulo="ODT por resolver"
++            valor={odtAbiertas}
++            icono="ot"
++            nota={r ? `${numeroWeb(r.odtAbiertas)} ${r.odtAbiertas === 1 ? 'abierta' : 'abiertas'} · ${numeroWeb(r.odtEnRevision)} en revisión` : '— abiertas · — en revisión'}
++            onPress={() => irA('/panel/mantenimiento')}
++          />
++          <KpiResumen
++            forma="arriba"
++            titulo="Alertas nuevas"
++            valor={num(r?.alertasSinLeer)}
++            icono="alertas"
++            nota="Pendientes de leer"
++            onPress={() => irA('/notificaciones', { companyId: empresaId })}
++          />
++        </View>
++      </Escalonado>
++
++      {/* ── El mapa en tiempo real ── */}
++      <Escalonado indice={2}>
++        <TarjetaResumen
++          titulo="Vehículos en tiempo real"
++          enlace={{ label: 'Ver centro de control →', onPress: () => irA('/mapa-flota') }}
++          sinCuerpo>
++          <View style={[styles.mapa, { height: altoMapa, borderBottomLeftRadius: radii.lg, borderBottomRightRadius: radii.lg }]}>
++            <MapaVehiculo
++              markers={markers}
++              hideOverlays
++              sinUsuario
++              encuadreClave={encuadreClave}
++              resaltadoId={seleccion?.u.vehicle.id ?? null}
++              // Quieto: el scroll de la pantalla no lo arrastra. Tocar un punto
++              // lo elige abajo; tocar el resto abre el mapa completo.
++              interactivo={false}
++              onMarkerPress={setSeleccionado}
++              onMapaPress={() => irA('/mapa-flota', seleccion ? { unidad: seleccion.u.vehicle.id } : {})}
++              style={styles.mapaLleno}
++            />
++          </View>
++        </TarjetaResumen>
++      </Escalonado>
++
++      {/* ── El vehículo seleccionado ── */}
++      <Escalonado indice={3}>
++        <TarjetaResumen
++          titulo="Vehículo seleccionado"
++          accion={
++            unidades.length > 0 ? (
++              <SelectorUnidad
++                texto={seleccion ? `${seleccion.nombre}${seleccion.conSenal ? '' : ` — ${textoSinSenal(seleccion.reporte, juicio)}`}` : ''}
++                onPress={() => setEligiendo(true)}
++              />
++            ) : null
++          }>
++          {seleccion ? (
++            <FichaUnidad x={seleccion} ahora={juicio} empresaId={empresaId} irA={irA} />
++          ) : (
++            <VacioResumen
++              glifo="flota"
++              titulo="Sin unidades todavía"
++              texto="Las unidades registradas aparecerán aquí."
++              accion={<Button label="Ver vehículos" variant="secondary" onPress={() => irA('/panel/flota')} />}
++            />
++          )}
++        </TarjetaResumen>
++        <OptionPickerModal
++          visible={eligiendo}
++          title="Seleccionar vehículo"
++          options={opciones}
++          selectedIds={seleccion ? [seleccion.u.vehicle.id] : []}
++          searchable
++          onChange={(ids) => {
++            if (ids[0]) setSeleccionado(ids[0]);
++            setEligiendo(false);
++          }}
++          onClose={() => setEligiendo(false)}
++        />
++      </Escalonado>
++
++      {/* ── Las tres cifras del día ── */}
++      <Escalonado indice={4} style={{ gap: 12 }}>
++        <KpiResumen
++          forma="lado"
++          titulo="Inspecciones de hoy"
++          valor={num(r?.inspeccionesHoy)}
++          icono="inspeccion"
++          nota={sinInspeccion == null ? 'Consulta el historial' : `${numeroWeb(sinInspeccion)} ${sinInspeccion === 1 ? 'unidad pendiente' : 'unidades pendientes'}`}
++          onPress={() => irA('/inspecciones', { companyId: empresaId })}
++        />
++        <KpiResumen
++          forma="lado"
++          titulo="Mantenimiento"
++          valor={odtAbiertas}
++          icono="ot"
++          nota="Órdenes pendientes y en revisión"
++          tono={typeof odtAbiertas === 'number' && odtAbiertas > 0 ? 'aviso' : undefined}
++          onPress={() => irA('/panel/mantenimiento')}
++        />
++        <KpiResumen
++          forma="lado"
++          titulo="Documentos por vencer"
++          valor={num(r?.docsPorVencer)}
++          icono="reporte"
++          nota="Revisa los próximos vencimientos"
++          tono={r && r.docsPorVencer > 0 ? 'aviso' : undefined}
++          onPress={() => irA('/documentos', { companyId: empresaId })}
++        />
++      </Escalonado>
++
++      {/* ── El manejo de los conductores (sin datos, no aparece) ── */}
++      <Escalonado indice={5}>
++        <TarjetaManejo
++          empresaId={empresaId}
++          dias={DIAS_MANEJO[0]}
++          onConductor={(id, nombre) =>
++            irA('/ver-perfil', { userId: id, nombre, role: 'conductor', companyId: empresaId })
++          }
++        />
++      </Escalonado>
++
++      {/* ── Hoy, en orden ── */}
++      <Escalonado indice={6}>
++        <TarjetaResumenEnLinea
++          titulo="Hoy, en orden"
++          enlace={{ label: 'Ver alertas', onPress: () => irA('/notificaciones', { companyId: empresaId }) }}>
++          {eventosHoy.length === 0 ? (
++            <VacioResumen
++              glifo="reloj"
++              titulo="Hoy no ha pasado nada todavía"
++              texto="Cuando una unidad haga su inspección, se abra una orden o deje de reportar, lo verás aquí con su hora."
++            />
++          ) : (
++            <ListaHoy eventos={eventosHoy} hora={formatHora} />
++          )}
++        </TarjetaResumenEnLinea>
++      </Escalonado>
++    </>
++  );
++}
++
++/** El «select» de la cabecera de la ficha: la unidad elegida y su flecha. */
++function SelectorUnidad({ texto, onPress }: { texto: string; onPress: () => void }) {
++  const { colors, borderWidths } = useTheme();
++  return (
++    <PressableScale
++      onPress={onPress}
++      accessibilityRole="button"
++      accessibilityLabel={`Seleccionar vehículo. Ahora: ${texto}`}
++      style={[
++        styles.selector,
++        { backgroundColor: colors.surfaceSunken, borderColor: colors.border, borderWidth: borderWidths.thin },
++      ]}>
++      <ThemedText numberOfLines={1} style={[styles.flex1, styles.selectorTexto]}>
++        {texto}
++      </ThemedText>
++      <View style={styles.abajo}>
++        <TabIcon name="chevron" color={colors.text} size={16} />
++      </View>
++    </PressableScale>
++  );
++}
++
++/**
++ * La ficha del vehículo elegido, como `FichaUnidad` de la web: estado, placa,
++ * qué es, su imagen, la velocidad, la última señal, el conductor con su
++ * pastilla de manejo, dónde está, odómetro y GPS, «Más información» y el
++ * expediente.
++ */
++function FichaUnidad({
++  x,
++  ahora,
++  empresaId,
++  irA,
++}: {
++  x: Unidad;
++  ahora: number;
++  empresaId: string;
++  irA: (pathname: string, params?: Record<string, string>) => void;
++}) {
++  const { colors, borderWidths } = useTheme();
++  const v = x.u.vehicle;
++  const pos = x.viva?.pos ?? null;
++  const sinSenal = x.estado === 'sin-senal';
++  const estado: { texto: string; tono: keyof ColorTokens } = sinSenal
++    ? { texto: textoSinSenal(x.reporte, ahora), tono: 'textSecondary' }
++    : x.estado === 'marcha'
++      ? { texto: 'En marcha', tono: 'success' }
++      : { texto: 'Detenido', tono: 'warning' };
++  const ultimo = sinSenal ? textoUltimoReporte(x.reporte) : null;
++  const descripcion = [x.nombre, [v.marca, v.modelo, v.anio].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
++  const velocidad = pos?.velocidadKmh;
++  const odometro = v.odometroKm ?? pos?.odometroKm ?? null;
++  const gps = x.conSenal ? 'Conectado' : pos ? textoSinSenal(x.reporte, ahora) : 'Sin dato';
++
++  // Lo que no cabe arriba, solo si hay dato (como la web).
++  const extras: [string, string][] = [];
++  if (pos?.contacto != null && velocidad != null) extras.push(['Motor', pos.contacto ? 'Encendido' : 'Apagado']);
++  if (x.viva?.gps?.imei) extras.push(['IMEI del equipo', x.viva.gps.imei]);
++  if (pos) extras.push(['Coordenadas', coordsEnTexto(pos)]);
++
++  const color = colors[estado.tono];
++  return (
++    <View style={styles.ficha}>
++      <View style={styles.fichaEstado}>
++        <View style={[styles.estado, { borderColor: color, backgroundColor: sinSenal ? colors.surfaceElevated : tinteEstado(colors, estado.tono) }]}>
++          <View style={[styles.estadoPunto, { backgroundColor: color }]} />
++          <ThemedText style={[styles.estadoTexto, { color }]}>{estado.texto}</ThemedText>
++        </View>
++        {ultimo ? <ThemedText style={[styles.chico, { color: colors.textSecondary }]}>{ultimo}</ThemedText> : null}
++      </View>
++      <View style={{ gap: 6 }}>
++        <ThemedText style={styles.placa}>{v.placa || 'Sin placa'}</ThemedText>
++        {descripcion ? <ThemedText style={[styles.descripcion, { color: colors.textSecondary }]}>{descripcion}</ThemedText> : null}
++      </View>
++
++      <View style={styles.retratoCaja}>
++        <View style={[styles.retrato, { borderColor: colors.border, borderWidth: borderWidths.thin }]}>
++          <VehiculoRetrato vehicle={v} enMarcha={x.estado === 'marcha'} alto={150} />
++        </View>
++        <ThemedText style={[styles.chico, { color: colors.textSecondary }]}>Imagen de referencia</ThemedText>
++      </View>
++
++      <View style={styles.velocidad}>
++        <TabIcon name="velocidad" color={colors.text} size={25} />
++        <ThemedText tabular style={styles.velocidadCifra}>
++          {velocidad == null ? 'Sin velocidad GPS' : numeroWeb(Math.round(velocidad))}
++          {velocidad == null ? null : <ThemedText style={styles.velocidadUnidad}> km/h</ThemedText>}
++        </ThemedText>
++      </View>
++
++      <View style={{ gap: 12 }}>
++        <Dato glifo="reloj" etiqueta="Última señal" valor={x.reporte ? desdeWeb(x.reporte, ahora) : 'Sin reportes'} />
++        <Dato
++          tabIcon="personal"
++          etiqueta="Conductor"
++          valor={x.u.conductorActual ?? 'Sin conductor asignado'}
++          extra={x.u.conductorActual && x.u.conductorId ? <PastillaConductor empresaId={empresaId} userId={x.u.conductorId} conduce /> : null}
++        />
++        <Dato glifo="pin" etiqueta="Ubicación" valor={pos ? coordsEnTexto(pos) : 'Sin posición disponible'} />
++      </View>
++
++      <View style={styles.metricas}>
++        <Metrica glifo="mapa" etiqueta="Odómetro" valor={odometro == null ? 'Sin dato' : `${numeroWeb(Math.round(odometro))} km`} />
++        <Metrica glifo="wifi" etiqueta="GPS" valor={gps} />
++      </View>
++
++      <MasInformacion filas={extras} />
++
++      <Button
++        label="Ver expediente"
++        icon="reporte"
++        onPress={() => irA('/unidad', { vehicleId: v.id, companyId: v.companyId || empresaId })}
++      />
++    </View>
++  );
++}
++
++/** El fondo suave de la pastilla de estado, del color de su tono. */
++function tinteEstado(colors: ColorTokens, tono: keyof ColorTokens): string {
++  if (tono === 'success') return colors.successSurface;
++  if (tono === 'warning') return colors.warningSurface;
++  return colors.surfaceElevated;
++}
++
++/** «hace 3 min», como `desde` de la web («ahora» bajo el minuto, días desde ayer). */
++function desdeWeb(iso: string, ahora: number): string {
++  const seg = Math.floor((ahora - new Date(iso).getTime()) / 1000);
++  if (seg < 60) return 'ahora';
++  const dias = Math.floor(seg / 86_400);
++  if (dias === 1) return 'ayer';
++  if (dias > 1) return `hace ${dias} días`;
++  return haceCuanto(iso, new Date(ahora));
++}
++
++function Dato({
++  glifo,
++  tabIcon,
++  etiqueta,
++  valor,
++  extra,
++}: {
++  glifo?: 'reloj' | 'pin';
++  tabIcon?: 'personal';
++  etiqueta: string;
++  valor: string;
++  extra?: ReactNode;
++}) {
++  const { colors } = useTheme();
++  return (
++    <View style={styles.dato}>
++      <View style={styles.datoIcono}>
++        {glifo ? <Glifo nombre={glifo} color={colors.text} /> : null}
++        {tabIcon ? <TabIcon name={tabIcon} color={colors.text} size={19} /> : null}
++      </View>
++      <View style={[styles.flex1, { gap: 2 }]}>
++        <ThemedText style={[styles.datoEtiqueta, { color: colors.textSecondary }]}>{etiqueta}</ThemedText>
++        <View style={styles.datoValorFila}>
++          <ThemedText style={styles.datoValor}>{valor}</ThemedText>
++          {extra}
++        </View>
++      </View>
++    </View>
++  );
++}
++
++function Metrica({ glifo, etiqueta, valor }: { glifo: 'mapa' | 'wifi'; etiqueta: string; valor: string }) {
++  const { colors, borderWidths } = useTheme();
++  return (
++    <View
++      style={[
++        styles.metrica,
++        { backgroundColor: colors.surfaceSunken, borderColor: colors.border, borderWidth: borderWidths.thin },
++      ]}>
++      <Glifo nombre={glifo} color={colors.text} size={22} />
++      <View style={styles.flex1}>
++        <ThemedText style={[styles.metricaEtiqueta, { color: colors.textSecondary }]}>{etiqueta}</ThemedText>
++        <ThemedText style={styles.metricaValor} numberOfLines={2}>
++          {valor}
++        </ThemedText>
++      </View>
++    </View>
++  );
++}
++
++/**
++ * Lo que pasó HOY, armado con lo que el servidor sí sabe: inspecciones
++ * enviadas, órdenes abiertas, avisos y unidades que dejaron de reportar. Lo
++ * más nuevo arriba y solo los doce últimos, como la web: el detalle vive en
++ * cada módulo.
++ */
++function eventosDeHoy(
++  { unidades, odts, alertas, inspecciones }: DatosEventos & { unidades: Unidad[] },
++  ahora: number,
++  irA: (pathname: string, params?: Record<string, string>) => void,
++  empresaId: string,
++): EventoHoy[] {
++  const hoy = new Date(ahora).toDateString();
++  const esDeHoy = (iso: string | null | undefined): iso is string => !!iso && new Date(iso).toDateString() === hoy;
++  const porId = new Map(unidades.map((x) => [x.u.vehicle.id, x]));
++  const lista: EventoHoy[] = [];
++
++  for (const i of inspecciones) {
++    if (!esDeHoy(i.enviadaEn)) continue;
++    const vehiculo = identidadDeUnidad({ numero: i.unidad, placa: i.placa }) || '—';
++    lista.push({
++      id: `insp-${i.id}`,
++      en: i.enviadaEn,
++      tono: i.resultado === 'aprobada' ? 'ok' : 'aviso',
++      texto: `${vehiculo} · inspección de hoy hecha por ${i.conductor}`,
++      detalle: RESULTADO[i.resultado] ?? i.resultado,
++      onPress: () => irA('/inspecciones', { companyId: empresaId }),
++    });
++  }
++  for (const o of odts) {
++    if (!esDeHoy(o.creadaEn)) continue;
++    const x = porId.get(o.vehicleId);
++    lista.push({
++      id: `odt-${o.id}`,
++      en: o.creadaEn,
++      tono: 'aviso',
++      texto: `${x ? x.nombre : o.vehicleLabel || '—'} · se abrió una orden de trabajo`,
++      detalle: o.descripcion,
++      onPress: () => irA('/panel/mantenimiento'),
++    });
++  }
++  for (const n of alertas) {
++    if (!esDeHoy(n.creadaEn)) continue;
++    lista.push({
++      id: `aviso-${n.id}`,
++      en: n.creadaEn,
++      tono: n.leida ? 'gris' : 'azul',
++      texto: n.titulo,
++      detalle: n.detalle,
++      onPress: () => irA('/notificaciones', { companyId: empresaId }),
++    });
++  }
++  for (const x of unidades) {
++    if (!esDeHoy(x.reporte) || x.conSenal) continue;
++    lista.push({
++      id: `senal-${x.u.vehicle.id}`,
++      en: x.reporte,
++      tono: 'malo',
++      texto: `${x.nombre} dejó de reportar`,
++      detalle: textoSinSenal(x.reporte, ahora),
++      onPress: () => irA('/unidad', { vehicleId: x.u.vehicle.id, companyId: empresaId }),
++    });
++  }
++  return masNuevoPrimero(lista, (e) => e.en).slice(0, 12);
++}
++
++/** Las palabras del resultado, las mismas del catálogo de la web. */
++const RESULTADO: Record<string, string> = {
++  pendiente: 'Pendiente',
++  aprobada: 'Aprobada',
++  aprobada_con_observaciones: 'Aprobada con observaciones',
++  bloqueada: 'Bloqueada',
++};
++
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+   safeArea: { flex: 1 },
+-  content: { width: '100%', maxWidth: 720, alignSelf: 'center', paddingBottom: 12 },
++  content: { width: '100%', maxWidth: 720, alignSelf: 'center', paddingBottom: 24 },
+   flex1: { flex: 1, minWidth: 0 },
+-  fila: { flexDirection: 'row', alignItems: 'center' },
+-
+-  // ── Hoy ──
+-  // Por abajo, no por la línea base: la cifra es mucho más alta que el texto y
+-  // alineadas por base el bloque de dos líneas se descolgaba de la tarjeta.
+-  filaCifra: { flexDirection: 'row', alignItems: 'flex-end' },
+-  cifraGrande: { fontSize: 36, lineHeight: 36, letterSpacing: -1.4 },
+-  cifraTexto: { flex: 1, minWidth: 0, gap: 1, paddingBottom: 3 },
+-  cifraTitulo: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
+-  cifraTotal: { fontSize: 13, lineHeight: 18, fontWeight: '500' },
+-  // La misma pista que las barras de eventos del perfil: no estrena lenguaje.
+-  pista: { flexDirection: 'row', gap: 2, height: 6, overflow: 'hidden' },
+-
+-  // ── Control ──
+-  lista: { padding: 0, overflow: 'hidden' },
+-  avisoIcono: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+-  avisoLabel: { fontSize: 15, fontWeight: '500' },
+-
+-  // ── El período ──
+-  encoge: { flexShrink: 1 },
+-  // Ni crece ni se aplasta: mide lo que sus tres filas, en teléfono y en tableta.
+-  alNatural: { flexGrow: 0, flexShrink: 0, height: 'auto' },
+-  flecha: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
+-  flechaIzq: { transform: [{ rotate: '180deg' }] },
+-  datoCifra: { flexDirection: 'row', alignItems: 'baseline', gap: 3 },
+-  datoValor: { fontSize: 24, lineHeight: 28, fontWeight: '700' },
+-  datoSufijo: { fontSize: 13, fontWeight: '600' },
+-  // El ancho de la columna de la unidad: el de "km", y el mismo aunque no haya.
+-  datoUnidad: { width: 22 },
+-  datoRotulo: { fontSize: 15 },
++  par: { flexDirection: 'row', gap: 12 },
++
++  mapa: { overflow: 'hidden' },
++  mapaLleno: { height: '100%', borderRadius: 0, borderWidth: 0 },
++
++  selector: {
++    flexDirection: 'row',
++    alignItems: 'center',
++    gap: 8,
++    height: 46,
++    paddingHorizontal: 16,
++    borderRadius: 16,
++    alignSelf: 'flex-start',
++    maxWidth: 230,
++  },
++  selectorTexto: { fontSize: 14, lineHeight: 20 },
++  abajo: { transform: [{ rotate: '90deg' }] },
++
++  // ── Ficha (`.fleet-card` de la web) ──
++  ficha: { gap: 16 },
++  fichaEstado: { gap: 6, alignItems: 'flex-start' },
++  estado: { flexDirection: 'row', alignItems: 'center', gap: 7, borderWidth: 1, borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
++  estadoPunto: { width: 8, height: 8, borderRadius: 4 },
++  estadoTexto: { fontSize: 12, lineHeight: 17, fontWeight: '500' },
++  chico: { fontSize: 12, lineHeight: 17 },
++  placa: { fontSize: 28, lineHeight: 31, fontWeight: '700', letterSpacing: -0.7 },
++  descripcion: { fontSize: 13, lineHeight: 18 },
++  retratoCaja: { alignItems: 'center', gap: 10 },
++  retrato: { width: '100%', maxWidth: 240, borderRadius: 16, overflow: 'hidden', paddingVertical: 8 },
++  velocidad: { flexDirection: 'row', alignItems: 'center', gap: 12 },
++  velocidadCifra: { fontSize: 24, lineHeight: 34, fontWeight: '600' },
++  velocidadUnidad: { fontSize: 16, fontWeight: '600' },
++  dato: { flexDirection: 'row', alignItems: 'center', gap: 11 },
++  datoIcono: { width: 19, alignItems: 'center' },
++  datoEtiqueta: { fontSize: 12, lineHeight: 17 },
++  datoValorFila: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
++  datoValor: { fontSize: 13, lineHeight: 18 },
++  metricas: { flexDirection: 'row', gap: 10 },
++  metrica: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 11, padding: 11, borderRadius: 10 },
++  metricaEtiqueta: { fontSize: 11, lineHeight: 15 },
++  metricaValor: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
+ });
+diff --git a/src/app/panel/mantenimiento.tsx b/src/app/panel/mantenimiento.tsx
+index 448d6e6..38c3d2f 100644
+--- a/src/app/panel/mantenimiento.tsx
++++ b/src/app/panel/mantenimiento.tsx
+@@ -1,6 +1,6 @@
+ import { Redirect, useRouter } from 'expo-router';
+-import { useMemo, useState, type ReactNode } from 'react';
+-import { StyleSheet, View } from 'react-native';
++import { useEffect, useMemo, useState, type ReactNode } from 'react';
++import { AppState, StyleSheet, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { useAuth } from '@/auth';
+@@ -47,6 +47,14 @@ import { useTheme } from '@/theme';
+ import type { WorkOrderListItem } from '@/types';
+ import { identidadDeUnidad } from '@/lib/vehiculos';
+ import { aplicarFiltros, type Filtro } from '@/utils/filtros';
++import {
++  diaLocal,
++  filtrarPorFecha,
++  hayFiltroFecha,
++  msHastaMedianoche,
++  SIN_FECHA,
++  type FiltroFecha,
++} from '@/utils/filtro-fecha';
+ import { colorDeEnte } from '@/utils/paleta-flota';
+ import { COLAS, tareasDe, unidadesPorAtender, type Tarea, type TipoTarea } from '@/utils/tareas-mantto';
+ 
+@@ -90,6 +98,28 @@ const grupoDeOdt = (o: WorkOrderListItem): GrupoEstado =>
+  *
+  * Debajo, cómo avanza una ODT y cuántas unidades están al día.
+  */
++/**
++ * El día de hoy (AAAA-MM-DD, hora local) que se renueva solo a la medianoche:
++ * con la pantalla abierta toda la noche, «Hoy», «7 días» y «30 días» pasan a
++ * contar desde el día nuevo. Igual que la web (`useDiaDeHoy` en Mantenimiento).
++ */
++function useDiaDeHoy(): string {
++  const [dia, setDia] = useState(() => diaLocal());
++  useEffect(() => {
++    // Un poco después de las 00:00, por si el reloj del teléfono se adelanta.
++    const reloj = setTimeout(() => setDia(diaLocal()), msHastaMedianoche() + 1000);
++    // Con el teléfono dormido el reloj se atrasa: al volver a la app se mira otra vez.
++    const sub = AppState.addEventListener('change', (s) => {
++      if (s === 'active') setDia(diaLocal());
++    });
++    return () => {
++      clearTimeout(reloj);
++      sub.remove();
++    };
++  }, [dia]);
++  return dia;
++}
++
+ export default function AdminMantenimientoScreen() {
+   const { spacing, radii } = useTheme();
+   const { user, status } = useAuth();
+@@ -102,6 +132,8 @@ export default function AdminMantenimientoScreen() {
+   /** Los filtros de arriba de la lista: el estado (los 3 de la ODT) y el tipo ('' = todos). */
+   const [grupo, setGrupo] = useState<GrupoEstado>('todas');
+   const [tipo, setTipo] = useState<'' | TipoTarea>('');
++  /** La fecha de reporte: Hoy, 7 días, 30 días, Todo o un rango (como la web). */
++  const [fecha, setFecha] = useState<FiltroFecha>(SIN_FECHA);
+   /** Cuántas filas de la Lista se pintan: el historial entero son cientos. */
+   const [tope, setTope] = useState(TANDA);
+   // Al cambiar de empresa (la pantalla se reutiliza) se limpia lo que se
+@@ -113,6 +145,7 @@ export default function AdminMantenimientoScreen() {
+     setFiltro([]);
+     setGrupo('todas');
+     setTipo('');
++    setFecha(SIN_FECHA);
+     setTope(TANDA);
+   }
+ 
+@@ -154,6 +187,9 @@ export default function AdminMantenimientoScreen() {
+   // El hook ya sabe que un refresco no es una carga; aquí solo queda cuándo
+   // se enciende la barra: si la espera no se nota, no se enciende.
+   const refrescando = useTardando(pidiendo || historial.refrescando);
++  // El filtro de fecha se calcula en cada pintada con la hora de ese momento:
++  // al cambiar el día, esto vuelve a pintar y «Hoy» ya es el día nuevo.
++  useDiaDeHoy();
+ 
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+ 
+@@ -200,8 +236,13 @@ export default function AdminMantenimientoScreen() {
+     const f = unidadDe.get(vehicleId);
+     return normalizar(`${texto} ${f?.vehicle.numero ?? ''} ${f?.vehicle.placa ?? ''}`).includes(nq);
+   };
++  /** Cuándo se reportó (ODT) o se generó (alerta) una tarea. */
++  const fechaDe = (t: Tarea) =>
++    t.destino.pathname === '/orden' ? ordenDe.get(t.destino.id)?.creadaEn : accionDe.get(t.destino.id)?.creadaEn;
+   const buscadas = tareas.filter((t) => coincide(`${t.titulo} ${t.reporta ?? ''}`, t.vehicleId));
+-  const filtradas = aplicarFiltros(buscadas, filtros, filtro);
++  // Por área y, además, por la fecha de reporte. Filtrar no reordena.
++  const sinFecha = aplicarFiltros(buscadas, filtros, filtro);
++  const filtradas = filtrarPorFecha(sinFecha, fecha, fechaDe);
+   // La cuenta de cada opción, sobre lo que la búsqueda ya dejó pasar.
+   const opciones = filtros.map((f) => ({
+     id: f.id,
+@@ -210,9 +251,6 @@ export default function AdminMantenimientoScreen() {
+     ...(f.color ? { color: f.color } : {}),
+   }));
+ 
+-  /** Cuándo se reportó (ODT) o se generó (alerta) una tarea. */
+-  const fechaDe = (t: Tarea) =>
+-    t.destino.pathname === '/orden' ? ordenDe.get(t.destino.id)?.creadaEn : accionDe.get(t.destino.id)?.creadaEn;
+   /** Una tarea en los 3 estados: la ODT por el suyo; la alerta, en revisión si ya está en proceso. */
+   const grupoDe = (t: Tarea): GrupoEstado => {
+     const o = t.destino.pathname === '/orden' ? ordenDe.get(t.destino.id) : undefined;
+@@ -227,8 +265,8 @@ export default function AdminMantenimientoScreen() {
+   );
+   const colas = COLAS.map((c) => ({ ...c, items: visibles.filter((t) => t.cola === c.id) }));
+ 
+-  // Las resueltas (del historial), con la misma búsqueda, área y tipo.
+-  const historialFiltrado = masNuevasPrimero(
++  // Las resueltas (del historial), con la misma búsqueda, área, fecha y tipo.
++  const historialSinFecha = masNuevasPrimero(
+     aplicarFiltros(
+       (historial.data ?? []).filter((o) => coincide(`${o.descripcion} ${o.driverName}`, o.vehicleId)),
+       filtrosDe<WorkOrderListItem>((o) => o.vehicleId),
+@@ -236,6 +274,7 @@ export default function AdminMantenimientoScreen() {
+     ),
+     (o) => o.creadaEn,
+   );
++  const historialFiltrado = filtrarPorFecha(historialSinFecha, fecha, (o) => o.creadaEn);
+   const resueltas = historialFiltrado.filter((o) => o.estado === 'cerrada' && (!tipo || tipoDeOdt(o) === tipo));
+ 
+   // La Lista con «Todas»: las pendientes y las resueltas juntas, de la más
+@@ -304,8 +343,12 @@ export default function AdminMantenimientoScreen() {
+       <SearchBar value={q} onChangeText={setQ} placeholder="Buscar orden o unidad…" />
+     );
+ 
+-  /** Arriba de la lista, justo debajo del buscador: el estado y el tipo. */
+-  const filtrosArriba = (cuentas: Record<GrupoEstado, number | string>, cuentaTipo: (t: TipoTarea) => number) => (
++  /** Arriba de la lista, justo debajo del buscador: el estado, la fecha y el tipo. */
++  const filtrosArriba = (
++    cuentas: Record<GrupoEstado, number | string>,
++    cuentaTipo: (t: TipoTarea) => number,
++    cuentaFecha: (f: FiltroFecha) => number,
++  ) => (
+     <FiltroEstadoMantenimiento
+       valor={grupo}
+       onCambiar={setGrupo}
+@@ -313,6 +356,14 @@ export default function AdminMantenimientoScreen() {
+       tipos={TIPOS.map((t) => ({ ...t, cuenta: cuentaTipo(t.id) }))}
+       tipo={tipo}
+       onTipo={(id) => setTipo(id as '' | TipoTarea)}
++      fecha={{
++        valor: fecha,
++        onCambiar: (f) => {
++          setFecha(f);
++          setTope(TANDA);
++        },
++        cuenta: cuentaFecha,
++      }}
+     />
+   );
+ 
+@@ -360,7 +411,13 @@ export default function AdminMantenimientoScreen() {
+       {filasLista.length > 0 ? (
+         conVerMas(filasLista, pintarFila)
+       ) : faltanResueltas && historial.estado !== 'error' ? null : (
+-        <Vacio texto={nq || filtro.length > 0 || tipo || grupo !== 'todas' ? 'Nada coincide con los filtros.' : 'Todavía no hay órdenes.'} />
++        <Vacio
++          texto={
++            nq || filtro.length > 0 || tipo || grupo !== 'todas' || hayFiltroFecha(fecha)
++              ? 'Nada coincide con los filtros.'
++              : 'Todavía no hay órdenes.'
++          }
++        />
+       )}
+       {/* Las pendientes se ven ya; las resueltas llegan después, debajo. */}
+       {faltanResueltas ? (
+@@ -395,6 +452,16 @@ export default function AdminMantenimientoScreen() {
+           (cuentaResueltas
+             ? historialFiltrado.filter((o) => o.estado === 'cerrada' && tipoDeOdt(o) === tp).length
+             : 0),
++        // Cuántas deja cada fecha: lo que la búsqueda, el área y el tipo ya dejaron pasar.
++        (f) =>
++          filtrarPorFecha(sinFecha, f, fechaDe).filter(
++            (t) => (!tipo || t.tipo === tipo) && (grupo === 'todas' || grupoDe(t) === grupo),
++          ).length +
++          (cuentaResueltas
++            ? filtrarPorFecha(historialSinFecha, f, (o) => o.creadaEn).filter(
++                (o) => o.estado === 'cerrada' && (!tipo || tipoDeOdt(o) === tipo),
++              ).length
++            : 0),
+       )}
+       {grupo === 'resuelta' ? (
+         listaResueltas
+diff --git a/src/app/panel/mas.tsx b/src/app/panel/mas.tsx
+index a9739d4..860d6fd 100644
+--- a/src/app/panel/mas.tsx
++++ b/src/app/panel/mas.tsx
+@@ -148,6 +148,26 @@ export default function AdminMasScreen() {
+       // Los de SU empresa, como desde el Resumen; no los propios.
+       onPress: () => router.navigate({ pathname: '/documentos', params: { companyId: cid } }),
+     },
++    // Las tres salían del Resumen viejo; el de ahora es el de la web y no las
++    // trae, así que viven aquí para no quedar sin entrada.
++    {
++      icon: 'check',
++      tono: 'success',
++      label: 'Quién puede salir hoy',
++      onPress: () => router.navigate({ pathname: '/aptitud', params: { companyId: cid } }),
++    },
++    {
++      icon: 'velocidad',
++      tono: 'warning',
++      label: 'Índices de manejo',
++      onPress: () => router.navigate({ pathname: '/indices', params: { companyId: cid } }),
++    },
++    {
++      icon: 'tendencia',
++      tono: 'info',
++      label: 'Kilómetros del mes',
++      onPress: () => router.navigate({ pathname: '/kilometros', params: { companyId: cid } }),
++    },
+     {
+       icon: 'candado',
+       tono: 'info',
+diff --git a/src/components/eventos-manejo.tsx b/src/components/eventos-manejo.tsx
+index 5c2fcb3..9a8eb0d 100644
+--- a/src/components/eventos-manejo.tsx
++++ b/src/components/eventos-manejo.tsx
+@@ -97,6 +97,8 @@ const TODOS = (): ReadonlySet<TipoEvento> => new Set(CLAVES_EVENTO);
+  * —período, tipos, tandas— y se cierra el globo.
+  * `eventoInicial`: un evento que hay que dejar a la vista y abierto al llegar
+  * (desde el perfil del conductor).
++ * Con `vehiculoId` (el mapa de una unidad), «Hoy» y «7 días» enseñan todos los
++ * del período; solo «Últimos 5» va de 5 en 5 (igual que la web).
+  */
+ export function useEventosManejo({
+   conductorId,
+@@ -188,7 +190,11 @@ export function useEventosManejo({
+     }
+   }
+ 
+-  const vista = useMemo(() => filtrarEventosManejo(eventos, { periodo, tipos, limites }), [eventos, periodo, tipos, limites]);
++  const todoElPeriodo = Boolean(vehiculoId);
++  const vista = useMemo(
++    () => filtrarEventosManejo(eventos, { periodo, tipos, limites, todoElPeriodo }),
++    [eventos, periodo, tipos, limites, todoElPeriodo],
++  );
+   const grupos = useMemo(() => agruparEventos(vista.visibles), [vista.visibles]);
+   // Si el filtro esconde el elegido, se suelta (y el mapa cierra su globo).
+   const elegido = grupoDe(grupos, activo) ? activo : null;
+diff --git a/src/components/filtro-estado-mantenimiento.tsx b/src/components/filtro-estado-mantenimiento.tsx
+index e15f3e4..dde5200 100644
+--- a/src/components/filtro-estado-mantenimiento.tsx
++++ b/src/components/filtro-estado-mantenimiento.tsx
+@@ -1,18 +1,34 @@
+ import { useState } from 'react';
+ import { Pressable, StyleSheet, View } from 'react-native';
+ 
++import { Button } from '@/components/button';
++import { CampoFecha } from '@/components/campo-fecha';
++import { Card } from '@/components/card';
++import { EtiquetaSeccion } from '@/components/etiqueta-seccion';
++import { HojaModal } from '@/components/hoja-modal';
+ import { OptionPickerModal } from '@/components/option-picker';
+ import { OpcionRiel, RielOpciones } from '@/components/riel-opciones';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { TabIcon } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+ import { useTheme, type ColorTokens } from '@/theme';
++import {
++  ATAJOS_FECHA,
++  SIN_FECHA,
++  hayFiltroFecha,
++  textoFiltroFecha,
++  type FiltroFecha,
++} from '@/utils/filtro-fecha';
+ 
+ /**
+  * LOS FILTROS DE MANTENIMIENTO, arriba de la lista y como en la web: el estado
+  * en un control de píldora (cada opción con su punto de color y su cuenta; la
+  * elegida rellena en el azul FOM) y, al lado, el botón «Tipo» que abre las
+  * opciones. El control se desliza de lado si no cabe: nunca corta el texto.
++ *
++ * Con `fecha`, además el botón «Fecha» (Hoy, 7 días, 30 días, Todo o un rango):
++ * tres filtros no caben en una línea, así que el estado va arriba a lo ancho y
++ * «Fecha» y «Tipo» debajo, mitad y mitad, como la web en el teléfono.
+  */
+ 
+ /** El azul FOM es fijo en web y app, con su texto oscuro encima (nunca blanco). */
+@@ -31,6 +47,13 @@ const GRUPOS: { id: GrupoEstado; label: string; tono?: keyof ColorTokens }[] = [
+ 
+ export type OpcionTipo = { id: string; label: string; cuenta: number };
+ 
++/** El filtro de fecha: lo elegido, cómo cambiarlo y cuántas deja pasar cada opción. */
++export type FiltroFechaProps = {
++  valor: FiltroFecha;
++  onCambiar: (f: FiltroFecha) => void;
++  cuenta: (f: FiltroFecha) => number;
++};
++
+ export function FiltroEstadoMantenimiento({
+   valor,
+   onCambiar,
+@@ -38,6 +61,7 @@ export function FiltroEstadoMantenimiento({
+   tipos,
+   tipo,
+   onTipo,
++  fecha,
+ }: {
+   valor: GrupoEstado;
+   onCambiar: (g: GrupoEstado) => void;
+@@ -48,14 +72,29 @@ export function FiltroEstadoMantenimiento({
+   /** El tipo elegido; '' = todos. */
+   tipo: string;
+   onTipo: (id: string) => void;
++  /** El filtro de fecha; sin él, la fila es la de siempre (estado y «Tipo»). */
++  fecha?: FiltroFechaProps;
+ }) {
+-  const { colors, spacing, borderWidths, radii } = useTheme();
++  const { colors, spacing, borderWidths } = useTheme();
+   const [abierto, setAbierto] = useState(false);
++  const [eligiendoFecha, setEligiendoFecha] = useState(false);
+   const elegido = tipos.find((t) => t.id === tipo);
+   const total = tipos.reduce((a, t) => a + t.cuenta, 0);
++  const conFecha = hayFiltroFecha(fecha?.valor ?? SIN_FECHA);
++
++  /** «Tipo»: un botón que abre las opciones, no un triángulo de texto. */
++  const botonTipo = (
++    <PressableScale
++      onPress={() => setAbierto(true)}
++      accessibilityRole="button"
++      accessibilityLabel={elegido ? `Tipo de orden: ${elegido.label}` : 'Tipo de orden'}
++      style={fecha ? styles.mitad : undefined}>
++      <BotonFiltro icono="filtro" texto="Tipo" activo={!!elegido} />
++    </PressableScale>
++  );
+ 
+   return (
+-    <View style={[styles.fila, { gap: spacing.sm }]}>
++    <View style={[fecha ? styles.columna : styles.fila, { gap: spacing.sm }]}>
+       <View
+         style={[
+           styles.riel,
+@@ -106,27 +145,33 @@ export function FiltroEstadoMantenimiento({
+         </RielOpciones>
+       </View>
+ 
+-      {/* «Tipo»: un botón que abre las opciones, no un triángulo de texto. */}
+-      <PressableScale
+-        onPress={() => setAbierto(true)}
+-        accessibilityRole="button"
+-        accessibilityLabel={elegido ? `Tipo de orden: ${elegido.label}` : 'Tipo de orden'}>
+-        <View
+-          style={[
+-            styles.tipo,
+-            {
+-              borderRadius: radii.pill,
+-              borderWidth: borderWidths.hairline,
+-              borderColor: elegido ? AZUL_FOM : colors.borderStrong,
+-              backgroundColor: elegido ? AZUL_FOM : colors.surfaceElevated,
+-            },
+-          ]}>
+-          <TabIcon name="filtro" color={elegido ? SOBRE_AZUL : colors.text} size={16} />
+-          <ThemedText style={[styles.texto, { color: elegido ? SOBRE_AZUL : colors.text, fontWeight: '600' }]}>
+-            Tipo
+-          </ThemedText>
++      {fecha ? (
++        <View style={[styles.fila, { gap: spacing.sm }]}>
++          {/* Con una fecha puesta, el botón dice cuál («30 días», «3 oct – 20 oct»). */}
++          <PressableScale
++            onPress={() => setEligiendoFecha(true)}
++            accessibilityRole="button"
++            accessibilityLabel={conFecha ? `Fecha de reporte: ${textoFiltroFecha(fecha.valor)}` : 'Fecha de reporte'}
++            style={styles.mitad}>
++            <BotonFiltro icono="calendario" texto={conFecha ? textoFiltroFecha(fecha.valor) : 'Fecha'} activo={conFecha} />
++          </PressableScale>
++          {botonTipo}
+         </View>
+-      </PressableScale>
++      ) : (
++        botonTipo
++      )}
++      {fecha ? (
++        <HojaFecha
++          visible={eligiendoFecha}
++          valor={fecha.valor}
++          cuenta={fecha.cuenta}
++          onCambiar={(f) => {
++            fecha.onCambiar(f);
++            setEligiendoFecha(false);
++          }}
++          onCerrar={() => setEligiendoFecha(false)}
++        />
++      ) : null}
+ 
+       <OptionPickerModal
+         visible={abierto}
+@@ -144,8 +189,117 @@ export function FiltroEstadoMantenimiento({
+   );
+ }
+ 
++/** El botón de «Fecha» y de «Tipo»: en píldora, relleno en el azul FOM si filtra algo. */
++function BotonFiltro({ icono, texto, activo }: { icono: 'filtro' | 'calendario'; texto: string; activo: boolean }) {
++  const { colors, borderWidths, radii } = useTheme();
++  return (
++    <View
++      style={[
++        styles.tipo,
++        {
++          borderRadius: radii.pill,
++          borderWidth: borderWidths.hairline,
++          borderColor: activo ? AZUL_FOM : colors.borderStrong,
++          backgroundColor: activo ? AZUL_FOM : colors.surfaceElevated,
++        },
++      ]}>
++      <TabIcon name={icono} color={activo ? SOBRE_AZUL : colors.text} size={16} />
++      <ThemedText
++        style={[styles.texto, styles.textoBoton, { color: activo ? SOBRE_AZUL : colors.text, fontWeight: '600' }]}
++        numberOfLines={1}>
++        {texto}
++      </ThemedText>
++    </View>
++  );
++}
++
++/**
++ * La hoja de «Fecha»: arriba los atajos con cuántas órdenes deja cada uno y,
++ * debajo, un rango desde/hasta que se aplica con su botón (a medio elegir no
++ * filtra nada). Cuenta por el día en que se reportó la orden.
++ */
++function HojaFecha({
++  visible,
++  valor,
++  cuenta,
++  onCambiar,
++  onCerrar,
++}: FiltroFechaProps & { visible: boolean; onCerrar: () => void }) {
++  const { colors, spacing, borderWidths } = useTheme();
++  const [desde, setDesde] = useState('');
++  const [hasta, setHasta] = useState('');
++  // Al abrirse, el rango muestra lo que está aplicado (o vacío si es un atajo).
++  // Se ajusta en el render, no en un efecto, como hace la hoja con su alto.
++  const [abiertaAntes, setAbiertaAntes] = useState(false);
++  if (visible !== abiertaAntes) {
++    setAbiertaAntes(visible);
++    if (visible) {
++      setDesde(valor.atajo === 'rango' ? valor.desde : '');
++      setHasta(valor.atajo === 'rango' ? valor.hasta : '');
++    }
++  }
++  const activo = hayFiltroFecha(valor);
++
++  return (
++    <HojaModal visible={visible} onClose={onCerrar} titulo="Fecha de reporte" icon="calendario" tone="primary">
++      <ThemedText variant="caption" color="textSecondary">
++        Por el día en que se reportó la orden.
++      </ThemedText>
++      <Card style={{ padding: 0, overflow: 'hidden' }}>
++        {ATAJOS_FECHA.map((a, i) => {
++          const opcion: FiltroFecha = { ...SIN_FECHA, atajo: a.id };
++          const on = a.id ? valor.atajo === a.id : !activo;
++          const n = cuenta(opcion);
++          return (
++            <PressableScale
++              key={a.id || 'todo'}
++              onPress={() => onCambiar(opcion)}
++              accessibilityRole="button"
++              accessibilityState={{ selected: on }}
++              accessibilityLabel={`${a.label}, ${n}`}>
++              <View
++                style={[
++                  styles.fila,
++                  {
++                    paddingHorizontal: spacing.lg,
++                    paddingVertical: spacing.md,
++                    gap: spacing.md,
++                    borderTopWidth: i === 0 ? 0 : borderWidths.hairline,
++                    borderTopColor: colors.border,
++                  },
++                ]}>
++                <ThemedText variant="button" style={styles.flex1} numberOfLines={1}>
++                  {a.label}
++                </ThemedText>
++                <ThemedText variant="caption" color="textSecondary" tabular>
++                  {String(n)}
++                </ThemedText>
++                <View style={styles.marca}>{on ? <TabIcon name="check" color={colors.primary} size={16} /> : null}</View>
++              </View>
++            </PressableScale>
++          );
++        })}
++      </Card>
++
++      <EtiquetaSeccion label="Rango de fechas" />
++      <CampoFecha label="Desde" value={desde} onChange={setDesde} soloPasado opcional />
++      <CampoFecha label="Hasta" value={hasta} onChange={setHasta} soloPasado opcional />
++      <Button
++        label="Aplicar rango"
++        onPress={() => onCambiar({ atajo: 'rango', desde, hasta })}
++        disabled={!desde && !hasta}
++      />
++    </HojaModal>
++  );
++}
++
+ const styles = StyleSheet.create({
+   fila: { flexDirection: 'row', alignItems: 'center' },
++  columna: { flexDirection: 'column', alignItems: 'stretch' },
++  flex1: { flex: 1, minWidth: 0 },
++  mitad: { flex: 1, minWidth: 0 },
++  marca: { width: 16, alignItems: 'center' },
++  textoBoton: { flexShrink: 1 },
+   // El riel ocupa lo que queda; lo que no cabe se desliza.
+   riel: { flex: 1, minWidth: 0, borderRadius: 999, overflow: 'hidden' },
+   rielContenido: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 4 },
+@@ -170,5 +324,5 @@ const styles = StyleSheet.create({
+     justifyContent: 'center',
+   },
+   cuentaTexto: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
+-  tipo: { height: 44, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14 },
++  tipo: { height: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 14 },
+ });
+diff --git a/src/components/resumen-piezas.tsx b/src/components/resumen-piezas.tsx
+new file mode 100644
+index 0000000..66334c8
+--- /dev/null
++++ b/src/components/resumen-piezas.tsx
+@@ -0,0 +1,533 @@
++import { useState, type ReactNode } from 'react';
++import { ScrollView, StyleSheet, View } from 'react-native';
++import Svg, { Circle, Path } from 'react-native-svg';
++
++import { useConteo } from '@/components/animated-number';
++import { Card } from '@/components/card';
++import { PastillaManejo, useManejoDelEnte } from '@/components/manejo-conductor';
++import { PressableScale } from '@/components/pressable-scale';
++import { TabIcon, type TabIconName } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import { useTheme, type ColorTokens } from '@/theme';
++import { miles } from '@/utils/numero';
++
++/*
++ * PIEZAS DEL RESUMEN del supervisor, copia de las del Resumen web en teléfono
++ * (`src/panel/modulos/Resumen.jsx` y sus estilos en `redesign.css`/`panel.css`):
++ * la tarjeta de la flota, las cifras con su ícono, la tarjeta con título y
++ * enlace, la lista «Hoy, en orden» y la tabla del manejo. Medidas y colores
++ * salen de la web a 390 px; los colores, del tema (son los mismos tokens).
++ */
++
++// ── Cifras como las escribe la web ───────────────────────────────────────────
++
++/**
++ * Un número como `toLocaleString('es')` de la web: hasta tres decimales con
++ * coma, y el punto de miles solo desde 10.000 («1484 km», «74.107 km»).
++ * `miles` lo agrupa siempre, y la tabla quedaría distinta de la web.
++ */
++export function numeroWeb(n: number | null | undefined): string {
++  if (typeof n !== 'number' || !Number.isFinite(n)) return '—';
++  const redondo = Math.round(n * 1000) / 1000;
++  const decimales = `${redondo}`.split('.')[1]?.length ?? 0;
++  const texto = miles(redondo, decimales);
++  return Math.abs(redondo) < 10_000 ? texto.replace(/\./g, '') : texto;
++}
++
++/** La cifra sube desde cero al aparecer, como la `Cifra` de la web; el guion va tal cual. */
++function Cifra({ valor, style }: { valor: number | string; style?: object }) {
++  const numero = typeof valor === 'number' ? valor : NaN;
++  const visto = useConteo(Number.isFinite(numero) ? numero : 0);
++  return (
++    <ThemedText tabular style={style}>
++      {typeof valor === 'number' ? numeroWeb(visto) : valor}
++    </ThemedText>
++  );
++}
++
++// ── Íconos que la familia de la app no tiene (los mismos trazos de la web) ──
++
++export type GlifoResumen = 'reloj' | 'pin' | 'mapa' | 'wifi' | 'documento';
++
++export function Glifo({ nombre, color, size = 19 }: { nombre: GlifoResumen; color: string; size?: number }) {
++  const trazo = { stroke: color, strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
++  return (
++    <Svg width={size} height={size} viewBox="0 0 24 24">
++      {nombre === 'reloj' ? (
++        <>
++          <Circle cx={12} cy={12} r={9} {...trazo} />
++          <Path d="M12 7v5l3 2" {...trazo} />
++        </>
++      ) : null}
++      {nombre === 'pin' ? (
++        <>
++          <Path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" {...trazo} />
++          <Circle cx={12} cy={9.5} r={2.5} {...trazo} />
++        </>
++      ) : null}
++      {nombre === 'mapa' ? <Path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14" {...trazo} /> : null}
++      {nombre === 'wifi' ? (
++        <>
++          <Path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0M9 16a5 5 0 0 1 6 0" {...trazo} />
++          <Circle cx={12} cy={20} r={1} fill={color} />
++        </>
++      ) : null}
++      {nombre === 'documento' ? (
++        <>
++          <Path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" {...trazo} />
++          <Path d="M14 3v5h5M9 13h6M9 17h4" {...trazo} />
++        </>
++      ) : null}
++    </Svg>
++  );
++}
++
++// ── «Se actualiza solo cada 30 s» ────────────────────────────────────────────
++
++export function ChipVivo({ texto }: { texto: string }) {
++  const { colors } = useTheme();
++  return (
++    <View style={styles.vivo} accessibilityRole="text">
++      <View style={[styles.vivoPunto, { backgroundColor: colors.success }]} />
++      <ThemedText style={[styles.vivoTexto, { color: colors.textSecondary }]}>{texto}</ThemedText>
++    </View>
++  );
++}
++
++// ── Flota de vehículos ───────────────────────────────────────────────────────
++
++/**
++ * La tarjeta grande de arriba: cuántas unidades hay y qué parte va rodando.
++ * `sabeMarcha` en falso (aún sin posiciones) cambia las palabras a
++ * «reportando / sin señal», como en la web.
++ */
++export function TarjetaFlota({
++  total,
++  activas,
++  sabeMarcha,
++  onPress,
++}: {
++  total: number;
++  activas: number;
++  sabeMarcha: boolean;
++  onPress: () => void;
++}) {
++  const { colors, radii } = useTheme();
++  const proporcion = total > 0 ? activas / total : 0;
++  return (
++    <PressableScale
++      onPress={onPress}
++      accessibilityRole="button"
++      accessibilityLabel={`Flota de vehículos: ${total}. Ver vehículos`}>
++      <Card style={[styles.flota, { borderRadius: radii.md }]}>
++        <View style={styles.flotaArriba}>
++          <View style={[styles.flotaIcono, { backgroundColor: colors.infoSurface }]}>
++            <TabIcon name="flota" color={colors.primary} size={28} />
++          </View>
++          <View style={styles.flex1}>
++            <ThemedText style={styles.flotaTitulo}>Flota de vehículos</ThemedText>
++            <View style={styles.flotaCifra}>
++              <Cifra valor={total} style={styles.flotaNumero} />
++              <ThemedText style={[styles.flotaUnidad, { color: colors.textSecondary }]}>vehículos</ThemedText>
++            </View>
++          </View>
++        </View>
++        <View style={[styles.barra, { backgroundColor: '#45515E' }]}>
++          <View style={{ width: `${proporcion * 100}%`, backgroundColor: colors.success }} />
++        </View>
++        <View style={styles.leyenda}>
++          <ThemedText tabular style={[styles.leyendaTexto, { color: colors.success }]}>
++            {`${activas} ${sabeMarcha ? 'en marcha' : 'reportando'}`}
++          </ThemedText>
++          <ThemedText tabular style={[styles.leyendaTexto, { color: colors.textSecondary }]}>
++            {`${total - activas} ${sabeMarcha ? 'detenidos' : 'sin señal'}`}
++          </ThemedText>
++        </View>
++      </Card>
++    </PressableScale>
++  );
++}
++
++// ── Una cifra con su ícono (el `Kpi` de la web) ──────────────────────────────
++
++/**
++ * `arriba`: el ícono encima (las dos de media anchura bajo la flota).
++ * `lado`: el ícono a la izquierda (las tres de ancho entero bajo la ficha).
++ * `tono` solo tiñe la baldosa del ícono: en la web la cifra sigue en blanco.
++ */
++export function KpiResumen({
++  titulo,
++  valor,
++  icono,
++  nota,
++  tono,
++  forma,
++  onPress,
++}: {
++  titulo: string;
++  valor: number | string;
++  icono: TabIconName;
++  nota: string;
++  tono?: 'aviso';
++  forma: 'arriba' | 'lado';
++  onPress: () => void;
++}) {
++  const { colors, radii } = useTheme();
++  const colorIcono = tono === 'aviso' ? colors.warning : colors.primary;
++  return (
++    <PressableScale
++      onPress={onPress}
++      accessibilityRole="button"
++      accessibilityLabel={`${titulo}: ${valor}. ${nota}`}
++      style={forma === 'arriba' ? styles.flex1 : undefined}>
++      <Card style={[forma === 'arriba' ? styles.kpiArriba : styles.kpiLado, { borderRadius: radii.lg }]}>
++        <View
++          style={[
++            styles.kpiIcono,
++            { backgroundColor: tono === 'aviso' ? colors.warningSurface : colors.infoSurface, borderRadius: 12 },
++          ]}>
++          <TabIcon name={icono} color={colorIcono} size={25} />
++        </View>
++        <ThemedText numberOfLines={1} style={[styles.kpiTitulo, { color: colors.textSecondary }]}>
++          {titulo}
++        </ThemedText>
++        <Cifra valor={valor} style={styles.kpiValor} />
++        <ThemedText style={[styles.kpiNota, { color: colors.textSecondary }]}>{nota}</ThemedText>
++      </Card>
++    </PressableScale>
++  );
++}
++
++// ── La tarjeta con título y enlace (la `Tarjeta` de la web) ──────────────────
++
++export function TarjetaResumen({
++  titulo,
++  enlace,
++  accion,
++  sinCuerpo = false,
++  children,
++}: {
++  titulo: string;
++  /** El enlace azul de la cabecera («Ver alertas»). */
++  enlace?: { label: string; onPress: () => void };
++  /** Otra cosa en la cabecera (el selector de vehículo). */
++  accion?: ReactNode;
++  /** Sin el relleno del cuerpo: el mapa y la tabla van a sangre. */
++  sinCuerpo?: boolean;
++  children: ReactNode;
++}) {
++  const { colors, radii } = useTheme();
++  return (
++    <Card style={[styles.tarjeta, { borderRadius: radii.lg }]}>
++      <View style={styles.tarjetaCab}>
++        <ThemedText style={styles.tarjetaTitulo}>{titulo}</ThemedText>
++        {enlace ? (
++          <PressableScale onPress={enlace.onPress} accessibilityRole="link" hitSlop={8}>
++            <ThemedText style={[styles.enlace, { color: colors.primary }]}>{enlace.label}</ThemedText>
++          </PressableScale>
++        ) : null}
++        {accion}
++      </View>
++      {sinCuerpo ? children : <View style={styles.tarjetaCuerpo}>{children}</View>}
++    </Card>
++  );
++}
++
++/** «Hoy, en orden» y «Ver alertas» en la MISMA línea, como la web en teléfono. */
++export function TarjetaResumenEnLinea({
++  titulo,
++  enlace,
++  children,
++}: {
++  titulo: string;
++  enlace: { label: string; onPress: () => void };
++  children: ReactNode;
++}) {
++  const { colors, radii } = useTheme();
++  return (
++    <Card style={[styles.tarjeta, { borderRadius: radii.lg }]}>
++      <View style={[styles.tarjetaCab, styles.cabEnLinea]}>
++        <ThemedText style={[styles.tarjetaTitulo, styles.flex1]}>{titulo}</ThemedText>
++        <PressableScale onPress={enlace.onPress} accessibilityRole="link" hitSlop={8}>
++          <ThemedText style={[styles.enlace, { color: colors.primary }]}>{enlace.label}</ThemedText>
++        </PressableScale>
++      </View>
++      <View style={styles.tarjetaCuerpo}>{children}</View>
++    </Card>
++  );
++}
++
++// ── «Hoy, en orden» ──────────────────────────────────────────────────────────
++
++export type TonoEvento = 'ok' | 'aviso' | 'malo' | 'azul' | 'gris';
++
++export type EventoHoy = {
++  id: string;
++  /** Cuándo pasó (ISO): da la hora y el orden, de lo más nuevo a lo más viejo. */
++  en: string;
++  tono: TonoEvento;
++  texto: string;
++  detalle: string;
++  onPress: () => void;
++};
++
++const COLOR_EVENTO: Record<TonoEvento, keyof ColorTokens> = {
++  ok: 'success',
++  aviso: 'warning',
++  malo: 'danger',
++  azul: 'primary',
++  gris: 'textMuted',
++};
++
++/** Las filas de la lista: hora, punto de color, qué pasó y, debajo, el detalle. */
++export function ListaHoy({ eventos, hora }: { eventos: EventoHoy[]; hora: (iso: string) => string }) {
++  const { colors, borderWidths } = useTheme();
++  return (
++    <View>
++      {eventos.map((e, i) => (
++        <PressableScale
++          key={e.id}
++          onPress={e.onPress}
++          accessibilityRole="button"
++          accessibilityLabel={`${hora(e.en)}. ${e.texto}. ${e.detalle}`}
++          style={[
++            styles.evento,
++            { borderTopWidth: i === 0 ? 0 : borderWidths.hairline, borderTopColor: colors.border },
++          ]}>
++          <ThemedText tabular style={[styles.eventoHora, { color: colors.textSecondary }]}>
++            {hora(e.en)}
++          </ThemedText>
++          <View style={styles.eventoPuntoCaja}>
++            <View style={[styles.eventoPunto, { backgroundColor: colors[COLOR_EVENTO[e.tono]] }]} />
++          </View>
++          <View style={[styles.flex1, styles.eventoTextos]}>
++            <ThemedText style={styles.eventoTexto}>{e.texto}</ThemedText>
++            {e.detalle ? (
++              <ThemedText style={[styles.eventoDetalle, { color: colors.textSecondary }]}>{e.detalle}</ThemedText>
++            ) : null}
++          </View>
++        </PressableScale>
++      ))}
++    </View>
++  );
++}
++
++/** El vacío de la web dentro de una tarjeta: círculo azul suave, título y frase. */
++export function VacioResumen({
++  glifo,
++  titulo,
++  texto,
++  accion,
++}: {
++  glifo: GlifoResumen | TabIconName;
++  titulo: string;
++  texto: string;
++  accion?: ReactNode;
++}) {
++  const { colors } = useTheme();
++  const propio = ['reloj', 'pin', 'mapa', 'wifi', 'documento'].includes(glifo);
++  return (
++    <View style={styles.vacio}>
++      <View style={[styles.vacioCirculo, { backgroundColor: colors.infoSurface }]}>
++        {propio ? (
++          <Glifo nombre={glifo as GlifoResumen} color={colors.primary} size={28} />
++        ) : (
++          <TabIcon name={glifo as TabIconName} color={colors.primary} size={28} />
++        )}
++      </View>
++      <ThemedText style={styles.vacioTitulo}>{titulo}</ThemedText>
++      <ThemedText style={[styles.vacioTexto, { color: colors.textSecondary }]}>{texto}</ThemedText>
++      {accion}
++    </View>
++  );
++}
++
++// ── «Manejo de los conductores · últimos 7 días» ─────────────────────────────
++
++/** Ancho de cada columna: en el teléfono la tabla se desliza de lado, como la web. */
++const COLUMNAS = [
++  { titulo: 'Conductor', ancho: 118, num: false },
++  { titulo: 'Score', ancho: 168, num: false },
++  { titulo: 'Por 100 km', ancho: 104, num: true },
++  { titulo: 'Frenadas', ancho: 96, num: true },
++  { titulo: 'Aceleraciones', ancho: 128, num: true },
++  { titulo: 'Excesos', ancho: 90, num: true },
++  { titulo: 'Km', ancho: 80, num: true },
++] as const;
++
++/**
++ * La tabla del manejo del Resumen web (`RankingManejo`): mismo título dentro
++ * de la tarjeta, mismas columnas y mismo orden, del mejor al peor. Lee la
++ * MISMA lectura de la empresa que las pastillas de Usuarios. Si no hay nada
++ * que enseñar —o no se pudo leer—, la tarjeta no aparece, como en la web.
++ */
++export function TarjetaManejo({
++  empresaId,
++  dias,
++  onConductor,
++}: {
++  empresaId: string | null | undefined;
++  dias: number;
++  onConductor: (id: string, nombre: string) => void;
++}) {
++  const { colors, borderWidths } = useTheme();
++  const { lista, incompleta, estado } = useManejoDelEnte(empresaId, dias);
++  if (estado !== 'ok' || !lista || lista.length === 0) return null;
++  return (
++    <View style={styles.manejo}>
++      <TarjetaResumen titulo={`Manejo de los conductores · últimos ${dias} días`} sinCuerpo>
++        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
++          <View>
++            <View
++              style={[
++                styles.fila,
++                { backgroundColor: colors.surfaceElevated, borderBottomWidth: borderWidths.hairline, borderBottomColor: colors.border },
++              ]}>
++              {COLUMNAS.map((c) => (
++                <ThemedText
++                  key={c.titulo}
++                  numberOfLines={1}
++                  style={[styles.th, { width: c.ancho, color: colors.textSecondary }, c.num ? styles.num : null]}>
++                  {c.titulo}
++                </ThemedText>
++              ))}
++            </View>
++            {lista.map((s, i) => (
++              <PressableScale
++                key={s.id}
++                onPress={() => onConductor(s.id, s.nombre)}
++                accessibilityRole="button"
++                accessibilityLabel={`Ver el perfil de ${s.nombre}`}
++                style={[
++                  styles.fila,
++                  { borderTopWidth: i === 0 ? 0 : borderWidths.hairline, borderTopColor: colors.border },
++                ]}>
++                <ThemedText style={[styles.td, styles.tdNombre, { width: COLUMNAS[0].ancho, color: colors.textSecondary }]}>
++                  {s.nombre}
++                </ThemedText>
++                <View style={[styles.td, { width: COLUMNAS[1].ancho, alignItems: 'flex-start' }]}>
++                  <PastillaManejo score={s} />
++                </View>
++                <Celda ancho={COLUMNAS[2].ancho} valor={numeroWeb(s.eventosPor100)} />
++                <Celda ancho={COLUMNAS[3].ancho} valor={numeroWeb(s.frenadas)} />
++                <Celda ancho={COLUMNAS[4].ancho} valor={numeroWeb(s.aceleraciones)} />
++                <Celda ancho={COLUMNAS[5].ancho} valor={numeroWeb(s.excesos)} />
++                <Celda ancho={COLUMNAS[6].ancho} valor={numeroWeb(Math.round(s.km))} />
++              </PressableScale>
++            ))}
++          </View>
++        </ScrollView>
++      </TarjetaResumen>
++      {incompleta ? (
++        <ThemedText variant="caption" color="warning">
++          Lista incompleta: la empresa tiene más conductores de los que se pudieron leer.
++        </ThemedText>
++      ) : null}
++    </View>
++  );
++}
++
++function Celda({ ancho, valor }: { ancho: number; valor: string }) {
++  const { colors } = useTheme();
++  return (
++    <ThemedText tabular numberOfLines={1} style={[styles.td, styles.num, { width: ancho, color: colors.textSecondary }]}>
++      {valor}
++    </ThemedText>
++  );
++}
++
++// ── «Más información» de la ficha (el `<details>` de la web) ─────────────────
++
++export function MasInformacion({ filas }: { filas: [string, string][] }) {
++  const { colors } = useTheme();
++  const [abierta, setAbierta] = useState(false);
++  if (filas.length === 0) return null;
++  return (
++    <View>
++      <PressableScale
++        onPress={() => setAbierta((a) => !a)}
++        accessibilityRole="button"
++        accessibilityState={{ expanded: abierta }}
++        style={styles.masFila}>
++        <View style={abierta ? styles.girado : undefined}>
++          <Svg width={10} height={10} viewBox="0 0 10 10">
++            <Path d="M2 1l6 4-6 4z" fill={colors.textSecondary} />
++          </Svg>
++        </View>
++        <ThemedText style={[styles.masTexto, { color: colors.textSecondary }]}>Más información</ThemedText>
++      </PressableScale>
++      {abierta
++        ? filas.map(([k, v]) => (
++            <View key={k} style={styles.masDato}>
++              <ThemedText style={[styles.masTexto, { color: colors.textSecondary }]}>{k}</ThemedText>
++              <ThemedText style={styles.masValor}>{v}</ThemedText>
++            </View>
++          ))
++        : null}
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  flex1: { flex: 1, minWidth: 0 },
++  fila: { flexDirection: 'row', alignItems: 'center' },
++
++  vivo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
++  vivoPunto: { width: 7, height: 7, borderRadius: 4 },
++  vivoTexto: { fontSize: 12, lineHeight: 19 },
++
++  // ── Flota ── (padding 22, radio 16, como `.pnl-flota-metrica`)
++  flota: { padding: 22, gap: 16 },
++  flotaArriba: { flexDirection: 'row', alignItems: 'center', gap: 16 },
++  flotaIcono: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
++  flotaTitulo: { fontSize: 14, lineHeight: 20, fontWeight: '600', letterSpacing: -0.28 },
++  flotaCifra: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
++  flotaNumero: { fontSize: 40, lineHeight: 48, fontWeight: '700' },
++  flotaUnidad: { fontSize: 12, lineHeight: 18 },
++  barra: { flexDirection: 'row', height: 10, borderRadius: 8, overflow: 'hidden' },
++  leyenda: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: -4 },
++  leyendaTexto: { fontSize: 12, lineHeight: 19 },
++
++  // ── Kpi ── (`.pnl-kpi.con-icono`)
++  kpiArriba: { paddingTop: 70, paddingHorizontal: 16, paddingBottom: 16, minHeight: 172 },
++  kpiLado: { paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 80 },
++  kpiIcono: { position: 'absolute', top: 17, left: 19, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
++  kpiTitulo: { fontSize: 13, lineHeight: 19, fontWeight: '500' },
++  kpiValor: { fontSize: 28, lineHeight: 31, fontWeight: '700', letterSpacing: -0.4, marginTop: 9 },
++  kpiNota: { fontSize: 12, lineHeight: 18, marginTop: 9 },
++
++  // ── Tarjeta ── (`.pnl-card`: radio 24, cabecera de 16)
++  tarjeta: { padding: 0, overflow: 'hidden' },
++  tarjetaCab: { padding: 16, gap: 12 },
++  cabEnLinea: { flexDirection: 'row', alignItems: 'center' },
++  tarjetaTitulo: { fontSize: 17, lineHeight: 24, fontWeight: '600', letterSpacing: -0.2 },
++  tarjetaCuerpo: { paddingHorizontal: 16, paddingBottom: 16 },
++  enlace: { fontSize: 14, lineHeight: 22, fontWeight: '500' },
++
++  // ── Hoy, en orden ── (`.rs-evento` en teléfono: 64 px · 10 px · resto)
++  evento: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 10, gap: 12 },
++  eventoHora: { width: 64, fontSize: 12, lineHeight: 22 },
++  eventoPuntoCaja: { width: 10, height: 22, justifyContent: 'center' },
++  eventoPunto: { width: 8, height: 8, borderRadius: 4 },
++  eventoTextos: { gap: 10 },
++  eventoTexto: { fontSize: 14, lineHeight: 22, fontWeight: '500' },
++  eventoDetalle: { fontSize: 12, lineHeight: 19 },
++
++  vacio: { alignItems: 'center', gap: 8, paddingVertical: 24, paddingHorizontal: 8 },
++  vacioCirculo: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
++  vacioTitulo: { fontSize: 15, lineHeight: 21, fontWeight: '600', textAlign: 'center' },
++  vacioTexto: { fontSize: 13, lineHeight: 19, textAlign: 'center' },
++
++  // ── Tabla del manejo ── (`.pnl-tabla`: celdas 13 px, relleno 18)
++  manejo: { gap: 8 },
++  th: { fontSize: 13, lineHeight: 21, fontWeight: '600', paddingVertical: 14, paddingHorizontal: 18 },
++  td: { fontSize: 13, lineHeight: 21, paddingVertical: 17, paddingHorizontal: 18 },
++  tdNombre: { fontWeight: '600' },
++  num: { textAlign: 'right' },
++
++  masFila: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8 },
++  girado: { transform: [{ rotate: '90deg' }] },
++  masTexto: { fontSize: 12, lineHeight: 17 },
++  masDato: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 4 },
++  masValor: { fontSize: 13, lineHeight: 18, flexShrink: 1, textAlign: 'right' },
++});
+diff --git a/src/lib/eventos-manejo.ts b/src/lib/eventos-manejo.ts
+index 49c0fa9..20ac17c 100644
+--- a/src/lib/eventos-manejo.ts
++++ b/src/lib/eventos-manejo.ts
+@@ -101,6 +101,11 @@ export interface EventoManejo {
+   id: string;
+   tipo: TipoEvento | null;
+   hora: string | null;
++  /**
++   * La hora en ms, leída una sola vez al llegar (ordenar y filtrar cientos de
++   * eventos no vuelve a leer el texto de la hora). Igual que la web.
++   */
++  t: number | null;
+   vehiculoId: string | null;
+   unidad: string | null;
+   lat: number | null;
+@@ -119,14 +124,25 @@ const numeroONulo = (n: unknown): number | null => {
+   return Number.isFinite(v) ? v : null;
+ };
+ 
+-/** Un evento de `GET …/driving-events` en la forma de la app. */
++const msDe = (iso: string | null | undefined): number | null => {
++  const t = Date.parse(iso ?? '');
++  return Number.isFinite(t) ? t : null;
++};
++
++/** La hora de un evento en ms: la ya leída (`t`) o, si no la trae, la de su texto. */
++const msEvento = (e: Pick<EventoManejo, 'hora'> & { t?: number | null }): number | null =>
++  typeof e.t === 'number' && Number.isFinite(e.t) ? e.t : msDe(e.hora);
++
++/** Un evento de `GET …/driving-events` en la forma de la app (con su hora ya leída en `t`). */
+ export function comoEventoManejo(crudo: unknown): EventoManejo {
+   const e = (crudo ?? {}) as Record<string, unknown>;
+   const texto = (v: unknown) => (typeof v === 'string' && v ? v : null);
++  const hora = texto(e.occurredAt);
+   return {
+     id: String(e.id ?? ''),
+     tipo: POR_SERVIDOR[String(e.type ?? '')] ?? null,
+-    hora: texto(e.occurredAt),
++    hora,
++    t: msDe(hora),
+     vehiculoId: texto(e.vehicleId),
+     unidad: texto(e.vehicleCode),
+     lat: numeroONulo(e.lat),
+@@ -141,11 +157,6 @@ export function velocidadExceso(e: Pick<EventoManejo, 'antes' | 'despues'> | nul
+   return e?.antes ?? e?.despues ?? null;
+ }
+ 
+-const msDe = (iso: string | null | undefined): number | null => {
+-  const t = Date.parse(iso ?? '');
+-  return Number.isFinite(t) ? t : null;
+-};
+-
+ const conPosicion = (e: EventoManejo) =>
+   typeof e.lat === 'number' &&
+   typeof e.lng === 'number' &&
+@@ -157,7 +168,7 @@ const conPosicion = (e: EventoManejo) =>
+ 
+ /** ¿Va en el mapa? De los tres tipos, con hora y posición, y si es exceso, de MÁS de 120. */
+ export function vaEnMapa(e: EventoManejo | null | undefined): e is EventoEnMapa {
+-  if (!e || !e.tipo || !(e.tipo in POR_CLAVE) || !conPosicion(e) || msDe(e.hora) === null) return false;
++  if (!e || !e.tipo || !(e.tipo in POR_CLAVE) || !conPosicion(e) || msEvento(e) === null) return false;
+   if (e.tipo !== 'exceso') return true;
+   const v = velocidadExceso(e);
+   return v !== null && v > EXCESO_KMH;
+@@ -165,7 +176,7 @@ export function vaEnMapa(e: EventoManejo | null | undefined): e is EventoEnMapa
+ 
+ /** Del más nuevo al más viejo (a igual hora, por id, para que el orden no baile). */
+ const masNuevoPrimero = (a: EventoEnMapa, b: EventoEnMapa) =>
+-  (msDe(b.hora) ?? 0) - (msDe(a.hora) ?? 0) || b.id.localeCompare(a.id);
++  (msEvento(b) ?? 0) - (msEvento(a) ?? 0) || b.id.localeCompare(a.id);
+ 
+ /**
+  * Los que se pintan, del más nuevo al más viejo.
+@@ -197,7 +208,7 @@ export function eventosParaMapa(
+     .filter(vaEnMapa)
+     .filter((e) => !vehiculoId || e.vehiculoId === vehiculoId)
+     .filter((e) => {
+-      const t = msDe(e.hora)!;
++      const t = msEvento(e)!;
+       return t >= inicio && t <= fin;
+     })
+     .sort(masNuevoPrimero);
+@@ -221,7 +232,7 @@ export function filtrarPorTipos<T extends EventoManejo>(lista: readonly T[] | nu
+ /** Excesos que no se pintan por ir a 120 km/h o menos (o sin velocidad registrada). */
+ export function excesosBajoUmbral(lista: readonly EventoManejo[] | null | undefined, { dias = null as number | null, ahora = Date.now() } = {}): number {
+   const inicio = dias ? ahora - Number(dias) * 86400000 : -Infinity;
+-  return (lista ?? []).filter((e) => e?.tipo === 'exceso' && !vaEnMapa(e) && (msDe(e.hora) ?? -Infinity) >= inicio).length;
++  return (lista ?? []).filter((e) => e?.tipo === 'exceso' && !vaEnMapa(e) && (msEvento(e) ?? -Infinity) >= inicio).length;
+ }
+ 
+ // ── Filtros: período, tipos y «Ver 5 más» ───────────────────────────────────
+@@ -263,7 +274,7 @@ export function eventosDeHoy<T extends EventoManejo>(lista: readonly T[] | null
+   const inicio = inicioDelDia(ahora);
+   const fin = inicio + 86400000;
+   return (lista ?? []).filter((e) => {
+-    const t = msDe(e.hora);
++    const t = msEvento(e);
+     return t !== null && t >= inicio && t < fin;
+   });
+ }
+@@ -286,8 +297,10 @@ export interface VistaEventos {
+  * Lo que muestran el mapa y la lista. `lista`: ya pasada por `eventosParaMapa`.
+  * - `periodo`: la ventana de tiempo («Últimos 5» = todo lo que llegó).
+  * - `tipos`: los encendidos (sin dar, los tres).
+- * - `limites`: cuántos de cada tipo; los que no se dan, `n` (5). Nunca se pintan
+- *   todos de golpe: de cada tipo, los más nuevos, y «Ver 5 más» trae otra tanda.
++ * - `limites`: cuántos de cada tipo; los que no se dan, `n` (5). De cada tipo, los
++ *   más nuevos, y «Ver 5 más» trae otra tanda.
++ * - `todoElPeriodo` (una unidad en el mapa, 23 oct 2026): con «Hoy» o «7 días» se
++ *   ven TODOS los del período; solo «Últimos 5» va de 5 en 5. Igual que la web.
+  */
+ export function filtrarEventosManejo(
+   lista: readonly EventoEnMapa[] | null | undefined,
+@@ -297,12 +310,14 @@ export function filtrarEventosManejo(
+     limites = {},
+     ahora = Date.now(),
+     n = ULTIMOS_N,
++    todoElPeriodo = false,
+   }: {
+     periodo?: PeriodoEvento;
+     tipos?: Iterable<TipoEvento> | null;
+     limites?: LimitesEvento;
+     ahora?: number;
+     n?: number;
++    todoElPeriodo?: boolean;
+   } = {},
+ ): VistaEventos {
+   const todos = [...(lista ?? [])].sort(masNuevoPrimero);
+@@ -310,7 +325,7 @@ export function filtrarEventosManejo(
+     periodo === 'hoy'
+       ? eventosDeHoy(todos, ahora)
+       : periodo === '7' || periodo === '30'
+-        ? todos.filter((e) => (msDe(e.hora) ?? -Infinity) >= ahora - Number(periodo) * 86400000)
++        ? todos.filter((e) => (msEvento(e) ?? -Infinity) >= ahora - Number(periodo) * 86400000)
+         : todos;
+   const cuenta = contarPorTipo(delPeriodo);
+   const mostrados: CuentaEventos = { frenada: 0, aceleracion: 0, exceso: 0 };
+@@ -318,7 +333,7 @@ export function filtrarEventosManejo(
+   const activos = new Set(tipos ?? CLAVES_EVENTO);
+   const visibles = delPeriodo.filter((e) => {
+     if (!activos.has(e.tipo)) return false;
+-    const tope = Math.max(0, limites[e.tipo] ?? n);
++    const tope = todoElPeriodo && periodo !== 'ultimos' ? Infinity : Math.max(0, limites[e.tipo] ?? n);
+     if (mostrados[e.tipo] >= tope) return false;
+     mostrados[e.tipo] += 1;
+     return true;
+diff --git a/src/services/fomEventosManejo.ts b/src/services/fomEventosManejo.ts
+index 5640b5f..6354be7 100644
+--- a/src/services/fomEventosManejo.ts
++++ b/src/services/fomEventosManejo.ts
+@@ -31,10 +31,31 @@ export type EventosManejoFom =
+   /** La ruta no existe todavía en el servidor (404/403/405): no hay nada que pintar. */
+   | { estado: 'no-publicado' };
+ 
+-/** Se guardan unos minutos por conductor + período: cambiar de pastilla no vuelve a pedir. */
++/**
++ * Se guardan unos minutos por conductor + período: cambiar de pastilla no
++ * vuelve a pedir. La llave lleva de quién es la sesión y en qué empresa se
++ * trabaja: al cambiar cualquiera de los dos se vacía todo, para no tener a
++ * mano los eventos de otra empresa. Lo vencido se borra al pasar (igual que
++ * `crearCacheEventos` en la web).
++ */
+ const VIGENTE_MS = 3 * 60_000;
+ const TOPE_MEMORIA = 40;
+ const memoria = new Map<string, { en: number; generacion: number; datos: Promise<EventosManejoFom> }>();
++/** Usuario y empresa de lo que hay guardado. */
++let duenoMemoria: string | null = null;
++
++/** Vacía la memoria si cambió la sesión o la empresa, y borra lo vencido o de otra generación. */
++function limpiarMemoria(dueno: string, ahora: number): void {
++  if (dueno !== duenoMemoria) {
++    memoria.clear();
++    duenoMemoria = dueno;
++    return;
++  }
++  const generacion = generacionLecturas();
++  for (const [clave, g] of memoria) {
++    if (g.generacion !== generacion || ahora - g.en >= VIGENTE_MS) memoria.delete(clave);
++  }
++}
+ 
+ function esSinPublicar(e: unknown): boolean {
+   return e instanceof ErrorFom && [403, 404, 405].includes(e.statusCode);
+@@ -63,12 +84,14 @@ export async function getEventosManejoFom(
+ ): Promise<EventosManejoFom> {
+   const d = diasServidor(dias);
+   const ente = companyId || enteActivoFom();
+-  const clave = `${usuarioActivoFom() ?? ''}|${ente ?? ''}|${conductorId}|${d}`;
++  // Quién mira y en qué empresa (la de la sesión y la que se está viendo, como la web).
++  const dueno = `${usuarioActivoFom() ?? ''}|${enteActivoFom() ?? ''}|${ente ?? ''}`;
++  const clave = `${dueno}|${conductorId}|${d}`;
++  const ahora = Date.now();
++  limpiarMemoria(dueno, ahora);
+   const guardada = memoria.get(clave);
+-  if (!fresco && guardada && guardada.generacion === generacionLecturas() && Date.now() - guardada.en < VIGENTE_MS) {
+-    return guardada.datos;
+-  }
+-  const entrada = { en: Date.now(), generacion: generacionLecturas(), datos: leer(conductorId, d, ente) };
++  if (!fresco && guardada) return guardada.datos;
++  const entrada = { en: ahora, generacion: generacionLecturas(), datos: leer(conductorId, d, ente) };
+   memoria.delete(clave);
+   memoria.set(clave, entrada);
+   while (memoria.size > TOPE_MEMORIA) {
+diff --git a/src/utils/filtro-fecha.ts b/src/utils/filtro-fecha.ts
+new file mode 100644
+index 0000000..5f74d72
+--- /dev/null
++++ b/src/utils/filtro-fecha.ts
+@@ -0,0 +1,105 @@
++import { instanteOrden, type FechaOrden } from '@/lib/orden';
++import { formatFechaCorta } from '@/utils/date';
++
++/**
++ * FILTRO DE FECHA de Mantenimiento: «Hoy», «7 días», «30 días», «Todo» o un
++ * rango propio. Cuenta por el día en que se REPORTÓ la orden (su `creadaEn`,
++ * la misma fecha que se ve en la tarjeta y que ordena la lista). La web hace
++ * la misma cuenta en src/panel/datos/filtroFecha.js.
++ *
++ * FOM no deja pedir las órdenes por fecha (solo estado, unidad y página): se
++ * filtra aquí, sobre lo ya cargado. Pendiente para el servidor:
++ * `createdFrom` / `createdTo` en el listado de work-orders.
++ *
++ * Los días van en hora LOCAL: «Hoy» es desde las 00:00 de aquí, y «7 días» es
++ * hoy y los 6 anteriores, enteros.
++ */
++
++export type AtajoFecha = '' | 'hoy' | '7d' | '30d' | 'rango';
++
++/** Lo elegido: un atajo o, con «rango», sus dos días en `AAAA-MM-DD` ('' = sin ese lado). */
++export type FiltroFecha = { atajo: AtajoFecha; desde: string; hasta: string };
++
++/** Sin filtro: lo que arranca la pantalla. */
++export const SIN_FECHA: FiltroFecha = { atajo: '', desde: '', hasta: '' };
++
++/** Los atajos, en el orden en que se ofrecen. `''` = todas las fechas. */
++export const ATAJOS_FECHA: { id: Exclude<AtajoFecha, 'rango'>; label: string; corto: string; dias?: number }[] = [
++  { id: 'hoy', label: 'Hoy', corto: 'Hoy', dias: 1 },
++  { id: '7d', label: 'Últimos 7 días', corto: '7 días', dias: 7 },
++  { id: '30d', label: 'Últimos 30 días', corto: '30 días', dias: 30 },
++  { id: '', label: 'Todas las fechas', corto: 'Todo' },
++];
++
++const RE_DIA = /^\d{4}-\d{2}-\d{2}$/;
++
++/** 00:00 locales del día de `ms`, menos `atras` días. */
++function inicioDelDia(ms: number, atras = 0): number {
++  const d = new Date(ms);
++  return new Date(d.getFullYear(), d.getMonth(), d.getDate() - atras).getTime();
++}
++
++/** `AAAA-MM-DD` de un día en hora local. */
++export function diaLocal(ms = Date.now()): string {
++  const d = new Date(ms);
++  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
++}
++
++/**
++ * Cuánto falta (ms) para las 00:00 locales del día siguiente a `ahora`: a esa
++ * hora «Hoy», «7 días» y «30 días» cambian y la pantalla vuelve a filtrar.
++ */
++export function msHastaMedianoche(ahora = Date.now()): number {
++  return Math.max(1, inicioDelDia(ahora, -1) - ahora);
++}
++
++/** El tramo en ms: `desde` incluido, `hasta` excluido; `null` = sin límite por ese lado. */
++export function rangoDeFecha(valor: FiltroFecha, ahora = Date.now()): { desde: number | null; hasta: number | null } {
++  const atajo = ATAJOS_FECHA.find((a) => a.dias && a.id === valor.atajo);
++  if (atajo?.dias) return { desde: inicioDelDia(ahora, atajo.dias - 1), hasta: null };
++  if (valor.atajo !== 'rango') return { desde: null, hasta: null };
++  let desde = RE_DIA.test(valor.desde) ? instanteOrden(valor.desde) : null;
++  let hasta = RE_DIA.test(valor.hasta) ? instanteOrden(valor.hasta) : null;
++  if (desde === -Infinity) desde = null;
++  if (hasta === -Infinity) hasta = null;
++  // Un rango al revés se da la vuelta en vez de dejar la lista vacía.
++  if (desde !== null && hasta !== null && desde > hasta) [desde, hasta] = [hasta, desde];
++  // «Hasta el 20» incluye todo el 20: se corta a las 00:00 del 21.
++  if (hasta !== null) hasta = inicioDelDia(hasta, -1);
++  return { desde, hasta };
++}
++
++/** ¿Hay algún filtro de fecha puesto? */
++export function hayFiltroFecha(valor: FiltroFecha): boolean {
++  const r = rangoDeFecha(valor);
++  return r.desde !== null || r.hasta !== null;
++}
++
++/**
++ * Las de la lista que caen en el filtro, por la fecha que da `fecha`. Sin
++ * filtro pasa todo; con filtro, lo que no trae fecha se queda fuera. No
++ * reordena: la lista sigue de la más nueva a la más vieja.
++ */
++export function filtrarPorFecha<T>(lista: readonly T[], valor: FiltroFecha, fecha: (x: T) => FechaOrden, ahora = Date.now()): T[] {
++  const { desde, hasta } = rangoDeFecha(valor, ahora);
++  if (desde === null && hasta === null) return [...lista];
++  return lista.filter((x) => {
++    const ms = instanteOrden(fecha(x));
++    if (ms === -Infinity) return false;
++    return (desde === null || ms >= desde) && (hasta === null || ms < hasta);
++  });
++}
++
++/** Lo que dice el botón con el filtro puesto: «Hoy», «7 días», «3 oct – 20 oct», «Desde 3 oct». */
++export function textoFiltroFecha(valor: FiltroFecha): string {
++  const atajo = ATAJOS_FECHA.find((a) => a.dias && a.id === valor.atajo);
++  if (atajo) return atajo.corto;
++  if (valor.atajo !== 'rango') return '';
++  let a = RE_DIA.test(valor.desde) ? valor.desde : '';
++  let b = RE_DIA.test(valor.hasta) ? valor.hasta : '';
++  if (a && b && a > b) [a, b] = [b, a];
++  if (a && b) return a === b ? formatFechaCorta(a) : `${formatFechaCorta(a)} – ${formatFechaCorta(b)}`;
++  if (a) return `Desde ${formatFechaCorta(a)}`;
++  if (b) return `Hasta ${formatFechaCorta(b)}`;
++  return '';
++}
+-- 
+2.55.0.windows.3
+
