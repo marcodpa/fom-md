@@ -1,0 +1,135 @@
+/* Escena del televisor (EscenaTelevisorV8, T-142). Sin caja propia: el televisor va solo sobre el
+   fondo de la página. Lo que pinta este CSS es el estado FINAL (encendido en el Centro de control):
+   así se ve con «reducir movimiento» y antes de que corra el movimiento. momentoTelevisorV8.js
+   lo apaga y lo enciende con el scroll (solo transform, opacidad y un brillo corto).
+   Dentro de la pantalla todo se mide en cqw (ancho de la pantalla): la carga escala con ella. */
+
+.v8-tv {
+  --v8-tv-ancho: min(1000px, 100%, calc((100svh - 250px) * 1.5));
+  /* cqw = ancho del televisor (la figura es contenedor): el bisel y el pie escalan con él. */
+  --v8-tv-bisel: clamp(6px, 1.2cqw, 13px);
+  margin: 0 auto;
+  width: var(--v8-tv-ancho);
+  container-type: inline-size;
+}
+.v8-tv-escena { position: relative; padding: clamp(12px, 3svh, 32px) 0 0; }
+.v8-tv-aparato { position: relative; will-change: transform; }
+
+/* Marco: bisel negro fino, canto con un filo de luz arriba y sombra que cae hacia abajo. */
+.v8-tv-marco {
+  position: relative;
+  padding: var(--v8-tv-bisel) var(--v8-tv-bisel) calc(var(--v8-tv-bisel) * 1.9);
+  border-radius: calc(var(--v8-tv-bisel) * 1.3);
+  background: linear-gradient(180deg, #232a34 0%, #0d1117 6%, #07090c 70%, #10151c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 0 0 0 1px rgba(255, 255, 255, .07),
+    0 60px 110px -46px rgba(3, 8, 20, .95),
+    0 24px 40px -28px rgba(0, 0, 0, .9);
+}
+
+.v8-tv-pantalla {
+  position: relative;
+  aspect-ratio: 1280 / 800;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #04060a;
+  container-type: inline-size;
+  isolation: isolate;
+}
+
+/* Panel real (las dos tomas llenan la pantalla). */
+.v8-tv-panel, .v8-tv-toma, .v8-tv-carga, .v8-tv-destello, .v8-tv-reflejo { position: absolute; inset: 0; }
+.v8-tv-toma { transform-origin: 42% 40%; }
+.v8-tv-toma img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.v8-tv-toma.is-unidad { opacity: 0; }
+
+/* Pulso suave sobre algunas unidades del mapa real (solo con la pantalla viva). */
+.v8-tv-pulso {
+  position: absolute; width: 2.6cqw; aspect-ratio: 1; margin: -1.3cqw 0 0 -1.3cqw;
+  border-radius: 50%; border: max(1px, .16cqw) solid #8bc6ff; opacity: 0; pointer-events: none;
+}
+.v8-tv.is-viva .v8-tv-pulso { animation: v8-tv-pulso 2.6s cubic-bezier(.2, .7, .3, 1) infinite; }
+.v8-tv.is-viva .v8-tv-pulso:nth-child(3) { animation-delay: .5s; }
+.v8-tv.is-viva .v8-tv-pulso:nth-child(4) { animation-delay: 1.1s; }
+.v8-tv.is-viva .v8-tv-pulso:nth-child(5) { animation-delay: 1.6s; }
+.v8-tv.is-viva .v8-tv-pulso:nth-child(6) { animation-delay: 2.1s; }
+@keyframes v8-tv-pulso {
+  0% { opacity: 0; transform: scale(.35); }
+  18% { opacity: .85; }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+
+/* La pantalla de carga de FOM: mismas piezas, colores y orden que /public/carga-fom.css. */
+.v8-tv-carga {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5cqw;
+  background: radial-gradient(60% 45% at 50% 46%, rgba(52, 155, 250, .16), rgba(52, 155, 250, 0) 70%), #0a0d12;
+  color: #f7f8fa;
+  font-family: 'Spline Sans', system-ui, sans-serif;
+  opacity: 0;
+  transform-origin: 50% 50%;
+}
+.v8-tv-carga-marca { display: flex; align-items: center; gap: 1.8cqw; }
+.v8-tv-flechas { width: 8.8cqw; height: auto; aspect-ratio: 104 / 82; overflow: visible; }
+.v8-tv-flechas path { fill: #349bfa; transform-box: fill-box; transform-origin: 50% 50%; }
+.v8-tv-nombre { display: flex; font-weight: 700; font-size: 5.4cqw; line-height: 1; letter-spacing: .02em; }
+.v8-tv-nombre span { display: inline-block; }
+.v8-tv-lema { margin: 0; font-size: max(7px, 1cqw); font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: #abb3bf; }
+.v8-tv-barra { position: relative; width: 14cqw; height: max(2px, .26cqw); border-radius: 3px; overflow: hidden; background: rgba(171, 179, 191, .14); }
+.v8-tv-barra::after {
+  content: ''; position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: 3px;
+  background: linear-gradient(90deg, rgba(59, 213, 255, 0), #3bd5ff, #349bfa);
+  transform: translateX(-100%);
+}
+.v8-tv.is-cargando .v8-tv-barra::after { animation: v8-tv-barra 1.4s cubic-bezier(.45, 0, .25, 1) infinite; }
+@keyframes v8-tv-barra { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.v8-tv-estado { margin: 0; font-size: max(7px, 1.05cqw); color: #8c97a7; }
+
+/* Encendido: línea de luz que se abre y destello suave. */
+.v8-tv-linea {
+  position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px;
+  background: linear-gradient(90deg, rgba(139, 198, 255, 0), #cfe6ff 22%, #fff 50%, #cfe6ff 78%, rgba(139, 198, 255, 0));
+  opacity: 0; transform-origin: 50% 50%; pointer-events: none;
+}
+.v8-tv-destello {
+  background: radial-gradient(70% 60% at 50% 50%, rgba(226, 240, 255, .85), rgba(139, 198, 255, .22) 55%, rgba(139, 198, 255, 0) 85%);
+  opacity: 0; pointer-events: none;
+}
+/* Vidrio: un reflejo diagonal apenas visible, siempre encima. */
+.v8-tv-reflejo {
+  background: linear-gradient(118deg, rgba(255, 255, 255, .06) 0%, rgba(255, 255, 255, .015) 30%, rgba(255, 255, 255, 0) 42%);
+  pointer-events: none;
+}
+
+/* Piloto en el bisel de abajo: rojo tenue en espera, azul FOM encendido. */
+.v8-tv-led {
+  position: absolute; left: 50%; bottom: calc(var(--v8-tv-bisel) * .95 - 2px); width: 4px; height: 4px; margin-left: -2px;
+  border-radius: 50%; background: #3a1e22;
+}
+.v8-tv-led b { position: absolute; inset: 0; border-radius: 50%; background: #3d9bf5; box-shadow: 0 0 6px 1px rgba(61, 155, 245, .7); }
+
+/* Pie: cuello y base finos. */
+.v8-tv-pie { display: flex; flex-direction: column; align-items: center; }
+.v8-tv-pie i { width: 7%; height: 4.2cqw; background: linear-gradient(90deg, #07090c, #1c222b 50%, #07090c); }
+.v8-tv-pie b {
+  width: 32%; height: max(6px, 1.2cqw); border-radius: 999px;
+  background: linear-gradient(180deg, #262e39, #0b0e13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 22px 34px -14px rgba(0, 0, 0, .85);
+}
+
+.v8-tv .v8-nota-demo { margin-top: 18px; }
+
+@media (max-width: 1023px) {
+  .v8-tv { --v8-tv-ancho: min(100%, 860px); }
+}
+@media (max-width: 599px) {
+  .v8-tv { --v8-tv-bisel: 6px; }
+  .v8-tv-marco { padding-bottom: 11px; }
+  .v8-tv-led { bottom: 3px; width: 3px; height: 3px; margin-left: -1.5px; }
+  .v8-tv-pie i { width: 10%; }
+  .v8-tv-pie b { width: 42%; }
+  .v8-tv .v8-nota-demo { margin-top: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v8-tv-pulso { display: none; }
+}

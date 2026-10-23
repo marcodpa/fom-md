@@ -1,0 +1,50 @@
+/* Escena «En la cabina» (EscenaTableroV8, T-142). La foto ya trae la orilla fundida con el fondo
+   (alfa horneado): va sin caja, sin máscara extra y sin radio. El teléfono va en primer plano, en
+   su soporte, y sobresale por abajo. El CSS pinta el estado final quieto. */
+
+.v8-tab { margin: 0 auto; width: min(1180px, 100%); }
+.v8-tab-escena { position: relative; padding-bottom: 9%; }
+.v8-tab-foto { position: relative; will-change: transform; transform-origin: 46% 62%; }
+.v8-tab-foto .v8-foto { display: block; width: 100%; height: auto; }
+
+.v8-tab-tel {
+  --v8-tab-tel: clamp(150px, 19%, 232px);
+  position: absolute; right: 9%; bottom: 7%; width: var(--v8-tab-tel);
+  will-change: transform;
+}
+.v8-tab-marco {
+  position: relative; padding: calc(var(--v8-tab-tel) * .034); border-radius: calc(var(--v8-tab-tel) * .17);
+  background: linear-gradient(145deg, #3a4350 0%, #161b22 18%, #0b0e13 50%, #1a2029 82%, #444d5a 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .16),
+    inset 0 0 0 calc(var(--v8-tab-tel) * .015) #05070a,
+    0 50px 90px -30px rgba(3, 8, 20, .95),
+    0 20px 34px -18px rgba(0, 0, 0, .9);
+}
+.v8-tab-marco > .v8-pantalla { border-radius: calc(var(--v8-tab-tel) * .135); aspect-ratio: 1170 / 2532; background: var(--v8-pantalla-fondo, #0a0d13); }
+
+/* Soporte: dos pinzas a los lados y el brazo que baja al tablero (se pierde hacia abajo). */
+.v8-tab-pinza {
+  position: absolute; top: 40%; height: 15%; width: 9px; border-radius: 4px; z-index: 1;
+  background: linear-gradient(180deg, #3a4350, #12161c);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 4px 10px rgba(0, 0, 0, .5);
+}
+.v8-tab-pinza.is-izq { left: -6px; }
+.v8-tab-pinza.is-der { right: -6px; }
+.v8-tab-brazo {
+  position: absolute; left: 50%; top: 52%; width: 20px; height: 70%; margin-left: -10px; border-radius: 10px;
+  background: linear-gradient(90deg, #12161c, #2b333e 50%, #12161c);
+  -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent);
+  mask-image: linear-gradient(180deg, #000 45%, transparent);
+}
+
+.v8-tab .v8-nota-demo { margin-top: 0; }
+
+@media (max-width: 599px) {
+  .v8-tab-escena { padding-bottom: 14%; }
+  .v8-tab-tel { --v8-tab-tel: min(150px, 40vw); right: 6%; bottom: 6%; }
+  .v8-tab-pinza { width: 6px; }
+  .v8-tab-pinza.is-izq { left: -4px; }
+  .v8-tab-pinza.is-der { right: -4px; }
+  .v8-tab-brazo { width: 14px; margin-left: -7px; }
+}

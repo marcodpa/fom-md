@@ -26,6 +26,7 @@ const Entrar = lazy(() => import('./pages/Entrar'))
 const CambiarClaveInicial = lazy(() => import('./pages/CambiarClaveInicial'))
 const Consola = lazy(() => import('./panel/Consola'))
 const MotionPage = lazy(() => import('./motion/MotionPage'))
+const LaboratorioV8 = lazy(() => import('./pages/v8/LaboratorioV8')) // T-142: escenas en prueba, ruta oculta
 // T-104: web nueva (v8), aparte en /nuevo/* hasta que Marco la apruebe. Sus rutas salen de UNA
 // tabla (src/pages/v8/rutasV8.js); cada página se registra sola por nombre de archivo.
 import { RUTAS_V8, PAGINAS_V8, PUBLICADA, esRutaV8 } from './pages/v8/rutasV8'
@@ -56,7 +57,7 @@ function ScrollTop() {
 export default function App() {
   const { pathname } = useLocation()
   const esConsola = pathname === '/motion' || pathname === '/entrar' || pathname === '/cambiar-clave-inicial' || pathname.startsWith('/panel')
-  const v8 = esRutaV8(pathname)
+  const v8 = esRutaV8(pathname) || pathname === '/nuevo/laboratorio'
   const v7 = !v8 && (pathname === '/' || Boolean(V7_PAGES[pathname.slice(1)]))
   return <div id="top" className={esConsola || v8 ? undefined : `marketing-v2${v7 ? ' v7-shell' : ''}`}>
     <a className="skip-link" href="#contenido">Saltar al contenido</a>
@@ -73,6 +74,7 @@ export default function App() {
         {/* Los enlaces viejos a /nuevo/* llevan a la página publicada. */}
         {PUBLICADA && PAGINAS_V8.map(p => <Route key={'nuevo-' + p.clave} path={p.nueva} element={<Navigate to={p.real} replace />} />)}
         <Route path="/motion" element={<MotionPage />} />
+        <Route path="/nuevo/laboratorio" element={<LaboratorioV8 />} />
         <Route path="/entrar" element={<Entrar />} />
         <Route path="/cambiar-clave-inicial" element={<CambiarClaveInicial />} />
         <Route path="/panel/*" element={<Consola />} />

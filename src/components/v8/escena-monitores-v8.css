@@ -1,0 +1,67 @@
+/* Escena del puesto de monitores (EscenaMonitoresV8, T-142). Sin caja propia: los monitores van
+   solos sobre el fondo de la página. El CSS pinta el estado final (los tres encendidos); el arco y
+   el encendido los pone momentoMonitoresV8.js. Con «reducir movimiento» el arco lo pone este CSS. */
+
+.v8-mon { margin: 0 auto; width: min(1400px, calc(100vw - 44px)); }
+.v8-mon-fila {
+  display: flex; justify-content: center; align-items: flex-end; gap: 1.2%;
+  padding: clamp(12px, 3svh, 32px) 0 0;
+}
+.v8-mon-col { flex: none; width: 27.5%; container-type: inline-size; }
+.v8-mon-col.is-centro { width: 41%; position: relative; z-index: 1; }
+.v8-mon-aparato { position: relative; will-change: transform; }
+
+.v8-mon-marco {
+  position: relative;
+  padding: 1.3cqw 1.3cqw 1.9cqw;
+  border-radius: 1.9cqw;
+  background: linear-gradient(180deg, #232a34 0%, #0d1117 7%, #07090c 72%, #10151c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .15),
+    inset 0 0 0 1px rgba(255, 255, 255, .07),
+    0 44px 80px -36px rgba(3, 8, 20, .95),
+    0 18px 30px -22px rgba(0, 0, 0, .9);
+}
+.v8-mon-pantalla {
+  position: relative; aspect-ratio: 1280 / 800; overflow: hidden; border-radius: .7cqw;
+  background: #04060a; isolation: isolate;
+}
+.v8-mon-toma, .v8-mon-reflejo { position: absolute; inset: 0; }
+.v8-mon-toma { transform-origin: 50% 50%; }
+.v8-mon-toma img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.v8-mon-linea {
+  position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px;
+  background: linear-gradient(90deg, rgba(139, 198, 255, 0), #cfe6ff 22%, #fff 50%, #cfe6ff 78%, rgba(139, 198, 255, 0));
+  opacity: 0; pointer-events: none;
+}
+.v8-mon-reflejo {
+  background: linear-gradient(118deg, rgba(255, 255, 255, .06) 0%, rgba(255, 255, 255, .015) 30%, rgba(255, 255, 255, 0) 42%);
+  pointer-events: none;
+}
+
+.v8-mon-pie { display: flex; flex-direction: column; align-items: center; }
+.v8-mon-pie i { width: 11%; height: 6.5cqw; background: linear-gradient(90deg, #07090c, #1c222b 50%, #07090c); }
+.v8-mon-pie b {
+  width: 40%; height: max(5px, 1.5cqw); border-radius: 999px;
+  background: linear-gradient(180deg, #262e39, #0b0e13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 18px 28px -12px rgba(0, 0, 0, .85);
+}
+
+.v8-mon-nombre { margin: 16px 0 0; text-align: center; font-size: 15px; font-weight: 600; color: var(--v8-texto-2, #abb3bf); }
+.v8-mon .v8-nota-demo { margin-top: 20px; }
+
+/* Teléfono: el del centro arriba, a lo ancho; los otros dos debajo, lado a lado. */
+@media (max-width: 599px) {
+  .v8-mon { width: calc(100% - 40px); }
+  .v8-mon-fila { flex-wrap: wrap; align-items: flex-start; gap: 22px 12px; }
+  .v8-mon-col { width: calc(50% - 6px); }
+  .v8-mon-col.is-centro { order: -1; width: 100%; }
+  .v8-mon-nombre { margin-top: 10px; font-size: 13px; }
+  .v8-mon-col.is-centro .v8-mon-nombre { font-size: 15px; }
+}
+
+/* «Reducir movimiento»: el arco quieto (en el teléfono, sin arco). */
+@media (prefers-reduced-motion: reduce) and (min-width: 600px) {
+  .v8-mon-col.is-izquierda .v8-mon-aparato { transform: perspective(1600px) translateX(5%) translateZ(-70px) rotateY(18deg); }
+  .v8-mon-col.is-derecha .v8-mon-aparato { transform: perspective(1600px) translateX(-5%) translateZ(-70px) rotateY(-18deg); }
+}

@@ -1,0 +1,73 @@
+/* Escena «El aviso llega» (EscenaAlertaV8, T-142). Sin caja propia: el portátil y el teléfono van
+   solos sobre el fondo de la página. El CSS pinta el estado final quieto (el aviso marcado en las
+   dos pantallas, sin señal); momentoAlertaV8.js anima la señal y el resto. */
+
+.v8-al { margin: 0 auto; width: min(1120px, 100%); }
+.v8-al-grupo {
+  position: relative;
+  display: flex; justify-content: center; align-items: flex-end; gap: clamp(48px, 9%, 120px);
+  padding: clamp(16px, 4svh, 40px) 0 0;
+}
+
+/* Portátil de frente: tapa con bisel negro y base fina más ancha. */
+.v8-al-portatil { position: relative; flex: none; width: min(64%, calc((100svh - 260px) * 1.45)); container-type: inline-size; will-change: transform; }
+.v8-al-tapa {
+  position: relative; padding: 1.6cqw 1.6cqw 2.2cqw; border-radius: 2.2cqw 2.2cqw .6cqw .6cqw;
+  background: linear-gradient(180deg, #232a34 0%, #0d1117 6%, #07090c 80%, #0f141b 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), inset 0 0 0 1px rgba(255, 255, 255, .07);
+}
+.v8-al-base { position: relative; margin: 0 -5.5%; height: 2.1cqw; border-radius: 0 0 2.4cqw 2.4cqw / 0 0 2cqw 2cqw;
+  background: linear-gradient(180deg, #3a4350 0%, #1a2029 35%, #0b0e13 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 40px 70px -30px rgba(3, 8, 20, .95), 0 16px 26px -16px rgba(0, 0, 0, .9);
+}
+.v8-al-base i { position: absolute; left: 50%; top: 0; width: 16%; height: 42%; margin-left: -8%; border-radius: 0 0 1cqw 1cqw; background: #0b0e13; }
+
+.v8-al-pantalla { position: relative; overflow: hidden; background: #04060a; isolation: isolate; }
+.v8-al-pantalla.is-panel { aspect-ratio: 1280 / 800; border-radius: .5cqw; }
+.v8-al-pantalla img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.v8-al-reflejo { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(118deg, rgba(255, 255, 255, .06) 0%, rgba(255, 255, 255, .015) 30%, rgba(255, 255, 255, 0) 42%);
+}
+
+/* Teléfono del supervisor (mismo canto de titanio oscuro que la escena de teléfonos). */
+.v8-al-tel { --v8-al-tel: clamp(170px, calc((100svh - 300px) * .42), 230px); position: relative; flex: none; width: var(--v8-al-tel); margin-bottom: 1%; will-change: transform; }
+.v8-al-tel-marco {
+  position: relative; padding: calc(var(--v8-al-tel) * .034); border-radius: calc(var(--v8-al-tel) * .17);
+  background: linear-gradient(145deg, #3a4350 0%, #161b22 18%, #0b0e13 50%, #1a2029 82%, #444d5a 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .16),
+    inset 0 0 0 calc(var(--v8-al-tel) * .015) #05070a,
+    0 46px 80px -32px rgba(3, 8, 20, .95);
+}
+.v8-al-pantalla.is-app { aspect-ratio: 1170 / 2532; border-radius: calc(var(--v8-al-tel) * .135); background: #0a0d13; }
+
+/* El aviso marcado: un anillo azul que sigue la fila real de la captura. */
+.v8-al-marca { position: absolute; border-radius: 6px; pointer-events: none;
+  box-shadow: inset 0 0 0 2px #3d9bf5; background: rgba(61, 155, 245, .1);
+}
+.is-app .v8-al-marca { border-radius: 10px; }
+.v8-al-marca b { position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 2px #8bc6ff; opacity: 0; }
+
+/* La señal: una ruta punteada y una chispa con su estela (solo con movimiento). */
+.v8-al-senal { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.v8-al-ruta { fill: none; stroke: #3d9bf5; stroke-width: 1.5; stroke-dasharray: 3 7; stroke-linecap: round; opacity: 0; }
+.v8-al-chispa { position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+  background: #8bc6ff; box-shadow: 0 0 0 3px rgba(61, 155, 245, .35); opacity: 0; pointer-events: none;
+}
+.v8-al-chispa.is-estela { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; box-shadow: none; background: #3d9bf5; }
+
+.v8-al .v8-nota-demo { margin-top: 22px; }
+
+@media (max-width: 1023px) {
+  .v8-al-portatil { width: 62%; }
+  .v8-al-tel { --v8-al-tel: 22vw; }
+}
+/* Teléfono: el portátil arriba a lo ancho y el teléfono debajo, corrido a la derecha. */
+@media (max-width: 599px) {
+  .v8-al-grupo { flex-direction: column; align-items: stretch; gap: 30px; }
+  .v8-al-portatil { width: 89%; align-self: center; }
+  .v8-al-tel { --v8-al-tel: min(150px, 42vw); align-self: flex-end; margin: 0 10% 0 0; }
+  .v8-al-marca { border-radius: 3px; }
+  .is-app .v8-al-marca { border-radius: 6px; }
+  .v8-al-marca { box-shadow: inset 0 0 0 1.5px #3d9bf5; }
+}
