@@ -6,7 +6,7 @@
 import { useRef } from 'react'
 import { PAGES } from '../../content/pages'
 import {
-  SitioV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8, TarjetaVidrioV8,
+  SitioV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8, TarjetaVidrioV8, EscenaLaptopV8,
   BotonV8, EnlaceV8, EnlaceBaseV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
 import './que-ofrecemos-v8.css'
@@ -125,17 +125,20 @@ export default function QueOfrecemosV8() {
       </ContenedorV8>
     </SeccionV8>
 
-    {/* Alertas, seguridad y reportes: captura real de Reportes. */}
+    {/* Alertas, seguridad y reportes (T-141): laptop que se abre al bajar con Reportes y, ya
+        abierta, Alertas (capturas reales del panel). */}
     <SeccionV8 id="alertas" banda className="qo-alertas" aria-labelledby="qo-alertas-titulo">
-      <ContenedorV8 className="v8-split">
-        <div>
-          <p className="v8-kick" data-v8-aparece="">Alertas, seguridad y reportes</p>
-          <h2 id="qo-alertas-titulo" className="v8-h2" data-v8-aparece="">Prioriza lo que requiere atención.</h2>
-          <p className="v8-lead qo-mt20" data-v8-aparece="">Los avisos y los datos de la flota ayudan a entender cada recorrido.</p>
-          <p className="qo-mt24"><EnlaceV8 to={rutaV8('seguridad')}>Seguridad</EnlaceV8></p>
-        </div>
-        <CapturaFlotanteV8 nombre="cap-panel-reportes" nota sizes="(min-width: 1180px) 640px, (min-width: 900px) 55vw, calc(100vw - 56px)"
-          alt="Reportes actuales del panel FOM: reporte de vehículos, ODT por estado y unidades ahora. Datos de demostración." />
+      <ContenedorV8 className="v8-centro qo-alertas-cab">
+        <p className="v8-kick" data-v8-aparece="">Alertas, seguridad y reportes</p>
+        <h2 id="qo-alertas-titulo" className="v8-h2" data-v8-aparece="">Prioriza lo que requiere atención.</h2>
+        <p className="v8-lead qo-mt20" data-v8-aparece="">Los avisos y los datos de la flota ayudan a entender cada recorrido.</p>
+        <p className="qo-mt24"><EnlaceV8 to={rutaV8('seguridad')}>Seguridad</EnlaceV8></p>
+      </ContenedorV8>
+      <ContenedorV8 className="qo-alertas-escena">
+        <EscenaLaptopV8 etiqueta="Laptop con los Reportes y las Alertas del panel FOM" pantallas={[
+          { nombre: 'cap-panel-reportes', alt: 'Reportes actuales del panel FOM: reporte de vehículos, ODT por estado y unidades ahora. Datos de demostración.' },
+          { nombre: 'cap-panel-alertas', alt: 'Alertas actuales del panel FOM con excesos de velocidad. Datos de demostración.' },
+        ]} />
       </ContenedorV8>
     </SeccionV8>
 

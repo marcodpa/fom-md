@@ -129,6 +129,7 @@ export default function AppV8() {
           <li data-v8-aparece=""><b className="v8-fuerte">Lista de revisión por vehículo.</b></li>
           <li data-v8-aparece=""><b className="v8-fuerte">Registro de observaciones y fallas,</b> con foto.</li>
         </ul>
+        <p className="app-mt-enlace" data-v8-aparece=""><EnlaceV8 to={rutaV8('plataforma', 'inspecciones')}>Ver cómo funciona</EnlaceV8></p>
       </EscenaV8>
     </SeccionV8>
 

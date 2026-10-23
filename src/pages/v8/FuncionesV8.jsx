@@ -219,6 +219,15 @@ export default function FuncionesV8() {
         </div>)}
         <p className="v8-nota-demo">Capturas reales · Datos de demostración</p>
       </div>
+
+      {/* Enlace a la sección Inspecciones de Plataforma. */}
+      <ContenedorV8>
+        <p className="funciones-inspeccion v8-sm v8-t2" data-v8-aparece="">
+          <b className="v8-fuerte">Inspección diaria con la hoja de tu empresa</b> <span className="funciones-nuevo">nuevo</span>{' '}
+          El conductor la llena en la app, el supervisor ve quién falta y lo que falla se vuelve orden de trabajo.{' '}
+          <EnlaceV8 to={rutaV8('plataforma', 'inspecciones')}>Ver cómo funciona</EnlaceV8>
+        </p>
+      </ContenedorV8>
     </SeccionV8>
 
     <SeccionV8 id="reportes" banda className="funciones-reportes" aria-labelledby="funciones-reportes-titulo">

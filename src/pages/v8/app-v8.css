@@ -4,6 +4,7 @@
 
 .v8-site .app-mt-lead { margin-top: 20px; }
 .v8-site .app-lista { display: grid; gap: 12px; margin-top: 28px; }
+.v8-site .app-mt-enlace { margin-top: 24px; }
 
 /* Hero: foto a la derecha fundida hacia la izquierda y el texto encima, a la izquierda. */
 .v8-site .v8-hero.app-hero { padding: 0; text-align: left; }

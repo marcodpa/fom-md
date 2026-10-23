@@ -13,6 +13,8 @@
 .inicio-duo-telefono { position: absolute; left: calc(var(--v8-margen) + 40px); bottom: 8%; z-index: 1; }
 .inicio-duo-pie { display: flex; justify-content: center; gap: 44px; margin-top: 8px; padding: 0 22px; }
 .inicio-rasgos { margin-top: 72px; }
+.inicio-inspeccion { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--v8-borde, #262e39); }
+.inicio-inspeccion .v8-enlace { white-space: nowrap; }
 
 /* Funciones */
 .inicio-funciones-cab { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
@@ -24,9 +26,9 @@
 
 /* Mapa y GPS */
 .inicio-mapa-escena { position: relative; margin-top: 32px; }
-/* T-118: el monitor del patio va completo con esquinas redondeadas; los chips flotan dentro de la
-   foto, a 24 px de sus bordes. */
-.inicio-mapa-chips { position: absolute; left: calc(var(--v8-margen) + 24px); right: calc(var(--v8-margen) + 24px); bottom: 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+/* T-141: la laptop que se abre (EscenaLaptopV8) con el Centro de control real; los chips van
+   debajo, en fila. */
+.inicio-mapa-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 40px; }
 .inicio-cifras-mapa { margin-top: 56px; }
 
 .inicio-faq-mas { margin-top: 32px; }
@@ -42,7 +44,7 @@
   .inicio-carrusel { margin-top: 28px; }
   .inicio-mapa-escena { margin-top: 20px; }
   .inicio-duo-foto { height: auto; }
-  .inicio-mapa-chips { position: relative; left: auto; right: auto; bottom: auto; grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 16px 0 0; }
+  .inicio-mapa-chips { grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 16px 0 0; }
   .inicio-cifras-mapa { margin-top: 40px; }
   .inicio-faq-mas { margin-top: 24px; }
 }
@@ -58,9 +60,8 @@
    (inicio-hero-movil-v) en cuanto exista; mientras, el recorte con el monitor completo. */
 @media (max-width: 599px) {
   .inicio-hero .v8-hero-medio .v8-foto { height: auto; }
-  .v8-site .v8-foto.inicio-duo-foto, .v8-site .v8-foto.inicio-mapa-foto { display: none; }
+  .v8-site .v8-foto.inicio-duo-foto { display: none; }
   .inicio-duo-telefono { margin: 0 auto; width: 280px !important; }
-  .inicio-mapa-telefono { margin: 0 auto; }
   .inicio-mapa-chips { margin-top: 24px; }
 }
 

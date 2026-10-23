@@ -8,6 +8,7 @@ export { default as useMomentoV8, MEDIDAS_V8 } from './useMomentoV8'
 export { LogoV8, IconoV8, ICONOS_V8 } from './MarcaV8'
 export { FotoIntegradaV8, CapturaFlotanteV8, PantallaTelefonoV8 } from './ImagenesV8'
 export { default as EscenaTelefonosV8 } from './EscenaTelefonosV8'
+export { default as EscenaLaptopV8 } from './EscenaLaptopV8'
 export { PANTALLAS_LARGAS_V8, pantallaLargaV8 } from './pantallasV8'
 export { fotoV8, NOMBRES_FOTOS_V8 } from './fotosV8'
 export {

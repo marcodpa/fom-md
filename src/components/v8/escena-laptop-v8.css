@@ -1,0 +1,155 @@
+/* Escena de laptop (EscenaLaptopV8, T-141). Sin caja ni fondo propio: la laptop va sola sobre el
+   fondo de la página. Estado por defecto = ABIERTA (así queda con «reducir movimiento»); el
+   momento (momentoLaptopV8.js) la cierra al cargar y la abre con el scroll. Solo se animan
+   transform y opacidad.
+
+   Geometría (todo en función de --v8-lap-w, el ancho de la tapa):
+   - .v8-lap-equipo: el conjunto, inclinado hacia quien mira (se ve desde un poco arriba). Gira
+     sobre la bisagra.
+   - .v8-lap-tapa: gira sobre la bisagra. Abierta, su giro compensa justo el del conjunto: la
+     pantalla queda de frente y a la profundidad de la bisagra, así la captura nunca se ve más
+     grande que su tamaño.
+   - .v8-lap-base: plano horizontal que sale de la bisagra hacia quien mira (rotateX 90°). */
+
+.v8-lap {
+  --v8-lap-w: min(820px, calc(100vw - 96px), calc((100svh - 260px) * 1.2));
+  --v8-lap-incl: -10deg;  /* conjunto: vista desde un poco arriba */
+  --v8-lap-abre: 10deg;   /* tapa abierta: lo justo para quedar de frente */
+  margin: 0 auto;
+  width: var(--v8-lap-w);
+}
+.v8-lap-escena {
+  position: relative;
+  perspective: 2600px;
+  perspective-origin: 50% 60%;
+  /* La base sale hacia abajo en pantalla: se le guarda sitio. */
+  padding: 0 0 calc(var(--v8-lap-w) * .13);
+}
+.v8-lap-equipo {
+  position: relative;
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+  transform: rotateX(var(--v8-lap-incl));
+  will-change: transform;
+}
+
+/* ── Tapa ─────────────────────────────────────────────────────────────── */
+.v8-lap-tapa {
+  position: relative;
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+  transform: rotateX(var(--v8-lap-abre));
+  will-change: transform;
+}
+.v8-lap-cara, .v8-lap-dorso {
+  border-radius: calc(var(--v8-lap-w) * .026) calc(var(--v8-lap-w) * .026) calc(var(--v8-lap-w) * .008) calc(var(--v8-lap-w) * .008);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.v8-lap-cara {
+  position: relative;
+  padding: calc(var(--v8-lap-w) * .032) calc(var(--v8-lap-w) * .026) calc(var(--v8-lap-w) * .036);
+  background: linear-gradient(180deg, #0b0e13, #07090c);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .1),
+    inset 0 0 0 calc(var(--v8-lap-w) * .004) #2b323c,
+    0 0 0 1px #1d232c;
+}
+.v8-lap-camara {
+  position: absolute; left: 50%; top: calc(var(--v8-lap-w) * .013);
+  width: calc(var(--v8-lap-w) * .0075); aspect-ratio: 1; border-radius: 50%;
+  translate: -50% 0;
+  background: radial-gradient(circle at 40% 40%, #2c4a6b, #070a0e 70%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .06);
+}
+.v8-lap-pantalla {
+  position: relative; overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border-radius: calc(var(--v8-lap-w) * .006);
+  background: #0a0d12;
+}
+.v8-lap-pantalla img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+.v8-lap-capa { position: absolute; inset: 0; }
+.v8-lap-capa.is-sigue { opacity: 0; }
+/* Pantalla apagada (negra) y reflejo del vidrio: solo se ven mientras se abre. */
+.v8-lap-apagada { position: absolute; inset: 0; background: #030406; opacity: 0; pointer-events: none; }
+.v8-lap-reflejo {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, 0) 38%);
+}
+/* Dorso de la tapa (aluminio): se ve con la laptop cerrada. */
+.v8-lap-dorso {
+  position: absolute; inset: 0;
+  transform: rotateY(180deg) translateZ(1px);
+  background: linear-gradient(160deg, #4a525d 0%, #2a3038 45%, #1b2027 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14);
+  display: grid; place-items: center;
+}
+.v8-lap-dorso span {
+  width: 9%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 70%);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+.v8-lap-base {
+  position: absolute; top: 100%; left: -4%; right: -4%;
+  height: calc(var(--v8-lap-w) * .6);
+  transform-origin: 50% 0;
+  transform: rotateX(90deg);
+  transform-style: preserve-3d;
+  border-radius: calc(var(--v8-lap-w) * .006) calc(var(--v8-lap-w) * .006) calc(var(--v8-lap-w) * .03) calc(var(--v8-lap-w) * .03);
+  background: linear-gradient(180deg, #2e353f 0%, #3b434e 30%, #343b45 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), inset 0 calc(var(--v8-lap-w) * .012) calc(var(--v8-lap-w) * .02) rgba(0, 0, 0, .45);
+}
+.v8-lap-teclado {
+  position: absolute; left: 12%; right: 12%; top: 8%;
+  display: grid; gap: calc(var(--v8-lap-w) * .005);
+  padding: calc(var(--v8-lap-w) * .008);
+  border-radius: calc(var(--v8-lap-w) * .008);
+  background: #161a20;
+}
+.v8-lap-fila { display: flex; gap: calc(var(--v8-lap-w) * .005); height: calc(var(--v8-lap-w) * .03); }
+.v8-lap-fila i {
+  flex: 1 1 0; border-radius: calc(var(--v8-lap-w) * .003);
+  background: linear-gradient(180deg, #0c0f13, #090b0e);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+.v8-lap-fila.is-espacio i.is-barra { flex: 5.2 1 0; }
+.v8-lap-tactil {
+  position: absolute; left: 33%; right: 33%; top: 56%; bottom: 7%;
+  border-radius: calc(var(--v8-lap-w) * .01);
+  background: linear-gradient(180deg, #353c46, #2f363f);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), inset 0 1px 3px rgba(0, 0, 0, .35);
+}
+/* Canto delantero de la base (grosor). */
+.v8-lap-frente {
+  position: absolute; left: 0; right: 0; top: 100%;
+  height: calc(var(--v8-lap-w) * .018);
+  transform-origin: 50% 0;
+  transform: rotateX(-90deg);
+  border-radius: 0 0 calc(var(--v8-lap-w) * .02) calc(var(--v8-lap-w) * .02);
+  background: linear-gradient(180deg, #1e242b, #12161b);
+}
+.v8-lap-frente::after {
+  content: ''; position: absolute; left: 42%; right: 42%; top: 0; height: 40%;
+  border-radius: 0 0 6px 6px; background: rgba(0, 0, 0, .35);
+}
+/* Sombra de apoyo sobre el fondo (solo da altura; no es una caja). */
+.v8-lap-sombra {
+  position: absolute; left: 4%; right: 4%; bottom: calc(var(--v8-lap-w) * .005);
+  height: calc(var(--v8-lap-w) * .06);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(2, 4, 8, .85), rgba(2, 4, 8, 0));
+  pointer-events: none;
+}
+
+.v8-lap .v8-nota-demo { margin-top: 10px; text-align: center; }
+
+@media (max-width: 1023px) {
+  .v8-lap { --v8-lap-w: min(720px, calc(100vw - 80px)); }
+}
+@media (max-width: 599px) {
+  /* La base es más ancha que la tapa y se abre hacia quien mira: la tapa deja aire a los lados. */
+  .v8-lap { --v8-lap-w: calc(100vw - 104px); --v8-lap-incl: -12deg; --v8-lap-abre: 12deg; }
+  .v8-lap-escena { perspective: 1600px; padding-bottom: calc(var(--v8-lap-w) * .19); }
+}

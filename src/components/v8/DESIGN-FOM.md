@@ -44,7 +44,8 @@ Contraste medido sobre `#0a0d12`: texto 17,8:1 · secundario 9,2:1 · tenue 6,6:
 - Vidrio oscuro redondeado para tarjetas, notas y la barra. Una sola cabecera flotante.
 - Fotos de escena con esquinas de 28 px, sin velos ni degradados encima; las fotos a sangre se
   funden por el borde con máscara corta. Nada «pegado»: todo se apoya en el fondo de la página.
-- Escena de teléfonos: sin caja propia; la cinta azul se funde en el fondo por los cuatro bordes.
+- Escena de teléfonos y de laptop: sin caja propia ni fondo; los equipos van solos sobre el fondo de
+  la página (sin cinta ni calle detrás, T-139).
 - Sombras solo para dar altura (caída hacia abajo, negra azulada). Sin brillos de neón.
 
 ## Movimiento

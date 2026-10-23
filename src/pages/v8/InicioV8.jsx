@@ -5,13 +5,15 @@
 //   2) Escena fija «Panel en la oficina. App en la calle.»: el panel se aparta y entra el teléfono,
 //      cuya pantalla se desplaza (solo escritorio ≥ 1024 px). Debajo, la escena de teléfonos
 //      (EscenaTelefonosV8): la app (vista del conductor) en dos pantallas que se desplazan y se inclinan.
+//   3) «Toda tu flota. Un solo mapa.» (T-141): laptop que se abre al bajar (EscenaLaptopV8) con el
+//      Centro de control real y, ya abierta, la unidad seleccionada.
 // Todo lo demás: quieto o aparición suave. Teléfono: sin escenas fijas, mismas piezas apiladas.
 import { useRef } from 'react'
 import { PAGES } from '../../content/pages'
 import {
   SitioV8, NavLocalV8, HeroV8, SeccionV8, ContenedorV8, EncabezadoV8, FotoIntegradaV8, CapturaFlotanteV8,
   RasgosV8, CarruselV8, TarjetaCarruselV8, EscenaV8, BloqueCifrasV8, ChipV8, PreguntasV8, CtaFinalV8,
-  EnlaceV8, EscenaTelefonosV8, useMomentoV8, rutaV8,
+  EnlaceV8, EscenaTelefonosV8, EscenaLaptopV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
 import './inicio-v8.css'
 
@@ -44,6 +46,12 @@ const CHIPS_MAPA = [
   { icono: 'pin', titulo: 'Posición en vivo', texto: 'Cada 10 segundos, con rumbo y velocidad.' },
   { icono: 'route', titulo: 'Historial de recorrido', texto: 'La ruta de cualquier día, con paradas y kilómetros.' },
   { icono: 'gauge', titulo: 'Estado de la unidad', texto: 'En movimiento, detenida con motor encendido o apagada.' },
+]
+
+// Laptop del mapa (T-141): capturas reales del panel.
+const LAPTOP_MAPA = [
+  { nombre: 'cap-panel-mapa', alt: 'Centro de control actual del panel FOM: toda la flota en el mapa. Datos de demostración.' },
+  { nombre: 'cap-panel-mapa-unidad', alt: 'Centro de control actual del panel FOM con una unidad seleccionada y su detalle. Datos de demostración.' },
 ]
 
 const CIFRAS_SEGURIDAD = [stat('seguridad', 'Botón SOS, emergencias y privacidad'), stat('seguridad', 'Puntaje de manejo seguro')].map(cifra)
@@ -141,6 +149,13 @@ export default function InicioV8() {
         <EscenaTelefonosV8 telefonos={TELEFONOS} etiqueta="La app: reporte de falla y orden resuelta" />
       </ContenedorV8>
       <ContenedorV8><RasgosV8 className="inicio-rasgos" items={RASGOS} /></ContenedorV8>
+      {/* Enlace a la sección Inspecciones de Plataforma. */}
+      <ContenedorV8>
+        <p className="inicio-inspeccion v8-sm v8-t2" data-v8-aparece="">
+          <b className="v8-fuerte">Inspección diaria desde la app:</b> el supervisor ve quién falta y lo que falla se vuelve orden de trabajo.{' '}
+          <EnlaceV8 to={rutaV8('plataforma', 'inspecciones')}>Ver cómo funciona</EnlaceV8>
+        </p>
+      </ContenedorV8>
     </SeccionV8>
 
     <SeccionV8 id="funciones" banda aria-labelledby="inicio-funciones-titulo">
@@ -173,13 +188,10 @@ export default function InicioV8() {
           bajada={<span className="v8-solo-escritorio">La ubicación de todas las unidades sobre una vista única y actualizada, con su identificación y estado.</span>} anchoBajada={680} />
       </ContenedorV8>
       <ContenedorV8 className="inicio-mapa-escena">
-        <FotoIntegradaV8 className="inicio-mapa-foto" nombre="patio-monitor-mapa" marco="redondo" sizes="(min-width: 1240px) 1136px, calc(100vw - 40px)" posicion="62% 50%"
-          alt="Monitor con el Centro de control actual frente al patio de la flota al anochecer. Datos de demostración." />
+        <EscenaLaptopV8 etiqueta="Laptop con el Centro de control del panel FOM" pantallas={LAPTOP_MAPA} />
         <div className="inicio-mapa-chips">
           {CHIPS_MAPA.map(c => <ChipV8 key={c.titulo} {...c} />)}
         </div>
-        <CapturaFlotanteV8 className="inicio-mapa-telefono v8-solo-movil" nombre="cap-movil-sup-mapa" ancho={280}
-          alt="Centro de control actual en la app del supervisor: toda la flota en el mapa. Datos de demostración." />
       </ContenedorV8>
       <ContenedorV8><BloqueCifrasV8 className="inicio-cifras-mapa" cifras={CIFRAS_MAPA} /></ContenedorV8>
     </SeccionV8>

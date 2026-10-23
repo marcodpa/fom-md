@@ -175,8 +175,8 @@ está en
   (número) calcula `sizes` solo. `nota` = `true` pone «Captura real del panel · Datos de
   demostración» (o el texto que pases). Nunca más ancha que la captura real.
 - **`EscenaTelefonosV8`** `{ telefonos: [{ nombre, alt, pie?, corto? }], nota?, etiqueta? }` — (T-130,
-  efecto tipo slush.app con estilo FOM) tarjeta de vidrio de 40 px con una cinta azul FOM en 3D
-  detrás y 2 o 3 teléfonos de marco realista con capturas reales. Escritorio ≥ 1024 px: fija; la
+  efecto tipo slush.app con estilo FOM) 2 o 3 teléfonos de marco realista con capturas reales,
+  solos sobre el fondo de la página (sin caja ni cinta detrás desde T-134/T-139). Escritorio ≥ 1024 px: fija; la
   pantalla de cada teléfono se desplaza y luego se inclinan en 3D hacia lados opuestos. Tableta y
   teléfono: sin fijar, más suave (con tres, en abanico). La mueve `useMomentoV8` sola
   (`data-v8-tels`). En uso: Inicio (bajo «Panel en la oficina») y App («Todo lo del día»).

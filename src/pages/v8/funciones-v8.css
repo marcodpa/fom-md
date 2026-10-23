@@ -63,6 +63,15 @@
 .funciones-senal-etiqueta i { width: 6px; height: 6px; border-radius: 50%; background: #3d9bf5; flex: none; }
 .v8-nota-demo.funciones-tele-nota { margin-top: 8px; }
 
+/* Enlace a Inspecciones de Plataforma, al pie de «Del aviso a la decisión». */
+.funciones-inspeccion { max-width: 760px; margin: 48px auto 0; text-align: center; }
+.funciones-inspeccion .v8-enlace { white-space: nowrap; }
+.funciones-nuevo {
+  display: inline-block; margin-left: 4px; padding: 1px 9px; border-radius: 999px; vertical-align: 1px;
+  font-size: 12px; font-weight: 600; line-height: 1.5; color: #0a0d12; background: var(--v8-azul, #3d9bf5);
+}
+@media (max-width: 599px) { .funciones-inspeccion { margin-top: 32px; text-align: left; } }
+
 /* GPS: texto a la izquierda, foto de la operadora a la derecha. */
 .v8-sec.funciones-gps { padding-top: 120px; }
 .funciones-gps-rejilla {

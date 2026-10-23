@@ -31,6 +31,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import { escenasTelefonosV8, telefonoSueltoV8 } from './momentoTelefonosV8'
+import { escenasLaptopV8 } from './momentoLaptopV8'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
@@ -129,6 +130,8 @@ export default function useMomentoV8(raiz, momentos) {
       // 4a · Escenas de teléfonos (EscenaTelefonosV8), antes que los carruseles: las escenas fijas
       //      se crean de arriba abajo para que cada una cuente el alto que añaden las anteriores.
       escenasTelefonosV8({ q, gsap, escritorio, f })
+      // 4a' · Escenas de laptop (EscenaLaptopV8, T-141): la tapa se abre con el scroll.
+      escenasLaptopV8({ q, gsap, escritorio })
 
       // 4b · Carruseles de tarjetas sincronizados con el scroll (T-122).
       //      Escritorio: la sección queda fija, el scroll vertical mueve la pista de derecha a

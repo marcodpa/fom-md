@@ -27,6 +27,10 @@
 .qo-hero-puntos b { display: block; }
 .qo-hero-puntos .v8-xs { display: block; margin-top: 4px; }
 
+/* Alertas, seguridad y reportes (T-141): texto centrado y, debajo, la laptop que se abre. */
+.qo-alertas-cab { max-width: 760px; }
+.qo-alertas-escena { margin-top: 48px; }
+
 /* ── Qué ofrecemos: tres tarjetas de vidrio ──────────────────────────── */
 .qo-oferta-titulo { text-align: center; }
 .qo-oferta { margin-top: 48px; }
