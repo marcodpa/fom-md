@@ -1,0 +1,496 @@
+From 386d4cdc9b499041562a153535f089bb674934bd Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Fri, 23 Oct 2026 14:07:34 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20=C2=ABVer=20manejo=20brusco=C2=BB=20junt?=
+ =?UTF-8?q?a=20a=20todos=20los=20conductores=20de=20la=20unidad=20y=20una?=
+ =?UTF-8?q?=20persona=20que=20ya=20no=20es=20conductor=20activo=20no=20tum?=
+ =?UTF-8?q?ba=20los=20eventos=20(nota=20gris=20como=20la=20web)=20(T-156)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/mapa-flota.tsx            |  51 ++++++++++----
+ src/components/eventos-manejo.tsx |  43 ++++++++++--
+ src/lib/eventos-manejo.ts         | 108 ++++++++++++++++++++++++++++++
+ src/services/fomEventosManejo.ts  |  64 +++++++++++++-----
+ 4 files changed, 229 insertions(+), 37 deletions(-)
+
+diff --git a/src/app/mapa-flota.tsx b/src/app/mapa-flota.tsx
+index 0fcb58d..e3e15f3 100644
+--- a/src/app/mapa-flota.tsx
++++ b/src/app/mapa-flota.tsx
+@@ -1,5 +1,5 @@
+ import { useLocalSearchParams, useRouter } from 'expo-router';
+-import { useMemo, useState, type ComponentType } from 'react';
++import { useEffect, useMemo, useState, type ComponentType } from 'react';
+ import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+ import { useSafeAreaInsets } from 'react-native-safe-area-context';
+ import Svg, { Path } from 'react-native-svg';
+@@ -10,6 +10,7 @@ import {
+   FiltrosEventos,
+   ListaEventos,
+   NotaEventos,
++  NotaPersonas,
+   useEventosManejo,
+   type EventosManejoEstado,
+ } from '@/components/eventos-manejo';
+@@ -24,7 +25,7 @@ import { PERIODOS_MAPA, type PropsEventosMapa } from '@/lib/eventos-manejo';
+ import { HAY_MAPBOX } from '@/lib/mapbox';
+ import { textoUltimoReporte } from '@/lib/sin-senal';
+ import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
+-import { enteActivoFom } from '@/services';
++import { enteActivoFom, getConductoresDeUnidad } from '@/services';
+ import { useTheme } from '@/theme';
+ import type { MapMarker } from '@/types';
+ 
+@@ -136,14 +137,6 @@ export default function MapaFlotaScreen() {
+   const [altoFicha, setAltoFicha] = useState(0);
+   const abajo = enRuta ? altoPanel + 8 : unidad ? (altoFicha || (ultimoReporte ? 200 : 182)) + 8 : 0;
+ 
+-  // Los eventos de manejo de la unidad tocada. El servidor los da por conductor:
+-  // los de quien la tiene asignada (o los del conductor del enlace del perfil).
+-  const conductorId = tocada && tocada === params.unidad && params.conductor ? params.conductor : unidad?.conductor?.id;
+-  const eventos = useEventosManejo({
+-    conductorId,
+-    vehiculoId: tocada,
+-    eventoInicial: params.evento ?? null,
+-  });
+   /**
+    * La unidad con el modo «manejo brusco» encendido (null: ninguna): cada
+    * unidad empieza sin eventos. Encendido de entrada si se llegó a uno desde
+@@ -155,6 +148,33 @@ export default function MapaFlotaScreen() {
+   // Soltar la unidad (o tocar otra) lo apaga: al volver a elegirla, empieza sin eventos.
+   if (manejoDe && manejoDe !== tocada) setManejoDe(null);
+   const verManejo = !enRuta && !!tocada && manejoDe === tocada;
++
++  // Los eventos de manejo de la unidad tocada. El servidor los da por conductor:
++  // se piden los de TODOS sus conductores asignados —principal y secundarios,
++  // de sus asignaciones, como la web— más el del enlace del perfil, y se dejan
++  // los de esta unidad. Los asignados solo se leen con el modo abierto.
++  const conductorId = tocada && tocada === params.unidad && params.conductor ? params.conductor : unidad?.conductor?.id;
++  const [asignados, setAsignados] = useState<{ unidad: string; ids: string[] } | null>(null);
++  useEffect(() => {
++    if (!verManejo || !tocada) return;
++    let vivo = true;
++    // Sin asignaciones legibles (otra empresa, un rol que no las ve) queda en
++    // vacío: se siguen pidiendo los del principal.
++    getConductoresDeUnidad(tocada).then((c) => {
++      if (!vivo) return;
++      const ids = [c.titular?.userId, ...c.secundarios.map((s) => s.userId)].filter((id): id is string => !!id);
++      setAsignados({ unidad: tocada, ids });
++    });
++    return () => {
++      vivo = false;
++    };
++  }, [verManejo, tocada]);
++  const eventos = useEventosManejo({
++    conductorId,
++    conductorIds: asignados && asignados.unidad === tocada ? asignados.ids : null,
++    vehiculoId: tocada,
++    eventoInicial: params.evento ?? null,
++  });
+   const alternarManejo = () => {
+     if (!tocada) return;
+     // Al ocultarlos se cierra también el globo, para que no reaparezca al volver.
+@@ -354,8 +374,9 @@ function IconoBoton({ trazos, color }: { trazos: readonly string[]; color: strin
+ /**
+  * El modo «manejo brusco» en la ficha de la unidad: las pastillas (Últimos 5 /
+  * Hoy / 7 días y los tres tipos), el aviso si no hay nada que enseñar
+- * —«Disponible cuando el servidor lo publique» mientras el servidor no los dé—
+- * y la lista corta. Tocar un evento centra el mapa y abre su globo.
++ * —«Disponible cuando el servidor lo publique» solo si la ruta no existe para
++ * ninguno de sus conductores— y la lista corta. Debajo, en gris, si alguien
++ * asignado ya no es conductor activo. Tocar un evento centra el mapa y abre su globo.
+  */
+ function EventosDeLaFicha({ ev, altoLista }: { ev: EventosManejoEstado; altoLista: number }) {
+   const { colors, spacing } = useTheme();
+@@ -368,9 +389,13 @@ function EventosDeLaFicha({ ev, altoLista }: { ev: EventosManejoEstado; altoList
+       {ev.carga === 'ok' && ev.periodo !== 'oculto' && ev.vista.visibles.length > 0 ? (
+         <ScrollView style={{ maxHeight: altoLista }} nestedScrollEnabled>
+           <ListaEventos ev={ev} />
++          <NotaPersonas ev={ev} />
+           <NotaEventos ev={ev} />
+         </ScrollView>
+-      ) : null}
++      ) : (
++        // Sin lista («Sin eventos…», oculto): la nota va igual, debajo del aviso.
++        <NotaPersonas ev={ev} />
++      )}
+     </View>
+   );
+ }
+diff --git a/src/components/eventos-manejo.tsx b/src/components/eventos-manejo.tsx
+index 9a8eb0d..7dfda12 100644
+--- a/src/components/eventos-manejo.tsx
++++ b/src/components/eventos-manejo.tsx
+@@ -18,6 +18,7 @@ import {
+   fechaHoraEvento,
+   filtrarEventosManejo,
+   grupoDe,
++  notaDeVarios,
+   PERIODOS_LISTA,
+   TINTA_EVENTO,
+   tipoEvento,
+@@ -34,7 +35,7 @@ import {
+   type TipoEvento,
+   type VistaEventos,
+ } from '@/lib/eventos-manejo';
+-import { getEventosManejoFom, type EventosManejoFom } from '@/services/fomEventosManejo';
++import { getEventosManejoDeVariosFom, type EventosManejoFom } from '@/services/fomEventosManejo';
+ import { useTheme } from '@/theme';
+ 
+ /*
+@@ -75,6 +76,10 @@ export interface EventosManejoEstado {
+   refrescando: boolean;
+   /** Llegaron los 100 más recientes: puede haber más viejos. */
+   tope: boolean;
++  /** De varios conductores: cuántos ya no son conductores activos (404). */
++  descartados: number;
++  /** De varios conductores: cuántos no se pudieron leer mientras otros sí. */
++  fallidos: number;
+   periodo: PeriodoEvento;
+   elegirPeriodo: (p: PeriodoEvento) => void;
+   tipos: ReadonlySet<TipoEvento>;
+@@ -93,7 +98,8 @@ const TODOS = (): ReadonlySet<TipoEvento> => new Set(CLAVES_EVENTO);
+ 
+ /**
+  * Los eventos de manejo de un conductor (y, con `vehiculoId`, solo los de esa
+- * unidad), con sus filtros. Al cambiar de unidad o de conductor se limpia todo
++ * unidad), con sus filtros. `conductorIds`: más conductores de la misma unidad
++ * (principal y secundarios): se piden todos y se juntan, como la web. Al cambiar de unidad o de conductor se limpia todo
+  * —período, tipos, tandas— y se cierra el globo.
+  * `eventoInicial`: un evento que hay que dejar a la vista y abierto al llegar
+  * (desde el perfil del conductor).
+@@ -102,12 +108,14 @@ const TODOS = (): ReadonlySet<TipoEvento> => new Set(CLAVES_EVENTO);
+  */
+ export function useEventosManejo({
+   conductorId,
++  conductorIds = null,
+   vehiculoId = null,
+   companyId = null,
+   periodoInicial = 'ultimos',
+   eventoInicial = null,
+ }: {
+   conductorId: string | null | undefined;
++  conductorIds?: readonly string[] | null;
+   vehiculoId?: string | null;
+   companyId?: string | null;
+   periodoInicial?: PeriodoEvento;
+@@ -134,7 +142,11 @@ export function useEventosManejo({
+ 
+   // «Ocultar» no pide nada nuevo: sigue con lo del mes (lo de «Últimos 5»).
+   const dias = diasDePeriodo(periodo);
+-  const pedido = conductorId ? `${conductorId}|${companyId ?? ''}|${dias}` : null;
++  // De quién se piden: el conductor y los demás de la unidad, sin repetidos. Los
++  // secundarios pueden llegar después: se sigue viendo lo del principal mientras.
++  const ids = conductorId ? [...new Set([conductorId, ...(conductorIds ?? [])].filter(Boolean))] : [];
++  const deQuien = ids.join(',');
++  const pedido = conductorId ? `${deQuien}|${companyId ?? ''}|${dias}` : null;
+   const [respuesta, setRespuesta] = useState<{ pedido: string; datos?: EventosManejoFom; error?: unknown } | null>(null);
+   /** Lo último bueno de esta unidad: al cambiar de período se sigue viendo mientras llega lo nuevo. */
+   const [ultimo, setUltimo] = useState<{ unidad: string; datos: EventosManejoFom } | null>(null);
+@@ -142,11 +154,11 @@ export function useEventosManejo({
+   const fresco = useRef(false);
+ 
+   useEffect(() => {
+-    if (!conductorId || !pedido) return;
++    if (!deQuien || !pedido) return;
+     let vivo = true;
+     const saltarMemoria = fresco.current;
+     fresco.current = false;
+-    getEventosManejoFom(conductorId, dias, { companyId, fresco: saltarMemoria }).then(
++    getEventosManejoDeVariosFom(deQuien.split(','), dias, { companyId, fresco: saltarMemoria }).then(
+       (datos) => {
+         if (!vivo) return;
+         setRespuesta({ pedido, datos });
+@@ -159,7 +171,7 @@ export function useEventosManejo({
+     return () => {
+       vivo = false;
+     };
+-  }, [conductorId, companyId, dias, pedido, unidad, intento]);
++  }, [deQuien, companyId, dias, pedido, unidad, intento]);
+ 
+   const actual = respuesta && respuesta.pedido === pedido ? respuesta : null;
+   const datos = actual?.datos ?? (ultimo && ultimo.unidad === unidad ? ultimo.datos : null);
+@@ -203,6 +215,8 @@ export function useEventosManejo({
+     carga,
+     refrescando: carga === 'ok' && !actual,
+     tope: !!datos && datos.estado === 'ok' && datos.tope,
++    descartados: datos && datos.estado === 'ok' ? datos.descartados : 0,
++    fallidos: datos && datos.estado === 'ok' ? datos.fallidos : 0,
+     periodo,
+     elegirPeriodo: (p) => {
+       setPeriodo(p);
+@@ -435,6 +449,22 @@ export function ListaEventos({
+   );
+ }
+ 
++/**
++ * Alguien de la unidad no se pudo leer (ya no es conductor activo, o falló su
++ * lectura): una nota gris DEBAJO de la lista —o del «Sin eventos»—, no un error
++ * que tape lo demás. Mismos textos que la web.
++ */
++export function NotaPersonas({ ev }: { ev: EventosManejoEstado }) {
++  if (ev.carga !== 'ok') return null;
++  const texto = notaDeVarios(ev);
++  if (!texto) return null;
++  return (
++    <ThemedText variant="caption" color="textMuted" style={styles.nota} accessibilityLiveRegion="polite">
++      {texto}
++    </ThemedText>
++  );
++}
++
+ /** Las notas de pie: el umbral de los excesos y el aviso de tope. */
+ export function NotaEventos({ ev }: { ev: EventosManejoEstado }) {
+   if (ev.carga !== 'ok') return null;
+@@ -476,6 +506,7 @@ export function EventosManejoConductor({ userId, empresaId }: { userId: string;
+           } as never);
+         }}
+       />
++      <NotaPersonas ev={ev} />
+       <NotaEventos ev={ev} />
+     </Card>
+   );
+diff --git a/src/lib/eventos-manejo.ts b/src/lib/eventos-manejo.ts
+index 20ac17c..093ff6b 100644
+--- a/src/lib/eventos-manejo.ts
++++ b/src/lib/eventos-manejo.ts
+@@ -214,6 +214,114 @@ export function eventosParaMapa(
+     .sort(masNuevoPrimero);
+ }
+ 
++// ── Varios conductores de una unidad (principal y secundarios) ──────────────
++
++/** Lo que se sabe de UNA persona al pedir sus eventos. */
++export type EventosDePersona =
++  | {
++      estado: 'ok';
++      /** Del más nuevo al más viejo, tal como llegaron (sin filtrar). */
++      eventos: EventoManejo[];
++      /** Llegaron los 100 más recientes: puede haber más viejos en el período. */
++      tope: boolean;
++    }
++  /** La ruta no existe todavía en el servidor: no hay nada que pintar. */
++  | { estado: 'no-publicado' }
++  /** 404 «Driver not found»: la persona asignada ya no es conductor activo. */
++  | { estado: 'descartado' };
++
++/** Lo de todas las personas de una unidad, juntas. */
++export type EventosDeVarios =
++  | {
++      estado: 'ok';
++      /** Sin repetidos, del más nuevo al más viejo. */
++      eventos: EventoManejo[];
++      /** A alguno el servidor le cortó en 100: puede haber más viejos. */
++      tope: boolean;
++      /** Cuántos ya no son conductores activos (404): cuentan como sin eventos. */
++      descartados: number;
++      /** Cuántos no se pudieron leer (500, sin red) mientras otros sí. */
++      fallidos: number;
++    }
++  /** La ruta no existe para nadie (el servidor todavía no la publica). */
++  | { estado: 'no-publicado' };
++
++/** Del más nuevo al más viejo (a igual hora, por id); sin hora, al final. */
++const masNuevoPrimeroCualquiera = (a: EventoManejo, b: EventoManejo) =>
++  (msEvento(b) ?? -Infinity) - (msEvento(a) ?? -Infinity) || b.id.localeCompare(a.id);
++
++/**
++ * Los eventos de VARIOS conductores (los de una unidad), juntos: `pedidos` son
++ * las promesas, una por persona. Igual que `juntarDeVarios` de la web:
++ * - Un 404 de persona (`descartado`) cuenta como «sin eventos» y se anota en
++ *   `descartados` (va en una nota gris debajo de la lista).
++ * - Los demás errores solo hacen fallar el todo si no llegó nada de nadie; si
++ *   no, se anotan en `fallidos` y se enseña lo que sí llegó.
++ * - «Sin publicar» solo si la ruta no existe para NADIE; mezclado con otros que
++ *   sí respondieron, es uno que no se pudo leer.
++ */
++export async function juntarDeVarios(pedidos: readonly Promise<EventosDePersona>[]): Promise<EventosDeVarios> {
++  const resultados = await Promise.allSettled(pedidos);
++  const porId = new Map<string, EventoManejo>();
++  const sinId: EventoManejo[] = [];
++  let respondieron = 0;
++  let tope = false;
++  let descartados = 0;
++  let sinRuta = 0;
++  let fallidos = 0;
++  let primerError: unknown = null;
++  let hayError = false;
++  for (const r of resultados) {
++    if (r.status === 'rejected') {
++      fallidos += 1;
++      if (!hayError) primerError = r.reason;
++      hayError = true;
++    } else if (r.value.estado === 'descartado') descartados += 1;
++    else if (r.value.estado === 'no-publicado') sinRuta += 1;
++    else {
++      respondieron += 1;
++      tope ||= r.value.tope;
++      for (const e of r.value.eventos) {
++        if (!e) continue;
++        if (!e.id) sinId.push(e);
++        else if (!porId.has(e.id)) porId.set(e.id, e);
++      }
++    }
++  }
++  if (respondieron === 0 && descartados === 0) {
++    if (hayError) throw primerError;
++    if (sinRuta > 0) return { estado: 'no-publicado' };
++  }
++  return {
++    estado: 'ok',
++    eventos: [...porId.values(), ...sinId].sort(masNuevoPrimeroCualquiera),
++    tope,
++    descartados,
++    fallidos: fallidos + sinRuta,
++  };
++}
++
++/**
++ * La nota gris de debajo de la lista cuando alguien de la unidad no se pudo
++ * leer; '' si no hace falta. Mismos textos que la web (`CuerpoManejo`).
++ */
++export function notaDeVarios({ descartados = 0, fallidos = 0 }: { descartados?: number; fallidos?: number }): string {
++  return [
++    descartados > 0
++      ? descartados === 1
++        ? 'Una persona asignada ya no es conductor activo; sus eventos no se muestran.'
++        : `${miles(descartados)} personas asignadas ya no son conductores activos; sus eventos no se muestran.`
++      : '',
++    fallidos > 0
++      ? fallidos === 1
++        ? 'No se pudieron leer los eventos de un conductor asignado.'
++        : `No se pudieron leer los eventos de ${miles(fallidos)} conductores asignados.`
++      : '',
++  ]
++    .filter(Boolean)
++    .join(' ');
++}
++
+ export type CuentaEventos = Record<TipoEvento, number>;
+ 
+ /** Cuántos hay de cada tipo. */
+diff --git a/src/services/fomEventosManejo.ts b/src/services/fomEventosManejo.ts
+index 6354be7..b432d4c 100644
+--- a/src/services/fomEventosManejo.ts
++++ b/src/services/fomEventosManejo.ts
+@@ -1,5 +1,12 @@
+ import { ErrorFom, generacionLecturas, pedir } from '@/lib/fom-api';
+-import { comoEventoManejo, diasServidor, LIMITE_EVENTOS, type EventoManejo } from '@/lib/eventos-manejo';
++import {
++  comoEventoManejo,
++  diasServidor,
++  juntarDeVarios,
++  LIMITE_EVENTOS,
++  type EventosDePersona,
++  type EventosDeVarios,
++} from '@/lib/eventos-manejo';
+ 
+ import { rutaDeEnte } from './fomRutas';
+ import { enteActivoFom, usuarioActivoFom } from './fomSesion';
+@@ -14,22 +21,16 @@ import { enteActivoFom, usuarioActivoFom } from './fomSesion';
+  * publica con otro nombre, se cambia SOLO aquí.
+  *
+  * El servidor no los da por unidad, solo por conductor (igual que en la web):
+- * el mapa de la flota pide los del conductor asignado y se queda con los de esa
+- * unidad.
++ * el mapa de la flota pide los de TODOS los conductores asignados a la unidad
++ * (principal y secundarios), los junta y se queda con los de esa unidad.
+  */
+ export const RUTA_EVENTOS_MANEJO = (conductorId: string) => `/drivers/${encodeURIComponent(conductorId)}/driving-events`;
+ 
+-/** Lo que responde el servicio. */
+-export type EventosManejoFom =
+-  | {
+-      estado: 'ok';
+-      /** Del más nuevo al más viejo, tal como llegaron (sin filtrar). */
+-      eventos: EventoManejo[];
+-      /** Llegaron los 100 más recientes: puede haber más viejos en el período. */
+-      tope: boolean;
+-    }
+-  /** La ruta no existe todavía en el servidor (404/403/405): no hay nada que pintar. */
+-  | { estado: 'no-publicado' };
++/**
++ * Lo que responde el servicio: los de una o varias personas, juntos. Sin
++ * publicar solo si la ruta no existe para nadie (ver `juntarDeVarios`).
++ */
++export type EventosManejoFom = EventosDeVarios;
+ 
+ /**
+  * Se guardan unos minutos por conductor + período: cambiar de pastilla no
+@@ -40,7 +41,7 @@ export type EventosManejoFom =
+  */
+ const VIGENTE_MS = 3 * 60_000;
+ const TOPE_MEMORIA = 40;
+-const memoria = new Map<string, { en: number; generacion: number; datos: Promise<EventosManejoFom> }>();
++const memoria = new Map<string, { en: number; generacion: number; datos: Promise<EventosDePersona> }>();
+ /** Usuario y empresa de lo que hay guardado. */
+ let duenoMemoria: string | null = null;
+ 
+@@ -57,11 +58,22 @@ function limpiarMemoria(dueno: string, ahora: number): void {
+   }
+ }
+ 
++/**
++ * La ruta no existe en el servidor: 403/405, o un 404 que no es de la persona
++ * —el «Cannot GET …» del servidor o una página de error que no es JSON—.
++ */
+ function esSinPublicar(e: unknown): boolean {
+-  return e instanceof ErrorFom && [403, 404, 405].includes(e.statusCode);
++  if (!(e instanceof ErrorFom)) return false;
++  if (e.statusCode === 403 || e.statusCode === 405) return true;
++  return e.statusCode === 404 && (e.code === 'respuesta_no_json' || /^Cannot [A-Z]+ /u.test(e.message));
+ }
+ 
+-async function leer(conductorId: string, dias: number, companyId: string | null): Promise<EventosManejoFom> {
++/** 404 de la persona («Driver not found»): ya no es conductor activo. Igual que la web. */
++function esPersonaDescartada(e: unknown): boolean {
++  return e instanceof ErrorFom && e.statusCode === 404 && !esSinPublicar(e);
++}
++
++async function leer(conductorId: string, dias: number, companyId: string | null): Promise<EventosDePersona> {
+   const ruta = rutaDeEnte(`${RUTA_EVENTOS_MANEJO(conductorId)}?days=${dias}&limit=${LIMITE_EVENTOS}`, companyId);
+   try {
+     const r = (await pedir(ruta, { fresco: true })) as unknown;
+@@ -69,10 +81,26 @@ async function leer(conductorId: string, dias: number, companyId: string | null)
+     return { estado: 'ok', eventos: filas.map(comoEventoManejo), tope: filas.length >= LIMITE_EVENTOS };
+   } catch (e) {
+     if (esSinPublicar(e)) return { estado: 'no-publicado' };
++    if (esPersonaDescartada(e)) return { estado: 'descartado' };
+     throw e;
+   }
+ }
+ 
++/**
++ * Los eventos de VARIOS conductores (los de una unidad: principal y
++ * secundarios), juntos, sin repetidos y del más nuevo al más viejo. Quien ya no
++ * es conductor activo (404) no tumba nada: cuenta como sin eventos y se dice en
++ * una nota (`juntarDeVarios`, igual que la web).
++ */
++export function getEventosManejoDeVariosFom(
++  conductorIds: readonly string[],
++  dias: number,
++  opciones: { companyId?: string | null; fresco?: boolean } = {},
++): Promise<EventosManejoFom> {
++  const ids = [...new Set(conductorIds.filter(Boolean))];
++  return juntarDeVarios(ids.map((id) => getEventosManejoFom(id, dias, opciones)));
++}
++
+ /**
+  * Los eventos de un conductor en los últimos `dias` (se pide el período del
+  * servidor que lo cubre: 7, 30 o 90). `fresco` salta lo guardado (Reintentar).
+@@ -81,7 +109,7 @@ export async function getEventosManejoFom(
+   conductorId: string,
+   dias: number,
+   { companyId, fresco = false }: { companyId?: string | null; fresco?: boolean } = {},
+-): Promise<EventosManejoFom> {
++): Promise<EventosDePersona> {
+   const d = diasServidor(dias);
+   const ente = companyId || enteActivoFom();
+   // Quién mira y en qué empresa (la de la sesión y la que se está viendo, como la web).
+-- 
+2.55.0.windows.3
+
