@@ -11,7 +11,7 @@ import PanelRecorrido from '../comp/PanelRecorrido'
 import { analizar, COLA_MIN, colaReciente } from '../datos/recorrido'
 import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
 import { leerEnlaceEvento } from '../datos/eventosManejo'
-import { BloqueManejoBrusco, BloqueManejoFlota, useManejoBrusco, useManejoFlota } from '../comp/ManejoBrusco'
+import { BloqueManejoBrusco, useManejoBrusco } from '../comp/ManejoBrusco'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import '../../styles/control-map.css'
@@ -60,9 +60,6 @@ export default function CentroControl() {
   // arriba, que corre después, lo vuelva a cerrar).
   const [manejoDe, setManejoDe] = useState(null)
   const viendoManejo = Boolean(seleccionado) && manejoDe === seleccionado
-  // Manejo brusco de TODA la flota (botón junto a «Unidades»): con él abierto, al elegir una
-  // unidad se abren directo sus eventos, y al soltarla vuelven los de la flota.
-  const [manejoFlota, setManejoFlota] = useState(false)
 
   const areas = useDatos(() => repo.areas(), [])
   // Seguimiento en vivo: se vuelve a preguntar por la flota cada 15 segundos.
@@ -154,14 +151,8 @@ export default function CentroControl() {
     listoParaVolar: colaActual || cola.estado === 'error',
   })
 
-  // Vista general: los eventos de todas las unidades a la vista (5 de cada tipo por unidad).
-  // Se lee solo con el modo abierto y sin unidad elegida.
-  const flotaManejo = useManejoFlota({ vehiculos: lista, activo: manejoFlota && !seleccionado })
-  const viendoFlota = manejoFlota && !seleccionado
-  const elegirUnidad = (id) => {
-    setSeleccionado(id)
-    if (manejoFlota && id) setManejoDe(id)
-  }
+  // El manejo brusco se mira unidad por unidad, desde su ficha («Ver manejo brusco»).
+  const elegirUnidad = (id) => setSeleccionado(id)
 
   // Si un filtro deja fuera la unidad abierta, se cierra el detalle.
   useEffect(() => {
@@ -224,7 +215,7 @@ export default function CentroControl() {
     hojas().forEach((el) => observador.observe(el))
     medir()
     return () => observador.disconnect()
-  }, [seleccionado, listaAbierta, viendoRecorrido, viendoManejo, viendoFlota, flota.estado, hayLista])
+  }, [seleccionado, listaAbierta, viendoRecorrido, viendoManejo, flota.estado, hayLista])
 
   // Recorrido y manejo brusco no se mezclan: abrir uno cierra el otro. Las dos capas juntas
   // (viajes, paradas y eventos) se tapan entre sí y la hoja tendría dos listas largas.
@@ -238,15 +229,14 @@ export default function CentroControl() {
       <div className="control-map-canvas">
         <Mapa vehiculos={lista} seleccionado={seleccionado} alSeleccionar={elegirUnidad}
           cola={seleccionado && !viendoRecorrido ? colaPuntos : null} viajes={analisis?.viajes} paradas={analisis?.paradas} foco={foco} viajeActivo={viajeActivo} alElegirViaje={(n) => setViajeActivo((a) => (a === n ? null : n))}
-          eventosManejo={viendoManejo ? manejo.visibles : viendoFlota ? flotaManejo.visibles : null}
-          eventoActivo={viendoFlota ? flotaManejo.elegido : manejo.elegido} alElegirEvento={viendoFlota ? flotaManejo.elegir : manejo.elegir} encuadrarEventos={false}
+          eventosManejo={viendoManejo ? manejo.visibles : null}
+          eventoActivo={manejo.elegido} alElegirEvento={manejo.elegir} encuadrarEventos={false}
           alto="100%" ficha={false} leyenda={false} espacioFicha herramientas />
       </div>
       <div className="control-search">
         <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}</p>{incompleta && <p role="status">Lista incompleta: la flota es más grande de lo que se pudo leer.</p>}</div>
           <div className="control-acciones">
-            <button className="pnl-btn" type="button" aria-pressed={manejoFlota} aria-label={manejoFlota ? 'Ocultar el manejo brusco de la flota' : 'Ver el manejo brusco de la flota'} onClick={() => { setManejoFlota((v) => !v); setListaAbierta(false); setSeleccionado(null) }}><Icono nombre="velocidad" tam={18} />Manejo brusco</button>
-            <button className="pnl-btn" type="button" aria-label="Unidades" aria-expanded={listaAbierta} aria-controls="control-unidades" onClick={() => { setListaAbierta(v => !v); setManejoFlota(false); setSeleccionado(null) }}><Icono nombre="camion" tam={18} />Unidades</button>
+            <button className="pnl-btn" type="button" aria-label="Unidades" aria-expanded={listaAbierta} aria-controls="control-unidades" onClick={() => { setListaAbierta(v => !v); setSeleccionado(null) }}><Icono nombre="camion" tam={18} />Unidades</button>
           </div>
         </div>
         <Buscador valor={q} alCambiar={setQ} placeholder="Placa, alias o conductor…" />
@@ -274,10 +264,6 @@ export default function CentroControl() {
       {listaAbierta && flota.estado === 'ok' && lista.length > 0 && !seleccionado && <aside className="control-panel" id="control-unidades" aria-label="Unidades de la flota">
         <div className="control-panel-heading"><h2>Unidades <span>{lista.length}</span></h2><button type="button" aria-label="Cerrar lista de unidades" onClick={() => setListaAbierta(false)}><Icono nombre="cerrar" /></button></div>
         <ListaUnidades vehiculos={lista} seleccionado={seleccionado} alSeleccionar={elegirUnidad} />
-      </aside>}
-      {viendoFlota && !listaAbierta && flota.estado === 'ok' && lista.length > 0 && <aside className="control-panel control-flota-manejo" aria-label="Manejo brusco de la flota">
-        <div className="control-panel-heading"><h2>Manejo brusco <span>{f.numero(lista.length)} {lista.length === 1 ? 'unidad' : 'unidades'}</span></h2><button type="button" aria-label="Cerrar el manejo brusco de la flota" onClick={() => setManejoFlota(false)}><Icono nombre="cerrar" /></button></div>
-        <BloqueManejoFlota m={flotaManejo} />
       </aside>}
       {seleccionado && <aside className={`control-panel control-unit${enModo ? ' con-ruta' : ''}`} aria-label="Detalle de la unidad">
         <FichaUnidad unidad={unidad} alCerrar={() => setSeleccionado(null)} alVerRecorrido={alternarRecorrido} viendoRecorrido={viendoRecorrido}

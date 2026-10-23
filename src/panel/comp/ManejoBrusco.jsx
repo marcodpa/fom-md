@@ -9,7 +9,7 @@ import { Cargando, ErrorCarga, Tarjeta, Vacio } from './ui'
 import {
   CLAVES_EVENTO, DIAS_PEDIDO, EXCESO_KMH, PASO_EVENTOS, PERIODOS_LISTA, PERIODOS_MAPA, TIPOS_EVENTO,
   alCambiarUnidad, conteoTipo, crearCacheEventos, diasDelPeriodo, eleccionParaEvento, eleccionValida, enlaceEventoEnMapa, eventoDelEnlace,
-  eventosParaMapa, filtrarEventosFlota, filtrarEventosManejo, juntarEventos, mezclarEventos, mostrarInicial, periodoIncompleto, textoEvento,
+  eventosParaMapa, filtrarEventosManejo, juntarDeVarios, mostrarInicial, periodoIncompleto, textoEvento,
   tipoEvento, unidadEvento, velocidadesEvento, verMas,
 } from '../datos/eventosManejo'
 import * as f from '../datos/formato'
@@ -38,7 +38,7 @@ export function IconoEventoManejo({ tipo, tam = 28 }) {
 // --- Pedidos: uno por persona y período, guardado unos minutos --------------
 // Las pastillas filtran aquí; solo pasar de 30 a 7 días (o al revés) pide algo. El refresco de
 // 60 s de la pantalla vuelve a leer lo guardado hasta que vence; un fallo no se guarda.
-// La ficha de una unidad y la vista de la flota comparten lo guardado. Va por sesión y empresa:
+// La ficha de una unidad y el perfil comparten lo guardado. Va por sesión y empresa:
 // al entrar con otra cuenta o a otra empresa se vacía (ver crearCacheEventos).
 const VIGENCIA_MS = 3 * 60000
 const cache = crearCacheEventos({
@@ -54,10 +54,13 @@ function pedirEventos({ userId, propio, dias = DIAS_PEDIDO, fresco = false }) {
   return cache.pedir({ userId, propio, dias, fresco })
 }
 
-/** Los de varios conductores (los de una unidad), juntos y sin repetidos. */
+/**
+ * Los de varios conductores (los de una unidad), juntos y sin repetidos. Quien ya no es conductor
+ * activo (404) no tumba la ficha: cuenta como sin eventos y se dice en una nota (juntarDeVarios).
+ */
 async function pedirDeVarios({ userIds, propio, dias }) {
   if (propio) return pedirEventos({ propio, dias })
-  return juntarEventos(await Promise.all(userIds.map((userId) => pedirEventos({ userId, dias }))))
+  return juntarDeVarios(userIds.map((userId) => pedirEventos({ userId, dias })))
 }
 
 // --- Lo elegido se recuerda mientras dure la sesión -------------------------
@@ -150,6 +153,9 @@ export function useManejoBrusco({
     elegido,
     aviso: estado.aviso ?? '',
     incompleto: periodoIncompleto(crudos, eleccion.periodo),
+    // De varios conductores: cuántos ya no son conductores activos (404) y cuántos no se pudieron leer.
+    descartados: crudos?.descartados ?? 0,
+    fallidos: crudos?.fallidos ?? 0,
     periodos,
     periodo: eleccion.periodo,
     tipos: eleccion.tipos,
@@ -210,7 +216,7 @@ function ListaManejo({ m, enlace }) {
       <h4><IconoEventoManejo tipo={t.clave} tam={18} />{t.plural}<span>{conteoTipo(g)}</span></h4>
       <ul className="em-lista">
         {g.eventos.map((e) => <li key={e.id}>
-          <FilaEvento e={e} activo={e.id === m.elegido} alElegir={m.elegir} a={enlace?.(e)} conUnidad={Boolean(enlace || m.conUnidad)} />
+          <FilaEvento e={e} activo={e.id === m.elegido} alElegir={m.elegir} a={enlace?.(e)} conUnidad={Boolean(enlace)} />
         </li>)}
       </ul>
       {g.quedan > 0 && <button type="button" className="pnl-btn sutil mb-mas" onClick={() => m.verMas(t.clave)}>
@@ -227,6 +233,17 @@ function CuerpoManejo({ m, enlace, sinConductor }) {
   if (m.estado === 'sin') return <p className="em-nota">{sinConductor}</p>
   if (m.estado === 'cargando') return <Cargando filas={2} />
   if (m.estado === 'error') return <ErrorCarga compacto error={m.error} texto="No se pudieron consultar los eventos de manejo." onReintentar={m.recargar} />
+  // Alguien de la unidad no se pudo leer: una nota gris debajo, no un error rojo que tape lo demás.
+  const notas = [
+    m.descartados > 0 ? (m.descartados === 1 ? 'Una persona asignada ya no es conductor activo; sus eventos no se muestran.' : `${f.numero(m.descartados)} personas asignadas ya no son conductores activos; sus eventos no se muestran.`) : '',
+    m.fallidos > 0 ? (m.fallidos === 1 ? 'No se pudieron leer los eventos de un conductor asignado.' : `No se pudieron leer los eventos de ${f.numero(m.fallidos)} conductores asignados.`) : '',
+  ].filter(Boolean)
+  const nota = notas.length > 0 && <p className="em-nota" role="status">{notas.join(' ')}</p>
+  return <><CuerpoListo m={m} enlace={enlace} />{nota}</>
+}
+
+/** El cuerpo con los eventos ya leídos: oculto, vacío o la lista. */
+function CuerpoListo({ m, enlace }) {
   if (m.periodo === 'oculto') return <p className="em-nota" role="status">Eventos ocultos en el mapa. Elige un período para verlos.</p>
   if (m.total === 0) return <Vacio compacto icono="velocidad" titulo="Sin eventos bruscos en este período"
     texto={`Sin frenadas ni aceleraciones bruscas, ni excesos de más de ${EXCESO_KMH} km/h, ${TEXTO_PERIODO[m.periodo] ?? ''}.`} />
@@ -249,225 +266,6 @@ export function BloqueManejoBrusco({ m, sinConductor = 'Sin conductor asignado: 
     {m.estado !== 'sin' && <FiltrosManejo m={m} />}
     {m.aviso && <p className="em-nota mb-aviso" role="status">{m.aviso}</p>}
     <CuerpoManejo m={m} sinConductor={sinConductor} />
-    {notas.length > 0 && <p className="em-nota">{notas.join(' ')}</p>}
-  </section>
-}
-
-// --- Vista general: el manejo brusco de toda la flota ------------------------
-// El servidor no tiene una lectura de eventos de la empresa entera ni por unidad: solo por
-// conductor (pendiente con Juan en fom-core). Mientras tanto se pide conductor por conductor, pocos a la vez
-// para no ahogar al servidor (pool de 10 conexiones, fom-core#713), y el mapa se va llenando.
-// Solo con el modo abierto y sin unidad elegida; lo leído se guarda y se reusa en la ficha.
-const A_LA_VEZ = 3
-/** Cada cuánto se repinta mientras van llegando (no en cada conductor: con 340 serían 340 repintados). */
-const REPINTAR_MS = 1000
-
-/**
- * Manejo brusco de la flota. `vehiculos`: las unidades a la vista (con los filtros del Centro de
- * control); `activo`: el modo está abierto. De cada unidad, los 5 más nuevos de cada tipo.
- */
-export function useManejoFlota({ vehiculos, activo }) {
-  const [eleccion, setEleccion] = useState(() => leerEleccion('flota', PERIODOS_MAPA))
-  useEffect(() => {
-    try { sessionStorage.setItem(`${CLAVE_SESION}flota`, JSON.stringify(eleccion)) } catch { /* sin almacenamiento: solo no se recuerda */ }
-  }, [eleccion])
-  const [activoId, setActivoId] = useState(null)
-  const oculto = eleccion.periodo === 'oculto'
-  const dias = diasDelPeriodo(eleccion.periodo)
-
-  // Quién maneja cada unidad: el principal y también los secundarios (asignaciones vigentes,
-  // que el servidor ya tiene guardadas 5 min para la flota: no es un pedido más).
-  const asignaciones = useDatos(() => (activo ? repo.conductores().catch(() => []) : Promise.resolve(null)), [activo])
-  const firmaUnidades = (vehiculos ?? []).map((v) => `${v.id}>${v.conductorPrincipalId ?? ''}`).join('|')
-  const { unidades, conductores } = useMemo(() => {
-    const u = new Set()
-    const c = new Set()
-    for (const par of firmaUnidades ? firmaUnidades.split('|') : []) {
-      const [id, conductor] = par.split('>')
-      u.add(id)
-      if (conductor) c.add(conductor)
-    }
-    for (const a of asignaciones.datos ?? []) if (a?.id && u.has(a.vehiculoId)) c.add(a.id)
-    return { unidades: u, conductores: [...c] }
-  }, [firmaUnidades, asignaciones.datos])
-  const asignacionesListas = asignaciones.datos != null
-
-  // Lo leído, por «días:conductor». Se queda entre aperturas y entre cambios de filtro: solo se
-  // pide lo que falta o lo que ya venció (se sigue viendo lo anterior hasta que llega lo nuevo).
-  const leidos = useRef(new Map())
-  const [version, setVersion] = useState(0)
-  const [vuelta, setVuelta] = useState(0)
-  // La vuelta en la que se pidió «Actualizar»: solo esa sale al servidor saltándose lo guardado.
-  const vueltaFresca = useRef(-1)
-  const [enCurso, setEnCurso] = useState(false)
-  const firmaConductores = conductores.join('|')
-  useEffect(() => {
-    if (!activo || oculto || !asignacionesListas) return undefined
-    let vivo = true
-    let repintar = null
-    const avisar = () => {
-      if (repintar) return
-      repintar = setTimeout(() => { repintar = null; if (vivo) setVersion((n) => n + 1) }, REPINTAR_MS)
-    }
-    const faltan = conductores.filter((id) => {
-      const r = leidos.current.get(`${dias}:${id}`)
-      return !r || r.error || r.vencido || Date.now() - r.en > VIGENCIA_MS
-    })
-    if (!faltan.length) return undefined
-    setEnCurso(true)
-    // Se gasta al usarlo: otra vuelta (un reintento, otro período) vuelve a usar lo guardado.
-    const fresco = vuelta === vueltaFresca.current
-    if (fresco) vueltaFresca.current = -1
-    const trabajar = async () => {
-      while (vivo && faltan.length) {
-        const id = faltan.shift()
-        try {
-          const lista = await pedirEventos({ userId: id, dias, fresco })
-          if (vivo) leidos.current.set(`${dias}:${id}`, { lista, en: Date.now() })
-        } catch (error) {
-          if (vivo) leidos.current.set(`${dias}:${id}`, { error, en: Date.now() })
-        }
-        avisar()
-      }
-    }
-    Promise.all(Array.from({ length: A_LA_VEZ }, trabajar)).then(() => {
-      if (!vivo) return
-      clearTimeout(repintar)
-      repintar = null
-      setEnCurso(false)
-      setVersion((n) => n + 1)
-    })
-    return () => {
-      vivo = false
-      clearTimeout(repintar)
-      setEnCurso(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activo, oculto, asignacionesListas, dias, firmaConductores, vuelta])
-
-  // Lo de cada conductor se filtra (período y unidades a la vista) una sola vez, al llegar, y se
-  // intercala con lo que ya había: un repintado no rehace las decenas de miles de antes. Una
-  // lectura nueva de un conductor ya mezclado quita solo lo suyo de antes. Con otras unidades,
-  // otro período o un conductor que ya no está, se rehace desde cero.
-  const mezcla = useRef({ dias: null, unidades: null, de: new Map(), lista: [] })
-  const { lista, leidosN, fallidos } = useMemo(() => {
-    let m = mezcla.current
-    const vigentes = new Set(conductores)
-    if (m.dias !== dias || m.unidades !== unidades || [...m.de.keys()].some((id) => !vigentes.has(id))) {
-      m = mezcla.current = { dias, unidades, de: new Map(), lista: [] }
-    }
-    const quitar = new Set()
-    const nuevas = []
-    let n = 0
-    let malos = 0
-    for (const id of conductores) {
-      const r = leidos.current.get(`${dias}:${id}`)
-      if (!r) continue
-      n += 1
-      if (r.error) { malos += 1; continue }
-      const antes = m.de.get(id)
-      if (antes?.r === r) continue
-      for (const e of antes?.eventos ?? []) quitar.add(e.id)
-      const propia = eventosParaMapa(r.lista, { dias }).filter((e) => unidades.has(e.vehiculoId))
-      m.de.set(id, { r, eventos: propia })
-      // El aviso de corte en 100 mira lo que llegó entero, no solo lo filtrado.
-      if (r.lista?.tope && r.lista.length) {
-        propia.tope = true
-        propia.completoDesde = juntarEventos([r.lista]).completoDesde
-      }
-      nuevas.push(propia)
-    }
-    if (quitar.size) {
-      const resto = m.lista.filter((e) => !quitar.has(e.id))
-      if (m.lista.tope) Object.assign(resto, { tope: true, completoDesde: m.lista.completoDesde })
-      m.lista = resto
-    }
-    if (nuevas.length) m.lista = mezclarEventos(m.lista, nuevas)
-    return { lista: m.lista, leidosN: n, fallidos: malos }
-    // `version` cambia cuando llega algo nuevo a `leidos`.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conductores, dias, unidades, version])
-  const crudos = lista
-  const filtro = useMemo(
-    () => filtrarEventosFlota(lista, { periodo: eleccion.periodo, tipos: eleccion.tipos }),
-    [lista, eleccion],
-  )
-  const estable = useRef({ firma: '', v: filtro.visibles })
-  const firma = filtro.visibles.map((e) => e.id).join('|')
-  if (firma !== estable.current.firma) estable.current = { firma, v: filtro.visibles }
-  const visibles = estable.current.v
-  const elegido = visibles.some((e) => e.id === activoId) ? activoId : null
-
-  const total = conductores.length
-  return {
-    // Mientras lee y aún no llegó nada del período, «Cargando» (no «Sin eventos»).
-    estado: !activo ? 'sin' : !asignacionesListas || (!oculto && total > 0 && (leidosN === 0 || (enCurso && filtro.total === 0))) ? 'cargando' : 'ok',
-    ...filtro,
-    visibles,
-    elegido,
-    conductores: total,
-    leidos: leidosN,
-    fallidos,
-    leyendo: enCurso && leidosN < total,
-    incompleto: periodoIncompleto(crudos, eleccion.periodo),
-    periodos: PERIODOS_MAPA,
-    periodo: eleccion.periodo,
-    tipos: eleccion.tipos,
-    elegir: (id) => setActivoId(id ?? null),
-    setPeriodo: (periodo) => setEleccion((el) => ({ ...el, periodo })),
-    alternarTipo: (tipo) => setEleccion((el) => ({
-      ...el,
-      tipos: el.tipos.includes(tipo) ? el.tipos.filter((t) => t !== tipo) : CLAVES_EVENTO.filter((c) => c === tipo || el.tipos.includes(c)),
-    })),
-    /**
-     * Vuelve a pedir los que fallaron (y, con `todo`, todos: «Actualizar»). Lo leído no se borra:
-     * se marca vencido y se sigue viendo hasta que llega lo nuevo.
-     */
-    recargar: (todo = false) => {
-      for (const [llave, r] of leidos.current) {
-        if (r.error) leidos.current.delete(llave)
-        // Se marca en el mismo objeto: lo ya mezclado en el mapa no se rehace por esto.
-        else if (todo) r.vencido = true
-      }
-      if (todo) cache.vencer()
-      setVuelta((n) => {
-        if (todo) vueltaFresca.current = n + 1
-        return n + 1
-      })
-    },
-  }
-}
-
-/**
- * Bloque «Manejo brusco de la flota» (vista general del Centro de control): filtros, cuánto se
- * lleva leído y los más recientes de cada tipo, con su unidad. Tocar uno lo abre en el mapa.
- */
-export function BloqueManejoFlota({ m }) {
-  // La lista solo enseña los 5 más nuevos de cada tipo de toda la flota; el mapa, 5 por unidad.
-  const corta = {
-    ...m,
-    porTipo: Object.fromEntries(CLAVES_EVENTO.map((c) => [c, { ...m.porTipo[c], eventos: m.porTipo[c].eventos.slice(0, PASO_EVENTOS), quedan: 0 }])),
-    conUnidad: true,
-  }
-  const notas = [
-    m.periodo !== 'oculto' ? `En el mapa, de cada unidad los ${PASO_EVENTOS} más nuevos de cada tipo. Excesos: solo los de más de ${EXCESO_KMH} km/h.` : '',
-    m.incompleto ? 'El servidor entrega como mucho 100 eventos por conductor: puede haber más antiguos.' : '',
-    !HAY_MAPBOX ? 'El mapa de eventos necesita Mapbox, que no está configurado aquí.' : '',
-  ].filter(Boolean)
-  return <section className="mb-bloque" aria-label="Manejo brusco de la flota" aria-busy={m.leyendo || m.estado === 'cargando'}>
-    <FiltrosManejo m={m} />
-    {m.periodo !== 'oculto' && m.conductores > 0 && <p className="em-nota" role="status">
-      {m.leyendo
-        ? `Leyendo conductores: ${f.numero(m.leidos)} de ${f.numero(m.conductores)}. El mapa se va llenando.`
-        : `${f.numero(m.unidades)} ${m.unidades === 1 ? 'unidad' : 'unidades'} con eventos · ${f.numero(m.leidos - m.fallidos)} de ${f.numero(m.conductores)} ${m.conductores === 1 ? 'conductor leído' : 'conductores leídos'}.`}
-      {!m.leyendo && <> <button type="button" className="mb-enlace" onClick={() => m.recargar(true)}>Actualizar</button></>}
-    </p>}
-    {m.fallidos > 0 && !m.leyendo && <p className="em-nota mb-aviso" role="status">
-      No se pudieron leer {f.numero(m.fallidos)} {m.fallidos === 1 ? 'conductor' : 'conductores'}. <button type="button" className="mb-enlace" onClick={() => m.recargar()}>Reintentar</button>
-    </p>}
-    {m.conductores === 0 && m.estado === 'ok'
-      ? <p className="em-nota">Ninguna unidad a la vista tiene conductor asignado: el servidor entrega los eventos por conductor.</p>
-      : <CuerpoManejo m={{ ...corta, estado: m.estado }} sinConductor="" />}
     {notas.length > 0 && <p className="em-nota">{notas.join(' ')}</p>}
   </section>
 }

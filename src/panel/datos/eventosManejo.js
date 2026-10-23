@@ -310,6 +310,33 @@ export function juntarEventos(listas) {
   return salida
 }
 
+/**
+ * Los eventos de VARIOS conductores (los de una unidad), juntos: `pedidos` son las promesas, una
+ * por persona. Un 404 («Driver not found»: la persona asignada ya no es conductor activo) cuenta
+ * como «sin eventos» y se anota en `descartados`. Los demás errores solo hacen fallar el todo si
+ * no llegó nada de nadie; si no, se anotan en `fallidos` y se enseña lo que sí llegó.
+ */
+export async function juntarDeVarios(pedidos) {
+  const resultados = await Promise.allSettled(pedidos)
+  const listas = []
+  let descartados = 0
+  let fallidos = 0
+  let primerError = null
+  for (const r of resultados) {
+    if (r.status === 'fulfilled') listas.push(r.value)
+    else if (r.reason?.estado === 404) descartados += 1
+    else {
+      fallidos += 1
+      primerError ??= r.reason
+    }
+  }
+  if (primerError && listas.length === 0 && descartados === 0) throw primerError
+  const salida = juntarEventos(listas)
+  salida.descartados = descartados
+  salida.fallidos = fallidos
+  return salida
+}
+
 function masViejoDe(lista) {
   let viejo = Infinity
   for (const e of lista) viejo = Math.min(viejo, msEvento(e) ?? Infinity)

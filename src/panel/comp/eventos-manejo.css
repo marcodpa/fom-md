@@ -48,7 +48,3 @@
 .mb-bloque .pnl-vacio.compacto { padding: 14px 8px; }
 /* En la ficha angosta del mapa, el texto de cada fila no se corta. */
 .control-unit .mb-bloque .em-fila-txt b { font-size: 13px; }
-/* Vista de la flota (Centro de control sin unidad elegida): va bajo el título de su hoja. */
-.control-flota-manejo .mb-bloque { margin-top: 0; padding-top: 0; border-top: 0; }
-/* «Actualizar» y «Reintentar» dentro de una nota. */
-.mb-enlace { min-height: 44px; padding: 0 4px; border: 0; background: none; color: #85c9ff; font: inherit; font-weight: 600; cursor: pointer; }

@@ -73,12 +73,13 @@ test('manejo brusco: lo vencido se borra, un fallo no se guarda y «Actualizar»
   assert.equal(s.pedidos.length, antes + 1, 'lo nuevo ya queda guardado')
 })
 
-test('la ficha y la flota piden por la caché con dueño (sesión y empresa) y repintan cada segundo', () => {
+test('la ficha de la unidad pide por la caché con dueño (sesión y empresa)', () => {
   const src = leer('src/panel/comp/ManejoBrusco.jsx')
   assert.match(src, /crearCacheEventos\(/u)
   assert.match(src, /empresaGestionActualId\(\)/u)
-  assert.match(src, /REPINTAR_MS = 1000/u)
-  assert.doesNotMatch(src, /leidos\.current\.delete\(llave\)\s*\n\s*setVuelta/u, '«Actualizar» no borra lo leído')
+  // T-151: la vista del manejo brusco de toda la flota se quitó del Centro de control.
+  assert.doesNotMatch(src, /useManejoFlota|BloqueManejoFlota/u)
+  assert.doesNotMatch(leer('src/panel/modulos/CentroControl.jsx'), /manejoFlota|ManejoFlota/u)
 })
 
 const HORA = 3600000
