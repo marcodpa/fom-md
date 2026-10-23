@@ -107,13 +107,23 @@ export function eventosParaMapa(lista, { dias = null, desde = null, hasta = null
     desde === null ? -Infinity : (typeof desde === 'number' ? desde : msDe(desde) ?? -Infinity),
   )
   const fin = hasta === null ? Infinity : (typeof hasta === 'number' ? hasta : msDe(hasta) ?? Infinity)
-  return (Array.isArray(lista) ? lista : [])
-    .filter((e) => vaEnMapa(e) && (!vehiculoId || e.vehiculoId === vehiculoId))
-    .filter((e) => {
-      const t = msDe(e.hora)
-      return t !== null && t >= inicio && t <= fin
-    })
-    .sort((a, b) => msDe(b.hora) - msDe(a.hora) || String(b.id).localeCompare(String(a.id)))
+  const filas = []
+  for (const e of Array.isArray(lista) ? lista : []) {
+    if (!vaEnMapa(e) || (vehiculoId && e.vehiculoId !== vehiculoId)) continue
+    const t = msDe(e.hora)
+    if (t !== null && t >= inicio && t <= fin) filas.push({ t, e })
+  }
+  return ordenarPorHora(filas)
+}
+
+/**
+ * Del más nuevo al más viejo (a igual hora, por id). `filas`: [{ t (ms), e }]. La hora se lee una
+ * vez por evento y no en cada comparación: con la flota entera son decenas de miles.
+ */
+function ordenarPorHora(filas) {
+  return filas
+    .sort((a, b) => b.t - a.t || String(b.e?.id).localeCompare(String(a.e?.id)))
+    .map((x) => x.e)
 }
 
 /** Cuántos hay de cada tipo: { frenada, aceleracion, exceso }. */
@@ -213,8 +223,12 @@ export function excesosBajoUmbral(lista, { dias = null, ahora = Date.now() } = {
 // - Cada tipo se enciende y se apaga solo, con su conteo «5 de 23».
 // - De cada tipo se ven 5 y «Ver 5 más» suma otros 5: nunca se pintan 100 de golpe.
 // - «Ocultar» no muestra ninguno.
-// Se pide UNA sola vez el período largo (30 días, hasta 100 eventos) y se filtra aquí: los
-// 100 más nuevos de 30 días recortados a 7 son los mismos que daría pedir 7 días.
+// Cambio del 23 oct (Marco: «no salen todas las aceleraciones de cada carro»):
+// - Con UNA unidad elegida, «Hoy» y «7 días» pintan TODOS los suyos del período; solo
+//   «Últimos 5» va de 5 en 5. Se piden 30 días para «Últimos 5» y 7 para «Hoy» y «7 días»
+//   (el servidor corta en 100 por conductor: 7 días cubren más de la semana).
+// - Sin unidad elegida (vista general de la flota): de CADA unidad los 5 más nuevos de cada
+//   tipo (`filtrarEventosFlota`).
 // ============================================================
 
 /** Cuántos se ven de cada tipo al empezar y cuántos suma «Ver más». */
@@ -247,10 +261,50 @@ export function inicioPeriodo(periodo, ahora = Date.now()) {
   return ahora - DIAS_PEDIDO * 86400000
 }
 
+/**
+ * Días que se piden al servidor para un período. El servidor da como mucho 100 por conductor:
+ * para «Hoy» y «7 días» se piden 7 días, así un conductor con muchos eventos no se queda con
+ * los 100 más nuevos de 30 días (que pueden no llegar ni a cubrir la semana).
+ */
+export function diasDelPeriodo(periodo) {
+  return periodo === 'hoy' || periodo === '7' ? 7 : DIAS_PEDIDO
+}
+
+/**
+ * Junta los eventos de varios conductores (una unidad con dos conductores, o la flota entera)
+ * sin repetidos, del más nuevo al más viejo. Si a alguno el servidor le cortó en 100: `tope` y
+ * `completoDesde` (ms), desde cuándo llegó todo de todos; antes de eso puede faltar algo.
+ */
+export function juntarEventos(listas) {
+  const porId = new Map()
+  const sinId = []
+  let tope = false
+  let completoDesde = -Infinity
+  for (const l of Array.isArray(listas) ? listas : []) {
+    if (!Array.isArray(l)) continue
+    for (const e of l) {
+      if (!e) continue
+      if (!e.id) sinId.push(e)
+      else if (!porId.has(e.id)) porId.set(e.id, e)
+    }
+    if (l.tope && l.length) {
+      tope = true
+      let viejo = Infinity
+      for (const e of l) viejo = Math.min(viejo, msDe(e?.hora) ?? Infinity)
+      completoDesde = Math.max(completoDesde, viejo)
+    }
+  }
+  const salida = ultimosEventos([...porId.values(), ...sinId], Infinity)
+  if (tope) {
+    salida.tope = true
+    salida.completoDesde = completoDesde
+  }
+  return salida
+}
+
 /** Los N más nuevos (la lista puede venir en cualquier orden). */
 export function ultimosEventos(lista, n = PASO_EVENTOS) {
-  return [...(Array.isArray(lista) ? lista : [])]
-    .sort((a, b) => (msDe(b?.hora) ?? -Infinity) - (msDe(a?.hora) ?? -Infinity) || String(b?.id).localeCompare(String(a?.id)))
+  return ordenarPorHora((Array.isArray(lista) ? lista : []).map((e) => ({ t: msDe(e?.hora) ?? -Infinity, e })))
     .slice(0, Math.max(0, n))
 }
 
@@ -284,21 +338,59 @@ export function verMas(mostrar, tipo) {
  *   aunque el tipo esté apagado, para el «5 de 23» de su pastilla.
  * - `total`: cuántos hay en el período, de los tres tipos.
  */
-export function filtrarEventosManejo(lista, { periodo = 'ultimos', tipos = null, mostrar = null, ahora = Date.now() } = {}) {
+export function filtrarEventosManejo(lista, { periodo = 'ultimos', tipos = null, mostrar = null, todoElPeriodo = false, ahora = Date.now() } = {}) {
   const activos = tipos ? (tipos instanceof Set ? tipos : new Set(tipos)) : new Set(CLAVES_EVENTO)
-  const todos = ultimosEventos(lista, Infinity)
-  const inicio = inicioPeriodo(periodo, ahora)
-  const delPeriodo = periodo === 'hoy' ? eventosDeHoy(todos, ahora) : todos.filter((e) => (msDe(e.hora) ?? -Infinity) >= inicio)
+  const delPeriodo = eventosDelPeriodo(ultimosEventos(lista, Infinity), periodo, ahora)
   const porTipo = {}
   for (const clave of CLAVES_EVENTO) {
     const deTipo = delPeriodo.filter((e) => e.tipo === clave)
     const encendido = periodo !== 'oculto' && activos.has(clave)
-    const tope = mostrar?.[clave] ?? PASO_EVENTOS
+    // `todoElPeriodo` (una unidad en el mapa): con «Hoy» o «7 días» se ven todos los del período;
+    // solo «Últimos 5» va de 5 en 5.
+    const tope = todoElPeriodo && periodo !== 'ultimos' ? Infinity : mostrar?.[clave] ?? PASO_EVENTOS
     const eventos = encendido ? deTipo.slice(0, tope) : []
     porTipo[clave] = { total: deTipo.length, eventos, quedan: encendido ? deTipo.length - eventos.length : 0, encendido }
   }
   const visibles = ultimosEventos(CLAVES_EVENTO.flatMap((c) => porTipo[c].eventos), Infinity)
   return { visibles, porTipo, total: delPeriodo.length }
+}
+
+/** Los de un período, de una lista ya ordenada del más nuevo al más viejo. */
+function eventosDelPeriodo(todos, periodo, ahora) {
+  if (periodo === 'hoy') return eventosDeHoy(todos, ahora)
+  const inicio = inicioPeriodo(periodo, ahora)
+  return todos.filter((e) => (msDe(e.hora) ?? -Infinity) >= inicio)
+}
+
+/**
+ * La vista general del Centro de control (todas las unidades, ninguna elegida): de CADA unidad,
+ * los `mostrar[tipo]` (5) más nuevos de cada tipo del período. Así una unidad con muchos eventos
+ * no tapa a las demás y el mapa no carga miles de golpe (340 unidades × 3 tipos × 5 como mucho).
+ * Devuelve lo mismo que `filtrarEventosManejo`; en `porTipo`, `eventos` son los que van al mapa
+ * (de todas las unidades) y `total` los del período; `unidades`: cuántas tienen alguno.
+ * Recorre la lista una sola vez: sirve con decenas de miles de eventos.
+ */
+export function filtrarEventosFlota(lista, { periodo = 'ultimos', tipos = null, mostrar = null, ahora = Date.now() } = {}) {
+  const activos = tipos ? (tipos instanceof Set ? tipos : new Set(tipos)) : new Set(CLAVES_EVENTO)
+  const delPeriodo = eventosDelPeriodo(ultimosEventos(lista, Infinity), periodo, ahora)
+  const porTipo = Object.fromEntries(CLAVES_EVENTO.map((c) => [c, { total: 0, eventos: [], quedan: 0, encendido: periodo !== 'oculto' && activos.has(c) }]))
+  const vistos = new Map()
+  const unidades = new Set()
+  const visibles = []
+  for (const e of delPeriodo) {
+    const g = porTipo[e.tipo]
+    if (!g) continue
+    g.total += 1
+    unidades.add(e.vehiculoId ?? '')
+    if (!g.encendido) continue
+    const llave = `${e.vehiculoId ?? ''}|${e.tipo}`
+    const n = vistos.get(llave) ?? 0
+    if (n >= (mostrar?.[e.tipo] ?? PASO_EVENTOS)) continue
+    vistos.set(llave, n + 1)
+    g.eventos.push(e)
+    visibles.push(e)
+  }
+  return { visibles, porTipo, total: delPeriodo.length, unidades: unidades.size }
 }
 
 /** «5 de 23»; «23» si se ven todos o el tipo está apagado. */
@@ -313,7 +405,9 @@ export function conteoTipo({ total = 0, eventos = [], encendido = true } = {}) {
  */
 export function periodoIncompleto(lista, periodo, ahora = Date.now()) {
   if (!lista?.tope || !lista.length) return false
-  const masViejo = Math.min(...lista.map((e) => msDe(e.hora) ?? Infinity))
+  // De varios conductores (`juntarEventos`): desde cuándo llegó todo de todos.
+  let masViejo = Number.isFinite(lista.completoDesde) ? lista.completoDesde : Infinity
+  if (!Number.isFinite(lista.completoDesde)) for (const e of lista) masViejo = Math.min(masViejo, msDe(e.hora) ?? Infinity)
   return masViejo > inicioPeriodo(periodo, ahora)
 }
 
@@ -390,13 +484,62 @@ export function distanciaMetros(a, b) {
  * `metros` 0: ninguno se junta. `suelto`: id que nunca se agrupa (el elegido, con su globo).
  */
 export function agruparCercanos(lista, metros = 0, suelto = null) {
+  const eventos = (Array.isArray(lista) ? lista : []).filter(vaEnMapa)
   const grupos = []
-  for (const e of (Array.isArray(lista) ? lista : []).filter(vaEnMapa)) {
-    const g = metros > 0 && e.id !== suelto ? grupos.find((x) => x.id !== suelto && distanciaMetros(x, e) <= metros) : null
+  const buscar = metros > 0 ? buscadorDeGrupos(eventos, metros, grupos, suelto) : null
+  for (const e of eventos) {
+    const g = buscar && e.id !== suelto ? buscar(e) : null
     if (g) g.eventos.push(e)
-    else grupos.push({ id: e.id, lat: e.lat, lng: e.lng, eventos: [e] })
+    else {
+      grupos.push({ id: e.id, lat: e.lat, lng: e.lng, eventos: [e] })
+      buscar?.anotar(grupos.length - 1)
+    }
   }
   return grupos.map((g) => (g.eventos.length > 1 ? { ...g, id: `grupo:${g.eventos.map((e) => e.id).join('|')}` } : g))
+}
+
+/** Un grado de latitud mide ~111,2 km; con 110 km la celda queda un poco más grande, nunca menos. */
+const METROS_GRADO = 110000
+
+/**
+ * El primer grupo (en orden de creación) cuyo punto está a `metros` o menos del evento. Con la
+ * flota entera hay miles de eventos y comparar cada uno con todos los grupos colgaba el mapa al
+ * acercar: se reparten en una rejilla de celdas de al menos `metros` de lado y solo se mira la
+ * celda del evento y sus 8 vecinas. El resultado es el mismo que recorrerlos todos.
+ * Con radios enormes (mapa muy alejado) o cerca de los polos se recorren todos: ahí hay pocos grupos.
+ */
+function buscadorDeGrupos(eventos, metros, grupos, suelto) {
+  let cosMin = 1
+  for (const e of eventos) cosMin = Math.min(cosMin, Math.cos((e.lat * Math.PI) / 180))
+  const vale = (x, e) => x.id !== suelto && distanciaMetros(x, e) <= metros
+  if (metros > 50000 || cosMin < 0.05) {
+    const todos = (e) => grupos.find((x) => vale(x, e)) ?? null
+    todos.anotar = () => {}
+    return todos
+  }
+  const alto = metros / METROS_GRADO
+  const ancho = metros / (METROS_GRADO * cosMin)
+  const celdas = new Map()
+  const celda = (p) => [Math.floor(p.lat / alto), Math.floor(p.lng / ancho)]
+  const buscar = (e) => {
+    const [f, c] = celda(e)
+    let mejor = -1
+    for (let df = -1; df <= 1; df += 1) {
+      for (let dc = -1; dc <= 1; dc += 1) {
+        for (const i of celdas.get(`${f + df}:${c + dc}`) ?? []) {
+          if ((mejor === -1 || i < mejor) && vale(grupos[i], e)) mejor = i
+        }
+      }
+    }
+    return mejor === -1 ? null : grupos[mejor]
+  }
+  buscar.anotar = (i) => {
+    const [f, c] = celda(grupos[i])
+    const llave = `${f}:${c}`
+    if (!celdas.has(llave)) celdas.set(llave, [])
+    celdas.get(llave).push(i)
+  }
+  return buscar
 }
 
 /** «3 eventos en este punto». */

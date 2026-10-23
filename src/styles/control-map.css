@@ -20,6 +20,9 @@
 .control-search p{font-size:12px;color:#b7c7d9;margin:3px 0 0}
 .fom-dark .control-search .pnl-btn{min-height:44px;padding:8px 12px;font-size:13px;gap:8px}
 .control-search .pnl-buscar{width:min(36vw,460px)}
+/* «Manejo brusco» (de la flota) y «Unidades», juntos a la derecha del título. */
+.control-acciones{display:flex;gap:8px;flex-shrink:0}
+.fom-dark .control-acciones .pnl-btn[aria-pressed="true"]{background:#173553;border-color:#2D5D88;color:#8BC6FF}
 .control-filters{position:absolute;top:106px;left:20px;right:78px;display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;z-index:2;pointer-events:none}
 .control-filters>*{pointer-events:auto}
 .control-filters .pnl-chips{flex-wrap:nowrap;gap:6px;margin:0;flex-shrink:0}

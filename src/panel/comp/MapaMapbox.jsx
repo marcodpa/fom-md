@@ -6,7 +6,7 @@ import { textoSinSenal } from '../datos/sinSenal'
 import CapasMapa from './CapasMapa'
 import HerramientasRuta from './HerramientasRuta'
 import { limitesDe, mensajeLlegada, pintarEventosManejo, pintarLlegada } from './herramientasMapbox'
-import { RADIO_GRUPO_PX, TIPOS_EVENTO, geojsonEventos, metrosPorPixel, partesEvento, tipoEvento, tituloGrupo, velocidadesEvento } from '../datos/eventosManejo'
+import { RADIO_GRUPO_PX, TIPOS_EVENTO, geojsonEventos, metrosPorPixel, partesEvento, tipoEvento, tituloGrupo, unidadEvento, velocidadesEvento } from '../datos/eventosManejo'
 import * as fmt from '../datos/formato'
 import { emparejarPuntos, emparejarViajes, rutaConTrafico } from '../datos/mapboxApi'
 import { CLAVES_COLOR, coloresDe, configDe, estiloDe, guardarPrefs, leerPrefs, luzEfectiva, sin3d } from './mapaPrefs'
@@ -46,6 +46,8 @@ const HERR_VACIO = Object.freeze({ eligiendo: false, llegada: null, cargandoLleg
 const mapaClaro = (prefs) => prefs.vista !== 'satelite' && ['day', 'dawn'].includes(luzEfectiva(prefs))
 
 const sinMovimiento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+/** Un círculo de eventos con más de esto, al tocarlo, acerca el mapa en vez de abrir su globo. */
+const GRUPO_MAX_GLOBO = 30
 // Un punto de la cola reconocible entre refrescos (la cola se corre: entran puntos y salen otros).
 const marcaDe = (p) => `${p.hora}|${p.lat}|${p.lng}`
 /** Lo que flota sobre el mapa y no debe tapar lo que se encuadra (la leyenda y el pie no cuentan). */
@@ -842,8 +844,18 @@ export default function MapaMapbox({
         },
         alTocarGrupo: (ids, lngLat) => {
           if (modoDestino.current) return
-          const filas = ids.map((id) => (eventosRef.current ?? []).find((x) => x.id === id)).filter(Boolean)
+          const porId = new Map((eventosRef.current ?? []).map((x) => [x.id, x]))
+          const filas = ids.map((id) => porId.get(id)).filter(Boolean)
           if (!filas.length) return
+          // Un círculo grande (la flota entera con el mapa alejado): se acerca hasta él en vez de
+          // abrir un globo con cientos de filas. Si ya no se puede acercar más, va el globo.
+          const limitesGrupo = filas.length > GRUPO_MAX_GLOBO ? limitesDe(mapboxgl, filas.map((x) => [x.lng, x.lat])) : null
+          if (limitesGrupo && m.getZoom() < 17) {
+            m.fitBounds(limitesGrupo, { padding: 72, maxZoom: Math.min(17, m.getZoom() + 4), duration: sinMovimiento() ? 0 : 600 })
+            return
+          }
+          // De varias unidades (vista de la flota): cada fila dice de cuál es.
+          const variasUnidades = new Set(filas.map((x) => x.vehiculoId)).size > 1
           // Abrir un grupo suelta el evento elegido (su globo se cambia por el del grupo).
           if (elegidoRef.current) {
             toqueEnMapa.current = true
@@ -852,7 +864,7 @@ export default function MapaMapbox({
           eventosCapa.current?.abrirGrupo(lngLat, tituloGrupo(filas.length), filas.map((x) => ({
             id: x.id,
             titulo: [tipoEvento(x.tipo)?.nombre, velocidadesEvento(x)].filter(Boolean).join(' · '),
-            detalle: x.hora ? fmt.fechaHora(x.hora) : '',
+            detalle: [x.hora ? fmt.fechaHora(x.hora) : '', variasUnidades ? unidadEvento(x) : ''].filter(Boolean).join(' · '),
           })), (id) => {
             toqueEnMapa.current = true
             elegirEventoRef.current?.(id)
