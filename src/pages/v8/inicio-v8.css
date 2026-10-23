@@ -1,7 +1,9 @@
 /* Inicio v8 (T-104): solo lo propio de esta página; lo común vive en components/v8/v8-base.css. */
 
 /* Frase de presentación */
-.v8-sec.inicio-frase { padding: 120px 0 40px; }
+.v8-sec.inicio-frase { padding: 0; }
+.inicio-frase-escena { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; justify-content: center; }
+.inicio-palabra { display: inline; }
 
 /* Panel en la oficina, app en la calle */
 .v8-sec.inicio-duo { padding-top: 60px; }
@@ -45,7 +47,8 @@
   .inicio-faq-mas { margin-top: 24px; }
 }
 @media (max-width: 599px) {
-  .v8-sec.inicio-frase { padding: 40px 0 64px; }
+  .v8-sec.inicio-frase { padding: 0; }
+  .inicio-frase-escena { min-height: 80svh; }
   .v8-sec.inicio-duo { padding-top: 16px; }
   .inicio-cifras-seguridad { margin-top: 28px; }
 }

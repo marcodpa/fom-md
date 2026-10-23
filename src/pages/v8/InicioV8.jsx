@@ -53,10 +53,28 @@ const CIFRAS_MAPA = [
   cifra(stat('plataforma', 'Seguridad de datos y escalabilidad')),
 ]
 
+// La frase se enciende palabra por palabra al bajar y ocupa sola la pantalla (estilo Apple).
+const FRASE = [
+  'FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas.',
+  'Seguimiento, cuidado del vehículo y comunicación forman parte de una misma operación.',
+]
+const palabras = texto => texto.split(' ').map((p, i, todas) => <span key={i} className="inicio-palabra">{p}{i < todas.length - 1 ? ' ' : ''}</span>)
+
 export default function InicioV8() {
   const raiz = useRef(null)
 
   useMomentoV8(raiz, ({ q, gsap, escritorio }) => {
+    // 0 · La frase: queda sola en pantalla y cada palabra pasa de tenue a encendida con el scroll.
+    //     En escritorio se queda fija mientras se enciende; en el teléfono se enciende al pasar.
+    const frase = q('.inicio-frase-escena')[0]
+    if (frase) {
+      gsap.fromTo(q('.inicio-palabra'), { opacity: 0.12 }, {
+        opacity: 1, ease: 'none', stagger: 0.1,
+        scrollTrigger: escritorio
+          ? { trigger: frase, start: 'center center', end: '+=120%', pin: true, scrub: 0.5 }
+          : { trigger: frase, start: 'top 80%', end: 'bottom 45%', scrub: 0.5 },
+      })
+    }
     if (!escritorio) return
     // 2 · Escena fija: el panel (la foto de la oficina) se aparta a la derecha y entra el teléfono.
     //     Solo traslación y opacidad: la foto nunca se reescala.
@@ -82,9 +100,9 @@ export default function InicioV8() {
 
     <NavLocalV8 titulo="Inicio" enlaces={LOCAL} />
 
-    <SeccionV8 className="inicio-frase" aria-label="Qué es FOM">
-      <ContenedorV8>
-        <p className="v8-frase" data-v8-aparece="">FOM reúne el trabajo de la oficina y del equipo en campo en una sola plataforma para flotas. <span className="v8-t2">Seguimiento, cuidado del vehículo y comunicación forman parte de una misma operación.</span></p>
+    <SeccionV8 className="inicio-frase" aria-label="Qué es FOM" data-v8-3d="">
+      <ContenedorV8 className="inicio-frase-escena">
+        <p className="v8-frase inicio-frase-texto">{palabras(FRASE[0])} <span className="v8-t2">{palabras(FRASE[1])}</span></p>
       </ContenedorV8>
     </SeccionV8>
 
