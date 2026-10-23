@@ -12,6 +12,8 @@ import { conSenalAlDia, msSinReportar, SIN_SENAL_MS, textoSinSenal, useMinuto } 
 import { Icono } from '../Iconos'
 import RankingManejo from '../comp/RankingManejo'
 import { masNuevoPrimero } from '../datos/orden'
+import { useVistaTelefono } from '../comp/movil-navegacion'
+import { IconoMovil } from '../comp/movil-piezas'
 
 // ============================================================
 // RESUMEN — el inicio del supervisor
@@ -131,6 +133,7 @@ export default function Resumen() {
   const contadores = useDatos(cargarContadores, [], UN_MINUTO)
   const eventos = useDatos(cargarEventos, [], TRES_MINUTOS)
   const [seleccionado, setSeleccionado] = useState(null)
+  const esMovil = useVistaTelefono()
 
   // Se sigue mostrando como un solo tablero: carga hasta tener las tres
   // partes y, si una falla, se avisa como antes.
@@ -144,16 +147,31 @@ export default function Resumen() {
     ? { resumen: contadores.datos, vehiculos: vehiculos.datos, ...eventos.datos }
     : null
 
+  const vivo = estado === 'ok' && (
+    <span className="rs-vivo">
+      <i />
+      Se actualiza solo cada 30 s
+    </span>
+  )
+
   return (
     <>
-      <Cabecera titulo="Resumen" bajada="Toda tu operación, en un solo lugar.">
-        {estado === 'ok' && (
-          <span className="rs-vivo">
-            <i />
-            Se actualiza solo cada 30 s
-          </span>
-        )}
-      </Cabecera>
+      {esMovil ? (
+        <>
+          {/* Como panel/index.tsx de la app: «Reporte» junto al título y el aviso de refresco debajo. */}
+          <Cabecera titulo="Resumen" bajada="Toda tu operación, en un solo lugar.">
+            <Link className="pnl-btn primario" to="/panel/reportes" aria-label="Generar un reporte">
+              <IconoMovil nombre="reporte" tam={16} />
+              Reporte
+            </Link>
+          </Cabecera>
+          {vivo && <div className="rs-vivo-movil">{vivo}</div>}
+        </>
+      ) : (
+        <Cabecera titulo="Resumen" bajada="Toda tu operación, en un solo lugar.">
+          {vivo}
+        </Cabecera>
+      )}
 
       <div className="pnl-cuerpo">
         {estado === 'cargando' && <Cargando filas={6} />}

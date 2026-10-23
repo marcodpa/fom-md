@@ -242,6 +242,9 @@ export default function MapaMapbox({
   alElegirEvento,
   encuadrarEventos = true,
   alFallar,
+  // Como el mapa de la app (mapa-fom-dom.tsx): sin acercar/alejar ni panel de
+  // capas, solo la pastilla «MAPA»/«SAT» que cambia la vista. La usa el teléfono.
+  pildoraVista = false,
 }) {
   const contenedor = useRef(null)
   const mapa = useRef(null)
@@ -441,7 +444,7 @@ export default function MapaMapbox({
         // Solo en desarrollo: para inspeccionar el mapa desde la consola del navegador.
         if (import.meta.env?.DEV) window.__fomMapa = m
         m.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right')
-        m.addControl(new mapboxgl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: false }), 'bottom-right')
+        if (!pildoraVista) m.addControl(new mapboxgl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: false }), 'bottom-right')
 
         // Si en 25 s no cargó nada, el token o la red fallaron: se avisa para volver a Leaflet.
         // El estilo llegó = el token sirve; con eso basta. Si la pestaña está en segundo
@@ -956,7 +959,15 @@ export default function MapaMapbox({
     <div className={`pnl-mapa fleet-map oscuro con-mapbox luz-${luzActual}${herr.eligiendo ? ' eligiendo-destino' : ''}`} style={{ height: alto }}>
       <div ref={contenedor} className="pnl-mapa-lienzo" />
 
-      <CapasMapa prefs={prefs} alCambiar={cambiarPrefs} luzActual={luzActual} />
+      {pildoraVista ? (
+        <button type="button" className={`mapa-pildora-vista${prefs.vista === 'satelite' ? ' on' : ''}`}
+          aria-label={prefs.vista === 'satelite' ? 'Ver mapa' : 'Ver satélite'}
+          onClick={() => cambiarPrefs({ ...prefs, vista: prefs.vista === 'satelite' ? 'calles' : 'satelite' })}>
+          {prefs.vista === 'satelite' ? 'SAT' : 'MAPA'}
+        </button>
+      ) : (
+        <CapasMapa prefs={prefs} alCambiar={cambiarPrefs} luzActual={luzActual} />
+      )}
 
       {herramientas && v && validPosition(v) && (
         <HerramientasRuta unidad={v} estado={herr} alElegirDestino={empezarDestino} alCancelar={cancelarDestino} alQuitarLlegada={quitarLlegada} />

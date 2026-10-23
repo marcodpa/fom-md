@@ -342,7 +342,9 @@ export default function Consola() {
         {esMovil && (enPestana
           ? <MovilEncabezado
               seccion={titulo}
-              nombre={perfil.empresaGestion?.nombre || (esAdminFom(perfil) ? '' : perfil.empresa)}
+              // Como encabezado-fom de la app: el conductor ve solo la sección
+              // (su empresa ya está en Mi perfil); los demás, la empresa.
+              nombre={area === 'conductor' ? '' : perfil.empresaGestion?.nombre || (esAdminFom(perfil) ? '' : perfil.empresa)}
               sinLeer={sinLeer}
               etiquetaCampana={etiquetaCampana}
               iniciales={perfil.iniciales}

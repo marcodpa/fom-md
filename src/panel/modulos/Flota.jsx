@@ -455,8 +455,9 @@ export default function Flota() {
 
             <div className="mv-flota-lista">
             <Tarjeta
-              titulo={`${ordenadas.length} ${ordenadas.length === 1 ? 'unidad' : 'unidades'}`}
-              accion={
+              // En el teléfono no va la cuenta: la tira de arriba ya la dice, como en la app.
+              titulo={esMovil ? null : `${ordenadas.length} ${ordenadas.length === 1 ? 'unidad' : 'unidades'}`}
+              accion={(!esMovil || (esGestorDeFlota && areaId)) &&
                 <span className="pnl-chips" style={{ alignItems: 'center' }}>
                   {esGestorDeFlota && areaId && (
                     <button type="button" className="pnl-btn primario" onClick={() => setAsignando({ area: areaId })}>

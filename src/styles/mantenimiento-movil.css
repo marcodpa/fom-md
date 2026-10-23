@@ -170,7 +170,14 @@
 /* «Tiempo trabajado» en una fila suelta, como odt-asignada-acciones.tsx: rótulo a la
    izquierda y el reloj a la derecha, sin la caja hundida de la computadora. */
 .mvm .mnt-asig-tiempo { width: 100%; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--app-esp-sm); margin: 0; padding: 0; border: 0; border-radius: 0; background: none; text-align: left; }
-.mvm .mnt-asig-tiempo dt { justify-content: flex-start; font: var(--app-body); color: var(--app-texto-2); }
-.mvm .mnt-asig-tiempo dd { margin: 0; font: var(--app-subtitle); font-weight: var(--app-peso-negrita); color: var(--app-texto); font-variant-numeric: tabular-nums; }
+/* RelojOdt: rótulo en caption gris con el ícono de pausa (o el punto que late) y «0:00:00» en
+   texto de botón, gris si está parado y en blanco mientras corre. */
+.mvm .mnt-asig-tiempo dt { justify-content: flex-start; gap: var(--app-esp-sm); font: var(--app-caption); color: var(--app-texto-2); }
+.mvm .mnt-asig-tiempo dt > svg { flex: none; color: var(--app-texto-3); }
+.mvm .mnt-asig-tiempo dd { margin: 0; font: var(--app-button); color: var(--app-texto-2); font-variant-numeric: tabular-nums; }
+.mvm .mnt-asig-tiempo.corre dd { color: var(--app-texto); }
+.mvm .mnt-asig-latido { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--app-exito); animation: mnt-asig-latido 1.4s ease-in-out infinite; }
+@keyframes mnt-asig-latido { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .mvm .mnt-asig-latido { animation: none; } }
 /* En qué va el trabajo: texto suelto en gris, no una etiqueta (odt-asignada-seccion.tsx · momento). */
 .mvm .mnt-asig-tags .pnl-tag { height: auto; padding: 0; border-radius: 0; background: none; font: var(--app-caption); color: var(--app-texto-2); }

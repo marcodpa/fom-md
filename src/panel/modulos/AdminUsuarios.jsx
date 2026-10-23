@@ -109,18 +109,100 @@ export default function AdminUsuarios() {
       setParametros(siguientes, { replace: true })
     }
   }
-  const [moviendo, setMoviendo] = useState(null)
-  const [claveDe, setClaveDe] = useState(null) // {nombre, clave} tras restablecer
-  const [aviso, setAviso] = useState('')
   const esMovil = useVistaTelefono()
 
   const { datos, estado, error, recargar } = useDatos(() => cargar(q, empresaId, rol), [q, empresaId, rol])
+  const cuenta = useAccionesCuenta({ actor, alCambiar: recargar })
+  const { aviso, restablecerClave, aDesempleados, eliminarDefinitivo, suspender, reactivar, revocarAcceso } = cuenta
+
+  return (
+    <>
+      <Cabecera
+        titulo="Usuarios"
+        bajada={esMovil ? 'La gente de tu empresa.' : `Personal de ${actor?.empresa || 'tu empresa'}. Consulta sus roles, unidades y documentos.`}
+      >
+        {/* En el teléfono «Exportar» va en la hoja de filtros: arriba solo queda «Nuevo usuario». */}
+        {!esMovil && <button
+          type="button"
+          className="pnl-btn"
+          onClick={() => exportarCSV(datos?.lista ?? [])}
+          disabled={(datos?.lista ?? []).length === 0}
+        >
+          <Icono nombre="descargar" tam={16} />
+          Exportar
+        </button>}
+        {(datos?.lista?.alcance?.administrable ?? true) && (
+          <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)} aria-label="Nuevo usuario">
+            <Icono nombre="mas" tam={16} />
+            {/* En el teléfono, «Nuevo» a secas, como el BotonNuevo de panel/personal.tsx. */}
+            {esMovil ? 'Nuevo' : 'Nuevo usuario'}
+          </button>
+        )}
+      </Cabecera>
+
+      <div className="pnl-cuerpo usr-directorio">
+        {estado === 'cargando' && <Cargando filas={6} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
+        {estado === 'ok' && (
+          <Contenido
+            datos={datos}
+            q={q}
+            setQ={setQ}
+            rol={rol}
+            setRol={setRol}
+            aviso={aviso}
+            restablecerClave={restablecerClave}
+            aDesempleados={aDesempleados}
+            eliminarDefinitivo={eliminarDefinitivo}
+            abrirMover={cuenta.hacer.mover}
+            directorioReal={DIRECTORIO_REAL}
+            actor={actor}
+            suspender={suspender}
+            reactivar={reactivar}
+            revocarAcceso={revocarAcceso}
+          />
+        )}
+      </div>
+
+      {estado === 'ok' && (
+        <>
+          <ModalCrear
+            abierto={creando}
+            empresas={datos.empresas}
+            alCerrar={cerrarCreacion}
+            alGuardar={recargar}
+            directorioReal={DIRECTORIO_REAL}
+            actor={actor}
+            suspender={suspender}
+            reactivar={reactivar}
+            revocarAcceso={revocarAcceso}
+          />
+          {cuenta.modalMover(datos.empresas)}
+        </>
+      )}
+
+      {cuenta.modalClave}
+    </>
+  )
+}
+
+/**
+ * LAS ACCIONES DE UNA CUENTA: clave, suspender, reactivar, revocar, mover y
+ * dar salida, con sus preguntas de confirmación. Las usan el menú «⋮» de la
+ * lista (computadora) y el perfil de la persona en el teléfono, que es donde
+ * las tiene la app: mismas funciones, mismos permisos (`accionesDeCuenta`).
+ * `alCambiar` se llama tras cada cambio para releer lo que se ve.
+ */
+function useAccionesCuenta({ actor, alCambiar }) {
+  const [moviendo, setMoviendo] = useState(null)
+  const [claveDe, setClaveDe] = useState(null) // {nombre, clave} tras restablecer
+  const [aviso, setAviso] = useState('')
 
   const accion = async (fn) => {
     setAviso('')
     try {
       await fn()
-      await recargar()
+      await alCambiar?.()
     } catch (e) {
       setAviso(e.message)
     }
@@ -135,7 +217,7 @@ export default function AdminUsuarios() {
     try {
       const r = await repo.admin.usuarios.cambiarClave(p.id, actor)
       setClaveDe({ nombre: p.nombre, clave: r.clave })
-      await recargar()
+      await alCambiar?.()
     } catch (e) {
       setAviso(e.message)
     }
@@ -166,94 +248,96 @@ export default function AdminUsuarios() {
     accion(() => repo.admin.usuarios.eliminar(p.id))
   }
 
-  return (
-    <>
-      <Cabecera
-        titulo="Usuarios"
-        bajada={esMovil ? 'La gente de tu empresa.' : `Personal de ${actor?.empresa || 'tu empresa'}. Consulta sus roles, unidades y documentos.`}
-      >
-        {/* En el teléfono «Exportar» va en la hoja de filtros: arriba solo queda «Nuevo usuario». */}
-        {!esMovil && <button
-          type="button"
-          className="pnl-btn"
-          onClick={() => exportarCSV(datos?.lista ?? [])}
-          disabled={(datos?.lista ?? []).length === 0}
-        >
-          <Icono nombre="descargar" tam={16} />
-          Exportar
-        </button>}
-        {(datos?.lista?.alcance?.administrable ?? true) && (
-          <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
-            <Icono nombre="mas" tam={16} />
-            Nuevo usuario
-          </button>
-        )}
-      </Cabecera>
+  /** Lo que hace cada acción de `accionesDeCuenta`. */
+  const hacer = {
+    clave: restablecerClave, suspender, reactivar, revocar: revocarAcceso,
+    mover: setMoviendo, eliminar: eliminarDefinitivo, salida: aDesempleados,
+  }
 
-      <div className="pnl-cuerpo usr-directorio">
-        {estado === 'cargando' && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
-        {estado === 'ok' && (
-          <Contenido
-            datos={datos}
-            q={q}
-            setQ={setQ}
-            rol={rol}
-            setRol={setRol}
-            aviso={aviso}
-            restablecerClave={restablecerClave}
-            aDesempleados={aDesempleados}
-            eliminarDefinitivo={eliminarDefinitivo}
-            abrirMover={setMoviendo}
-            directorioReal={DIRECTORIO_REAL}
-            actor={actor}
-            suspender={suspender}
-            reactivar={reactivar}
-            revocarAcceso={revocarAcceso}
-          />
-        )}
-      </div>
+  const modalMover = (empresas) => !DIRECTORIO_REAL && (
+    <ModalMover usuario={moviendo} empresas={empresas ?? []} alCerrar={() => setMoviendo(null)} alGuardar={alCambiar} />
+  )
 
-      {estado === 'ok' && (
+  const modalClave = (
+    <Modal titulo="Clave restablecida" abierto={!!claveDe} alCerrar={() => setClaveDe(null)} ancho={440}>
+      {claveDe && (
         <>
-          <ModalCrear
-            abierto={creando}
-            empresas={datos.empresas}
-            alCerrar={cerrarCreacion}
-            alGuardar={recargar}
-            directorioReal={DIRECTORIO_REAL}
-            actor={actor}
-            suspender={suspender}
-            reactivar={reactivar}
-            revocarAcceso={revocarAcceso}
-          />
-          {!DIRECTORIO_REAL && <ModalMover
-            usuario={moviendo}
-            empresas={datos.empresas}
-            alCerrar={() => setMoviendo(null)}
-            alGuardar={recargar}
-          />}
+          <p>
+            La clave de <b>{claveDe.nombre}</b> quedó en <code>{claveDe.clave}</code>.
+          </p>
+          <p className="pnl-campo-ayuda">
+            Entrégasela en persona: deberá cambiarla al entrar. No se volverá a mostrar.
+          </p>
+          <div className="pnl-chips">
+            <button type="button" className="pnl-btn primario" onClick={() => setClaveDe(null)}>
+              Entendido
+            </button>
+          </div>
         </>
       )}
+    </Modal>
+  )
 
-      <Modal titulo="Clave restablecida" abierto={!!claveDe} alCerrar={() => setClaveDe(null)} ancho={440}>
-        {claveDe && (
-          <>
-            <p>
-              La clave de <b>{claveDe.nombre}</b> quedó en <code>{claveDe.clave}</code>.
-            </p>
-            <p className="pnl-campo-ayuda">
-              Entrégasela en persona: deberá cambiarla al entrar. No se volverá a mostrar.
-            </p>
-            <div className="pnl-chips">
-              <button type="button" className="pnl-btn primario" onClick={() => setClaveDe(null)}>
-                Entendido
-              </button>
-            </div>
-          </>
-        )}
-      </Modal>
-    </>
+  return { aviso, setAviso, hacer, modalMover, modalClave, restablecerClave, aDesempleados, eliminarDefinitivo, suspender, reactivar, revocarAcceso }
+}
+
+/** El nombre de cada acción en su botón. */
+const TEXTO_ACCION = {
+  clave: 'Clave', suspender: 'Suspender', reactivar: 'Reactivar', revocar: 'Revocar',
+  mover: 'Mover', eliminar: 'Eliminar', salida: 'Dar salida',
+}
+
+/**
+ * Qué acciones se le ofrecen a quien administra sobre esta persona, en orden.
+ * En modo conectado solo las que el servidor sabe hacer, y solo sobre quien el
+ * rango del actor puede administrar: ofrecer un botón que va a devolver 403 es
+ * peor que no ofrecerlo. `lista` es la lectura de Usuarios (trae el alcance).
+ */
+function accionesDeCuenta(p, { lista, actor, directorioReal }) {
+  if (directorioReal && (lista?.alcance?.administrable ?? true) && puedeAdministrar(actor, p)) {
+    return [
+      'clave',
+      p.estado === 'suspended' ? 'reactivar' : p.estado === 'active' ? 'suspender' : null,
+      p.estado !== 'revoked' ? 'revocar' : null,
+    ].filter(Boolean)
+  }
+  if (!directorioReal && p.rol !== 'admin') return ['mover', 'clave', p.esDesempleado ? 'eliminar' : 'salida']
+  return []
+}
+
+/**
+ * Las acciones de la cuenta en el PERFIL de la persona, en el teléfono: la app
+ * no tiene el menú «⋮» en la lista y las pone aquí. Se lee la misma lista que
+ * Usuarios para usar la misma fila (ids, estado y alcance) y los mismos permisos.
+ * Si no se le puede hacer nada, no aparece.
+ */
+export function AccionesCuentaMovil({ personaId, alCambiar }) {
+  const sesion = useSesion()
+  const actor = sesion?.perfil
+  const lectura = useDatos(() => cargar('', actor?.empresaId, ''), [actor?.empresaId])
+  // Tras cada cambio se relee la fila (sus acciones) y el perfil que la rodea.
+  const cuenta = useAccionesCuenta({ actor, alCambiar: () => Promise.all([lectura.recargar(), alCambiar?.()]) })
+  const lista = lectura.datos?.lista ?? []
+  const fila = lista.find((x) => String(x.userId ?? x.id) === String(personaId) || String(x.id) === String(personaId)) ?? null
+  const acciones = fila ? accionesDeCuenta(fila, { lista, actor, directorioReal: DIRECTORIO_REAL }) : []
+  if (!fila || acciones.length === 0) return null
+  return (
+    <section className="pnl-card usr-cuenta-movil" aria-labelledby="usr-cuenta-titulo">
+      <div className="pnl-card-cab"><h2 id="usr-cuenta-titulo">Cuenta</h2></div>
+      <div className="pnl-card-cuerpo">
+        {cuenta.aviso && <p className="pnl-campo-error" role="alert">{cuenta.aviso}</p>}
+        <div className="pnl-chips">
+          {acciones.map((a) => (
+            <button key={a} type="button" className={`pnl-btn sutil${['revocar', 'eliminar', 'salida', 'suspender'].includes(a) ? ' peligro' : ''}`}
+              onClick={() => cuenta.hacer[a](fila)}>
+              {TEXTO_ACCION[a]}
+            </button>
+          ))}
+        </div>
+      </div>
+      {cuenta.modalMover(lectura.datos?.empresas)}
+      {cuenta.modalClave}
+    </section>
   )
 }
 
@@ -283,60 +367,31 @@ function Contenido({
         { v: 'supervisor_personal', t: 'Personales' },
       ]
 
-  // Las acciones de una cuenta. En modo conectado solo las que el servidor sabe
-  // hacer, y solo sobre quien el rango del actor puede administrar: ofrecer un
-  // botón que va a devolver 403 es peor que no ofrecerlo.
+  // Las acciones de una cuenta en el menú «⋮»: las de `accionesDeCuenta`, las
+  // mismas que el perfil de la persona ofrece en el teléfono.
   function accionesDe(p) {
-    if (directorioReal && (lista.alcance?.administrable ?? true) && puedeAdministrar(actor, p)) return (
+    const permitidas = accionesDeCuenta(p, { lista, actor, directorioReal })
+    if (permitidas.length === 0) return null
+    const hacer = {
+      clave: restablecerClave, suspender, reactivar, revocar: revocarAcceso,
+      mover: abrirMover, eliminar: eliminarDefinitivo, salida: aDesempleados,
+    }
+    return (
       <AccionesUsuario nombre={p.nombre}>
       <div className="pnl-chips">
-        <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
-          Clave
-        </button>
-        {p.estado === 'suspended' ? (
-          <button type="button" className="pnl-btn sutil" onClick={() => reactivar(p)}>
-            Reactivar
+        {permitidas.map((a) => (
+          <button key={a} type="button" className="pnl-btn sutil" onClick={() => hacer[a](p)}>
+            {TEXTO_ACCION[a]}
           </button>
-        ) : p.estado === 'active' ? (
-          <button type="button" className="pnl-btn sutil" onClick={() => suspender(p)}>
-            Suspender
-          </button>
-        ) : null}
-        {p.estado !== 'revoked' && (
-          <button type="button" className="pnl-btn sutil" onClick={() => revocarAcceso(p)}>
-            Revocar
-          </button>
-        )}
+        ))}
       </div>
       </AccionesUsuario>
-      )
-    if (!directorioReal && p.rol !== 'admin') return (
-      <AccionesUsuario nombre={p.nombre}>
-      <div className="pnl-chips">
-        <button type="button" className="pnl-btn sutil" onClick={() => abrirMover(p)}>
-          Mover
-        </button>
-        <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
-          Clave
-        </button>
-        {p.esDesempleado ? (
-          <button type="button" className="pnl-btn sutil" onClick={() => eliminarDefinitivo(p)}>
-            Eliminar
-          </button>
-        ) : (
-          <button type="button" className="pnl-btn sutil" onClick={() => aDesempleados(p)}>
-            Dar salida
-          </button>
-        )}
-      </div>
-      </AccionesUsuario>
-      )
-    return null
+    )
   }
 
   // En la vista de teléfono, la pestaña de la app: tira, buscador con filtros y una lista de personas.
   if (esMovil) return <UsuariosMovil lista={lista} q={q} setQ={setQ} rol={rol} setRol={setRol} opcionesRol={opcionesRol}
-    aviso={aviso} manejoPorId={manejoPorId} accionesDe={accionesDe} alExportar={() => exportarCSV(lista)} />
+    aviso={aviso} manejoPorId={manejoPorId} alExportar={() => exportarCSV(lista)} />
 
   return (
     <>

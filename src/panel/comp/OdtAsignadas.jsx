@@ -5,6 +5,7 @@ import { Icono } from '../Iconos'
 import { etiqueta } from '../datos/catalogos'
 import TarjetaMantenimiento from './TarjetaMantenimiento'
 import { ESTADOS_DE_TALLER, MOMENTOS, accionesDe, listarAsignadas, registrarEvento, textoTiempo } from '../datos/odtAsignadas'
+import { useVistaTelefono } from './movil-navegacion'
 
 // ============================================================
 // «ASIGNADAS A TI» — las ODT que la persona de la sesión tiene a su cargo.
@@ -15,7 +16,29 @@ import { ESTADOS_DE_TALLER, MOMENTOS, accionesDe, listarAsignadas, registrarEven
 
 const COLOR_MOMENTO = { asignada: 'gris', en_ejecucion: 'verde', pausada: 'ambar', en_calidad: 'azul' }
 
-export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir }) {
+/** «1:05:23», como `formatoReloj` de la app: horas sin tope, minutos y segundos con dos cifras. */
+export function formatoReloj(segundos) {
+  const s = Math.max(0, Math.floor(Number(segundos) || 0))
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  return `${h}:${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+}
+
+/** «U-001 · Z69FC7W»: el número de puerta y la placa, como `vehicleLabel` de la app. */
+function identidadDe(unidad) {
+  const numero = unidad?.numero && unidad.numero !== '—' ? unidad.numero.toUpperCase() : null
+  const placa = unidad?.placa && unidad.placa !== '—' ? unidad.placa : null
+  return [numero, placa].filter(Boolean).join(' · ')
+}
+
+/**
+ * - `unidad`: la unidad del conductor (opcional). En el teléfono, la tarjeta de
+ *   una orden de esa unidad la nombra «U-001 · placa», como la app.
+ */
+export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir, unidad = null }) {
+  // En el teléfono, la sección de la app (odt-asignada-seccion.tsx): su bajada,
+  // el título de la orden, «Sin iniciar» y el reloj «0:00:00».
+  const movil = useVistaTelefono()
   // Se vuelve a preguntar solo si cambia alguna orden en taller (no por cada refresco de la lista).
   const clave = useMemo(
     () => (odts ?? []).filter((o) => ESTADOS_DE_TALLER.includes(o.estado)).map((o) => `${o.id}:${o.estado}`).join(','),
@@ -32,11 +55,12 @@ export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir }) {
   const corriendo = items.some((o) => o.estado === 'en_ejecucion')
 
   // Mientras alguien trabaja, el tiempo sigue contando en pantalla sin pedir nada al servidor.
+  // En el teléfono el reloj lleva segundos: avanza cada segundo, como en la app.
   useEffect(() => {
     if (!corriendo) return undefined
-    const id = setInterval(() => setAhora(Date.now()), 30_000)
+    const id = setInterval(() => setAhora(Date.now()), movil ? 1000 : 30_000)
     return () => clearInterval(id)
-  }, [corriendo])
+  }, [corriendo, movil])
 
   if (lectura.estado === 'error') {
     return (
@@ -58,17 +82,21 @@ export default function OdtAsignadas({ odts, perfil, alCambiar, alAbrir }) {
     <section className="pnl-card mnt-asig" aria-labelledby="mnt-asig-titulo">
       <div className="pnl-card-cab">
         <h2 id="mnt-asig-titulo">Asignadas a ti</h2>
-        <span className="mnt-asig-cuenta">{items.length} {items.length === 1 ? 'orden a tu cargo' : 'órdenes a tu cargo'}</span>
+        <span className="mnt-asig-cuenta">
+          {movil ? 'El supervisor te asignó estas ODT. Inicia, pausa y entrega desde aquí.'
+            : `${items.length} ${items.length === 1 ? 'orden a tu cargo' : 'órdenes a tu cargo'}`}
+        </span>
       </div>
       {aviso && <div className="mnt-success mnt-asig-aviso" role="status"><Icono nombre="check" tam={20} />{aviso}</div>}
       <div className="mnt-asig-lista mnt-tarjetas">
-        {items.map((o) => <Asignada key={o.id} item={o} ahora={ahora} alHacer={despues} alAbrir={alAbrir && conocidas.has(o.id) ? alAbrir : null} />)}
+        {items.map((o) => <Asignada key={o.id} item={o} ahora={ahora} alHacer={despues} alAbrir={alAbrir && conocidas.has(o.id) ? alAbrir : null}
+          movil={movil} nombreUnidad={unidad && o.vehiculoId === unidad.id ? identidadDe(unidad) : ''} />)}
       </div>
     </section>
   )
 }
 
-function Asignada({ item, ahora, alHacer, alAbrir }) {
+function Asignada({ item, ahora, alHacer, alAbrir, movil = false, nombreUnidad = '' }) {
   // El paso que pide nota (Pausar o Entregar) mientras se escribe; null si no hay ninguno abierto.
   const [pidiendo, setPidiendo] = useState(null)
   const [nota, setNota] = useState('')
@@ -115,7 +143,12 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
   }
 
   // La misma tarjeta de todo Mantenimiento; debajo, en qué va el trabajo, el tiempo y los botones.
-  const odt = { id: item.id, estado: item.estado, descripcion: item.titulo, tipoFalla: item.tipoFalla, prioridad: item.prioridad, creadaEn: item.creadaEn, vehiculoNombre: item.vehiculoNombre }
+  // En el teléfono, como TarjetaOdt de la app con lo que da su lista de asignadas: de título la
+  // descripción de la orden y debajo «U-001 · placa · Correctiva».
+  const odt = movil
+    ? { id: item.id, estado: item.estado, descripcion: item.titulo, tipoFalla: null, tipo: item.tipo === 'preventiva' ? 'preventiva' : 'correctiva', prioridad: item.prioridad, creadaEn: item.creadaEn, vehiculoNombre: nombreUnidad || item.vehiculoNombre }
+    : { id: item.id, estado: item.estado, descripcion: item.titulo, tipoFalla: item.tipoFalla, prioridad: item.prioridad, creadaEn: item.creadaEn, vehiculoNombre: item.vehiculoNombre }
+  const corre = item.estado === 'en_ejecucion'
   return (
     <TarjetaMantenimiento odt={odt} alAbrir={alAbrir}>
       <div className="mnt-asig-fila">
@@ -123,12 +156,27 @@ function Asignada({ item, ahora, alHacer, alAbrir }) {
           <div className="mnt-asig-tags">
             <Tag color={COLOR_MOMENTO[item.estado] ?? 'gris'} plano>{momento.t}</Tag>
           </div>
-          {momento.ayuda && <p>{momento.ayuda}</p>}
+          {/* La app dice solo el momento; la ayuda larga queda para la computadora. */}
+          {!movil && momento.ayuda && <p>{momento.ayuda}</p>}
         </div>
-        <dl className="mnt-asig-tiempo">
-          <dt><Icono nombre="reloj" tam={16} />Tiempo trabajado</dt>
-          <dd>{textoTiempo(segundos)}</dd>
-        </dl>
+        {movil ? (
+          <dl className={`mnt-asig-tiempo${corre ? ' corre' : ''}`} aria-label={`Tiempo trabajado ${formatoReloj(segundos)}${corre ? ', corriendo' : ''}`}>
+            <dt>
+              {corre ? <i className="mnt-asig-latido" aria-hidden="true" /> : (
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 4h16v16H4z" /><path d="M9 9v6" /><path d="M15 9v6" />
+                </svg>
+              )}
+              Tiempo trabajado
+            </dt>
+            <dd>{formatoReloj(segundos)}</dd>
+          </dl>
+        ) : (
+          <dl className="mnt-asig-tiempo">
+            <dt><Icono nombre="reloj" tam={16} />Tiempo trabajado</dt>
+            <dd>{textoTiempo(segundos)}</dd>
+          </dl>
+        )}
       </div>
 
       {!pidiendo && acciones.length > 0 && (

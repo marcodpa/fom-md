@@ -11,6 +11,8 @@ import {
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import './usuarios-perfil.css'
+import { useVistaTelefono } from '../comp/movil-navegacion'
+import { AccionesCuentaMovil } from './AdminUsuarios'
 
 import { PESTANAS, PestanasPerfil, MetricasPerfil, Identidad, FichaDatos, UnidadAsignada, Conduccion, Inspecciones, Documentos, ModalPerfil } from '../comp/PerfilUsuario'
 
@@ -38,6 +40,8 @@ export default function ExpedienteConductor() {
   }, [guardado])
 
   const [editandoPerfil, setEditandoPerfil] = useState(false)
+  // En el teléfono la lista de Usuarios no tiene el menú «⋮» (como la app): sus acciones van aquí.
+  const esMovil = useVistaTelefono()
 
   const asignar = async (vehiculoId) => {
     if (!vehiculoId) return
@@ -137,6 +141,7 @@ export default function ExpedienteConductor() {
             {pestana === 'inspecciones' && <Inspecciones inspecciones={inspecciones} error={p.inspeccionesError} />}
             {pestana === 'documentos' && <Documentos persona={p} alActualizar={ficha.recargar} documentos={p.documentos ?? []} error={p.documentosError} />}
             </section>
+            {esMovil && <AccionesCuentaMovil personaId={id} alCambiar={ficha.recargar} />}
           </>
         )}
       </div>

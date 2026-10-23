@@ -22,7 +22,12 @@
 .mvs-mapa > .pnl-mapa { border: 0; border-radius: 0; }
 .mvs-mapa .mapa-capas { display: none; }
 .mvs-mapa .pnl-mapa :is(.mapboxgl-ctrl-bottom-right, .leaflet-bottom.leaflet-right) { display: none; }
-.mvs-ampliar { position: absolute; top: 12px; right: 12px; z-index: 5; width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--app-borde); border-radius: var(--app-r-pill); background: rgb(20 26 34 / .94); color: var(--app-texto); }
+/* Encuadrar arriba a la izquierda y la pastilla «MAPA» a la derecha, como panel/flota.tsx. */
+.mvs-ampliar { position: absolute; top: 12px; left: 12px; z-index: 5; width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--app-borde); border-radius: var(--app-r-pill); background: rgb(20 26 34 / .94); color: var(--app-texto); }
+/* La pastilla «MAPA»/«SAT» de mapa-fom-dom.tsx: 44 × 44, esquina 14, texto 11/700. */
+.mapa-pildora-vista { position: absolute; top: 12px; right: 12px; z-index: 5; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 14px; background: rgb(20 26 34 / .94); color: var(--app-texto-2, #a9b4c2); font: 700 11px/1 var(--app-fuente, system-ui, sans-serif); letter-spacing: .6px; cursor: pointer; }
+.mapa-pildora-vista.on { color: var(--app-primario, #349bfa); }
+.mapa-pildora-vista:focus-visible { outline: 3px solid #85c9ff; outline-offset: 2px; }
 .mvs-mapa-nota { position: absolute; left: 14px; bottom: 12px; z-index: 5; padding: 7px 13px; border: 1px solid var(--app-borde); border-radius: var(--app-r-pill); background: var(--app-sup-baja); color: var(--app-texto-3); font-size: 13px; }
 .mvs-tocada { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 6; display: grid; gap: 8px; padding: 12px; border-radius: var(--app-r-lg); background: rgb(20 26 34 / .96); box-shadow: 0 6px 18px rgb(0 0 0 / .5); }
 .mvs-tocada-fila { display: flex; align-items: flex-start; gap: 8px; }
@@ -59,6 +64,14 @@
 .mvs-tira-centrada > div + div { border-left: 1px solid var(--app-borde); }
 .mvs-tira-centrada b { font: var(--app-kpi-valor); font-variant-numeric: tabular-nums; color: var(--tono, var(--app-texto)); }
 .mvs-tira-centrada small { font-size: 13px; line-height: 16px; color: var(--app-texto-2); }
+/* La tira de tres de personal.tsx (TiraEstado centrada): número con su punto, la palabra y la barrita. */
+.mvs-tira-tres { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mvs-tira-tres > div { justify-items: center; text-align: center; }
+.mvs-tira-tres .mv-tira-pista { justify-self: stretch; }
+.mvs-tira-tres .mv-tira-num i + b { color: var(--app-texto-2); }
+.mvs-tira-tres .mv-tira-num b.verde { color: var(--app-exito); }
+.mvs-tira-tres .mv-tira-num b.rojo { color: var(--app-peligro); }
+.mvs-tira-tres .mv-tira-pista > i.rojo { background: var(--app-peligro); }
 .mvs-vacio { margin: 0; padding: 24px 0; text-align: center; color: var(--app-texto-2); font-size: 15px; }
 .mvs-personas { margin: 0; padding: 0; list-style: none; overflow: hidden; border: 1px solid var(--app-borde); border-radius: var(--app-r-lg); background: var(--app-sup); }
 .mvs-personas li { display: flex; align-items: center; }
@@ -73,6 +86,7 @@
 .mvs-persona-txt small i { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--app-texto-3); }
 .mvs-persona-txt small i.con { background: var(--app-exito); }
 .mvs-persona-txt small .encoge { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.mvs-persona-txt small .encoge.con { color: var(--app-exito); }
 /* La pastilla de manejo de la app (pastilla.tsx): sin punto, esquina 10, alto 22 y tinte al 12 %. */
 .mvs-persona .pnl-tag { flex: none; height: var(--app-pastilla-alto); display: inline-flex; align-items: center; gap: var(--app-pastilla-hueco); padding: var(--app-pastilla-pad); border-radius: var(--app-r-sm); font: var(--app-pastilla-texto); white-space: nowrap; }
 .mvs-persona .pnl-tag::before { display: none; }
@@ -115,3 +129,9 @@
 .mvs-aldia-aviso { font-size: 14px; line-height: 20px; color: var(--app-peligro); }
 
 .pnl.fom-dark[data-diseno] :is(.mvs-ampliar, .mvs-filtrar, .mvs-persona, .mvs-aldia, .mvs-tocada-botones > *):focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+
+/* ---------- Perfil de una persona: las acciones de su cuenta ---------- */
+/* En el teléfono la lista no lleva «⋮»: clave, suspender, revocar… van al final del perfil. */
+.usr-cuenta-movil .pnl-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--app-esp-sm); }
+.usr-cuenta-movil .pnl-btn { justify-content: center; min-height: var(--app-boton-alto, 48px); border: 1px solid var(--app-borde); border-radius: var(--app-r-pill); background: var(--app-sup-baja); color: var(--app-texto); }
+.usr-cuenta-movil .pnl-btn.peligro { color: var(--app-peligro); }

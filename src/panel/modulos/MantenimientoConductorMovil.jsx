@@ -224,7 +224,7 @@ export default function MantenimientoConductorMovil({
     <div className="mvm">
       {titulo}
       {/* Las órdenes que el supervisor le asignó, para trabajarlas (aunque no tenga unidad). */}
-      {!cargando && ordenes && <OdtAsignadas odts={ordenes} perfil={perfil} alCambiar={alCambiar} alAbrir={alAbrir} />}
+      {!cargando && ordenes && <OdtAsignadas odts={ordenes} perfil={perfil} alCambiar={alCambiar} alAbrir={alAbrir} unidad={unidad} />}
 
       {!cargando && !error && !asignacion ? (
         <Vacio titulo="Aún no conduces una unidad" texto="Cuando tu supervisor te asigne un vehículo, aquí verás su mantenimiento." />

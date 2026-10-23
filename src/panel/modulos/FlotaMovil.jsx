@@ -27,7 +27,7 @@ export function MapaFlotaMovil({ unidades, cargando, novedadDe, nombreConductor,
   const callada = elegida && elegida.conectado === false
   return (
     <section className="mvs-mapa" aria-label="Mapa de la flota">
-      <Mapa vehiculos={conPunto} alto="100%" leyenda={false} ficha={false}
+      <Mapa vehiculos={conPunto} alto="100%" leyenda={false} ficha={false} pildoraVista
         seleccionado={tocada} alSeleccionar={(id) => setTocada(id)} />
       {/* Ampliar: el mapa entero, a pantalla completa (Centro de control). */}
       <Link to="/panel/mapa" className="mvs-ampliar" aria-label="Ver el mapa completo">

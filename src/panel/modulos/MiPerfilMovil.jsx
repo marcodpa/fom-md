@@ -17,8 +17,12 @@ import '../../styles/perfil-movil.css'
 // el índice de manejo con el anillo, las tres cifras, «Mi información», los
 // accesos y «Cerrar sesión» (con pregunta).
 //
-// Lo que la app tiene y la web no: activarse en otra unidad con el PIN y
-// cambiar la contraseña. No se ofrecen: serían botones que no llevan a nada.
+// Lo que la app tiene y la web no: «Otra unidad» (activarse en otra unidad
+// con el PIN, pin-unidad.tsx) y cambiar la contraseña. No se ofrecen: serían
+// botones que no llevan a nada.
+//
+// El punto verde del retrato es el «en línea» de perfil-hero.tsx: en la app
+// se enciende si tiene sesión de manejo; aquí, si tiene unidad asignada.
 // ============================================================
 
 /** Trazos de tab-icon.tsx de la app que el set de la web no tiene. */
@@ -105,6 +109,7 @@ export default function MiPerfilMovil({ persona, sesion, aviso, alEditar, docume
           <i className="mvp-retrato-halo" aria-hidden="true" />
           <span className="mvp-retrato-marco">
             <Avatar userId={persona.id} iniciales={f.iniciales(nombre)} nombre={nombre} clase="mvp-avatar" tam={216} />
+            {unidad && <i className="mvp-en-linea" role="img" aria-label="Con unidad asignada" />}
           </span>
         </div>
         <h1 className="mvp-nombre">{nombre}</h1>

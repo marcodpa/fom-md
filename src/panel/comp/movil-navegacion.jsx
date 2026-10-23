@@ -40,7 +40,7 @@ const PESTANAS = {
     { a: '/panel/flota', icono: 'camion', texto: 'Vehículos' },
     { a: '/panel/personal', icono: 'gente', texto: 'Usuarios' },
     // Cinco pestañas en un teléfono no caben con el nombre entero.
-    { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento', corto: 'Mantenim.' },
+    { a: '/panel/mantenimiento', icono: 'ot', texto: 'Mantenimiento', corto: 'Mantenim.' },
     PERFIL,
   ],
   // La web del admin FOM no tiene Resumen: abre en Usuarios generales.
@@ -55,12 +55,13 @@ const PESTANAS = {
     { a: '/panel/reportes', icono: 'reporte', texto: 'Reportes' },
     PERFIL,
   ],
-  // La app pone Inspección como segunda pestaña; la web del conductor no tiene
-  // esa pantalla, así que va el Mapa, que sí tiene.
+  // Los íconos de (driver)/_layout de la app: casa, llave y persona. La app
+  // pone Inspección como segunda pestaña; la web del conductor no tiene esa
+  // pantalla (ni cómo enviar la inspección diaria), así que va el Mapa.
   conductor: [
-    { a: '/panel', icono: 'camion', texto: 'Mi unidad' },
+    { a: '/panel', icono: 'inicio', texto: 'Mi unidad' },
     { a: '/panel/mapa', icono: 'mapa', texto: 'Mapa' },
-    { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento' },
+    { a: '/panel/mantenimiento', icono: 'ot', texto: 'Mantenimiento' },
     PERFIL,
   ],
   personal: [

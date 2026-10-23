@@ -209,6 +209,8 @@
   .pnl.fom-dark[data-movil] .pnl-cab-acciones > .pnl-btn.primario:only-child { flex: none; min-height: var(--app-nuevo-alto); padding: var(--app-nuevo-pad); gap: var(--app-nuevo-hueco); font: var(--app-nuevo-texto); box-shadow: var(--app-nuevo-sombra); }
   .pnl.fom-dark[data-movil] .pnl-cab-acciones > .pnl-btn.primario:only-child :is(svg, .ico) { width: var(--app-nuevo-icono); height: var(--app-nuevo-icono); }
   .pnl.fom-dark[data-movil] .pnl-cuerpo { padding: 0 var(--app-esp-lg) var(--app-esp-xl); gap: var(--app-esp-lg); }
+  /* Resumen: «Se actualiza solo cada 30 s» bajo el título, como en panel/index.tsx de la app. */
+  .pnl.fom-dark[data-movil] .rs-vivo-movil { padding: 0 calc(var(--app-esp-lg) + 4px) var(--app-esp-md); }
   /* Tarjetas de la app: superficie, borde de 1 px y radio 24; en oscuro sin sombra. */
   .pnl.fom-dark[data-movil] .pnl-card { border-radius: var(--app-tarjeta-radio); box-shadow: var(--app-sombra-tarjeta); }
   /* Tarjetas a todo el ancho: una columna. */
