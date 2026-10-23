@@ -28,6 +28,7 @@ import { Icono } from '../Iconos'
 import OdtAsignadas from '../comp/OdtAsignadas'
 import TarjetaMantenimiento, { GrupoTarjetas } from '../comp/TarjetaMantenimiento'
 import { masNuevasPrimero } from '../datos/odtAsignadas'
+import { ATAJOS_FECHA, SIN_FECHA, diaLocal, filtrarPorFecha, hayFiltroFecha, textoFiltroFecha } from '../datos/filtroFecha'
 import { esGestor } from '../roles'
 
 // ============================================================
@@ -184,6 +185,8 @@ function Ordenes({ enLista = false }) {
   const { datos, estado, error, recargar } = useDatos(cargarMantenimiento, [])
   const [q, setQ] = useState('')
   const [tipo, setTipo] = useState('')
+  // Fecha de reporte: atajo («hoy», «7d», «30d», «rango») y, si es rango, sus dos días.
+  const [fecha, setFecha] = useState(SIN_FECHA)
   const [vista, setVista] = useState(enLista ? 'lista' : 'atencion')
   const [grupo, setGrupo] = useState('')
   const [params] = useSearchParams()
@@ -192,16 +195,18 @@ function Ordenes({ enLista = false }) {
   const [aviso, setAviso] = useState('')
   const odts = datos?.odts ?? []
   const vehiculos = datos?.vehiculos ?? []
-  // Lo que deja pasar la búsqueda, el tipo y la unidad, sin mirar el estado: de aquí salen las
-  // cuentas del control de estado. Siempre de la más nueva a la más vieja, como la app.
-  const sinEstado = useMemo(() => masNuevasPrimero(odts.filter(o => {
+  // Lo que deja pasar la búsqueda y el tipo, sin mirar fecha ni estado: de aquí salen las
+  // cuentas del filtro de fecha. Siempre de la más nueva a la más vieja, como la app.
+  const sinFecha = useMemo(() => masNuevasPrimero(odts.filter(o => {
     if (tipo && o.tipo !== tipo) return false
     return [o.id, o.descripcion, o.vehiculoNombre, o.creadorNombre, etiqueta('tipo_falla', o.tipoFalla)].join(' ').toLowerCase().includes(q.trim().toLowerCase())
   })), [odts, q, tipo])
+  // Y además la fecha de reporte: de aquí salen las cuentas del control de estado. Filtrar no reordena.
+  const sinEstado = useMemo(() => filtrarPorFecha(sinFecha, fecha), [sinFecha, fecha])
   const visibles = useMemo(() => (grupo ? sinEstado.filter(o => estadoVisible(o.estado).clave === grupo) : sinEstado), [sinEstado, grupo])
   const detalle = detalleId ? odts.find(o => o.id === detalleId) : null
-  // Arriba de la lista, justo debajo del título y el buscador: el estado y el tipo de orden.
-  const filtrosArriba = <div className="mnt-filtrar"><FiltroEstado odts={sinEstado} valor={grupo} alCambiar={setGrupo}/><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/></div>
+  // Arriba de la lista, justo debajo del título y el buscador: el estado, la fecha y el tipo de orden.
+  const filtrosArriba = <div className="mnt-filtrar"><FiltroEstado odts={sinEstado} valor={grupo} alCambiar={setGrupo}/><FiltroFecha odts={sinFecha} valor={fecha} alCambiar={setFecha}/><FiltroTipo odts={odts} valor={tipo} alCambiar={setTipo}/></div>
   const cambioVista = <div className="mnt-view"><button type="button" aria-pressed={vista === 'atencion'} onClick={() => setVista('atencion')}>Prioridades</button><button type="button" aria-pressed={vista === 'lista'} onClick={() => setVista('lista')}>Lista</button></div>
   return <div className="mnt-content">
     <div className="mnt-toolbar"><div><h2>Órdenes de trabajo</h2><p>De la falla reportada a la unidad lista para volver.</p></div><button className="pnl-btn primario" type="button" onClick={() => setCreando(true)}><Icono nombre="mas" tam={18}/>Nueva ODT</button></div>
@@ -225,7 +230,7 @@ function Ordenes({ enLista = false }) {
 /** Las tarjetas seguidas, de a `tanda` con «Ver más» (el historial entero pueden ser cientos). */
 export function Tarjetas({ odts, alAbrir, tanda = 12, unidad = true, vacio = 'No hay órdenes con estos filtros' }) {
   const [tope, setTope] = useState(tanda)
-  if (!odts.length) return <Vacio icono="llave" titulo={vacio} texto="Prueba con otra búsqueda, otro estado u otro tipo de orden."/>
+  if (!odts.length) return <Vacio icono="llave" titulo={vacio} texto="Prueba con otra búsqueda, otras fechas, otro estado u otro tipo de orden."/>
   return <>
     <div className="mnt-tarjetas">{odts.slice(0, tope).map(o => <TarjetaMantenimiento key={o.id} odt={o} alAbrir={alAbrir} unidad={unidad}/>)}</div>
     {odts.length > tope && <button type="button" className="pnl-btn sutil mnt-ver-mas" onClick={() => setTope(tope + tanda)}>Ver más ({odts.length - tope})</button>}
@@ -291,6 +296,51 @@ export function FiltroTipo({ odts, valor, alCambiar }) {
   return <div className="mnt-tipo" ref={caja}>
     <button type="button" className={`mnt-tipo-boton${valor ? ' activo' : ''}`} aria-haspopup="true" aria-expanded={abierto} aria-label={valor ? `Tipo de orden: ${elegida?.t}` : 'Tipo de orden'} onClick={() => setAbierto(!abierto)}><Icono nombre="filtro" tam={16}/>Tipo{valor && <em>{elegida?.t}</em>}<svg className="mnt-flecha" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
     {abierto && <div className="mnt-tipo-menu" role="group" aria-label="Tipo de orden">{opciones.map(o => <button type="button" key={o.v || 'todos'} aria-pressed={valor === o.v} onClick={() => { alCambiar(o.v); setAbierto(false) }}><span>{o.t}</span><b>{o.n}</b><i aria-hidden="true">{valor === o.v ? <Icono nombre="check" tam={16}/> : null}</i></button>)}</div>}
+  </div>
+}
+
+/**
+ * «Fecha»: un botón como el de «Tipo» que abre los atajos (Hoy, 7 días, 30 días, Todo) con su
+ * cuenta y, debajo, un rango propio desde/hasta. Cuenta por la fecha en que se reportó la orden.
+ */
+export function FiltroFecha({ odts, valor, alCambiar }) {
+  const [abierto, setAbierto] = useState(false)
+  // El rango se escribe aquí y se aplica con el botón: a medio escribir no se filtra nada.
+  const [desde, setDesde] = useState(valor.desde)
+  const [hasta, setHasta] = useState(valor.hasta)
+  const caja = useRef(null)
+  useEffect(() => {
+    if (!abierto) return undefined
+    const fuera = (e) => { if (!caja.current?.contains(e.target)) setAbierto(false) }
+    const tecla = (e) => { if (e.key === 'Escape') { setAbierto(false); caja.current?.querySelector('button')?.focus() } }
+    document.addEventListener('pointerdown', fuera)
+    document.addEventListener('keydown', tecla)
+    return () => { document.removeEventListener('pointerdown', fuera); document.removeEventListener('keydown', tecla) }
+  }, [abierto])
+  const activo = hayFiltroFecha(valor)
+  const texto = textoFiltroFecha(valor)
+  const hoy = diaLocal()
+  function elegir(nuevo) { alCambiar(nuevo); setAbierto(false) }
+  function abrir() {
+    // Al abrir, el rango muestra lo que está aplicado (o vacío si es un atajo).
+    if (!abierto) { setDesde(valor.atajo === 'rango' ? valor.desde : ''); setHasta(valor.atajo === 'rango' ? valor.hasta : '') }
+    setAbierto(!abierto)
+  }
+  return <div className="mnt-tipo mnt-fecha" ref={caja}>
+    <button type="button" className={`mnt-tipo-boton${activo ? ' activo' : ''}`} aria-haspopup="true" aria-expanded={abierto} aria-label={activo ? `Fecha de reporte: ${texto}` : 'Fecha de reporte'} onClick={abrir}><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Fecha</span>{activo && <em>{texto}</em>}<svg className="mnt-flecha" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    {abierto && <div className="mnt-tipo-menu mnt-fecha-menu" role="group" aria-label="Fecha de reporte">
+      <p className="mnt-fecha-nota">Por el día en que se reportó</p>
+      {ATAJOS_FECHA.map(a => {
+        const elegido = a.clave ? valor.atajo === a.clave : !activo
+        return <button type="button" key={a.clave || 'todo'} aria-pressed={elegido} onClick={() => elegir(a.clave ? { ...SIN_FECHA, atajo: a.clave } : SIN_FECHA)}><span>{a.t}</span><b>{filtrarPorFecha(odts, { ...SIN_FECHA, atajo: a.clave }).length}</b><i aria-hidden="true">{elegido ? <Icono nombre="check" tam={16}/> : null}</i></button>
+      })}
+      <form className={`mnt-fecha-rango${valor.atajo === 'rango' && activo ? ' activo' : ''}`} onSubmit={e => { e.preventDefault(); if (desde || hasta) elegir({ atajo: 'rango', desde, hasta }) }}>
+        <span>Rango de fechas</span>
+        <label>Desde<input type="date" className="pnl-input" value={desde} max={hasta || hoy} onChange={e => setDesde(e.target.value)}/></label>
+        <label>Hasta<input type="date" className="pnl-input" value={hasta} min={desde || undefined} max={hoy} onChange={e => setHasta(e.target.value)}/></label>
+        <button type="submit" className="pnl-btn primario" disabled={!desde && !hasta}>Aplicar rango</button>
+      </form>
+    </div>}
   </div>
 }
 

@@ -145,20 +145,40 @@
 .mnt-tipo-boton em{font-style:normal;height:24px;display:inline-grid;place-items:center;padding:0 10px;border-radius:999px;background:#3D9BF5;color:#08121C;font-size:12px;font-weight:600}
 .mnt-flecha{transition:transform .15s}.mnt-tipo-boton[aria-expanded=true] .mnt-flecha{transform:rotate(180deg)}
 .mnt-tipo-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:40;min-width:240px;display:grid;gap:2px;padding:6px;border-radius:16px;background:var(--e-sup-alta);border:1px solid var(--e-borde-fuerte);box-shadow:var(--e-sombra-flotante,0 6px 18px rgba(0,0,0,.5))}
-.mnt-root .mnt-tipo-menu button{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border:0;border-radius:10px;background:none;color:var(--e-texto);font:inherit;font-size:14px;text-align:left;cursor:pointer}
-.mnt-tipo-menu button:hover{background:var(--e-sup-baja)}
-.mnt-tipo-menu button[aria-pressed=true]{background:var(--e-info-sup);font-weight:600}
+.mnt-root .mnt-tipo-menu>button{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border:0;border-radius:10px;background:none;color:var(--e-texto);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.mnt-tipo-menu>button:hover{background:var(--e-sup-baja)}
+.mnt-tipo-menu>button[aria-pressed=true]{background:var(--e-info-sup);font-weight:600}
 .mnt-tipo-menu span{flex:1}
 .mnt-tipo-menu b{font-size:12px;font-weight:600;color:var(--e-texto-2);font-variant-numeric:tabular-nums}
 .mnt-tipo-menu i{width:16px;height:16px;display:grid;place-items:center;color:var(--e-info)}
+/* «Fecha»: el mismo botón y menú que «Tipo». Arriba los atajos con su cuenta; debajo, un rango
+   desde/hasta que se aplica con su botón (a medio escribir no filtra). */
+.mnt-fecha-menu{min-width:300px}
+.mnt-root .mnt-fecha-nota{margin:6px 12px 4px;font-size:11px;line-height:16px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--e-texto-2)}
+.mnt-fecha-rango{display:grid;grid-template-columns:1fr 1fr;gap:10px 8px;margin-top:6px;padding:12px 6px 6px;border-top:1px solid var(--e-borde)}
+.mnt-fecha-rango>span{grid-column:1/-1;font-size:13px;font-weight:600;color:var(--e-texto)}
+.mnt-fecha-rango.activo>span{color:var(--e-info)}
+.mnt-fecha-rango label{display:grid;gap:4px;min-width:0;font-size:12px;color:var(--e-texto-2)}
+.mnt-root .mnt-fecha-rango .pnl-input{width:100%;min-width:0;height:40px;padding:0 8px;font-size:13px}
+.mnt-root .mnt-fecha-rango .pnl-btn{grid-column:1/-1;justify-content:center}
+/* La tarjeta recorta lo que sale de sus esquinas (apariencia.css): con un menú abierto y pocas
+   órdenes debajo, el menú quedaba cortado. Mientras está abierto, la tarjeta no recorta. */
+.pnl .mnt-root .pnl-card:has(.mnt-tipo-menu){overflow:visible}
 @media(max-width:700px){
   .mnt-filtrar{gap:8px}
   .mnt-root .pnl-card>.mnt-filtrar{padding:0 16px 14px}
-  /* El botón «Tipo» queda fijo a la derecha; lo que no cabe del control se desliza. */
-  .mnt-seg{flex:1}
-  .mnt-root .mnt-tipo-boton{padding:0 12px}
+  /* Tres filtros no caben en una línea: el estado arriba, a lo ancho (lo que no cabe se
+     desliza), y «Fecha» y «Tipo» debajo, mitad y mitad. Sus menús se abren a lo ancho. */
+  .mnt-filtrar{flex-wrap:wrap;position:relative}
+  .mnt-seg{flex:1 1 100%}
+  .mnt-tipo{flex:1 1 0;position:static;min-width:0}
+  .mnt-root .mnt-tipo-boton{width:100%;justify-content:center;padding:0 12px}
   .mnt-tipo-boton em{display:none}
   .mnt-tipo-boton.activo{background:#3D9BF5;border-color:#3D9BF5;color:#08121C}
+  .mnt-tipo-menu{left:16px;right:16px;min-width:0}
+  /* Con una fecha puesta, el botón dice cuál («30 días», «3 oct – 20 oct») en vez de «Fecha». */
+  .mnt-fecha .mnt-tipo-boton.activo>span{display:none}
+  .mnt-fecha .mnt-tipo-boton em{display:inline;min-width:0;height:auto;padding:0;background:none;color:inherit;font-size:13px;overflow:hidden;text-overflow:ellipsis}
 }
 /* T-78 La tarjeta de mantenimiento, igual que la app: la misma en Prioridades (agrupada por
    estado) y en Lista (seguida), para el supervisor, el conductor y «Asignadas a ti». */
