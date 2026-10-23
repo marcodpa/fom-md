@@ -70,6 +70,3 @@
 @media (max-width: 899px) { .inicio-telefonos { margin-top: 56px; } }
 @media (max-width: 599px) { .inicio-telefonos { margin-top: 40px; } }
 
-/* T-144 · Televisor que se enciende (EscenaTelevisorV8). */
-.inicio-tv .v8-tv { margin-top: 40px; }
-@media (max-width: 599px) { .inicio-tv .v8-tv { margin-top: 24px; } }

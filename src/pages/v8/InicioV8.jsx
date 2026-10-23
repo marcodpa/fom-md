@@ -7,9 +7,6 @@
 //      (EscenaTelefonosV8): la app (vista del conductor) en dos pantallas que se desplazan y se inclinan.
 //   3) «Toda tu flota. Un solo mapa.» (T-141): laptop que se abre al bajar (EscenaLaptopV8) con el
 //      Centro de control real y, ya abierta, la unidad seleccionada.
-//   4) «Abre el panel.» (T-144): televisor que se enciende con la pantalla de carga de FOM y muestra
-//      el Resumen y luego Alertas (EscenaTelevisorV8; se mueve solo). Va tras las cifras del mapa,
-//      para que no queden dos escenas fijas seguidas, y no repite el Centro de control de la laptop.
 // Todo lo demás: quieto o aparición suave. Teléfono: sin escenas fijas, mismas piezas apiladas.
 import { useRef } from 'react'
 import { PAGES } from '../../content/pages'
@@ -18,7 +15,6 @@ import {
   RasgosV8, CarruselV8, TarjetaCarruselV8, EscenaV8, BloqueCifrasV8, ChipV8, PreguntasV8, CtaFinalV8,
   EnlaceV8, EscenaTelefonosV8, EscenaLaptopV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
-import { EscenaTelevisorV8 } from '../../components/v8/escenasExtraV8'
 import './inicio-v8.css'
 
 const P = PAGES
@@ -58,11 +54,6 @@ const LAPTOP_MAPA = [
   { nombre: 'cap-panel-mapa-unidad', alt: 'Centro de control actual del panel FOM con una unidad seleccionada y su detalle. Datos de demostración.' },
 ]
 
-// Televisor (T-144): el Resumen al encender y, al final, Alertas (el mapa ya lo muestra la laptop).
-const TV_PANEL = [
-  { nombre: 'cap-panel-resumen', alt: 'Resumen del panel FOM: 26 vehículos, 9 órdenes por resolver y 8 alertas nuevas. Datos de demostración.' },
-  { nombre: 'cap-panel-alertas', alt: 'Alertas del panel FOM: excesos de velocidad sin leer. Datos de demostración.' },
-]
 
 const CIFRAS_SEGURIDAD = [stat('seguridad', 'Botón SOS, emergencias y privacidad'), stat('seguridad', 'Puntaje de manejo seguro')].map(cifra)
 const CIFRAS_MAPA = [
@@ -204,14 +195,6 @@ export default function InicioV8() {
         </div>
       </ContenedorV8>
       <ContenedorV8><BloqueCifrasV8 className="inicio-cifras-mapa" cifras={CIFRAS_MAPA} /></ContenedorV8>
-    </SeccionV8>
-
-    <SeccionV8 id="panel" className="inicio-tv" aria-labelledby="inicio-tv-titulo">
-      <ContenedorV8>
-        <EncabezadoV8 centro id="inicio-tv-titulo" kicker="Panel web" titulo={['Abre el panel.', 'Ahí está tu flota.']} anchoBajada={640}
-          bajada="Al entrar, FOM te muestra el Resumen: la flota, las órdenes por resolver y las alertas nuevas." />
-        <EscenaTelevisorV8 pantallas={TV_PANEL} etiqueta="Televisor que se enciende con la pantalla de carga de FOM y muestra el Resumen y las Alertas del panel" />
-      </ContenedorV8>
     </SeccionV8>
 
     <SeccionV8 id="preguntas" banda aria-labelledby="inicio-faq-titulo">

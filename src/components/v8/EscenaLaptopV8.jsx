@@ -1,6 +1,9 @@
 // Escena de laptop de la web v8 (T-141, pedido de Marco): el mismo tipo de efecto que la escena de
-// teléfonos, pero para el PANEL WEB. Una laptop hecha en CSS (tapa con bisel y cámara, bisagra,
-// base de aluminio con teclado y panel táctil) que se ABRE al bajar: la tapa gira desde cerrada
+// teléfonos, pero para el PANEL WEB. Una laptop hecha en CSS con el aspecto de una portátil
+// moderna de aluminio negro mate (T-149: bisel fino con muesca de cámara, canto de la tapa
+// delgado, bisagra negra, teclado de teclas planas, rejillas de altavoz, panel táctil grande y el
+// recorte para abrir con el dedo). En la tapa, el logo de FOM centrado y con acabado espejo (nunca
+// el logo de otra marca). Se ABRE al bajar: la tapa gira desde cerrada
 // hasta abierta con perspectiva 3D, la pantalla se enciende con la captura REAL del panel y, si se
 // pasa una segunda captura, la pantalla cambia a ella como si alguien navegara el panel.
 // Sin caja ni fondo propio: va directo sobre el fondo de la página (noche o banda), sin calle.
@@ -18,8 +21,8 @@ import './escena-laptop-v8.css'
 // La captura entra a 2x en el ancho de la pantalla (≈ 0,86 del ancho de la tapa).
 const SIZES = '(max-width: 599px) calc(100vw - 72px), (max-width: 1023px) 80vw, 760px'
 
-// Teclas por fila (la última es la barra espaciadora con sus vecinas).
-const FILAS = [14, 14, 13, 12, 11]
+// Teclas por fila: fila de funciones (baja), cuatro filas de letras y la de la barra espaciadora.
+const FILAS = [14, 13, 13, 12]
 
 function Captura({ nombre, alt, oculta }) {
   const f = fotoV8(nombre)
@@ -38,24 +41,29 @@ export default function EscenaLaptopV8({ pantallas, nota = true, etiqueta, class
       <div className="v8-lap-equipo">
         <div className="v8-lap-tapa">
           <div className="v8-lap-cara">
-            <span className="v8-lap-camara" aria-hidden="true" />
             <div className="v8-lap-pantalla">
               {pantallas.map((p, i) => <div key={p.nombre} className={`v8-lap-capa${i ? ' is-sigue' : ''}`}>
                 <Captura nombre={p.nombre} alt={p.alt} />
               </div>)}
               <div className="v8-lap-apagada" aria-hidden="true" />
               <div className="v8-lap-reflejo" aria-hidden="true" />
+              <span className="v8-lap-muesca" aria-hidden="true"><i /></span>
             </div>
           </div>
-          <div className="v8-lap-dorso" aria-hidden="true"><span /></div>
+          <div className="v8-lap-dorso" aria-hidden="true"><span className="v8-lap-logo" /></div>
+          <div className="v8-lap-canto" aria-hidden="true" />
         </div>
         <div className="v8-lap-base" aria-hidden="true">
+          <div className="v8-lap-bisagra" />
+          <div className="v8-lap-altavoz is-izq" />
+          <div className="v8-lap-altavoz is-der" />
           <div className="v8-lap-teclado">
-            {FILAS.map((n, f) => <div key={f} className="v8-lap-fila">{Array.from({ length: n }, (_, i) => <i key={i} />)}</div>)}
-            <div className="v8-lap-fila is-espacio"><i /><i /><i /><i className="is-barra" /><i /><i /><i /></div>
+            <div className="v8-lap-fila is-fn">{Array.from({ length: 14 }, (_, i) => <i key={i} />)}</div>
+            {FILAS.map((n, f) => <div key={f} className="v8-lap-fila">{Array.from({ length: n }, (_, i) => <i key={i} className={i === 0 && f > 0 ? 'is-ancha' : i === n - 1 && f > 0 ? 'is-ancha' : undefined} />)}</div>)}
+            <div className="v8-lap-fila is-espacio"><i /><i /><i /><i /><i className="is-barra" /><i /><i /><span className="v8-lap-flechas"><i /><i /></span></div>
           </div>
           <div className="v8-lap-tactil" />
-          <div className="v8-lap-frente" />
+          <div className="v8-lap-frente"><span className="v8-lap-dedo" /></div>
         </div>
       </div>
     </div>

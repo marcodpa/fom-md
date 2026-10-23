@@ -83,6 +83,10 @@
 .funciones-gps-foto { grid-area: foto; }
 .funciones-gps-lista { grid-area: lista; align-self: start; display: grid; gap: 14px; margin-top: 28px; }
 .funciones-gps-lista-movil { display: none; }
+/* Televisor del Centro de control (T-149), al pie de la sección GPS. */
+.funciones-gps-tv { margin-top: 96px; }
+@media (max-width: 899px) { .funciones-gps-tv { margin-top: 56px; } }
+@media (max-width: 599px) { .funciones-gps-tv { margin-top: 36px; } }
 
 /* Telemática */
 /* (la caja de la foto de Telemática es .funciones-tele-medio, arriba) */

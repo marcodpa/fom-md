@@ -6,6 +6,11 @@
 //      vehículo que avanza y un ping de posición por tramo (funciones-animaciones.jsx).
 //   1c) Telemática (T-117): señales que toma el equipo sobre la Hilux (puntos, líneas a la antena,
 //      ondas hacia el panel y etiquetas escalonadas).
+//   1d) Rastreo GPS (T-149, movido desde el Inicio): televisor que se enciende con la pantalla de
+//      carga de FOM y muestra el Centro de control y la unidad seleccionada (EscenaTelevisorV8, se
+//      mueve solo; fija en escritorio). Va al final de la sección GPS: la lista la separa del hero y
+//      el encabezado de Telemática la separa de la camioneta; el recorrido fijo queda dos secciones
+//      más abajo.
 //   2) Recorrido fijo «Del aviso a la decisión»: la captura en vidrio cambia entre Mantenimiento,
 //      Reportes y Alertas mientras el texto avanza (solo escritorio ≥ 1024 px).
 // Todo lo demás: quieto o aparición suave. Teléfono: capturas apiladas, sin escena fija.
@@ -16,6 +21,7 @@ import {
   TarjetaVidrioV8, EscenaV8, ListaPasosV8, PestanasV8, PreguntasV8, BotonV8, EnlaceV8, NotaVidrioV8, useMomentoV8, rutaV8,
 } from '../../components/v8'
 import { hayFotoV8 } from '../../components/v8/fotosV8'
+import { EscenaTelevisorV8 } from '../../components/v8/escenasExtraV8'
 import { RutaCostaV8, SenalesTelematicaV8, animarRutaCostaV8, animarSenalesV8 } from './funciones-animaciones'
 import './funciones-v8.css'
 
@@ -156,6 +162,10 @@ export default function FuncionesV8() {
         <ul className="funciones-gps-lista-movil">
           {GPS_MOVIL.map(([b, t]) => <li key={b}><h3 className="v8-h4">{b}</h3><p className="v8-sm v8-t2">{t}</p></li>)}
         </ul>
+      </ContenedorV8>
+      {/* Televisor que se enciende (modo por defecto: Centro de control y unidad seleccionada). */}
+      <ContenedorV8 className="funciones-gps-tv">
+        <EscenaTelevisorV8 etiqueta="Televisor que se enciende con la pantalla de carga de FOM y muestra el Centro de control y una unidad seleccionada" />
       </ContenedorV8>
     </SeccionV8>
 

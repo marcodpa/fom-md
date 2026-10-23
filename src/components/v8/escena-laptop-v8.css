@@ -1,7 +1,12 @@
-/* Escena de laptop (EscenaLaptopV8, T-141). Sin caja ni fondo propio: la laptop va sola sobre el
-   fondo de la página. Estado por defecto = ABIERTA (así queda con «reducir movimiento»); el
-   momento (momentoLaptopV8.js) la cierra al cargar y la abre con el scroll. Solo se animan
-   transform y opacidad.
+/* Escena de laptop (EscenaLaptopV8, T-141; aspecto de portátil moderna desde T-149). Sin caja ni
+   fondo propio: la laptop va sola sobre el fondo de la página. Estado por defecto = ABIERTA (así
+   queda con «reducir movimiento»); el momento (momentoLaptopV8.js) la cierra al cargar y la abre
+   con el scroll. Solo se animan transform y opacidad.
+
+   Acabado (T-149, Marco: «que sea una Mac nueva», sin la marca de nadie): aluminio negro espacial
+   mate con reflejo sutil y cantos con luz fina; bisel negro muy fino con muesca de cámara; bisagra
+   negra; teclado negro de teclas planas; rejillas de altavoz; panel táctil grande; recorte para
+   abrir con el dedo. En la tapa, el logo de FOM centrado con acabado espejo.
 
    Geometría (todo en función de --v8-lap-w, el ancho de la tapa):
    - .v8-lap-equipo: el conjunto, inclinado hacia quien mira (se ve desde un poco arriba). Gira
@@ -15,6 +20,11 @@
   --v8-lap-w: min(820px, calc(100vw - 96px), calc((100svh - 260px) * 1.2));
   --v8-lap-incl: -10deg;  /* conjunto: vista desde un poco arriba */
   --v8-lap-abre: 10deg;   /* tapa abierta: lo justo para quedar de frente */
+  --v8-lap-grosor: calc(var(--v8-lap-w) * .009); /* tapa delgada */
+  /* Aluminio negro espacial (mate). */
+  --v8-lap-al-1: #2b2f35;
+  --v8-lap-al-2: #202328;
+  --v8-lap-al-3: #181a1e;
   margin: 0 auto;
   width: var(--v8-lap-w);
 }
@@ -42,104 +52,161 @@
   will-change: transform;
 }
 .v8-lap-cara, .v8-lap-dorso {
-  border-radius: calc(var(--v8-lap-w) * .026) calc(var(--v8-lap-w) * .026) calc(var(--v8-lap-w) * .008) calc(var(--v8-lap-w) * .008);
+  border-radius: calc(var(--v8-lap-w) * .03) calc(var(--v8-lap-w) * .03) calc(var(--v8-lap-w) * .012) calc(var(--v8-lap-w) * .012);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
+/* Frente: bisel negro muy fino; el canto de aluminio asoma como un filo de luz alrededor. */
 .v8-lap-cara {
   position: relative;
-  padding: calc(var(--v8-lap-w) * .032) calc(var(--v8-lap-w) * .026) calc(var(--v8-lap-w) * .036);
-  background: linear-gradient(180deg, #0b0e13, #07090c);
+  padding: calc(var(--v8-lap-w) * .016) calc(var(--v8-lap-w) * .016) calc(var(--v8-lap-w) * .024);
+  background: #050608;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, .1),
-    inset 0 0 0 calc(var(--v8-lap-w) * .004) #2b323c,
-    0 0 0 1px #1d232c;
-}
-.v8-lap-camara {
-  position: absolute; left: 50%; top: calc(var(--v8-lap-w) * .013);
-  width: calc(var(--v8-lap-w) * .0075); aspect-ratio: 1; border-radius: 50%;
-  translate: -50% 0;
-  background: radial-gradient(circle at 40% 40%, #2c4a6b, #070a0e 70%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .06);
+    0 0 0 calc(var(--v8-lap-w) * .0028) #2f343b,
+    0 0 0 calc(var(--v8-lap-w) * .0028 + 1px) rgba(255, 255, 255, .16),
+    inset 0 0 0 1px rgba(255, 255, 255, .05);
 }
 .v8-lap-pantalla {
   position: relative; overflow: hidden;
   aspect-ratio: 16 / 10;
-  border-radius: calc(var(--v8-lap-w) * .006);
+  border-radius: calc(var(--v8-lap-w) * .016) calc(var(--v8-lap-w) * .016) calc(var(--v8-lap-w) * .004) calc(var(--v8-lap-w) * .004);
   background: #0a0d12;
 }
 .v8-lap-pantalla img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
 .v8-lap-capa { position: absolute; inset: 0; }
 .v8-lap-capa.is-sigue { opacity: 0; }
+/* Muesca de la cámara, arriba al centro, del negro del bisel. */
+.v8-lap-muesca {
+  position: absolute; left: 50%; top: 0; z-index: 2;
+  width: 10.5%; height: 3.6%;
+  translate: -50% 0;
+  background: #050608;
+  border-radius: 0 0 calc(var(--v8-lap-w) * .007) calc(var(--v8-lap-w) * .007);
+  display: grid; place-items: center;
+}
+.v8-lap-muesca i {
+  width: calc(var(--v8-lap-w) * .0065); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #2d4258 0, #0b1118 55%, #020304 100%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .05);
+}
 /* Pantalla apagada (negra) y reflejo del vidrio: solo se ven mientras se abre. */
 .v8-lap-apagada { position: absolute; inset: 0; background: #030406; opacity: 0; pointer-events: none; }
 .v8-lap-reflejo {
   position: absolute; inset: 0; opacity: 0; pointer-events: none;
-  background: linear-gradient(115deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, 0) 38%);
+  background: linear-gradient(115deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, 0) 38%);
 }
-/* Dorso de la tapa (aluminio): se ve con la laptop cerrada. */
+
+/* Dorso de la tapa: aluminio mate con un reflejo amplio y suave (sin manchas), filo de luz en el
+   borde y el logo de FOM en espejo. Va detrás de la pantalla, a la distancia del grosor. */
 .v8-lap-dorso {
   position: absolute; inset: 0;
-  transform: rotateY(180deg) translateZ(1px);
-  background: linear-gradient(160deg, #4a525d 0%, #2a3038 45%, #1b2027 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14);
+  transform: rotateY(180deg) translateZ(var(--v8-lap-grosor));
+  background:
+    linear-gradient(128deg, rgba(255, 255, 255, .07) 0%, rgba(255, 255, 255, .02) 34%, rgba(255, 255, 255, 0) 52%, rgba(255, 255, 255, .035) 78%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(180deg, var(--v8-lap-al-1), var(--v8-lap-al-2) 55%, var(--v8-lap-al-3));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .13),
+    inset 0 1px 0 rgba(255, 255, 255, .22);
   display: grid; place-items: center;
 }
-.v8-lap-dorso span {
-  width: 9%; aspect-ratio: 1; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 70%);
+/* Logo de FOM (flechas + FOM) centrado, del tamaño que tendría el logo de una portátil, en espejo:
+   el degradado claro-oscuro hace de reflejo sobre el aluminio mate. Girado 180°: se lee derecho
+   con la laptop cerrada, que es cuando se ve. */
+.v8-lap-logo {
+  width: 21%; aspect-ratio: 280 / 84;
+  rotate: 180deg;
+  background: linear-gradient(118deg, #5d636b 0%, #c9ced5 22%, #f4f6f9 34%, #8b9199 47%, #e7eaee 60%, #6f757d 78%, #b8bdc4 100%);
+  -webkit-mask: url('/brand/fom-logo.svg') center / contain no-repeat;
+  mask: url('/brand/fom-logo.svg') center / contain no-repeat;
+}
+/* Canto superior de la tapa (su grosor): un filo de aluminio que se ve con la tapa cerrada. */
+.v8-lap-canto {
+  position: absolute; left: calc(var(--v8-lap-w) * .006); right: calc(var(--v8-lap-w) * .006); top: 0;
+  height: var(--v8-lap-grosor);
+  transform-origin: 50% 0;
+  transform: rotateX(-90deg);
+  border-radius: calc(var(--v8-lap-w) * .006);
+  background: linear-gradient(180deg, #4a5059, #2a2e34);
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────── */
 .v8-lap-base {
-  position: absolute; top: 100%; left: -4%; right: -4%;
+  position: absolute; top: 100%; left: 0; right: 0;
   height: calc(var(--v8-lap-w) * .6);
   transform-origin: 50% 0;
   transform: rotateX(90deg);
   transform-style: preserve-3d;
-  border-radius: calc(var(--v8-lap-w) * .006) calc(var(--v8-lap-w) * .006) calc(var(--v8-lap-w) * .03) calc(var(--v8-lap-w) * .03);
-  background: linear-gradient(180deg, #2e353f 0%, #3b434e 30%, #343b45 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), inset 0 calc(var(--v8-lap-w) * .012) calc(var(--v8-lap-w) * .02) rgba(0, 0, 0, .45);
+  border-radius: calc(var(--v8-lap-w) * .006) calc(var(--v8-lap-w) * .006) calc(var(--v8-lap-w) * .034) calc(var(--v8-lap-w) * .034);
+  background:
+    linear-gradient(170deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 45%),
+    linear-gradient(180deg, var(--v8-lap-al-2), var(--v8-lap-al-1) 40%, var(--v8-lap-al-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), inset 0 -1px 0 rgba(255, 255, 255, .2);
 }
+/* Bisagra negra junto a la tapa. */
+.v8-lap-bisagra {
+  position: absolute; left: 9%; right: 9%; top: 0;
+  height: calc(var(--v8-lap-w) * .016);
+  border-radius: 0 0 calc(var(--v8-lap-w) * .006) calc(var(--v8-lap-w) * .006);
+  background: linear-gradient(180deg, #050607, #121417);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .06);
+}
+/* Rejillas de altavoz a los lados del teclado: puntos finos. */
+.v8-lap-altavoz {
+  position: absolute; top: 9%; height: 40%; width: 6.5%;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, .75) 0 34%, transparent 40%);
+  background-size: calc(var(--v8-lap-w) * .0068) calc(var(--v8-lap-w) * .0068);
+  opacity: .9;
+}
+.v8-lap-altavoz.is-izq { left: 4.5%; }
+.v8-lap-altavoz.is-der { right: 4.5%; }
+/* Teclado: pozo negro y teclas planas negras con espacio entre ellas. */
 .v8-lap-teclado {
-  position: absolute; left: 12%; right: 12%; top: 8%;
-  display: grid; gap: calc(var(--v8-lap-w) * .005);
-  padding: calc(var(--v8-lap-w) * .008);
-  border-radius: calc(var(--v8-lap-w) * .008);
-  background: #161a20;
+  position: absolute; left: 12.5%; right: 12.5%; top: 7.5%;
+  display: grid; gap: calc(var(--v8-lap-w) * .0042);
+  padding: calc(var(--v8-lap-w) * .0055);
+  border-radius: calc(var(--v8-lap-w) * .007);
+  background: #0b0c0e;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .04);
 }
-.v8-lap-fila { display: flex; gap: calc(var(--v8-lap-w) * .005); height: calc(var(--v8-lap-w) * .03); }
+.v8-lap-fila { display: flex; gap: calc(var(--v8-lap-w) * .0042); height: calc(var(--v8-lap-w) * .029); }
+.v8-lap-fila.is-fn { height: calc(var(--v8-lap-w) * .016); }
 .v8-lap-fila i {
-  flex: 1 1 0; border-radius: calc(var(--v8-lap-w) * .003);
-  background: linear-gradient(180deg, #0c0f13, #090b0e);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+  flex: 1 1 0; border-radius: calc(var(--v8-lap-w) * .0032);
+  background: linear-gradient(180deg, #1a1c20, #141518);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .035);
 }
-.v8-lap-fila.is-espacio i.is-barra { flex: 5.2 1 0; }
+.v8-lap-fila i.is-ancha { flex: 1.55 1 0; }
+.v8-lap-fila.is-espacio i.is-barra { flex: 5.6 1 0; }
+.v8-lap-flechas { flex: 2.1 1 0; display: flex; flex-direction: column; gap: 1px; }
+.v8-lap-flechas i { flex: 1 1 0; }
+/* Panel táctil grande, del mismo aluminio, con un filo apenas marcado. */
 .v8-lap-tactil {
-  position: absolute; left: 33%; right: 33%; top: 56%; bottom: 7%;
-  border-radius: calc(var(--v8-lap-w) * .01);
-  background: linear-gradient(180deg, #353c46, #2f363f);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), inset 0 1px 3px rgba(0, 0, 0, .35);
+  position: absolute; left: 27%; right: 27%; top: 54%; bottom: 6%;
+  border-radius: calc(var(--v8-lap-w) * .012);
+  background: linear-gradient(180deg, #25282d, #212429);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 1px 0 rgba(255, 255, 255, .05), 0 0 0 1px rgba(0, 0, 0, .25);
 }
-/* Canto delantero de la base (grosor). */
+/* Canto delantero de la base (fino) con el recorte para abrir con el dedo. */
 .v8-lap-frente {
-  position: absolute; left: 0; right: 0; top: 100%;
-  height: calc(var(--v8-lap-w) * .018);
+  position: absolute; left: 1.2%; right: 1.2%; top: 100%;
+  height: calc(var(--v8-lap-w) * .014);
   transform-origin: 50% 0;
   transform: rotateX(-90deg);
-  border-radius: 0 0 calc(var(--v8-lap-w) * .02) calc(var(--v8-lap-w) * .02);
-  background: linear-gradient(180deg, #1e242b, #12161b);
+  border-radius: 0 0 calc(var(--v8-lap-w) * .022) calc(var(--v8-lap-w) * .022);
+  background: linear-gradient(180deg, #33383f, #16181b);
 }
-.v8-lap-frente::after {
-  content: ''; position: absolute; left: 42%; right: 42%; top: 0; height: 40%;
-  border-radius: 0 0 6px 6px; background: rgba(0, 0, 0, .35);
+.v8-lap-dedo {
+  position: absolute; left: 50%; top: 0; width: 13%; height: 55%;
+  translate: -50% 0;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: linear-gradient(180deg, #0c0d0f, #1d2024);
 }
 /* Sombra de apoyo sobre el fondo (solo da altura; no es una caja). */
 .v8-lap-sombra {
-  position: absolute; left: 4%; right: 4%; bottom: calc(var(--v8-lap-w) * .005);
-  height: calc(var(--v8-lap-w) * .06);
+  position: absolute; left: 2%; right: 2%; bottom: calc(var(--v8-lap-w) * -.004);
+  height: calc(var(--v8-lap-w) * .07);
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(2, 4, 8, .85), rgba(2, 4, 8, 0));
+  background: radial-gradient(closest-side, rgba(1, 2, 5, .9), rgba(1, 2, 5, .45) 55%, rgba(1, 2, 5, 0));
   pointer-events: none;
 }
 
