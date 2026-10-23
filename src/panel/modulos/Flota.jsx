@@ -16,6 +16,8 @@ import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
 import '../../styles/movil-modulos.css'
+import { useVistaTelefono } from '../comp/movil-navegacion'
+import { BuscadorFiltrosMovil, MapaFlotaMovil } from './FlotaMovil'
 
 // ============================================================
 // FLOTA — listado maestro de unidades
@@ -314,6 +316,9 @@ export default function Flota() {
   const atencion = lista.filter(requiereAtencion).length
   const sinConductor = lista.filter((v) => !v.conductorPrincipalId).length
 
+  // En la vista de teléfono, la pestaña de la app: mapa en su tarjeta y los filtros en una hoja.
+  const esMovil = useVistaTelefono()
+
   function ordenarPor(k) {
     setOrden((o) => (o.k === k ? { k, dir: o.dir === 'asc' ? 'desc' : 'asc' } : { k, dir: 'asc' }))
   }
@@ -324,7 +329,8 @@ export default function Flota() {
 
   return (
     <>
-      <Cabecera titulo="Vehículos" bajada="Toda la flota en una sola tabla: estado, documentos y responsable de cada unidad.">
+      <Cabecera titulo="Vehículos" bajada={esMovil ? 'Dónde está y cómo está cada unidad.' : 'Toda la flota en una sola tabla: estado, documentos y responsable de cada unidad.'}>
+        {!esMovil && <>
         <Buscador valor={q} alCambiar={setQ} placeholder="Buscar unidad, placa, conductor o área…" />
         <button
           type="button"
@@ -347,6 +353,7 @@ export default function Flota() {
             Agregar vehículos a un área
           </button>
         )}
+        </>}
         {/* «Nueva unidad» no va aquí: crear unidades es del Administrador FOM y se hace en
             Administración › Vehículos generales, que entra a la empresa y abre este mismo alta. */}
       </Cabecera>
@@ -428,8 +435,23 @@ export default function Flota() {
               />
             </div>
 
-            <Chips opciones={chipsEstado} valor={filtro} alCambiar={setFiltro} />
-            <Chips opciones={chipsArea} valor={areaId} alCambiar={setAreaId} />
+            {esMovil ? <>
+              <MapaFlotaMovil unidades={filtradas} cargando={vehiculos.estado === 'cargando'} novedadDe={novedadDe}
+                nombreConductor={nombreConductor} alAbrir={abrir} ahora={ahora} />
+              <BuscadorFiltrosMovil q={q} alBuscar={setQ} placeholder="Unidad, placa, conductor o área" titulo="Filtrar unidades"
+                grupos={[
+                  { titulo: 'Estado', opciones: chipsEstado, valor: filtro, alCambiar: setFiltro, base: 'todas' },
+                  { titulo: 'Área', opciones: chipsArea, valor: areaId, alCambiar: setAreaId, base: '' },
+                ]}
+                acciones={<>
+                  {esGestorDeFlota && <button type="button" className="pnl-btn sutil" onClick={() => setCreandoArea(true)}><Icono nombre="pin" tam={16} />Nueva área</button>}
+                  {esGestorDeFlota && <button type="button" className="pnl-btn" onClick={() => setAsignando({ area: areaId })}><Icono nombre="camion" tam={16} />Agregar vehículos a un área</button>}
+                  <button type="button" className="pnl-btn" onClick={() => exportarCSV(ordenadas)} disabled={!ordenadas.length}><Icono nombre="descargar" tam={16} />Exportar CSV</button>
+                </>} />
+            </> : <>
+              <Chips opciones={chipsEstado} valor={filtro} alCambiar={setFiltro} />
+              <Chips opciones={chipsArea} valor={areaId} alCambiar={setAreaId} />
+            </>}
 
             <div className="mv-flota-lista">
             <Tarjeta

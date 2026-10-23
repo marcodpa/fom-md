@@ -11,6 +11,8 @@ import * as f from '../datos/formato'
 import { ROLES_ASIGNABLES, etiquetaRol } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import AccionesUsuario from '../comp/AccionesUsuario'
+import { useVistaTelefono } from '../comp/movil-navegacion'
+import UsuariosMovil from './UsuariosMovil'
 import { PastillaManejo } from '../comp/ManejoConductor'
 import './usuarios-perfil.css'
 import '../../styles/movil-modulos.css'
@@ -110,6 +112,7 @@ export default function AdminUsuarios() {
   const [moviendo, setMoviendo] = useState(null)
   const [claveDe, setClaveDe] = useState(null) // {nombre, clave} tras restablecer
   const [aviso, setAviso] = useState('')
+  const esMovil = useVistaTelefono()
 
   const { datos, estado, error, recargar } = useDatos(() => cargar(q, empresaId, rol), [q, empresaId, rol])
 
@@ -167,9 +170,10 @@ export default function AdminUsuarios() {
     <>
       <Cabecera
         titulo="Usuarios"
-        bajada={`Personal de ${actor?.empresa || 'tu empresa'}. Consulta sus roles, unidades y documentos.`}
+        bajada={esMovil ? 'La gente de tu empresa.' : `Personal de ${actor?.empresa || 'tu empresa'}. Consulta sus roles, unidades y documentos.`}
       >
-        <button
+        {/* En el teléfono «Exportar» va en la hoja de filtros: arriba solo queda «Nuevo usuario». */}
+        {!esMovil && <button
           type="button"
           className="pnl-btn"
           onClick={() => exportarCSV(datos?.lista ?? [])}
@@ -177,7 +181,7 @@ export default function AdminUsuarios() {
         >
           <Icono nombre="descargar" tam={16} />
           Exportar
-        </button>
+        </button>}
         {(datos?.lista?.alcance?.administrable ?? true) && (
           <button type="button" className="pnl-btn primario" onClick={() => setCreando(true)}>
             <Icono nombre="mas" tam={16} />
@@ -264,6 +268,75 @@ function Contenido({
   const hayConductores = lista.some((p) => p.conduce)
   const { datos: ranking } = useDatos(() => (hayConductores ? repo.manejo.ranking({ dias: 7 }).catch(() => null) : Promise.resolve(null)), [hayConductores])
   const manejoPorId = new Map((ranking ?? []).map((m) => [m.id, m]))
+  const esMovil = useVistaTelefono()
+  const opcionesRol = directorioReal
+    ? [
+        { v: '', t: 'Todos' },
+        { v: 'conductor', t: 'Conductores' },
+        { v: 'supervisor', t: 'Supervisores' },
+        { v: 'usuario', t: 'Usuarios' },
+      ]
+    : [
+        { v: '', t: 'Todos' },
+        { v: 'conductor', t: 'Conductores' },
+        { v: 'supervisor_company', t: 'Supervisores' },
+        { v: 'supervisor_personal', t: 'Personales' },
+      ]
+
+  // Las acciones de una cuenta. En modo conectado solo las que el servidor sabe
+  // hacer, y solo sobre quien el rango del actor puede administrar: ofrecer un
+  // botón que va a devolver 403 es peor que no ofrecerlo.
+  function accionesDe(p) {
+    if (directorioReal && (lista.alcance?.administrable ?? true) && puedeAdministrar(actor, p)) return (
+      <AccionesUsuario nombre={p.nombre}>
+      <div className="pnl-chips">
+        <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
+          Clave
+        </button>
+        {p.estado === 'suspended' ? (
+          <button type="button" className="pnl-btn sutil" onClick={() => reactivar(p)}>
+            Reactivar
+          </button>
+        ) : p.estado === 'active' ? (
+          <button type="button" className="pnl-btn sutil" onClick={() => suspender(p)}>
+            Suspender
+          </button>
+        ) : null}
+        {p.estado !== 'revoked' && (
+          <button type="button" className="pnl-btn sutil" onClick={() => revocarAcceso(p)}>
+            Revocar
+          </button>
+        )}
+      </div>
+      </AccionesUsuario>
+      )
+    if (!directorioReal && p.rol !== 'admin') return (
+      <AccionesUsuario nombre={p.nombre}>
+      <div className="pnl-chips">
+        <button type="button" className="pnl-btn sutil" onClick={() => abrirMover(p)}>
+          Mover
+        </button>
+        <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
+          Clave
+        </button>
+        {p.esDesempleado ? (
+          <button type="button" className="pnl-btn sutil" onClick={() => eliminarDefinitivo(p)}>
+            Eliminar
+          </button>
+        ) : (
+          <button type="button" className="pnl-btn sutil" onClick={() => aDesempleados(p)}>
+            Dar salida
+          </button>
+        )}
+      </div>
+      </AccionesUsuario>
+      )
+    return null
+  }
+
+  // En la vista de teléfono, la pestaña de la app: tira, buscador con filtros y una lista de personas.
+  if (esMovil) return <UsuariosMovil lista={lista} q={q} setQ={setQ} rol={rol} setRol={setRol} opcionesRol={opcionesRol}
+    aviso={aviso} manejoPorId={manejoPorId} accionesDe={accionesDe} alExportar={() => exportarCSV(lista)} />
 
   return (
     <>
@@ -283,19 +356,7 @@ function Contenido({
       >
         <div className="pnl-card-cuerpo">
           <Chips
-            opciones={directorioReal
-              ? [
-                  { v: '', t: 'Todos' },
-                  { v: 'conductor', t: 'Conductores' },
-                  { v: 'supervisor', t: 'Supervisores' },
-                  { v: 'usuario', t: 'Usuarios' },
-                ]
-              : [
-                  { v: '', t: 'Todos' },
-                  { v: 'conductor', t: 'Conductores' },
-                  { v: 'supervisor_company', t: 'Supervisores' },
-                  { v: 'supervisor_personal', t: 'Personales' },
-                ]}
+            opciones={opcionesRol}
             valor={rol}
             alCambiar={setRol}
           />
@@ -388,54 +449,7 @@ function Contenido({
                         <Link className="usr-ver-perfil" to={`/panel/personal/${encodeURIComponent(p.userId ?? p.id)}`} aria-label={`Ver perfil de ${p.nombre}`}>
                           Ver perfil <Icono nombre="volver" tam={16} />
                         </Link>
-                      {/* En modo conectado solo se ofrecen las acciones que el
-                          servidor sabe hacer, y solo sobre quien el rango del
-                          actor puede administrar. Ofrecer un boton que va a
-                          devolver 403 es peor que no ofrecerlo. */}
-                      {directorioReal && (lista.alcance?.administrable ?? true) && puedeAdministrar(actor, p) && (
-                        <AccionesUsuario nombre={p.nombre}>
-                        <div className="pnl-chips">
-                          <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
-                            Clave
-                          </button>
-                          {p.estado === 'suspended' ? (
-                            <button type="button" className="pnl-btn sutil" onClick={() => reactivar(p)}>
-                              Reactivar
-                            </button>
-                          ) : p.estado === 'active' ? (
-                            <button type="button" className="pnl-btn sutil" onClick={() => suspender(p)}>
-                              Suspender
-                            </button>
-                          ) : null}
-                          {p.estado !== 'revoked' && (
-                            <button type="button" className="pnl-btn sutil" onClick={() => revocarAcceso(p)}>
-                              Revocar
-                            </button>
-                          )}
-                        </div>
-                        </AccionesUsuario>
-                      )}
-                      {!directorioReal && p.rol !== 'admin' && (
-                        <AccionesUsuario nombre={p.nombre}>
-                        <div className="pnl-chips">
-                          <button type="button" className="pnl-btn sutil" onClick={() => abrirMover(p)}>
-                            Mover
-                          </button>
-                          <button type="button" className="pnl-btn sutil" onClick={() => restablecerClave(p)}>
-                            Clave
-                          </button>
-                          {p.esDesempleado ? (
-                            <button type="button" className="pnl-btn sutil" onClick={() => eliminarDefinitivo(p)}>
-                              Eliminar
-                            </button>
-                          ) : (
-                            <button type="button" className="pnl-btn sutil" onClick={() => aDesempleados(p)}>
-                              Dar salida
-                            </button>
-                          )}
-                        </div>
-                        </AccionesUsuario>
-                      )}
+                      {accionesDe(p)}
                       </div>
                     </td>
                   </tr>

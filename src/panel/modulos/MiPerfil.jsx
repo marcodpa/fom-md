@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
-import { rolCanonico } from '../roles'
+import { areaDe, esAdminFom, rolCanonico } from '../roles'
 import { indiceDePersona } from '../datos/perfilUsuario'
 import { PESTANAS, PestanasPerfil, MetricasPerfil, Identidad, FichaDatos, UnidadAsignada, Conduccion, Inspecciones, Documentos } from '../comp/PerfilUsuario'
 import { useSesion } from '../useSesion'
@@ -20,6 +20,7 @@ import './usuarios-perfil.css'
 import MovilAccesos from '../comp/movil-accesos'
 import { useVistaTelefono } from '../comp/movil-navegacion'
 import MiPerfilMovil from './MiPerfilMovil'
+import MiPerfilSupervisorMovil from './MiPerfilSupervisorMovil'
 
 const PESTANAS_PROPIAS = PESTANAS
 
@@ -121,6 +122,17 @@ function Perfil() {
       <Modal abierto={viendoDocumentos && !documento} titulo="Documentos" alCerrar={() => setViendoDocumentos(false)} ancho={760}>
         {viendoDocumentos && persona && <Documentos persona={persona} alActualizar={() => setRevision(v => v + 1)} documentos={documentos} error={perfil.documentosError} alVer={setDocumento} />}
       </Modal>
+      {dialogos}
+    </>
+  }
+
+  // Quien opera la empresa (o el admin FOM dentro de una) en la vista de teléfono: «Mi perfil» del panel de la app.
+  const operaEmpresa = areaDe(sesion?.perfil) === 'operativo' || (esAdminFom(sesion?.perfil) && Boolean(sesion?.perfil.empresaGestion))
+  if (esMovil && operaEmpresa) {
+    return <>
+      {cargando ? <div className="pnl-cuerpo"><Cargando filas={4} /></div>
+        : !perfil ? <div className="pnl-cuerpo"><ErrorCarga error={{ message: error }} onReintentar={() => setRevision(v => v + 1)} /></div>
+          : <MiPerfilSupervisorMovil persona={persona} sesion={sesion?.perfil} aviso={aviso} alEditar={editar} />}
       {dialogos}
     </>
   }

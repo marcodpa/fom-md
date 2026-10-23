@@ -30,6 +30,8 @@ import TarjetaMantenimiento, { GrupoTarjetas } from '../comp/TarjetaMantenimient
 import { masNuevasPrimero } from '../datos/odtAsignadas'
 import { ATAJOS_FECHA, SIN_FECHA, diaLocal, filtrarPorFecha, hayFiltroFecha, msHastaMedianoche, textoFiltroFecha } from '../datos/filtroFecha'
 import { esGestor } from '../roles'
+import { useVistaTelefono } from '../comp/movil-navegacion'
+import { CifrasMovil, ComoAvanzaMovil, UnidadesAlDiaMovil } from './MantenimientoMovil'
 
 // ============================================================
 // MANTENIMIENTO — órdenes de trabajo de la flota.
@@ -171,8 +173,10 @@ export default function Mantenimiento() {
   // «Todas las órdenes» ya no es pestaña: es lo mismo que Órdenes › Lista (enlaces viejos caen ahí).
   const vista = params.get('vista') === 'planes' ? 'planes' : 'ordenes'
   function cambiar(v) { setParams(v === 'ordenes' ? {} : { vista: v }) }
+  // En la vista de teléfono, sin la miga de pan: la pestaña de abajo ya dice dónde estás (como la app).
+  const esMovil = useVistaTelefono()
   return <div className="mnt-root">
-    <div className="mnt-heading"><div><span className="mnt-breadcrumb">Inicio › Mantenimiento</span><h1>Mantenimiento</h1><p>Qué necesita atención y qué sigue.</p></div></div>
+    <div className="mnt-heading"><div>{!esMovil && <span className="mnt-breadcrumb">Inicio › Mantenimiento</span>}<h1>Mantenimiento</h1><p>Qué necesita atención y qué sigue.</p></div></div>
     <nav className="mnt-nav" aria-label="Secciones de mantenimiento">
       {[['ordenes', 'llave', 'Órdenes'], ['planes', 'sync', 'Planes']].map(([v, icono, t]) => <button key={v} type="button" aria-current={vista === v ? 'page' : undefined} className={vista === v ? 'activo' : ''} onClick={() => cambiar(v)}><Icono nombre={icono} tam={18}/>{t}</button>)}
     </nav>
@@ -207,6 +211,7 @@ function Ordenes({ enLista = false }) {
   const [detalleId, setDetalleId] = useState(() => params.get('orden'))
   const [creando, setCreando] = useState(false)
   const [aviso, setAviso] = useState('')
+  const esMovil = useVistaTelefono()
   const odts = datos?.odts ?? []
   const vehiculos = datos?.vehiculos ?? []
   // Lo que deja pasar la búsqueda y el tipo, sin mirar fecha ni estado: de aquí salen las
@@ -233,9 +238,11 @@ function Ordenes({ enLista = false }) {
     {estado === 'ok' && <>
       {/* Arriba de todo, lo que le toca hacer a quien tiene la sesión (solo si es responsable de alguna). */}
       <OdtAsignadas odts={odts} perfil={sesion?.perfil ?? null} alCambiar={recargar} alAbrir={setDetalleId}/>
-      <Indicadores odts={odts}/>
-      <div className="mnt-overview"><div><Tarjeta titulo="Órdenes de trabajo" accion={<div className="mnt-attention-tools">{cambioVista}<Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>} sinCuerpo>{filtrosArriba}<div className="mnt-lista-cuerpo">{vista === 'atencion' ? <PorEstado odts={visibles} alAbrir={setDetalleId} alCrear={() => setCreando(true)}/> : <Tarjetas odts={visibles} alAbrir={setDetalleId} tanda={30}/>}</div></Tarjeta></div><aside className="mnt-guide"><h3>Cómo avanza una ODT</h3><p className="mnt-guide-intro">Del reporte al cierre, en tres pasos.</p>{ESTADOS_VISIBLES.map((g,i) => <div className="mnt-guide-step" key={g.clave}><b>{i+1}</b><div><Tag color={g.color}>{g.etiqueta}</Tag><p>{PASOS_GUIA[g.clave]}</p></div></div>)}<Link to="/panel/mantenimiento?vista=planes" className="pnl-link">Prepara tus servicios con un plan →</Link></aside></div>
-      <details className="mnt-legacy"><summary>Consultar reglas heredadas</summary><ReglasHeredadas/></details>
+      {esMovil ? <CifrasMovil odts={odts}/> : <Indicadores odts={odts}/>}
+      <div className="mnt-overview"><div><Tarjeta titulo={esMovil ? 'Necesita tu atención' : 'Órdenes de trabajo'} accion={<div className="mnt-attention-tools">{cambioVista}<Buscador valor={q} alCambiar={setQ} placeholder="Buscar orden o unidad…"/></div>} sinCuerpo>{filtrosArriba}<div className="mnt-lista-cuerpo">{vista === 'atencion' ? <PorEstado odts={visibles} alAbrir={setDetalleId} alCrear={() => setCreando(true)}/> : <Tarjetas odts={visibles} alAbrir={setDetalleId} tanda={30}/>}</div></Tarjeta></div><aside className="mnt-guide"><h3>Cómo avanza una ODT</h3><p className="mnt-guide-intro">Del reporte al cierre, en tres pasos.</p>{ESTADOS_VISIBLES.map((g,i) => <div className="mnt-guide-step" key={g.clave}><b>{i+1}</b><div><Tag color={g.color}>{g.etiqueta}</Tag><p>{PASOS_GUIA[g.clave]}</p></div></div>)}<Link to="/panel/mantenimiento?vista=planes" className="pnl-link">Prepara tus servicios con un plan →</Link></aside></div>
+      {/* En el teléfono, debajo de la lista como en la app: los pasos de una ODT y cuántas unidades están al día. */}
+      {esMovil && <><ComoAvanzaMovil pasos={PASOS_GUIA}/><UnidadesAlDiaMovil odts={odts} vehiculos={vehiculos}/></>}
+      {!esMovil && <details className="mnt-legacy"><summary>Consultar reglas heredadas</summary><ReglasHeredadas/></details>}
     </>}
     <Modal titulo="Detalle de la orden" abierto={Boolean(detalle)} alCerrar={() => setDetalleId(null)} ancho={1080}>{detalle && <Detalle key={detalle.id} odt={detalle} perfil={sesion?.perfil ?? null} vehiculo={vehiculos.find(v => v.id === detalle.vehiculoId)} recargar={recargar} alCerrar={() => setDetalleId(null)}/>}</Modal>
     <Modal titulo="Nueva ODT" abierto={creando} alCerrar={() => setCreando(false)} ancho={840}>{creando && <NuevaOdt vehiculos={vehiculos} creadorId={sesion?.perfil?.id ?? null} recargar={recargar} alCerrar={() => setCreando(false)} alCrear={nombre => setAviso(`ODT creada para ${nombre}. Ya puedes revisarla.`)}/>}</Modal>
