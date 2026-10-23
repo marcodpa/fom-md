@@ -13,6 +13,7 @@
 //
 // Modo de la inspección de HOY de la Unidad 01 (para las capturas):
 //   GET /__demo/modo?inspeccion=pendiente|aprobada|observaciones|bloqueada
+// Volver al estado del arranque (sin reiniciar el proceso): GET /__demo/reiniciar
 import { createServer } from 'node:http'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -31,6 +32,7 @@ const modo = { inspeccion: 'pendiente' }
 const inspeccionesNuevas = [] // las que se envían desde la app mientras corre
 const leidas = new Set()
 const descartadas = new Set()
+const ORDENES_DE_ARRANQUE = D.ORDENES.length // las ODT nuevas entran arriba (unshift)
 
 function inspeccionDeHoyCarlos() {
   const u = D.UNIDAD_CARLOS
@@ -542,6 +544,16 @@ const servidor = createServer(async (req, res) => {
     if (url.pathname === '/__demo/modo') {
       if (url.searchParams.get('inspeccion')) modo.inspeccion = url.searchParams.get('inspeccion')
       return json(res, 200, modo)
+    }
+    // Vuelve al estado del arranque (lo usa lote.mjs antes de cada captura): sin inspecciones ni
+    // ODT nuevas y con todos los avisos sin leer.
+    if (url.pathname === '/__demo/reiniciar') {
+      modo.inspeccion = 'pendiente'
+      inspeccionesNuevas.length = 0
+      leidas.clear()
+      descartadas.clear()
+      while (D.ORDENES.length > ORDENES_DE_ARRANQUE) D.ORDENES.shift()
+      return json(res, 200, { ok: true })
     }
     // La foto de un vehículo por marca y modelo (capturar.mjs la pone en lugar del render
     // del catálogo de la app). 404 si todavía no hay foto con licencia para él.

@@ -55,9 +55,16 @@ const numeroDe = (texto) => {
   for (const ch of String(texto)) h = (h * 31 + ch.charCodeAt(0)) % 1e11
   return h
 }
+// El primer bloque sale de la clave (FNV-1a): la app enseña el código de la ODT con los 8
+// primeros caracteres del id (`ODT-55E1A962`) y con ceros salían todas «ODT-D0000000».
+const hex8 = (texto) => {
+  let h = 2166136261
+  for (const ch of String(texto)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0
+  return h.toString(16).padStart(8, '0')
+}
 export function uuid(tipo, clave) {
   const p = PREFIJO[tipo]
-  return `${p}000000-0000-4000-8000-${String(numeroDe(clave)).padStart(12, '0')}`
+  return `${hex8(`${tipo}:${clave}`)}-${p}00-4000-8000-${String(numeroDe(clave)).padStart(12, '0')}`
 }
 
 // --- Azar determinista por clave --------------------------------------------
