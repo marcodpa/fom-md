@@ -4,27 +4,27 @@
 // ese paso. Cinco pasos:
 //   0 · La empresa          → solo la raíz.                        Captura: Empresas (admin FOM).
 //   1 · Sus áreas           → las cuatro áreas con su tipo y sus unidades. Captura: Vehículos.
-//   2 · Sus unidades        → tres unidades viajan de Occidente al contrato (12 → 9, 0 → 3), igual
-//                             que en la captura «Agregar 3 unidades a…».
+//   2 · Sus unidades        → tres unidades pasan de Occidente al contrato: cambian los números
+//                             (12 → 9, 0 → 3) y las dos áreas se resaltan, igual que en la captura
+//                             «Agregar 3 unidades a…». Sin un cuadro por unidad (pedido de Marco).
 //   3 · Un área a la vez    → solo Costa oriental queda encendida.  Captura: Centro de control.
-//   4 · Quién ve qué        → la empresa entera para su administrador; la Unidad 01 para su
-//                             conductor.                            Captura: Usuarios.
+//   4 · Quién ve qué        → la empresa entera para su supervisor; la Unidad 01, en el contrato,
+//                             para su conductor.                    Captura: Usuarios.
 // Movimiento (patrón de piezasEscenaV8): escena fija solo en escritorio ≥ 1024 px, donde el
 // scroll elige el paso; los cambios son transiciones de CSS (solo transform y opacidad). Tableta y
 // «reducir movimiento»: el paso se elige con el riel (sin transiciones con «reducir movimiento»).
 // Teléfono: el organigrama ya armado (paso 2) y los pasos apilados, cada uno con su texto.
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { CapturaFlotanteV8, IconoV8 } from '../../../components/v8'
-import { inicioCentradoV8, puntoV8, usarEscenaV8 } from '../../../components/v8/piezasEscenaV8'
+import { inicioCentradoV8, usarEscenaV8 } from '../../../components/v8/piezasEscenaV8'
 
 // Datos de la demostración, tal como salen en el panel (Vehículos: chips por área).
 const AREAS = [
-  { id: 'occ', nombre: 'Occidente', tipo: 'Ubicación', antes: 12, despues: 9, viajeros: 3 },
+  { id: 'occ', nombre: 'Occidente', tipo: 'Ubicación', antes: 12, despues: 9 },
   { id: 'cos', nombre: 'Costa oriental', tipo: 'Ubicación', antes: 9, despues: 9 },
   { id: 'sur', nombre: 'Sur del lago', tipo: 'Ubicación', antes: 5, despues: 5 },
-  { id: 'con', nombre: 'Contrato Petrolera del Lago', tipo: 'Contrato', antes: 0, despues: 3, llegan: 3 },
+  { id: 'con', nombre: 'Contrato Petrolera del Lago', tipo: 'Contrato', antes: 0, despues: 3, conductor: true },
 ]
-const VIAJEROS = ['Unidad 01', 'Unidad 02', 'Unidad 03'] // las que pasan al contrato en la captura
 
 export const PASOS_AREAS = [
   {
@@ -84,37 +84,9 @@ function Puntos({ puntos }) {
   </ul>
 }
 
-// Unidades de un área: un cuadro por unidad. En Occidente, las tres primeras son huecos (de ahí
-// salen las que viajan); en el contrato, las tres que llegan van dentro y empiezan sobre los huecos.
-function Unidades({ area }) {
-  const fijas = area.antes - (area.viajeros || 0)
-  return <span className="ar-unidades">
-    {Array.from({ length: area.viajeros || 0 }, (_, i) => <i key={`h${i}`} className="ar-u is-hueco" data-hueco={i} />)}
-    {Array.from({ length: fijas }, (_, i) => <i key={i} className="ar-u" style={{ '--i': i }} />)}
-    {Array.from({ length: area.llegan || 0 }, (_, i) => <i key={`v${i}`} className={`ar-u is-viajero${i === 0 ? ' is-suya' : ''}`} data-viajero={i} style={{ '--i': i }} title={VIAJEROS[i]} />)}
-  </span>
-}
-
 // El organigrama. `paso` decide lo que se ve (CSS: [data-paso]).
 export function OrganigramaAreasV8({ paso, className = '' }) {
-  const raiz = useRef(null)
-  // Dónde empieza cada unidad viajera: el hueco de Occidente, medido sin transformaciones.
-  useLayoutEffect(() => {
-    const el = raiz.current
-    if (!el) return
-    const medir = () => el.querySelectorAll('[data-viajero]').forEach(v => {
-      const hueco = el.querySelector(`[data-hueco="${v.dataset.viajero}"]`)
-      if (!hueco) return
-      const a = puntoV8(v, el), b = puntoV8(hueco, el)
-      v.style.setProperty('--dx', `${Math.round(b.x - a.x)}px`)
-      v.style.setProperty('--dy', `${Math.round(b.y - a.y)}px`)
-    })
-    medir()
-    const obs = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(medir) : null
-    obs?.observe(el)
-    return () => obs?.disconnect()
-  }, [])
-  return <div ref={raiz} className={`ar-org ${className}`} data-paso={paso} role="img"
+  return <div className={`ar-org ${className}`} data-paso={paso} role="img"
     aria-label="Organigrama de la demostración: Transporte Lago Sur, C.A., contratista, con cuatro áreas: Occidente, Costa oriental y Sur del lago, de tipo ubicación, y Contrato Petrolera del Lago, de tipo contrato. Tres unidades pasan de Occidente al contrato.">
     <div className="ar-raiz">
       <span className="ar-raiz-icono" aria-hidden="true"><IconoV8 nombre="truck" /></span>
@@ -128,10 +100,9 @@ export function OrganigramaAreasV8({ paso, className = '' }) {
         <span className="ar-rama" aria-hidden="true" />
         <span className="ar-area-cab">
           <b>{a.nombre}</b>
-          <small>{a.tipo} · <span className="ar-cuenta is-antes">{a.antes}</span><span className="ar-cuenta is-despues">{a.despues}</span></small>
+          <small>{a.tipo} · <span className="ar-cuenta is-antes">{a.antes}</span><span className="ar-cuenta is-despues">{a.despues}</span> unidades</small>
         </span>
-        <Unidades area={a} />
-        {a.llegan && <em className="ar-rol is-conductor">Carlos Méndez, conductor: su Unidad 01</em>}
+        {a.conductor && <em className="ar-rol is-conductor">Carlos Méndez, conductor: su Unidad 01</em>}
       </li>)}
     </ol>
   </div>

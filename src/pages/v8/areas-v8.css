@@ -80,16 +80,12 @@
 .v8-site .ar-tronco { width: 2px; height: 22px; background: var(--ar-linea); transform-origin: 50% 0; }
 .v8-site .ar-bus { width: 75%; height: 2px; background: var(--ar-linea); transform-origin: 50% 50%; }
 .v8-site .ar-areas { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; list-style: none; }
-.v8-site .ar-area { position: relative; display: grid; justify-items: center; align-content: start; gap: 10px; padding: 0 4px 6px; border-radius: var(--v8-r-campo); text-align: center;
-  transition: opacity .6s var(--v8-ease), transform .7s var(--v8-ease) calc(var(--i) * 70ms); }
+.v8-site .ar-area { position: relative; display: grid; justify-items: center; align-content: start; gap: 10px; padding: 0 6px 12px; border-radius: var(--v8-r-campo); text-align: center;
+  transition: opacity .6s var(--v8-ease), transform .7s var(--v8-ease) calc(var(--i) * 70ms), background-color .6s var(--v8-ease), box-shadow .6s var(--v8-ease); }
+.v8-site .ar-cuenta { font-weight: 600; color: var(--v8-texto); transition: color .6s var(--v8-ease); }
 .v8-site .ar-rama { width: 2px; height: 16px; background: var(--ar-linea); transform-origin: 50% 0; transition: transform .45s var(--v8-ease) calc(.2s + var(--i) * 70ms); }
 .v8-site .ar-area-cab b { display: block; font-size: 15px; font-weight: 600; line-height: 1.25; color: var(--v8-texto); text-wrap: balance; }
 .v8-site .ar-area-cab small { display: block; margin-top: 3px; font-size: 13px; color: var(--v8-tenue); }
-.v8-site .ar-unidades { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; width: 113px; min-height: 14px; }
-.v8-site .ar-u { width: 14px; height: 14px; border-radius: 4px; background: var(--v8-azul); opacity: .82;
-  transition: opacity .4s var(--v8-ease) calc(.35s + var(--i, 0) * 25ms), transform .9s var(--v8-ease), box-shadow .4s var(--v8-ease); }
-.v8-site .ar-u.is-hueco { visibility: hidden; }
-.v8-site .ar-u.is-viajero { position: relative; z-index: 1; background: var(--v8-azul-claro); transform: translate(var(--dx, 0), var(--dy, 0)); }
 .v8-site .ar-cuenta.is-despues { display: none; }
 .v8-site .ar-rol { position: absolute; z-index: 2; padding: 5px 10px; border-radius: 999px; font-style: normal; font-size: 13px; font-weight: 600; white-space: nowrap;
   color: var(--v8-sobre-azul); background: var(--v8-azul-claro); opacity: 0; transform: translateY(6px); transition: opacity .45s var(--v8-ease), transform .6s var(--v8-ease); pointer-events: none; }
@@ -103,17 +99,17 @@
 .v8-site .ar-bus { transition: transform .5s var(--v8-ease) .15s; }
 .v8-site .ar-org[data-paso='0'] .ar-area { opacity: 0; transform: translateY(14px); }
 .v8-site .ar-org[data-paso='0'] .ar-rama { transform: scaleY(0); }
-.v8-site .ar-org[data-paso='0'] .ar-u { opacity: 0; transition-delay: 0s; }
 /* 2, 3 y 4 · las tres unidades ya están en el contrato */
-.v8-site .ar-org:is([data-paso='2'], [data-paso='3'], [data-paso='4']) .ar-u.is-viajero { transform: none; }
 .v8-site .ar-org:is([data-paso='2'], [data-paso='3'], [data-paso='4']) .ar-cuenta.is-antes { display: none; }
 .v8-site .ar-org:is([data-paso='2'], [data-paso='3'], [data-paso='4']) .ar-cuenta.is-despues { display: inline; }
+/* 2 · resalte suave de las dos áreas que cambian (Occidente 12 → 9, contrato 0 → 3) */
+.v8-site .ar-org:not(.is-movil)[data-paso='2'] .ar-area:is(.is-occ, .is-con) { background: rgba(61, 155, 245, .1); box-shadow: inset 0 0 0 1px rgba(139, 198, 255, .28); }
+.v8-site .ar-org:not(.is-movil)[data-paso='2'] .ar-area:is(.is-occ, .is-con) .ar-cuenta { color: var(--v8-azul-claro); }
 /* 3 · un área a la vez */
 .v8-site .ar-org[data-paso='3'] .ar-area:not(.is-cos) { opacity: .28; }
 /* 4 · quién ve qué: el supervisor, toda la empresa; el conductor, su unidad */
 .v8-site .ar-org[data-paso='4'] .ar-rol { opacity: 1; transform: none; }
 .v8-site .ar-org[data-paso='4'] .ar-rol.is-admin { transform: translate(0, -50%); }
-.v8-site .ar-org[data-paso='4'] .ar-u.is-suya { box-shadow: 0 0 0 3px var(--v8-noche), 0 0 0 5px var(--v8-azul-claro); }
 
 /* ── Teléfono: el organigrama armado, las áreas en dos columnas, y los pasos apilados ───────── */
 .v8-site .ar-movil { margin-top: 32px; }
@@ -176,7 +172,7 @@
 /* «Reducir movimiento»: todo quieto; el paso cambia sin giro y los puntos están a la vista. */
 @media (prefers-reduced-motion: reduce) {
   .v8-site .ar-paso, .v8-site .ar-cuadro, .v8-site .ar-riel-barra i, .v8-site .ar-area, .v8-site .ar-rama, .v8-site .ar-tronco, .v8-site .ar-bus,
-  .v8-site .ar-u, .v8-site .ar-rol, .v8-site .ar-punto i, .v8-site .ar-punto span { transition: none !important; }
+  .v8-site .ar-cuenta, .v8-site .ar-rol, .v8-site .ar-punto i, .v8-site .ar-punto span { transition: none !important; }
   .v8-site .ar-paso.is-activo, .v8-site .ar-cuadro.is-activo { transform: none; }
   .v8-site .is-activo .ar-punto i, .v8-site .is-activo .ar-punto span { opacity: 1; transform: none; }
 }
