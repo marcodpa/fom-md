@@ -1,0 +1,1517 @@
+From ff13ed7669e80a8b72dc558b2f0699918606decb Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Mon, 26 Oct 2026 13:36:56 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20transiciones=20suaves=20en=20toda=20la?=
+ =?UTF-8?q?=20app=20(pantallas,=20pesta=C3=B1as,=20hojas,=20listas,=20carg?=
+ =?UTF-8?q?a,=20toques=20y=20cambio=20de=20tema)=20con=20los=20mismos=20ti?=
+ =?UTF-8?q?empos=20que=20la=20web=20(T-185)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/_layout.tsx                  |   9 +-
+ src/app/_layout.tsx                           |  32 ++--
+ src/app/admin/_layout.tsx                     |  10 +-
+ src/app/compania/_layout.tsx                  |  10 +-
+ src/app/gerencial/_layout.tsx                 |   8 +-
+ src/app/gerencial/odt.tsx                     |  11 +-
+ src/app/login.tsx                             |   5 +-
+ src/app/panel/_layout.tsx                     |  10 +-
+ src/app/personal/_layout.tsx                  |   8 +-
+ src/components/animated-number.tsx            |   6 +-
+ src/components/button.tsx                     |  31 ++--
+ src/components/capa-centrada.tsx              |  64 ++++++--
+ src/components/escalonado.tsx                 |  28 ++--
+ src/components/evidence-field.tsx             |  18 +--
+ .../filtro-estado-mantenimiento.tsx           |   6 +-
+ src/components/fundido-tema.tsx               |  62 ++++++++
+ src/components/hoja-modal.tsx                 |  27 ++--
+ src/components/odt-paso-fotos.tsx             |   6 +-
+ src/components/option-picker.tsx              |  25 ++-
+ src/components/pressable-scale.tsx            |  41 ++---
+ src/components/segmented-control.tsx          |  12 +-
+ src/components/skeleton.tsx                   |  74 +++++----
+ src/components/text-field.tsx                 |   7 +-
+ src/theme/index.ts                            |  15 ++
+ src/theme/movimiento.ts                       | 143 ++++++++++++++++++
+ src/theme/tokens.ts                           |  19 ++-
+ 26 files changed, 494 insertions(+), 193 deletions(-)
+ create mode 100644 src/components/fundido-tema.tsx
+ create mode 100644 src/theme/movimiento.ts
+
+diff --git a/src/app/(driver)/_layout.tsx b/src/app/(driver)/_layout.tsx
+index 3113906..9778792 100644
+--- a/src/app/(driver)/_layout.tsx
++++ b/src/app/(driver)/_layout.tsx
+@@ -8,6 +8,7 @@ import { PantallaTransicion } from '@/components/pantalla-transicion';
+ import { TabIcon } from '@/components/tab-icon';
+ import { useDriving, useTenant } from '@/session';
+ import { SyncBanner } from '@/sync';
++import { opcionesPestanas, useReducedMotion } from '@/theme';
+ 
+ /**
+  * Navegación inferior de FOM-DRIVER (la app del conductor): Mi unidad ·
+@@ -19,6 +20,7 @@ export default function DriverTabsLayout() {
+   const { user } = useAuth();
+   const { cargando } = useDriving();
+   const tenant = useTenant();
++  const reducido = useReducedMotion();
+ 
+   // Mientras se resuelve su unidad asignada, un loader. Todo conductor entra a
+   // su Inicio y monitorea su vehículo asignado (aunque en el momento lo maneje
+@@ -82,13 +84,14 @@ export default function DriverTabsLayout() {
+     <View style={styles.flex}>
+       <Tabs
+         tabBar={(props) => <AppTabBar {...props} />}
+-        // Sin esto, la 'shift' a veces deja la pestaña entrante en blanco/negro
++        // Sin esto, el fundido a veces deja la pestaña entrante en blanco/negro
+         // (carrera al desmontar la escena saliente: react-navigation #12755).
+         detachInactiveScreens={false}
+         screenOptions={{
+           headerShown: false,
+-          // Transición suave al cambiar de pestaña.
+-          animation: 'shift',
++          // Fundido corto al cambiar de pestaña; la píldora de la barra es la
++          // que se desliza (tiempos en `movimiento.ts`).
++          ...opcionesPestanas(reducido),
+         }}>
+         <Tabs.Screen
+           name="index"
+diff --git a/src/app/_layout.tsx b/src/app/_layout.tsx
+index 1f85a25..61c1279 100644
+--- a/src/app/_layout.tsx
++++ b/src/app/_layout.tsx
+@@ -10,11 +10,21 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
+ import { SafeAreaProvider } from 'react-native-safe-area-context';
+ 
+ import { AuthProvider } from '@/auth';
++import { FundidoTema } from '@/components/fundido-tema';
+ import { MedidorFom } from '@/components/medidor-fom';
+ import { SplashRuta } from '@/components/splash-ruta';
+ import { TransicionEntrada } from '@/components/transicion-entrada';
+ import { AdminProvider, DrivingProvider, TenantProvider } from '@/session';
+-import { FUENTES_FOM, ThemeProvider, useTheme, useThemeController } from '@/theme';
++import {
++  FUENTES_FOM,
++  opcionesFundido,
++  opcionesHoja,
++  opcionesPila,
++  ThemeProvider,
++  useReducedMotion,
++  useTheme,
++  useThemeController,
++} from '@/theme';
+ 
+ /**
+  * El splash nativo NO se retira solo.
+@@ -62,9 +72,9 @@ export default function RootLayout() {
+  * Las SUPERFICIES de aterrizaje (login y el destino de cada rol) no se empujan
+  * como una pantalla más: se FUNDEN entre sí, igual que el cambio de pestaña.
+  * Entrar a la app no es "avanzar" en una pila, es cambiar de contexto, y el
+- * deslizamiento lateral hacía sentir un corte brusco.
++ * deslizamiento lateral hacía sentir un corte brusco. Tiempos en `movimiento.ts`.
+  */
+-const FUNDIDO = { animation: 'fade', animationDuration: 300 } as const;
++const FUNDIDO = opcionesFundido;
+ 
+ /**
+  * DOCUMENTOS sube como una HOJA, no como una pantalla más.
+@@ -75,7 +85,7 @@ const FUNDIDO = { animation: 'fade', animationDuration: 300 } as const;
+  * encarga: entras al documento por encima y al volver caes otra vez en la
+  * lista, que es donde estabas.
+  */
+-const HOJA = { presentation: 'modal', animation: 'slide_from_bottom', animationDuration: 320 } as const;
++const HOJA = opcionesHoja;
+ 
+ /**
+  * Stack raíz. Con los headers ocultos, el fondo de cada pantalla lo fija el
+@@ -89,6 +99,7 @@ const HOJA = { presentation: 'modal', animation: 'slide_from_bottom', animationD
+ function NavigationChrome() {
+   const { colors } = useTheme();
+   const { colorScheme } = useThemeController();
++  const reducido = useReducedMotion();
+ 
+   const temaNavegacion = useMemo(() => {
+     const base = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
+@@ -119,12 +130,11 @@ function NavigationChrome() {
+           screenOptions={{
+             headerShown: false,
+             contentStyle: { backgroundColor: colors.background },
+-            // Transición fluida entre pantallas. Se puede volver de DOS maneras:
+-            // el botón "Volver" del ScreenHeader Y el gesto de deslizar desde el
++            // Transición fluida entre pantallas, la misma en toda la app (y en
++            // los grupos con pila propia). Se puede volver de DOS maneras: el
++            // botón "Volver" del ScreenHeader Y el gesto de deslizar desde el
+             // borde.
+-            animation: 'slide_from_right',
+-            animationDuration: 220,
+-            gestureEnabled: true,
++            ...opcionesPila(reducido),
+           }}>
+           {/* El resto de rutas se registran solas (enrutado por archivos); aquí
+               solo se ajusta la transición de las superficies de aterrizaje. */}
+@@ -140,6 +150,10 @@ function NavigationChrome() {
+         </Stack>
+       </TemaNavegacion>
+ 
++      {/* Cambio de tema (claro, oscuro, Glass): lo de antes se apaga encima
++          de lo nuevo, en vez de saltar de un color a otro. */}
++      <FundidoTema />
++
+       {/* Capa de entrada: por ENCIMA del navegador, así el cambio de pantalla
+           tras iniciar sesión ocurre detrás y no se ve ningún corte. */}
+       <TransicionEntrada />
+diff --git a/src/app/admin/_layout.tsx b/src/app/admin/_layout.tsx
+index 0ffd5bd..9e52f1c 100644
+--- a/src/app/admin/_layout.tsx
++++ b/src/app/admin/_layout.tsx
+@@ -4,7 +4,7 @@ import { useCallback } from 'react';
+ import { esMultiempresa, useAuth } from '@/auth';
+ import { AppTabBar } from '@/components/app-tab-bar';
+ import { TabIcon } from '@/components/tab-icon';
+-import { DEFAULT_BRAND, useThemeController } from '@/theme';
++import { DEFAULT_BRAND, opcionesPestanas, useReducedMotion, useThemeController } from '@/theme';
+ 
+ /**
+  * ADMINISTRACIÓN FOM — la superficie PROPIA de los 3 administradores del
+@@ -19,6 +19,7 @@ import { DEFAULT_BRAND, useThemeController } from '@/theme';
+ export default function AdminFomTabsLayout() {
+   const { user, status } = useAuth();
+   const { setBrand } = useThemeController();
++  const reducido = useReducedMotion();
+ 
+   // La administración del sistema nunca hereda la marca de una empresa.
+   useFocusEffect(
+@@ -34,13 +35,14 @@ export default function AdminFomTabsLayout() {
+   return (
+     <Tabs
+       tabBar={(props) => <AppTabBar {...props} />}
+-      // Sin esto, la 'shift' a veces deja la pestaña entrante en blanco/negro
++      // Sin esto, el fundido a veces deja la pestaña entrante en blanco/negro
+       // (carrera al desmontar la escena saliente: react-navigation #12755).
+       detachInactiveScreens={false}
+       screenOptions={{
+         headerShown: false,
+-        // Transición suave al cambiar de pestaña.
+-        animation: 'shift',
++        // Fundido corto al cambiar de pestaña; la píldora de la barra es la
++        // que se desliza (tiempos en `movimiento.ts`).
++        ...opcionesPestanas(reducido),
+       }}>
+       <Tabs.Screen
+         name="index"
+diff --git a/src/app/compania/_layout.tsx b/src/app/compania/_layout.tsx
+index 7fb0cff..ec06ffd 100644
+--- a/src/app/compania/_layout.tsx
++++ b/src/app/compania/_layout.tsx
+@@ -4,7 +4,7 @@ import { useCallback } from 'react';
+ import { esAdmin, useAuth } from '@/auth';
+ import { AppTabBar } from '@/components/app-tab-bar';
+ import { TabIcon } from '@/components/tab-icon';
+-import { useThemeController, DEFAULT_BRAND } from '@/theme';
++import { DEFAULT_BRAND, opcionesPestanas, useReducedMotion, useThemeController } from '@/theme';
+ import { getCompanyBrandById } from '@/services';
+ 
+ /**
+@@ -19,6 +19,7 @@ import { getCompanyBrandById } from '@/services';
+ export default function CompaniaTabsLayout() {
+   const { user, status } = useAuth();
+   const { setBrand } = useThemeController();
++  const reducido = useReducedMotion();
+ 
+   // La sesión se pinta con la marca de la compañía (P14).
+   useFocusEffect(
+@@ -46,13 +47,14 @@ export default function CompaniaTabsLayout() {
+   return (
+     <Tabs
+       tabBar={(props) => <AppTabBar {...props} />}
+-      // Sin esto, la 'shift' a veces deja la pestaña entrante en blanco/negro
++      // Sin esto, el fundido a veces deja la pestaña entrante en blanco/negro
+       // (carrera al desmontar la escena saliente: react-navigation #12755).
+       detachInactiveScreens={false}
+       screenOptions={{
+         headerShown: false,
+-        // Transición suave al cambiar de pestaña.
+-        animation: 'shift',
++        // Fundido corto al cambiar de pestaña; la píldora de la barra es la
++        // que se desliza (tiempos en `movimiento.ts`).
++        ...opcionesPestanas(reducido),
+       }}>
+       <Tabs.Screen
+         name="index"
+diff --git a/src/app/gerencial/_layout.tsx b/src/app/gerencial/_layout.tsx
+index e4acfb6..83ed69b 100644
+--- a/src/app/gerencial/_layout.tsx
++++ b/src/app/gerencial/_layout.tsx
+@@ -1,7 +1,7 @@
+ import { Redirect, Stack } from 'expo-router';
+ 
+ import { esAdmin, esMultiempresa, useAuth } from '@/auth';
+-import { useTheme } from '@/theme';
++import { opcionesPila, useReducedMotion, useTheme } from '@/theme';
+ 
+ /**
+  * Grupo de la VISTA GERENCIAL: la capa de reportes, histórico de ODT y
+@@ -11,6 +11,7 @@ import { useTheme } from '@/theme';
+  */
+ export default function GerencialLayout() {
+   const { colors } = useTheme();
++  const reducido = useReducedMotion();
+   const { user, status } = useAuth();
+ 
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+@@ -26,9 +27,8 @@ export default function GerencialLayout() {
+       screenOptions={{
+         headerShown: false,
+         contentStyle: { backgroundColor: colors.background },
+-        animation: 'slide_from_right',
+-        animationDuration: 260,
+-        gestureEnabled: true,
++        // La misma transición que la pila raíz (`movimiento.ts`).
++        ...opcionesPila(reducido),
+       }}
+     />
+   );
+diff --git a/src/app/gerencial/odt.tsx b/src/app/gerencial/odt.tsx
+index 47105f8..2a11abc 100644
+--- a/src/app/gerencial/odt.tsx
++++ b/src/app/gerencial/odt.tsx
+@@ -1,12 +1,13 @@
+ import { useLocalSearchParams } from 'expo-router';
+ import { useState } from 'react';
+-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
++import { Image, ScrollView, StyleSheet, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { Card } from '@/components/card';
+ import { Chip } from '@/components/chip';
+ import { ErrorState } from '@/components/error-state';
+ import { PhotoViewer } from '@/components/photo-viewer';
++import { PressableScale } from '@/components/pressable-scale';
+ import { OTStatusBadge } from '@/components/ot-status-badge';
+ import { ScreenHeader } from '@/components/screen-header';
+ import { Skeleton } from '@/components/skeleton';
+@@ -127,7 +128,7 @@ export default function GerencialOdtScreen() {
+                       showsHorizontalScrollIndicator={false}
+                       contentContainerStyle={{ gap: spacing.md }}>
+                       {orden.evidenciaResolucionUrls.map((url) => (
+-                        <Pressable
++                        <PressableScale
+                           key={url}
+                           onPress={() => setFotoAbierta(url)}
+                           accessibilityRole="imagebutton"
+@@ -139,7 +140,7 @@ export default function GerencialOdtScreen() {
+                               { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg },
+                             ]}
+                           />
+-                        </Pressable>
++                        </PressableScale>
+                       ))}
+                     </ScrollView>
+                   ) : null}
+@@ -157,7 +158,7 @@ export default function GerencialOdtScreen() {
+                     showsHorizontalScrollIndicator={false}
+                     contentContainerStyle={{ gap: spacing.md }}>
+                     {orden.evidenciaUrls.map((url) => (
+-                      <Pressable
++                      <PressableScale
+                         key={url}
+                         onPress={() => setFotoAbierta(url)}
+                         accessibilityRole="imagebutton"
+@@ -169,7 +170,7 @@ export default function GerencialOdtScreen() {
+                             { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg },
+                           ]}
+                         />
+-                      </Pressable>
++                      </PressableScale>
+                     ))}
+                   </ScrollView>
+                 ) : (
+diff --git a/src/app/login.tsx b/src/app/login.tsx
+index aaf9b97..2391419 100644
+--- a/src/app/login.tsx
++++ b/src/app/login.tsx
+@@ -8,6 +8,7 @@ import { useAuth } from '@/auth';
+ import { useArranqueCubierto } from '@/lib/arranque';
+ import { LoginBackground } from '@/components/login-background';
+ import { LogoFomCompleto } from '@/components/logo-fom';
++import { PressableScale } from '@/components/pressable-scale';
+ import { ContenidoTransicion } from '@/components/pantalla-transicion';
+ import { TextField } from '@/components/text-field';
+ import { ThemedText } from '@/components/themed-text';
+@@ -645,7 +646,7 @@ export default function LoginScreen() {
+                     {recuperacion}
+                   </ThemedText>
+                 ) : (
+-                  <Pressable
++                  <PressableScale
+                     onPress={onRecuperarClave}
+                     disabled={recuperando || ocupado}
+                     hitSlop={8}
+@@ -654,7 +655,7 @@ export default function LoginScreen() {
+                     <ThemedText style={[styles.center, styles.olvido]}>
+                       {recuperando ? 'Enviando correo…' : '¿Olvidaste tu contraseña?'}
+                     </ThemedText>
+-                  </Pressable>
++                  </PressableScale>
+                 )}
+               </Animated.View>
+             </View>
+diff --git a/src/app/panel/_layout.tsx b/src/app/panel/_layout.tsx
+index fc63e56..1c80b42 100644
+--- a/src/app/panel/_layout.tsx
++++ b/src/app/panel/_layout.tsx
+@@ -6,7 +6,7 @@ import { AppTabBar } from '@/components/app-tab-bar';
+ import { TabIcon } from '@/components/tab-icon';
+ import { useAdmin } from '@/session';
+ import { getCompanyBrandById } from '@/services';
+-import { useThemeController } from '@/theme';
++import { opcionesPestanas, useReducedMotion, useThemeController } from '@/theme';
+ 
+ /**
+  * Panel de administración por PESTAÑAS (FOM-WEB móvil): Resumen · Vehículos ·
+@@ -19,6 +19,7 @@ export default function AdminTabsLayout() {
+   const { setBrand } = useThemeController();
+   const { user, status } = useAuth();
+   const { empresaId } = useAdmin();
++  const reducido = useReducedMotion();
+ 
+   // Pinta el panel con la marca de la empresa activa.
+   useEffect(() => {
+@@ -45,13 +46,14 @@ export default function AdminTabsLayout() {
+   return (
+     <Tabs
+       tabBar={(props) => <AppTabBar {...props} />}
+-      // Sin esto, la 'shift' a veces deja la pestaña entrante en blanco/negro
++      // Sin esto, el fundido a veces deja la pestaña entrante en blanco/negro
+       // (carrera al desmontar la escena saliente: react-navigation #12755).
+       detachInactiveScreens={false}
+       screenOptions={{
+         headerShown: false,
+-        // Transición suave al cambiar de pestaña.
+-        animation: 'shift',
++        // Fundido corto al cambiar de pestaña; la píldora de la barra es la
++        // que se desliza (tiempos en `movimiento.ts`).
++        ...opcionesPestanas(reducido),
+       }}>
+       <Tabs.Screen
+         name="index"
+diff --git a/src/app/personal/_layout.tsx b/src/app/personal/_layout.tsx
+index 7b4ec90..419190f 100644
+--- a/src/app/personal/_layout.tsx
++++ b/src/app/personal/_layout.tsx
+@@ -1,7 +1,7 @@
+ import { Redirect, Stack } from 'expo-router';
+ 
+ import { esCuentaPersonal, useAuth } from '@/auth';
+-import { useTheme } from '@/theme';
++import { opcionesPila, useReducedMotion, useTheme } from '@/theme';
+ 
+ /**
+  * Grupo de las CUENTAS PERSONALES (FOM-02 §5–§6): la flota doméstica de Ale
+@@ -10,6 +10,7 @@ import { useTheme } from '@/theme';
+  */
+ export default function PersonalLayout() {
+   const { colors } = useTheme();
++  const reducido = useReducedMotion();
+   const { user, status } = useAuth();
+ 
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+@@ -20,9 +21,8 @@ export default function PersonalLayout() {
+       screenOptions={{
+         headerShown: false,
+         contentStyle: { backgroundColor: colors.background },
+-        animation: 'slide_from_right',
+-        animationDuration: 260,
+-        gestureEnabled: true,
++        // La misma transición que la pila raíz (`movimiento.ts`).
++        ...opcionesPila(reducido),
+       }}
+     />
+   );
+diff --git a/src/components/animated-number.tsx b/src/components/animated-number.tsx
+index 3c82c05..2d6ee9f 100644
+--- a/src/components/animated-number.tsx
++++ b/src/components/animated-number.tsx
+@@ -3,7 +3,7 @@ import { type StyleProp, type TextStyle } from 'react-native';
+ import { useReducedMotion as useReducedMotionReanimated } from 'react-native-reanimated';
+ 
+ import { ThemedText, type TextVariant } from '@/components/themed-text';
+-import { type ColorTokens } from '@/theme';
++import { CONTEO, type ColorTokens } from '@/theme';
+ 
+ type AnimatedNumberProps = {
+   /** Valor final. Cuenta hasta aquí al aparecer / cambiar. */
+@@ -28,7 +28,7 @@ type AnimatedNumberProps = {
+  * animación. Ahora usa el mismo motor que `useConteo`, que solo repinta cuando
+  * cambia el entero que se ve.
+  */
+-export function AnimatedNumber({ value, variant = 'display', color, duration = 900, format, style }: AnimatedNumberProps) {
++export function AnimatedNumber({ value, variant = 'display', color, duration = CONTEO.destacada, format, style }: AnimatedNumberProps) {
+   const shown = useConteo(value, duration);
+   return (
+     <ThemedText variant={variant} color={color} tabular style={style}>
+@@ -38,7 +38,7 @@ export function AnimatedNumber({ value, variant = 'display', color, duration = 9
+ }
+ 
+ /** Lo que dura el conteo de una cifra de tablero (ms). */
+-const CONTEO_MS = 500;
++const CONTEO_MS = CONTEO.tablero;
+ /** Cada cuánto, como mucho, se repinta la cifra mientras cuenta (ms). */
+ const CONTEO_PASO = 33;
+ 
+diff --git a/src/components/button.tsx b/src/components/button.tsx
+index 077cde5..244a720 100644
+--- a/src/components/button.tsx
++++ b/src/components/button.tsx
+@@ -1,9 +1,10 @@
+-import { useRef, useState } from 'react';
+-import { ActivityIndicator, Animated, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
++import { useState } from 'react';
++import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
++import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+ 
+ import { TabIcon, type TabIconName } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+-import { useReducedMotion, useTheme } from '@/theme';
++import { curvasUI, DURACION, RESORTE, useReducedMotion, useTheme } from '@/theme';
+ 
+ type ButtonVariant = 'primary' | 'secondary' | 'danger';
+ 
+@@ -37,7 +38,9 @@ export function Button({
+ }: ButtonProps) {
+   const { colors, radii, spacing, motion, shadows, borderWidths, opacity } = useTheme();
+   const reduced = useReducedMotion();
+-  const scale = useRef(new Animated.Value(1)).current;
++  // La escala corre en el hilo de UI: el toque responde aunque JS esté ocupado.
++  const escala = useSharedValue(1);
++  const estiloEscala = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+   const [pressed, setPressed] = useState(false);
+ 
+   const isDisabled = disabled || loading;
+@@ -55,14 +58,12 @@ export function Button({
+   const velo = pressed && !isDisabled;
+   const foreground = isDisabled ? colors.textSecondary : baseFg;
+ 
+-  function animateTo(value: number) {
+-    if (reduced) return;
+-    Animated.timing(scale, {
+-      toValue: value,
+-      duration: motion.durations.micro,
+-      easing: motion.easing.standard,
+-      useNativeDriver: true,
+-    }).start();
++  // Se encoge en 140 ms y vuelve con un resorte (los mismos de PressableScale).
++  function apoyar() {
++    if (!reduced) escala.set(withTiming(motion.pressedScale, { duration: DURACION.rapido, easing: curvasUI.salida }));
++  }
++  function soltar() {
++    if (!reduced) escala.set(withSpring(1, RESORTE.toque));
+   }
+ 
+   return (
+@@ -73,11 +74,11 @@ export function Button({
+       accessibilityState={{ disabled: !!isDisabled, busy: !!loading }}
+       onPressIn={() => {
+         setPressed(true);
+-        animateTo(motion.pressedScale);
++        apoyar();
+       }}
+       onPressOut={() => {
+         setPressed(false);
+-        animateTo(1);
++        soltar();
+       }}
+       style={[
+         styles.base,
+@@ -90,13 +91,13 @@ export function Button({
+           borderRadius: radii.pill,
+           paddingVertical: spacing.md,
+           paddingHorizontal: spacing.xl,
+-          transform: [{ scale }],
+         },
+         // Los botones RELLENOS y activos FLOTAN sobre la pantalla (sombra de
+         // flotante, no de tarjeta). El secundario con borde no lleva sombra:
+         // evita el "ghost-card" borde+sombra.
+         !bordered && !isDisabled ? shadows.floating : null,
+         style,
++        estiloEscala,
+       ]}>
+       {velo ? (
+         <View
+diff --git a/src/components/capa-centrada.tsx b/src/components/capa-centrada.tsx
+index 85b89e9..e8b1a79 100644
+--- a/src/components/capa-centrada.tsx
++++ b/src/components/capa-centrada.tsx
+@@ -1,8 +1,8 @@
+ import type { ReactNode } from 'react';
+-import { useEffect, useRef } from 'react';
+-import { Animated, Easing, Modal, Pressable, StyleSheet, View } from 'react-native';
++import { useEffect, useState } from 'react';
++import { Animated, Modal, Pressable, StyleSheet, View } from 'react-native';
+ 
+-import { useReducedMotion } from '@/theme';
++import { curvas, DURACION, RESORTE, useReducedMotion, VELO } from '@/theme';
+ 
+ /** Aire mínimo entre lo que flota y los bordes de la pantalla. */
+ const MARGEN = 12;
+@@ -28,34 +28,70 @@ type Props = {
+ export function CapaCentrada({ visible, onClose, children }: Props) {
+   const reducido = useReducedMotion();
+ 
+-  const t = useRef(new Animated.Value(0)).current;
++  /**
++   * El `Modal` sigue montado mientras la pieza SE VA: si se apagaba a la vez
++   * que `visible`, la ventana nativa desaparecía de golpe y el cierre no se
++   * veía. Se apaga al terminar (o enseguida con «reducir movimiento»). Mismo
++   * arreglo que `HojaModal`.
++   */
++  const [montado, setMontado] = useState(visible);
++  const [visiblePrevio, setVisiblePrevio] = useState(visible);
++  if (visiblePrevio !== visible) {
++    setVisiblePrevio(visible);
++    if (visible) setMontado(true);
++    else if (reducido) setMontado(false);
++  }
++  // Lo último que se enseñó: quien la usa suele vaciar su estado al cerrar, y
++  // sin esto la pieza se iría en blanco durante el fundido.
++  const [ultimo, setUltimo] = useState<ReactNode>(children);
++  if (visible && ultimo !== children) setUltimo(children);
++  const hijos = visible ? children : ultimo;
++
++  // `t` es la pieza (crece con resorte) y `velo` el fondo (solo se funde). En
++  // el estado y no en una ref: regla del React Compiler.
++  const [t] = useState(() => new Animated.Value(0));
++  const [velo] = useState(() => new Animated.Value(0));
+   useEffect(() => {
+     if (reducido) {
+       t.setValue(visible ? 1 : 0);
++      velo.setValue(visible ? 1 : 0);
+       return;
+     }
+-    const anim = Animated.timing(t, {
++    const pieza = visible
++      ? Animated.spring(t, { toValue: 1, ...RESORTE.ventana, useNativeDriver: true })
++      : Animated.timing(t, { toValue: 0, duration: DURACION.rapido, easing: curvas.entrada, useNativeDriver: true });
++    const fondo = Animated.timing(velo, {
+       toValue: visible ? 1 : 0,
+-      duration: visible ? 260 : 160,
+-      easing: visible ? Easing.bezier(0.16, 1, 0.3, 1) : Easing.in(Easing.cubic),
++      duration: visible ? VELO.abrir : VELO.cerrar,
++      easing: visible ? curvas.salida : curvas.entrada,
+       useNativeDriver: true,
+     });
+-    anim.start();
++    const anim = Animated.parallel([pieza, fondo]);
++    anim.start(({ finished }) => {
++      if (finished && !visible) setMontado(false);
++    });
+     return () => anim.stop();
+-  }, [visible, t, reducido]);
++  }, [visible, t, velo, reducido]);
+ 
+-  // Entra creciendo un pelo desde el centro: aparece, no salta.
++  // Entra creciendo un pelo desde el centro, con un rebote que apenas se ve:
++  // aparece, no salta. La opacidad va acotada para que el rebote no la pase de 1.
+   const escala = t.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] });
++  const opacidad = t.interpolate({ inputRange: [0, 0.6], outputRange: [0, 1], extrapolate: 'clamp' });
+ 
+   return (
+-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+-      <Animated.View style={[StyleSheet.absoluteFill, styles.velo, { opacity: t }]}>
++    <Modal visible={visible || montado} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
++      <Animated.View
++        style={[StyleSheet.absoluteFill, styles.velo, { opacity: velo }]}
++        // Mientras se va ya no recibe toques.
++        pointerEvents={visible ? 'auto' : 'none'}>
+         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Cerrar" />
+       </Animated.View>
+ 
+       <View style={styles.centro} pointerEvents="box-none">
+-        <Animated.View style={[styles.pieza, { opacity: t, transform: [{ scale: escala }] }]}>
+-          {children}
++        <Animated.View
++          style={[styles.pieza, { opacity: opacidad, transform: [{ scale: escala }] }]}
++          pointerEvents={visible ? 'auto' : 'none'}>
++          {hijos}
+         </Animated.View>
+       </View>
+     </Modal>
+diff --git a/src/components/escalonado.tsx b/src/components/escalonado.tsx
+index fb05345..9a043c0 100644
+--- a/src/components/escalonado.tsx
++++ b/src/components/escalonado.tsx
+@@ -9,20 +9,28 @@ import Animated, {
+   type EntryExitAnimationFunction,
+ } from 'react-native-reanimated';
+ 
++import { CURVA, DURACION as TIEMPOS, ESCALONADO } from '@/theme';
++
+ /** Lo que sube cada bloque al entrar (px). */
+-const SUBIDA = 10;
+-/** Lo que dura la entrada de cada bloque (ms). */
+-const DURACION = 240;
++const SUBIDA = ESCALONADO.subida;
++/** Lo que dura la entrada de cada bloque (ms): la «normal» de la app y la web. */
++const DURACION = TIEMPOS.normal;
+ /** El escalón entre un bloque y el siguiente (ms). */
+-const ESCALON = 45;
++const ESCALON = ESCALONADO.paso;
+ /** Solo los primeros entran escalonados (la cabecera y ~8 filas): el resto ya está fuera de la vista. */
+-const MAX_ESCALONES = 12;
++const MAX_ESCALONES = ESCALONADO.maximo;
+ /**
+  * Cuánto dura "la primera vez" de un grupo desde que monta su primer bloque.
+  * Lo que monte después (un refresco, el scroll de la lista, un filtro) ya no
+  * anima: entra de una.
+  */
+-const VENTANA = 900;
++const VENTANA = ESCALONADO.ventana;
++/** Entrar y salir de lo que flota: normal al llegar, rápido al irse. */
++const FLOTANTE_ENTRA = TIEMPOS.normal;
++const FLOTANTE_SALE = TIEMPOS.rapido;
++/** Las curvas de la app, en números: dentro del worklet se arma la función. */
++const SALIDA = CURVA.salida;
++const ENTRADA = CURVA.entrada;
+ 
+ /**
+  * Cuándo montó el primer bloque de cada grupo, por pantalla (la `key` de su
+@@ -41,7 +49,7 @@ const MAX_INICIOS = 100;
+ function entradaBloque(retardo: number): EntryExitAnimationFunction {
+   return () => {
+     'worklet';
+-    const curva = { duration: DURACION, easing: Easing.out(Easing.cubic) };
++    const curva = { duration: DURACION, easing: Easing.bezier(SALIDA[0], SALIDA[1], SALIDA[2], SALIDA[3]) };
+     return {
+       initialValues: { opacity: 0, transform: [{ translateY: SUBIDA }] },
+       animations: {
+@@ -109,12 +117,12 @@ export function Escalonado({ children, indice = 0, grupo = 'pantalla', style }:
+ /**
+  * Las tarjetas y paneles que APARECEN sobre la pantalla (la ficha de una
+  * unidad al tocarla, el panel del recorrido): suben 16 px y se funden en
+- * 200 ms; al irse, bajan un poco y se apagan, más rápido.
++ * 240 ms; al irse, bajan un poco y se apagan en 140.
+  * Con "reducir movimiento" Reanimated las deja de una (`ReduceMotion.System`).
+  */
+ export const entradaFlotante: EntryExitAnimationFunction = () => {
+   'worklet';
+-  const curva = { duration: 200, easing: Easing.out(Easing.cubic) };
++  const curva = { duration: FLOTANTE_ENTRA, easing: Easing.bezier(SALIDA[0], SALIDA[1], SALIDA[2], SALIDA[3]) };
+   return {
+     initialValues: { opacity: 0, transform: [{ translateY: 16 }] },
+     animations: {
+@@ -126,7 +134,7 @@ export const entradaFlotante: EntryExitAnimationFunction = () => {
+ 
+ export const salidaFlotante: EntryExitAnimationFunction = () => {
+   'worklet';
+-  const curva = { duration: 140, easing: Easing.in(Easing.cubic) };
++  const curva = { duration: FLOTANTE_SALE, easing: Easing.bezier(ENTRADA[0], ENTRADA[1], ENTRADA[2], ENTRADA[3]) };
+   return {
+     initialValues: { opacity: 1, transform: [{ translateY: 0 }] },
+     animations: {
+diff --git a/src/components/evidence-field.tsx b/src/components/evidence-field.tsx
+index e16132c..83de0b1 100644
+--- a/src/components/evidence-field.tsx
++++ b/src/components/evidence-field.tsx
+@@ -1,7 +1,7 @@
+ import { Image } from 'expo-image';
+ import * as ImagePicker from 'expo-image-picker';
+ import { useState } from 'react';
+-import { Alert, Pressable, StyleSheet, View } from 'react-native';
++import { Alert, StyleSheet, View } from 'react-native';
+ 
+ import { PhotoViewer } from '@/components/photo-viewer';
+ import { PressableScale } from '@/components/pressable-scale';
+@@ -113,14 +113,14 @@ export function EvidenceField({
+             return (
+               <View key={`${uri}-${i}`} style={[styles.fila, { gap: spacing.sm }]}>
+                 <View style={[styles.miniWrap, { borderRadius: radii.md, borderColor: colors.border }]}>
+-                  <Pressable
++                  <PressableScale
+                     onPress={() => setFotoAbierta(uri)}
+                     accessibilityRole="imagebutton"
+                     accessibilityLabel={`Ver la foto ${i + 1} a pantalla completa`}
+                     style={styles.thumb}>
+                     <Image source={{ uri }} style={styles.thumb} contentFit="cover" />
+-                  </Pressable>
+-                  <Pressable
++                  </PressableScale>
++                  <PressableScale
+                     onPress={() => quitar(i)}
+                     hitSlop={6}
+                     disabled={!editable}
+@@ -130,7 +130,7 @@ export function EvidenceField({
+                     <ThemedText variant="caption" style={{ color: colors.onDanger }}>
+                       ✕
+                     </ThemedText>
+-                  </Pressable>
++                  </PressableScale>
+                 </View>
+                 <View style={styles.flex1}>
+                   <TextField
+@@ -154,21 +154,21 @@ export function EvidenceField({
+               key={`${uri}-${i}`}
+               style={[styles.thumbWrap, { borderRadius: radii.md, borderColor: colors.border }]}>
+               {/* Tocar la foto la abre a pantalla completa (no en miniatura). */}
+-              <Pressable
++              <PressableScale
+                 onPress={() => setFotoAbierta(uri)}
+                 accessibilityRole="imagebutton"
+                 accessibilityLabel="Ver foto a pantalla completa"
+                 style={styles.thumb}>
+                 <Image source={{ uri }} style={styles.thumb} contentFit="cover" />
+-              </Pressable>
+-              <Pressable
++              </PressableScale>
++              <PressableScale
+                 onPress={() => quitar(i)}
+                 hitSlop={6}
+                 style={[styles.remove, { backgroundColor: colors.danger, borderRadius: radii.pill }]}>
+                 <ThemedText variant="caption" style={{ color: colors.onDanger }}>
+                   ✕
+                 </ThemedText>
+-              </Pressable>
++              </PressableScale>
+             </View>
+           ))}
+         </View>
+diff --git a/src/components/filtro-estado-mantenimiento.tsx b/src/components/filtro-estado-mantenimiento.tsx
+index dde5200..d4fe55f 100644
+--- a/src/components/filtro-estado-mantenimiento.tsx
++++ b/src/components/filtro-estado-mantenimiento.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from 'react';
+-import { Pressable, StyleSheet, View } from 'react-native';
++import { StyleSheet, View } from 'react-native';
+ 
+ import { Button } from '@/components/button';
+ import { CampoFecha } from '@/components/campo-fecha';
+@@ -106,7 +106,7 @@ export function FiltroEstadoMantenimiento({
+             const cuenta = cuentas[g.id];
+             return (
+               <OpcionRiel key={g.id} id={g.id}>
+-                <Pressable
++                <PressableScale
+                   onPress={() => onCambiar(g.id)}
+                   accessibilityRole="button"
+                   accessibilityState={{ selected: on }}
+@@ -138,7 +138,7 @@ export function FiltroEstadoMantenimiento({
+                       {String(cuenta)}
+                     </ThemedText>
+                   </View>
+-                </Pressable>
++                </PressableScale>
+               </OpcionRiel>
+             );
+           })}
+diff --git a/src/components/fundido-tema.tsx b/src/components/fundido-tema.tsx
+new file mode 100644
+index 0000000..5ebbf1b
+--- /dev/null
++++ b/src/components/fundido-tema.tsx
+@@ -0,0 +1,62 @@
++import { useCallback, useEffect, useState } from 'react';
++import { StyleSheet } from 'react-native';
++import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
++
++import { curvasUI, DURACION, useReducedMotion, useTheme } from '@/theme';
++
++/**
++ * CAMBIO DE TEMA SUAVE (claro ↔ oscuro, Azul FOM ↔ Glass gris).
++ *
++ * Sin esto, toda la app saltaba de colores en un cuadro. Aquí, en el mismo
++ * cuadro en que se pinta el tema nuevo, se pone encima un velo del FONDO
++ * ANTERIOR y se apaga en 380 ms: lo nuevo aparece fundiéndose desde el color de
++ * antes. Solo opacidad, en el hilo de UI, y sin tocar nada de debajo.
++ *
++ * No toma toques (`pointerEvents="none"`): mientras se apaga ya se puede usar
++ * la pantalla. Con «reducir movimiento» el cambio es directo.
++ */
++export function FundidoTema() {
++  const { colors, colorScheme, apariencia } = useTheme();
++  const reducido = useReducedMotion();
++  const clave = `${colorScheme}:${apariencia}`;
++
++  // Lo que se pintaba antes. Se compara DURANTE el render (estado derivado):
++  // así el velo sale en el mismo cuadro que el tema nuevo, sin un parpadeo.
++  const [antes, setAntes] = useState({ clave, fondo: colors.background });
++  const [velo, setVelo] = useState<{ id: number; color: string } | null>(null);
++  // Estable: si cambiara en cada render, el velo volvería a arrancar su fundido.
++  const quitarVelo = useCallback(() => setVelo(null), []);
++  if (antes.clave !== clave) {
++    setAntes({ clave, fondo: colors.background });
++    if (!reducido) setVelo((v) => ({ id: (v?.id ?? 0) + 1, color: antes.fondo }));
++  } else if (antes.fondo !== colors.background) {
++    // Mismo tema con otro fondo (no debería pasar): se apunta sin animar.
++    setAntes({ clave, fondo: colors.background });
++  }
++
++  if (!velo) return null;
++  // Con `key`: un segundo cambio a medio fundido arranca un velo nuevo.
++  return <Velo key={velo.id} color={velo.color} alTerminar={quitarVelo} />;
++}
++
++function Velo({ color, alTerminar }: { color: string; alTerminar: () => void }) {
++  // Nace opaco: el primer cuadro tapa el salto de color.
++  const opacidad = useSharedValue(1);
++
++  useEffect(() => {
++    opacidad.set(
++      withTiming(0, { duration: DURACION.lento, easing: curvasUI.enfasis }, (terminado) => {
++        if (terminado) runOnJS(alTerminar)();
++      }),
++    );
++  }, [opacidad, alTerminar]);
++
++  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.value }));
++
++  return (
++    <Animated.View
++      pointerEvents="none"
++      style={[StyleSheet.absoluteFill, { backgroundColor: color }, estilo]}
++    />
++  );
++}
+diff --git a/src/components/hoja-modal.tsx b/src/components/hoja-modal.tsx
+index e40a7b7..679f13d 100644
+--- a/src/components/hoja-modal.tsx
++++ b/src/components/hoja-modal.tsx
+@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
+ import { useEffect, useId, useState } from 'react';
+ import {
+   Animated,
+-  Easing,
+   Keyboard,
+   Modal,
+   Platform,
+@@ -19,7 +18,7 @@ import { PressableScale } from '@/components/pressable-scale';
+ import { ScrollVisible } from '@/components/scroll-visible';
+ import { TabIcon, type TabIconName } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+-import { useReducedMotion, useTheme, type ColorTokens } from '@/theme';
++import { curvas, DURACION, RESORTE, useReducedMotion, useTheme, VELO, type ColorTokens } from '@/theme';
+ 
+ type Props = {
+   visible: boolean;
+@@ -117,29 +116,39 @@ export function HojaModal({ visible, onClose, titulo, icon, tone = 'primary', ca
+     };
+   }, [visible]);
+ 
+-  // El valor vive en el estado, no en una ref: una ref creada con `new` en
++  // Los valores viven en el estado, no en una ref: una ref creada con `new` en
+   // cada render construye un objeto que se tira (regla del React Compiler).
++  // `t` es la hoja (0 abajo, 1 arriba) y `velo` el fondo: van por separado
++  // porque la hoja sube con resorte y el fondo solo se funde.
+   const [t] = useState(() => new Animated.Value(0));
++  const [velo] = useState(() => new Animated.Value(0));
+   useEffect(() => {
+     if (reducido) {
+       t.setValue(visible ? 1 : 0);
++      velo.setValue(visible ? 1 : 0);
+       return;
+     }
+-    const anim = Animated.timing(t, {
++    const hoja = visible
++      ? // Sube con un resorte sin rebote: arranca con decisión y se posa sola.
++        Animated.spring(t, { toValue: 1, ...RESORTE.hoja, useNativeDriver: true })
++      : // Se va más rápido de lo que llegó.
++        Animated.timing(t, { toValue: 0, duration: DURACION.normal, easing: curvas.entrada, useNativeDriver: true });
++    const fondo = Animated.timing(velo, {
+       toValue: visible ? 1 : 0,
+-      duration: visible ? 400 : 220,
+-      easing: visible ? Easing.bezier(0.16, 1, 0.3, 1) : Easing.in(Easing.cubic),
++      duration: visible ? VELO.abrir : VELO.cerrar,
++      easing: visible ? curvas.salida : curvas.entrada,
+       useNativeDriver: true,
+     });
++    const anim = Animated.parallel([hoja, fondo]);
+     anim.start(({ finished }) => {
+       // Solo si terminó de bajar: si se interrumpió (se volvió a abrir), sigue montado.
+       if (finished && !visible) setMontado(false);
+     });
+     return () => anim.stop();
+-  }, [visible, t, reducido]);
++  }, [visible, t, velo, reducido]);
+ 
+   // La hoja sube desde fuera de la pantalla; el velo solo se funde.
+-  const subir = t.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
++  const subir = t.interpolate({ inputRange: [0, 1], outputRange: [600, 0], extrapolate: 'clamp' });
+ 
+   return (
+     <Modal visible={visible || montado} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+@@ -149,7 +158,7 @@ export function HojaModal({ visible, onClose, titulo, icon, tone = 'primary', ca
+       {/* Mientras baja ya no recibe toques: un segundo toque en el velo no
+           debe volver a cerrar ni tocar nada de una hoja que se va. */}
+       <GestureHandlerRootView style={styles.raiz} pointerEvents={visible ? 'auto' : 'none'}>
+-        <Animated.View style={[StyleSheet.absoluteFill, styles.velo, { opacity: t }]}>
++        <Animated.View style={[StyleSheet.absoluteFill, styles.velo, { opacity: velo }]}>
+           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" />
+         </Animated.View>
+ 
+diff --git a/src/components/odt-paso-fotos.tsx b/src/components/odt-paso-fotos.tsx
+index db5f291..edc9402 100644
+--- a/src/components/odt-paso-fotos.tsx
++++ b/src/components/odt-paso-fotos.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from 'react';
+-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
++import { Image, ScrollView, StyleSheet, View } from 'react-native';
+ 
+ import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
+@@ -111,7 +111,7 @@ export function GaleriaOdt({
+             const nombre = titulos?.[i]?.trim();
+             return (
+               <View key={`${url}-${i}`} style={styles.fotoItem}>
+-                <Pressable
++                <PressableScale
+                   onPress={() => onAbrir(url)}
+                   accessibilityRole="imagebutton"
+                   accessibilityLabel={nombre ? `Ver a pantalla completa: ${nombre}` : 'Ver la foto a pantalla completa'}>
+@@ -119,7 +119,7 @@ export function GaleriaOdt({
+                     source={{ uri: url }}
+                     style={[styles.foto, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg }]}
+                   />
+-                </Pressable>
++                </PressableScale>
+                 {nombre ? (
+                   <ThemedText variant="caption" color="textSecondary" numberOfLines={2}>
+                     {nombre}
+diff --git a/src/components/option-picker.tsx b/src/components/option-picker.tsx
+index 963b8f5..61d02e6 100644
+--- a/src/components/option-picker.tsx
++++ b/src/components/option-picker.tsx
+@@ -16,7 +16,7 @@ import Svg, { Path } from 'react-native-svg';
+ import { Button } from '@/components/button';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { ThemedText } from '@/components/themed-text';
+-import { useReducedMotion, useTheme, type ColorTokens } from '@/theme';
++import { curvas, DURACION, RESORTE, useReducedMotion, useTheme, type ColorTokens } from '@/theme';
+ 
+ export type PickerOption = {
+   id: string;
+@@ -147,7 +147,7 @@ export function OptionPickerModal({
+   onClose,
+   onLimpiar,
+ }: OptionPickerModalProps) {
+-  const { colors, radii, spacing, shadows, motion } = useTheme();
++  const { colors, radii, spacing, shadows } = useTheme();
+   const reduced = useReducedMotion();
+   // Alto de la ventana: acota la hoja al espacio que queda LIBRE sobre el
+   // teclado (no un porcentaje de CSS, para no depender de cómo resuelve Yoga
+@@ -196,13 +196,8 @@ export function OptionPickerModal({
+     if (visible) {
+       if (reduced) anim.setValue(1);
+       else
+-        Animated.spring(anim, {
+-          toValue: 1,
+-          useNativeDriver: true,
+-          damping: motion.spring.damping,
+-          stiffness: motion.spring.stiffness,
+-          mass: motion.spring.mass,
+-        }).start();
++        // El resorte de las hojas: sin rebote, para que no asome nada por debajo.
++        Animated.spring(anim, { toValue: 1, useNativeDriver: true, ...RESORTE.hoja }).start();
+       return;
+     }
+     // Al cerrar, la hoja se desmonta cuando TERMINA la animación (en el
+@@ -210,13 +205,14 @@ export function OptionPickerModal({
+     // animación dura cero y el resultado es el mismo por el mismo camino.
+     Animated.timing(anim, {
+       toValue: 0,
+-      duration: reduced ? 0 : motion.durations.base,
+-      easing: motion.easing.emphasized,
++      // Se va más rápido de lo que llegó, acelerando.
++      duration: reduced ? 0 : DURACION.normal,
++      easing: curvas.entrada,
+       useNativeDriver: true,
+     }).start(({ finished }) => {
+       if (finished) setRender(false);
+     });
+-  }, [visible, reduced, anim, motion]);
++  }, [visible, reduced, anim]);
+ 
+   // Teclado: se escucha SOLO mientras la hoja está abierta (una pantalla monta
+   // hasta 7 pickers a la vez; suscribir siempre serían 14 listeners vivos).
+@@ -280,8 +276,9 @@ export function OptionPickerModal({
+   const activeIds = multiSelect ? draft : selectedIds;
+   // Se suma `kbAlto` para que al cerrar CON el teclado abierto la hoja salga
+   // completa de pantalla (si no, quedaría asomando la altura del teclado).
+-  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [sheetH + kbAlto, 0] });
+-  const backdropOpacity = anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.5] });
++  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [sheetH + kbAlto, 0], extrapolate: 'clamp' });
++  // El fondo se funde antes de que la hoja llegue: a mitad de camino ya está oscuro.
++  const backdropOpacity = anim.interpolate({ inputRange: [0, 0.6], outputRange: [0, 0.5], extrapolate: 'clamp' });
+ 
+   if (!render) return null;
+ 
+diff --git a/src/components/pressable-scale.tsx b/src/components/pressable-scale.tsx
+index 752a73f..8f4eb2b 100644
+--- a/src/components/pressable-scale.tsx
++++ b/src/components/pressable-scale.tsx
+@@ -1,14 +1,7 @@
+-import { useRef } from 'react';
+-import {
+-  Animated,
+-  Pressable,
+-  type GestureResponderEvent,
+-  type PressableProps,
+-  type StyleProp,
+-  type ViewStyle,
+-} from 'react-native';
++import { Pressable, type GestureResponderEvent, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
++import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+ 
+-import { useReducedMotion, useTheme } from '@/theme';
++import { curvasUI, DURACION, ESCALA_PRESION, RESORTE, useReducedMotion } from '@/theme';
+ 
+ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+ 
+@@ -18,35 +11,29 @@ type PressableScaleProps = Omit<PressableProps, 'style'> & {
+ 
+ /**
+  * `Pressable` con feedback de escala al presionar (DISENO_DIRECCION §7: feedback
+- * en TODO lo tocable). Se encoge a `motion.pressedScale` al mantener y vuelve al
+- * soltar. Respeta "reducir movimiento". Para tarjetas y filas de lista tocables.
++ * en TODO lo tocable). Se encoge a 0,97 en 140 ms al apoyar el dedo y vuelve
++ * con un resorte al soltar, que es lo que lo hace sentir vivo y no mecánico.
++ *
++ * Corre en el hilo de UI (Reanimated) y solo mueve `transform`: aunque la
++ * pantalla esté ocupada cargando, el toque responde. Respeta "reducir
++ * movimiento". Para tarjetas, filas y botones tocables.
+  */
+ export function PressableScale({ style, onPressIn, onPressOut, children, ...rest }: PressableScaleProps) {
+   const reduced = useReducedMotion();
+-  const { motion } = useTheme();
+-  const scale = useRef(new Animated.Value(1)).current;
+-
+-  function animateTo(value: number) {
+-    if (reduced) return;
+-    Animated.timing(scale, {
+-      toValue: value,
+-      duration: motion.durations.micro,
+-      easing: motion.easing.standard,
+-      useNativeDriver: true,
+-    }).start();
+-  }
++  const escala = useSharedValue(1);
++  const estiloEscala = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+ 
+   return (
+     <AnimatedPressable
+       onPressIn={(e: GestureResponderEvent) => {
+-        animateTo(motion.pressedScale);
++        if (!reduced) escala.set(withTiming(ESCALA_PRESION, { duration: DURACION.rapido, easing: curvasUI.salida }));
+         onPressIn?.(e);
+       }}
+       onPressOut={(e: GestureResponderEvent) => {
+-        animateTo(1);
++        if (!reduced) escala.set(withSpring(1, RESORTE.toque));
+         onPressOut?.(e);
+       }}
+-      style={[style, { transform: [{ scale }] }]}
++      style={[style, estiloEscala]}
+       {...rest}>
+       {children}
+     </AnimatedPressable>
+diff --git a/src/components/segmented-control.tsx b/src/components/segmented-control.tsx
+index 6f84132..d562ebc 100644
+--- a/src/components/segmented-control.tsx
++++ b/src/components/segmented-control.tsx
+@@ -1,8 +1,9 @@
+ import { useEffect, useState } from 'react';
+-import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
++import { Animated, Easing, StyleSheet, View } from 'react-native';
+ 
++import { PressableScale } from '@/components/pressable-scale';
+ import { ThemedText } from '@/components/themed-text';
+-import { useReducedMotion, useTheme, type ColorTokens } from '@/theme';
++import { DURACION, useReducedMotion, useTheme, type ColorTokens } from '@/theme';
+ 
+ export type SegmentOption<T extends string> = {
+   value: T;
+@@ -79,7 +80,8 @@ export function SegmentedControl<T extends string>({
+     }
+     const anim = Animated.timing(bruto, {
+       toValue: destino,
+-      duration: 420,
++      // La «lenta» de la app: con el rebote al final, 380 ms se leen enteros.
++      duration: DURACION.lento,
+       // Rebote corto al aterrizar: el cambio de tipo se siente, no solo se ve.
+       easing: Easing.bezier(0.34, 1.4, 0.5, 1),
+       useNativeDriver: true,
+@@ -140,7 +142,7 @@ export function SegmentedControl<T extends string>({
+         const apagada = !!opt.disabled && !active;
+         const badge = opt.badge ?? 0;
+         return (
+-          <Pressable
++          <PressableScale
+             key={opt.value}
+             onPress={() => onChange(opt.value)}
+             disabled={apagada}
+@@ -165,7 +167,7 @@ export function SegmentedControl<T extends string>({
+                 </ThemedText>
+               </View>
+             ) : null}
+-          </Pressable>
++          </PressableScale>
+         );
+       })}
+     </View>
+diff --git a/src/components/skeleton.tsx b/src/components/skeleton.tsx
+index 875eaea..981dbd1 100644
+--- a/src/components/skeleton.tsx
++++ b/src/components/skeleton.tsx
+@@ -1,7 +1,16 @@
+-import { useEffect, useState } from 'react';
+-import { Animated, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
++import { useEffect } from 'react';
++import { StyleSheet, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
++import Animated, {
++  cancelAnimation,
++  FadeIn,
++  FadeOut,
++  useAnimatedStyle,
++  useSharedValue,
++  withRepeat,
++  withTiming,
++} from 'react-native-reanimated';
+ 
+-import { useReducedMotion, useTheme } from '@/theme';
++import { curvasUI, DURACION, useReducedMotion, useTheme } from '@/theme';
+ 
+ type SkeletonProps = {
+   width?: DimensionValue;
+@@ -16,45 +25,48 @@ type SkeletonProps = {
+  */
+ const PARPADEO = 1600;
+ 
++/**
++ * CARGA → CONTENIDO SIN SALTOS: el esqueleto aparece con un fundido corto y,
++ * cuando llegan los datos y se quita, se APAGA en vez de desaparecer de golpe.
++ * Mientras se apaga, el contenido ya está debajo (y en las pantallas con
++ * `Escalonado`, entrando): el cambio se lee como un fundido, no como un corte.
++ */
++const ENTRA = FadeIn.duration(DURACION.rapido);
++const SALE = FadeOut.duration(DURACION.normal);
++
+ /**
+  * Bloque "esqueleto" de carga: una superficie tenue que late suavemente, para
+- * usar en vez de spinners en listas y paneles (DISENO_DIRECCION §7). Respeta
+- * "reducir movimiento" (queda fijo y atenuado).
++ * usar en vez de spinners en listas y paneles (DISENO_DIRECCION §7). Todo en el
++ * hilo de UI y solo con opacidad. Respeta "reducir movimiento" (queda fijo y
++ * atenuado; los fundidos de entrada y salida los apaga Reanimated solo).
+  */
+ export function Skeleton({ width = '100%', height = 16, radius, style }: SkeletonProps) {
+   const reduced = useReducedMotion();
+-  const { colors, colorScheme, radii, motion } = useTheme();
+-  // En estado y no en ref: se lee al pintar, y una ref leída al pintar no avisa a React.
+-  const [opacity] = useState(() => new Animated.Value(0.5));
++  const { colors, colorScheme, radii } = useTheme();
++  const latido = useSharedValue(0.5);
+   // En claro el esqueleto es un "hueco" (sunken sobre tarjeta blanca); en
+   // oscuro necesita ser una placa más clara para verse sobre el fondo.
+   const tono = colorScheme === 'dark' ? colors.surfaceElevated : colors.surfaceSunken;
+-  const curva = motion.easing.emphasized;
++  const esquina = radius ?? radii.sm;
+ 
+   useEffect(() => {
+-    if (reduced) return;
+-    const loop = Animated.loop(
+-      Animated.sequence([
+-        Animated.timing(opacity, { toValue: 1, duration: PARPADEO / 2, easing: curva, useNativeDriver: true }),
+-        Animated.timing(opacity, { toValue: 0.5, duration: PARPADEO / 2, easing: curva, useNativeDriver: true }),
+-      ]),
+-    );
+-    loop.start();
+-    return () => loop.stop();
+-  }, [reduced, opacity, curva]);
++    if (reduced) {
++      latido.set(0.8);
++      return;
++    }
++    latido.set(withRepeat(withTiming(1, { duration: PARPADEO / 2, easing: curvasUI.enfasis }), -1, true));
++    return () => cancelAnimation(latido);
++  }, [reduced, latido]);
++
++  const estiloLatido = useAnimatedStyle(() => ({ opacity: latido.value }));
+ 
+   return (
+-    <Animated.View
+-      style={[
+-        {
+-          width,
+-          height,
+-          borderRadius: radius ?? radii.sm,
+-          backgroundColor: tono,
+-          opacity: reduced ? 0.8 : opacity,
+-        },
+-        style,
+-      ]}
+-    />
++    // Por fuera, el tamaño y los fundidos de entrar y salir; por dentro, el
++    // latido. Separados para que no se pisen la opacidad.
++    <Animated.View entering={ENTRA} exiting={SALE} style={[{ width, height, borderRadius: esquina }, style]}>
++      <Animated.View
++        style={[StyleSheet.absoluteFill, { borderRadius: esquina, backgroundColor: tono }, estiloLatido]}
++      />
++    </Animated.View>
+   );
+ }
+diff --git a/src/components/text-field.tsx b/src/components/text-field.tsx
+index 1958e72..224a67d 100644
+--- a/src/components/text-field.tsx
++++ b/src/components/text-field.tsx
+@@ -1,7 +1,8 @@
+ import { forwardRef, useEffect, useRef, useState } from 'react';
+-import { Animated, Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
++import { Animated, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
+ 
+ import { EyeIcon } from '@/components/eye-icon';
++import { PressableScale } from '@/components/pressable-scale';
+ import { useScrollVisible } from '@/components/scroll-visible';
+ import { TecladoListo, useTecladoListoId } from '@/components/teclado-listo';
+ import { ThemedText } from '@/components/themed-text';
+@@ -152,7 +153,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
+           {...rest}
+         />
+         {esPassword ? (
+-          <Pressable
++          <PressableScale
+             onPress={() => setRevelado((v) => !v)}
+             hitSlop={8}
+             accessibilityRole="button"
+@@ -160,7 +161,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
+             style={styles.eyeButton}>
+             {/* Ojo abierto = visible; ojo tachado = oculto. */}
+             <EyeIcon off={!revelado} color={revelado ? colors.primary : colors.textMuted} />
+-          </Pressable>
++          </PressableScale>
+         ) : null}
+       </View>
+       {inputAccessoryViewID ? null : <TecladoListo nativeID={idListo} />}
+diff --git a/src/theme/index.ts b/src/theme/index.ts
+index 78c1a4f..dc4744e 100644
+--- a/src/theme/index.ts
++++ b/src/theme/index.ts
+@@ -15,6 +15,21 @@ export { DEFAULT_BRAND } from './brand';
+ export { APARIENCIAS } from './apariencia';
+ export { FUENTES_FOM, familiaPorPeso } from './fuentes';
+ export { borderWidths, colorSchemes, motion, opacity, paletaGlass, radii, spacing, typography } from './tokens';
++export {
++  CONTEO,
++  CURVA,
++  curvas,
++  curvasUI,
++  DURACION,
++  ESCALA_PRESION,
++  ESCALONADO,
++  opcionesFundido,
++  opcionesHoja,
++  opcionesPestanas,
++  opcionesPila,
++  RESORTE,
++  VELO,
++} from './movimiento';
+ export type {
+   Apariencia,
+   BorderWidths,
+diff --git a/src/theme/movimiento.ts b/src/theme/movimiento.ts
+new file mode 100644
+index 0000000..0a3fea6
+--- /dev/null
++++ b/src/theme/movimiento.ts
+@@ -0,0 +1,143 @@
++/**
++ * MOVIMIENTO DE FOM: los mismos tiempos y curvas que el panel web (T-184 en la
++ * web, `src/styles/MOVIMIENTO.md`; T-185 aquí). Un solo sitio para que toda la
++ * app se mueva igual: navegación, pestañas, hojas, listas, carga y toques.
++ *
++ * Reglas que se cumplen en todos lados:
++ *  - Solo `transform` y `opacity`, que corren en el hilo de UI y no repintan.
++ *  - Con «reducir movimiento» del sistema no hay desplazamientos: o nada, o un
++ *    fundido.
++ *  - Entra con la curva de salida (llega rápido y se posa); se va con la de
++ *    entrada (arranca suave y desaparece), y siempre más rápido de lo que entró.
++ */
++
++import type { BottomTabNavigationOptions } from 'expo-router/build/react-navigation/bottom-tabs';
++import { Easing as EasingRN, Platform } from 'react-native';
++import { Easing } from 'react-native-reanimated';
++
++/** Las tres duraciones de la app y de la web (ms). */
++export const DURACION = {
++  /** Toques, lo que se va y los cambios pequeños. */
++  rapido: 140,
++  /** Lo normal: fundidos, pestañas, bloques que entran. */
++  normal: 240,
++  /** Lo grande: pantallas, hojas y el cambio de tema. */
++  lento: 380,
++} as const;
++
++/**
++ * Las curvas, como los cuatro números de un `cubic-bezier` de CSS: así se
++ * copian tal cual a la web y se usan aquí en los dos motores.
++ */
++export const CURVA = {
++  /** Llega rápido y se posa (lo que entra). */
++  salida: [0.22, 1, 0.36, 1],
++  /** Arranca suave y se acelera (lo que se va). */
++  entrada: [0.4, 0, 1, 1],
++  /** Ida y vuelta pareja (lo que late o cambia de sitio). */
++  enfasis: [0.65, 0, 0.35, 1],
++} as const;
++
++type Puntos = readonly [number, number, number, number];
++const bezierRN = (p: Puntos) => EasingRN.bezier(p[0], p[1], p[2], p[3]);
++
++/** Curvas para `Animated` de React Native (con `useNativeDriver`). */
++export const curvas = {
++  salida: bezierRN(CURVA.salida),
++  entrada: bezierRN(CURVA.entrada),
++  enfasis: bezierRN(CURVA.enfasis),
++};
++
++/**
++ * Curvas para Reanimated (`withTiming`). Dentro de un worklet se arman con
++ * `Easing.bezier(...CURVA.x)`, que sí viaja al hilo de UI.
++ */
++export const curvasUI = {
++  salida: Easing.bezier(CURVA.salida[0], CURVA.salida[1], CURVA.salida[2], CURVA.salida[3]),
++  entrada: Easing.bezier(CURVA.entrada[0], CURVA.entrada[1], CURVA.entrada[2], CURVA.entrada[3]),
++  enfasis: Easing.bezier(CURVA.enfasis[0], CURVA.enfasis[1], CURVA.enfasis[2], CURVA.enfasis[3]),
++};
++
++/**
++ * Resortes. Sirven igual en `Animated.spring` y en `withSpring`.
++ * La «amortiguación» de cada uno va anotada: 1 = sin rebote.
++ */
++export const RESORTE = {
++  /** Al soltar lo que se tocó: vuelve con un rebote que casi no se ve (0,65). */
++  toque: { damping: 18, stiffness: 320, mass: 0.6 },
++  /**
++   * Hojas que suben desde abajo: SIN rebote (≈1). Si rebotaran, por debajo
++   * del borde asomaría el velo durante un instante.
++   */
++  hoja: { damping: 30, stiffness: 230, mass: 1 },
++  /** Ventanas centradas y piezas que crecen: un pelo de rebote (0,72). */
++  ventana: { damping: 22, stiffness: 260, mass: 0.9 },
++} as const;
++
++/** Lo que se encoge lo que se toca. */
++export const ESCALA_PRESION = 0.97;
++
++/** Velo detrás de hojas y ventanas: se funde, nunca se desliza. */
++export const VELO = { abrir: DURACION.normal, cerrar: DURACION.rapido } as const;
++
++/**
++ * Entrada escalonada de bloques y filas (la cascada de la web): cada uno sube
++ * 10 px y se funde, 45 ms después del anterior. Solo la primera vez.
++ */
++export const ESCALONADO = {
++  subida: 10,
++  paso: 45,
++  /** De ahí en adelante ya está fuera de la vista: entra de una. */
++  maximo: 12,
++  /** Lo que dura «la primera vez» de una pantalla (ms). */
++  ventana: 900,
++} as const;
++
++/** Cifras que cuentan hasta su valor (ms). */
++export const CONTEO = {
++  /** Las de un tablero. */
++  tablero: 500,
++  /** La cifra grande de una ficha. */
++  destacada: 900,
++} as const;
++
++// ── Navegación ─────────────────────────────────────────────────────────────
++
++/**
++ * PANTALLAS: la de siempre del teléfono, entrando desde la derecha y volviendo
++ * con el gesto del borde. En Android se usa la de iOS (`ios_from_right`) para
++ * que el sentido y el gesto sean el mismo en los dos. Con «reducir
++ * movimiento», un fundido.
++ */
++export function opcionesPila(reducido: boolean) {
++  return {
++    animation: reducido ? 'fade' : Platform.OS === 'android' ? 'ios_from_right' : 'slide_from_right',
++    animationDuration: reducido ? DURACION.rapido : DURACION.lento,
++    gestureEnabled: true,
++  } as const;
++}
++
++/**
++ * SUPERFICIES de aterrizaje (login y el inicio de cada rol): no se empujan,
++ * se funden. Entrar a la app es cambiar de sitio, no avanzar en una pila.
++ */
++export const opcionesFundido = { animation: 'fade', animationDuration: DURACION.lento } as const;
++
++/** Rutas que suben como HOJA (Documentos). */
++export const opcionesHoja = {
++  presentation: 'modal',
++  animation: 'slide_from_bottom',
++  animationDuration: DURACION.lento,
++} as const;
++
++/**
++ * PESTAÑAS: fundido corto entre una y otra; la píldora de la barra es la que
++ * se desliza. Con «reducir movimiento», cambio seco.
++ */
++export function opcionesPestanas(reducido: boolean): BottomTabNavigationOptions {
++  if (reducido) return { animation: 'none' };
++  return {
++    animation: 'fade',
++    transitionSpec: { animation: 'timing', config: { duration: DURACION.normal, easing: curvas.salida } },
++  };
++}
+diff --git a/src/theme/tokens.ts b/src/theme/tokens.ts
+index c720b78..8633d55 100644
+--- a/src/theme/tokens.ts
++++ b/src/theme/tokens.ts
+@@ -10,7 +10,9 @@
+  * combinado (tokens + marca) mediante `useTheme()`.
+  */
+ 
+-import { Easing, Platform, StyleSheet } from 'react-native';
++import { Platform, StyleSheet } from 'react-native';
++
++import { curvas, DURACION, ESCALA_PRESION, RESORTE } from './movimiento';
+ 
+ import type {
+   Apariencia,
+@@ -26,20 +28,21 @@ import type {
+ } from './types';
+ 
+ /**
+- * Tokens de movimiento centralizados (DISENO_DIRECCION §7). Duraciones cortas
+- * y discretas; un único punto de verdad para todas las microinteracciones.
++ * Tokens de movimiento centralizados (DISENO_DIRECCION §7). Salen de
++ * `movimiento.ts`, que comparte tiempos y curvas con la web (T-185): rápido
++ * 140, normal 240, lento 380.
+  */
+ export const motion: MotionTokens = {
+   // T4 · `micro` separa el feedback de presión de las transiciones.
+-  durations: { micro: 100, fast: 120, base: 220, slow: 360 },
++  durations: { micro: 100, fast: DURACION.rapido, base: DURACION.normal, slow: DURACION.lento },
+   // T2 · curvas centralizadas (restraint: entradas decelerate).
+   easing: {
+-    standard: Easing.out(Easing.cubic),
+-    emphasized: Easing.inOut(Easing.cubic),
++    standard: curvas.salida,
++    emphasized: curvas.enfasis,
+   },
+   // T3 · resorte único de interacción, baja oscilación.
+-  spring: { damping: 22, stiffness: 260, mass: 0.9 },
+-  pressedScale: 0.97,
++  spring: RESORTE.ventana,
++  pressedScale: ESCALA_PRESION,
+ };
+ 
+ /** Escala de espaciado. Base de 4px para alinear con rejillas comunes. */
+-- 
+2.55.0.windows.3
+
