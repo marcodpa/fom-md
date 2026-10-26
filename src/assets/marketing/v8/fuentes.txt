@@ -148,8 +148,8 @@ cap-panel-documentos             panel     comparativa/web-v8-fotos/capturas-pan
 cap-panel-personal               panel     comparativa/web-v8-fotos/capturas-panel/3x/w-personal.png
 cap-panel-conductor              panel     comparativa/web-v8-fotos/capturas-panel/3x/w-conductor.png
 cap-panel-inventario-gps         panel     comparativa/web-v8-fotos/capturas-panel/3x/w-inventario-gps.png
-# Las cap-movil (teléfono) salen ahora de fuentes-t153.txt (capturas de la app real); aquí solo quedan
-# las que no tienen pareja en la app: cap-movil-mnt-reportar-fotos y cap-movil-mnt-fotos (T-162).
+# Las cap-movil (teléfono) salen de fuentes-t153.txt (capturas de la app real). Desde T-181 también
+# cap-movil-mnt-reportar-fotos y cap-movil-mnt-fotos (la app ya tiene órdenes con fotos reales, T-169).
 
 # Mantenimiento en Plataforma (T-123): demo en modo «reducir movimiento», 3x. Fotos de la ODT de
 # demostración (odt-009) servidas en local al capturar (scratchpad/t123/cap3x.py); no se subió nada.
@@ -158,5 +158,3 @@ cap-mnt-revision                 panel     comparativa/web-v8-fotos/capturas-pan
 cap-mnt-resuelta                 panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-resuelta.png
 cap-mnt-fotos                    panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-fotos.png
 cap-mnt-plan                     panel     comparativa/web-v8-fotos/capturas-panel/3x/w-mnt-plan.png
-cap-movil-mnt-reportar-fotos     telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-cond-reportar-fotos.png
-cap-movil-mnt-fotos              telefono  comparativa/web-v8-fotos/capturas-panel/3x/m-sup-fotos.png

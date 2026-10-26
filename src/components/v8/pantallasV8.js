@@ -27,6 +27,18 @@ export const PANTALLAS_LARGAS_V8 = {
   // Continuación real: Mi unidad sigue con su telemetría (la misma hoja, 690 filas más abajo;
   // coincidencia exacta de píxeles entre la fila 2100 de la primera y la 1410 de la segunda).
   'cap-movil-cond-inicio': { ...APP, sigue: 'cap-movil-cond-inicio-telemetria', junta: false, corte: 2100, desde: 1410 },
+  // T-181: con las órdenes con fotos reales de la app (T-169) vuelven las continuaciones reales.
+  // Reportar una falla baja hasta la Evidencia con la foto del disco y su título (la misma
+  // pantalla 522 filas más abajo: píxeles idénticos entre las filas 702 y 2232 de la primera y
+  // 180 y 1710 de la segunda). Corte en el hueco entre la Descripción y «Evidencia», para que el
+  // punto verde de la Evidencia salga de la captura con foto. Fijo abajo, el botón «Crear ODT»
+  // (empieza justo en la fila 2346; a sus lados asoman los bordes de «Tomar foto» y «Galería»).
+  'cap-movil-mnt-reportar': { ...APP, sigue: 'cap-movil-mnt-reportar-fotos', junta: false, pie: 2346, corte: 2190, desde: 1668 },
+  // La orden resuelta del supervisor baja hasta La unidad, las fotos del reporte y del trabajo
+  // terminado y el historial (2097 filas más abajo; coinciden desde la fila 312 de la segunda,
+  // arriba difiere el brillo azul del fondo). Corte dentro de la tarjeta de La unidad, en el
+  // relleno liso encima de «Unidad». Sin pestañas: nada fijo abajo.
+  'cap-movil-mnt-resuelta': { ...APP, sigue: 'cap-movil-mnt-fotos', junta: false, pie: ALTO_PANTALLA_V8, corte: 2433, desde: 336 },
 }
 
 // Filas del fundido entre dos pantallas distintas.

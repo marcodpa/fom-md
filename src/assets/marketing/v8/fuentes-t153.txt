@@ -1,8 +1,10 @@
 # T-153 (23 oct 2026): capturas de teléfono de la web = capturas de la APP real (fom-driver-juan,
 # demo de tools/app-demo-api, repetidas en T-161). Tabla de parejas: comparativa/web-v8-fotos/capturas-app/INDICE-APP.md
 # Uso: python src/assets/marketing/v8/preparar_fotos.py --lista src/assets/marketing/v8/fuentes-t153.txt
-# Quedan con la captura vieja (sin pareja usable): cap-movil-areas-vehiculos (la app no lista las unidades
-# de cada área), cap-movil-mnt-fotos y cap-movil-mnt-reportar-fotos (las órdenes de la demo van sin fotos).
+# Queda con la captura vieja (sin pareja usable): cap-movil-areas-vehiculos (la app no lista las unidades
+# de cada área). T-181 (26 oct 2026): cap-movil-mnt-fotos y cap-movil-mnt-reportar-fotos ya salen de la app
+# (órdenes con fotos reales con licencia, T-169) y se quitaron de fuentes.txt; mnt-reportar y mnt-resuelta
+# vuelven a ser pantallas largas en pantallasV8.js (siguen con mnt-reportar-fotos y mnt-fotos).
 # T-162 (24 oct 2026): cap-movil-mnt-reportar y cap-movil-mnt-resuelta activadas; ya no son pantallas
 # largas en pantallasV8.js (no siguen con mnt-reportar-fotos ni mnt-fotos, que son viejas).
 # Estas cap-movil salen SOLO de esta lista: se quitaron de fuentes.txt y fuentes-t143.txt.
@@ -17,8 +19,10 @@ cap-movil-insp-bloqueada         telefono  comparativa/web-v8-fotos/capturas-app
 cap-movil-insp-historial         telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-insp-historial.png
 cap-movil-insp-resultado         telefono  comparativa/web-v8-fotos/capturas-app/3x/m-insp-resultado.png
 cap-movil-mnt-asignadas          telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-asignadas.png
+cap-movil-mnt-fotos              telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-fotos.png
 cap-movil-mnt-plan               telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-plan.png
 cap-movil-mnt-reportar           telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-reportar.png
+cap-movil-mnt-reportar-fotos     telefono  comparativa/web-v8-fotos/capturas-app/3x/m-cond-reportar-fotos.png
 cap-movil-mnt-resuelta           telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-resuelta.png
 cap-movil-sup-alertas            telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-alertas.png
 cap-movil-sup-conductor          telefono  comparativa/web-v8-fotos/capturas-app/3x/m-sup-conductor.png

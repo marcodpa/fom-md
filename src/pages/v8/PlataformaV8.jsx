@@ -137,7 +137,7 @@ const PASOS_MNT = [
       nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app FOM, vista del conductor: falla de Frenos, gravedad Alta y la descripción. Datos de demostración.',
       puntos: [{ x: 0.37, y: 0.35, t: 'Tipo de falla', izq: true }, { x: 0.7, y: 0.6, t: 'Gravedad', izq: true }],
     },
-    movil: { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app FOM, vista del conductor: Toyota Hilux de la U-001, falla de Frenos, gravedad Alta y la descripción. Datos de demostración.' },
+    movil: { nombre: 'cap-movil-mnt-reportar', alt: 'Reportar una falla en la app FOM, vista del conductor: Toyota Hilux de la U-001, falla de Frenos, gravedad Alta, la descripción y, más abajo, la foto del disco de freno con su título. Datos de demostración.' },
   },
   {
     estado: 'En revisión', tono: 'azul', titulo: 'El supervisor decide y asigna.',
@@ -169,7 +169,7 @@ const PASOS_MNT = [
       nombre: 'cap-mnt-resuelta', alt: 'Orden resuelta en el panel FOM: resultado del trabajo, cierre, costo de 155 dólares y 15 días hasta el cierre. Datos de demostración.',
       puntos: [{ x: 0.455, y: 0.637, t: 'Qué se hizo' }, { x: 0.31, y: 0.745, t: 'Costo registrado', abajo: true }, { x: 0.53, y: 0.745, t: 'Cuánto tardó' }, { x: 0.775, y: 0.375, t: '¿Volvió? Se reabre', abajo: true }],
     },
-    movil: { nombre: 'cap-movil-mnt-resuelta', alt: 'Orden resuelta en la app del supervisor: qué se hizo, fecha de cierre, costo de 155 USD y el botón Reabrir. Datos de demostración.' },
+    movil: { nombre: 'cap-movil-mnt-resuelta', alt: 'Orden resuelta en la app del supervisor: qué se hizo, fecha de cierre, costo de 155 USD y el botón Reabrir; más abajo, la unidad y las fotos del reporte y del trabajo terminado. Datos de demostración.' },
   },
   {
     estado: 'Fotos e historial', corto: 'Historial', tono: 'neutro', titulo: 'Fotos e historial, siempre a mano.',
@@ -184,10 +184,10 @@ const PASOS_MNT = [
       puntos: [{ x: 0.275, y: 0.31, t: 'Fotos del reporte' }, { x: 0.185, y: 0.495, t: 'Fotos del trabajo terminado' }, { x: 0.235, y: 0.634, t: 'Historial: lo último arriba' }],
     },
     fono: {
-      nombre: 'cap-movil-mnt-reportar-fotos', alt: 'Fotos de la falla en la app FOM, vista del conductor, cada una con su título. Datos de demostración.',
-      puntos: [{ x: 0.5, y: 0.43, t: 'Fotos de la falla', izq: true }, { x: 0.1, y: 0.667, t: 'Cada foto con su título', izq: true }],
+      nombre: 'cap-movil-mnt-reportar-fotos', alt: 'Reportar una falla en la app FOM, vista del conductor: falla de Frenos, gravedad Alta, la descripción y la foto del disco de freno con su título «Disco de freno delantero». Datos de demostración.',
+      puntos: [{ x: 0.81, y: 0.413, t: 'Gravedad', izq: true }, { x: 0.12, y: 0.82, t: 'Una foto con su título', izq: true }],
     },
-    movil: { nombre: 'cap-movil-mnt-fotos', alt: 'Fotos del reporte, del trabajo terminado e historial de la orden en el teléfono. Datos de demostración.' },
+    movil: { nombre: 'cap-movil-mnt-fotos', alt: 'Orden resuelta en la app del supervisor: la unidad, la foto del reporte (disco de freno delantero), la del trabajo terminado (rueda montada en el taller) y el historial. Datos de demostración.' },
   },
 ]
 
@@ -253,8 +253,9 @@ function EscenaPasos({ clave, pasos, paso, irAPaso, etiqueta, nota }) {
           <PuntosMnt puntos={p.panel.puntos} />
         </div>)}
         <div className="mnt-fonos">
+          {/* Con puntos encima: la captura sola, sin pantalla larga (T-181; en tableta se desplazaría). */}
           {pasos.map((p, i) => p.fono && <div key={p.fono.nombre} className={`mnt-fono${paso === i ? ' is-activo' : paso > i ? ' is-pasado' : ''}`} aria-hidden={paso !== i}>
-            <CapturaFlotanteV8 nombre={p.fono.nombre} alt={p.fono.alt} ancho="100%" sizes="210px" />
+            <CapturaFlotanteV8 nombre={p.fono.nombre} alt={p.fono.alt} ancho="100%" sizes="210px" largo={false} />
             <PuntosMnt puntos={p.fono.puntos} />
           </div>)}
         </div>
