@@ -1,34 +1,34 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import Mapa from '../comp/Mapa'
-import FotoFija from '../comp/FotoFija'
 import { MovilEncabezado } from '../comp/movil-piezas'
 import { useMovil } from '../comp/movil-navegacion'
 import { Cargando } from '../comp/ui'
-import { Icono } from '../Iconos'
-import { ids } from '../datos/cloudinary'
 import { DIAS_MANEJO, calificacionManejo } from '../datos/manejo'
 import { estadoUnidad } from '../datos/estadoUnidad'
-import { textoSinSenal, textoUltimoReporte } from '../datos/sinSenal'
+import { conSenalAlDia, textoSinSenal, transmitiendo } from '../datos/sinSenal'
+import { colaReciente } from '../datos/recorrido'
+import { horasDeHoy, partesTiempo, resumenDeHoy, textoKm, textoTiempo } from '../datos/recorridoHoy'
+import { fotoSinFondo } from '../datos/fotoSinFondo'
 import * as f from '../datos/formato'
-import { masNuevoPrimero } from '../datos/orden'
-import { color, etiqueta } from '../datos/catalogos'
 import { BotonSos } from './SosConductor'
 import '../../styles/mi-unidad-movil.css'
 
 // ============================================================
-// MI UNIDAD EN EL TELÉFONO — la pantalla «Mi unidad» de la app
+// MI UNIDAD EN EL TELÉFONO — la pantalla «Mi unidad» de la app (T-170)
 // ------------------------------------------------------------
-// Copia de `(driver)/index.tsx` de FOM-DRIVER: el mapa a pantalla completa,
-// el encabezado flotando encima y la lengüeta abajo que se abre arrastrándola
-// (o tocándola) con todo lo demás: avisos de detenido o sin señal, la unidad
-// con su retrato y su ficha, y el índice de manejo con el anillo.
+// Copia de `(driver)/index.tsx` de FOM-DRIVER con el diseño aprobado por Marco
+// (versión oscura): el mapa con la unidad, la cola de sus últimos minutos y el
+// SOS; una franja oscura con la unidad, su velocidad en vivo y lo de hoy (km y
+// tiempo en marcha); la foto sin fondo montada sobre la hoja «Resumen» (dónde
+// está, odómetro, índice de manejo, mantenimiento pendiente y la inspección de
+// hoy). Subida, aparece la telemetría; desplazada, la franja se encoge y queda
+// fija con su miniatura, y debajo siguen la telemetría y el índice de manejo.
 //
-// El botón SOS rojo flota sobre el mapa, como en la app (T-167b): abre la
-// pantalla de emergencia, que avisa al supervisor por la misma ruta que la app.
-// Lo que la app tiene y la web no: los avisos de compañeros que pidieron ayuda.
+// Con otra unidad tomada por PIN (T-167b), se ve ESA unidad con la etiqueta
+// «USANDO … · PIN» sobre el mapa, como la app.
 // ============================================================
 
 /** El saludo de la cápsula, como `saludoPorHora` de la app. */
@@ -53,6 +53,8 @@ const conValor = (t) => (t && String(t).trim() !== '—' ? String(t).trim() : nu
 const etiquetaCorta = (u) => (conValor(u.numero)?.toUpperCase() ?? conValor(u.placa) ?? '')
 /** «U-001 · Z69FC7W»: lo que la unidad no tenga, no se escribe. */
 const identidad = (u) => [conValor(u.numero)?.toUpperCase(), conValor(u.placa)].filter(Boolean).join(' · ')
+/** «Toyota Hilux». */
+const marcaModelo = (u) => `${conValor(u.marca) ?? ''} ${conValor(u.modelo) ?? ''}`.trim()
 
 /** Los tres estados de la app: verde rodando, ámbar parada y transmitiendo, gris callada. */
 function estadoApp(u) {
@@ -70,21 +72,22 @@ function tonoVelocidad(kmh) {
   return 'exito'
 }
 
-/** Íconos de la app que el set de la web no tiene (tab-icon.tsx). */
+/** Íconos de la app y de la maqueta que el set de la web no tiene. */
 const TRAZOS = {
-  pausa: <><path d="M4 4h16v16H4z" /><path d="M9 9v6" /><path d="M15 9v6" /></>,
-  gps: <><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>,
   flota: <><path d="M3 6h11v9H3z" /><path d="M14 9h4l3 3v3h-7z" /><circle cx="7" cy="17.5" r="1.6" /><circle cx="17" cy="17.5" r="1.6" /></>,
   velocidad: <><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" /><path d="M12 12l4-3" /><path d="M12 12h.01" /></>,
   frenos: <><circle cx="10.5" cy="12" r="7.5" /><circle cx="10.5" cy="12" r="2.8" /><path d="M17.5 8.5h2.6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-2.6" /></>,
   electrico: <path d="M13 2.5 4.5 14H11l-1 7.5L19.5 10H13z" />,
-  inspeccion: <><path d="M9 4h6v3H9z" /><path d="M9 5.5H6.5a1 1 0 0 0-1 1V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6.5a1 1 0 0 0-1-1H15" /><path d="m9 14 2 2 4-4" /></>,
-  ot: <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />,
-  chevron: <path d="M9 18l6-6-6-6" />,
+  camion: <><path d="M3 6h11v10H3z" /><path d="M14 9h4l3 3v4h-7" /><circle cx="7" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></>,
+  pin: <><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></>,
+  odo: <><path d="M4 17a8 8 0 1 1 16 0" /><path d="M12 17l4-5" /><circle cx="12" cy="17" r="1.2" /></>,
+  escudo: <><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></>,
+  llave: <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />,
+  flecha: <><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></>,
 }
-function IconoApp({ nombre, tam = 20 }) {
+function IconoApp({ nombre, tam = 20, grosor = 2 }) {
   return (
-    <svg viewBox="0 0 24 24" width={tam} height={tam} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width={tam} height={tam} fill="none" stroke="currentColor" strokeWidth={grosor} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       {TRAZOS[nombre]}
     </svg>
   )
@@ -95,139 +98,288 @@ function Punto({ tono, activo = false, tam = 7 }) {
   return <i className={`mvu-punto ${tono}${activo ? ' late' : ''}`} style={{ width: tam, height: tam }} aria-hidden="true" />
 }
 
-/**
- * LA LENGÜETA: flota sobre el mapa con la franja siempre a la vista y se abre
- * ARRASTRÁNDOLA o con un toque, como en Apple/Google Maps. El dedo la mueve
- * 1:1 y al soltar cae abierta o cerrada según dónde quedó o con qué fuerza se
- * lanzó. El gesto vive solo en la franja: el contenido se desplaza sin pelear.
- */
-/** Lo que se ve de la lengüeta cerrada: la flecha y la fila del estado (el mismo valor en el CSS). */
-const ALTO_PICO = 62
+/* ------------------------------ La hoja de tres estados ------------------------------ */
 
-function Lengueta({ cabecera, children }) {
-  const [abierta, setAbierta] = useState(false)
-  // Mientras se arrastra: cuánto baja la hoja desde abierta, en px (null = quieta).
-  const [arrastre, setArrastre] = useState(null)
-  const hoja = useRef(null)
+/** Alto de la franja; la hoja se monta sobre sus últimos `SOLAPE` px (la maqueta). */
+const ALTO_FRANJA = 190
+const SOLAPE = 50
+/** La hoja subida deja una tira de mapa bajo el encabezado (12 + 52 de la cápsula + 48). */
+const ARRIBA_HOJA = 112
+/** Lo que se ve al entrar mientras no se midió el Resumen (franja + Resumen de la maqueta). */
+const VISIBLE_INICIAL = 446
+/** Aire bajo el Resumen al entrar, antes de la barra de pestañas. */
+const AIRE_ABAJO = 12
+/** La franja compacta aparece cuando la grande ya se fue por arriba. */
+const UMBRAL_COMPACTA = ALTO_FRANJA - SOLAPE - 65
+
+/**
+ * LA HOJA, con los tres estados de la maqueta: al entrar a media altura (la
+ * franja con la foto y el Resumen entero); subida, arrastrándola o tocando la
+ * franja (aparece la telemetría); y desplazada (la franja se encoge en una
+ * barra fija con la miniatura). A media altura TODA la hoja se arrastra; subida,
+ * el contenido se desplaza y el asa es la franja.
+ *
+ * `alBorde` recibe dónde queda el borde de arriba de la hoja quieta, para que
+ * el mapa ponga la unidad en medio de lo que se ve.
+ */
+function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
+  const marco = useRef(null)
+  const cuerpo = useRef(null)
+  const medida = useRef(null)
   const gesto = useRef(null)
   const huboArrastre = useRef(false)
+  const [alto, setAlto] = useState(0)
+  const [altoResumen, setAltoResumen] = useState(null)
+  const [subida, setSubida] = useState(false)
+  const [arrastre, setArrastre] = useState(null)
+  const [conCompacta, setConCompacta] = useState(false)
 
-  // Esc la cierra, como cualquier hoja de la web.
+  // El alto de la pantalla (sin la barra de pestañas) y el del Resumen, siempre al día.
+  useLayoutEffect(() => {
+    const medir = () => {
+      if (marco.current) setAlto(marco.current.clientHeight)
+      if (medida.current) setAltoResumen(Math.round(medida.current.offsetHeight))
+    }
+    medir()
+    const obs = new ResizeObserver(medir)
+    if (marco.current) obs.observe(marco.current)
+    if (medida.current) obs.observe(medida.current)
+    return () => obs.disconnect()
+  }, [])
+
+  const visible = altoResumen == null ? VISIBLE_INICIAL : ALTO_FRANJA - SOLAPE + 20 + altoResumen + AIRE_ABAJO
+  /** Desplazamiento de la hoja a media altura (0 = subida). */
+  const media = Math.max(0, Math.round(alto - visible - ARRIBA_HOJA))
+  const borde = ARRIBA_HOJA + (subida ? 0 : media)
+  useEffect(() => { if (alto > 0) alBorde?.(borde) }, [alto, borde, alBorde])
+
+  // Al bajarla se vuelve al principio: a media altura se ve el Resumen, no lo de abajo.
   useEffect(() => {
-    if (!abierta) return undefined
-    const alTecla = (e) => { if (e.key === 'Escape') setAbierta(false) }
+    if (!subida && cuerpo.current) cuerpo.current.scrollTop = 0
+  }, [subida])
+
+  // Esc la baja, como cualquier hoja de la web.
+  useEffect(() => {
+    if (!subida) return undefined
+    const alTecla = (e) => { if (e.key === 'Escape') setSubida(false) }
     window.addEventListener('keydown', alTecla)
     return () => window.removeEventListener('keydown', alTecla)
-  }, [abierta])
-
-  const recorrido = () => Math.max(0, (hoja.current?.offsetHeight ?? 0) - ALTO_PICO)
+  }, [subida])
 
   function alBajar(e) {
     if (e.button !== undefined && e.button !== 0) return
-    const r = recorrido()
-    gesto.current = { y0: e.clientY, desde: abierta ? 0 : r, r, ultimoY: e.clientY, ultimoT: e.timeStamp, v: 0 }
+    // Subida, solo la franja arrastra: lo demás se desplaza.
+    if (subida && !e.target.closest?.('.mvu-asa')) return
+    gesto.current = { y0: e.clientY, desde: subida ? 0 : media, ultimoY: e.clientY, ultimoT: e.timeStamp, v: 0 }
     huboArrastre.current = false
-    e.currentTarget.setPointerCapture?.(e.pointerId)
   }
   function alMover(e) {
     const g = gesto.current
     if (!g) return
     const dy = e.clientY - g.y0
-    if (!huboArrastre.current && Math.abs(dy) < 6) return
-    huboArrastre.current = true
+    if (!huboArrastre.current) {
+      if (Math.abs(dy) < 6) return
+      huboArrastre.current = true
+      e.currentTarget.setPointerCapture?.(e.pointerId)
+    }
     const dt = e.timeStamp - g.ultimoT
     if (dt > 0) g.v = (e.clientY - g.ultimoY) / dt
     g.ultimoY = e.clientY
     g.ultimoT = e.timeStamp
-    setArrastre(Math.max(0, Math.min(g.r, g.desde + dy)))
+    setArrastre(Math.max(0, Math.min(media, g.desde + dy)))
   }
   function alSoltar() {
     const g = gesto.current
     gesto.current = null
     if (!g || !huboArrastre.current) return
     // Un lanzamiento rápido manda sobre la posición; si no, la mitad del recorrido.
-    const abrir = Math.abs(g.v) > 0.55 ? g.v < 0 : (arrastre ?? g.desde) < g.r / 2
-    setAbierta(abrir)
+    const sube = Math.abs(g.v) > 0.55 ? g.v < 0 : (arrastre ?? g.desde) < media / 2
+    setSubida(sube)
     setArrastre(null)
   }
-  function alTocar() {
+  function alTocarAsa() {
     // El arrastre ya decidió: el clic que llega al soltar no vuelve a cambiarla.
     if (huboArrastre.current) { huboArrastre.current = false; return }
-    setAbierta((a) => !a)
+    setSubida((s) => !s)
   }
 
-  const r = arrastre == null ? null : recorrido()
-  const progreso = arrastre == null ? (abierta ? 1 : 0) : 1 - arrastre / (r || 1)
-  const estilo = arrastre == null ? undefined : { transform: `translateY(${arrastre}px)`, transition: 'none' }
+  const y = arrastre ?? (subida ? 0 : media)
+  const progreso = media > 0 ? 1 - y / media : 1
+  const quieta = arrastre == null
 
   return (
-    <>
-      <div className={`mvu-velo${abierta ? ' activo' : ''}`} style={{ opacity: progreso * 0.5 }}
-        onClick={() => setAbierta(false)} aria-hidden="true" />
-      {/* El marco recorta lo que cae bajo la barra de pestañas (en Glass la barra es transparente). */}
-      <div className="mvu-hoja-marco">
-      <section ref={hoja} className={`mvu-hoja${abierta ? ' abierta' : ''}`} style={estilo} aria-label="Detalle de tu unidad">
-        <button type="button" className="mvu-franja" aria-expanded={abierta}
-          aria-label={abierta ? 'Cerrar el detalle de tu unidad' : 'Abrir el detalle de tu unidad'}
-          onPointerDown={alBajar} onPointerMove={alMover} onPointerUp={alSoltar} onPointerCancel={alSoltar} onClick={alTocar}>
-          <svg className="mvu-flecha" width="16" height="10" viewBox="0 0 24 14" aria-hidden="true"
-            style={{ transform: `rotate(${progreso * 180}deg)` }}>
-            <path d="M4 11l8-7 8 7" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="mvu-pico">{cabecera}</span>
-        </button>
-        {/* Cerrada no se alcanza con el tabulador: lo de dentro no se ve. */}
-        <div className="mvu-hoja-cuerpo" {...(abierta ? {} : { inert: '' })}>
-          {children}
+    <div className="mvu-hmarco" ref={marco}>
+      {sos && (
+        <div className={`mvu-sos${progreso > 0.4 ? ' oculto' : ''}`}
+          style={{ top: ARRIBA_HOJA - 68, transform: `translateY(${y}px)`, opacity: Math.max(0, Math.min(1, (y / Math.max(1, media) - 0.55) / 0.45)), transition: quieta ? undefined : 'none' }}>
+          {sos}
         </div>
+      )}
+      <section className="mvu-h" aria-label="Tu unidad"
+        style={{ top: ARRIBA_HOJA, transform: `translateY(${y}px)`, transition: quieta ? undefined : 'none' }}
+        onPointerDown={alBajar} onPointerMove={alMover} onPointerUp={alSoltar} onPointerCancel={alSoltar}>
+        <div ref={cuerpo} className={`mvu-h-cuerpo${subida ? ' subida' : ''}`}
+          onScroll={(e) => setConCompacta(e.currentTarget.scrollTop > UMBRAL_COMPACTA)}>
+          <button type="button" className="mvu-asa" aria-expanded={subida}
+            aria-label={subida ? 'Bajar el detalle de tu unidad' : 'Ver más de tu unidad'} onClick={alTocarAsa}>
+            {franja}
+          </button>
+          <div className="mvu-h-hoja">
+            <div ref={medida}>{resumen}</div>
+            {/* Lo de abajo solo se alcanza con la hoja subida: a media altura no se ve. */}
+            <div {...(subida ? {} : { inert: '' })}>{resto}</div>
+          </div>
+          {foto}
+        </div>
+        {/* Desplazada: la franja encogida queda fija arriba. Tocarla vuelve al principio. */}
+        <button type="button" className={`mvu-compacta-boton${conCompacta ? ' visible' : ''}`} tabIndex={conCompacta ? 0 : -1}
+          aria-hidden={!conCompacta} aria-label="Volver al resumen de tu unidad"
+          onClick={() => cuerpo.current?.scrollTo({ top: 0, behavior: 'smooth' })}>
+          {compacta}
+        </button>
       </section>
-      </div>
-    </>
-  )
-}
-
-/** Celda de la ficha: etiqueta chica y dato grande sobre la superficie hundida. */
-function Celda({ etiqueta, valor, unidad, tono = '', fila = false }) {
-  return (
-    <div className={`mvu-celda${fila ? ' fila' : ''}`}>
-      <span className="mvu-celda-k">{etiqueta}</span>
-      <span className="mvu-celda-v">
-        <b className={tono}>{valor}</b>
-        {unidad && <small>{unidad}</small>}
-      </span>
     </div>
   )
 }
 
-/** Aviso de arriba de la lengüeta (detenido, sin señal), con su ícono en una caja. */
-function Aviso({ icono, titulo, detalle }) {
+/* ------------------------------ Piezas de la maqueta ------------------------------ */
+
+/** La unidad sin fondo (su foto o la silueta de su tipo), en el lienzo 8:5. Ya trae su sombra. */
+function FotoSinFondo({ unidad, ancho, className = '' }) {
+  const { url, silueta } = fotoSinFondo(unidad.marca, unidad.modelo, unidad.tipo)
+  if (!url) return null
+  const nombre = marcaModelo(unidad) || 'la unidad'
+  return <img className={className} src={url} width={ancho} height={Math.round(ancho / 1.6)} alt={silueta ? `Silueta de ${nombre}` : nombre} />
+}
+
+/** «● EN VIVO» (o la hora de la última buena, o «SIN SEÑAL»). */
+function MarcaVivo({ vivo, chip = false }) {
+  if (!vivo) return null
+  const tono = vivo.tipo === 'vivo' ? 'exito' : 'apagado'
+  const texto = vivo.tipo === 'vivo' ? 'En vivo' : vivo.tipo === 'sin-conexion' ? `Sin conexión · ${vivo.hora}` : 'Sin señal'
+  return <span className={`${chip ? 'mvu-chip mini' : 'mvu-vivo'} ${tono}`}><Punto tono={tono} activo={vivo.tipo === 'vivo'} tam={6} />{texto}</span>
+}
+
+/** LA FRANJA: la unidad, su velocidad en vivo y las dos cifras de hoy. */
+function Franja({ unidad, velocidad, enMarcha, vivo, hoy }) {
+  const tiempo = partesTiempo(hoy.minutos)
+  const titulo = [marcaModelo(unidad), unidad.anio].filter(Boolean).join(' · ')
   return (
-    <div className="mvu-aviso" role="status">
-      <span className="mvu-aviso-icono"><IconoApp nombre={icono} tam={21} /></span>
-      <span className="mvu-aviso-txt">
-        <b>{titulo}</b>
-        {detalle && <small>{detalle}</small>}
+    <span className="mvu-franja2">
+      <i className="mvu-tirador" aria-hidden="true" />
+      <span className="mvu-f-fila">
+        <span className="mvu-f-id">
+          <span className="mvu-f-ico"><IconoApp nombre="camion" /></span>
+          <span className="mvu-f-txt">
+            <b>{titulo || unidad.alias || 'Tu unidad'}</b>
+            <small>{identidad(unidad)}</small>
+          </span>
+        </span>
+        <span className="mvu-f-vel">
+          <span className={tonoVelocidad(enMarcha ? velocidad : 0)}><b>{velocidad == null ? '—' : f.numero(Math.round(velocidad))}</b><small>km/h</small></span>
+          <MarcaVivo vivo={vivo} />
+        </span>
+      </span>
+      <span className="mvu-f-cifras">
+        <span><b>{textoKm(hoy.km)}{hoy.km != null && <small>km</small>}</b><small className="k">Recorrido hoy</small></span>
+        <span><b>{tiempo.cifra}{tiempo.unidad && <small>{tiempo.unidad}</small>}</b><small className="k">En marcha hoy</small></span>
+      </span>
+    </span>
+  )
+}
+
+function Casilla({ icono, valor, unidad, etiqueta, tono = '' }) {
+  return (
+    <div className={`mvu-casilla${tono ? ` ${tono}` : ''}`}>
+      <IconoApp nombre={icono} grosor={1.9} />
+      <span>
+        <b>{valor}{unidad && <small>{unidad}</small>}</b>
+        <small className="k">{etiqueta}</small>
       </span>
     </div>
   )
 }
 
 /**
- * RETRATO de la unidad: su foto si la tiene y, si no, la camioneta de
- * referencia, flotando sobre su sombra. El piso brilla en verde si va rodando.
+ * EL RESUMEN: dónde está (zona + coordenadas + hora, con su estado), tres
+ * casillas y la inspección de hoy con su botón (que lleva a la pestaña Inspección).
  */
-function Retrato({ unidad, enMarcha }) {
-  const nombre = `${unidad.marca ?? ''} ${unidad.modelo ?? ''}`.trim() || 'Tu unidad'
+function Resumen({ unidad, estado, ahora, indice, pendientes, inspeccion }) {
+  const coordenadas = Number.isFinite(unidad.lat) && Number.isFinite(unidad.lng) ? `${unidad.lat.toFixed(5)}, ${unidad.lng.toFixed(5)}` : null
+  const detalle = [coordenadas, unidad.ultimoReporte ? horaCorta(unidad.ultimoReporte) : null].filter(Boolean).join(' · ')
+  const tonoEstado = estado === 'marcha' ? 'exito' : estado === 'sin-senal' ? 'apagado' : 'aviso'
+  const hecha = inspeccion?.hecha ?? false
   return (
-    <div className={`mvu-retrato${enMarcha ? ' marcha' : ''}`}>
-      <i className="mvu-retrato-piso" aria-hidden="true" />
-      <i className="mvu-retrato-sombra" aria-hidden="true" />
-      <div className="mvu-retrato-vehiculo">
-        <FotoFija publicId={unidad.id ? ids.vehiculo(unidad.id) : null} ancho={640} ajuste="contener" alt={`Foto de ${nombre}`}>
-          <img src="/images/maps/vehicle-reference.png" alt="" width="1536" height="1024" />
-        </FotoFija>
+    <div className="mvu-resumen">
+      <h2 className="mvu-h-tit">Resumen</h2>
+      <div className="mvu-donde">
+        <span className="mvu-donde-ico"><IconoApp nombre="pin" grosor={1.9} /></span>
+        <span className="mvu-donde-txt">
+          <b>{conValor(unidad.areaNombre) && unidad.areaNombre !== 'Sin área' ? unidad.areaNombre : 'Última ubicación'}</b>
+          <small>{detalle || 'Sin posición todavía'}</small>
+        </span>
+        <span className={`mvu-chip ${tonoEstado}`}>
+          <Punto tono={tonoEstado} activo={estado === 'marcha'} />
+          <span className="mvu-chip-txt">{estado === 'sin-senal' ? textoSinSenal(unidad.ultimoReporte, ahora) : estado === 'marcha' ? 'En marcha' : 'Detenido'}</span>
+        </span>
+      </div>
+      <div className="mvu-casillas">
+        <Casilla icono="odo" valor={unidad.km == null ? '—' : f.numero(Math.round(unidad.km))} unidad={unidad.km == null ? '' : 'km'} etiqueta="Odómetro" />
+        <Casilla icono="escudo" valor={indice?.valor == null ? '—' : String(Math.round(indice.valor))} unidad={indice?.valor == null ? '' : '/100'} etiqueta="Índice de manejo" tono={indice?.tono ?? ''} />
+        <Casilla icono="llave" valor={pendientes == null ? '—' : String(pendientes)} unidad={pendientes == null ? '' : 'pend.'} etiqueta="Mantenimiento" tono={pendientes ? 'aviso' : ''} />
+      </div>
+      <div className="mvu-accion">
+        <span className="mvu-accion-cifra">
+          <b>{inspeccion?.total ? inspeccion.hechos : '—'}{inspeccion?.total ? <small>/{inspeccion.total}</small> : null}</b>
+          <small className="k">Inspección de hoy</small>
+        </span>
+        <Link className="mvu-boton-azul" to="/panel/inspeccion"
+          aria-label={hecha ? 'Ver el resultado de la inspección de hoy' : 'Iniciar la inspección de hoy'}>
+          {hecha ? 'Ver resultado' : 'Iniciar inspección'}
+          <span className="mvu-boton-flecha"><IconoApp nombre="flecha" tam={18} grosor={2.2} /></span>
+        </Link>
       </div>
     </div>
+  )
+}
+
+/** TELEMETRÍA: lo que llega del GPS ahora mismo, en una lista. */
+function Telemetria({ unidad, vivo }) {
+  const filas = [
+    { k: 'Temp. motor', v: unidad.tempMotorC == null ? '—' : String(unidad.tempMotorC), u: unidad.tempMotorC == null ? '' : '°C',
+      tono: unidad.tempMotorC >= 105 ? 'peligro' : unidad.tempMotorC >= 98 ? 'aviso' : '' },
+    { k: 'Marcha', v: conValor(unidad.caja) ?? '—' },
+    { k: 'Placa', v: conValor(unidad.placa) ?? '—' },
+  ]
+  return (
+    <section className="mvu-sec" aria-label="Telemetría">
+      <div className="mvu-sec-tit">
+        <span className="mvu-overline">Telemetría</span>
+        {vivo && vivo.tipo !== 'sin-senal' && <MarcaVivo vivo={vivo} chip />}
+      </div>
+      <dl className="mvu-lista">
+        {filas.map((x) => (
+          <div key={x.k}><dt>{x.k}</dt><dd className={x.tono}>{x.v}{x.u && <small>{x.u}</small>}</dd></div>
+        ))}
+      </dl>
+    </section>
+  )
+}
+
+/** Lo que queda fijo arriba al desplazar la hoja: miniatura, nombre, lo de hoy y la velocidad. */
+function Compacta({ unidad, velocidad, enMarcha, hoy }) {
+  const delDia = hoy.km == null && hoy.minutos == null
+    ? 'Sin recorrido de hoy'
+    : `${hoy.km == null ? '—' : `${textoKm(hoy.km)} km`} hoy · ${textoTiempo(hoy.minutos)} en marcha`
+  return (
+    <span className="mvu-compacta">
+      <span className="mvu-miniatura"><FotoSinFondo unidad={unidad} ancho={86} /></span>
+      <span className="mvu-f-txt">
+        <b>{[marcaModelo(unidad), etiquetaCorta(unidad)].filter(Boolean).join(' · ')}</b>
+        <small>{delDia}</small>
+      </span>
+      <span className={`mvu-f-vel chico ${tonoVelocidad(enMarcha ? velocidad : 0)}`}><b>{velocidad == null ? '—' : f.numero(Math.round(velocidad))}</b><small>km/h</small></span>
+    </span>
   )
 }
 
@@ -372,152 +524,128 @@ export function ManejoAnillo() {
   )
 }
 
-/* ------------------------------------ Hoy ------------------------------------ */
-
-/** Los colores del catálogo (los de `Tag`) en los tonos de la lengüeta. */
-const TONO_DE_COLOR = { verde: 'exito', ambar: 'aviso', rojo: 'peligro', gris: 'apagado' }
-const tonoDe = (c) => TONO_DE_COLOR[c] ?? 'apagado'
-/** Órdenes que se ven antes de «Ver en Mantenimiento». */
-const ORDENES_A_LA_VISTA = 3
-
-/** Una fila de «Hoy»: ícono en su caja, título y detalle, y la pastilla del estado. */
-function FilaHoy({ icono, tono, titulo, detalle, pastilla }) {
-  return (
-    <div className="mvu-hoy-fila">
-      <span className={`mvu-hoy-icono ${tono}`}><IconoApp nombre={icono} tam={20} /></span>
-      <span className="mvu-hoy-txt">
-        <b>{titulo}</b>
-        {detalle && <small>{detalle}</small>}
-      </span>
-      <span className={`mvu-chip mini ${tono}`}>{pastilla}</span>
-    </div>
-  )
-}
-
-/**
- * HOY: la inspección del día y el mantenimiento pendiente de la unidad. En la
- * app viven en sus pestañas; aquí se resumen y llevan a la suya.
- *
- * Pendiente, la inspección se hace en la pestaña «Inspección» de la web
- * (T-167a), con las mismas rutas que la app. Hecha, se ve su resultado aquí.
- */
-function TarjetaHoy({ unidad }) {
-  const [verResultado, setVerResultado] = useState(false)
-  const idResultado = useId()
-  const hoy = f.hoyISO()
-  // La más nueva de hoy, si se hizo más de una.
-  const inspeccion = masNuevoPrimero(unidad.inspecciones, ['creadaEn', 'fecha'])
-    .find((i) => String(i.fecha ?? i.creadaEn ?? '').slice(0, 10) === hoy) ?? null
-  const abiertas = masNuevoPrimero(unidad.odts, 'creadaEn').filter((o) => o.estado === 'abierta' || o.estado === 'en_revision')
-  const tonoInspeccion = inspeccion ? tonoDe(color('inspeccion_resultado', inspeccion.resultado)) : 'aviso'
-  const cuando = inspeccion?.creadaEn ? horaCorta(inspeccion.creadaEn) : null
-
-  return (
-    <section className="mvu-tarjeta mvu-hoy" aria-label="Hoy">
-      <span className="mvu-overline">Hoy</span>
-
-      {/* --- Inspección del día --- */}
-      <div className="mvu-hoy-bloque">
-        <FilaHoy
-          icono="inspeccion"
-          tono={tonoInspeccion}
-          titulo="Inspección del día"
-          detalle={inspeccion
-            ? [cuando ? `Hecha a las ${cuando}` : 'Hecha hoy', inspeccion.fallasCriticas > 0 ? f.cantidad(inspeccion.fallasCriticas, 'falla crítica', 'fallas críticas') : null].filter(Boolean).join(' · ')
-            : 'Hazla antes de salir'}
-          pastilla={inspeccion ? etiqueta('inspeccion_resultado', inspeccion.resultado) : 'Pendiente'}
-        />
-        {inspeccion ? (
-          <>
-            <button type="button" className="mvu-hoy-accion" aria-expanded={verResultado} aria-controls={idResultado}
-              onClick={() => setVerResultado((v) => !v)}>
-              {verResultado ? 'Ocultar resultado' : 'Ver resultado'}
-              <span className={`mvu-hoy-giro${verResultado ? ' abierto' : ''}`}><IconoApp nombre="chevron" tam={16} /></span>
-            </button>
-            {verResultado && (
-              <dl className="mvu-hoy-datos" id={idResultado}>
-                <div><dt>Resultado</dt><dd>{etiqueta('inspeccion_resultado', inspeccion.resultado)}</dd></div>
-                <div><dt>Fecha y hora</dt><dd>{f.fechaHora(inspeccion.creadaEn || inspeccion.fecha)}</dd></div>
-                <div><dt>Fallas críticas</dt><dd>{f.numero(inspeccion.fallasCriticas)}</dd></div>
-                <div><dt>Observaciones</dt><dd>{f.numero(inspeccion.observaciones)}</dd></div>
-                {inspeccion.plantilla && <div><dt>Formato</dt><dd>{inspeccion.plantilla}</dd></div>}
-                <div><dt>Ubicación</dt><dd>{inspeccion.ubicacion || 'Sin ubicación'}</dd></div>
-              </dl>
-            )}
-          </>
-        ) : (
-          <Link className="mvu-hoy-accion" to="/panel/inspeccion">
-            Hacer la inspección
-            <IconoApp nombre="chevron" tam={16} />
-          </Link>
-        )}
-      </div>
-
-      {/* --- Mantenimiento pendiente (lo más nuevo primero) --- */}
-      <div className="mvu-hoy-bloque">
-        <FilaHoy
-          icono="ot"
-          tono={abiertas.length ? 'aviso' : 'exito'}
-          titulo="Mantenimiento"
-          detalle={abiertas.length
-            ? f.cantidad(abiertas.length, 'orden abierta o en taller', 'órdenes abiertas o en taller')
-            : 'Sin fallas reportadas ni trabajos en taller'}
-          pastilla={abiertas.length ? 'Pendiente' : 'Al día'}
-        />
-        {abiertas.length > 0 && (
-          <ul className="mvu-hoy-ordenes">
-            {abiertas.slice(0, ORDENES_A_LA_VISTA).map((o) => (
-              <li key={o.id}>
-                <span className="mvu-hoy-txt">
-                  <b>{o.descripcion || 'Orden sin descripción'}</b>
-                  <small>{[o.falla ? etiqueta('tipo_falla', o.falla) : 'Sin tipo', o.creadaEn ? f.desde(o.creadaEn) : null].filter(Boolean).join(' · ')}</small>
-                </span>
-                <span className={`mvu-chip mini ${tonoDe(color('odt_estado_visible', o.estado))}`}>{etiqueta('odt_estado_visible', o.estado)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-        <Link className="mvu-hoy-accion" to="/panel/mantenimiento">
-          {abiertas.length > ORDENES_A_LA_VISTA ? `Ver las ${abiertas.length} en Mantenimiento` : 'Ver Mantenimiento'}
-          <IconoApp nombre="chevron" tam={16} />
-        </Link>
-      </div>
-    </section>
-  )
-}
-
 /* ---------------------------------- Pantalla ---------------------------------- */
 
+/** Las tonalidades del índice de la casilla (las de la pastilla de manejo). */
+const TONO_CALIFICACION = { green: 'exito', yellow: 'aviso', red: 'peligro' }
+/** El día entero se vuelve a pedir cada 5 minutos: la cifra de km no cambia de un minuto a otro. */
+const CINCO_MINUTOS = 5 * 60_000
+
 /**
- * Lo pinta MiUnidad en el teléfono con los datos que ya leyó: aquí no se pide
- * nada de la unidad, solo el índice de manejo (igual que en escritorio).
+ * La unidad que se usa por PIN, con su última posición encima (como hace
+ * MiUnidad con la asignada): dónde está, a qué velocidad y si transmite.
  */
-export default function MiUnidadMovil({ perfil, unidad, enMapa, cargando, error, alReintentar, posicionVieja, ahora }) {
+function conUltimoPunto(ficha, recorrido, ahora) {
+  if (!ficha) return null
+  const p = (recorrido ?? []).at(-1)
+  if (!p || (ficha.ultimoReporte && Date.parse(p.hora) <= Date.parse(ficha.ultimoReporte))) return conSenalAlDia(ficha, ahora)
+  const v = p.velocidadKmh ?? null
+  return conSenalAlDia({
+    ...ficha,
+    recorrido,
+    lat: p.lat,
+    lng: p.lng,
+    ultimoReporte: p.hora,
+    velocidadKmh: v,
+    estadoMarcha: v == null ? null : v > 0 ? 'en_marcha' : 'parada',
+    conectado: transmitiendo(p.hora),
+    conexion: transmitiendo(p.hora) ? 'reportando' : 'sin_senal',
+  }, ahora)
+}
+
+/**
+ * Lo pinta MiUnidad en el teléfono con los datos que ya leyó de la unidad
+ * asignada. Aquí se pide lo propio de esta pantalla: el día (km, tiempo en
+ * marcha y la cola), el índice, la inspección de hoy y, si hay una sesión por
+ * PIN abierta, la unidad que se está usando.
+ */
+export default function MiUnidadMovil({ perfil, unidad: asignada, enMapa: enMapaAsignada, cargando, error, alReintentar, posicionVieja, ahora }) {
   const movil = useMovil()
   const sinLeer = movil?.sinLeer ?? 0
+
+  // ¿Usa otra unidad por PIN? Entonces Mi unidad es ESA (como la app, con «USANDO … · PIN»).
+  const sesionPin = useDatos(() => repo.otraUnidad.sesionActual().catch(() => null), [perfil?.userId, perfil?.empresaId], 60_000)
+  const idPin = sesionPin.datos?.rol === 'secundario' && sesionPin.datos.vehiculoId && sesionPin.datos.vehiculoId !== asignada?.id
+    ? sesionPin.datos.vehiculoId
+    : null
+  const fichaPin = useDatos(() => (idPin ? repo.vehiculos.obtener(idPin) : Promise.resolve(null)), [idPin])
+  const vivoPin = useDatos(async () => ({ id: idPin, recorrido: idPin ? await repo.recorrido(idPin) : [] }), [idPin], 30_000)
+  const conPin = Boolean(idPin && fichaPin.datos?.id === idPin)
+  const unidadPin = useMemo(
+    () => (conPin ? conUltimoPunto(fichaPin.datos, vivoPin.datos?.id === idPin ? vivoPin.datos.recorrido : null, ahora) : null),
+    [conPin, fichaPin.datos, vivoPin.datos, idPin, ahora],
+  )
+  const unidad = unidadPin ?? asignada
+  const enMapa = useMemo(() => {
+    if (!unidadPin) return enMapaAsignada
+    return Number.isFinite(unidadPin.lat) && Number.isFinite(unidadPin.lng) ? [unidadPin] : []
+  }, [unidadPin, enMapaAsignada])
+  const lecturaVieja = unidadPin ? vivoPin.estado === 'error' : posicionVieja
+  const id = unidad?.id ?? null
+
+  // HOY: las posiciones del día con el análisis del supervisor. Si el servidor no deja leerlas, «—».
+  const dia = useDatos(
+    async () => ({ id, puntos: id ? (await repo.recorridoDetallado(id, { horas: horasDeHoy() })).puntos : [] }),
+    [id],
+    CINCO_MINUTOS,
+  )
+  const puntosDia = dia.datos?.id === id ? dia.datos.puntos : null
+  const hoy = useMemo(() => (puntosDia ? resumenDeHoy(puntosDia) : { km: null, minutos: null }), [puntosDia])
+  // La cola: sus últimos minutos de camino, hasta el último punto conocido.
+  const cola = useMemo(() => (puntosDia ? colaReciente(puntosDia).puntos : []), [puntosDia])
+
+  // El índice de los últimos 7 días (la misma lectura que la tarjeta de abajo).
+  const manejo = useDatos(() => repo.manejo.miScore({ dias: DIAS_MANEJO[0] }), [perfil?.id, perfil?.empresaId])
+  const calificacion = manejo.datos ? calificacionManejo(manejo.datos) : 'unavailable'
+  const indice = calificacion !== 'unavailable' ? { valor: manejo.datos.indice ?? null, tono: TONO_CALIFICACION[calificacion] ?? '' } : null
+
+  // La inspección de hoy: los puntos de la plantilla de la unidad y si ya está hecha.
+  const inspeccion = useDatos(async () => {
+    if (!unidad?.id) return null
+    const datos = repo.inspeccionConductor
+    const [diaria, plantilla] = await Promise.all([
+      datos.diariaDeHoy(unidad.id, { empresaId: perfil?.empresaId ?? null }).catch(() => null),
+      datos.plantilla(unidad).catch(() => null),
+    ])
+    const total = plantilla ? plantilla.categorias.reduce((n, c) => n + c.items.length, 0) : 0
+    const hecha = diaria?.estado === 'hecha'
+    return { id: unidad.id, hecha, total: total || null, hechos: hecha ? total : 0 }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unidad?.id, perfil?.empresaId])
+  const inspeccionHoy = inspeccion.datos?.id === unidad?.id ? inspeccion.datos : null
+
+  // Mantenimiento pendiente: sus órdenes abiertas o en taller.
+  const pendientes = unidad?.odts ? unidad.odts.filter((o) => o.estado === 'abierta' || o.estado === 'en_revision').length : null
+
+  // Dónde queda el borde de la hoja: el mapa se sube para que la unidad quede en medio de lo que se ve.
+  const [borde, setBorde] = useState(null)
+  const [altoMapa, setAltoMapa] = useState(0)
+  const mapaRef = useRef(null)
+  useLayoutEffect(() => {
+    const el = mapaRef.current?.parentElement
+    if (!el) return undefined
+    const medir = () => setAltoMapa(el.clientHeight)
+    medir()
+    const obs = new ResizeObserver(medir)
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+  const ENCABEZADO = 64
+  const corrimiento = borde != null && altoMapa > 0 ? Math.min(0, Math.round((ENCABEZADO + borde) / 2 - altoMapa / 2)) : 0
 
   const estado = unidad ? estadoApp(unidad) : null
   const enMarcha = estado === 'marcha'
   const sinSenal = estado === 'sin-senal'
   const hayLectura = Boolean(unidad?.ultimoReporte)
-  const velocidad = unidad?.velocidadKmh
-  const textoVelocidad = velocidad == null ? '—' : f.numero(Math.round(velocidad))
+  const velocidad = unidad?.velocidadKmh ?? null
+  const vivo = hayLectura && lecturaVieja
+    ? { tipo: 'sin-conexion', hora: horaCorta(unidad.ultimoReporte) }
+    : sinSenal ? { tipo: 'sin-senal' } : hayLectura ? { tipo: 'vivo' } : null
 
-  let cabecera
-  let contenido
-  if (cargando || error || !unidad) {
-    // Sin unidad (o sin saber cuál): el aviso en lugar de la telemetría.
-    const chip = cargando ? 'Cargando' : error ? 'Sin conexión' : 'Sin unidad'
-    const nota = cargando ? 'Buscando tu unidad…' : error ? 'No se pudo leer' : 'Aún sin asignar'
-    cabecera = (
-      <span className="mvu-pico-fila">
-        <span className="mvu-pico-izq">
-          <span className="mvu-chip apagado"><Punto tono="apagado" />{chip}</span>
-          <span className="mvu-pico-nota">{nota}</span>
-        </span>
-      </span>
-    )
-    contenido = cargando ? (
+  const sinUnidad = cargando || error || !unidad
+  let vacio = null
+  if (sinUnidad) {
+    vacio = cargando ? (
       <div className="mvu-tarjeta"><Cargando filas={4} /></div>
     ) : error ? (
       <div className="mvu-tarjeta mvu-centro">
@@ -532,86 +660,18 @@ export default function MiUnidadMovil({ perfil, unidad, enMapa, cargando, error,
         <b className="mvu-subtitulo">Aún no tienes un vehículo asignado</b>
       </div>
     )
-  } else {
-    const tonoEstado = enMarcha ? 'exito' : sinSenal ? 'apagado' : 'aviso'
-    cabecera = (
-      <span className="mvu-pico-fila">
-        <span className="mvu-pico-izq">
-          <span className={`mvu-chip ${tonoEstado}`}>
-            <Punto tono={tonoEstado} activo={enMarcha} />
-            <span className="mvu-chip-txt">{sinSenal ? textoSinSenal(unidad.ultimoReporte, ahora) : enMarcha ? 'En marcha' : 'Detenido'}</span>
-          </span>
-          <span className="mvu-pico-nota">{etiquetaCorta(unidad)}</span>
-        </span>
-        <span className="mvu-pico-velocidad"><b>{textoVelocidad}</b><small>km/h</small></span>
-      </span>
-    )
-    const titulo = [`${conValor(unidad.marca) ?? ''} ${conValor(unidad.modelo) ?? ''}`.trim(), unidad.anio].filter(Boolean).join(' · ')
-    contenido = (
-      <>
-        {/* DETENIDO: arriba del todo, con la hora de la última lectura y el sitio.
-            No se inventa «detenido hace X»: el GPS dice cuándo leyó, no desde cuándo está parado. */}
-        {hayLectura && !enMarcha && !sinSenal && (
-          <Aviso icono="pausa" titulo="Vehículo detenido"
-            detalle={[horaCorta(unidad.ultimoReporte), unidad.ubicacionTexto || null].filter(Boolean).join(' · ')} />
-        )}
-        {/* SIN SEÑAL: cuánto lleva así y la hora exacta del último reporte. */}
-        {sinSenal && (
-          <Aviso icono="gps" titulo={textoSinSenal(unidad.ultimoReporte, ahora)} detalle={textoUltimoReporte(unidad.ultimoReporte)} />
-        )}
-
-        {/* TU UNIDAD: el retrato, su identidad y la ficha en la misma tarjeta. */}
-        <section className="mvu-tarjeta mvu-unidad" aria-label="Tu unidad">
-          <Retrato unidad={unidad} enMarcha={enMarcha} />
-          <div className="mvu-unidad-cab">
-            <div className="mvu-unidad-nombre">
-              <b className="mvu-subtitulo">{titulo || unidad.alias || 'Tu unidad'}</b>
-              <small className="mvu-caption">{identidad(unidad)}</small>
-            </div>
-            <span className="mvu-velocidad">
-              <b className={tonoVelocidad(enMarcha ? velocidad : 0)}>{textoVelocidad}</b>
-              <small>km/h</small>
-            </span>
-          </div>
-          <div className="mvu-ficha">
-            <div className="mvu-duo">
-              <Celda etiqueta="Placa" valor={conValor(unidad.placa) ?? '—'} />
-              <Celda etiqueta="Año" valor={unidad.anio ? String(unidad.anio) : '—'} />
-            </div>
-            <div className="mvu-telemetria-cab">
-              <span className="mvu-overline">Telemetría</span>
-              {/* Si la última lectura falló, lo de abajo es la última buena: no se le llama «en vivo». */}
-              {hayLectura && posicionVieja ? (
-                <span className="mvu-chip apagado mini"><Punto tono="apagado" tam={6} />SIN CONEXIÓN · {horaCorta(unidad.ultimoReporte)}</span>
-              ) : hayLectura && !sinSenal ? (
-                <span className="mvu-chip exito mini"><Punto tono="exito" activo tam={6} />EN VIVO</span>
-              ) : null}
-            </div>
-            {hayLectura && (
-              <div className="mvu-telemetria">
-                <Celda fila etiqueta="Odómetro" valor={unidad.km == null ? '—' : f.numero(Math.round(unidad.km))} unidad={unidad.km == null ? '' : 'km'} />
-                <div className="mvu-duo">
-                  <Celda etiqueta="Temp. motor" valor={unidad.tempMotorC == null ? '—' : String(unidad.tempMotorC)} unidad={unidad.tempMotorC == null ? '' : '°C'}
-                    tono={unidad.tempMotorC >= 105 ? 'peligro' : unidad.tempMotorC >= 98 ? 'aviso' : ''} />
-                  <Celda etiqueta="Marcha" valor={conValor(unidad.caja) ?? '—'} />
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* HOY: la inspección del día y lo pendiente de mantenimiento. */}
-        <TarjetaHoy unidad={unidad} />
-      </>
-    )
   }
 
   return (
     <div className="mvu">
-      {/* Mapa protagonista a pantalla completa: solo tu unidad, sin su recorrido
-          (por dónde pasó es cosa de quien supervisa, no de quien conduce). */}
+      {/* El mapa: la unidad y la cola de sus últimos minutos, subido para que la unidad
+          quede en medio de lo que se ve entre el encabezado y la hoja. */}
       <div className="mvu-mapa">
-        <Mapa vehiculos={enMapa} alto="100%" leyenda={false} ficha={false} />
+        <div ref={mapaRef} className="mvu-mapa-lienzo" style={{ top: corrimiento, height: altoMapa || '100%', '--mvu-corrimiento': `${-corrimiento}px` }}>
+          <Mapa vehiculos={enMapa} cola={cola.length > 1 ? cola : null} alto="100%" leyenda={false} ficha={false} pildoraVista />
+        </div>
+        {/* Uso temporal por PIN: se ve de un vistazo qué unidad conduces. */}
+        {unidadPin && <span className="mvu-pin" role="status">{`USANDO ${etiquetaCorta(unidadPin)} · PIN`}</span>}
       </div>
 
       {/* El encabezado de la app, flotando sobre el mapa: saludo y tu nombre. */}
@@ -625,14 +685,33 @@ export default function MiUnidadMovil({ perfil, unidad, enMapa, cargando, error,
         />
       </div>
 
-      {/* Emergencia: el SOS sobre el mapa, con aire por encima de la lengüeta. */}
-      <BotonSos usuarioId={perfil?.userId ?? null} />
-
-      <Lengueta cabecera={cabecera}>
-        {contenido}
-        {/* TU MANEJO: el mismo índice que en Mi perfil, debajo de la unidad. */}
-        <ManejoAnillo key={`${perfil?.id}:${perfil?.empresaId}`} />
-      </Lengueta>
+      {sinUnidad ? (
+        <>
+          {/* Emergencia: el SOS sobre el mapa, con aire por encima del aviso. */}
+          <BotonSos usuarioId={perfil?.userId ?? null} />
+          <div className="mvu-sin-unidad">
+            {vacio}
+            {/* Tu manejo no depende de tener unidad hoy. */}
+            <ManejoAnillo key={`${perfil?.id}:${perfil?.empresaId}`} />
+          </div>
+        </>
+      ) : (
+        <HojaUnidad
+          alBorde={setBorde}
+          sos={<BotonSos usuarioId={perfil?.userId ?? null} />}
+          franja={<Franja unidad={unidad} velocidad={velocidad} enMarcha={enMarcha} vivo={vivo} hoy={hoy} />}
+          foto={<FotoSinFondo unidad={unidad} ancho={220} className="mvu-foto" />}
+          resumen={<Resumen unidad={unidad} estado={estado} ahora={ahora} indice={indice} pendientes={pendientes} inspeccion={inspeccionHoy} />}
+          resto={
+            <>
+              <Telemetria unidad={unidad} vivo={vivo} />
+              {/* TU MANEJO: el mismo índice que en Mi perfil. */}
+              <div className="mvu-sec"><ManejoAnillo key={`${perfil?.id}:${perfil?.empresaId}`} /></div>
+            </>
+          }
+          compacta={<Compacta unidad={unidad} velocidad={velocidad} enMarcha={enMarcha} hoy={hoy} />}
+        />
+      )}
     </div>
   )
 }
