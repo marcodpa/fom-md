@@ -162,13 +162,47 @@ function puenteFom(env) {
   }
 }
 
+// ============================================================
+// EL MOTOR DE ONNXRUNTIME, UNA SOLA VEZ EN dist (T-186)
+// ------------------------------------------------------------
+// El quitador de fondo (src/panel/quitador) baja el motor de `public/ort/`
+// (lo deja ahí scripts/bajar-modelo.mjs, con `?v=` para la caché) y se lo da
+// a onnxruntime ya cargado (`wasmBinary`). Pero el paquete de onnxruntime
+// nombra el mismo archivo con `new URL("….wasm", import.meta.url)`, y Vite,
+// al verlo, copiaba otros 26 MB a `dist/assets/`, que nadie pide.
+// Aquí esa dirección se cambia por la de `public/ort/` antes de que Vite la
+// vea: queda un solo motor publicado y, si algún día onnxruntime lo buscara
+// por su cuenta, lo encuentra en el mismo sitio.
+// ============================================================
+const MOTOR_ORT = 'ort-wasm-simd-threaded.asyncify.wasm'
+
+function motorOrtUnaVez() {
+  let base = '/'
+  const aviso = `new URL("${MOTOR_ORT}",import.meta.url)`
+  return {
+    name: 'fom-motor-ort-una-vez',
+    apply: 'build',
+    enforce: 'pre',
+    configResolved(config) {
+      base = config.base || '/'
+    },
+    transform(codigo, id) {
+      if (!id.includes('onnxruntime-web') || !codigo.includes(aviso)) return null
+      const enPublic = `new URL(${JSON.stringify(`${base}ort/${MOTOR_ORT}`)},self.location.href)`
+      return { code: codigo.split(aviso).join(enPublic), map: null }
+    },
+  }
+}
+
 export default defineConfig(({ mode }) => {
   // Sin el prefijo `VITE_`: son secretos de servidor y no deben acabar en el
   // bundle. Vite solo expone al cliente lo que empieza por `VITE_`.
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
-    plugins: [react()],
+    plugins: [react(), motorOrtUnaVez()],
+    // El quitador de fondo corre en un trabajador, que Vite empaqueta aparte con sus propios plugins.
+    worker: { plugins: () => [motorOrtUnaVez()] },
     // MapLibre arranca su worker desde una URL relativa a su propio archivo; si Vite lo pre-empaqueta
     // en dev, esa URL se rompe y el mapa vectorial queda en blanco.
     optimizeDeps: {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 import { vehicleMarkerSvg, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
-import { pintarCola, pintarRuta } from './rutaMapbox'
+import { AZUL_ESTELA_FOM, pintarCola, pintarRuta } from './rutaMapbox'
 import { textoSinSenal } from '../datos/sinSenal'
 import CapasMapa from './CapasMapa'
 import HerramientasRuta from './HerramientasRuta'
@@ -245,6 +245,9 @@ export default function MapaMapbox({
   // Como el mapa de la app (mapa-fom-dom.tsx): sin acercar/alejar ni panel de
   // capas, solo la pastilla «MAPA»/«SAT» que cambia la vista. La usa el teléfono.
   pildoraVista = false,
+  // Mi unidad del conductor, como la app (`estelaFom`): la cola azul FOM, continua y algo más
+  // gruesa. Sin ella (Centro de control y demás), punteada y del color del tema.
+  estelaFom = false,
 }) {
   const contenedor = useRef(null)
   const mapa = useRef(null)
@@ -740,10 +743,15 @@ export default function MapaMapbox({
       colaCapa.current = null
       return undefined
     }
-    const color = leerTokens().primario
+    const color = estelaFom ? AZUL_ESTELA_FOM : leerTokens().primario
+    // Si cambió `estelaFom` con la capa ya puesta, se rehace con el otro dibujo.
+    if (colaCapa.current && colaCapa.current.continua !== estelaFom) {
+      colaCapa.current.quitar()
+      colaCapa.current = null
+    }
     const dibujar = (puntos, trazo) => {
       if (colaCapa.current) colaCapa.current.actualizar(puntos, trazo)
-      else colaCapa.current = pintarCola(mapboxgl, m, puntos, color, trazo)
+      else colaCapa.current = pintarCola(mapboxgl, m, puntos, color, trazo, { continua: estelaFom })
     }
     // Otra unidad: lo pegado antes no sirve.
     if (colaPegada.current && colaPegada.current.unidad !== seleccionado) colaPegada.current = null
@@ -811,7 +819,7 @@ export default function MapaMapbox({
     // La capa se queda entre refrescos; se quita al no haber cola, al cambiar de estilo o al desmontar.
     return () => control.abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cola, seleccionado, listo])
+  }, [cola, seleccionado, listo, estelaFom])
 
   // Eventos de manejo: una capa de símbolos que se crea una vez por estilo y en cada cambio
   // (período, filtros, elegido) solo cambia sus datos. Los que caen casi en el mismo punto van

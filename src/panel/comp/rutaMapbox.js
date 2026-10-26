@@ -188,11 +188,16 @@ export function pintarRuta(gl, mapa, { viajes = [], paradas = [], color = '#349b
 
 const datosCola = (puntos, trazo) => ({ type: 'Feature', properties: {}, geometry: trazo?.length > 1 ? { type: 'LineString', coordinates: trazo } : linea(puntos) })
 
+/** Azul FOM de la estela de Mi unidad: el mismo que la app (`AZUL_ESTELA_FOM`). */
+export const AZUL_ESTELA_FOM = '#3D9BF5'
+
 /**
  * La cola reciente: una línea punteada y tenue, con un punto donde empieza.
+ * Con `continua` (Mi unidad, como la app con `estelaFom`) es una línea seguida y algo más
+ * gruesa, que no se apaga de noche (`line-emissive-strength`).
  * `actualizar(puntos, trazo)` la mueve en cada refresco sin quitar ni volver a crear la capa.
  */
-export function pintarCola(gl, mapa, puntos, color = '#349bfa', trazo = null) {
+export function pintarCola(gl, mapa, puntos, color = '#349bfa', trazo = null, { continua = false } = {}) {
   const ID = `cola-${Date.now().toString(36)}`
   mapa.addSource(ID, { type: 'geojson', data: datosCola(puntos, trazo) })
   mapa.addLayer({
@@ -201,7 +206,9 @@ export function pintarCola(gl, mapa, puntos, color = '#349bfa', trazo = null) {
     source: ID,
     slot: 'top',
     layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: { 'line-color': color, 'line-width': 6, 'line-opacity': 0.9, 'line-dasharray': [0.1, 1.8] },
+    paint: continua
+      ? { 'line-color': color, 'line-width': 7, 'line-opacity': 0.9, 'line-emissive-strength': 1 }
+      : { 'line-color': color, 'line-width': 6, 'line-opacity': 0.9, 'line-dasharray': [0.1, 1.8] },
   })
   const primero = puntos[0]
   const el = document.createElement('div')
@@ -210,6 +217,7 @@ export function pintarCola(gl, mapa, puntos, color = '#349bfa', trazo = null) {
   el.style.setProperty('--color', color)
   const marca = new gl.Marker({ element: el, anchor: 'center' }).setLngLat([primero.lng, primero.lat]).addTo(mapa)
   return {
+    continua,
     actualizar: (nuevos, nuevoTrazo = null) => {
       const fuente = mapa.getSource(ID)
       if (!fuente || !nuevos?.length) return

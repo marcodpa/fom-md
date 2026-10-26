@@ -1,8 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  alCambiarFotos, cloudinaryConfigurado, configurarCloudinary, desactivarQuitarFondo, etiquetas, idVigente, ids, olvidarFotos,
-  problemaDelArchivo, quitarFondoDisponible, subirImagen, ultimaVersion, urlDe, urlOriginal,
+  alCambiarFotos, cloudinaryConfigurado, configurarCloudinary, etiquetas, idVigente, ids, olvidarFotos,
+  problemaDelArchivo, subirImagen, ultimaVersion, urlDe, urlOriginal,
 } from '../src/panel/datos/cloudinary.js'
 
 const foto = (extra = {}) => ({ name: 'foto.jpg', type: 'image/jpeg', size: 200_000, ...extra })
@@ -135,14 +135,13 @@ test('contener conserva la foto completa antes de llegar al marco, sin recorte a
   assert.match(urlDe('fom/avatar/u1/2', 48, 48), /w_48,h_48,c_fill,g_auto/)
 })
 
-test('la URL es directa y liviana, y el recorte de fondo se apaga solo si falla', () => {
+test('la URL es directa y liviana, y nunca pide el recorte de fondo de pago', () => {
   configurarCloudinary({ nube: 'demo', preset: 'sin_firma' })
   assert.match(urlDe('fom/vehiculo/v1/2', 300, 200), /^https:\/\/res\.cloudinary\.com\/demo\/image\/upload\/f_auto,q_auto,w_300,h_200,c_fill,g_auto\/fom\/vehiculo\/v1\/2\?v=\d+$/)
   assert.match(urlDe('fom/vehiculo/v1/2', 300), /w_300,c_limit/)
   assert.match(urlOriginal('fom/vehiculo/v1/2'), /^https:\/\/res\.cloudinary\.com\/demo\/image\/upload\/fom\/vehiculo\/v1\/2\?v=\d+$/)
-  // Apagado por defecto (consume créditos): la foto sale normal.
-  assert.equal(quitarFondoDisponible(), false)
-  assert.doesNotMatch(urlDe('fom/vehiculo/v1/2', 900, 600, { sinFondo: true }), /background_removal/)
+  // El recorte de Cloudinary consumía créditos: desde T-179 lo hace el navegador y la URL sale siempre normal.
+  assert.doesNotMatch(urlDe('fom/vehiculo/v1/2', 900, 600), /background_removal/)
 })
 
 test('subir avisa a las pantallas para que pidan la foto nueva', async () => {

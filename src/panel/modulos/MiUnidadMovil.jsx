@@ -12,6 +12,7 @@ import { conSenalAlDia, textoSinSenal, transmitiendo } from '../datos/sinSenal'
 import { colaReciente } from '../datos/recorrido'
 import { horasDeHoy, partesTiempo, resumenDeHoy, textoKm, textoTiempo } from '../datos/recorridoHoy'
 import { fotoSinFondo } from '../datos/fotoSinFondo'
+import { useFotoSinFondo } from '../datos/fotoVehiculo'
 import { pendientesDeMiUnidad } from '../datos/mantenimientoPendiente'
 import * as f from '../datos/formato'
 import { BotonSos } from './SosConductor'
@@ -245,9 +246,13 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
 
 /* ------------------------------ Piezas de la maqueta ------------------------------ */
 
-/** La unidad sin fondo (su foto o la silueta de su tipo), en el lienzo 8:5. Ya trae su sombra. */
+/**
+ * La unidad sin fondo, en el lienzo 8:5 y ya con su sombra: el recorte guardado de SU foto si
+ * el gestor lo aceptó (T-179); si no, la del catálogo o la silueta de su tipo.
+ */
 function FotoSinFondo({ unidad, ancho, className = '' }) {
-  const { url, silueta } = fotoSinFondo(unidad.marca, unidad.modelo, unidad.tipo)
+  // Al triple del ancho en pantalla: los teléfonos tienen dos o tres píxeles por punto.
+  const { url, silueta } = useFotoSinFondo(unidad, fotoSinFondo, { ancho: ancho * 3 })
   if (!url) return null
   const nombre = marcaModelo(unidad) || 'la unidad'
   return <img className={className} src={url} width={ancho} height={Math.round(ancho / 1.6)} alt={silueta ? `Silueta de ${nombre}` : nombre} />
@@ -679,7 +684,7 @@ export default function MiUnidadMovil({ perfil, unidad: asignada, enMapa: enMapa
           quede en medio de lo que se ve entre el encabezado y la hoja. */}
       <div className="mvu-mapa">
         <div ref={mapaRef} className="mvu-mapa-lienzo" style={{ top: corrimiento, height: altoMapa || '100%', '--mvu-corrimiento': `${-corrimiento}px` }}>
-          <Mapa vehiculos={enMapa} cola={cola.length > 1 ? cola : null} alto="100%" leyenda={false} ficha={false} pildoraVista />
+          <Mapa vehiculos={enMapa} cola={cola.length > 1 ? cola : null} alto="100%" leyenda={false} ficha={false} pildoraVista estelaFom />
         </div>
         {/* Uso temporal por PIN: se ve de un vistazo qué unidad conduces. */}
         {unidadPin && <span className="mvu-pin" role="status">{`USANDO ${etiquetaCorta(unidadPin)} · PIN`}</span>}
