@@ -71,10 +71,13 @@
     pointer-events: auto;
     border-radius: var(--app-r-xl) var(--app-r-xl) 0 0;
     box-shadow: var(--app-sombra-hoja, 0 -8px 24px rgb(0 0 0 / .55));
-    transition: transform var(--app-d-lento) var(--app-curva);
+    /* Cae a su altura con el resorte de las hojas (movimiento.css); mientras el dedo la tiene, el script apaga la transición. */
+    transition: transform var(--mov-hoja, 520ms) var(--mov-resorte-hoja, var(--app-curva));
+    will-change: transform;
     touch-action: none;
   }
-  .mvu-h-cuerpo { position: relative; height: 100%; overflow: hidden; overscroll-behavior: contain; scrollbar-width: none; }
+  /* Abajo y a media altura el dedo mueve la hoja (nada se desplaza); arriba el contenido se desplaza. */
+  .mvu-h-cuerpo { position: relative; height: 100%; overflow: hidden; overscroll-behavior: contain; scrollbar-width: none; touch-action: none; }
   .mvu-h-cuerpo.subida { overflow-y: auto; touch-action: pan-y; }
   .mvu-h-cuerpo::-webkit-scrollbar { display: none; }
 
@@ -90,6 +93,7 @@
     font: inherit;
     text-align: left;
     cursor: grab;
+    touch-action: none;
     -webkit-tap-highlight-color: transparent;
   }
   .mvu-asa:active { cursor: grabbing; }
@@ -195,6 +199,7 @@
     pointer-events: none;
     transition: opacity var(--app-d-base) ease;
     cursor: pointer;
+    touch-action: none;
   }
   .mvu-compacta-boton.visible { opacity: 1; pointer-events: auto; }
   .mvu-compacta {
@@ -211,7 +216,7 @@
   .mvu-miniatura img { width: 86px; height: auto; max-width: none; }
 
   /* El SOS va pegado al borde de la hoja y se aparta al subirla. */
-  .mvu-sos { position: absolute; right: 16px; z-index: 19; pointer-events: auto; transition: transform var(--app-d-lento) var(--app-curva), opacity var(--app-d-base) ease; }
+  .mvu-sos { position: absolute; right: 16px; z-index: 19; pointer-events: auto; will-change: transform; transition: transform var(--mov-hoja, 520ms) var(--mov-resorte-hoja, var(--app-curva)), opacity var(--app-d-base) ease; }
   .mvu-sos.oculto { pointer-events: none; }
   .mvu-sos .sos-fab { position: static; width: 56px; height: 56px; font-size: 14px; letter-spacing: 1px; }
 

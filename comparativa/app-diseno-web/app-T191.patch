@@ -1,0 +1,392 @@
+From c270d865e69a34f16004304134a49aee70b64ffd Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Mon, 26 Oct 2026 16:06:10 -0400
+Subject: [PATCH] App: la hoja de Mi unidad se arrastra a tres alturas (abajo,
+ mitad, arriba), se queda donde la sueltas y hace scroll arriba como Apple
+ Maps (T-191)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/components/mi-unidad-hoja.tsx | 256 ++++++++++++++++++++++--------
+ 1 file changed, 194 insertions(+), 62 deletions(-)
+
+diff --git a/src/components/mi-unidad-hoja.tsx b/src/components/mi-unidad-hoja.tsx
+index 9c82461..3790a82 100644
+--- a/src/components/mi-unidad-hoja.tsx
++++ b/src/components/mi-unidad-hoja.tsx
+@@ -1,10 +1,11 @@
+ import type { ReactNode } from 'react';
+ import { useEffect, useState } from 'react';
+-import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
++import { Pressable, StyleSheet, View, type AccessibilityActionEvent, type LayoutChangeEvent } from 'react-native';
+ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+ import Animated, {
+   interpolate,
+   runOnJS,
++  runOnUI,
+   useAnimatedReaction,
+   useAnimatedRef,
+   useAnimatedScrollHandler,
+@@ -14,16 +15,65 @@ import Animated, {
+ } from 'react-native-reanimated';
+ 
+ import { ALTO_FRANJA, SOLAPE } from '@/components/mi-unidad-piezas';
+-import { useReducedMotion, useTheme } from '@/theme';
++import { RESORTE, useReducedMotion, useTheme } from '@/theme';
+ 
+ /** Lo que se ve de la hoja al entrar si aún no se midió el Resumen (franja + Resumen de la maqueta). */
+ const VISIBLE_INICIAL = 446;
+ /** Aire bajo el Resumen al entrar, antes de la barra de pestañas. */
+ const AIRE_ABAJO = 12;
+-/** Velocidad a partir de la cual el lanzamiento manda sobre la posición. */
++/** Lo que asoma de la hoja abajo: la franja entera (nombre, velocidad y cifras de hoy). */
++const VISIBLE_BAJO = ALTO_FRANJA - SOLAPE;
++/** Velocidad (px/s) a partir de la cual el lanzamiento manda sobre la posición. */
+ const VELOCIDAD_SNAP = 550;
+ /** Lo que mide la franja compacta (miniatura de 44 + 10 arriba y abajo). */
+ const ALTO_COMPACTA = 65;
++/** Cuánto hay que mover el dedo para decidir si arrastra la hoja o el contenido. */
++const UMBRAL_DECIDIR = 6;
++/** Segundos de impulso que se proyectan al soltar para elegir la altura. */
++const PROYECCION = 0.18;
++/** El resorte de las hojas (sin rebote), con el tope para que no asome nada por debajo. */
++const RESORTE_HOJA = { ...RESORTE.hoja, overshootClamping: true };
++
++/** Las tres alturas de la hoja. */
++const NIVEL = { arriba: 0, media: 1, abajo: 2 } as const;
++type Nivel = 0 | 1 | 2;
++
++/** La última altura en que se dejó la hoja: se recuerda mientras la app siga abierta. */
++let ultimoNivel: Nivel = NIVEL.media;
++function recordarNivel(n: Nivel) {
++  ultimoNivel = n;
++}
++
++/** Desplazamiento de la hoja en cada altura (0 = arriba del todo). */
++function destinoDe(nivel: number, media: number, bajo: number): number {
++  'worklet';
++  return nivel === 0 ? 0 : nivel === 1 ? media : bajo;
++}
++
++/**
++ * A qué altura cae la hoja al soltarla: la más cercana, o —con impulso— la
++ * siguiente en el sentido del lanzamiento (y más lejos si el impulso da para
++ * tanto), como la hoja de Mapas.
++ */
++function alturaAlSoltar(y: number, velocidad: number, media: number, bajo: number): Nivel {
++  'worklet';
++  const puntos = [0, media, bajo];
++  const sentido = velocidad < 0 ? -1 : 1;
++  let objetivo = y;
++  let candidatos = [0, 1, 2];
++  if (Math.abs(velocidad) > VELOCIDAD_SNAP) {
++    const delante = candidatos.filter((i) => sentido * (puntos[i] - y) > 12);
++    if (delante.length > 0) {
++      candidatos = delante;
++      objetivo = y + velocidad * PROYECCION;
++    }
++  }
++  let mejor = candidatos[0];
++  for (const i of candidatos) {
++    if (Math.abs(puntos[i] - objetivo) < Math.abs(puntos[mejor] - objetivo)) mejor = i;
++  }
++  return mejor as Nivel;
++}
+ 
+ type Props = {
+   /** Dónde queda el borde de arriba de la hoja subida (bajo el encabezado y una tira de mapa). */
+@@ -34,7 +84,7 @@ type Props = {
+   franja: ReactNode;
+   /** La foto sin fondo, montada entre la franja y la hoja. */
+   foto?: ReactNode;
+-  /** Lo de arriba de la hoja: avisos y el Resumen. Su alto decide cuánto se ve al entrar. */
++  /** Lo de arriba de la hoja: avisos y el Resumen. Su alto decide cuánto se ve a media altura. */
+   resumen: ReactNode;
+   /** Lo que aparece al subirla o desplazarla: telemetría, índice de manejo. */
+   resto?: ReactNode;
+@@ -50,93 +100,161 @@ type Props = {
+ };
+ 
+ /**
+- * LA HOJA DE «MI UNIDAD» (T-170), con los tres estados de la maqueta:
+- *  - al entrar, a media altura: la franja con la foto y el Resumen entero;
+- *  - subida (arrastrándola o tocando la franja): aparece la telemetría;
+- *  - desplazada: la franja se encoge en una barra fija con la miniatura y
+- *    debajo siguen la telemetría y el índice de manejo.
++ * LA HOJA DE «MI UNIDAD» (T-170, T-191): como la de Mapas, con tres alturas.
++ *  - abajo: solo asoma la franja (nombre, velocidad y las cifras de hoy) y el
++ *    mapa queda casi entero a la vista;
++ *  - a media altura: la franja con la foto y el Resumen entero;
++ *  - arriba: casi pantalla completa; el contenido se desplaza y la franja se
++ *    encoge en una barra fija con la miniatura.
+  *
+- * A media altura TODA la hoja se arrastra (no hay nada que desplazar); subida,
+- * el contenido se desplaza y el asa es la franja. Corre en el hilo de UI
+- * (gesture-handler + reanimated), como la lengüeta de siempre.
++ * Se arrastra con el dedo desde cualquier punto y se queda donde la sueltas
++ * (salta a la altura más cercana con el resorte de `movimiento.ts`, también
++ * con impulso). Arriba, el contenido se desplaza normal; si ya estás arriba del
++ * todo del desplazamiento y arrastras hacia abajo, la hoja baja. Abajo y a
++ * media altura arrastrar mueve la hoja, no el desplazamiento.
++ *
++ * Todo corre en el hilo de UI (gesture-handler + reanimated, solo `transform`):
++ * la hoja no vuelve a pintar el mapa ni nada mientras se mueve. La altura se
++ * recuerda mientras la app siga abierta.
+  */
+ export function HojaMiUnidad({ arriba, alto, franja, foto, resumen, resto, compacta, sos, onBorde }: Props) {
+   const { colors, spacing, shadows } = useTheme();
+   const reducido = useReducedMotion();
+ 
+-  // Cuánto mide lo que se ve al entrar: la franja (menos lo que la pisa la hoja) y el Resumen.
++  // Cuánto mide lo que se ve a media altura: la franja (menos lo que la pisa la hoja) y el Resumen.
+   const [altoResumen, setAltoResumen] = useState<number | null>(null);
+   const visible = altoResumen == null ? VISIBLE_INICIAL : ALTO_FRANJA - SOLAPE + 20 + altoResumen + AIRE_ABAJO;
+-  /** Desplazamiento de la hoja a media altura (0 = subida). */
++  /** Desplazamiento de la hoja a media altura (0 = arriba). */
+   const media = Math.max(0, Math.round(alto - visible - arriba));
++  /** Desplazamiento de la hoja abajo: solo asoma la franja. Siempre más abajo que la mitad. */
++  const bajo = Math.max(media + 1, Math.round(alto - arriba - VISIBLE_BAJO));
+ 
+-  const y = useSharedValue(media);
+-  const inicio = useSharedValue(media);
+-  const desplazado = useSharedValue(0);
++  // En pantallas tan bajas que la mitad coincide con arriba, la mitad es arriba.
++  const [nivel, setNivel] = useState<Nivel>(() => (ultimoNivel === NIVEL.media && media <= 0 ? NIVEL.arriba : ultimoNivel));
++  const subida = nivel === NIVEL.arriba;
++
++  const y = useSharedValue(destinoDe(nivel, media, bajo));
++  const nivelUI = useSharedValue<number>(nivel);
+   const mediaUI = useSharedValue(media);
++  const bajoUI = useSharedValue(bajo);
++  const inicio = useSharedValue(0);
++  const toqueX0 = useSharedValue(0);
++  const toqueY0 = useSharedValue(0);
++  const decidido = useSharedValue(false);
++  const arrastrando = useSharedValue(false);
++  const desplazado = useSharedValue(0);
+   const scrollRef = useAnimatedRef<Animated.ScrollView>();
+-  const [subida, setSubida] = useState(false);
+   const [conCompacta, setConCompacta] = useState(false);
+ 
+   // El borde quieto, para el mapa: se avisa al decidir el destino, no al final del resorte.
+-  const borde = arriba + (subida ? 0 : media);
++  const borde = arriba + destinoDe(nivel, media, bajo);
+   useEffect(() => {
+     onBorde?.(borde);
+   }, [borde, onBorde]);
+ 
+-  // Al bajarla se vuelve al principio: a media altura se ve el Resumen, no lo de abajo.
++  // Fuera de arriba se vuelve al principio: a media altura se ve el Resumen, no lo de abajo.
+   useEffect(() => {
+     if (!subida) scrollRef.current?.scrollTo({ y: 0, animated: !reducido });
+   }, [subida, scrollRef, reducido]);
+ 
+-  function asentar(destino: number) {
++  /** Anota la altura elegida (en el hilo de JS): de ahí salen el desplazamiento, el mapa y la memoria. */
++  function fijarNivel(n: Nivel) {
++    recordarNivel(n);
++    setNivel(n);
++  }
++
++  /** La hoja va a una altura: el resorte de las hojas, con el impulso con que se soltó. */
++  function asentar(n: Nivel, velocidad = 0) {
+     'worklet';
+-    const sube = destino === 0;
+-    runOnJS(setSubida)(sube);
++    // Sin lugar a media altura (pantalla muy baja), la mitad es arriba.
++    const destinoNivel = n === 1 && mediaUI.value <= 0 ? 0 : n;
++    nivelUI.value = destinoNivel;
++    runOnJS(fijarNivel)(destinoNivel as Nivel);
++    const destino = destinoDe(destinoNivel, mediaUI.value, bajoUI.value);
+     if (reducido) {
+       y.value = destino;
+       return;
+     }
+-    y.value = withSpring(destino, { damping: 22, stiffness: 260, mass: 0.9, overshootClamping: true });
++    y.value = withSpring(destino, { ...RESORTE_HOJA, velocity: velocidad });
+   }
+ 
+-  /** El arrastre: el dedo la mueve 1:1 y al soltar cae arriba o a media altura. */
+-  const arrastre = () =>
+-    Gesture.Pan()
+-      .activeOffsetY([-8, 8])
+-      .onBegin(() => {
+-        inicio.value = y.value;
+-      })
+-      .onUpdate((e) => {
+-        y.value = Math.max(0, Math.min(media, inicio.value + e.translationY));
+-      })
+-      .onEnd((e) => {
+-        // Un lanzamiento rápido manda sobre la posición.
+-        if (Math.abs(e.velocityY) > VELOCIDAD_SNAP) {
+-          asentar(e.velocityY < 0 ? 0 : media);
+-          return;
+-        }
+-        asentar(y.value < media / 2 ? 0 : media);
+-      });
+-
+-  // A media altura, toda la hoja es el asa. Subida, solo la franja: lo demás se desplaza.
+-  const arrastreHoja = arrastre().enabled(!subida && media > 0);
+-  const arrastreFranja = arrastre().enabled(subida);
+-  // Un toque en la franja también la sube o la baja: negarle el toque a algo tocable es una trampa.
+-  const toque = Gesture.Tap().onEnd(() => {
+-    asentar(y.value > media / 2 ? 0 : media);
+-  });
+-  const gestoFranja = Gesture.Exclusive(arrastreFranja, toque);
++  /**
++   * El arrastre. Decide solo, con el primer movimiento del dedo:
++   *  - arriba y quieta, el contenido manda: la hoja solo baja si el
++   *    desplazamiento ya está arriba del todo y el dedo baja;
++   *  - en cualquier otra altura (o en camino) el dedo mueve la hoja.
++   * Si no le toca, se aparta (`fail`) y el desplazamiento sigue como siempre.
++   */
++  const arrastre = Gesture.Pan()
++    .manualActivation(true)
++    .onTouchesDown((e) => {
++      const t = e.allTouches[0];
++      if (t) {
++        toqueX0.value = t.absoluteX;
++        toqueY0.value = t.absoluteY;
++      }
++      decidido.value = false;
++    })
++    .onTouchesMove((e, g) => {
++      if (decidido.value) return;
++      const t = e.allTouches[0];
++      if (!t) return;
++      const dx = t.absoluteX - toqueX0.value;
++      const dy = t.absoluteY - toqueY0.value;
++      if (Math.abs(dx) < UMBRAL_DECIDIR && Math.abs(dy) < UMBRAL_DECIDIR) return;
++      decidido.value = true;
++      if (Math.abs(dx) > Math.abs(dy)) {
++        g.fail();
++        return;
++      }
++      const contenidoManda = nivelUI.value === 0 && y.value <= 0.5;
++      if (contenidoManda && !(desplazado.value <= 0 && dy > 0)) {
++        g.fail();
++        return;
++      }
++      // Si la hoja iba en camino, el dedo la agarra donde esté.
++      inicio.value = y.value;
++      y.value = inicio.value;
++      arrastrando.value = true;
++      g.activate();
++    })
++    .onUpdate((e) => {
++      if (!arrastrando.value) return;
++      y.value = Math.max(0, Math.min(bajoUI.value, inicio.value + (e.absoluteY - toqueY0.value)));
++    })
++    .onTouchesUp((_e, g) => {
++      if (!arrastrando.value) g.fail();
++    })
++    .onEnd((e) => {
++      arrastrando.value = false;
++      asentar(alturaAlSoltar(y.value, e.velocityY, mediaUI.value, bajoUI.value), e.velocityY);
++    })
++    .onFinalize(() => {
++      // Cancelado a medio arrastre (llamada, otro gesto): cae a la más cercana.
++      if (!arrastrando.value) return;
++      arrastrando.value = false;
++      asentar(alturaAlSoltar(y.value, 0, mediaUI.value, bajoUI.value));
++    });
+ 
+-  // Medido el Resumen (o girada la pantalla), la hoja quieta a media altura se
+-  // recoloca. Solo si estaba quieta ahí: subida o en camino, no se la toca.
++  // Un toque en la franja también cambia la altura: de la mitad sube, de arriba o abajo vuelve a la mitad.
++  const toque = Gesture.Tap()
++    .maxDistance(10)
++    .onEnd((_e, ok) => {
++      if (ok) asentar(nivelUI.value === 1 ? 0 : 1);
++    });
++
++  // Medido el Resumen (o girada la pantalla), la hoja quieta se recoloca en su altura.
++  // Si va en camino o la tiene el dedo, no se la toca.
+   useEffect(() => {
+     mediaUI.value = media;
+-  }, [media, mediaUI]);
++    bajoUI.value = bajo;
++  }, [media, bajo, mediaUI, bajoUI]);
+   useAnimatedReaction(
+-    () => mediaUI.value,
++    () => mediaUI.value * 10000 + bajoUI.value,
+     (ahora, antes) => {
+-      if (antes != null && ahora !== antes && Math.abs(y.value - antes) < 1) y.value = ahora;
++      if (antes != null && ahora !== antes && !arrastrando.value) {
++        y.value = destinoDe(nivelUI.value, mediaUI.value, bajoUI.value);
++      }
+     },
+   );
+ 
+@@ -159,7 +277,7 @@ export function HojaMiUnidad({ arriba, alto, franja, foto, resumen, resto, compa
+   // El SOS va pegado al borde de la hoja y se apaga al subirla (la maqueta no lo deja sobre la franja).
+   const estiloSos = useAnimatedStyle(() => ({
+     transform: [{ translateY: y.value }],
+-    opacity: media > 0 ? interpolate(y.value, [media * 0.55, media], [0, 1], 'clamp') : 1,
++    opacity: mediaUI.value > 0 ? interpolate(y.value, [mediaUI.value * 0.55, mediaUI.value], [0, 1], 'clamp') : 1,
+   }));
+ 
+   const medirResumen = (e: LayoutChangeEvent) => {
+@@ -167,15 +285,23 @@ export function HojaMiUnidad({ arriba, alto, franja, foto, resumen, resto, compa
+     if (h > 0 && h !== altoResumen) setAltoResumen(h);
+   };
+ 
++  // Para quien usa el lector de pantalla: subir y bajar la hoja una altura.
++  const alAccesibilidad = (e: AccessibilityActionEvent) => {
++    const siguiente = e.nativeEvent.actionName === 'increment' ? nivel - 1 : nivel + 1;
++    if (siguiente < 0 || siguiente > 2) return;
++    runOnUI(asentar)(siguiente as Nivel);
++  };
++
+   return (
+-    <>
++    // Recorta lo que la hoja deja por debajo de la pantalla cuando está baja.
++    <View pointerEvents="box-none" style={styles.recorte}>
+       {sos ? (
+         <Animated.View pointerEvents={subida ? 'none' : 'box-none'} style={[styles.sos, { top: arriba - 68 }, estiloSos]}>
+           {sos}
+         </Animated.View>
+       ) : null}
+ 
+-      <GestureDetector gesture={arrastreHoja}>
++      <GestureDetector gesture={arrastre}>
+         <Animated.View style={[styles.hoja, shadows.sheet, { top: arriba, height: alto - arriba }, estiloHoja]}>
+           <Animated.ScrollView
+             ref={scrollRef}
+@@ -186,12 +312,17 @@ export function HojaMiUnidad({ arriba, alto, franja, foto, resumen, resto, compa
+             bounces={false}
+             overScrollMode="never"
+             contentContainerStyle={{ paddingBottom: spacing.xl }}>
+-            <GestureDetector gesture={gestoFranja}>
++            <GestureDetector gesture={toque}>
+               <View
+                 accessible
+                 accessibilityRole="adjustable"
+                 accessibilityLabel="Detalle de tu unidad"
+-                accessibilityHint={subida ? 'Arrastra o toca para bajarla' : 'Arrastra o toca para ver más'}>
++                accessibilityHint="Arrastra para subirla o bajarla, o toca para cambiar de altura"
++                accessibilityActions={[
++                  { name: 'increment', label: 'Subir la hoja' },
++                  { name: 'decrement', label: 'Bajar la hoja' },
++                ]}
++                onAccessibilityAction={alAccesibilidad}>
+                 {franja}
+               </View>
+             </GestureDetector>
+@@ -216,11 +347,12 @@ export function HojaMiUnidad({ arriba, alto, franja, foto, resumen, resto, compa
+           </Animated.View>
+         </Animated.View>
+       </GestureDetector>
+-    </>
++    </View>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
++  recorte: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, zIndex: 20, overflow: 'hidden' },
+   hoja: {
+     position: 'absolute',
+     left: 0,
+-- 
+2.55.0.windows.3
+

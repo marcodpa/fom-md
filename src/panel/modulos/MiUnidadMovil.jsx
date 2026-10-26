@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -26,8 +26,9 @@ import '../../styles/mi-unidad-movil.css'
 // SOS; una franja oscura con la unidad, su velocidad en vivo y lo de hoy (km y
 // tiempo en marcha); la foto sin fondo montada sobre la hoja «Resumen» (dónde
 // está, odómetro, índice de manejo, mantenimiento pendiente y la inspección de
-// hoy). Subida, aparece la telemetría; desplazada, la franja se encoge y queda
-// fija con su miniatura, y debajo siguen la telemetría y el índice de manejo.
+// hoy). La hoja se arrastra como la de Mapas, con tres alturas (T-191): abajo,
+// solo la franja; a media altura, el Resumen; arriba, casi pantalla completa con
+// la telemetría, y al desplazar la franja se encoge y queda fija con su miniatura.
 //
 // Con otra unidad tomada por PIN (T-167b), se ve ESA unidad con la etiqueta
 // «USANDO … · PIN» sobre el mapa, como la app.
@@ -100,41 +101,101 @@ function Punto({ tono, activo = false, tam = 7 }) {
   return <i className={`mvu-punto ${tono}${activo ? ' late' : ''}`} style={{ width: tam, height: tam }} aria-hidden="true" />
 }
 
-/* ------------------------------ La hoja de tres estados ------------------------------ */
+/* ------------------------------ La hoja de tres alturas ------------------------------ */
 
 /** Alto de la franja; la hoja se monta sobre sus últimos `SOLAPE` px (la maqueta). */
 const ALTO_FRANJA = 190
 const SOLAPE = 50
 /** La hoja subida deja una tira de mapa bajo el encabezado (12 + 52 de la cápsula + 48). */
 const ARRIBA_HOJA = 112
-/** Lo que se ve al entrar mientras no se midió el Resumen (franja + Resumen de la maqueta). */
+/** Lo que se ve a media altura mientras no se midió el Resumen (franja + Resumen de la maqueta). */
 const VISIBLE_INICIAL = 446
-/** Aire bajo el Resumen al entrar, antes de la barra de pestañas. */
+/** Aire bajo el Resumen a media altura, antes de la barra de pestañas. */
 const AIRE_ABAJO = 12
+/** Lo que asoma de la hoja abajo: la franja entera (nombre, velocidad y cifras de hoy). */
+const VISIBLE_BAJO = ALTO_FRANJA - SOLAPE
 /** La franja compacta aparece cuando la grande ya se fue por arriba. */
 const UMBRAL_COMPACTA = ALTO_FRANJA - SOLAPE - 65
+/** Velocidad (px/s) a partir de la cual el lanzamiento manda sobre la posición. */
+const VELOCIDAD_SNAP = 550
+/** Cuánto hay que mover el dedo (px) para decidir si arrastra la hoja o el contenido. */
+const UMBRAL_DECIDIR = 6
+/** Segundos de impulso que se proyectan al soltar para elegir la altura. */
+const PROYECCION = 0.18
+
+/** Las tres alturas de la hoja. */
+const NIVEL = { arriba: 0, media: 1, abajo: 2 }
+/** La última altura en que se dejó la hoja: se recuerda mientras la app siga abierta. */
+let ultimoNivel = NIVEL.media
+
+/** Lo que agarra la hoja cuando está arriba: la franja y, desplazada, la barra compacta. */
+const ASAS = '.mvu-asa, .mvu-compacta-boton'
+
+/** Desplazamiento de la hoja en cada altura (0 = arriba del todo). */
+const destinoDe = (nivel, media, bajo) => (nivel === NIVEL.arriba ? 0 : nivel === NIVEL.media ? media : bajo)
 
 /**
- * LA HOJA, con los tres estados de la maqueta: al entrar a media altura (la
- * franja con la foto y el Resumen entero); subida, arrastrándola o tocando la
- * franja (aparece la telemetría); y desplazada (la franja se encoge en una
- * barra fija con la miniatura). A media altura TODA la hoja se arrastra; subida,
- * el contenido se desplaza y el asa es la franja.
+ * A qué altura cae la hoja al soltarla: la más cercana, o —con impulso— la
+ * siguiente en el sentido del lanzamiento (y más lejos si el impulso da para
+ * tanto), como la hoja de Mapas. Es la misma regla de la app.
+ */
+function alturaAlSoltar(y, velocidad, media, bajo) {
+  const puntos = [0, media, bajo]
+  const sentido = velocidad < 0 ? -1 : 1
+  let objetivo = y
+  let candidatos = [0, 1, 2]
+  if (Math.abs(velocidad) > VELOCIDAD_SNAP) {
+    const delante = candidatos.filter((i) => sentido * (puntos[i] - y) > 12)
+    if (delante.length > 0) {
+      candidatos = delante
+      objetivo = y + velocidad * PROYECCION
+    }
+  }
+  return candidatos.reduce((mejor, i) => (Math.abs(puntos[i] - objetivo) < Math.abs(puntos[mejor] - objetivo) ? i : mejor), candidatos[0])
+}
+
+/** Dónde está la hoja ahora mismo (si va en camino, no donde irá). */
+function yVisual(el) {
+  if (!el) return 0
+  return new DOMMatrixReadOnly(getComputedStyle(el).transform).m42
+}
+
+/**
+ * LA HOJA, como la de Mapas, con tres alturas: abajo (solo asoma la franja con
+ * el nombre, la velocidad y las cifras de hoy; el mapa queda casi entero a la
+ * vista), a media altura (la franja con la foto y el Resumen entero) y arriba
+ * (casi pantalla completa; aparece la telemetría y, al desplazar, la franja se
+ * encoge en una barra fija con la miniatura).
+ *
+ * Se arrastra con el dedo y se queda donde la sueltas: salta a la altura más
+ * cercana con el resorte de movimiento.css, también con impulso. Abajo y a
+ * media altura, arrastrar mueve la hoja desde cualquier punto. Arriba, el
+ * contenido se desplaza normal y la hoja baja si estás arriba del todo del
+ * desplazamiento y arrastras hacia abajo (o desde la franja). La altura se
+ * recuerda mientras la app siga abierta.
+ *
+ * Mientras se arrastra solo se escribe `transform` (y la opacidad del SOS)
+ * directo en el elemento: no hay estado de React por cuadro, así que ni la
+ * hoja ni el mapa se vuelven a pintar. React solo se entera al soltar.
  *
  * `alBorde` recibe dónde queda el borde de arriba de la hoja quieta, para que
  * el mapa ponga la unidad en medio de lo que se ve.
  */
 function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
   const marco = useRef(null)
+  const hoja = useRef(null)
+  const sosRef = useRef(null)
   const cuerpo = useRef(null)
   const medida = useRef(null)
   const gesto = useRef(null)
   const huboArrastre = useRef(false)
+  /** Lo que el gesto necesita saber sin pasar por React: dónde está y cuánto mide cada altura. */
+  const actual = useRef({ y: 0, nivel: ultimoNivel, media: 0, bajo: 0, colocada: false })
   const [alto, setAlto] = useState(0)
   const [altoResumen, setAltoResumen] = useState(null)
-  const [subida, setSubida] = useState(false)
-  const [arrastre, setArrastre] = useState(null)
+  const [nivel, setNivel] = useState(ultimoNivel)
   const [conCompacta, setConCompacta] = useState(false)
+  const subida = nivel === NIVEL.arriba
 
   // El alto de la pantalla (sin la barra de pestañas) y el del Resumen, siempre al día.
   useLayoutEffect(() => {
@@ -150,84 +211,203 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
   }, [])
 
   const visible = altoResumen == null ? VISIBLE_INICIAL : ALTO_FRANJA - SOLAPE + 20 + altoResumen + AIRE_ABAJO
-  /** Desplazamiento de la hoja a media altura (0 = subida). */
+  /** Desplazamiento de la hoja a media altura (0 = arriba). */
   const media = Math.max(0, Math.round(alto - visible - ARRIBA_HOJA))
-  const borde = ARRIBA_HOJA + (subida ? 0 : media)
+  /** Desplazamiento de la hoja abajo: solo asoma la franja. Siempre más abajo que la mitad. */
+  const bajo = Math.max(media + 1, Math.round(alto - ARRIBA_HOJA - VISIBLE_BAJO))
+  const borde = ARRIBA_HOJA + destinoDe(nivel, media, bajo)
   useEffect(() => { if (alto > 0) alBorde?.(borde) }, [alto, borde, alBorde])
 
-  // Al bajarla se vuelve al principio: a media altura se ve el Resumen, no lo de abajo.
+  /** Pone la hoja (y el SOS pegado a su borde) a `y` px. Directo al elemento: sin pasar por React. */
+  const poner = useCallback((y, { arrastrando = false } = {}) => {
+    const a = actual.current
+    a.y = y
+    const hojaEl = hoja.current
+    const sosEl = sosRef.current
+    if (hojaEl) {
+      hojaEl.style.transition = arrastrando ? 'none' : ''
+      hojaEl.style.transform = `translate3d(0, ${y}px, 0)`
+    }
+    if (sosEl) {
+      sosEl.style.transition = arrastrando ? 'none' : ''
+      sosEl.style.transform = `translate3d(0, ${y}px, 0)`
+      // Se apaga al subir la hoja: la maqueta no lo deja sobre la franja.
+      sosEl.style.opacity = a.media > 0 ? String(Math.max(0, Math.min(1, (y / a.media - 0.55) / 0.45))) : '1'
+    }
+  }, [])
+
+  // Quieta: la hoja está en la altura elegida. La primera vez se coloca sin animar; si cambia
+  // lo medido (el Resumen cargó, giró la pantalla) se recoloca con el resorte. Mientras el dedo
+  // la tiene, no se la toca.
+  useLayoutEffect(() => {
+    const a = actual.current
+    a.nivel = nivel
+    a.media = media
+    a.bajo = bajo
+    if (alto <= 0 || gesto.current?.arrastrando) return
+    const primera = !a.colocada
+    a.colocada = true
+    poner(destinoDe(nivel, media, bajo), { arrastrando: primera })
+    if (primera) {
+      // Un cuadro sin transición y de ahí en adelante con el resorte.
+      void hoja.current?.offsetHeight
+      if (hoja.current) hoja.current.style.transition = ''
+      if (sosRef.current) sosRef.current.style.transition = ''
+    }
+  }, [alto, nivel, media, bajo, poner])
+
+  // Fuera de arriba se vuelve al principio: a media altura se ve el Resumen, no lo de abajo.
   useEffect(() => {
     if (!subida && cuerpo.current) cuerpo.current.scrollTop = 0
   }, [subida])
 
-  // Esc la baja, como cualquier hoja de la web.
+  /** La hoja va a una altura: se recuerda, se avisa a React (el mapa) y cae con el resorte. */
+  const ir = useCallback((n) => {
+    const a = actual.current
+    const destino = n === NIVEL.media && a.media <= 0 ? NIVEL.arriba : n
+    ultimoNivel = destino
+    a.nivel = destino
+    setNivel(destino)
+    poner(destinoDe(destino, a.media, a.bajo))
+  }, [poner])
+
+  // Esc la baja a media altura, como cualquier hoja de la web.
   useEffect(() => {
     if (!subida) return undefined
-    const alTecla = (e) => { if (e.key === 'Escape') setSubida(false) }
+    const alTecla = (e) => { if (e.key === 'Escape') ir(NIVEL.media) }
     window.addEventListener('keydown', alTecla)
     return () => window.removeEventListener('keydown', alTecla)
-  }, [subida])
+  }, [subida, ir])
+
+  /** Empieza a seguir un dedo (o el ratón). Todavía no mueve nada: espera a que pase del umbral. */
+  const empezar = useCallback((clientY, t, origen, extra = {}) => {
+    gesto.current = { origen, y0: clientY, desde: yVisual(hoja.current), ultimoY: clientY, ultimoT: t, v: 0, arrastrando: false, cuadro: 0, siguiente: 0, ...extra }
+    huboArrastre.current = false
+  }, [])
+
+  /** Mueve la hoja con el dedo. En cuanto pasa el umbral, la hoja es del gesto. */
+  const mover = useCallback((clientY, t) => {
+    const g = gesto.current
+    if (!g) return
+    const dy = clientY - g.y0
+    if (!g.arrastrando) {
+      if (Math.abs(dy) < UMBRAL_DECIDIR) return
+      g.arrastrando = true
+      huboArrastre.current = true
+      // Si iba en camino, el dedo la agarra donde esté.
+      g.desde = yVisual(hoja.current)
+      g.y0 = clientY
+    }
+    const dt = t - g.ultimoT
+    if (dt > 0) g.v = 0.6 * ((clientY - g.ultimoY) / dt) * 1000 + 0.4 * g.v
+    g.ultimoY = clientY
+    g.ultimoT = t
+    g.siguiente = Math.max(0, Math.min(actual.current.bajo, g.desde + (clientY - g.y0)))
+    // Un solo cambio de estilo por cuadro, sin pasar por React.
+    if (!g.cuadro) {
+      g.cuadro = requestAnimationFrame(() => {
+        g.cuadro = 0
+        poner(g.siguiente, { arrastrando: true })
+      })
+    }
+  }, [poner])
+
+  /** Suelta el dedo: la hoja cae a la altura más cercana (con el impulso con que se soltó). */
+  const soltar = useCallback(() => {
+    const g = gesto.current
+    gesto.current = null
+    if (!g) return
+    if (g.cuadro) cancelAnimationFrame(g.cuadro)
+    if (!g.arrastrando) return
+    const a = actual.current
+    ir(alturaAlSoltar(g.siguiente, g.v, a.media, a.bajo))
+  }, [ir])
+
+  // Arriba, el contenido se desplaza con el dedo (touch-action: pan-y): para que la hoja baje
+  // cuando el desplazamiento está arriba del todo hay que poder cancelar el toque, y React
+  // registra los suyos como pasivos. Por eso estos van directos al elemento.
+  useEffect(() => {
+    const el = cuerpo.current
+    if (!el) return undefined
+    const alTocar = (e) => {
+      if (actual.current.nivel !== NIVEL.arriba || e.touches.length !== 1 || e.target.closest?.(ASAS)) return
+      empezar(e.touches[0].clientY, e.timeStamp, 'toque', { scrollInicio: el.scrollTop })
+    }
+    const alMoverToque = (e) => {
+      const g = gesto.current
+      if (!g || g.origen !== 'toque') return
+      const y = e.touches[0].clientY
+      if (!g.arrastrando) {
+        if (Math.abs(y - g.y0) < UMBRAL_DECIDIR) return
+        // Solo baja la hoja si el desplazamiento empezó arriba del todo y el dedo baja; si no, manda el contenido.
+        if (g.scrollInicio > 0 || y < g.y0 || el.scrollTop > 0 || !e.cancelable) {
+          gesto.current = null
+          return
+        }
+      }
+      e.preventDefault()
+      mover(y, e.timeStamp)
+    }
+    const alTerminar = () => { if (gesto.current?.origen === 'toque') soltar() }
+    el.addEventListener('touchstart', alTocar, { passive: true })
+    el.addEventListener('touchmove', alMoverToque, { passive: false })
+    el.addEventListener('touchend', alTerminar)
+    el.addEventListener('touchcancel', alTerminar)
+    return () => {
+      el.removeEventListener('touchstart', alTocar)
+      el.removeEventListener('touchmove', alMoverToque)
+      el.removeEventListener('touchend', alTerminar)
+      el.removeEventListener('touchcancel', alTerminar)
+    }
+  }, [empezar, mover, soltar])
 
   function alBajar(e) {
     if (e.button !== undefined && e.button !== 0) return
-    // Subida, solo la franja arrastra: lo demás se desplaza.
-    if (subida && !e.target.closest?.('.mvu-asa')) return
-    gesto.current = { y0: e.clientY, desde: subida ? 0 : media, ultimoY: e.clientY, ultimoT: e.timeStamp, v: 0 }
-    huboArrastre.current = false
+    // Arriba, solo la franja arrastra con el puntero: lo demás se desplaza (el dedo, ver arriba).
+    if (actual.current.nivel === NIVEL.arriba && !e.target.closest?.(ASAS)) return
+    empezar(e.clientY, e.timeStamp, 'puntero')
   }
   function alMover(e) {
     const g = gesto.current
-    if (!g) return
-    const dy = e.clientY - g.y0
-    if (!huboArrastre.current) {
-      if (Math.abs(dy) < 6) return
-      huboArrastre.current = true
-      e.currentTarget.setPointerCapture?.(e.pointerId)
-    }
-    const dt = e.timeStamp - g.ultimoT
-    if (dt > 0) g.v = (e.clientY - g.ultimoY) / dt
-    g.ultimoY = e.clientY
-    g.ultimoT = e.timeStamp
-    setArrastre(Math.max(0, Math.min(media, g.desde + dy)))
+    if (!g || g.origen !== 'puntero') return
+    const eraArrastre = g.arrastrando
+    mover(e.clientY, e.timeStamp)
+    if (!eraArrastre && g.arrastrando) e.currentTarget.setPointerCapture?.(e.pointerId)
   }
   function alSoltar() {
-    const g = gesto.current
-    gesto.current = null
-    if (!g || !huboArrastre.current) return
-    // Un lanzamiento rápido manda sobre la posición; si no, la mitad del recorrido.
-    const sube = Math.abs(g.v) > 0.55 ? g.v < 0 : (arrastre ?? g.desde) < media / 2
-    setSubida(sube)
-    setArrastre(null)
+    if (gesto.current?.origen === 'puntero') soltar()
   }
   function alTocarAsa() {
     // El arrastre ya decidió: el clic que llega al soltar no vuelve a cambiarla.
     if (huboArrastre.current) { huboArrastre.current = false; return }
-    setSubida((s) => !s)
+    // De la mitad sube; de arriba o de abajo vuelve a la mitad.
+    ir(actual.current.nivel === NIVEL.media ? NIVEL.arriba : NIVEL.media)
+  }
+  function alTeclaAsa(e) {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+    e.preventDefault()
+    ir(Math.max(NIVEL.arriba, Math.min(NIVEL.abajo, actual.current.nivel + (e.key === 'ArrowUp' ? -1 : 1))))
   }
 
-  const y = arrastre ?? (subida ? 0 : media)
-  const progreso = media > 0 ? 1 - y / media : 1
-  const quieta = arrastre == null
+  const abajo = nivel === NIVEL.abajo
 
   return (
     <div className="mvu-hmarco" ref={marco}>
       {sos && (
-        <div className={`mvu-sos${progreso > 0.4 ? ' oculto' : ''}`}
-          style={{ top: ARRIBA_HOJA - 68, transform: `translateY(${y}px)`, opacity: Math.max(0, Math.min(1, (y / Math.max(1, media) - 0.55) / 0.45)), transition: quieta ? undefined : 'none' }}>
+        <div ref={sosRef} className={`mvu-sos${subida ? ' oculto' : ''}`} style={{ top: ARRIBA_HOJA - 68 }}>
           {sos}
         </div>
       )}
-      <section className="mvu-h" aria-label="Tu unidad"
-        style={{ top: ARRIBA_HOJA, transform: `translateY(${y}px)`, transition: quieta ? undefined : 'none' }}
+      <section ref={hoja} className={`mvu-h${subida ? ' subida' : ''}`} aria-label="Tu unidad" style={{ top: ARRIBA_HOJA }}
         onPointerDown={alBajar} onPointerMove={alMover} onPointerUp={alSoltar} onPointerCancel={alSoltar}>
         <div ref={cuerpo} className={`mvu-h-cuerpo${subida ? ' subida' : ''}`}
           onScroll={(e) => setConCompacta(e.currentTarget.scrollTop > UMBRAL_COMPACTA)}>
-          <button type="button" className="mvu-asa" aria-expanded={subida}
+          <button type="button" className="mvu-asa" aria-expanded={!abajo} onKeyDown={alTeclaAsa}
             aria-label={subida ? 'Bajar el detalle de tu unidad' : 'Ver más de tu unidad'} onClick={alTocarAsa}>
             {franja}
           </button>
           <div className="mvu-h-hoja">
-            <div ref={medida}>{resumen}</div>
+            <div ref={medida} {...(abajo ? { inert: '' } : {})}>{resumen}</div>
             {/* Lo de abajo solo se alcanza con la hoja subida: a media altura no se ve. */}
             <div {...(subida ? {} : { inert: '' })}>{resto}</div>
           </div>
@@ -236,7 +416,10 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
         {/* Desplazada: la franja encogida queda fija arriba. Tocarla vuelve al principio. */}
         <button type="button" className={`mvu-compacta-boton${conCompacta ? ' visible' : ''}`} tabIndex={conCompacta ? 0 : -1}
           aria-hidden={!conCompacta} aria-label="Volver al resumen de tu unidad"
-          onClick={() => cuerpo.current?.scrollTo({ top: 0, behavior: 'smooth' })}>
+          onClick={() => {
+            if (huboArrastre.current) { huboArrastre.current = false; return }
+            cuerpo.current?.scrollTo({ top: 0, behavior: 'smooth' })
+          }}>
           {compacta}
         </button>
       </section>
