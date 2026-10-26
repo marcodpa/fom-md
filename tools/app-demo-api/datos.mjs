@@ -758,5 +758,9 @@ for (const o of ORDENES) {
 // Por si la app un día lee la foto propia de la unidad (hoy usa el render de su catálogo:
 // capturar.mjs lo cambia por fotoDeVehiculo vía /__demo/foto-vehiculo).
 for (const u of UNIDADES) registrarFoto(`fom/vehiculo/${u.id}/1`, fotoDeVehiculo(u.make, u.model), null, `fom_vehiculo_${u.id}`)
+// T-188: DEMO_RECORTE=<ruta de un PNG con transparencia> guarda además el recorte sin fondo de la
+// foto de la unidad de Carlos (`fom/vehiculo-sin-fondo/<id>/1`, el mismo n que la foto), como lo
+// hace la web al subir una foto. Sin la variable, esa unidad solo tiene su foto con fondo.
+if (process.env.DEMO_RECORTE) registrarFoto(`fom/vehiculo-sin-fondo/${UNIDAD_CARLOS.id}/1`, process.env.DEMO_RECORTE, null, `fom_vehiculo_sin_fondo_${UNIDAD_CARLOS.id}`)
 
 export { s as semilla }

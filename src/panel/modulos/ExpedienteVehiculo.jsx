@@ -19,6 +19,8 @@ import { ArchivosDeDocumento, ModalNuevoDocumento } from './Documentos'
 import FotoUnidad from '../comp/FotoUnidad'
 import FichaDatosUnidad from './FichaDatosUnidad'
 import UsuariosUnidad from './UsuariosUnidad'
+import { FranjaFichaMovil, UbicacionUnidadMovil, textoRecorridoHoy, useHoyDeUnidad } from './FichaUnidadMovil'
+import { useMinuto } from '../datos/sinSenal'
 import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
 import { enlaceEventoEnMapa } from '../datos/eventosManejo'
@@ -351,6 +353,11 @@ export default function ExpedienteVehiculo() {
   const conductores = useDatos(() => repo.personal.listar({ soloConductores: true }), [])
 
   const [pinSeleccionado, setPinSeleccionado] = useState(null)
+  // En el teléfono (T-190): dónde está ahora y lo de hoy, y si el mapa de arriba enseña el día entero.
+  const ahora = useMinuto()
+  const vivo = useHoyDeUnidad(v, ahora, movil && estado === 'ok' && Boolean(v))
+  const [verRecorrido, setVerRecorrido] = useState(false)
+  useEffect(() => { setVerRecorrido(false) }, [id])
   const [guardado, setGuardado] = useState('')
   const [conductorElegido, setConductorElegido] = useState(null)
   const [asignandoConductor, setAsignandoConductor] = useState(false)
@@ -421,6 +428,13 @@ export default function ExpedienteVehiculo() {
   }, [v])
 
   const totalCostos = useMemo(() => (v?.costos ?? []).reduce((a, c) => a + c.monto, 0), [v])
+
+  // El manejo brusco de los últimos días, por tipo (la tarjeta «Manejo brusco» del teléfono).
+  const manejoPorTipo = useMemo(() => {
+    const cuenta = new Map()
+    eventosRecientes.forEach((e) => { const k = e.nombre ?? e.clave ?? 'Evento'; cuenta.set(k, (cuenta.get(k) ?? 0) + 1) })
+    return [...cuenta.entries()].sort((a, b) => b[1] - a[1])
+  }, [eventosRecientes])
 
   // Sin try/catch un rechazo del servidor era una promesa sin capturar:
   // ningun mensaje, el selector volvia a su valor, y parecia que «no dejaba».
@@ -508,8 +522,8 @@ export default function ExpedienteVehiculo() {
   return (
     <>
       <Cabecera
-        className="eu-cabecera"
-        imagen={v && <FotoUnidad key={v.id} unidad={v} variante="cabecera" />}
+        className={`eu-cabecera${movil ? ' fum-cab' : ''}`}
+        imagen={v && !movil && <FotoUnidad key={v.id} unidad={v} variante="cabecera" />}
         titulo={v ? v.alias : 'Expediente de la unidad'}
         bajada={
           // Solo lo que existe. Un año nulo salia como la palabra «null» en
@@ -519,7 +533,7 @@ export default function ExpedienteVehiculo() {
             : 'Ficha completa de la unidad'
         }
       >
-        {v && (
+        {v && !movil && (
           <>
             <Tag color={color('marcha_estado', v.estadoMarcha)}>
               {etiqueta('marcha_estado', v.estadoMarcha)}
@@ -552,7 +566,8 @@ export default function ExpedienteVehiculo() {
 
         {estado === 'ok' && v && (
           <>
-            <div className="pnl-grid k4">
+            {(() => {
+              const kpis = <div className="pnl-grid k4">
               <KpiKilometraje v={v} puedeRegistrar={esGestor(sesion?.perfil)} />
               <Kpi
                 titulo="Índice seguro"
@@ -578,6 +593,16 @@ export default function ExpedienteVehiculo() {
                 a={enlaceEventoEnMapa({ vehiculoId: v.id })}
               />
             </div>
+              // En el teléfono: arriba dónde está, y las cuatro cifras en la hoja bajo la foto.
+              if (!movil || !vivo.unidad) return kpis
+              return (
+                <div className="fum">
+                  <UbicacionUnidadMovil unidad={vivo.unidad} cola={vivo.cola} puntosDia={vivo.puntos} ahora={ahora}
+                    verRecorrido={verRecorrido} alVerRecorrido={() => setVerRecorrido((x) => !x)} />
+                  <FranjaFichaMovil unidad={vivo.unidad} hoy={vivo.hoy}>{kpis}</FranjaFichaMovil>
+                </div>
+              )
+            })()}
 
             {movil
               ? <PartesMovil activa={parteVista} alElegir={irAParte} />
@@ -586,7 +611,14 @@ export default function ExpedienteVehiculo() {
             {/* ---------------- Resumen ---------------- */}
             {ver('resumen') && (
               <Parte clave="resumen" movil={movil}>
-                <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto={movil ? '280px' : '470px'} ficha={false} /></Tarjeta></div>
+                {movil ? (
+                  // El mapa ya está arriba: aquí, lo de hoy en palabras y el día entero a un toque.
+                  <Tarjeta titulo="Recorrido" accion={<button type="button" className="pnl-link eu-ver" onClick={() => { setVerRecorrido(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ver recorrido →</button>}>
+                    <p className="fum-nota">{textoRecorridoHoy(vivo.hoy, vivo.unidad)}</p>
+                  </Tarjeta>
+                ) : (
+                  <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto="470px" ficha={false} /></Tarjeta></div>
+                )}
                 <div className="eu-resumen-grid">
                   <ResumenDocumentos documentos={v.documentos} verTodo={() => irAParte('documentos')} />
                   <ResumenCostos costos={v.costos} verTodo={() => irAParte('costos')} />
@@ -628,6 +660,14 @@ export default function ExpedienteVehiculo() {
                     ]}
                   />
                 </Tarjeta>
+
+                {movil && (
+                  <Tarjeta titulo="Manejo brusco" accion={<Link className="pnl-link eu-ver" to={enlaceEventoEnMapa({ vehiculoId: v.id })}>Ver en el mapa →</Link>}>
+                    {!manejoPorTipo.length ? <p className="fum-nota">{`Sin eventos de manejo en los últimos ${DIAS_EVENTOS} días.`}</p> : (
+                      <Datos items={manejoPorTipo.map(([nombre, n]) => ({ etiqueta: nombre, valor: String(n) }))} />
+                    )}
+                  </Tarjeta>
+                )}
 
                 <Tarjeta titulo="Equipo GPS">
                   <div className="pnl-filas">
@@ -856,6 +896,14 @@ export default function ExpedienteVehiculo() {
                 )}
               </Tarjeta>
               </Parte>
+            )}
+
+            {/* En el teléfono, Archivar va al final, como en la app (solo quien gestiona la flota). */}
+            {movil && esGestor(sesion?.perfil) && (
+              <button type="button" className="pnl-btn fum-archivar" onClick={() => setArchivando(true)}>
+                <Icono nombre="cerrar" tam={16} />
+                Archivar unidad
+              </button>
             )}
           </>
         )}

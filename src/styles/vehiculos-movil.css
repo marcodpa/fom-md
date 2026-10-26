@@ -1,0 +1,192 @@
+/* ============================================================
+   VEHÍCULOS EN EL TELÉFONO (T-190) — la lista y la ficha de la unidad
+   ------------------------------------------------------------
+   Copia de la app (FOM-DRIVER): fila-unidad-flota.tsx (la tarjeta de cada
+   unidad y las pastillas rápidas) y ficha-unidad-vista.tsx (la ubicación
+   arriba, la franja oscura con la foto montada y la hoja con las cifras).
+   El estilo es el aprobado de «Mi unidad» (mi-unidad-movil.css).
+   Solo bajo 768 px: en la computadora no existe.
+   ============================================================ */
+@media (max-width: 767px) {
+  :is(.vm-tramos, .vm-pastillas, .fum) .exito { --tono: var(--app-exito); --tono-sup: var(--app-exito-sup); }
+  :is(.vm-tramos, .vm-pastillas, .fum) .aviso,
+  :is(.vm-tramos, .fum) .ambar { --tono: var(--app-aviso); --tono-sup: var(--app-aviso-sup); }
+  :is(.vm-tramos, .vm-pastillas, .fum) .peligro,
+  :is(.vm-tramos, .fum) .rojo { --tono: var(--app-peligro); --tono-sup: var(--app-peligro-sup); }
+  :is(.vm-tramos, .vm-pastillas, .fum) .apagado { --tono: var(--app-texto-3); --tono-sup: var(--app-sup-baja); }
+
+  /* El mapa de la flota, a un tercio de pantalla: la lista es lo que se viene a ver. */
+  .mvs-mapa.vm-mapa-corto { height: max(220px, 30dvh); }
+
+  /* ---- Pastillas rápidas ---- */
+  .vm-pastillas { display: flex; gap: 8px; overflow-x: auto; margin: 2px -16px 0; padding: 2px 16px; scrollbar-width: none; }
+  .vm-pastillas::-webkit-scrollbar { display: none; }
+  .vm-pastilla {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--app-borde);
+    border-radius: var(--app-r-pill);
+    background: var(--app-sup-baja);
+    color: var(--app-texto-2);
+    font: 600 13px/18px var(--app-fuente);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background var(--app-d-rapido) var(--app-curva), border-color var(--app-d-rapido) var(--app-curva), color var(--app-d-rapido) var(--app-curva);
+  }
+  .vm-pastilla > i { width: 7px; height: 7px; border-radius: 50%; background: var(--tono); }
+  .vm-pastilla em { font: 700 12px/16px var(--app-fuente); font-style: normal; color: var(--app-texto-3); font-variant-numeric: tabular-nums; }
+  .vm-pastilla.on { border-color: var(--app-activo-borde); background: var(--app-activo-sup); color: var(--app-activo-texto); }
+  .vm-pastilla.on em { color: var(--app-activo-texto); }
+  .pnl.fom-dark[data-diseno] .vm-pastilla:focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+
+  /* ---- Lista virtual ---- */
+  .vm-tramos { display: block; }
+  .vm-lista { position: relative; }
+  .vm-lista-el { position: absolute; top: 0; left: 0; right: 0; }
+  .vm-tramo { margin: 0; padding-top: 14px; }
+
+  /* ---- La tarjeta de una unidad ---- */
+  .vm-tarjeta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 118px;
+    padding: 0 12px;
+    border: 1px solid var(--app-borde);
+    border-radius: 20px;
+    background: var(--app-sup);
+    color: var(--app-texto);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform var(--app-d-rapido) var(--app-curva), border-color var(--app-d-rapido) var(--app-curva);
+  }
+  .vm-tarjeta:active { transform: scale(var(--app-escala-press, .97)); }
+  .pnl.fom-dark[data-diseno] .vm-tarjeta:focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+  .vm-foto-caja { flex: none; width: 96px; height: 76px; display: grid; place-items: center; overflow: hidden; border-radius: var(--app-r-md); background: var(--app-sup-baja); color: var(--app-texto-3); }
+  .vm-foto { width: 92px; height: auto; aspect-ratio: 8 / 5; object-fit: contain; }
+  .vm-foto.con-fondo { width: 80px; border: 1px solid var(--app-borde-fuerte); border-radius: 10px; object-fit: cover; }
+  .vm-txt { flex: 1; min-width: 0; display: grid; gap: 5px; }
+  .vm-fila { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .vm-numero { flex: none; font-size: 19px; line-height: 24px; font-weight: 700; letter-spacing: -.3px; }
+  .vm-placa { flex: none; font-size: 13px; line-height: 18px; font-weight: 600; letter-spacing: .4px; color: var(--app-texto-2); }
+  .vm-aviso {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: var(--app-r-pill);
+    background: color-mix(in srgb, var(--tono) 12%, transparent);
+    color: var(--tono);
+    font: 600 12.5px/16px var(--app-fuente);
+  }
+  .vm-aviso > i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--tono); }
+  .vm-aviso > span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .vm-estado { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 600 13px/18px var(--app-fuente); color: var(--tono); }
+  .vm-estado b { margin-left: 4px; color: var(--app-texto); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .vm-estado .vm-gris { color: var(--app-texto-2); overflow: hidden; text-overflow: ellipsis; }
+  .vm-punto { position: relative; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--tono); }
+  .vm-punto.late::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--tono); animation: vm-latido 1.6s ease-out infinite; }
+  @keyframes vm-latido { from { transform: scale(1); opacity: .55; } to { transform: scale(2.8); opacity: 0; } }
+  .vm-gente { gap: 5px; color: var(--app-texto-3); }
+  .vm-gente svg { flex: none; }
+  .vm-detalle { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 500 12.5px/17px var(--app-fuente); color: var(--app-texto-2); }
+  .vm-detalle.tenue { color: var(--app-texto-3); }
+  .vm-zona { flex-shrink: 2; }
+  .vm-punto-area { flex: none; width: 6px; height: 6px; margin-left: 4px; border-radius: 50%; background: var(--app-texto-3); }
+
+  /* ============================================================
+     LA FICHA DE LA UNIDAD
+     ============================================================ */
+  /* La cabeza de escritorio sobra: la franja ya dice quién es. Queda Archivar. */
+  .eu-cabecera.fum-cab .pnl-cab-txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .eu-cabecera.fum-cab .pnl-cab-acciones .pnl-tag { display: none; }
+  .fum { display: grid; gap: 14px; }
+
+  /* ---- Dónde está ---- */
+  .fum-ubicacion { overflow: hidden; border: 1px solid var(--app-borde); border-radius: var(--app-r-lg); background: var(--app-sup); }
+  .fum-mapa { position: relative; height: 230px; overflow: hidden; }
+  .fum-mapa > .pnl-mapa { height: 100%; border: 0; border-radius: 0; }
+  .fum-sin-pos { position: absolute; left: 12px; bottom: 12px; z-index: 5; padding: 7px 14px; border: 1px solid var(--app-borde); border-radius: var(--app-r-pill); background: var(--app-sobre-mapa); color: var(--app-texto-2); font: 700 13px/18px var(--app-fuente); }
+  .fum-ampliar { position: absolute; top: 10px; right: 10px; z-index: 6; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--app-sobre-mapa); color: var(--app-texto); }
+  .fum-mapa .mapa-pildora-vista, .fum-mapa .mapa-capas { display: none; }
+  .fum-cuerpo { display: grid; gap: 12px; padding: 16px; }
+  .fum-donde { display: flex; align-items: center; gap: 12px; }
+  .fum-donde-ico { flex: none; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: var(--app-sup-baja); color: var(--app-texto-2); }
+  .fum-donde-txt { flex: 1; min-width: 0; display: grid; }
+  .fum-donde-txt b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 600 16px/21px var(--app-fuente); }
+  .fum-donde-txt small { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 500 12.5px/17px var(--app-fuente); color: var(--app-texto-3); }
+  .fum-chip { flex: 0 1 auto; max-width: 48%; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: var(--app-r-pill); background: var(--tono-sup); color: var(--tono); font: 600 12.5px/16px var(--app-fuente); white-space: nowrap; }
+  .fum-chip > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .fum-acciones { display: flex; gap: 8px; }
+  .fum-boton {
+    flex: 1;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: var(--app-r-pill);
+    background: var(--app-sup-baja);
+    color: var(--app-texto);
+    font: 600 14px/18px var(--app-fuente);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .fum-boton.primario { background: var(--app-primario); color: var(--app-sobre-primario); }
+  .fum-boton.borde { border-color: var(--app-primario); background: transparent; }
+  .fum-boton.borde.on { border-color: var(--app-activo-borde); background: var(--app-activo-sup); color: var(--app-activo-texto); }
+  .fum-boton.solo { flex: none; width: 100%; }
+  .pnl.fom-dark[data-diseno] .fum-boton:focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+
+  /* ---- La franja y la hoja ---- */
+  .fum-unidad { position: relative; }
+  .fum-franja {
+    height: 176px;
+    padding: 16px 18px 0;
+    border: 1px solid #1f2732;
+    border-bottom: 0;
+    border-radius: var(--app-r-xl) var(--app-r-xl) 0 0;
+    background: linear-gradient(180deg, #06090d 0%, #080b10 100%);
+    color: #f3f5f8;
+  }
+  .fum-franja .mvu-f-vel b { color: var(--tono, #f3f5f8); }
+  .fum-hoja {
+    position: relative;
+    margin-top: -44px;
+    padding: 20px 16px 16px;
+    border: 1px solid var(--app-borde);
+    border-radius: var(--app-r-xl) var(--app-r-xl) var(--app-r-lg) var(--app-r-lg);
+    background: var(--app-sup);
+  }
+  .fum-hoja h2 { margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -.3px; color: var(--app-texto); }
+  .fum-foto { position: absolute; top: 62px; right: -16px; z-index: 5; width: 182px; height: auto; pointer-events: none; }
+  .fum-franja .mvu-f-cifras { gap: 18px; }
+  .fum-franja .mvu-f-cifras b { font-size: 24px; line-height: 28px; }
+  .fum-foto.con-fondo { top: 124px; right: 14px; width: 172px; border: 1px solid var(--app-borde-fuerte); border-radius: 20px; box-shadow: 0 6px 18px rgb(0 0 0 / .28); }
+  /* Las cuatro cifras de la web, en 2 × 2 dentro de la hoja (las mismas, con sus enlaces). */
+  .fum-hoja .pnl-grid.k4 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 18px; }
+  .fum-hoja .pnl-grid.k4 .pnl-kpi { min-height: 104px; border-radius: var(--app-r-md); background: var(--app-sup-alta); }
+
+  /* ---- Manejo brusco y recorrido ---- */
+  .fum-nota { margin: 0; font: 400 14px/20px var(--app-fuente); color: var(--app-texto-2); }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .vm-punto.late::after { animation: none; }
+  .vm-tarjeta, .vm-pastilla { transition: none; }
+}
+
+@media (max-width: 767px) {
+  .fum-archivar { width: 100%; justify-content: center; margin-top: 4px; }
+}

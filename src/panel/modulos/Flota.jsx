@@ -1,5 +1,5 @@
 import MiniFoto from '../comp/MiniFoto'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import repo from '../datos/repo'
@@ -17,7 +17,7 @@ import { color, etiqueta } from '../datos/catalogos'
 import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
 import '../../styles/movil-modulos.css'
 import { useVistaTelefono } from '../comp/movil-navegacion'
-import { BuscadorFiltrosMovil, MapaFlotaMovil } from './FlotaMovil'
+import { BuscadorFiltrosMovil, FilaUnidadMovil, ListaVirtualMovil, MapaFlotaMovil, PastillasRapidasMovil } from './FlotaMovil'
 
 // ============================================================
 // FLOTA — listado maestro de unidades
@@ -113,11 +113,27 @@ const TRAMOS = [
 ]
 
 /**
- * La lista del teléfono, como flota.tsx: tres tramos por gravedad y dentro de
- * cada uno lo peor primero (luego, el orden elegido en la tabla). Cada fila es
- * una sola línea de estado; el detalle va debajo.
+ * Cómo está la unidad AHORA en el teléfono (la misma escala que la app):
+ * sin señal si calla, en marcha, detenida, o «reportando» si la fuente no sabe
+ * de marcha pero el equipo transmite. `null`: nunca reportó.
  */
-function ListaMovil({ unidades, alAbrir }) {
+function estadoMovil(v) {
+  if (v.conectado === false) return 'sin-senal'
+  if (v.estadoMarcha === 'en_marcha') return 'marcha'
+  if (v.estadoMarcha === 'parada') return 'detenido'
+  if (v.conectado) return 'reportando'
+  return v.ultimoReporte ? 'sin-senal' : null
+}
+
+/** El número de la unidad («U-003»), como `etiquetaCortaDeUnidad` de la app; sin él, su alias. */
+const numeroDe = (v) => (v.numero && String(v.numero).trim() !== '—' ? String(v.numero).toUpperCase() : v.alias || v.placa || 'Unidad')
+
+/**
+ * La lista del teléfono, como flota.tsx (T-190): tres tramos por gravedad y
+ * dentro de cada uno lo peor primero; cada unidad en su tarjeta con su foto. La
+ * lista es virtual: con 340 unidades solo se montan (y piden foto) las que se ven.
+ */
+function ListaMovil({ unidades, alAbrir, ahora }) {
   const tramos = useMemo(() => {
     const conNovedad = unidades.map((v, i) => ({ v, i, n: novedadDe(v) }))
     const orden = (a, b) => (a.n?.peso ?? 99) - (b.n?.peso ?? 99) || a.i - b.i
@@ -125,38 +141,13 @@ function ListaMovil({ unidades, alAbrir }) {
       .map((t) => ({ ...t, items: conNovedad.filter((u) => (u.n?.grupo ?? 'sin-novedad') === t.clave).sort(orden) }))
       .filter((t) => t.items.length > 0)
   }, [unidades])
+  const pintar = useCallback(({ v, n }) => (
+    <FilaUnidadMovil unidad={v} numero={numeroDe(v)} estado={estadoMovil(v)} aviso={n}
+      conductor={nombreConductor(v)} ahora={ahora} alAbrir={alAbrir} />
+  ), [ahora, alAbrir])
   return (
-    <div className="mv-solo-movil mv-tramos">
-      {tramos.map((t) => (
-        <section key={t.clave} className="mv-grupo" aria-label={t.t}>
-          <h3 className={`mv-grupo-cab ${t.color}`}>{t.t}</h3>
-          <div className="mv-lista-card">
-            {t.items.map(({ v, n }) => (
-              <button
-                key={v.id}
-                type="button"
-                className="mv-fila"
-                onClick={() => alAbrir(v.id)}
-                aria-label={`${v.alias}, ${v.placa}${n ? `, ${n.t}` : ''}`}
-              >
-                <span className="mv-fila-retrato">
-                  <MiniFoto vehiculoId={v.id} alto={46} ancho={60}><VehicleVisual modelo={v.modelo ?? ''} compacta /></MiniFoto>
-                </span>
-                <span className="mv-fila-txt">
-                  <span className="mv-fila-arriba">
-                    <b>{v.alias}</b>
-                    {n && <Tag color={n.color}>{n.t}</Tag>}
-                  </span>
-                  <span className="mv-fila-detalle">
-                    <Icono nombre="gente" tam={12} />
-                    <span>{[nombreConductor(v), v.placa, v.areaNombre].filter(Boolean).join(' · ')}</span>
-                  </span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ))}
+    <div className="vm-tramos">
+      <ListaVirtualMovil tramos={tramos} renderUnidad={pintar} />
     </div>
   )
 }
@@ -246,6 +237,10 @@ export default function Flota() {
   const [moviendo, setMoviendo] = useState(null) // la unidad cuya área se cambia desde su fila
   const [q, setQ] = useState('')
   const [filtro, setFiltro] = useState('todas')
+  // En el teléfono: la pastilla rápida (Todas, En marcha, Detenidas, Sin señal, Con avisos).
+  const [rapido, setRapido] = useState('todas')
+  // En la vista de teléfono, la pestaña de la app: mapa en su tarjeta, pastillas y los filtros finos en una hoja.
+  const esMovil = useVistaTelefono()
   const [areaId, setAreaId] = useState('')
   const [orden, setOrden] = useState({ k: 'unidad', dir: 'asc' })
   const [creando, setCreando] = useState(false)
@@ -274,11 +269,17 @@ export default function Flota() {
   )
 
   const filtradas = useMemo(() => {
+    if (esMovil) {
+      if (rapido === 'todas') return porArea
+      if (rapido === 'avisos') return porArea.filter((v) => novedadDe(v))
+      return porArea.filter((v) => estadoMovil(v) === rapido)
+    }
+    if (filtro === 'sin_senal') return porArea.filter((v) => v.conectado === false)
     if (filtro === 'en_marcha') return porArea.filter((v) => v.estadoMarcha === 'en_marcha')
     if (filtro === 'parada') return porArea.filter((v) => v.estadoMarcha === 'parada')
     if (filtro === 'atencion') return porArea.filter(requiereAtencion)
     return porArea
-  }, [porArea, filtro])
+  }, [porArea, filtro, esMovil, rapido])
 
   const ordenadas = useMemo(() => {
     const dir = orden.dir === 'asc' ? 1 : -1
@@ -296,6 +297,7 @@ export default function Flota() {
     { v: 'todas', t: 'Todas', n: porArea.length },
     { v: 'en_marcha', t: 'En marcha', n: porArea.filter((v) => v.estadoMarcha === 'en_marcha').length },
     { v: 'parada', t: 'Detenidas', n: porArea.filter((v) => v.estadoMarcha === 'parada').length },
+    { v: 'sin_senal', t: 'Sin señal', n: porArea.filter((v) => v.conectado === false).length },
     { v: 'atencion', t: 'Requieren atención', n: porArea.filter(requiereAtencion).length },
   ]
 
@@ -316,16 +318,23 @@ export default function Flota() {
   const atencion = lista.filter(requiereAtencion).length
   const sinConductor = lista.filter((v) => !v.conductorPrincipalId).length
 
-  // En la vista de teléfono, la pestaña de la app: mapa en su tarjeta y los filtros en una hoja.
-  const esMovil = useVistaTelefono()
+  // Las pastillas del teléfono, con lo que dejan la búsqueda y el área.
+  const pastillas = useMemo(() => {
+    const cuenta = (e) => porArea.filter((v) => estadoMovil(v) === e).length
+    const base = [{ v: 'todas', t: 'Todas', n: porArea.length }]
+    const estados = sabeMarcha
+      ? [{ v: 'marcha', t: 'En marcha', n: cuenta('marcha'), tono: 'exito' }, { v: 'detenido', t: 'Detenidas', n: cuenta('detenido'), tono: 'aviso' }]
+      : [{ v: 'reportando', t: 'Reportando', n: cuenta('reportando'), tono: 'exito' }]
+    return [...base, ...estados,
+      { v: 'sin-senal', t: 'Sin señal', n: cuenta('sin-senal'), tono: 'apagado' },
+      { v: 'avisos', t: 'Con avisos', n: porArea.filter((v) => novedadDe(v)).length, tono: 'peligro' }]
+  }, [porArea, sabeMarcha])
 
   function ordenarPor(k) {
     setOrden((o) => (o.k === k ? { k, dir: o.dir === 'asc' ? 'desc' : 'asc' } : { k, dir: 'asc' }))
   }
 
-  function abrir(id) {
-    navegar(`/panel/flota/${id}`)
-  }
+  const abrir = useCallback((id) => navegar(`/panel/flota/${id}`), [navegar])
 
   return (
     <>
@@ -397,7 +406,7 @@ export default function Flota() {
 
         {estado === 'ok' && (
           <>
-            <TiraMovil unidades={filtradas} sabeMarcha={sabeMarcha} />
+            <TiraMovil unidades={esMovil ? porArea : filtradas} sabeMarcha={sabeMarcha} />
             <div className="pnl-grid k4 mv-solo-escritorio">
               <Kpi titulo="Total de unidades" valor={lista.length} icono="camion" />
               {sabeMarcha ? (
@@ -440,7 +449,7 @@ export default function Flota() {
                 nombreConductor={nombreConductor} alAbrir={abrir} ahora={ahora} />
               <BuscadorFiltrosMovil q={q} alBuscar={setQ} placeholder="Unidad, placa, conductor o área" titulo="Filtrar unidades"
                 grupos={[
-                  { titulo: 'Estado', opciones: chipsEstado, valor: filtro, alCambiar: setFiltro, base: 'todas' },
+                  // El estado va en las pastillas de abajo; en la hoja, el área.
                   { titulo: 'Área', opciones: chipsArea, valor: areaId, alCambiar: setAreaId, base: '' },
                 ]}
                 acciones={<>
@@ -448,6 +457,7 @@ export default function Flota() {
                   {esGestorDeFlota && <button type="button" className="pnl-btn" onClick={() => setAsignando({ area: areaId })}><Icono nombre="camion" tam={16} />Agregar vehículos a un área</button>}
                   <button type="button" className="pnl-btn" onClick={() => exportarCSV(ordenadas)} disabled={!ordenadas.length}><Icono nombre="descargar" tam={16} />Exportar CSV</button>
                 </>} />
+              <PastillasRapidasMovil opciones={pastillas} valor={rapido} alCambiar={setRapido} />
             </> : <>
               <Chips opciones={chipsEstado} valor={filtro} alCambiar={setFiltro} />
               <Chips opciones={chipsArea} valor={areaId} alCambiar={setAreaId} />
@@ -491,7 +501,7 @@ export default function Flota() {
                     <button
                       type="button"
                       className="pnl-btn"
-                      onClick={() => { setQ(''); setFiltro('todas'); setAreaId('') }}
+                      onClick={() => { setQ(''); setFiltro('todas'); setRapido('todas'); setAreaId('') }}
                     >
                       Limpiar filtros
                     </button>
@@ -499,8 +509,8 @@ export default function Flota() {
                 />
               )}
 
-              {ordenadas.length > 0 && <ListaMovil unidades={ordenadas} alAbrir={abrir} />}
-              {ordenadas.length > 0 && (
+              {esMovil && ordenadas.length > 0 && <ListaMovil unidades={ordenadas} alAbrir={abrir} ahora={ahora} />}
+              {!esMovil && ordenadas.length > 0 && (
                 <div className="pnl-tabla-wrap mv-solo-escritorio">
                   <table className="pnl-tabla">
                     <thead>

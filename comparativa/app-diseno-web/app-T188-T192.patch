@@ -1,0 +1,2634 @@
+From 133edce7cbfcd45d773941cc3a26bcaf13d386db Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Mon, 26 Oct 2026 16:04:01 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20Veh=C3=ADculos=20redise=C3=B1ado=20(list?=
+ =?UTF-8?q?a=20con=20foto,=20estado=20y=20avisos;=20ficha=20con=20la=20ubi?=
+ =?UTF-8?q?caci=C3=B3n=20arriba),=20foto=20propia=20de=20cada=20unidad=20c?=
+ =?UTF-8?q?omo=20la=20web,=20mapa=20sin=20el=20error=20de=20DomWebView=20y?=
+ =?UTF-8?q?=20m=C3=A1s=20liviano,=20y=20animaciones=20entre=20pesta=C3=B1a?=
+ =?UTF-8?q?s=20visibles=20en=20Expo=2058=20(T-188,=20T-189,=20T-190,=20T-1?=
+ =?UTF-8?q?92)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .gitignore                                 |   3 +
+ src/app/gerencial/odt.tsx                  |   5 +-
+ src/app/panel/flota.tsx                    | 262 ++++-----
+ src/app/panel/index.tsx                    |   6 +-
+ src/app/unidad.tsx                         | 199 ++++---
+ src/app/unidades-mantenimiento.tsx         |  10 +-
+ src/components/app-tab-bar.tsx             |  24 +-
+ src/components/ficha-unidad-encabezado.tsx |  48 +-
+ src/components/ficha-unidad-vista.tsx      | 587 +++++++++++++++++++++
+ src/components/fila-unidad-flota.tsx       | 276 ++++++++++
+ src/components/foto-sin-fondo.tsx          |  40 +-
+ src/components/foto-vehiculo.tsx           |  59 +++
+ src/components/map-vehiculo-dom.tsx        | 120 ++++-
+ src/components/mi-unidad-piezas.tsx        |  24 +-
+ src/components/odt-paso-fotos.tsx          |   4 +-
+ src/components/user-report-result.tsx      |   4 +-
+ src/components/vehiculo-retrato.tsx        |  38 +-
+ src/hooks/use-foto-vehiculo.ts             |  75 +++
+ src/hooks/use-reloj.ts                     |   8 +-
+ src/lib/cloudinary.ts                      |  41 ++
+ src/theme/movimiento.ts                    |  39 +-
+ 21 files changed, 1570 insertions(+), 302 deletions(-)
+ create mode 100644 src/components/ficha-unidad-vista.tsx
+ create mode 100644 src/components/fila-unidad-flota.tsx
+ create mode 100644 src/components/foto-vehiculo.tsx
+ create mode 100644 src/hooks/use-foto-vehiculo.ts
+
+diff --git a/.gitignore b/.gitignore
+index 61c6b10..2cb2450 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -51,3 +51,6 @@ redesign/
+ # Contrato OpenAPI descargado de fom-app-01 (no publicar: la doc de FOM dice
+ # que Swagger no debe exponerse a Internet). Se regenera con scp cuando haga falta.
+ openapi-fom.json
++
++# Grafo de conocimiento generado (se reconstruye con /graphify)
++graphify-out/
+diff --git a/src/app/gerencial/odt.tsx b/src/app/gerencial/odt.tsx
+index 2a11abc..ece84fc 100644
+--- a/src/app/gerencial/odt.tsx
++++ b/src/app/gerencial/odt.tsx
+@@ -1,6 +1,7 @@
++import { Image } from 'expo-image';
+ import { useLocalSearchParams } from 'expo-router';
+ import { useState } from 'react';
+-import { Image, ScrollView, StyleSheet, View } from 'react-native';
++import { ScrollView, StyleSheet, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { Card } from '@/components/card';
+@@ -135,6 +136,7 @@ export default function GerencialOdtScreen() {
+                           accessibilityLabel="Ver foto a pantalla completa">
+                           <Image
+                             source={{ uri: url }}
++                            cachePolicy="memory-disk"
+                             style={[
+                               styles.evidence,
+                               { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg },
+@@ -165,6 +167,7 @@ export default function GerencialOdtScreen() {
+                         accessibilityLabel="Ver foto a pantalla completa">
+                         <Image
+                           source={{ uri: url }}
++                            cachePolicy="memory-disk"
+                           style={[
+                             styles.evidence,
+                             { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg },
+diff --git a/src/app/panel/flota.tsx b/src/app/panel/flota.tsx
+index 4229f59..9f7ffb8 100644
+--- a/src/app/panel/flota.tsx
++++ b/src/app/panel/flota.tsx
+@@ -1,18 +1,24 @@
+ import { Redirect, useRouter } from 'expo-router';
+-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
++import { useCallback, useEffect, useMemo, useState } from 'react';
+ import { ActivityIndicator, StyleSheet, useWindowDimensions, View, type SectionListRenderItem } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { esMultiempresa, useAuth } from '@/auth';
+ import { BotonNuevo } from '@/components/boton-nuevo';
+ import { BuscadorFiltros } from '@/components/buscador-filtros';
+-import { Card } from '@/components/card';
+-import { CeldaTarjeta } from '@/components/celda-tarjeta';
+ import { EmptyState } from '@/components/empty-state';
+ import { EncabezadoFom, TituloPantalla } from '@/components/encabezado-fom';
+ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
+ import { ErrorState } from '@/components/error-state';
+ import { Escalonado, Flotante } from '@/components/escalonado';
++import {
++  PastillasRapidas,
++  TARJETA_AIRE,
++  TARJETA_ALTO,
++  TarjetaUnidad,
++  type EstadoFila,
++  type OpcionRapida,
++} from '@/components/fila-unidad-flota';
+ import { ListaVisible } from '@/components/lista-visible';
+ import { MapaVehiculo } from '@/components/map-vehiculo';
+ import { Pastilla } from '@/components/pastilla';
+@@ -24,11 +30,9 @@ import { TextoVivo } from '@/components/texto-vivo';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { TiraEstado, type CifraEstado } from '@/components/tira-estado';
+-import { VehiculoIlustracion } from '@/components/vehiculo-ilustracion';
+ import { useAsyncData } from '@/hooks/use-async-data';
+ import { estadoDeUnidad, useFlotaFom } from '@/hooks/use-flota-fom';
+ import { GRACIA_ESQUELETO, useRefrescoVivo, useTardando } from '@/hooks/use-refresco';
+-import { tinte } from '@/lib/color';
+ import { textoSinSenal, textoUltimoReporte } from '@/lib/sin-senal';
+ import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
+ import {
+@@ -44,7 +48,7 @@ import {
+ import { unidadesIncompletas } from '@/services/fomVehiculos';
+ import { useAdmin } from '@/session';
+ import { useTheme, type ColorTokens } from '@/theme';
+-import type { Area, FleetVehicle, InspeccionEstado, LatLng, MapMarker, UnidadFlota, VehicleType } from '@/types';
++import type { Area, FleetVehicle, InspeccionEstado, LatLng, MapMarker, UnidadFlota } from '@/types';
+ import { formatVencimiento } from '@/utils/date';
+ import { aplicarFiltros, estadoDeFlota, filtrosDeFlotaEnVivo } from '@/utils/filtros';
+ import { colorDeEnte } from '@/utils/paleta-flota';
+@@ -69,8 +73,11 @@ const PUNTOS_TRAZA = 120;
+  * Mantto.) y el índice de manejo (su cifra está en Resumen → El período).
+  */
+ 
+-/** Alto FIJO de cada fila. Constante = el ojo baja en columna, sin saltos. */
+-const FILA_ALTO = 70;
++/**
++ * Las pastillas rápidas de arriba de la lista (T-190). Una sola a la vez; los
++ * filtros finos siguen en la hoja del buscador y se suman a esta.
++ */
++type Rapido = 'todas' | 'marcha' | 'detenido' | 'sin-senal' | 'avisos';
+ 
+ /**
+  * La ESCALA DE NOVEDADES: lo único que decide el orden, el tramo y el color de
+@@ -197,6 +204,7 @@ export default function AdminFlotaScreen() {
+ 
+   const [q, setQ] = useState('');
+   const [filtro, setFiltro] = useState<string[]>([]);
++  const [rapido, setRapido] = useState<Rapido>('todas');
+   /** La unidad destacada al tocar su punto en el mapa. */
+   const [resaltada, setResaltada] = useState<string | null>(null);
+   /** Por dónde pasó la destacada: su id y los puntos de su recorrido. */
+@@ -218,6 +226,7 @@ export default function AdminFlotaScreen() {
+     setEmpresaPrevia(empresaId);
+     setQ('');
+     setFiltro([]);
++    setRapido('todas');
+     setResaltada(null);
+     setTraza(null);
+   }
+@@ -403,6 +412,45 @@ export default function AdminFlotaScreen() {
+     [filtros, buscados],
+   );
+ 
++  /** Cómo está cada unidad AHORA; `null` mientras su posición no llega (no se adivina). */
++  const estadoDe = useCallback(
++    (f: FleetVehicle): EstadoFila => {
++      if (!vivaDe.has(f.vehicle.id)) return null;
++      const e = estadoDeFlota(f);
++      return e === 'marcha' ? 'marcha' : e === 'sin-senal' ? 'sin-senal' : 'detenido';
++    },
++    [vivaDe],
++  );
++
++  /** Las pastillas rápidas, cada una con cuántas lleva sobre lo que dejan la búsqueda y la hoja. */
++  const opcionesRapidas = useMemo<OpcionRapida<Rapido>[]>(() => {
++    let marcha = 0;
++    let detenido = 0;
++    let sinSenal = 0;
++    let avisos = 0;
++    for (const u of visibles) {
++      const e = estadoDe(u.f);
++      if (e === 'marcha') marcha += 1;
++      else if (e === 'detenido') detenido += 1;
++      else if (e === 'sin-senal') sinSenal += 1;
++      if (u.novedad) avisos += 1;
++    }
++    return [
++      { id: 'todas', label: 'Todas', cuenta: visibles.length },
++      { id: 'marcha', label: 'En marcha', cuenta: marcha, tono: 'success' },
++      { id: 'detenido', label: 'Detenidas', cuenta: detenido, tono: 'warning' },
++      { id: 'sin-senal', label: 'Sin señal', cuenta: sinSenal, tono: 'textMuted' },
++      { id: 'avisos', label: 'Con avisos', cuenta: avisos, tono: 'danger' },
++    ];
++  }, [visibles, estadoDe]);
++
++  /** Lo que queda en la lista (y en el mapa) con la pastilla rápida elegida. */
++  const enLista = useMemo(() => {
++    if (rapido === 'todas') return visibles;
++    if (rapido === 'avisos') return visibles.filter((u) => u.novedad);
++    return visibles.filter((u) => estadoDe(u.f) === rapido);
++  }, [visibles, rapido, estadoDe]);
++
+   /** Los tres tramos, cada uno ordenado por gravedad y luego por nombre. */
+   const tramos = useMemo<Tramo[]>(() => {
+     const orden = (a: UnidadLista, b: UnidadLista) =>
+@@ -411,7 +459,7 @@ export default function AdminFlotaScreen() {
+     const noSalen: UnidadLista[] = [];
+     const atencion: UnidadLista[] = [];
+     const sinNovedad: UnidadLista[] = [];
+-    for (const u of visibles) {
++    for (const u of enLista) {
+       if (!u.novedad) sinNovedad.push(u);
+       else if (u.novedad.grupo === 'no-salen') noSalen.push(u);
+       else atencion.push(u);
+@@ -423,14 +471,14 @@ export default function AdminFlotaScreen() {
+     ]
+       .filter((t) => t.data.length > 0)
+       .map((t, indice) => ({ ...t, indice }));
+-  }, [visibles]);
++  }, [enLista]);
+ 
+   // ── El mapa: solo lo VISIBLE, cada unidad en el color de su área ──
+   // En un memo: con 340 unidades no se rehace en cada render, solo cuando
+   // cambia lo que se ve, una posición, la traza o un SOS.
+   const markers = useMemo<MapMarker[]>(
+     () =>
+-      visibles
++      enLista
+         .filter((u) => u.f.coordsReales)
+         .map((u) => {
+           const color = colorDeArea(u.f.vehicle.areaId);
+@@ -457,7 +505,7 @@ export default function AdminFlotaScreen() {
+             ...(color ? { color } : {}),
+           };
+         }),
+-    [visibles, colorDeArea, enApuros, vivaDe, traza],
++    [enLista, colorDeArea, enApuros, vivaDe, traza],
+   );
+   // Cambia solo cuando cambia el CONJUNTO de puntos (filtro, búsqueda, una
+   // unidad que empieza a reportar), no con cada refresco: es una cadena, y el
+@@ -521,26 +569,28 @@ export default function AdminFlotaScreen() {
+   );
+ 
+   const renderUnidad = useCallback<SectionListRenderItem<UnidadLista, Tramo>>(
+-    ({ item: u, index, section }) => (
+-      <FilaUnidad
+-        id={u.f.vehicle.id}
+-        alias={u.alias}
+-        placa={u.f.vehicle.placa}
+-        tipo={u.f.vehicle.tipo}
+-        conductor={u.f.conductorActual}
+-        area={u.area}
+-        color={colorDeArea(u.f.vehicle.areaId) ?? colors.textMuted}
+-        novedadTono={u.novedad?.tono}
+-        novedadLabel={u.novedad?.label}
+-        novedadLatiendo={u.novedad?.latiendo}
+-        primera={index === 0}
+-        ultima={index === section.data.length - 1}
+-        indiceTramo={section.indice}
+-        resaltada={resaltada === u.f.vehicle.id}
+-        onPress={abrirUnidad}
+-      />
++    ({ item: u, section }) => (
++      // Entra con su tramo, en su mismo escalón (solo la primera vez).
++      <Escalonado grupo="lista" indice={4 + section.indice}>
++        <TarjetaUnidad
++          vehicle={u.f.vehicle}
++          numero={u.alias}
++          placa={u.f.vehicle.placa}
++          conductor={u.f.conductorActual}
++          area={u.area}
++          colorArea={colorDeArea(u.f.vehicle.areaId) ?? colors.textMuted}
++          estado={estadoDe(u.f)}
++          velocidad={u.f.velocidadKmh ?? 0}
++          ultimoReporte={vivaDe.get(u.f.vehicle.id)?.pos?.recibidaEn ?? null}
++          avisoTono={u.novedad?.tono}
++          avisoLabel={u.novedad?.label}
++          avisoLatiendo={u.novedad?.latiendo}
++          resaltada={resaltada === u.f.vehicle.id}
++          onPress={abrirUnidad}
++        />
++      </Escalonado>
+     ),
+-    [colorDeArea, colors.textMuted, resaltada, abrirUnidad],
++    [colorDeArea, colors.textMuted, estadoDe, vivaDe, resaltada, abrirUnidad],
+   );
+ 
+   // Pantalla de vigilancia: se refresca sola mientras se mira. Las posiciones
+@@ -552,9 +602,9 @@ export default function AdminFlotaScreen() {
+ 
+   const puedeCrear = esMultiempresa(user);
+ 
+-  // Medio alto de pantalla: el mapa es lo que se viene a ver (como en el
+-  // Centro de control de la web); la lista sigue debajo, a un desplazamiento.
+-  const altoMapa = Math.max(320, Math.round(ventana.height * 0.5));
++  // Un tercio de pantalla (T-190): la lista es lo que se viene a ver y cada
++  // ficha ya trae su ubicación; el mapa completo está a un toque.
++  const altoMapa = Math.max(220, Math.round(ventana.height * 0.3));
+   /** La unidad tocada en el mapa, con lo que hace falta para su ficha flotante. */
+   const tocada = resaltada ? conNovedad.find((u) => u.f.vehicle.id === resaltada) : undefined;
+   /**
+@@ -567,7 +617,7 @@ export default function AdminFlotaScreen() {
+     tocada && vivaTocada && estadoDeFlota(tocada.f) === 'sin-senal' ? { en: vivaTocada.pos?.recibidaEn ?? null } : null;
+ 
+   /** Las filas solo van en la lista cuando hay datos que enseñar; si no, manda la cabecera. */
+-  const secciones = estado !== 'error' && !(!data && esperaLarga) && visibles.length > 0 ? tramos : SIN_TRAMOS;
++  const secciones = estado !== 'error' && !(!data && esperaLarga) && enLista.length > 0 ? tramos : SIN_TRAMOS;
+ 
+   /*
+    * LA CABECERA de la lista: el título, el pulso, el mapa y el buscador. Va
+@@ -737,17 +787,12 @@ export default function AdminFlotaScreen() {
+             // 70—, no un bloque suelto: así la lista no salta al resolver.
+             <View style={{ gap: spacing.md }}>
+               <Skeleton height={44} radius={radii.md} />
+-              <Skeleton width={110} height={16} />
+-              <Card style={{ padding: 0, overflow: 'hidden' }}>
++              <Skeleton height={36} radius={radii.pill} />
++              <View style={{ gap: TARJETA_AIRE }}>
+                 {[0, 1, 2, 3].map((i) => (
+-                  <View
+-                    key={i}
+-                    style={{ height: FILA_ALTO, paddingHorizontal: spacing.lg, justifyContent: 'center', gap: 6 }}>
+-                    <Skeleton width="45%" height={16} />
+-                    <Skeleton width="65%" height={13} />
+-                  </View>
++                  <Skeleton key={i} height={TARJETA_ALTO} radius={radii.lg - 4} />
+                 ))}
+-              </Card>
++              </View>
+             </View>
+           ) : (
+             <>
+@@ -766,6 +811,11 @@ export default function AdminFlotaScreen() {
+                 />
+               </Escalonado>
+ 
++              {/* Las pastillas rápidas: cómo está cada una ahora y las que tienen avisos. */}
++              <Escalonado grupo="lista" indice={3}>
++                <PastillasRapidas opciones={opcionesRapidas} valor={rapido} onChange={setRapido} />
++              </Escalonado>
++
+               {/* Una flota más grande que el tope de lectura: se dice, no se
+                   enseña a medias como si fuera la entera. Mismo texto que la web. */}
+               {data?.incompleta || vivasIncompletas ? (
+@@ -776,7 +826,7 @@ export default function AdminFlotaScreen() {
+ 
+               {flota.length === 0 ? (
+                 <EmptyState title="Sin vehículos" />
+-              ) : visibles.length === 0 ? (
++              ) : enLista.length === 0 ? (
+                 // La palabra buscada sigue escrita en el buscador de arriba: no
+                 // hace falta repetirla aquí.
+                 <EmptyState title="Sin resultados" />
+@@ -811,134 +861,12 @@ export default function AdminFlotaScreen() {
+ 
+ const claveDeUnidad = (u: UnidadLista) => u.f.vehicle.id;
+ 
+-/**
+- * Una UNIDAD en la lista.
+- *
+- * Dos líneas de alto fijo. Arriba, lo que identifica —el alias— y lo que le
+- * pasa —una sola pastilla, alineada en todas las filas—. Abajo, el detalle que
+- * sí se puede recortar: placa, área y quién la conduce.
+- *
+- * El alias nunca se corta porque comparte línea solo con la pastilla; cuando
+- * llevaba también la placa y el modelo, un nombre normal ya se quedaba en
+- * «Unida…».
+- *
+- * Con `memo` y solo valores sueltos: el refresco de posiciones rehace los
+- * objetos de toda la flota cada veinte segundos, y así solo se repinta la fila
+- * a la que de verdad le cambió algo.
+- */
+-const FilaUnidad = memo(function FilaUnidad({
+-  id,
+-  alias,
+-  placa,
+-  tipo,
+-  conductor,
+-  area,
+-  color,
+-  novedadTono,
+-  novedadLabel,
+-  novedadLatiendo,
+-  primera,
+-  ultima,
+-  indiceTramo,
+-  resaltada,
+-  onPress,
+-}: {
+-  id: string;
+-  alias: string;
+-  placa: string;
+-  tipo: VehicleType | undefined;
+-  conductor: string | null | undefined;
+-  area: string;
+-  /** El color de su área: el mismo con el que se pinta su punto en el mapa. */
+-  color: string;
+-  /** Su peor novedad, en piezas sueltas para que `memo` pueda compararlas. */
+-  novedadTono: Novedad['tono'] | undefined;
+-  novedadLabel: string | undefined;
+-  novedadLatiendo: boolean | undefined;
+-  primera: boolean;
+-  ultima: boolean;
+-  /** El tramo en el que va: entra con él, en su mismo escalón. */
+-  indiceTramo: number;
+-  /** Su punto está tocado en el mapa: se destaca. */
+-  resaltada: boolean;
+-  onPress: (id: string) => void;
+-}) {
+-  const { colors, spacing, radii } = useTheme();
+-  const detalle = [placa, area].filter(Boolean).join(' · ');
+-
+-  // Al tocar un punto, la fila solo se destaca: el mapa va en el mismo scroll,
+-  // y bajar hasta ella escondería la ficha flotante que se acaba de abrir.
+-
+-  return (
+-    <Escalonado grupo="lista" indice={4 + indiceTramo}>
+-    <CeldaTarjeta primera={primera} ultima={ultima}>
+-    <PressableScale
+-      onPress={() => onPress(id)}
+-      accessibilityRole="button"
+-      accessibilityLabel={novedadLabel ? `${alias}, ${placa}, ${novedadLabel}` : `${alias}, ${placa}`}>
+-      <View
+-        style={[
+-          styles.fila,
+-          {
+-            paddingHorizontal: spacing.lg,
+-            gap: spacing.md,
+-            borderTopWidth: primera ? 0 : StyleSheet.hairlineWidth,
+-            borderTopColor: colors.border,
+-            backgroundColor: resaltada ? tinte(color, 0.08) : 'transparent',
+-          },
+-        ]}>
+-        {/* EL RETRATO de la unidad: la silueta de su tipo sobre el color de su
+-            ÁREA. El color dice de quién ES —lo mismo que su punto en el mapa—,
+-            no cómo está: el estado ya lo dicen el tramo y la pastilla, y
+-            teñirlo también aquí sería la tercera vez que se cuenta lo mismo. */}
+-        <View style={[styles.retrato, { backgroundColor: tinte(color, 0.12), borderRadius: radii.md }]}>
+-          <VehiculoIlustracion tipo={tipo} color={colors.textMuted} ancho={52} />
+-        </View>
+-
+-        <View style={styles.flex1}>
+-          {/* El código manda: nunca cede. Si el aviso es largo («Responsabilidad
+-              civil (RCV) vencido»), el que se recorta es el aviso. */}
+-          <View style={[styles.row, { gap: spacing.sm }]}>
+-            <ThemedText variant="button" numberOfLines={1} style={styles.codigo}>
+-              {alias}
+-            </ThemedText>
+-            {novedadTono && novedadLabel ? (
+-              <Pastilla tono={novedadTono} label={novedadLabel} conPunto latiendo={novedadLatiendo} encoge />
+-            ) : null}
+-          </View>
+-          {/* EL CONDUCTOR ASIGNADO, delante y con su ícono: es lo primero que
+-              se pregunta de una unidad. Sin titular lo dice igual —la línea no
+-              se esconde—, en neutro. */}
+-          <View style={[styles.row, styles.detalle, { gap: spacing.xs }]}>
+-            <TabIcon name="personal" color={colors.textMuted} size={12} />
+-            <ThemedText
+-              variant="caption"
+-              color={conductor ? 'textSecondary' : 'textMuted'}
+-              numberOfLines={1}
+-              style={styles.flex1}>
+-              {[conductor ?? 'Sin conductor', detalle].filter(Boolean).join(' · ')}
+-            </ThemedText>
+-          </View>
+-        </View>
+-      </View>
+-    </PressableScale>
+-    </CeldaTarjeta>
+-    </Escalonado>
+-  );
+-});
+-
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+   safeArea: { flex: 1 },
+   content: { width: '100%', maxWidth: 900, alignSelf: 'center', paddingBottom: 24 },
+   row: { flexDirection: 'row', alignItems: 'center' },
+-  fila: { flexDirection: 'row', alignItems: 'center', height: FILA_ALTO },
+-  retrato: { width: 60, height: 46, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+-  detalle: { marginTop: 3 },
+   flex1: { flex: 1, minWidth: 0 },
+-  // Crece para empujar la pastilla a la derecha y no se encoge por ella; un
+-  // alias muy largo se corta en su tope, no se come la fila.
+-  codigo: { flexGrow: 1, flexShrink: 0, maxWidth: '65%' },
+ 
+   // ── Mapa ──
+   // Una tarjeta grande y redonda, como el mapa del panel web.
+diff --git a/src/app/panel/index.tsx b/src/app/panel/index.tsx
+index 6c8cabc..af8c4f3 100644
+--- a/src/app/panel/index.tsx
++++ b/src/app/panel/index.tsx
+@@ -39,6 +39,7 @@ import { ThemedView } from '@/components/themed-view';
+ import { VehiculoRetrato } from '@/components/vehiculo-retrato';
+ import { useAsyncData } from '@/hooks/use-async-data';
+ import { estadoDeUnidad, transmitiendo, useFlotaFom, type EstadoUnidad, type UnidadFom } from '@/hooks/use-flota-fom';
++import { useFotoPropia } from '@/hooks/use-foto-vehiculo';
+ import { GRACIA_ESQUELETO, useRefrescoVivo, useTardando } from '@/hooks/use-refresco';
+ import { useReloj } from '@/hooks/use-reloj';
+ import { coordsEnTexto } from '@/lib/geo';
+@@ -549,6 +550,7 @@ function FichaUnidad({
+ }) {
+   const { colors, borderWidths } = useTheme();
+   const v = x.u.vehicle;
++  const fotoPropia = useFotoPropia(v.id);
+   const pos = x.viva?.pos ?? null;
+   const sinSenal = x.estado === 'sin-senal';
+   const estado: { texto: string; tono: keyof ColorTokens } = sinSenal
+@@ -587,7 +589,9 @@ function FichaUnidad({
+         <View style={[styles.retrato, { borderColor: colors.border, borderWidth: borderWidths.thin }]}>
+           <VehiculoRetrato vehicle={v} enMarcha={x.estado === 'marcha'} alto={150} />
+         </View>
+-        <ThemedText style={[styles.chico, { color: colors.textSecondary }]}>Imagen de referencia</ThemedText>
++        <ThemedText style={[styles.chico, { color: colors.textSecondary }]}>
++          {fotoPropia.tipo ? 'Foto de la unidad' : 'Imagen de referencia'}
++        </ThemedText>
+       </View>
+ 
+       <View style={styles.velocidad}>
+diff --git a/src/app/unidad.tsx b/src/app/unidad.tsx
+index 3bff921..6b4d89e 100644
+--- a/src/app/unidad.tsx
++++ b/src/app/unidad.tsx
+@@ -11,22 +11,22 @@ import {
+ import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ import { esAdmin, esMultiempresa, useAuth } from '@/auth';
+-import { idDeUnidad, identidadDeUnidad } from '@/lib/vehiculos';
++import { etiquetaCortaDeUnidad, idDeUnidad, identidadDeUnidad } from '@/lib/vehiculos';
++import { HAY_MAPBOX } from '@/lib/mapbox';
++import { horaCorta } from '@/lib/recorrido';
+ import { confirmar } from '@/lib/confirmar';
+ import { Button } from '@/components/button';
+ import { Chip } from '@/components/chip';
+ import { ErrorState } from '@/components/error-state';
+ import { FichaUnidadCostos } from '@/components/ficha-unidad-costos';
+-import { FichaUnidadEncabezado } from '@/components/ficha-unidad-encabezado';
+ import {
+-  CifrasFicha,
+   DatosFicha,
+   EnlaceSeccion,
+   PartesFicha,
+   SeccionFicha,
+-  type CifraFicha,
+   type ParteFicha,
+ } from '@/components/ficha-unidad-piezas';
++import { FranjaFicha, UbicacionUnidad, type CasillaFicha, type EstadoUbicacion } from '@/components/ficha-unidad-vista';
+ import { FilaMenu } from '@/components/fila-menu';
+ import { FilaManejo } from '@/components/manejo-conductor';
+ import { FilaPlegable } from '@/components/fila-plegable';
+@@ -39,6 +39,9 @@ import { Toast } from '@/components/toast';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { useAsyncData } from '@/hooks/use-async-data';
++import { transmitiendo } from '@/hooks/use-flota-fom';
++import { useRecorridoHoy } from '@/hooks/use-recorrido-hoy';
++import { useRefrescoVivo } from '@/hooks/use-refresco';
+ import { OTStatusBadge } from '@/components/ot-status-badge';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { TabIcon } from '@/components/tab-icon';
+@@ -209,6 +212,8 @@ export default function UnidadScreen() {
+         gps,
+         areas,
+         conductores,
++        posicion,
++        leida: Date.now(),
+         // Cómo está ahora: con su propia posición.
+         vivo: posicion
+           ? {
+@@ -270,6 +275,22 @@ export default function UnidadScreen() {
+     return items.filter((c) => c.vehicleId === vehicleId);
+   }, [cid, vehicleId, segundaOla]);
+ 
++  /**
++   * DÓNDE ESTÁ AHORA (T-190): su posición se relee sola mientras se mira la
++   * ficha, con la hora de la lectura para juzgar si calla. La primera sale de la
++   * misma tanda que la unidad (`data.posicion`).
++   */
++  const { data: viva, recargar: releerPosicion } = useAsyncData(async () => {
++    const pos = await getPosicionVehiculo(vehicleId);
++    return { vehicleId, pos, leida: Date.now() };
++  }, [vehicleId]);
++  useRefrescoVivo(releerPosicion);
++  const vivaActual = viva && viva.vehicleId === vehicleId ? viva : null;
++  const pos = vivaActual ? vivaActual.pos : (data?.posicion ?? null);
++  const leida = vivaActual?.leida ?? data?.leida ?? 0;
++  /** Lo de hoy: km, tiempo en marcha y la línea de sus últimos minutos. */
++  const hoy = useRecorridoHoy(vehicleId || null, pos);
++
+   /**
+    * El personal de la empresa, SOLO cuando se va a elegir a alguien: al tocar
+    * el titular o al abrir los secundarios. Es una lectura entera de la empresa
+@@ -402,12 +423,6 @@ export default function UnidadScreen() {
+     : v
+       ? juntar(v.marca, v.modelo) || 'Unidad'
+       : 'Unidad';
+-  const bajada = v ? juntar(`${v.marca ?? ''} ${v.modelo ?? ''}`.trim(), v.anio, v.placa) : '';
+-  const estadoAhora = data?.vivo
+-    ? data.vivo.estado === 'en_marcha'
+-      ? { label: 'En marcha', tono: 'success' as const }
+-      : { label: 'Detenida', tono: 'textSecondary' as const }
+-    : null;
+   const odtAbiertas = (data?.odts ?? []).filter((o) => o.estado === 'abierta').length;
+   const odtEnRevision = (data?.odts ?? []).filter((o) => o.estado === 'en_revision').length;
+   const eventos =
+@@ -415,40 +430,64 @@ export default function UnidadScreen() {
+   // Las métricas llegan en la segunda ola: mientras tanto, puntos suspensivos
+   // y no un 0 que se leería como dato.
+   const sinMetricas = !extra;
+-  const cifras: CifraFicha[] = [
++
++  // ── Dónde está y cómo está ahora ──
++  const velocidad = Math.round(pos?.velocidadKmh ?? 0);
++  const estadoUbicacion: EstadoUbicacion = !pos
++    ? null
++    : !transmitiendo(pos, leida)
++      ? 'sin-senal'
++      : velocidad > EN_MARCHA_KMH
++        ? 'marcha'
++        : 'detenido';
++  const horaPos = pos ? (pos.reportadaEn ?? pos.recibidaEn) : null;
++  const numero = v ? etiquetaCortaDeUnidad(v) : '';
++  const tituloFranja = v ? juntar(`${v.marca ?? ''} ${v.modelo ?? ''}`.trim(), v.anio) : '';
++  const identidad = v ? juntar(numero, v.placa && v.placa !== numero ? v.placa : null) : '';
++
++  /** El mapa completo con esta unidad tocada (su tarjeta trae Llegada y el manejo brusco). */
++  function abrirEnMapa(extra: Record<string, string> = {}) {
++    router.navigate({ pathname: '/mapa-flota' as never, params: { unidad: vehicleId, ...extra } } as never);
++  }
++  function verRecorrido() {
++    router.navigate({ pathname: '/mapa-flota', params: { recorrido: vehicleId, nombre: titulo, companyId: cid } });
++  }
++
++  // Las cuatro cifras de la web, en la hoja bajo la foto. Tocar una lleva a su sección.
++  const casillas: CasillaFicha[] = [
+     {
++      icono: 'odo',
+       label: 'Kilometraje',
+-      valor: v?.odometroKm != null ? `${miles(Math.round(v.odometroKm))} km` : 'Sin dato',
+-      nota: v?.odometroKm != null ? 'Odómetro registrado.' : 'Sin odómetro registrado.',
+-      icono: 'camion',
+-      tono: 'primary',
+-      apagada: v?.odometroKm == null,
++      valor: v?.odometroKm != null ? miles(Math.round(v.odometroKm)) : '—',
++      unidad: v?.odometroKm != null ? 'km' : undefined,
++      nota: v?.odometroKm != null ? 'Odómetro registrado' : 'Sin odómetro registrado',
++      onPress: () => irA('ficha'),
+     },
+     {
+-      label: 'Índice seguro',
+-      valor: sinMetricas ? '…' : String(metricas?.indiceSeguro ?? 0),
+-      nota: 'Manejo seguro sobre 100',
+       icono: 'escudo',
+-      tono: metricas ? TONO_INDICE[metricas.rango] : 'textMuted',
+-      // Sin kilómetros no hay nota que dar: el número va en gris. Un 0 en
+-      // negro se lee como «maneja pésimo» cuando lo que pasa es que no salió.
+-      apagada: sinMetricas || (metricas?.km ?? 0) <= 0,
++      label: 'Índice seguro',
++      valor: sinMetricas ? '…' : (metricas?.km ?? 0) > 0 ? String(metricas?.indiceSeguro ?? 0) : '—',
++      unidad: !sinMetricas && (metricas?.km ?? 0) > 0 ? '/100' : undefined,
++      nota: 'Manejo de este mes',
++      // Sin kilómetros no hay nota que dar: un 0 se leería como «maneja pésimo».
++      tono: metricas && (metricas.km ?? 0) > 0 ? TONO_INDICE[metricas.rango] : undefined,
++      onPress: () => irA('telemetria'),
+     },
+     {
++      icono: 'llave',
+       label: 'ODT abiertas',
+       valor: String(odtAbiertas),
+       nota: `${odtEnRevision} en revisión`,
+-      icono: 'llave',
+-      tono: odtAbiertas > 0 ? 'warning' : 'success',
++      tono: odtAbiertas > 0 ? 'warning' : undefined,
++      onPress: () => irA('mantenimiento'),
+     },
+     {
+-      label: 'Eventos de manejo',
++      icono: 'alerta',
++      label: 'Manejo brusco',
+       valor: sinMetricas ? '…' : String(eventos),
+-      // Las métricas son las del mes en curso (la web cuenta 28 días).
+-      nota: 'Este mes',
+-      icono: 'velocimetro',
+-      tono: eventos > 6 ? 'danger' : 'primary',
+-      apagada: sinMetricas,
++      nota: 'Eventos este mes',
++      tono: eventos > 6 ? 'danger' : undefined,
++      onPress: () => irA('telemetria'),
+     },
+   ];
+ 
+@@ -497,16 +536,36 @@ export default function UnidadScreen() {
+             }}
+             scrollEventThrottle={64}
+             contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: spacing.md, gap: spacing.md }]}>
+-            {/* ── RESUMEN: cabeza y las cuatro cifras de la web ── */}
+-            <FichaUnidadEncabezado
+-              vehiculo={v}
+-              titulo={titulo}
+-              bajada={bajada}
+-              estado={estadoAhora}
+-              tipo={v.tipo ? TIPO_LABEL[v.tipo] : null}
++            {/* ── DÓNDE ESTÁ: el mapa con su línea de los últimos minutos (T-190) ── */}
++            <UbicacionUnidad
++              id={vehicleId}
++              numero={numero}
++              placa={v.placa ?? ''}
++              pos={pos ? { lat: pos.lat, lng: pos.lng } : null}
++              rumbo={pos?.rumbo ?? null}
++              cola={hoy.cola}
++              estado={estadoUbicacion}
++              ultimoReporte={pos?.recibidaEn ?? null}
++              zona={areaActual?.nombre ?? null}
++              hora={horaPos ? horaCorta(horaPos) : null}
++              onMapa={() => abrirEnMapa()}
++              onRecorrido={verRecorrido}
++              onManejo={() => abrirEnMapa({ eventos: '1' })}
++              onLlegada={HAY_MAPBOX ? () => abrirEnMapa() : undefined}
+             />
+ 
+-            <CifrasFicha items={cifras} />
++            {/* ── LA UNIDAD: franja oscura, foto montada y sus cuatro cifras ── */}
++            <FranjaFicha
++              vehicle={v}
++              titulo={tituloFranja || titulo}
++              identidad={identidad}
++              tipo={v.tipo ? TIPO_LABEL[v.tipo] : null}
++              velocidad={velocidad}
++              estado={estadoUbicacion}
++              km={hoy.km}
++              minutos={hoy.minutos}
++              casillas={casillas}
++            />
+ 
+             <View
+               onLayout={(e) => {
+@@ -515,27 +574,17 @@ export default function UnidadScreen() {
+               <PartesFicha activa={parte} onElegir={irA} />
+             </View>
+ 
+-            {/* Recorrido del día: en el teléfono, el mapa completo de la flota
+-                con su recorrido, en vez de un mapa chico más que cargar aquí. */}
+-            <SeccionFicha
+-              titulo="Recorrido del día"
+-              derecha={
+-                <EnlaceSeccion
+-                  label="Ver en el mapa"
+-                  onPress={() =>
+-                    router.navigate({
+-                      pathname: '/mapa-flota',
+-                      params: { recorrido: vehicleId, nombre: titulo, companyId: cid },
+-                    })
+-                  }
+-                />
+-              }>
++            {/* ── RECORRIDO: lo de hoy, en palabras, y el día entero en el mapa ── */}
++            <SeccionFicha titulo="Recorrido" derecha={<EnlaceSeccion label="Ver recorrido" onPress={verRecorrido} />}>
+               <ThemedText style={styles.texto} color="textSecondary">
+-                {data.vivo
+-                  ? data.vivo.estado === 'en_marcha'
+-                    ? `En marcha a ${data.vivo.velocidadKmh} km/h.`
+-                    : 'Detenida ahora.'
+-                  : 'Sin posición del GPS por ahora.'}
++                {hoy.km == null && hoy.minutos == null
++                  ? estadoUbicacion
++                    ? 'Todavía no hay recorrido de hoy.'
++                    : 'Sin posición del GPS por ahora.'
++                  : `Hoy lleva ${hoy.km == null ? '—' : `${miles(hoy.km, 1)} km`} en ${
++                      hoy.minutos == null ? '—' : duracionCorta(hoy.minutos)
++                    } de marcha.`}
++                {horaPos ? ` Última posición a las ${horaCorta(horaPos)}.` : ''}
+               </ThemedText>
+             </SeccionFicha>
+ 
+@@ -580,9 +629,6 @@ export default function UnidadScreen() {
+                       k: 'Velocidad máxima',
+                       v: metricas?.velocidadMax != null ? `${Math.round(metricas.velocidadMax)} km/h` : 'Sin dato',
+                     },
+-                    { k: 'Excesos de velocidad', v: String(metricas?.excesosVelocidad ?? 0) },
+-                    { k: 'Frenadas bruscas', v: String(metricas?.frenadasBruscas ?? 0) },
+-                    { k: 'Aceleraciones bruscas', v: String(metricas?.aceleracionesBruscas ?? 0) },
+                   ]}
+                 />
+               )}
+@@ -598,6 +644,26 @@ export default function UnidadScreen() {
+               ) : null}
+             </SeccionFicha>
+ 
++            {/* ── MANEJO BRUSCO del mes: lo que se cuenta, y en el mapa dónde pasó ── */}
++            <SeccionFicha
++              titulo="Manejo brusco"
++              derecha={<EnlaceSeccion label="Ver en el mapa" onPress={() => abrirEnMapa({ eventos: '1' })} />}>
++              {sinMetricas ? (
++                <ThemedText style={styles.texto} color="textMuted">
++                  Cargando los eventos del mes…
++                </ThemedText>
++              ) : (
++                <DatosFicha
++                  columnas={1}
++                  datos={[
++                    { k: 'Excesos de velocidad', v: String(metricas?.excesosVelocidad ?? 0) },
++                    { k: 'Frenadas bruscas', v: String(metricas?.frenadasBruscas ?? 0) },
++                    { k: 'Aceleraciones bruscas', v: String(metricas?.aceleracionesBruscas ?? 0) },
++                  ]}
++                />
++              )}
++            </SeccionFicha>
++
+             {/* ── USUARIOS: quién la maneja y dónde ────────────────────────
+                 Tres filas de la misma pieza —la gramática del resto de la
+                 app— y cada una dice su valor sin abrirse. ── */}
+@@ -898,6 +964,15 @@ export default function UnidadScreen() {
+   );
+ }
+ 
++/** «45 min», «1 h 18 min», «2 h». */
++function duracionCorta(minutos: number): string {
++  const m = Math.round(minutos);
++  if (m < 60) return `${m} min`;
++  const h = Math.floor(m / 60);
++  const r = m % 60;
++  return r ? `${h} h ${r} min` : `${h} h`;
++}
++
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+   safeArea: { flex: 1 },
+diff --git a/src/app/unidades-mantenimiento.tsx b/src/app/unidades-mantenimiento.tsx
+index fb14f93..50902bd 100644
+--- a/src/app/unidades-mantenimiento.tsx
++++ b/src/app/unidades-mantenimiento.tsx
+@@ -8,6 +8,7 @@ import { BuscadorFiltros } from '@/components/buscador-filtros';
+ import { Card } from '@/components/card';
+ import { EncabezadoGrupo } from '@/components/encabezado-grupo';
+ import { ErrorState } from '@/components/error-state';
++import { FotoVehiculo } from '@/components/foto-vehiculo';
+ import { Insignia } from '@/components/insignia';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { Relevo } from '@/components/relevo';
+@@ -20,6 +21,7 @@ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { VehiculoIlustracion } from '@/components/vehiculo-ilustracion';
+ import { useAsyncData } from '@/hooks/use-async-data';
++import { useFotoPropia } from '@/hooks/use-foto-vehiculo';
+ import { GRACIA_ESQUELETO, useTardando } from '@/hooks/use-refresco';
+ import { tinte } from '@/lib/color';
+ import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
+@@ -243,6 +245,7 @@ function FilaEstadoUnidad({
+ }) {
+   const { colors, spacing, radii, borderWidths } = useTheme();
+   const alias = nombreDe(f);
++  const foto = useFotoPropia(f.vehicle.id);
+   const detalle = [f.vehicle.placa, area].filter(Boolean).join(' · ');
+   return (
+     <PressableScale
+@@ -262,7 +265,12 @@ function FilaEstadoUnidad({
+           },
+         ]}>
+         <View style={[styles.retrato, { backgroundColor: tinte(color ?? colors.textMuted, 0.12), borderRadius: radii.md }]}>
+-          <VehiculoIlustracion tipo={f.vehicle.tipo} color={colors.textMuted} ancho={52} />
++          <FotoVehiculo
++            foto={foto}
++            ancho={60}
++            alto={46}
++            respaldo={<VehiculoIlustracion tipo={f.vehicle.tipo} color={colors.textMuted} ancho={52} />}
++          />
+         </View>
+         <View style={[styles.flex1, { gap: 3 }]}>
+           <ThemedText variant="button" numberOfLines={1}>
+diff --git a/src/components/app-tab-bar.tsx b/src/components/app-tab-bar.tsx
+index fcb18d5..a10ce7f 100644
+--- a/src/components/app-tab-bar.tsx
++++ b/src/components/app-tab-bar.tsx
+@@ -2,12 +2,15 @@ import type { BottomTabBarProps } from 'expo-router/js-tabs';
+ import { useCallback, useState } from 'react';
+ import { StyleSheet, useWindowDimensions, View } from 'react-native';
+ import Animated, {
++  ReduceMotion,
+   runOnJS,
+   useAnimatedProps,
+   useAnimatedReaction,
+   useDerivedValue,
+   useFrameCallback,
+   useSharedValue,
++  withSequence,
++  withTiming,
+ } from 'react-native-reanimated';
+ import { useSafeAreaInsets } from 'react-native-safe-area-context';
+ import Svg, { Rect } from 'react-native-svg';
+@@ -15,7 +18,7 @@ import Svg, { Rect } from 'react-native-svg';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { FondoGlass } from '@/components/screen-background';
+ import { ThemedText } from '@/components/themed-text';
+-import { useReducedMotion, useTheme } from '@/theme';
++import { curvasUI, DURACION, useReducedMotion, useTheme } from '@/theme';
+ 
+ /**
+  * EL DOCK: la barra de pestañas de toda la app.
+@@ -115,6 +118,8 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab }: Bottom
+   const llegadas = useSharedValue(0);
+   /** El destino del viaje en curso: si cambia, empieza uno nuevo. */
+   const anterior = useSharedValue(-1);
++  /** Solo con «reducir movimiento»: la píldora no viaja, se funde en su sitio nuevo. */
++  const opacidad = useSharedValue(1);
+ 
+   /** A dónde va la píldora. Sale de la pestaña activa, sin pasar por React. */
+   const destino = useDerivedValue(() => state.index + 0.5, [state.index]);
+@@ -182,7 +187,17 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab }: Bottom
+   useAnimatedReaction(
+     () => destino.value,
+     (ahora, antes) => {
+-      if (antes !== null && ahora !== antes) runOnJS(encender)();
++      if (antes === null || ahora === antes) return;
++      runOnJS(encender)();
++      // Sin desplazamiento no hay nada que ver: se apaga y se vuelve a encender
++      // en la pestaña nueva. `ReduceMotion.Never`: si no, Reanimated, al ver el
++      // ajuste del sistema, saltaría al final sin animar y volveríamos a lo mismo.
++      if (sinMovimiento.value === 1) {
++        opacidad.value = withSequence(
++          withTiming(0, { duration: 0, reduceMotion: ReduceMotion.Never }),
++          withTiming(1, { duration: DURACION.normal, easing: curvasUI.salida, reduceMotion: ReduceMotion.Never }),
++        );
++      }
+     },
+     [encender],
+   );
+@@ -196,7 +211,10 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab }: Bottom
+     [apagar],
+   );
+ 
+-  const pildora = useAnimatedProps(() => figura(cabeza.value, cola.value, anchoTab, radio));
++  const pildora = useAnimatedProps(() => ({
++    ...figura(cabeza.value, cola.value, anchoTab, radio),
++    opacity: opacidad.value,
++  }));
+ 
+   return (
+     <View
+diff --git a/src/components/ficha-unidad-encabezado.tsx b/src/components/ficha-unidad-encabezado.tsx
+index 25b29da..aad1df8 100644
+--- a/src/components/ficha-unidad-encabezado.tsx
++++ b/src/components/ficha-unidad-encabezado.tsx
+@@ -3,8 +3,10 @@ import { StyleSheet, View } from 'react-native';
+ 
+ import { arteDeVehiculo } from '@/components/arte-vehiculos';
+ import { Chip } from '@/components/chip';
++import { FotoVehiculo } from '@/components/foto-vehiculo';
+ import { TabIcon } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
++import { useFotoPropia } from '@/hooks/use-foto-vehiculo';
+ import { useTheme, type ColorTokens } from '@/theme';
+ import type { Vehicle } from '@/types';
+ 
+@@ -12,8 +14,9 @@ import type { Vehicle } from '@/types';
+  * Cabeza de la ficha, como la de la web: la foto, «Unidad NN», marca · modelo
+  * · año · placa, y debajo cómo está ahora y qué tipo es.
+  *
+- * Las unidades no tienen foto propia en la app: va el render del modelo si lo
+- * hay, y si no el recuadro «Sin foto» de la web. Nunca un hueco vacío.
++ * La foto sale con la regla de la web: el recorte sin fondo de su foto actual, su
++ * foto propia, el render del modelo si lo hay y, si no, el recuadro «Sin foto».
++ * Nunca un hueco vacío.
+  */
+ export function FichaUnidadEncabezado({
+   vehiculo,
+@@ -22,7 +25,7 @@ export function FichaUnidadEncabezado({
+   estado,
+   tipo,
+ }: {
+-  vehiculo: Pick<Vehicle, 'marca' | 'modelo' | 'anio'>;
++  vehiculo: Pick<Vehicle, 'id' | 'marca' | 'modelo' | 'anio'>;
+   titulo: string;
+   bajada: string;
+   /** Cómo está ahora. `null` si no hay posición: no se adivina. */
+@@ -32,28 +35,31 @@ export function FichaUnidadEncabezado({
+ }) {
+   const { colors, spacing } = useTheme();
+   const arte = arteDeVehiculo(vehiculo);
++  const propia = useFotoPropia(vehiculo.id);
++  // Sin marca o modelo no se lee «undefined»: se dice lo que hay.
++  const nombre = [vehiculo.marca, vehiculo.modelo].filter(Boolean).join(' ');
++  const respaldo = arte ? (
++    <Image source={arte} style={styles.arte} contentFit="contain" accessibilityLabel={nombre || 'Imagen de la unidad'} />
++  ) : (
++    <>
++      <TabIcon name="flota" color={colors.textMuted} size={24} />
++      <ThemedText style={styles.sinFoto} color="textMuted">
++        Sin foto
++      </ThemedText>
++    </>
++  );
+ 
+   return (
+     <View style={[styles.fila, { gap: spacing.md + 2 }]}>
+       <View style={[styles.foto, { backgroundColor: colors.surfaceSunken, borderColor: colors.border }]}>
+-        {arte ? (
+-          <Image
+-            source={arte}
+-            style={styles.arte}
+-            contentFit="contain"
+-            // Sin marca o modelo no se lee «undefined»: se dice lo que hay.
+-            accessibilityLabel={
+-              [vehiculo.marca, vehiculo.modelo].filter(Boolean).join(' ') || 'Imagen de la unidad'
+-            }
+-          />
+-        ) : (
+-          <>
+-            <TabIcon name="flota" color={colors.textMuted} size={24} />
+-            <ThemedText style={styles.sinFoto} color="textMuted">
+-              Sin foto
+-            </ThemedText>
+-          </>
+-        )}
++        <FotoVehiculo
++          foto={propia}
++          // El borde de 1 px se come 2 de los 72.
++          ancho={propia.tipo === 'recorte' ? 66 : 70}
++          alto={propia.tipo === 'recorte' ? 52 : 70}
++          etiqueta={`Foto de ${nombre || 'la unidad'}`}
++          respaldo={respaldo}
++        />
+       </View>
+       <View style={[styles.textos, { gap: spacing.xs }]}>
+         <ThemedText style={styles.titulo} accessibilityRole="header" numberOfLines={1}>
+diff --git a/src/components/ficha-unidad-vista.tsx b/src/components/ficha-unidad-vista.tsx
+new file mode 100644
+index 0000000..8bf4656
+--- /dev/null
++++ b/src/components/ficha-unidad-vista.tsx
+@@ -0,0 +1,587 @@
++import { LinearGradient } from 'expo-linear-gradient';
++import type { ReactNode } from 'react';
++import { StyleSheet, View } from 'react-native';
++import Svg, { Circle, Path } from 'react-native-svg';
++
++import { FotoSinFondo } from '@/components/foto-sin-fondo';
++import { MapaVehiculo } from '@/components/map-vehiculo';
++import { PressableScale } from '@/components/pressable-scale';
++import { PulseDot } from '@/components/pulse-dot';
++import { TextoVivo } from '@/components/texto-vivo';
++import { ThemedText } from '@/components/themed-text';
++import { useFotoPropia } from '@/hooks/use-foto-vehiculo';
++import { textoSinSenal } from '@/lib/sin-senal';
++import { useTheme, type ColorTokens } from '@/theme';
++import type { LatLng, MapMarker, Vehicle } from '@/types';
++import { miles } from '@/utils/numero';
++
++/*
++ * LA CABEZA DE LA FICHA DE UNA UNIDAD (T-190), con el estilo aprobado de «Mi
++ * unidad»: arriba DÓNDE ESTÁ (el mapa con la unidad y la línea azul de sus
++ * últimos minutos, la zona, las coordenadas y la hora, y las acciones del mapa);
++ * debajo la franja oscura con la unidad, su velocidad y lo de hoy, la foto sin
++ * fondo montada entre la franja y la hoja, y en la hoja sus cuatro cifras.
++ * La web tiene lo mismo en `src/panel/modulos/FichaUnidadMovil.jsx`.
++ */
++
++/** La franja va SIEMPRE oscura, en los dos temas: es el escaparate de la foto (como Mi unidad). */
++const FRANJA_COLORES = ['#06090D', '#080B10'] as const;
++const FRANJA_BORDE = '#1F2732';
++const FRANJA_TEXTO = '#F3F5F8';
++const FRANJA_TEXTO_2 = '#ABB3BF';
++const FRANJA_TEXTO_3 = '#8C97A7';
++/** Alto de la franja; la hoja se monta sobre sus últimos `SOLAPE` px. */
++const ALTO_FRANJA = 176;
++const SOLAPE = 44;
++/** El lienzo 8:5 de la foto sin fondo: con 182 de ancho la unidad mide ~145 y no pisa las cifras de hoy. */
++const FOTO_ANCHO = 182;
++const FOTO_ANCHO_CON_FONDO = 150;
++/** Alto del mapa de la ubicación. */
++const ALTO_MAPA = 230;
++
++// ── Íconos (trazos de 24×24, los de la maqueta de Mi unidad) ────────────────
++
++type NombreIcono = 'camion' | 'pin' | 'odo' | 'escudo' | 'llave' | 'alerta' | 'ruta' | 'manejo' | 'bandera' | 'ampliar';
++
++const TRAZOS: Record<NombreIcono, ReactNode> = {
++  camion: (
++    <>
++      <Path d="M3 6h11v10H3z" />
++      <Path d="M14 9h4l3 3v4h-7" />
++      <Circle cx={7} cy={17.5} r={1.8} />
++      <Circle cx={17} cy={17.5} r={1.8} />
++    </>
++  ),
++  pin: (
++    <>
++      <Path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" />
++      <Circle cx={12} cy={9.5} r={2.5} />
++    </>
++  ),
++  odo: (
++    <>
++      <Path d="M4 17a8 8 0 1 1 16 0" />
++      <Path d="M12 17l4-5" />
++      <Circle cx={12} cy={17} r={1.2} />
++    </>
++  ),
++  escudo: (
++    <>
++      <Path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z" />
++      <Path d="M9 12l2 2 4-4" />
++    </>
++  ),
++  llave: (
++    <Path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
++  ),
++  alerta: (
++    <>
++      <Path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
++      <Path d="M12 9v4" />
++      <Path d="M12 17h.01" />
++    </>
++  ),
++  ruta: (
++    <>
++      <Circle cx={6} cy={19} r={2} />
++      <Circle cx={18} cy={5} r={2} />
++      <Path d="M8 19h8.5a3.5 3.5 0 0 0 0-7h-9a3.5 3.5 0 0 1 0-7H16" />
++    </>
++  ),
++  manejo: (
++    <>
++      <Path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
++      <Path d="M12 12l4-3" />
++      <Path d="M12 12h.01" />
++    </>
++  ),
++  bandera: (
++    <>
++      <Path d="M4 21V4" />
++      <Path d="M4 4h12l-2 4 2 4H4" />
++    </>
++  ),
++  ampliar: (
++    <>
++      <Path d="M8 3H5a2 2 0 0 0-2 2v3" />
++      <Path d="M16 3h3a2 2 0 0 1 2 2v3" />
++      <Path d="M8 21H5a2 2 0 0 1-2-2v-3" />
++      <Path d="M16 21h3a2 2 0 0 0 2-2v-3" />
++    </>
++  ),
++};
++
++function Icono({ nombre, color, tam = 20, grosor = 1.9 }: { nombre: NombreIcono; color: string; tam?: number; grosor?: number }) {
++  return (
++    <Svg width={tam} height={tam} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={grosor} strokeLinecap="round" strokeLinejoin="round">
++      {TRAZOS[nombre]}
++    </Svg>
++  );
++}
++
++/** Color de la velocidad: parada gris, normal verde, rápido ámbar, excesivo rojo (como Mi unidad). */
++function tonoVelocidad(kmh: number): keyof ColorTokens {
++  if (kmh <= 0) return 'textMuted';
++  if (kmh >= 100) return 'danger';
++  if (kmh >= 80) return 'warning';
++  return 'success';
++}
++
++/** Cómo está la unidad ahora. `null`: el GPS no dio su posición. */
++export type EstadoUbicacion = 'marcha' | 'detenido' | 'sin-senal' | null;
++
++// ── Dónde está ──────────────────────────────────────────────────────────────
++
++/**
++ * LA UBICACIÓN, arriba de todo: el mapa (quieto, para que el scroll no lo
++ * arrastre; tocarlo abre el mapa completo) con la unidad y la línea azul de sus
++ * últimos minutos; debajo la zona, las coordenadas y la hora, su estado, y las
++ * acciones de siempre: ver el recorrido, ver el manejo brusco y la llegada.
++ */
++export function UbicacionUnidad({
++  id,
++  numero,
++  placa,
++  pos,
++  rumbo,
++  cola,
++  estado,
++  ultimoReporte,
++  zona,
++  hora,
++  onMapa,
++  onRecorrido,
++  onManejo,
++  onLlegada,
++}: {
++  id: string;
++  numero: string;
++  placa: string;
++  pos: LatLng | null;
++  rumbo: number | null;
++  cola: LatLng[];
++  estado: EstadoUbicacion;
++  ultimoReporte: string | null;
++  zona: string | null;
++  hora: string | null;
++  onMapa: () => void;
++  onRecorrido: () => void;
++  onManejo: () => void;
++  /** Sin Mapbox no hay llegada: el botón no se pinta. */
++  onLlegada?: () => void;
++}) {
++  const { colors, radii } = useTheme();
++  const markers: MapMarker[] = pos
++    ? [
++        {
++          id,
++          label: numero,
++          coords: pos,
++          live: estado !== 'sin-senal',
++          ...(estado === 'marcha' ? { estado: 'marcha' as const } : estado === 'sin-senal' ? { estado: 'sin-senal' as const } : { estado: 'detenido' as const }),
++          rumbo,
++          placa,
++          ultimoReporte,
++          ...(cola.length > 1 ? { estela: cola } : {}),
++        },
++      ]
++    : [];
++  const coordenadas = pos ? `${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}` : '';
++  const detalle = [coordenadas || null, hora].filter(Boolean).join(' · ');
++
++  return (
++    <View style={[styles.tarjeta, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg }]}>
++      <View style={[styles.mapa, { height: ALTO_MAPA, borderTopLeftRadius: radii.lg, borderTopRightRadius: radii.lg }]}>
++        <MapaVehiculo
++          markers={markers}
++          hideOverlays
++          sinUsuario
++          estelaFom
++          encuadreClave={pos ? id : ''}
++          interactivo={false}
++          onMapaPress={onMapa}
++          onMarkerPress={onMapa}
++          style={styles.mapaLleno}
++        />
++        {/* El marcador ya dice quién es y cómo va; sin posición, se dice. */}
++        {!pos ? (
++          <View style={[styles.sinPos, { backgroundColor: 'rgba(20, 26, 34, 0.94)', borderColor: colors.border }]}>
++            <ThemedText style={styles.globoTexto} color="textSecondary">
++              Sin posición del GPS por ahora
++            </ThemedText>
++          </View>
++        ) : null}
++        <PressableScale
++          onPress={onMapa}
++          accessibilityRole="button"
++          accessibilityLabel="Ver en el mapa completo"
++          style={[styles.ampliar, { backgroundColor: 'rgba(20, 26, 34, 0.94)' }]}>
++          <Icono nombre="ampliar" color={colors.text} tam={18} grosor={2} />
++        </PressableScale>
++      </View>
++
++      <View style={styles.cuerpo}>
++        <View style={styles.donde}>
++          <View style={[styles.dondeIco, { backgroundColor: colors.surfaceSunken }]}>
++            <Icono nombre="pin" color={colors.textSecondary} />
++          </View>
++          <View style={styles.encoge}>
++            <ThemedText style={styles.dondeTit} numberOfLines={1}>
++              {zona ?? 'Última ubicación'}
++            </ThemedText>
++            <ThemedText style={[styles.dondeSub, { color: colors.textMuted }]} numberOfLines={1}>
++              {detalle || 'Sin posición todavía'}
++            </ThemedText>
++          </View>
++          <EtiquetaEstado estado={estado} ultimoReporte={ultimoReporte} />
++        </View>
++
++        <View style={styles.acciones}>
++          <PressableScale
++            onPress={onRecorrido}
++            accessibilityRole="button"
++            accessibilityHint="Abre el mapa con su recorrido, viajes y paradas"
++            style={[styles.boton, { backgroundColor: colors.primary }]}>
++            <Icono nombre="ruta" color={colors.onPrimary} tam={17} grosor={2} />
++            <ThemedText style={[styles.botonTexto, { color: colors.onPrimary }]} numberOfLines={1}>
++              Ver recorrido
++            </ThemedText>
++          </PressableScale>
++          <PressableScale
++            onPress={onManejo}
++            accessibilityRole="button"
++            accessibilityHint="Abre el mapa con sus frenadas, aceleraciones y excesos"
++            style={[styles.boton, styles.botonBorde, { borderColor: colors.primary }]}>
++            <Icono nombre="manejo" color={colors.text} tam={17} grosor={2} />
++            <ThemedText style={styles.botonTexto} numberOfLines={2}>
++              Ver manejo brusco
++            </ThemedText>
++          </PressableScale>
++        </View>
++        {onLlegada ? (
++          <PressableScale
++            onPress={onLlegada}
++            accessibilityRole="button"
++            accessibilityHint="Abre el mapa con la unidad para calcular cuánto tarda en llegar a un destino"
++            style={[styles.boton, styles.botonSolo, { backgroundColor: colors.surfaceSunken }]}>
++            <Icono nombre="bandera" color={colors.text} tam={17} grosor={2} />
++            <ThemedText style={styles.botonTexto} numberOfLines={1}>
++              Llegada
++            </ThemedText>
++          </PressableScale>
++        ) : null}
++      </View>
++    </View>
++  );
++}
++
++/** «● En marcha», «● Detenida» o «● Sin señal · hace …», en su color. */
++function EtiquetaEstado({ estado, ultimoReporte }: { estado: EstadoUbicacion; ultimoReporte: string | null }) {
++  const { colors } = useTheme();
++  if (!estado) return null;
++  const tono: keyof ColorTokens = estado === 'marcha' ? 'success' : estado === 'detenido' ? 'warning' : 'textMuted';
++  const fondo = estado === 'marcha' ? colors.successSurface : estado === 'detenido' ? colors.warningSurface : colors.surfaceSunken;
++  return (
++    <View style={[styles.etq, { backgroundColor: fondo }]}>
++      <PulseDot color={colors[tono]} size={7} active={estado === 'marcha'} />
++      {estado === 'sin-senal' ? (
++        <TextoVivo
++          style={[styles.etqTexto, { color: colors[tono] }]}
++          numberOfLines={1}
++          texto={(ahora) => textoSinSenal(ultimoReporte, ahora)}
++        />
++      ) : (
++        <ThemedText style={[styles.etqTexto, { color: colors[tono] }]} numberOfLines={1}>
++          {estado === 'marcha' ? 'En marcha' : 'Detenida'}
++        </ThemedText>
++      )}
++    </View>
++  );
++}
++
++// ── La franja y la hoja ─────────────────────────────────────────────────────
++
++/** Una cifra de la hoja: ícono, número con su unidad, nombre y una nota corta. */
++export type CasillaFicha = {
++  icono: 'odo' | 'escudo' | 'llave' | 'alerta';
++  valor: string;
++  unidad?: string;
++  label: string;
++  nota?: string;
++  tono?: keyof ColorTokens;
++  /** Toca la casilla: lleva a su sección. */
++  onPress?: () => void;
++};
++
++/** «42,6»; sin dato, «—». */
++function textoKm(km: number | null): string {
++  return km == null ? '—' : miles(km, 1);
++}
++
++/** «1 h 18» + «min»; sin dato, «—». */
++function partesTiempo(minutos: number | null): { cifra: string; unidad: string } {
++  if (minutos == null) return { cifra: '—', unidad: '' };
++  const m = Math.round(minutos);
++  if (m < 60) return { cifra: String(m), unidad: 'min' };
++  const h = Math.floor(m / 60);
++  const r = m % 60;
++  return r ? { cifra: `${h} h ${r}`, unidad: 'min' } : { cifra: String(h), unidad: 'h' };
++}
++
++/**
++ * LA FRANJA oscura con la foto montada y, debajo, la hoja con las cuatro cifras.
++ * Es la misma composición que Mi unidad del conductor: la foto sin fondo se sale
++ * de la franja y apoya las ruedas en la hoja.
++ */
++export function FranjaFicha({
++  vehicle,
++  titulo,
++  identidad,
++  tipo,
++  velocidad,
++  estado,
++  km,
++  minutos,
++  casillas,
++}: {
++  vehicle: Pick<Vehicle, 'id' | 'marca' | 'modelo' | 'tipo'>;
++  /** «Toyota Hilux · 2022». */
++  titulo: string;
++  /** «U-001 · Z69FC7W». */
++  identidad: string;
++  tipo: string | null;
++  velocidad: number;
++  estado: EstadoUbicacion;
++  km: number | null;
++  minutos: number | null;
++  casillas: CasillaFicha[];
++}) {
++  const { colors } = useTheme();
++  const propia = useFotoPropia(vehicle.id);
++  const conFondo = propia.tipo === 'foto';
++  const tiempo = partesTiempo(minutos);
++  const enMarcha = estado === 'marcha';
++  const marca =
++    estado === 'marcha' || estado === 'detenido'
++      ? { texto: 'EN VIVO', color: colors.success, late: true }
++      : estado === 'sin-senal'
++        ? { texto: 'SIN SEÑAL', color: colors.textMuted, late: false }
++        : null;
++  return (
++    <View>
++      <View style={[styles.franja, { height: ALTO_FRANJA }]}>
++        <LinearGradient colors={FRANJA_COLORES} style={StyleSheet.absoluteFill} />
++        <View style={styles.fFila}>
++          <View style={styles.fId}>
++            <View style={[styles.fIco, { backgroundColor: colors.primary }]}>
++              <Icono nombre="camion" color={colors.onPrimary} grosor={2} />
++            </View>
++            <View style={styles.encoge}>
++              <ThemedText style={[styles.fNom, { color: FRANJA_TEXTO }]} numberOfLines={1}>
++                {titulo || 'Unidad'}
++              </ThemedText>
++              <ThemedText style={[styles.fSub, { color: FRANJA_TEXTO_3 }]} numberOfLines={1}>
++                {[identidad, tipo].filter(Boolean).join(' · ')}
++              </ThemedText>
++            </View>
++          </View>
++          <View style={styles.fVel}>
++            <ThemedText style={[styles.fVelCifra, { color: colors[tonoVelocidad(enMarcha ? velocidad : 0)] }]} tabular>
++              {estado ? Math.round(enMarcha ? velocidad : 0) : '—'}
++              <ThemedText style={[styles.fVelUnidad, { color: FRANJA_TEXTO_3 }]}> km/h</ThemedText>
++            </ThemedText>
++            {marca ? (
++              <View style={styles.fVivo}>
++                <PulseDot color={marca.color} size={6} active={marca.late} />
++                <ThemedText style={[styles.fVivoTexto, { color: marca.color }]} numberOfLines={1}>
++                  {marca.texto}
++                </ThemedText>
++              </View>
++            ) : null}
++          </View>
++        </View>
++        <View style={styles.fCifras}>
++          <View>
++            <ThemedText style={[styles.fCifra, { color: FRANJA_TEXTO }]} tabular>
++              {textoKm(km)}
++              {km != null ? <ThemedText style={[styles.fCifraUnidad, { color: FRANJA_TEXTO_2 }]}> km</ThemedText> : null}
++            </ThemedText>
++            <ThemedText style={[styles.fCifraLabel, { color: FRANJA_TEXTO_3 }]}>Recorrido hoy</ThemedText>
++          </View>
++          <View>
++            <ThemedText style={[styles.fCifra, { color: FRANJA_TEXTO }]} tabular>
++              {tiempo.cifra}
++              {tiempo.unidad ? (
++                <ThemedText style={[styles.fCifraUnidad, { color: FRANJA_TEXTO_2 }]}>{` ${tiempo.unidad}`}</ThemedText>
++              ) : null}
++            </ThemedText>
++            <ThemedText style={[styles.fCifraLabel, { color: FRANJA_TEXTO_3 }]}>En marcha hoy</ThemedText>
++          </View>
++        </View>
++      </View>
++
++      <View style={[styles.hoja, { backgroundColor: colors.surface, borderColor: colors.border, marginTop: -SOLAPE }]}>
++        <ThemedText style={styles.hTit}>Resumen</ThemedText>
++        {/* Con la foto propia (con fondo) en su recuadro, las cifras bajan para no quedar debajo. */}
++        <View style={[styles.casillas, conFondo ? styles.casillasBajas : null]}>
++          {casillas.map((c) => (
++            <Casilla key={c.label} c={c} />
++          ))}
++        </View>
++      </View>
++
++      {/* La foto, entre la franja y la hoja (con fondo, en su recuadro y dentro de la pantalla). */}
++      <View pointerEvents="none" style={[styles.foto, conFondo ? styles.fotoConFondo : null]}>
++        <FotoSinFondo vehicle={vehicle} ancho={conFondo ? FOTO_ANCHO_CON_FONDO : FOTO_ANCHO} propia={propia} />
++      </View>
++    </View>
++  );
++}
++
++function Casilla({ c }: { c: CasillaFicha }) {
++  const { colors } = useTheme();
++  const cuerpo = (
++    <View style={[styles.casilla, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
++      <Icono nombre={c.icono} color={colors.textSecondary} />
++      <View>
++        <ThemedText style={[styles.casillaValor, { color: colors[c.tono ?? 'text'] }]} numberOfLines={1} tabular>
++          {c.valor}
++          {c.unidad ? <ThemedText style={[styles.casillaUnidad, { color: colors.textMuted }]}>{` ${c.unidad}`}</ThemedText> : null}
++        </ThemedText>
++        <ThemedText style={[styles.casillaLabel, { color: colors.textSecondary }]} numberOfLines={1}>
++          {c.label}
++        </ThemedText>
++        {c.nota ? (
++          <ThemedText style={[styles.casillaNota, { color: colors.textMuted }]} numberOfLines={1}>
++            {c.nota}
++          </ThemedText>
++        ) : null}
++      </View>
++    </View>
++  );
++  if (!c.onPress) return <View style={styles.casillaCaja}>{cuerpo}</View>;
++  return (
++    <PressableScale
++      onPress={c.onPress}
++      accessibilityRole="button"
++      accessibilityLabel={`${c.label}: ${c.valor}${c.unidad ? ` ${c.unidad}` : ''}`}
++      style={styles.casillaCaja}>
++      {cuerpo}
++    </PressableScale>
++  );
++}
++
++const styles = StyleSheet.create({
++  encoge: { flex: 1, minWidth: 0 },
++  // Ubicación
++  tarjeta: { borderWidth: 1, overflow: 'hidden' },
++  mapa: { overflow: 'hidden' },
++  mapaLleno: { height: '100%', borderRadius: 0, borderWidth: 0 },
++  globoTexto: { fontSize: 14, lineHeight: 18, fontWeight: '700' },
++  sinPos: {
++    position: 'absolute',
++    left: 12,
++    bottom: 12,
++    paddingHorizontal: 14,
++    paddingVertical: 7,
++    borderRadius: 999,
++    borderWidth: 1,
++  },
++  ampliar: {
++    position: 'absolute',
++    top: 10,
++    right: 10,
++    width: 40,
++    height: 40,
++    borderRadius: 20,
++    alignItems: 'center',
++    justifyContent: 'center',
++  },
++  cuerpo: { padding: 16, gap: 12 },
++  donde: { flexDirection: 'row', alignItems: 'center', gap: 12 },
++  dondeIco: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
++  dondeTit: { fontSize: 16, lineHeight: 21, fontWeight: '600' },
++  dondeSub: { fontSize: 12.5, lineHeight: 17, fontWeight: '500' },
++  etq: {
++    flexDirection: 'row',
++    alignItems: 'center',
++    gap: 6,
++    paddingHorizontal: 10,
++    paddingVertical: 5,
++    borderRadius: 999,
++    flexShrink: 1,
++    maxWidth: '48%',
++  },
++  etqTexto: { fontSize: 12.5, lineHeight: 16, fontWeight: '600' },
++  acciones: { flexDirection: 'row', gap: 8 },
++  boton: {
++    flex: 1,
++    minHeight: 46,
++    borderRadius: 999,
++    flexDirection: 'row',
++    alignItems: 'center',
++    justifyContent: 'center',
++    gap: 7,
++    paddingHorizontal: 12,
++  },
++  botonBorde: { borderWidth: 1 },
++  botonSolo: { flex: 0 },
++  botonTexto: { fontSize: 14, lineHeight: 18, fontWeight: '600', textAlign: 'center', flexShrink: 1 },
++  // Franja
++  franja: {
++    borderTopLeftRadius: 28,
++    borderTopRightRadius: 28,
++    borderWidth: 1,
++    borderBottomWidth: 0,
++    borderColor: FRANJA_BORDE,
++    overflow: 'hidden',
++    paddingTop: 16,
++    paddingHorizontal: 18,
++  },
++  fFila: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
++  fId: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 },
++  fIco: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
++  fNom: { fontSize: 16, lineHeight: 20, fontWeight: '600' },
++  fSub: { fontSize: 12, lineHeight: 16, fontWeight: '500', letterSpacing: 0.2 },
++  fVel: { alignItems: 'flex-end' },
++  fVelCifra: { fontSize: 24, lineHeight: 28, fontWeight: '700', letterSpacing: -0.4 },
++  fVelUnidad: { fontSize: 12, lineHeight: 16, fontWeight: '600', letterSpacing: 0 },
++  fVivo: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
++  fVivoTexto: { fontSize: 11, lineHeight: 14, fontWeight: '600', letterSpacing: 0.6 },
++  fCifras: { flexDirection: 'row', gap: 18, marginTop: 16 },
++  fCifra: { fontSize: 24, lineHeight: 28, fontWeight: '700', letterSpacing: -0.6 },
++  fCifraUnidad: { fontSize: 14, lineHeight: 18, fontWeight: '600', letterSpacing: 0 },
++  fCifraLabel: { fontSize: 12, lineHeight: 16, fontWeight: '500' },
++  // La foto se sale de la franja y apoya las ruedas en la hoja (posición de Mi unidad).
++  foto: { position: 'absolute', right: -16, top: 62, zIndex: 5 },
++  fotoConFondo: { right: 14, top: ALTO_FRANJA - SOLAPE - 14 },
++  // Hoja
++  hoja: {
++    borderTopLeftRadius: 28,
++    borderTopRightRadius: 28,
++    borderBottomLeftRadius: 24,
++    borderBottomRightRadius: 24,
++    borderWidth: 1,
++    paddingTop: 20,
++    paddingHorizontal: 16,
++    paddingBottom: 16,
++  },
++  hTit: { fontSize: 22, lineHeight: 28, fontWeight: '700', letterSpacing: -0.3 },
++  casillas: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 18 },
++  casillasBajas: { marginTop: 40 },
++  casillaCaja: { width: '48.5%', flexGrow: 1 },
++  casilla: {
++    borderWidth: 1,
++    borderRadius: 16,
++    paddingTop: 12,
++    paddingHorizontal: 12,
++    paddingBottom: 11,
++    minHeight: 104,
++    justifyContent: 'space-between',
++    gap: 6,
++  },
++  casillaValor: { fontSize: 19, lineHeight: 24, fontWeight: '700', letterSpacing: -0.3 },
++  casillaUnidad: { fontSize: 12, lineHeight: 16, fontWeight: '600', letterSpacing: 0 },
++  casillaLabel: { fontSize: 12.5, lineHeight: 16, fontWeight: '600' },
++  casillaNota: { fontSize: 11.5, lineHeight: 15, fontWeight: '500' },
++});
+diff --git a/src/components/fila-unidad-flota.tsx b/src/components/fila-unidad-flota.tsx
+new file mode 100644
+index 0000000..c084070
+--- /dev/null
++++ b/src/components/fila-unidad-flota.tsx
+@@ -0,0 +1,276 @@
++import { memo } from 'react';
++import { ScrollView, StyleSheet, View } from 'react-native';
++
++import { FotoSinFondo } from '@/components/foto-sin-fondo';
++import { Pastilla } from '@/components/pastilla';
++import { PressableScale } from '@/components/pressable-scale';
++import { PulseDot } from '@/components/pulse-dot';
++import { TabIcon } from '@/components/tab-icon';
++import { TextoVivo } from '@/components/texto-vivo';
++import { ThemedText } from '@/components/themed-text';
++import { useFotoPropia } from '@/hooks/use-foto-vehiculo';
++import { tinte } from '@/lib/color';
++import { textoSinSenal } from '@/lib/sin-senal';
++import { useTheme, type ColorTokens } from '@/theme';
++import type { Vehicle } from '@/types';
++
++/*
++ * PIEZAS DE LA LISTA DE VEHÍCULOS (T-190): la tarjeta de cada unidad y la fila
++ * de pastillas rápidas de arriba. La pantalla (`panel/flota.tsx`) trae los
++ * datos; aquí solo se pinta. La web tiene la misma tarjeta en
++ * `src/panel/modulos/FlotaMovil.jsx` (FilaUnidadMovil).
++ */
++
++/** Alto FIJO de la tarjeta y el aire que la separa de la siguiente: la lista no salta. */
++export const TARJETA_ALTO = 118;
++export const TARJETA_AIRE = 10;
++
++/** Cómo está ahora, ya decidido por la pantalla. `null`: su posición aún no llega. */
++export type EstadoFila = 'marcha' | 'detenido' | 'sin-senal' | null;
++
++/** Ancho de la foto en la tarjeta: lienzo 8:5, como la franja de Mi unidad. */
++const FOTO_ANCHO = 92;
++
++/**
++ * UNA UNIDAD de la lista, en su tarjeta.
++ *
++ * A la izquierda, la foto (el recorte sin fondo, su foto, la del catálogo o la
++ * silueta de su tipo). A la derecha, de arriba abajo: el número y la placa en
++ * grande; cómo está ahora (en marcha y a cuánto, detenida o sin señal y desde
++ * cuándo); quién la conduce y en qué zona opera, con el color de su área; y su
++ * aviso más grave en una pastilla, entero en su línea.
++ *
++ * Con `memo` y valores sueltos: las posiciones se releen cada veinte segundos y
++ * solo se repinta la tarjeta a la que de verdad le cambió algo.
++ */
++export const TarjetaUnidad = memo(function TarjetaUnidad({
++  vehicle,
++  numero,
++  placa,
++  conductor,
++  area,
++  colorArea,
++  estado,
++  velocidad,
++  ultimoReporte,
++  avisoTono,
++  avisoLabel,
++  avisoLatiendo,
++  resaltada,
++  onPress,
++}: {
++  vehicle: Pick<Vehicle, 'id' | 'marca' | 'modelo' | 'tipo'>;
++  numero: string;
++  placa: string;
++  conductor: string | null | undefined;
++  area: string;
++  /** El color de su área: el mismo de su punto en el mapa. */
++  colorArea: string;
++  estado: EstadoFila;
++  velocidad: number;
++  /** Hora de su último reporte (para «Sin señal · hace …»). */
++  ultimoReporte: string | null | undefined;
++  avisoTono: keyof ColorTokens | undefined;
++  avisoLabel: string | undefined;
++  avisoLatiendo: boolean | undefined;
++  resaltada: boolean;
++  onPress: (id: string) => void;
++}) {
++  const { colors, radii } = useTheme();
++  const propia = useFotoPropia(vehicle.id);
++  const placaVisible = placa && placa !== numero ? placa : '';
++  const etiqueta = [numero, placaVisible, avisoLabel].filter(Boolean).join(', ');
++
++  return (
++    <PressableScale
++      onPress={() => onPress(vehicle.id)}
++      accessibilityRole="button"
++      accessibilityLabel={etiqueta}
++      accessibilityHint="Abre su ficha con la ubicación"
++      style={{ marginBottom: TARJETA_AIRE }}>
++      <View
++        style={[
++          styles.tarjeta,
++          {
++            backgroundColor: resaltada ? tinte(colors.primary, 0.08) : colors.surface,
++            borderColor: resaltada ? tinte(colors.primary, 0.5) : colors.border,
++            borderRadius: radii.lg - 4,
++          },
++        ]}>
++        {/* La foto, sobre un fondo hundido: el recorte sin fondo flota en él. */}
++        <View style={[styles.foto, { backgroundColor: colors.surfaceSunken, borderRadius: radii.md }]}>
++          <FotoSinFondo vehicle={vehicle} ancho={propia.tipo === 'foto' ? 80 : FOTO_ANCHO} propia={propia} />
++        </View>
++
++        <View style={styles.textos}>
++          {/* El número manda: nunca cede. Si el aviso es largo, el que se recorta es el aviso. */}
++          <View style={styles.fila}>
++            <ThemedText style={styles.numero} numberOfLines={1}>
++              {numero}
++            </ThemedText>
++            {placaVisible ? (
++              <ThemedText style={[styles.placa, { color: colors.textSecondary }]} numberOfLines={1}>
++                {placaVisible}
++              </ThemedText>
++            ) : null}
++          </View>
++
++          <EstadoAhora estado={estado} velocidad={velocidad} ultimoReporte={ultimoReporte} />
++
++          <View style={[styles.fila, styles.gente]}>
++            <TabIcon name="personal" color={colors.textMuted} size={13} />
++            <ThemedText
++              style={[styles.detalle, { color: conductor ? colors.textSecondary : colors.textMuted }]}
++              numberOfLines={1}>
++              {conductor ?? 'Sin conductor'}
++            </ThemedText>
++            <View style={[styles.puntoArea, { backgroundColor: colorArea }]} />
++            <ThemedText style={[styles.detalle, styles.zona, { color: colors.textMuted }]} numberOfLines={1}>
++              {area}
++            </ThemedText>
++          </View>
++
++          {/* Su aviso más grave, entero en su línea: es lo que hay que atender. */}
++          {avisoTono && avisoLabel ? (
++            <View style={styles.fila}>
++              <Pastilla tono={avisoTono} label={avisoLabel} conPunto latiendo={avisoLatiendo} encoge />
++            </View>
++          ) : null}
++        </View>
++      </View>
++    </PressableScale>
++  );
++});
++
++/** «● En marcha · 61 km/h», «● Detenida» o «● Sin señal · hace 2 h». */
++function EstadoAhora({
++  estado,
++  velocidad,
++  ultimoReporte,
++}: {
++  estado: EstadoFila;
++  velocidad: number;
++  ultimoReporte: string | null | undefined;
++}) {
++  const { colors } = useTheme();
++  if (!estado) {
++    return (
++      <ThemedText style={[styles.estado, { color: colors.textMuted }]} numberOfLines={1}>
++        Buscando su posición…
++      </ThemedText>
++    );
++  }
++  const tono: keyof ColorTokens = estado === 'marcha' ? 'success' : estado === 'detenido' ? 'warning' : 'textMuted';
++  return (
++    <View style={styles.fila}>
++      <PulseDot color={colors[tono]} size={7} active={estado === 'marcha'} />
++      {estado === 'sin-senal' ? (
++        <TextoVivo
++          style={[styles.estado, { color: colors.textSecondary }]}
++          numberOfLines={1}
++          texto={(ahora) => textoSinSenal(ultimoReporte ?? null, ahora)}
++        />
++      ) : (
++        <ThemedText style={[styles.estado, { color: colors[tono] }]} numberOfLines={1}>
++          {estado === 'marcha' ? 'En marcha' : 'Detenida'}
++          {estado === 'marcha' ? (
++            <ThemedText style={[styles.estado, { color: colors.text }]} tabular>{`  ${Math.round(velocidad)} km/h`}</ThemedText>
++          ) : null}
++        </ThemedText>
++      )}
++    </View>
++  );
++}
++
++/** Una opción de la fila rápida: su nombre, cuántas lleva y su color. */
++export type OpcionRapida<K extends string> = { id: K; label: string; cuenta: number; tono?: keyof ColorTokens };
++
++/**
++ * LAS PASTILLAS RÁPIDAS de arriba de la lista (Todas, En marcha, Detenidas,
++ * Sin señal, Con avisos): una sola elegida a la vez, con su cuenta. Los filtros
++ * finos (área, inspección, papeles, tipo…) siguen en la hoja del buscador.
++ */
++export function PastillasRapidas<K extends string>({
++  opciones,
++  valor,
++  onChange,
++}: {
++  opciones: OpcionRapida<K>[];
++  valor: K;
++  onChange: (k: K) => void;
++}) {
++  const { colors } = useTheme();
++  return (
++    <ScrollView
++      horizontal
++      showsHorizontalScrollIndicator={false}
++      contentContainerStyle={styles.pastillas}
++      accessibilityRole="tablist">
++      {opciones.map((o) => {
++        const activa = o.id === valor;
++        const color = o.tono ? colors[o.tono] : colors.text;
++        return (
++          <PressableScale
++            key={o.id}
++            onPress={() => onChange(o.id)}
++            accessibilityRole="tab"
++            accessibilityState={{ selected: activa }}
++            accessibilityLabel={`${o.label}, ${o.cuenta}`}>
++            <View
++              style={[
++                styles.pastilla,
++                {
++                  backgroundColor: activa ? colors.activeSurface : colors.surfaceSunken,
++                  borderColor: activa ? colors.activeBorder : colors.border,
++                },
++              ]}>
++              {o.tono ? <View style={[styles.pastillaPunto, { backgroundColor: color }]} /> : null}
++              <ThemedText style={[styles.pastillaTexto, { color: activa ? colors.onActive : colors.textSecondary }]}>
++                {o.label}
++              </ThemedText>
++              <ThemedText
++                tabular
++                style={[styles.pastillaCuenta, { color: activa ? colors.onActive : colors.textMuted }]}>
++                {String(o.cuenta)}
++              </ThemedText>
++            </View>
++          </PressableScale>
++        );
++      })}
++    </ScrollView>
++  );
++}
++
++const styles = StyleSheet.create({
++  tarjeta: {
++    height: TARJETA_ALTO,
++    flexDirection: 'row',
++    alignItems: 'center',
++    gap: 12,
++    paddingHorizontal: 12,
++    borderWidth: 1,
++  },
++  foto: { width: 96, height: 76, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
++  textos: { flex: 1, minWidth: 0, gap: 5 },
++  fila: { flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 0 },
++  numero: { fontSize: 19, lineHeight: 24, fontWeight: '700', letterSpacing: -0.3, flexShrink: 0 },
++  placa: { fontSize: 13, lineHeight: 18, fontWeight: '600', letterSpacing: 0.4, flexShrink: 0 },
++  estado: { fontSize: 13, lineHeight: 18, fontWeight: '600', flexShrink: 1 },
++  gente: { gap: 5 },
++  detalle: { fontSize: 12.5, lineHeight: 17, fontWeight: '500', flexShrink: 1 },
++  zona: { flexShrink: 2 },
++  puntoArea: { width: 6, height: 6, borderRadius: 3, marginLeft: 4 },
++  pastillas: { gap: 8, paddingVertical: 2 },
++  pastilla: {
++    height: 36,
++    flexDirection: 'row',
++    alignItems: 'center',
++    gap: 7,
++    paddingHorizontal: 14,
++    borderRadius: 999,
++    borderWidth: 1,
++  },
++  pastillaPunto: { width: 7, height: 7, borderRadius: 4 },
++  pastillaTexto: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
++  pastillaCuenta: { fontSize: 12, lineHeight: 16, fontWeight: '700' },
++});
+diff --git a/src/components/foto-sin-fondo.tsx b/src/components/foto-sin-fondo.tsx
+index 765d028..6d6b645 100644
+--- a/src/components/foto-sin-fondo.tsx
++++ b/src/components/foto-sin-fondo.tsx
+@@ -1,5 +1,8 @@
+ import { Image } from 'expo-image';
+ 
++import { FotoVehiculo } from '@/components/foto-vehiculo';
++import type { FotoPropia } from '@/hooks/use-foto-vehiculo';
++import { useTheme } from '@/theme';
+ import type { Vehicle, VehicleType } from '@/types';
+ 
+ /** Lo que devuelve `require('…png')` en Metro: el número del recurso empaquetado. */
+@@ -79,22 +82,53 @@ export function fotoSinFondo(
+   return { fuente: SILUETAS[tipo ?? 'camioneta'] ?? SILUETAS.camioneta, silueta: true };
+ }
+ 
+-/** La unidad sin fondo (su foto o la silueta de su tipo), en un lienzo 8:5. */
++/**
++ * Lo que se ve de la unidad, con la misma regla que la web (T-188):
++ *  1. el recorte sin fondo de su foto actual, en el mismo lienzo 8:5;
++ *  2. su foto propia, que NO viene sin fondo: va dentro de una forma
++ *     redondeada, con su borde, y no recortada encima de la hoja;
++ *  3. la foto del catálogo por marca y modelo;
++ *  4. la silueta de su tipo.
++ * `propia` es lo que dice `useFotoPropia`; quien monta la foto lo pide una sola vez.
++ */
+ export function FotoSinFondo({
+   vehicle,
+   ancho,
++  propia,
+ }: {
+   vehicle: Pick<Vehicle, 'marca' | 'modelo' | 'tipo'>;
+   ancho: number;
++  propia: FotoPropia;
+ }) {
++  const { colors } = useTheme();
+   const { fuente, silueta } = fotoSinFondo(vehicle.marca, vehicle.modelo, vehicle.tipo);
+   const nombre = `${vehicle.marca} ${vehicle.modelo}`.trim();
+-  return (
++  const alto = Math.round(ancho / PROPORCION_FOTO);
++  const catalogo = (
+     <Image
+       source={fuente}
+-      style={{ width: ancho, height: Math.round(ancho / PROPORCION_FOTO) }}
++      style={{ width: ancho, height: alto }}
+       contentFit="contain"
+       accessibilityLabel={silueta ? `Silueta de ${nombre || 'la unidad'}` : nombre}
+     />
+   );
++  return (
++    <FotoVehiculo
++      foto={propia}
++      ancho={ancho}
++      alto={alto}
++      respaldo={catalogo}
++      etiqueta={`Foto de ${nombre || 'la unidad'}`}
++      estilo={
++        propia.tipo === 'foto'
++          ? {
++              borderRadius: ancho > 120 ? 20 : 10,
++              borderWidth: 1,
++              borderColor: colors.borderStrong,
++              boxShadow: '0 6px 18px rgba(0,0,0,0.28)',
++            }
++          : null
++      }
++    />
++  );
+ }
+diff --git a/src/components/foto-vehiculo.tsx b/src/components/foto-vehiculo.tsx
+new file mode 100644
+index 0000000..601194b
+--- /dev/null
++++ b/src/components/foto-vehiculo.tsx
+@@ -0,0 +1,59 @@
++import { Image } from 'expo-image';
++import type { ReactNode } from 'react';
++import { View, type StyleProp, type ViewStyle } from 'react-native';
++
++import type { FotoPropia } from '@/hooks/use-foto-vehiculo';
++import { urlDe } from '@/lib/cloudinary';
++
++/**
++ * La foto PROPIA de una unidad (la que subieron desde la web o la app) dentro
++ * de un recuadro de `ancho × alto`, con la regla de la web:
++ *  - el recorte sin fondo, entero y sin cortar (`contain`);
++ *  - si no hay, su foto normal, llenando el recuadro (`cover`, centrada en lo
++ *    importante por Cloudinary) — el recuadro va redondeado, no recortada
++ *    sobre lo de abajo;
++ *  - si no hay ninguna (o aún se busca, o no cargó), `respaldo`: el render del
++ *    catálogo por marca y modelo o la silueta de su tipo.
++ *
++ * Quien lo usa pone el tamaño, el redondeado y el fondo del recuadro.
++ */
++export function FotoVehiculo({
++  foto,
++  ancho,
++  alto,
++  respaldo,
++  etiqueta,
++  estilo,
++}: {
++  foto: FotoPropia;
++  ancho: number;
++  alto: number;
++  respaldo: ReactNode;
++  /** Qué se lee en voz alta; sin ella, la foto se ignora (es adorno junto al nombre). */
++  etiqueta?: string;
++  estilo?: StyleProp<ViewStyle>;
++}) {
++  if (!foto.id || !foto.tipo) return <>{respaldo}</>;
++  // Se pide al doble del tamaño: nítida en pantallas de 2x y 3x sin bajar de más.
++  const uri =
++    foto.tipo === 'recorte'
++      ? urlDe(foto.id, Math.round(ancho * 2), 0, { ajuste: 'contener' })
++      : urlDe(foto.id, Math.round(ancho * 2), Math.round(alto * 2));
++  if (!uri) return <>{respaldo}</>;
++  return (
++    <View style={[{ width: ancho, height: alto, overflow: 'hidden' }, estilo]}>
++      <Image
++        // Cada foto con su caché: al cambiar de unidad no se queda la anterior.
++        key={foto.id}
++        source={{ uri }}
++        recyclingKey={foto.id}
++        style={{ width: '100%', height: '100%' }}
++        contentFit={foto.tipo === 'recorte' ? 'contain' : 'cover'}
++        transition={180}
++        onError={foto.alFallar}
++        accessible={Boolean(etiqueta)}
++        accessibilityLabel={etiqueta}
++      />
++    </View>
++  );
++}
+diff --git a/src/components/map-vehiculo-dom.tsx b/src/components/map-vehiculo-dom.tsx
+index 882f34c..7da384a 100644
+--- a/src/components/map-vehiculo-dom.tsx
++++ b/src/components/map-vehiculo-dom.tsx
+@@ -1,6 +1,6 @@
+ import * as Location from 'expo-location';
+-import { useEffect, useMemo, useState } from 'react';
+-import { StyleSheet, View } from 'react-native';
++import { memo, useEffect, useMemo, useRef, useState } from 'react';
++import { LogBox, StyleSheet, View } from 'react-native';
+ 
+ import { LlegadaTarjeta, puntosLlegada, useLlegada, type UnidadLlegada } from '@/components/llegada-tarjeta';
+ import type { MapaVehiculoProps } from '@/components/map-vehiculo-clasico';
+@@ -12,6 +12,63 @@ import { useTheme } from '@/theme';
+ import type { MapMarker } from '@/types';
+ import { colorApagado } from '@/utils/paleta-flota';
+ 
++// Un aviso suelto del puente de Expo, no un fallo del mapa: el puente le contesta
++// a la vista web con `injectJavaScript`, y si el toque cambió de pantalla en ese
++// instante (la vista ya se quitó) el sistema rechaza la orden con «Unable to find
++// the 'DomWebView' view with tag N». No hay a quién contárselo ni qué reintentar.
++// Abajo se evita en lo posible; esto solo quita el cartel rojo del modo desarrollo.
++LogBox.ignoreLogs(["Unable to find the 'DomWebView' view"]);
++
++// La vista web (memorizada): el puente de Expo le reenvía TODAS las props cada
++// vez que el componente se pinta, aunque no hayan cambiado. Memorizada, solo se
++// pinta cuando de verdad cambia algo de lo que ve el mapa.
++const MapaWeb = memo(MapaFomDom);
++
++// Fuera del render y siempre el mismo objeto, para no mover las props del puente.
++const ESTILO_WEB = { flex: 1, backgroundColor: 'transparent' } as const;
++const DOM_PROPS = { style: ESTILO_WEB, scrollEnabled: false, containerStyle: ESTILO_WEB } as never;
++
++/**
++ * Las órdenes del mapa a la app se contestan SIN promesa. Con una promesa, el
++ * puente de Expo responde a la vista web cuando ella termina; si lo tocado
++ * cambió de pantalla (se quita la vista), esa respuesta llega a una vista que
++ * ya no existe. Sin promesa responde en el acto, con la vista todavía puesta.
++ */
++const sinEspera = <A extends unknown[]>(f: (...a: A) => void) => f as unknown as (...a: A) => Promise<void>;
++
++type Ultimas = {
++  llegada: ReturnType<typeof useLlegada>;
++  conTarjeta: boolean;
++  onMarkerPress?: (id: string) => void;
++  onMapaPress?: () => void;
++  actualizar: (cambio: { tipo?: 'standard' | 'satellite' }) => unknown;
++  onElegirViaje?: (n: number | null) => void;
++  alElegirEvento?: (id: string | null) => void;
++};
++
++/** Lo que la vista web le pide a la app; lee siempre de `ultimas`, lo más nuevo. */
++function crearAcciones(ultimas: { current: Ultimas }) {
++  return {
++    onLlegada: sinEspera(() => {
++      const u = ultimas.current;
++      if (u.conTarjeta) u.llegada.cerrar();
++      else u.llegada.abrir();
++    }),
++    // Eligiendo el destino de «Llegada», la unidad o el punto tocado es el destino.
++    onMarcador: sinEspera((id: string) => {
++      const u = ultimas.current;
++      if (!u.llegada.tocarUnidad(id)) u.onMarkerPress?.(id);
++    }),
++    onMapa: sinEspera((punto: { lat: number; lng: number }) => {
++      const u = ultimas.current;
++      if (!(punto && u.llegada.tocarPunto(punto))) u.onMapaPress?.();
++    }),
++    onPrefs: sinEspera((cambio: { tipo?: 'standard' | 'satellite' }) => void ultimas.current.actualizar(cambio)),
++    onViaje: sinEspera((n: number | null) => ultimas.current.onElegirViaje?.(n)),
++    onEvento: sinEspera((id: string | null) => ultimas.current.alElegirEvento?.(id)),
++  };
++}
++
+ /**
+  * El mapa de Mapbox de la web, para la app en el teléfono cuando no hay Mapbox
+  * nativo (Expo Go). Resuelve aquí todo lo que el mapa no puede saber por sí
+@@ -71,6 +128,16 @@ export function MapaVehiculoDom({
+   const [altoTarjeta, setAltoTarjeta] = useState(0);
+   const conTarjeta = llegada.fase !== 'cerrada';
+   const abajo = Math.max(margenAbajo, insetBottom);
++  // Lo que la vista web llama siempre es lo último que hay (ver `acciones`).
++  const ultimas = useRef<Ultimas>({ llegada, conTarjeta, onMarkerPress, onMapaPress, actualizar, onElegirViaje, alElegirEvento });
++  useEffect(() => {
++    ultimas.current = { llegada, conTarjeta, onMarkerPress, onMapaPress, actualizar, onElegirViaje, alElegirEvento };
++  });
++  // Siempre las mismas funciones: así la vista web memorizada no se repinta (ni se
++  // le reenvían todas las props) solo porque el componente se pintó.
++  // La referencia solo se lee cuando la vista web llama, nunca al pintar.
++  // eslint-disable-next-line react-hooks/refs
++  const [acciones] = useState(() => crearAcciones(ultimas));
+   // «Llegada» pedida desde fuera (el botón de la ficha): se abre si estaba cerrada.
+   useEffect(() => {
+     if (pedidoLlegada && llegada.fase === 'cerrada') llegada.abrir();
+@@ -177,19 +244,28 @@ export function MapaVehiculoDom({
+   const enMarcha = esMulti ? markers!.filter((p) => (p.estado ? p.estado === 'marcha' : p.live)).length : 0;
+   const pildora = hideOverlays ? null : esMulti ? `${markers!.length} ${markers!.length === 1 ? 'vehículo' : 'vehículos'} · ${enMarcha} en marcha` : (vehicleName ?? null);
+ 
+-  const llegadaDom =
+-    conTarjeta && llegada.destino
+-      ? {
+-          trazo: llegada.ruta?.trazo ?? [],
+-          destino: { lat: llegada.destino.lat, lng: llegada.destino.lng },
+-          claro: colorScheme === 'light' && prefs.tipo === 'standard',
+-        }
+-      : null;
+-  const encuadreLlegada = llegada.encuadreClave ? { limites: puntosLlegada(llegada), clave: llegada.encuadreClave } : null;
++  const trazoLlegada = llegada.ruta?.trazo;
++  const destinoLat = llegada.destino?.lat;
++  const destinoLng = llegada.destino?.lng;
++  const claroLlegada = colorScheme === 'light' && prefs.tipo === 'standard';
++  const llegadaDom = useMemo(
++    () =>
++      conTarjeta && destinoLat != null && destinoLng != null
++        ? { trazo: trazoLlegada ?? [], destino: { lat: destinoLat, lng: destinoLng }, claro: claroLlegada }
++        : null,
++    [conTarjeta, trazoLlegada, destinoLat, destinoLng, claroLlegada],
++  );
++  // El encuadre es «una vez por clave»: mientras la clave sea la misma, el mismo objeto.
++  const claveEncuadre = llegada.encuadreClave;
++  const encuadreLlegada = useMemo(
++    () => (claveEncuadre ? { limites: puntosLlegada(llegada), clave: claveEncuadre } : null),
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++    [claveEncuadre],
++  );
+ 
+   return (
+     <View style={[styles.caja, { backgroundColor: colors.background }, style]}>
+-      <MapaFomDom
++      <MapaWeb
+         token={MAPBOX_TOKEN}
+         estilo={ESTILO_MAPBOX[prefs.tipo]}
+         config={config}
+@@ -204,26 +280,21 @@ export function MapaVehiculoDom({
+         llegada={llegadaDom}
+         encuadreLlegada={encuadreLlegada}
+         llegadaBoton={conLlegada ? conTarjeta : null}
+-        onLlegada={async () => (conTarjeta ? llegada.cerrar() : llegada.abrir())}
++        onLlegada={acciones.onLlegada}
+         margenArriba={margenArriba}
+         margenAbajo={abajoMapa}
+         encuadreClave={encuadreClave}
+         pildora={pildora}
+-        // Eligiendo el destino de «Llegada», la unidad o el punto tocado es el destino.
+-        onMarcador={async (id) => {
+-          if (!llegada.tocarUnidad(id)) onMarkerPress?.(id);
+-        }}
+-        onMapa={async (punto) => {
+-          if (!(punto && llegada.tocarPunto(punto))) onMapaPress?.();
+-        }}
+-        onPrefs={async (cambio) => actualizar(cambio)}
+-        onViaje={async (n) => onElegirViaje?.(n)}
++        onMarcador={acciones.onMarcador}
++        onMapa={acciones.onMapa}
++        onPrefs={acciones.onPrefs}
++        onViaje={acciones.onViaje}
+         eventos={eventosDom}
+         eventoActivo={eventoActivo}
+-        onEvento={async (id) => alElegirEvento?.(id)}
++        onEvento={acciones.onEvento}
+         interactivo={interactivo}
+         estelaFom={estelaFom}
+-        dom={{ style: styles.web, scrollEnabled: false, containerStyle: styles.web } as never}
++        dom={DOM_PROPS}
+       />
+       <LlegadaTarjeta llegada={llegada} abajo={abajo} onAlto={setAltoTarjeta} />
+     </View>
+@@ -232,5 +303,4 @@ export function MapaVehiculoDom({
+ 
+ const styles = StyleSheet.create({
+   caja: { width: '100%', height: 300, overflow: 'hidden' },
+-  web: { flex: 1, backgroundColor: 'transparent' },
+ });
+diff --git a/src/components/mi-unidad-piezas.tsx b/src/components/mi-unidad-piezas.tsx
+index 6a1541b..84ddb5b 100644
+--- a/src/components/mi-unidad-piezas.tsx
++++ b/src/components/mi-unidad-piezas.tsx
+@@ -8,6 +8,7 @@ import { PressableScale } from '@/components/pressable-scale';
+ import { PulseDot } from '@/components/pulse-dot';
+ import { TextoVivo } from '@/components/texto-vivo';
+ import { ThemedText } from '@/components/themed-text';
++import { useFotoPropia } from '@/hooks/use-foto-vehiculo';
+ import { textoSinSenal } from '@/lib/sin-senal';
+ import { useTheme, type ColorTokens } from '@/theme';
+ import type { Vehicle } from '@/types';
+@@ -36,6 +37,12 @@ export const SOLAPE = 50;
+  * maqueta, y su suelo (92 % del alto) cae sobre la hoja.
+  */
+ const FOTO_ANCHO = 220;
++/**
++ * La foto propia con fondo, en su recuadro: chica, para ir en la hoja a la derecha del título
++ * «Resumen» sin tapar la velocidad ni las cifras de la franja (el recorte sin fondo no estorba
++ * porque es solo el vehículo; un rectángulo con fondo sí).
++ */
++const FOTO_ANCHO_CON_FONDO = 96;
+ 
+ // ── Íconos de la maqueta (trazos de 24×24) ──────────────────────────────────
+ 
+@@ -227,11 +234,17 @@ function MarcaVivo({ vivo }: { vivo: Vivo }) {
+   );
+ }
+ 
+-/** La foto sin fondo (ya trae su sombra), montada entre la franja y la hoja. */
++/**
++ * La foto sin fondo (ya trae su sombra), montada entre la franja y la hoja. Si lo único
++ * que hay es la foto propia CON fondo, va en un recuadro redondeado y metido dentro de
++ * la pantalla, no asomando por el borde como el recorte.
++ */
+ export function FotoMontada({ vehicle }: { vehicle: Vehicle }) {
++  const propia = useFotoPropia(vehicle.id);
++  const conFondo = propia.tipo === 'foto';
+   return (
+-    <View pointerEvents="none" style={styles.foto}>
+-      <FotoSinFondo vehicle={vehicle} ancho={FOTO_ANCHO} />
++    <View pointerEvents="none" style={[styles.foto, conFondo ? styles.fotoConFondo : null]}>
++      <FotoSinFondo vehicle={vehicle} ancho={conFondo ? FOTO_ANCHO_CON_FONDO : FOTO_ANCHO} propia={propia} />
+     </View>
+   );
+ }
+@@ -473,6 +486,7 @@ export function FranjaCompacta({
+   enMarcha: boolean;
+ }) {
+   const { colors } = useTheme();
++  const propia = useFotoPropia(vehicle.id);
+   const hoy =
+     km == null && minutos == null
+       ? 'Sin recorrido de hoy'
+@@ -481,7 +495,7 @@ export function FranjaCompacta({
+     <View style={styles.compacta}>
+       <LinearGradient colors={FRANJA_COLORES} style={StyleSheet.absoluteFill} />
+       <View style={styles.miniatura}>
+-        <FotoSinFondo vehicle={vehicle} ancho={86} />
++        <FotoSinFondo vehicle={vehicle} ancho={propia.tipo === 'foto' ? 70 : 86} propia={propia} />
+       </View>
+       <View style={styles.encoge}>
+         <ThemedText style={[styles.fNom, styles.compactaNom, { color: FRANJA_TEXTO }]} numberOfLines={1}>
+@@ -529,6 +543,8 @@ const styles = StyleSheet.create({
+   fCifraLabel: { fontSize: 12, lineHeight: 16, fontWeight: '500' },
+   // Foto: se sale de la franja y pisa la hoja (posición de la maqueta).
+   foto: { position: 'absolute', right: -21, top: 55, zIndex: 5 },
++  // La hoja empieza a ALTO_FRANJA - SOLAPE (140): el recuadro (60 de alto) queda en ella, junto al título.
++  fotoConFondo: { right: 20, top: 144 },
+   // Resumen
+   hTit: { fontSize: 22, lineHeight: 28, fontWeight: '700', letterSpacing: -0.3 },
+   donde: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14 },
+diff --git a/src/components/odt-paso-fotos.tsx b/src/components/odt-paso-fotos.tsx
+index edc9402..1b52d36 100644
+--- a/src/components/odt-paso-fotos.tsx
++++ b/src/components/odt-paso-fotos.tsx
+@@ -1,5 +1,6 @@
++import { Image } from 'expo-image';
+ import { useState } from 'react';
+-import { Image, ScrollView, StyleSheet, View } from 'react-native';
++import { ScrollView, StyleSheet, View } from 'react-native';
+ 
+ import { Button } from '@/components/button';
+ import { Card } from '@/components/card';
+@@ -117,6 +118,7 @@ export function GaleriaOdt({
+                   accessibilityLabel={nombre ? `Ver a pantalla completa: ${nombre}` : 'Ver la foto a pantalla completa'}>
+                   <Image
+                     source={{ uri: url }}
++                    cachePolicy="memory-disk"
+                     style={[styles.foto, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.lg }]}
+                   />
+                 </PressableScale>
+diff --git a/src/components/user-report-result.tsx b/src/components/user-report-result.tsx
+index 84ae88d..745d498 100644
+--- a/src/components/user-report-result.tsx
++++ b/src/components/user-report-result.tsx
+@@ -1,4 +1,5 @@
+-import { Image, StyleSheet, View } from 'react-native';
++import { Image } from 'expo-image';
++import { StyleSheet, View } from 'react-native';
+ 
+ import { Card } from '@/components/card';
+ import { MetricCard } from '@/components/metric-card';
+@@ -118,6 +119,7 @@ function UserRow({
+       ]}>
+       <Image
+         source={{ uri: user.fotoUrl }}
++        cachePolicy="memory-disk"
+         style={[styles.avatar, { borderRadius: radii.pill, backgroundColor: colors.surfaceSunken }]}
+       />
+       <View style={styles.flex1}>
+diff --git a/src/components/vehiculo-retrato.tsx b/src/components/vehiculo-retrato.tsx
+index f14db25..d11f239 100644
+--- a/src/components/vehiculo-retrato.tsx
++++ b/src/components/vehiculo-retrato.tsx
+@@ -12,14 +12,18 @@ import Animated, {
+ import Svg, { Defs, Ellipse, RadialGradient, Stop } from 'react-native-svg';
+ 
+ import { arteDeVehiculo } from '@/components/arte-vehiculos';
++import { FotoVehiculo } from '@/components/foto-vehiculo';
+ import { VehiculoIlustracion } from '@/components/vehiculo-ilustracion';
++import { useFotoPropia } from '@/hooks/use-foto-vehiculo';
++import { urlDe } from '@/lib/cloudinary';
+ import { useReducedMotion, useTheme } from '@/theme';
+ import type { Vehicle } from '@/types';
+ 
+ /**
+- * RETRATO de la unidad para la ficha: el render real del modelo cuando lo hay
+- * —fondo transparente, flotando sobre su sombra— y la silueta vectorial de
+- * respaldo cuando no. Siempre hay imagen: una ficha sin vehículo se siente rota.
++ * RETRATO de la unidad para la ficha, con la regla de la web (T-188): el recorte
++ * sin fondo de su foto actual —flotando sobre su sombra—, su foto propia en un
++ * recuadro redondeado, el render real del modelo cuando lo hay y, si no, la
++ * silueta vectorial. Siempre hay imagen: una ficha sin vehículo se siente rota.
+  *
+  * Los cristales del render van transparentes a propósito: se ve el fondo oscuro
+  * a través de ellos, que es justo como se ve un vidrio tintado.
+@@ -30,7 +34,10 @@ type Props = {
+    * El AÑO entra en la firma porque el catálogo de renders está ordenado por
+    * marca → año → modelo: una Hilux 2018 y una 2024 no son el mismo dibujo.
+    */
+-  vehicle: Pick<Vehicle, 'marca' | 'modelo' | 'tipo' | 'anio'>;
++  vehicle: Pick<Vehicle, 'marca' | 'modelo' | 'tipo' | 'anio'> & {
++    /** Sin id (una unidad que aún no se guarda) no hay foto propia que buscar. */
++    id?: string;
++  };
+   /** En marcha: las ruedas giran (silueta) y el piso brilla en verde. */
+   enMarcha: boolean;
+   /** Alto del escenario. */
+@@ -67,8 +74,26 @@ export function VehiculoRetrato({ vehicle, enMarcha, alto = 150 }: Props) {
+   }));
+ 
+   const arte = arteDeVehiculo(vehicle);
++  const propia = useFotoPropia(vehicle.id);
++  const recorte = propia.tipo === 'recorte' && propia.id ? urlDe(propia.id, 640, 0, { ajuste: 'contener' }) : '';
+   const tono = enMarcha ? colors.success : colors.textMuted;
+ 
++  // Su foto propia (con fondo): no flota ni lleva sombra; va entera en un recuadro redondeado.
++  if (propia.tipo === 'foto') {
++    return (
++      <View style={[styles.escenario, { height: alto }]}>
++        <FotoVehiculo
++          foto={propia}
++          ancho={Math.round(alto * 1.6)}
++          alto={alto}
++          respaldo={null}
++          etiqueta={`Foto de ${vehicle.marca} ${vehicle.modelo}`.trim()}
++          estilo={{ width: '100%', borderRadius: 14 }}
++        />
++      </View>
++    );
++  }
++
+   return (
+     <View style={[styles.escenario, { height: alto }]}>
+       {/* Resplandor del piso: verde en marcha, neutro parada. */}
+@@ -96,9 +121,10 @@ export function VehiculoRetrato({ vehicle, enMarcha, alto = 150 }: Props) {
+       </Animated.View>
+ 
+       <Animated.View style={[styles.vehiculo, estiloVehiculo]}>
+-        {arte ? (
++        {recorte || arte ? (
+           <Image
+-            source={arte}
++            source={recorte ? { uri: recorte } : arte}
++            onError={recorte ? propia.alFallar : undefined}
+             style={{ width: '100%', height: alto }}
+             contentFit="contain"
+             transition={220}
+diff --git a/src/hooks/use-foto-vehiculo.ts b/src/hooks/use-foto-vehiculo.ts
+new file mode 100644
+index 0000000..058b05c
+--- /dev/null
++++ b/src/hooks/use-foto-vehiculo.ts
+@@ -0,0 +1,75 @@
++import { useCallback, useEffect, useState } from 'react';
++
++import { useAppActiva } from '@/hooks/use-app-activa';
++import { fotosDeUnidad } from '@/lib/cloudinary';
++
++/**
++ * QUÉ FOTO PROPIA TOCA MOSTRAR de una unidad (la misma regla que la web, T-179):
++ *  1. el recorte sin fondo de su foto actual (`recorte`),
++ *  2. su foto propia (`foto`),
++ *  3. nada (`null`): quien lo usa pone la del catálogo por marca y modelo y, si
++ *     tampoco hay, la silueta de su tipo.
++ */
++export type FotoPropia = {
++  /** Todavía se está preguntando: mientras tanto se ve lo de respaldo. */
++  buscando: boolean;
++  tipo: 'recorte' | 'foto' | null;
++  /** Dirección de la foto elegida en Cloudinary (`<base>/<n>`), o `null`. */
++  id: string | null;
++  /** La imagen no cargó: se pasa a la siguiente de la lista. */
++  alFallar: () => void;
++};
++
++type Estado = {
++  de: string | undefined;
++  buscando: boolean;
++  original: string | null;
++  recorte: string | null;
++};
++
++export function useFotoPropia(vehiculoId: string | undefined | null): FotoPropia {
++  const id = vehiculoId || undefined;
++  const activa = useAppActiva();
++  const [estado, setEstado] = useState<Estado>({
++    de: id,
++    buscando: Boolean(id),
++    original: null,
++    recorte: null,
++  });
++  const [falladas, setFalladas] = useState<string[]>([]);
++
++  useEffect(() => {
++    // Con la app en segundo plano no se pregunta; al volver, se mira otra vez
++    // (lo recordado dura un minuto), por si la web subió una foto mientras tanto.
++    if (!id || !activa) return;
++    let vigente = true;
++    fotosDeUnidad(id)
++      .then((f) => {
++        if (vigente) setEstado({ de: id, buscando: false, ...f });
++      })
++      .catch(() => {
++        if (vigente) setEstado({ de: id, buscando: false, original: null, recorte: null });
++      });
++    return () => {
++      vigente = false;
++    };
++  }, [id, activa]);
++
++  // Al cambiar de unidad no se enseña ni un instante la foto de la anterior.
++  const { buscando, original, recorte } =
++    estado.de === id ? estado : { buscando: Boolean(id), original: null, recorte: null };
++  const elegida =
++    recorte && !falladas.includes(recorte)
++      ? { tipo: 'recorte' as const, id: recorte }
++      : original && !falladas.includes(original)
++        ? { tipo: 'foto' as const, id: original }
++        : { tipo: null, id: null };
++
++  const idElegida = elegida.id;
++  const alFallar = useCallback(() => {
++    // Si falla el recorte se pasa a la foto; si falla la foto, a lo de respaldo.
++    if (idElegida) setFalladas((previas) => [...previas, idElegida]);
++  }, [idElegida]);
++
++  return { buscando, ...elegida, alFallar };
++}
+diff --git a/src/hooks/use-reloj.ts b/src/hooks/use-reloj.ts
+index 6e562a9..fba7d9c 100644
+--- a/src/hooks/use-reloj.ts
++++ b/src/hooks/use-reloj.ts
+@@ -1,3 +1,4 @@
++import { useIsFocused } from 'expo-router';
+ import { useEffect, useState } from 'react';
+ 
+ /**
+@@ -10,11 +11,14 @@ import { useEffect, useState } from 'react';
+  */
+ export function useReloj(cada: number = 1_000, activo = true): number {
+   const [ahora, setAhora] = useState(() => Date.now());
++  // Una pestaña que no se mira (las pestañas siguen montadas) tampoco late: antes
++  // repintaba su pantalla entera —mapa incluido— cada minuto desde el fondo.
++  const enFoco = useIsFocused();
+   useEffect(() => {
+     // Fuera de la vista no late: nadie lo está leyendo.
+-    if (!activo) return;
++    if (!activo || !enFoco) return;
+     const id = setInterval(() => setAhora(Date.now()), cada);
+     return () => clearInterval(id);
+-  }, [cada, activo]);
++  }, [cada, activo, enFoco]);
+   return ahora;
+ }
+diff --git a/src/lib/cloudinary.ts b/src/lib/cloudinary.ts
+index ae7f090..3a6ee67 100644
+--- a/src/lib/cloudinary.ts
++++ b/src/lib/cloudinary.ts
+@@ -58,6 +58,8 @@ export type PropositoFom =
+ /** Dirección base de cada foto: idéntica a `ids` y `carpetaDe` de la web. */
+ export const ids = {
+   vehiculo: (id: string) => `fom/vehiculo/${id}`,
++  /** El recorte sin fondo de la foto de la unidad (lo guarda la web): `<base>/<n>`, con el n de la foto original. */
++  vehiculoSinFondo: (id: string) => `fom/vehiculo-sin-fondo/${id}`,
+   avatar: (userId: string) => `fom/avatar/${userId}`,
+   documento: (id: string, cara: CaraFoto) => `fom/documento/${id}/${cara}`,
+   persona: (userId: string, doc: DocPersona, cara: CaraFoto) => `fom/persona/${userId}/${doc}/${cara}`,
+@@ -211,6 +213,45 @@ export async function fotoVigente(base: string): Promise<string | null> {
+   return urlDeFoto(id);
+ }
+ 
++/** Las fotos de una unidad: direcciones completas (`<base>/<n>`), o `null` en lo que no haya. */
++export interface FotosDeUnidad {
++  /** Su foto actual (`fom/vehiculo/<id>/<n>`). */
++  original: string | null;
++  /** El recorte sin fondo de ESA misma foto (`fom/vehiculo-sin-fondo/<id>/<n>`), si el gestor lo guardó. */
++  recorte: string | null;
++}
++
++const SIN_FOTOS: FotosDeUnidad = { original: null, recorte: null };
++const fotosMemoria = new Map<string, { fotos: Promise<FotosDeUnidad>; hasta: number }>();
++
++/**
++ * Las fotos de una unidad, con la misma cuenta que la web (`buscarFotos`): la
++ * última foto numerada y, aparte, si ESA tiene recorte (los recortes no van
++ * 1, 2, 3…: solo hay de las que se recortaron). Se recuerda un minuto, así una
++ * lista con muchas filas no repite las consultas y lo que suba la web se ve
++ * pronto. Sin red no se recuerda nada: la próxima vez se vuelve a preguntar.
++ */
++export function fotosDeUnidad(vehiculoId: string | undefined | null): Promise<FotosDeUnidad> {
++  if (!NUBE || !vehiculoId) return Promise.resolve(SIN_FOTOS);
++  const recordado = fotosMemoria.get(vehiculoId);
++  if (recordado && recordado.hasta > Date.now()) return recordado.fotos;
++  const entrada = { fotos: Promise.resolve(SIN_FOTOS), hasta: Date.now() + DURA_MEMORIA };
++  entrada.fotos = (async () => {
++    const n = await ultimaVersion(ids.vehiculo(vehiculoId));
++    if (!n) return SIN_FOTOS;
++    const original = `${ids.vehiculo(vehiculoId)}/${n}`;
++    const idRecorte = `${ids.vehiculoSinFondo(vehiculoId)}/${n}`;
++    try {
++      return { original, recorte: (await existe(idRecorte)) ? idRecorte : null };
++    } catch {
++      entrada.hasta = 0; // sin red no se sabe si hay recorte: no se recuerda
++      return { original, recorte: null };
++    }
++  })();
++  fotosMemoria.set(vehiculoId, entrada);
++  return entrada.fotos;
++}
++
+ /** Una foto guardada en Cloudinary, con su título si lo lleva. */
+ export interface FotoCloudinary {
+   url: string;
+diff --git a/src/theme/movimiento.ts b/src/theme/movimiento.ts
+index fc35d20..cc6e7b1 100644
+--- a/src/theme/movimiento.ts
++++ b/src/theme/movimiento.ts
+@@ -112,7 +112,7 @@ export const CONTEO = {
+ export function opcionesPila(reducido: boolean) {
+   return {
+     animation: reducido ? 'fade' : Platform.OS === 'android' ? 'ios_from_right' : 'slide_from_right',
+-    animationDuration: reducido ? DURACION.rapido : DURACION.lento,
++    animationDuration: reducido ? DURACION.normal : DURACION.lento,
+     gestureEnabled: true,
+   } as const;
+ }
+@@ -130,14 +130,45 @@ export const opcionesHoja = {
+   animationDuration: DURACION.lento,
+ } as const;
+ 
++/** Cuánto se desliza la pestaña al entrar y al salir (px). Corto: acompaña al fundido, no lo reemplaza. */
++const DESPLAZO_PESTANA = 28;
++
+ /**
+- * PESTAÑAS: fundido corto entre una y otra; la píldora de la barra es la que
+- * se desliza. Con «reducir movimiento», cambio seco.
++ * Cómo se ve una pestaña según su `progress`: -1 = quedó a la izquierda de la
++ * activa, 0 = es la activa, 1 = quedó a la derecha. Entra desde el lado hacia
++ * el que está (si vas a una pestaña de la derecha, llega desde la derecha) y
++ * sale hacia el lado contrario, con la opacidad subiendo y bajando a la par.
++ */
++const pestanaConDeslizamiento: NonNullable<BottomTabNavigationOptions['sceneStyleInterpolator']> = ({ current }) => ({
++  sceneStyle: {
++    opacity: current.progress.interpolate({ inputRange: [-1, 0, 1], outputRange: [0, 1, 0], extrapolate: 'clamp' }),
++    transform: [
++      {
++        translateX: current.progress.interpolate({
++          inputRange: [-1, 0, 1],
++          outputRange: [-DESPLAZO_PESTANA, 0, DESPLAZO_PESTANA],
++          extrapolate: 'clamp',
++        }),
++      },
++    ],
++  },
++});
++
++/**
++ * PESTAÑAS: fundido con un deslizamiento corto entre una y otra (con la curva
++ * de salida, para que arranque rápido y se pose), y la píldora de la barra se
++ * estira hacia la nueva.
++ *
++ * Con «reducir movimiento» NO se apaga: queda solo el fundido, sin
++ * desplazamiento, que es lo que Apple permite. (En T-185 aquí se devolvía
++ * `animation: 'none'` y quien tenía esa opción encendida no veía ningún
++ * cambio: la píldora quieta y la pantalla de golpe.)
+  */
+ export function opcionesPestanas(reducido: boolean): BottomTabNavigationOptions {
+-  if (reducido) return { animation: 'none' };
+   return {
+     animation: 'fade',
++    // Sin esto, 'fade' usa su duración y curva de fábrica (150 ms, lineal).
+     transitionSpec: { animation: 'timing', config: { duration: DURACION.normal, easing: curvas.salida } },
++    ...(reducido ? null : { sceneStyleInterpolator: pestanaConDeslizamiento }),
+   };
+ }
+-- 
+2.55.0.windows.3
+

@@ -146,6 +146,24 @@
       "port": 8081
     },
     {
+      "name": "fom-app-telefono-rapido",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d C:/Users/home/Downloads/fom-driver-juan && set CI=1&& set REACT_NATIVE_PACKAGER_HOSTNAME=192.168.100.45&& npx expo start --lan --port 8081 --no-dev --minify"
+      ],
+      "port": 8081
+    },
+    {
+      "name": "fom-app-telefono-58",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d C:/Users/home/AppData/Local/Temp/claude/C--Users-home-Downloads-fom/d758679e-4e99-439e-a661-2e294ced3416/scratchpad/app-expo58 && set CI=1&& set REACT_NATIVE_PACKAGER_HOSTNAME=192.168.100.45&& npx expo start --lan --port 8081 --minify"
+      ],
+      "port": 8081
+    },
+    {
       "name": "fom-app-demo",
       "runtimeExecutable": "node",
       "runtimeArgs": [
