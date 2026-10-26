@@ -31,6 +31,7 @@ import AdminUsuarios from './modulos/AdminUsuarios'
 import AdminAuditoria from './modulos/AdminAuditoria'
 import MiUnidad from './modulos/MiUnidad'
 import MapaConductor from './modulos/MapaConductor'
+import InspeccionConductor from './modulos/InspeccionConductor'
 import MiPerfil from './modulos/MiPerfil'
 import Configuracion from './modulos/Configuracion'
 import Seguridad from './modulos/Seguridad'
@@ -110,6 +111,8 @@ const MENU_POR_AREA = {
       grupo: 'Mi trabajo',
       items: [
         { a: '/panel', icono: 'camion', texto: 'Mi unidad', fin: true },
+        // La inspección diaria se hace también desde la web (T-167a), como en la app.
+        { a: '/panel/inspeccion', icono: 'inspeccion', texto: 'Inspección del día' },
         { a: '/panel/mapa', icono: 'mapa', texto: 'Mapa' },
         { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento' },
         { a: '/panel/alertas', icono: 'alerta', texto: 'Alertas' },
@@ -133,7 +136,7 @@ const RUTAS_POR_AREA = {
   admin: null, // todas
   operativo: ['', 'mapa', 'alertas', 'seguridad', 'flota', 'jornadas', 'mantenimiento', 'inspecciones', 'documentos', 'personal', 'reportes'],
   gerencial: ['personal', 'reportes'],
-  conductor: ['', 'mapa', 'alertas', 'mantenimiento'],
+  conductor: ['', 'inspeccion', 'mapa', 'alertas', 'mantenimiento'],
   personal: ['mapa', 'alertas', 'documentos', 'personal'],
 }
 
@@ -366,6 +369,8 @@ export default function Consola() {
           <Route path="mantenimiento" element={area === 'conductor' ? <MantenimientoConductor /> : <Mantenimiento />} />
           <Route path="mantenimiento/planes" element={<Navigate to="/panel/mantenimiento?vista=planes" replace />} />
           <Route path="inspecciones" element={<Inspecciones />} />
+          {/* La diaria del conductor; quien gestiona la flota las ve todas en Inspecciones. */}
+          <Route path="inspeccion" element={area === 'conductor' ? <InspeccionConductor /> : <Navigate to="/panel/inspecciones" replace />} />
           <Route path="inspecciones/programa" element={<Navigate to="/panel/inspecciones?vista=plantillas" replace />} />
           <Route path="documentos" element={<Documentos />} />
           <Route path="personal" element={<AdminUsuarios />} />

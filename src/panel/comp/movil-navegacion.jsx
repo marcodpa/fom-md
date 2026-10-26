@@ -55,12 +55,12 @@ const PESTANAS = {
     { a: '/panel/reportes', icono: 'reporte', texto: 'Reportes' },
     PERFIL,
   ],
-  // Los íconos de (driver)/_layout de la app: casa, llave y persona. La app
-  // pone Inspección como segunda pestaña; la web del conductor no tiene esa
-  // pantalla (ni cómo enviar la inspección diaria), así que va el Mapa.
+  // Las de (driver)/_layout de la app, con sus íconos: casa, portapapeles,
+  // llave y persona. El Mapa deja la barra (T-167a): Mi unidad ya es el mapa
+  // de su unidad, y el de la flota queda en «Accesos» de Mi perfil.
   conductor: [
     { a: '/panel', icono: 'inicio', texto: 'Mi unidad' },
-    { a: '/panel/mapa', icono: 'mapa', texto: 'Mapa' },
+    { a: '/panel/inspeccion', icono: 'inspeccion', texto: 'Inspección' },
     { a: '/panel/mantenimiento', icono: 'ot', texto: 'Mantenimiento' },
     PERFIL,
   ],

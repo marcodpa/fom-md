@@ -1,0 +1,157 @@
+/* ============================================================
+   INSPECCIÓN DEL DÍA DEL CONDUCTOR — igual que la app (T-167a)
+   ------------------------------------------------------------
+   Medidas de FOM-DRIVER: (driver)/inspeccion.tsx, inspection-item.tsx,
+   evidence-field.tsx, text-field.tsx, progress-bar.tsx, button.tsx,
+   inspeccion-hecha-hoy.tsx, inspeccion-fin-de-semana.tsx y
+   inspecciones-resultado.tsx. Valores de tokens-app.css: los mismos en el
+   teléfono y en la computadora (allí en una columna de 680 px).
+   ============================================================ */
+.ic {
+  --azul-fom: var(--app-primario);
+  font-family: var(--app-fuente);
+  color: var(--app-texto);
+}
+.ic .exito { --tono: var(--app-exito); --tono-sup: var(--app-exito-sup); --sobre-tono: var(--app-sobre-exito); }
+.ic .aviso { --tono: var(--app-aviso); --tono-sup: var(--app-aviso-sup); --sobre-tono: var(--app-sobre-aviso); }
+.ic .peligro { --tono: var(--app-peligro); --tono-sup: var(--app-peligro-sup); --sobre-tono: var(--app-sobre-peligro); }
+.ic .info { --tono: var(--app-info); --tono-sup: var(--app-info-sup); --sobre-tono: var(--app-sobre-info); }
+.ic .primario { --tono: var(--app-primario); --sobre-tono: var(--app-sobre-primario); }
+.ic .neutro { --tono: var(--app-texto-2); --tono-sup: var(--app-sup-alta); --sobre-tono: var(--app-fondo); }
+
+/* ---- Marco: título de la app en el teléfono; en la computadora, la cabecera del panel ---- */
+.ic-titulo { padding: calc(var(--app-titulo-arriba) - 2px) calc(var(--app-esp-lg) + 4px) var(--app-esp-sm); }
+.ic-titulo h1 { margin: 0; font: var(--app-titulo-pantalla); letter-spacing: var(--app-titulo-pantalla-track); color: var(--app-texto); }
+.ic-titulo p { margin: 6px 0 0; font: var(--app-bajada); color: var(--app-texto-2); }
+.ic-cuerpo { display: flex; flex-direction: column; gap: var(--app-esp-lg); width: 100%; max-width: 680px; padding: var(--app-esp-lg) 0 var(--app-esp-xxl); }
+.ic-movil .ic-cuerpo { max-width: none; padding: var(--app-esp-lg) var(--app-esp-lg) var(--app-esp-xxl); }
+/* En la computadora el cuerpo va bajo la cabecera, con su mismo margen. */
+.ic:not(.ic-movil) > .ic-cuerpo { max-width: calc(680px + 2 * var(--e-xl)); padding: var(--e-lg) var(--e-xl) var(--e-xl); }
+
+/* ---- Piezas comunes ---- */
+.ic-tarjeta { display: flex; flex-direction: column; gap: var(--app-esp-xs); padding: var(--app-tarjeta-pad); border: var(--app-borde-fino) solid var(--app-borde); border-radius: var(--app-tarjeta-radio); background: var(--app-sup); box-shadow: var(--app-sombra-tarjeta); }
+.ic-intro, .ic-texto { margin: 0; font: var(--app-body); color: var(--app-texto-2); }
+.ic-nota { margin: 0; font: var(--app-caption); color: var(--app-texto-3); }
+.ic-caption { margin: 0; font: var(--app-caption); }
+.ic-rojo { color: var(--app-peligro); }
+.ic-azul { color: var(--app-primario); }
+.ic-error { margin: 0; font: var(--app-caption); color: var(--app-peligro); }
+.ic-overline { margin: 0; font: var(--app-overline); letter-spacing: var(--app-track-amplio); text-transform: uppercase; color: var(--app-texto-3); }
+.ic-subtitulo { margin: 0; font: var(--app-subtitle); color: var(--app-texto); }
+.ic-rotulo { font: var(--app-caption); color: var(--app-texto-2); }
+
+/* Pastilla (pastilla.tsx): 22 de alto, tinte al 12 % y punto opcional. */
+.ic-pastilla { flex: none; display: inline-flex; align-items: center; gap: var(--app-pastilla-hueco); min-height: var(--app-pastilla-alto); padding: var(--app-pastilla-pad); border-radius: var(--app-r-pill); background: color-mix(in srgb, var(--tono) var(--app-pastilla-tinte), transparent); color: var(--tono); font: var(--app-pastilla-texto); white-space: nowrap; }
+.ic-pastilla > i { width: var(--app-pastilla-punto); height: var(--app-pastilla-punto); border-radius: 50%; background: var(--tono); }
+
+/* Botón (button.tsx): píldora de 48, primario azul FOM, secundario superficie alta con borde fuerte. */
+.ic-boton { width: 100%; min-height: var(--app-boton-alto); display: inline-flex; align-items: center; justify-content: center; gap: var(--app-esp-sm); padding: var(--app-boton-pad); border: var(--app-borde-fino) solid transparent; border-radius: var(--app-r-pill); font: var(--app-button); cursor: pointer; transition: transform var(--app-d-rapido) var(--app-curva), filter var(--app-d-rapido) ease; -webkit-tap-highlight-color: transparent; }
+.ic-boton.primario { background: var(--app-primario); color: var(--app-sobre-primario); }
+.ic-boton.secundario { background: var(--app-sup-alta); border-color: var(--app-borde-fuerte); color: var(--app-texto); }
+.ic-boton:active:not(:disabled) { transform: scale(var(--app-escala-press)); }
+.ic-boton:hover:not(:disabled) { filter: brightness(1.06); }
+/* Deshabilitado: relleno neutro con texto legible (no un botón «apagado»). */
+.ic-boton:disabled { background: var(--app-borde); border-color: var(--app-borde); color: var(--app-texto-2); cursor: not-allowed; }
+.ic-boton[aria-busy] { cursor: progress; }
+.ic-acciones { display: flex; flex-direction: column; gap: var(--app-esp-sm); }
+
+/* Vacío (empty-state.tsx). */
+.ic-vacio { display: grid; justify-items: center; gap: var(--app-esp-sm); padding: var(--app-esp-xxl) var(--app-esp-lg); text-align: center; }
+.ic-vacio-icono { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; background: var(--app-info-sup); color: var(--app-primario); }
+.ic-vacio b { font: var(--app-subtitle); color: var(--app-texto); }
+.ic-vacio small { max-width: 460px; font: var(--app-body); color: var(--app-texto-2); }
+
+/* ---- Formulario ---- */
+.ic-vehiculo small { font: var(--app-caption); color: var(--app-texto-3); }
+.ic-vehiculo b { font: var(--app-subtitle); color: var(--app-texto); overflow-wrap: anywhere; }
+
+.ic-progreso { display: flex; flex-direction: column; gap: var(--app-esp-sm); }
+.ic-progreso-fila { display: flex; align-items: center; justify-content: space-between; gap: var(--app-esp-sm); font: var(--app-caption); color: var(--app-texto-2); font-variant-numeric: tabular-nums; }
+.ic-barra { height: 8px; border-radius: var(--app-r-pill); background: var(--app-sup-baja); overflow: hidden; }
+.ic-barra > i { display: block; height: 100%; border-radius: var(--app-r-pill); background: var(--tono); transition: width var(--app-d-lento) var(--app-curva); }
+
+.ic-categoria { display: flex; flex-direction: column; gap: var(--app-esp-xs); }
+.ic-lista { gap: 0; padding-block: var(--app-esp-xs); }
+.ic-item { display: flex; flex-direction: column; gap: var(--app-esp-sm); padding-block: var(--app-esp-md); }
+.ic-item + .ic-item { border-top: var(--app-borde-hairline) solid var(--app-borde); }
+.ic-item-cab { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-esp-sm); }
+.ic-item-nombre { font: var(--app-body); color: var(--app-texto); }
+.ic-critico { padding: 2px var(--app-esp-sm); border-radius: var(--app-r-pill); background: var(--app-peligro-sup); color: var(--app-peligro); font: var(--app-overline); letter-spacing: var(--app-track-amplio); text-transform: uppercase; }
+.ic-ayuda { font: var(--app-caption); color: var(--app-texto-3); white-space: pre-line; }
+
+/* Las tres respuestas: inactivas hundidas con borde; la elegida, de su color. */
+.ic-toggle { display: flex; gap: var(--app-esp-sm); }
+.ic-opcion { flex: 1; min-width: 0; min-height: 44px; display: grid; place-items: center; padding: var(--app-esp-sm) 4px; border: var(--app-borde-hairline) solid var(--app-borde); border-radius: var(--app-r-md); background: var(--app-sup-baja); color: var(--app-texto-2); font: var(--app-caption); cursor: pointer; transition: background-color var(--app-d-base) var(--app-curva), transform var(--app-d-rapido) ease; -webkit-tap-highlight-color: transparent; }
+.ic-opcion > span { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ic-opcion.on { border-color: var(--tono); background: var(--tono); color: var(--sobre-tono); }
+.ic-opcion:active { transform: scale(var(--app-escala-press)); }
+
+/* Campo de texto (text-field.tsx): rótulo arriba, caja hundida de esquina 16. */
+.ic-campo { display: flex; flex-direction: column; gap: var(--app-esp-xs); }
+.ic-campo > span { font: var(--app-caption); color: var(--app-texto-2); }
+.ic-campo textarea { min-height: 80px; padding: var(--app-campo-pad); border: var(--app-borde-fino) solid var(--app-borde); border-radius: var(--app-r-md); background: var(--app-sup-baja); color: var(--app-texto); font: var(--app-body); resize: vertical; outline: none; }
+.ic-campo textarea::placeholder { color: var(--app-texto-3); }
+.ic-campo textarea:focus { border-color: var(--app-primario); }
+
+/* Evidencia (evidence-field.tsx): dos azulejos y las miniaturas de 84. */
+.ic-fotos-acciones { display: flex; gap: var(--app-esp-sm); }
+.ic-azulejo { position: relative; flex: 1; display: grid; place-items: center; padding: var(--app-esp-lg) var(--app-esp-sm); border: var(--app-borde-hairline) solid var(--app-borde); border-radius: var(--app-r-md); background: var(--app-sup-baja); color: var(--app-primario); font: var(--app-button); cursor: pointer; }
+.ic-azulejo input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.ic-azulejo:focus-within { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+.ic-miniaturas { display: flex; flex-wrap: wrap; gap: var(--app-esp-sm); }
+.ic-miniatura { position: relative; width: 84px; height: 84px; border: var(--app-borde-hairline) solid var(--app-borde); border-radius: var(--app-r-md); overflow: hidden; }
+.ic-miniatura-ver { width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.ic-miniatura-ver img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ic-miniatura-quitar { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--app-r-pill); background: var(--app-peligro); color: var(--app-sobre-peligro); font-size: 11px; line-height: 1; cursor: pointer; }
+.ic-foto-grande { display: block; max-width: 100%; max-height: 70vh; margin: 0 auto; border-radius: var(--app-r-md); }
+.ic-odt { display: flex; flex-direction: column; gap: var(--app-esp-xs); }
+
+/* ---- «Ya está hecha» y la pregunta del fin de semana ---- */
+.ic-hecha { gap: var(--app-esp-md); }
+.ic-hecha-cab { display: flex; align-items: center; gap: var(--app-esp-md); }
+.ic-hecha-txt { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.ic-hecha-txt small { font: var(--app-caption); color: var(--app-texto-2); }
+.ic-circulo { width: 48px; height: 48px; flex: none; display: grid; place-items: center; border-radius: var(--app-r-pill); background: var(--tono-sup); color: var(--tono); }
+.ic-hecha-cab .ic-subtitulo { flex: 1; min-width: 0; }
+.ic-hecha-fila { display: flex; align-items: center; gap: var(--app-esp-sm); }
+.ic-hecha-fila > span:first-child { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: var(--app-caption); color: var(--app-texto-3); }
+.ic-aviso-linea { margin: 0; font: var(--app-caption); color: var(--app-aviso); }
+.ic-aviso-caja { margin: 0; padding: 10px 12px; border-radius: var(--app-r-md); background: var(--tono-sup); color: var(--tono); font: var(--app-caption); }
+
+.ic-ordenes { display: flex; flex-direction: column; gap: var(--app-esp-sm); }
+.ic-orden { width: 100%; text-align: left; font: inherit; cursor: pointer; transition: transform var(--app-d-rapido) ease; }
+.ic-orden:active { transform: scale(var(--app-escala-press)); }
+.ic-orden-fila { display: flex; align-items: center; justify-content: space-between; gap: var(--app-esp-sm); }
+.ic-orden-fila b { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: var(--app-subtitle); color: var(--app-texto); }
+.ic-orden small { font: var(--app-caption); color: var(--app-texto-2); }
+
+/* ---- Resultado de inspección (la hoja) ---- */
+.ic-resultado { display: flex; flex-direction: column; gap: var(--app-esp-md); }
+.ic-resultado-cab { display: flex; align-items: center; gap: var(--app-esp-sm); }
+.ic-resultado-cab .ic-subtitulo { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ic-datos { display: grid; gap: var(--app-esp-xs); margin: 0; }
+.ic-datos > div { display: flex; justify-content: space-between; gap: var(--app-esp-md); }
+.ic-datos dt { font: var(--app-caption); color: var(--app-texto-3); }
+.ic-datos dd { margin: 0; font: var(--app-caption); color: var(--app-texto-2); text-align: right; }
+.ic-resumen { display: grid; gap: 2px; padding: var(--app-esp-md); border: var(--app-borde-hairline) solid var(--app-borde); border-radius: var(--app-r-md); background: var(--app-sup-baja); }
+.ic-resumen b { font: var(--app-button); }
+.ic-resumen small { font: var(--app-caption); color: var(--app-texto-3); }
+.ic-mala { display: flex; align-items: flex-start; gap: var(--app-esp-sm); padding-top: var(--app-esp-md); border-top: var(--app-borde-hairline) solid var(--app-borde); }
+.ic-mala > div { flex: 1; min-width: 0; display: grid; }
+.ic-mala b { font: var(--app-button); color: var(--app-texto); }
+.ic-mala small { font: var(--app-caption); color: var(--app-texto-3); }
+.ic-mala > div > span { font: var(--app-caption); color: var(--app-texto-2); }
+
+/* ---- Esqueleto ---- */
+.ic-esqueleto { display: flex; flex-direction: column; gap: var(--app-esp-lg); }
+.ic-esqueleto i { display: block; width: 100%; border-radius: var(--app-r-sm); background: var(--app-sup-alta); animation: ic-latido 1.4s ease-in-out infinite; }
+.ic-esqueleto .ic-tarjeta { gap: var(--app-esp-sm); }
+@keyframes ic-latido { 50% { opacity: .55; } }
+
+.pnl.fom-dark[data-diseno] .ic :is(.ic-opcion, .ic-boton, .ic-orden, .ic-miniatura-ver, .ic-miniatura-quitar):focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ic-barra > i, .ic-opcion, .ic-boton, .ic-orden { transition: none; }
+  .ic-opcion:active, .ic-boton:active:not(:disabled), .ic-orden:active { transform: none; }
+  .ic-esqueleto i { animation: none; }
+}

@@ -22,7 +22,10 @@ import { hoyISO } from './formato'
 import { comoEventoManejo } from './eventosManejo'
 import { calificacionManejo } from './manejo'
 import { empresaGestionActualId } from './api'
-import { argumentosDeFormato, cuerpoPlantilla, publicarSiHaceFalta } from './repoApi'
+import {
+  AVISO_BLOQUEADA, AVISO_OTRA_UNIDAD, InspeccionYaHecha, argumentosDeFormato, cuerpoPlantilla, detalleDeEnvio,
+  guardarDiaria, leerDiariaGuardada, plantillaDeFormato, publicarSiHaceFalta, resultadoDeEnvio,
+} from './repoApi'
 import { perfilActual } from '../auth'
 
 // Flota de estrés (T-80): solo con `?estres=…` o `fom.demo.estres` guardado.
@@ -250,7 +253,16 @@ function todasNotificaciones() {
     .sort((a, b) => new Date(b.creadaEn) - new Date(a.creadaEn))
 }
 function todasInspecciones() {
-  return [...agregados('inspecciones'), ...INSPECCIONES, ...historialInspecciones()].map((i) => aplicar('inspecciones', i))
+  return [...agregados('inspecciones'), ...INSPECCIONES.filter((i) => !esDiariaPendienteDemo(i)), ...historialInspecciones()]
+    .map((i) => aplicar('inspecciones', i))
+}
+
+// El conductor de la demostración (usr-002) hace su diaria desde la web (T-167a):
+// la semilla no se la da hecha, así la de hoy de su unidad queda pendiente
+// hasta que él la envíe, igual para él que para su supervisor.
+const CONDUCTOR_DEMO = 'usr-002'
+function esDiariaPendienteDemo(i) {
+  return i.conductorId === CONDUCTOR_DEMO && i.fecha === hoyISO()
 }
 
 // La semilla trae 12 días de inspecciones; la vista «Por persona» necesita el
@@ -1628,6 +1640,193 @@ export const repo = {
         return responder(lista)
       },
     },
+  },
+}
+
+// ---------------- Inspección diaria del conductor (T-167a) ----------------
+// Misma forma que repoApi.inspeccionConductor, para probar el flujo entero sin
+// servidor: el formato, el envío (con su resultado y sus ODT), lo que queda
+// recordado en el navegador y los avisos al supervisor.
+//
+// Va APARTE del objeto `repo` a propósito: repo.js mezcla toda la semilla en el
+// modo conectado, y esta colección no debe colarse allí como si fuera real.
+
+/** El orden de la hoja de la demo: frenos y luces primero, como el formato de la app. */
+const ORDEN_CATEGORIAS_DEMO = ['Frenos', 'Luces']
+function formatoDemo(tipo) {
+  const publicada = plantillasDeLaEmpresa().find((t) => t.estado === 'publicada')
+  if (publicada) {
+    return {
+      id: publicada.id,
+      name: publicada.nombre,
+      // Como el servidor: solo los puntos que aplican al tipo de la unidad.
+      items: publicada.items
+        .filter((it) => !it.vehicleTypes?.length || it.vehicleTypes.includes(tipo))
+        .map((it, n) => ({ ...it, id: it.id ?? it.code ?? `punto-${n + 1}` })),
+    }
+  }
+  const peso = (c) => { const n = ORDEN_CATEGORIAS_DEMO.indexOf(c); return n < 0 ? ORDEN_CATEGORIAS_DEMO.length : n }
+  const items = ITEMS_INSPECCION
+    .filter((i) => i.tipos.length === 0 || i.tipos.includes(tipo))
+    .map((i, n) => ({ i, n }))
+    .sort((a, b) => peso(a.i.categoria) - peso(b.i.categoria) || a.n - b.n)
+    .map(({ i }, n) => ({ id: i.id, category: i.categoria, name: i.nombre, isCritical: i.critico, helpText: null, displayOrder: n + 1 }))
+  return { id: 'formato-demo', name: 'Inspección preoperacional', items }
+}
+
+/** FOM decide el resultado: un crítico en falla bloquea; cualquier otra no conformidad, observaciones. */
+function resultadoDemo(plantilla, respuestas) {
+  const criticos = new Set(plantilla.categorias.flatMap((c) => c.items).filter((i) => i.critico).map((i) => i.id))
+  if (respuestas.some((r) => r.estado === 'falla' && criticos.has(r.itemId))) return 'bloqueada'
+  return respuestas.some((r) => r.estado !== 'conforme') ? 'aprobada_con_observaciones' : 'aprobada'
+}
+
+function avisoDemo(aviso, veh) {
+  agregar('notificaciones', {
+    id: `not-i${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`,
+    empresaId: EMPRESA.id,
+    tipo: aviso.kind,
+    titulo: `${aviso.title} — ${veh?.alias ?? 'Unidad'} (${veh?.placa ?? ''})`,
+    detalle: aviso.detail,
+    odtId: null,
+    leida: false,
+    creadaEn: new Date().toISOString(),
+  })
+}
+
+export const inspeccionConductorSemilla = {
+  async plantilla(vehiculo) {
+    return responder(() => plantillaDeFormato(formatoDemo(vehiculo.tipo), vehiculo.tipo))
+  },
+
+  async diariaDeHoy(vehiculoId, { empresaId = null } = {}) {
+    const hoy = hoyISO()
+    const guardada = leerDiariaGuardada(empresaId, vehiculoId, hoy)
+    const perfiles = todosPerfiles()
+    const veh = todosVehiculos().find((v) => v.id === vehiculoId)
+    // La demo ve la lista entera, como un supervisor: también la que hizo otra persona.
+    const diaria = todasInspecciones()
+      .filter((i) => i.vehiculoId === vehiculoId && i.fecha === hoy && i.clase !== 'scheduled')
+      .sort((a, b) => String(b.creadaEn).localeCompare(String(a.creadaEn)))[0]
+    if (diaria) {
+      const detalle = guardada?.detalle?.id === diaria.id ? guardada.detalle : diaria.detalle ?? null
+      return responder({
+        estado: 'hecha',
+        detalle,
+        inspeccion: detalle ?? {
+          id: diaria.id,
+          resultado: diaria.resultado,
+          clase: diaria.clase ?? 'daily',
+          fecha: diaria.fecha,
+          enviadaEn: diaria.creadaEn,
+          vehiculoId,
+          unidad: veh?.numero ?? veh?.alias ?? 'Unidad',
+          placa: veh?.placa ?? null,
+          conductor: perfiles.find((p) => p.id === diaria.conductorId)?.nombre ?? 'Sin conductor',
+          conductorId: diaria.conductorId ?? null,
+          ubicacion: diaria.ubicacion ?? null,
+          formato: diaria.plantilla ?? 'Inspección preoperacional',
+        },
+      })
+    }
+    if (guardada) return responder({ estado: 'hecha', inspeccion: guardada.detalle, detalle: guardada.detalle })
+    return responder({ estado: 'pendiente' })
+  },
+
+  async detalle(id) {
+    const i = todasInspecciones().find((x) => x.id === id)
+    if (!i?.detalle) throw new Error('No pudimos cargar las respuestas de esta inspección.')
+    return responder(i.detalle)
+  },
+
+  async enviar({ vehiculo, plantilla, respuestas, ubicacion }, quien) {
+    if (!plantilla?.formatoId) throw new Error('Tu empresa no tiene un formato de inspección publicado.')
+    const hoy = hoyISO()
+    // Una por unidad y día, como la regla de FOM (409).
+    if (todasInspecciones().some((i) => i.vehiculoId === vehiculo.id && i.fecha === hoy && i.clase !== 'scheduled')) {
+      guardarDiaria(quien.empresaId, vehiculo.id, null)
+      throw new InspeccionYaHecha()
+    }
+    const veh = todosVehiculos().find((v) => v.id === vehiculo.id) ?? vehiculo
+    const items = new Map(plantilla.categorias.flatMap((c) => c.items).map((i) => [i.id, i]))
+    const estado = resultadoDemo(plantilla, respuestas)
+    const ahora = new Date().toISOString()
+    const id = `insp-w${Date.now().toString(36)}`
+
+    // Las ODT que pide la inspección: siempre en los críticos, y en las demás si dijo que sí.
+    // Numeradas como las de la semilla (odt-016, odt-017…), sin repetir ninguna.
+    const usados = new Set(todasOdts().map((o) => o.id))
+    let siguiente = usados.size
+    const nuevoId = () => {
+      let id
+      do id = `odt-${String(++siguiente).padStart(3, '0')}`
+      while (usados.has(id))
+      usados.add(id)
+      return id
+    }
+    const ordenes = respuestas
+      .filter((r) => r.estado === 'falla' && (items.get(r.itemId)?.critico || r.crearOdt === true))
+      .map((r) => {
+        const item = items.get(r.itemId)
+        const odt = {
+          id: nuevoId(),
+          empresaId: EMPRESA.id,
+          vehiculoId: vehiculo.id,
+          creadorId: quien.id,
+          autorVia: 'principal',
+          tipo: 'correctiva',
+          estado: 'abierta',
+          descripcion: `Inspección: ${item?.nombre ?? r.itemId}${r.nota?.trim() ? `. ${r.nota.trim()}` : ''}`,
+          tipoFalla: null,
+          ubicacion: ubicacion || veh?.ubicacionTexto || '',
+          evidenciaUrls: [],
+          notaSolucion: null,
+          costo: null,
+          resueltaEn: null,
+          reglaId: null,
+          creadaEn: ahora,
+        }
+        agregar('odts', odt)
+        agregar('notificaciones', {
+          id: `not-${odt.id}`,
+          empresaId: EMPRESA.id,
+          tipo: 'odt_nueva',
+          titulo: `Nueva ODT — Vehículo ${veh?.alias ?? ''} (${veh?.placa ?? ''})`,
+          detalle: odt.descripcion,
+          odtId: odt.id,
+          leida: false,
+          creadaEn: ahora,
+        })
+        return { id: odt.id, estado: odt.estado, descripcion: odt.descripcion }
+      })
+
+    const detalle = detalleDeEnvio({ id, resultado: estado, enviadaEn: ahora, vehiculo: veh, plantilla, respuestas, ubicacion, quien })
+    const resultado = resultadoDeEnvio(estado, plantilla, respuestas, ordenes, ahora)
+    // En la lista del supervisor, con sus cuentas y lo respondido (para «Ver resultado»).
+    agregar('inspecciones', {
+      id,
+      vehiculoId: vehiculo.id,
+      conductorId: quien.id,
+      fecha: hoy,
+      resultado: estado,
+      clase: 'daily',
+      ubicacion: detalle.ubicacion,
+      creadaEn: ahora,
+      plantilla: plantilla.nombre,
+      observaciones: respuestas.filter((r) => r.estado !== 'conforme').length - resultado.fallasCriticas,
+      fallasCriticas: resultado.fallasCriticas,
+      detalle,
+    })
+    if (estado === 'bloqueada') avisoDemo(AVISO_BLOQUEADA, veh)
+    guardarDiaria(quien.empresaId, vehiculo.id, detalle)
+    // La demo no tiene dónde guardar fotos: se cuentan y la pantalla lo dice.
+    const fotos = respuestas.reduce((n, r) => n + (r.estado === 'falla' ? r.fotos?.length ?? 0 : 0), 0)
+    return responder({ resultado, detalle, fotos: { subidas: 0, fallidas: 0, enDemo: fotos } }, 450)
+  },
+
+  async pedirOtraUnidad(vehiculoId) {
+    avisoDemo(AVISO_OTRA_UNIDAD, todosVehiculos().find((v) => v.id === vehiculoId))
+    return responder(true, 250)
   },
 }
 

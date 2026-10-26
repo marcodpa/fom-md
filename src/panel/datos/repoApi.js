@@ -22,6 +22,8 @@ import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
 import { cuerpoCredencial, credencialesVigentes } from './credencialesPersona'
 import { cambiosGps } from './metadatosGps'
 import { LIMITE_EVENTOS, comoEventoManejo, diasServidor } from './eventosManejo'
+import { cloudinaryConfigurado, subirImagen } from './cloudinary'
+import { carpetaDe } from './archivos'
 
 /**
  * Une el vehículo con su estado en vivo en la forma que consumen los módulos.
@@ -2386,5 +2388,336 @@ repoApi.gpsEscritura.sinEmparejar = async function sinEmparejar() {
     bytesUltimo: d.lastMessageBytes ?? null,
   }))
 }
+
+// ============================================================
+// INSPECCIÓN DIARIA DEL CONDUCTOR (T-167a)
+// ------------------------------------------------------------
+// Copia de src/services/inspeccionService.ts de la app: las mismas rutas de
+// `/api/v1/mobile` (ver api.js), el mismo cuerpo y las mismas reglas. FOM
+// decide el resultado —un ítem crítico en falla bloquea la unidad— y crea las
+// órdenes. Las fotos no van a FOM: suben a Cloudinary en la misma dirección
+// que la app (`fom/inspections/<id>/inspection_evidence`), con el ítem de título.
+//
+// Las piezas exportadas las usa también la demostración (repoSemilla.js), para
+// que las dos digan lo mismo con la misma forma.
+// ============================================================
+
+/** La diaria recordada en este navegador, por empresa y unidad: la misma unidad en otra empresa es otra cuenta. */
+const claveDiaria = (empresaId, vehiculoId) => `fom:inspeccion-diaria:${empresaId ?? ''}:${vehiculoId}`
+
+/**
+ * Lo que este navegador recuerda de la diaria de hoy de una unidad: `{ detalle }`
+ * (detalle `null` si solo se sabe que existe), o `null`. La de otro día no dice nada de hoy.
+ */
+export function leerDiariaGuardada(empresaId, vehiculoId, fecha = hoyISO(), almacen = globalThis.localStorage) {
+  try {
+    const g = JSON.parse(almacen?.getItem(claveDiaria(empresaId, vehiculoId)) || 'null')
+    return g?.fecha === fecha ? { detalle: g.detalle ?? null } : null
+  } catch {
+    return null
+  }
+}
+
+export function guardarDiaria(empresaId, vehiculoId, detalle, fecha = hoyISO(), almacen = globalThis.localStorage) {
+  try {
+    almacen?.setItem(claveDiaria(empresaId, vehiculoId), JSON.stringify({ fecha, detalle }))
+  } catch {
+    // Sin almacenamiento solo se pierde el recuerdo; FOM sigue teniendo la inspección.
+  }
+}
+
+/**
+ * Un formato (forma del servidor: `{ id, name, items: [{ id, category, name,
+ * isCritical, helpText, displayOrder }] }`) agrupado por categoría en su orden.
+ * Sin formato sale vacío: la pantalla dice que la empresa no publicó ninguno.
+ */
+export function plantillaDeFormato(formato, tipo = 'otro') {
+  const categorias = []
+  const items = [...(formato?.items ?? [])].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+  for (const item of items) {
+    let categoria = categorias.find((c) => c.nombre === item.category)
+    if (!categoria) {
+      categoria = { nombre: item.category, items: [] }
+      categorias.push(categoria)
+    }
+    categoria.items.push({
+      id: item.id,
+      categoria: item.category,
+      nombre: item.name,
+      critico: Boolean(item.isCritical),
+      ayuda: item.helpText || null,
+    })
+  }
+  return { formatoId: formato?.id ?? null, nombre: formato?.name || 'Inspección preoperacional', tipo, categorias }
+}
+
+/**
+ * El cuerpo de `POST /mobile/vehicles/{id}/inspections`, como `enviar` de la app:
+ * las fallas en ítems CRÍTICOS piden su orden siempre; las demás, si el
+ * conductor respondió «Sí, crear ODT».
+ */
+export function cuerpoInspeccion({ plantilla, respuestas, ubicacion }) {
+  const items = new Map(plantilla.categorias.flatMap((c) => c.items).map((i) => [i.id, i]))
+  const lugar = String(ubicacion ?? '').trim()
+  return {
+    templateId: plantilla.formatoId,
+    ...(lugar.length >= 2 ? { location: lugar.slice(0, 200) } : {}),
+    answers: respuestas.map((r) => ({
+      templateItemId: r.itemId,
+      itemState: r.estado,
+      ...(r.nota?.trim() ? { note: r.nota.trim().slice(0, 1000) } : {}),
+      ...(r.estado === 'falla' && (items.get(r.itemId)?.critico || r.crearOdt === true) ? { requestedWorkOrder: true } : {}),
+    })),
+  }
+}
+
+/** Cómo se nombra la unidad en la hoja: su número (U-001) y, si no tiene, su alias. */
+export function unidadDeVehiculo(v) {
+  const valido = (x) => (x && x !== '—' ? x : null)
+  return { unidad: valido(v?.numero) ?? valido(v?.alias) ?? 'Unidad', placa: valido(v?.placa) }
+}
+
+/** Lo enviado, en la forma de «Ver resultado». El orden del formato es el de la hoja impresa. */
+export function detalleDeEnvio({ id, resultado, enviadaEn, vehiculo, plantilla, respuestas, ubicacion, quien }) {
+  const orden = new Map(plantilla.categorias.flatMap((c) => c.items).map((item, n) => [item.id, { item, n }]))
+  const lugar = String(ubicacion ?? '').trim()
+  return {
+    id,
+    resultado,
+    clase: 'daily',
+    fecha: hoyISO(new Date(enviadaEn)),
+    enviadaEn,
+    vehiculoId: vehiculo.id,
+    ...unidadDeVehiculo(vehiculo),
+    conductor: quien.nombre,
+    conductorId: quien.id,
+    ubicacion: lugar || null,
+    formato: plantilla.nombre,
+    respuestas: respuestas
+      .map((r) => {
+        const deFormato = orden.get(r.itemId)
+        return {
+          id: r.itemId,
+          itemId: r.itemId,
+          categoria: deFormato?.item.categoria ?? '',
+          nombre: deFormato?.item.nombre ?? r.itemId,
+          estado: r.estado,
+          critico: deFormato?.item.critico ?? false,
+          nota: r.nota?.trim() || null,
+          orden: deFormato?.n ?? 0,
+        }
+      })
+      .sort((a, b) => a.orden - b.orden),
+  }
+}
+
+/**
+ * FOM rechazó el envío porque la unidad ya tiene su diaria de hoy (409). Es su
+ * propia clase para que la pantalla no muestre un error y ya: pasa a «ya está
+ * hecha», que es lo que de verdad ocurre.
+ */
+export class InspeccionYaHecha extends Error {
+  constructor() {
+    super('La inspección de hoy de esta unidad ya está hecha.')
+    this.name = 'InspeccionYaHecha'
+    this.yaHecha = true
+  }
+}
+
+/** Lo que contesta FOM sobre una inspección, dicho para quien lo lee (errorDeInspeccion de la app). */
+function errorDeInspeccion(e) {
+  const texto = String(e?.message ?? '')
+  if (e?.estado === 409 && /already submitted today/iu.test(texto)) return new InspeccionYaHecha()
+  if (e?.estado === 403 && !/contraseña/u.test(texto)) return new Error('No estás asignado a esta unidad.')
+  if (e?.estado === 404 && texto === 'Ese recurso no existe en el servidor.') return new Error('Esta unidad o su formato de inspección ya no están disponibles.')
+  if (e?.estado === 400 && /every item/iu.test(texto)) return new Error('Responde todos los ítems antes de enviar.')
+  return e instanceof Error ? e : new Error(texto || 'No se pudo completar la inspección.')
+}
+
+const RESULTADOS_DIARIA = ['aprobada', 'aprobada_con_observaciones', 'bloqueada']
+
+/** Una inspección de la lista de FOM en el vocabulario de la pantalla. */
+function resumenDeFila(f) {
+  return {
+    id: f.id,
+    resultado: RESULTADOS_DIARIA.includes(f.result) ? f.result : 'pendiente',
+    clase: f.kind ?? null,
+    fecha: f.inspectionDate,
+    enviadaEn: f.submittedAt ?? null,
+    vehiculoId: f.vehicleId,
+    unidad: f.vehicleCode,
+    placa: f.vehiclePlate ?? null,
+    conductor: f.driverName?.trim() || 'Sin conductor',
+    conductorId: f.driverUserId ?? null,
+    ubicacion: f.location?.trim() || null,
+    formato: f.templateName,
+  }
+}
+
+/**
+ * Sube las fotos de las fallas, una por una, a la carpeta de la inspección.
+ * La inspección ya quedó guardada: si una foto no llega se cuenta y se dice,
+ * no se deshace el envío.
+ */
+async function subirFotosDeInspeccion(inspeccionId, plantilla, respuestas) {
+  const nombres = new Map(plantilla.categorias.flatMap((c) => c.items).map((i) => [i.id, i.nombre]))
+  const conFoto = respuestas.filter((r) => r.estado === 'falla' && r.fotos?.length)
+  const total = conFoto.reduce((n, r) => n + r.fotos.length, 0)
+  if (total === 0) return { subidas: 0, fallidas: 0, motivo: null }
+  if (!cloudinaryConfigurado()) return { subidas: 0, fallidas: total, motivo: 'Cloudinary no está configurado en esta web.' }
+  let subidas = 0
+  let motivo = null
+  for (const r of conFoto) {
+    for (const archivo of r.fotos) {
+      try {
+        await subirImagen(archivo, {
+          publicId: carpetaDe('inspections', inspeccionId, 'inspection_evidence'),
+          etiqueta: `fom_inspections_${inspeccionId}`,
+          titulo: nombres.get(r.itemId) ?? r.itemId,
+        })
+        subidas += 1
+      } catch (e) {
+        motivo ??= e?.message || 'No se pudo subir la foto.'
+      }
+    }
+  }
+  return { subidas, fallidas: total - subidas, motivo }
+}
+
+/** Lo que se cuenta del envío, como `ResultadoInspeccion` de la app. */
+export function resultadoDeEnvio(estado, plantilla, respuestas, ordenesGeneradas, completadaEn) {
+  const criticos = new Set(plantilla.categorias.flatMap((c) => c.items).filter((i) => i.critico).map((i) => i.id))
+  const fallas = respuestas.filter((r) => r.estado === 'falla')
+  return { estado, fallas: fallas.length, fallasCriticas: fallas.filter((r) => criticos.has(r.itemId)).length, ordenesGeneradas, completadaEn }
+}
+
+/** El aviso de «pide otra unidad», el mismo de la app. */
+export const AVISO_OTRA_UNIDAD = {
+  kind: 'replacement_request',
+  category: 'fleet',
+  title: 'Pide otra unidad',
+  detail: 'Su unidad quedó bloqueada en la inspección y necesita otra para salir.',
+}
+/** El aviso de unidad bloqueada que sale con el envío. */
+export const AVISO_BLOQUEADA = {
+  kind: 'inspection_blocked',
+  category: 'safety',
+  title: 'Unidad bloqueada en la inspección',
+  detail: 'Una falla crítica en la inspección preoperacional impide salir con la unidad.',
+}
+
+export const inspeccionConductor = {
+  /** El formato de la unidad; FOM ya lo filtra por su tipo. Con más de uno publicado se usa el primero. */
+  async plantilla(vehiculo) {
+    try {
+      const r = await api.formatosDeInspeccion(vehiculo.id)
+      return plantillaDeFormato(r?.items?.[0], vehiculo.tipo)
+    } catch (e) {
+      throw errorDeInspeccion(e)
+    }
+  },
+
+  /**
+   * ¿La unidad ya tiene su DIARIA de hoy? Como getDiariaDeHoy de la app, mira
+   * en dos sitios: la lista de la unidad en FOM (ve también la que hizo otra
+   * persona) y lo enviado desde este navegador (cubre al conductor, a quien FOM
+   * puede no dejarle leer esa lista). Si FOM no contesta y el navegador no sabe
+   * nada, `sin_comprobar`: se deja hacerla —mejor que bloquear sin datos— y se avisa.
+   */
+  async diariaDeHoy(vehiculoId, { empresaId = null } = {}) {
+    const fecha = hoyISO()
+    const guardada = leerDiariaGuardada(empresaId, vehiculoId, fecha)
+    try {
+      const r = await api.inspeccionesDeUnidad(vehiculoId, { limit: 20, offset: 0 })
+      // Si hubo dos (servidor sin la regla de una por día), manda la última.
+      const diaria = (r?.items ?? [])
+        .map(resumenDeFila)
+        .filter((i) => i.fecha === fecha && i.clase !== 'scheduled' && i.resultado !== 'pendiente')
+        .sort((a, b) => String(b.enviadaEn ?? '').localeCompare(String(a.enviadaEn ?? '')))[0]
+      if (diaria) {
+        return { estado: 'hecha', inspeccion: diaria, detalle: guardada?.detalle?.id === diaria.id ? guardada.detalle : null }
+      }
+    } catch (e) {
+      if (!guardada) {
+        return {
+          estado: 'sin_comprobar',
+          motivo: e?.estado
+            ? 'No pudimos comprobar en FOM si esta unidad ya tiene la inspección de hoy. Puedes hacerla igual.'
+            : 'Sin conexión: no pudimos comprobar si esta unidad ya tiene la inspección de hoy. Puedes hacerla igual.',
+        }
+      }
+    }
+    // Lo enviado desde este navegador vale aunque la lista de FOM no lo enseñe.
+    if (guardada) return { estado: 'hecha', inspeccion: guardada.detalle, detalle: guardada.detalle }
+    return { estado: 'pendiente' }
+  },
+
+  /** Una inspección con lo respondido, ítem por ítem, en el orden del formato. */
+  async detalle(id) {
+    try {
+      const r = await api.inspeccionDeUnidad(id)
+      return {
+        ...resumenDeFila(r.inspection),
+        respuestas: [...(r.findings ?? [])]
+          .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+          .map((f) => ({
+            id: f.id,
+            itemId: f.templateItemId,
+            categoria: f.category,
+            nombre: f.name,
+            estado: ['conforme', 'observacion', 'falla'].includes(f.itemState) ? f.itemState : 'conforme',
+            critico: Boolean(f.isCritical),
+            nota: f.note?.trim() || null,
+            orden: f.displayOrder ?? 0,
+          })),
+      }
+    } catch (e) {
+      throw errorDeInspeccion(e)
+    }
+  },
+
+  /**
+   * Envía la diaria y la recuerda en este navegador con lo respondido. Si FOM
+   * dice que ya había una (409), también se recuerda: el formulario no se
+   * vuelve a ofrecer hoy. Devuelve `{ resultado, detalle, fotos }`.
+   */
+  async enviar({ vehiculo, plantilla, respuestas, ubicacion }, quien) {
+    if (!plantilla?.formatoId) throw new Error('Tu empresa no tiene un formato de inspección publicado.')
+    let enviada
+    try {
+      enviada = await api.enviarInspeccionDiaria(vehiculo.id, cuerpoInspeccion({ plantilla, respuestas, ubicacion }))
+    } catch (e) {
+      const error = errorDeInspeccion(e)
+      if (error instanceof InspeccionYaHecha) guardarDiaria(quien.empresaId, vehiculo.id, null)
+      throw error
+    }
+    const fotos = await subirFotosDeInspeccion(enviada.inspectionId, plantilla, respuestas)
+    if (enviada.result === 'bloqueada') {
+      // El aviso es un extra: si FOM no lo toma, la inspección ya quedó guardada.
+      await api.avisarAlSupervisor({ ...AVISO_BLOQUEADA, vehicleId: vehiculo.id, inspectionId: enviada.inspectionId, severity: 'high' }).catch(() => undefined)
+    }
+    const ordenes = await Promise.all((enviada.workOrderIds ?? []).map((id) =>
+      api.ordenDeInspeccion(id)
+        .then((r) => ({ id: r?.workOrder?.id ?? id, estado: r?.workOrder?.status ?? 'abierta', descripcion: r?.workOrder?.description ?? '' }))
+        .catch(() => null)))
+    const completadaEn = new Date().toISOString()
+    const resultado = resultadoDeEnvio(enviada.result, plantilla, respuestas, ordenes.filter(Boolean), completadaEn)
+    const detalle = detalleDeEnvio({ id: enviada.inspectionId, resultado: enviada.result, enviadaEn: completadaEn, vehiculo, plantilla, respuestas, ubicacion, quien })
+    guardarDiaria(quien.empresaId, vehiculo.id, detalle)
+    return { resultado, detalle, fotos }
+  },
+
+  /** El conductor pide otra unidad porque la suya quedó bloqueada. */
+  async pedirOtraUnidad(vehiculoId) {
+    try {
+      await api.avisarAlSupervisor({ ...AVISO_OTRA_UNIDAD, vehicleId: vehiculoId, severity: 'high' })
+    } catch (e) {
+      if (/todavía no está en el servidor publicado/u.test(String(e?.message))) throw new Error('Pedir otra unidad todavía no está publicado en FOM.')
+      throw e
+    }
+  },
+}
+
+repoApi.inspeccionConductor = inspeccionConductor
 
 export default repoApi

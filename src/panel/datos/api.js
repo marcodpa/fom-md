@@ -601,4 +601,31 @@ Object.assign(api, {
     pedir(`${CONSOLA}/inspections/${inspectionId}/findings/${answerId}/follow-up`, { metodo: 'POST', cuerpo }),
 })
 
+// ============================================================
+// La inspección DIARIA del conductor (T-167a): las MISMAS rutas que la app
+// (src/services/inspeccionService.ts de FOM-DRIVER). La consola no tiene
+// versión propia de estas: el formato de la unidad, el envío, la lista de la
+// unidad y el aviso al supervisor viven en `/api/v1/mobile`. No pasan por
+// `/tenants/{id}`: son del conductor en sesión, nunca de otra empresa.
+// ============================================================
+const MOVIL = '/api/v1/mobile'
+
+Object.assign(api, {
+  /** El formato publicado para el tipo de la unidad: `{ items: [{ id, name, items: [...] }] }`. */
+  formatosDeInspeccion: (vehicleId) =>
+    pedir(`${MOVIL}/vehicles/${encodeURIComponent(vehicleId)}/inspection-templates`),
+  /** Envía la inspección: `{ templateId, location?, answers }` → `{ inspectionId, result, workOrderIds }`. */
+  enviarInspeccionDiaria: (vehicleId, cuerpo) =>
+    pedir(`${MOVIL}/vehicles/${encodeURIComponent(vehicleId)}/inspections`, { metodo: 'POST', cuerpo }),
+  /** Las inspecciones de una unidad, de la más nueva a la más vieja (al conductor puede responderle 403). */
+  inspeccionesDeUnidad: (vehicleId, { limit = 20, offset = 0 } = {}) =>
+    pedir(`${MOVIL}/inspections${consulta({ vehicleId, limit, offset })}`),
+  /** Una inspección con sus hallazgos (`{ inspection, findings }`). */
+  inspeccionDeUnidad: (id) => pedir(`${MOVIL}/inspections/${encodeURIComponent(id)}`),
+  /** La orden que generó la inspección (`{ workOrder }`). */
+  ordenDeInspeccion: (id) => pedir(`${MOVIL}/work-orders/${encodeURIComponent(id)}`),
+  /** Aviso del conductor a su supervisor: unidad bloqueada o «pide otra unidad». */
+  avisarAlSupervisor: (cuerpo) => pedir(`${MOVIL}/notices`, { metodo: 'POST', cuerpo }),
+})
+
 export default api
