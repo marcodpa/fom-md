@@ -1,0 +1,34 @@
+# T-166 (26 oct 2026): fotos con una persona y un teléfono o tableta, con la pantalla de la APP actual
+# (capturas-app/3x de T-161; la tableta lleva el panel: capturas-panel/3x/w-areas-empresas.png).
+# Compuestas en local con OpenCV (homografía por las 4 esquinas, esquinas redondeadas, niveles de pantalla,
+# reflejo suave), sin IA. Qué pantalla lleva cada foto:
+#   conductor-sos        Mi unidad del conductor con el índice 83/100      capturas-app/3x/m-cond-inicio-indice.png
+#   mano-app-perfil      Mi perfil del conductor (Carlos Méndez, 83/100)    capturas-app/3x/m-cond-perfil.png
+#   tecnico-app-unidad   Inspecciones del supervisor (17 de 26 hoy)         capturas-app/3x/m-sup-inspecciones.png
+#   fila-flota (tableta) Empresas del panel (contratista, compañía, personal) capturas-panel/3x/w-areas-empresas.png
+#   inicio-hero-movil-v  Resumen del supervisor                             capturas-app/3x/m-sup-resumen.png
+#   plataforma-hero-movil-v  Mapa de la flota                               capturas-app/3x/m-sup-mapa.png
+#   que-ofrecemos-hero-movil-v  Mantenimiento del supervisor                capturas-app/3x/m-sup-mantenimiento.png
+# conductor-sos, mano-app-perfil y fila-flota no tienen foto base con la pantalla vacía: la captura tapa entera
+# la pantalla vieja (mismas 4 esquinas; en conductor-sos se midieron de nuevo y la mano se recorta con su orilla).
+# Uso: python src/assets/marketing/v8/preparar_fotos.py --lista src/assets/marketing/v8/fuentes-t166.txt
+# Estas líneas sustituyen a las mismas de fuentes.txt (mismos nombres y fuentes; las fuentes cambiaron).
+conductor-sos                    foto      comparativa/web-v8-fotos/maestros/conductor-sos.webp
+conductor-sos-movil              foto      comparativa/web-v8-fotos/maestros/conductor-sos-movil.webp
+conductor-sos-plena              foto      comparativa/web-v8-fotos/plenas/conductor-sos-plena.webp
+conductor-sos-plena-movil        foto      comparativa/web-v8-fotos/plenas/conductor-sos-plena-movil.webp
+mano-app-perfil                  foto      comparativa/web-v8-fotos/maestros/mano-app-perfil.webp
+mano-app-perfil-movil            foto      comparativa/web-v8-fotos/maestros/mano-app-perfil-movil.webp
+mano-app-perfil-plena            foto      comparativa/web-v8-fotos/plenas/mano-app-perfil-plena.webp
+mano-app-perfil-plena-movil      foto      comparativa/web-v8-fotos/plenas/mano-app-perfil-plena-movil.webp
+tecnico-app-unidad               foto      comparativa/web-v8-fotos/maestros/tecnico-app-unidad.webp
+tecnico-app-unidad-movil         foto      comparativa/web-v8-fotos/maestros/tecnico-app-unidad-movil.webp
+tecnico-app-unidad-plena         foto      comparativa/web-v8-fotos/plenas/tecnico-app-unidad-plena.webp
+tecnico-app-unidad-plena-movil   foto      comparativa/web-v8-fotos/plenas/tecnico-app-unidad-plena-movil.webp
+fila-flota                       foto      comparativa/web-v8-fotos/maestros/fila-flota.webp
+fila-flota-movil                 foto      comparativa/web-v8-fotos/maestros/fila-flota-movil.webp
+fila-flota-plena                 foto      comparativa/web-v8-fotos/plenas/fila-flota-plena.webp
+fila-flota-plena-movil           foto      comparativa/web-v8-fotos/plenas/fila-flota-plena-movil.webp
+inicio-hero-movil-v              foto      comparativa/web-v8-fotos/maestros/inicio-hero-movil-v.webp
+plataforma-hero-movil-v          foto      comparativa/web-v8-fotos/maestros/plataforma-hero-movil-v.webp
+que-ofrecemos-hero-movil-v       foto      comparativa/web-v8-fotos/maestros/que-ofrecemos-hero-movil-v.webp
