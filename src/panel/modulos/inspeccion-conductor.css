@@ -85,6 +85,9 @@
 .ic-opcion > span { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .ic-opcion.on { border-color: var(--tono); background: var(--tono); color: var(--sobre-tono); }
 .ic-opcion:active { transform: scale(var(--app-escala-press)); }
+/* Las tres respuestas caben enteras en un teléfono de 390 px: 13 px de letra, 6 entre botones y 2 a los lados. */
+.ic-toggle-respuestas { gap: 6px; }
+.ic-toggle-respuestas > .ic-opcion { padding-inline: 2px; font-size: 13px; }
 
 /* Campo de texto (text-field.tsx): rótulo arriba, caja hundida de esquina 16. */
 .ic-campo { display: flex; flex-direction: column; gap: var(--app-esp-xs); }

@@ -228,7 +228,7 @@ function semillaDemo(perfil) {
   const responsable = { id: perfil?.id ?? 'demo', nombre: perfil?.nombre ?? 'Conductor de prueba', desde: hace(180) }
   return [
     { id: 'odt-asig-demo-1', estado: 'asignada', vehiculoId: v?.id ?? null, vehiculoNombre: unidad, titulo: 'Cambiar las pastillas de freno delanteras: chillan al frenar.', tipoFalla: 'frenos', prioridad: 'alta', creadaEn: hace(240), responsable, eventos: [] },
-    { id: 'odt-asig-demo-2', estado: 'pausada', vehiculoId: v?.id ?? null, vehiculoNombre: unidad, titulo: 'Revisar la luz de cruce derecha, se apaga sola.', tipoFalla: 'electrico', prioridad: 'media', creadaEn: hace(1440), responsable,
+    { id: 'odt-asig-demo-2', estado: 'pausada', vehiculoId: v?.id ?? null, vehiculoNombre: unidad, titulo: 'Luz trasera izquierda rota: se cayó la mica y no enciende.', tipoFalla: 'electrico', prioridad: 'media', creadaEn: hace(1440), responsable,
       eventos: [{ tipo: 'inicio', en: hace(170), nota: '' }, { tipo: 'pausa', en: hace(90), nota: 'Falta el repuesto' }] },
   ]
 }

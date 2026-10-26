@@ -1,0 +1,95 @@
+From d9380dad03b2a76a351689dcde761dcf488472bd Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Mon, 26 Oct 2026 09:18:23 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20=C2=ABObservaci=C3=B3n=C2=BB=20cabe=20en?=
+ =?UTF-8?q?tera=20en=20los=20botones=20de=20la=20inspecci=C3=B3n=20(T-173)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/components/inspection-item.tsx | 20 +++++++++++++++++---
+ 1 file changed, 17 insertions(+), 3 deletions(-)
+
+diff --git a/src/components/inspection-item.tsx b/src/components/inspection-item.tsx
+index 5b00ac8..9b8c3a1 100644
+--- a/src/components/inspection-item.tsx
++++ b/src/components/inspection-item.tsx
+@@ -62,10 +62,14 @@ export function InspectionItem({ item, respuesta, onChange }: InspectionItemProp
+         </View>
+       </View>
+ 
+-      {/* Tres respuestas (§4.1): Conforme / Observación / Falla */}
+-      <View style={[styles.toggle, { gap: spacing.sm }]}>
++      {/* Tres respuestas (§4.1): Conforme / Observación / Falla. A 390 px
++          «⚠ Observación» no cabía (se cortaba en «Observaci…»): un punto
++          menos de letra y menos aire entre botones, sin partir la palabra
++          (igual que en la web). */}
++      <View style={[styles.toggle, styles.toggleApretado]}>
+         <ToggleButton
+           label="✓ Conforme"
++          apretado
+           active={estado === 'conforme'}
+           activeBg={colors.success}
+           activeFg={colors.onSuccess}
+@@ -73,6 +77,7 @@ export function InspectionItem({ item, respuesta, onChange }: InspectionItemProp
+         />
+         <ToggleButton
+           label="⚠ Observación"
++          apretado
+           active={estado === 'observacion'}
+           activeBg={colors.warning}
+           activeFg={colors.onWarning}
+@@ -80,6 +85,7 @@ export function InspectionItem({ item, respuesta, onChange }: InspectionItemProp
+         />
+         <ToggleButton
+           label="✕ Falla"
++          apretado
+           active={estado === 'falla'}
+           activeBg={colors.danger}
+           activeFg={colors.onDanger}
+@@ -165,12 +171,15 @@ function ToggleButton({
+   activeBg,
+   activeFg,
+   onPress,
++  apretado = false,
+ }: {
+   label: string;
+   active: boolean;
+   activeBg: string;
+   activeFg: string;
+   onPress: () => void;
++  /** Letra 13 y 2 px a los lados: para que tres respuestas quepan a 390 px. */
++  apretado?: boolean;
+ }) {
+   const { colors, radii, spacing } = useTheme();
+   return (
+@@ -186,11 +195,12 @@ function ToggleButton({
+           borderRadius: radii.md,
+           paddingVertical: spacing.sm,
+         },
++        apretado && styles.toggleBtnApretado,
+       ]}>
+       <ThemedText
+         variant="caption"
+         numberOfLines={1}
+-        style={{ color: active ? activeFg : colors.textSecondary }}>
++        style={[{ color: active ? activeFg : colors.textSecondary }, apretado && styles.toggleTextoApretado]}>
+         {label}
+       </ThemedText>
+     </PressableScale>
+@@ -204,6 +214,10 @@ const styles = StyleSheet.create({
+   badge: { paddingVertical: 2 },
+   flex1: { flex: 1 },
+   toggle: { flexDirection: 'row' },
++  // 13 px de letra, 6 entre botones y 2 a los lados (mismo número que la web).
++  toggleApretado: { gap: 6 },
++  toggleBtnApretado: { paddingHorizontal: 2 },
++  toggleTextoApretado: { fontSize: 13 },
+   toggleBtn: {
+     flex: 1,
+     alignItems: 'center',
+-- 
+2.55.0.windows.3
+

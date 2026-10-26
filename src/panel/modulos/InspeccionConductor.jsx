@@ -48,9 +48,6 @@ const TRAZOS = {
   reporte: <><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" /><path d="M15 3v4h4" /><path d="M9 17v-4" /><path d="M12 17v-6" /><path d="M15 17v-2" /></>,
   vacio: <><path d="M4 13l2-7h12l2 7" /><path d="M4 13h5a3 3 0 0 0 6 0h5v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /></>,
 }
-/** Las tres respuestas caben enteras en un teléfono de 390 px: 13 px de letra, 6 entre botones y 2 a los lados. */
-const TOGGLE_APRETADO = { gap: 6 }
-const OPCION_APRETADA = { fontSize: 13, paddingInline: 2 }
 
 function IconoApp({ nombre, tam = 20 }) {
   return (
@@ -341,10 +338,11 @@ function Pregunta({ item, respuesta, alCambiar, fotosVivas }) {
 
       {/* Tres respuestas (§4.1): Conforme / Observación / Falla. A 390 px
           «⚠ Observación» no cabía (se cortaba en «Observaci…»): un punto
-          menos de letra y menos aire entre botones, sin partir la palabra. */}
-      <div className="ic-toggle" role="group" aria-label={`Respuesta para ${item.nombre}`} style={TOGGLE_APRETADO}>
+          menos de letra y menos aire entre botones, sin partir la palabra
+          (.ic-toggle-respuestas en inspeccion-conductor.css). */}
+      <div className="ic-toggle ic-toggle-respuestas" role="group" aria-label={`Respuesta para ${item.nombre}`}>
         {[['conforme', '✓ Conforme', 'exito'], ['observacion', '⚠ Observación', 'aviso'], ['falla', '✕ Falla', 'peligro']].map(([valor, texto, tono]) => (
-          <button key={valor} type="button" className={`ic-opcion ${tono}${estado === valor ? ' on' : ''}`} aria-pressed={estado === valor} style={OPCION_APRETADA}
+          <button key={valor} type="button" className={`ic-opcion ${tono}${estado === valor ? ' on' : ''}`} aria-pressed={estado === valor}
             onClick={() => alCambiar(conEstado(respuesta, item.id, valor))}>
             <span>{texto}</span>
           </button>

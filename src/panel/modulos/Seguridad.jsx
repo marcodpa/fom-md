@@ -27,6 +27,17 @@ const ESTADO_SOS = { active: 'Activa', acknowledged: 'Reconocida', resolved: 'Re
 const COLOR_SOS = { active: 'rojo', acknowledged: 'ambar', resolved: 'verde', cancelled: 'gris' }
 const TIPO_SOS = { accident: 'Accidente', mechanical: 'Falla mecánica', medical: 'Emergencia médica', security: 'Seguridad', other: 'Otra' }
 
+/**
+ * La app manda la dirección en palabras al final del detalle, tras un salto de
+ * línea («…\nDónde: …», ver detalleParaFom en repoApi). En la fila el salto se
+ * perdía y «Dónde:» quedaba pegado al texto: se separa y va en su propia línea.
+ */
+function partirDetalle(detalle) {
+  const texto = String(detalle ?? '')
+  const corte = texto.lastIndexOf('\nDónde: ')
+  return corte < 0 ? { que: texto, lugar: '' } : { que: texto.slice(0, corte).trim(), lugar: texto.slice(corte + 1).trim() }
+}
+
 function coords(u) {
   return u && u.latitude != null ? `${Number(u.latitude).toFixed(5)}, ${Number(u.longitude).toFixed(5)}` : null
 }
@@ -179,14 +190,16 @@ export default function Seguridad() {
               <div className="pnl-filas">
                 {masNuevoPrimero(sos.datos, 'reportadaEn').map((s) => {
                   const donde = coords(s.ubicacionVehiculo) ?? coords(s.ubicacionReportante)
+                  const { que, lugar } = partirDetalle(s.detalle)
                   return (
                     <div className={`pnl-fila${s.estado === 'active' ? ' critica' : ''}`} key={s.id}>
                       <Icono nombre="alerta" tam={18} />
                       <div className="pnl-fila-txt">
                         <b>{TIPO_SOS[s.tipo] ?? s.tipo}{s.tipoOtro ? ` · ${s.tipoOtro}` : ''}</b>
                         <span>
-                          {s.detalle} · {f.fechaHora(s.reportadaEn)}
+                          {que} · {f.fechaHora(s.reportadaEn)}
                           {donde && <> · <a className="pnl-link" href={`https://www.openstreetmap.org/?mlat=${donde.split(',')[0]}&mlon=${donde.split(',')[1].trim()}#map=16/${donde.split(',')[0]}/${donde.split(',')[1].trim()}`} target="_blank" rel="noreferrer">{donde}</a></>}
+                          {lugar && <><br />{lugar}</>}
                         </span>
                       </div>
                       <Tag color={COLOR_SOS[s.estado] ?? 'gris'}>{ESTADO_SOS[s.estado] ?? s.estado}</Tag>

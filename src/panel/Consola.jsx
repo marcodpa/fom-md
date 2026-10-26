@@ -119,6 +119,9 @@ const MENU_POR_AREA = {
         { a: '/panel/mapa', icono: 'mapa', texto: 'Mapa' },
         { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento' },
         { a: '/panel/alertas', icono: 'alerta', texto: 'Alertas' },
+        // Activarse en otra unidad con el PIN (T-167b). En el teléfono se llega
+        // desde Mi perfil, como en la app; en la computadora, desde aquí.
+        { a: '/panel/otra-unidad', icono: 'sync', texto: 'Otra unidad', soloEscritorio: true },
         // El SOS, como en la app (T-167b). En el teléfono no va en «Accesos»:
         // allí es el botón rojo que flota sobre el mapa de Mi unidad.
         { a: '/panel/sos', icono: 'llamar', texto: 'Emergencia (SOS)', clase: 'sos-nav', soloEscritorio: true },
