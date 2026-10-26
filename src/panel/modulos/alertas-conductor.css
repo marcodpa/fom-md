@@ -1,0 +1,37 @@
+/* ============================================================
+   ALERTAS DEL CONDUCTOR (T-167c) — mis-notificaciones.tsx de la app
+   ------------------------------------------------------------
+   Usa las piezas de mantenimiento-movil.css (tarjeta, riel, buscador,
+   tramos); aquí solo lo que esta pantalla añade.
+   ============================================================ */
+.mva { padding-top: var(--app-esp-md); }
+.mva-escritorio { max-width: 760px; padding: 0 0 32px; }
+
+.mva-cabeza { display: flex; align-items: center; gap: 8px; }
+.mva-cabeza .mvm-buscar { flex: 1; min-width: 0; }
+.mva-cabeza .mvm-buscar input { flex: 1; min-width: 0; border: 0; background: none; color: var(--app-texto); font: inherit; font-size: 16px; outline: none; }
+.mva-marcar { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 0; border-radius: var(--app-r-pill); background: var(--app-primario); color: #fff; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+/* La tarjeta ya no es un botón: dentro van «abrir» y sus dos acciones. */
+.mvm-tarjeta.mva-tarjeta { cursor: default; padding: 0; gap: 0; }
+.mvm-tarjeta.mva-tarjeta:active { transform: none; }
+.mva-abrir { display: block; width: 100%; padding: 12px 12px 6px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.mva-abrir:active { transform: scale(var(--app-escala-press, .97)); }
+.mva-textos { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.mva-titulo-fila { display: flex; align-items: center; gap: 8px; }
+.mva-titulo-fila .mvm-late { flex: none; }
+.mva-meta { display: flex; align-items: center; gap: 7px; margin-top: 2px; font: var(--app-caption); color: var(--app-texto-3); }
+.mva-meta > i { width: 2.5px; height: 2.5px; flex: none; border-radius: 50%; background: var(--app-borde-fuerte); }
+.mva-meta time { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mva-autor { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mva-chevron { margin-left: auto; display: grid; }
+
+.mva-acciones { display: flex; justify-content: flex-end; gap: 6px; padding: 0 10px 10px 56px; }
+.mva-accion { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px; border: 1px solid var(--app-borde); border-radius: var(--app-r-pill); background: var(--app-sup-baja); color: var(--app-texto-2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.mva-accion.quitar { color: var(--app-peligro); }
+
+.pnl.fom-dark[data-diseno] :is(.mva-abrir, .mva-accion, .mva-marcar):focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mva-abrir:active { transform: none; }
+}

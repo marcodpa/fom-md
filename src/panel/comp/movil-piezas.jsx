@@ -1,6 +1,9 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import LogoFom from '../../components/LogoFom'
 import { Icono } from '../Iconos'
+import { useSesion } from '../useSesion'
+import { areaDe } from '../roles'
+import { useAvisosConductor } from '../datos/useAvisosConductor'
 
 /**
  * Las piezas de la app para la web en el teléfono (encabezado-fom.tsx,
@@ -37,8 +40,18 @@ export function IconoMovil({ nombre, tam = 20 }) {
  * EL ENCABEZADO DE LAS PESTAÑAS: la cápsula (logo, la sección en mayúsculas
  * chicas y la empresa), la campana con su globo y el avatar redondo. Se queda
  * fijo arriba y el contenido pasa por detrás.
+ *
+ * Al conductor la campana le cuenta SUS avisos (su unidad, las órdenes que
+ * reportó y sus papeles), como encabezado-fom de la app, y no los de toda la
+ * empresa que llegan en `sinLeer`. Los demás roles, sin cambios.
  */
 export function MovilEncabezado({ seccion, nombre, sinLeer, etiquetaCampana, iniciales }) {
+  const sesion = useSesion()
+  const { pathname } = useLocation()
+  const esConductor = areaDe(sesion?.perfil) === 'conductor'
+  const suyos = useAvisosConductor(sesion?.perfil, { activo: esConductor, refresco: pathname })
+  const avisos = esConductor ? suyos.noLeidas : sinLeer
+  const etiqueta = esConductor ? (avisos > 0 ? `Alertas: ${avisos} sin leer` : 'Alertas') : etiquetaCampana
   return (
     <header className="mv-barra">
       <div className="mv-capsula">
@@ -49,9 +62,9 @@ export function MovilEncabezado({ seccion, nombre, sinLeer, etiquetaCampana, ini
           {nombre && <b className="mv-nombre">{nombre}</b>}
         </span>
       </div>
-      <Link to="/panel/alertas" className="mv-circulo" aria-label={etiquetaCampana}>
+      <Link to="/panel/alertas" className="mv-circulo" aria-label={etiqueta}>
         <Icono nombre="campana" tam={20} />
-        {sinLeer > 0 && <span className="mv-insignia" aria-hidden="true">{sinLeer > 99 ? '99+' : sinLeer}</span>}
+        {avisos > 0 && <span className="mv-insignia" aria-hidden="true">{avisos > 99 ? '99+' : avisos}</span>}
       </Link>
       <Link to="/panel/mi-perfil" className="mv-circulo mv-avatar" aria-label="Mi perfil">{iniciales}</Link>
     </header>

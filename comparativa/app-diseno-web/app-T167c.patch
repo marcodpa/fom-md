@@ -1,0 +1,173 @@
+From d308460e3335fd26e96cf9a248f6f0e6919d560c Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Mon, 26 Oct 2026 08:13:14 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20la=20campana=20sale=20con=20su=20n=C3=BA?=
+ =?UTF-8?q?mero=20en=20todas=20las=20pantallas=20del=20conductor=20(tambi?=
+ =?UTF-8?q?=C3=A9n=20Mi=20perfil=20e=20Inspecci=C3=B3n)=20(T-167c)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/components/encabezado-fom.tsx    | 36 ++++++++++++++++++--
+ src/services/notiConductorService.ts | 51 +++++++++++++++++++++-------
+ 2 files changed, 72 insertions(+), 15 deletions(-)
+
+diff --git a/src/components/encabezado-fom.tsx b/src/components/encabezado-fom.tsx
+index 1dc52c7..6097611 100644
+--- a/src/components/encabezado-fom.tsx
++++ b/src/components/encabezado-fom.tsx
+@@ -16,7 +16,8 @@ import { tinte } from '@/lib/color';
+ // Directo del servicio: la cuenta corta de la campana no está en el índice de
+ // servicios.
+ import { cuentaAvisosEnMemoria, getCuentaAvisos, type CuentaAvisos } from '@/services/notificationService';
+-import { useAdmin } from '@/session';
++import { getPanelMantenimientoConductor, noLeidasEnMemoria } from '@/services/notiConductorService';
++import { useAdmin, useDriving } from '@/session';
+ import { DEFAULT_BRAND, useTheme } from '@/theme';
+ 
+ /**
+@@ -131,7 +132,8 @@ type EncabezadoFomProps = {
+   flotante?: boolean;
+   /**
+    * Cuántos avisos sin leer, cuando la pantalla ya los cuenta (el conductor).
+-   * Sin este dato, el encabezado los cuenta solo con la empresa activa.
++   * Sin este dato, el encabezado los cuenta solo: con la empresa activa, o con
++   * el panel del conductor en sus pantallas.
+    */
+   sinLeer?: number;
+ };
+@@ -146,6 +148,7 @@ export function EncabezadoFom({
+   const { colors, spacing, radii, brand, apariencia, colorScheme, borderWidths } = useTheme();
+   const { user } = useAuth();
+   const { empresaId } = useAdmin();
++  const { vehicle: unidad } = useDriving();
+   const router = useRouter();
+   const ruta = usePathname();
+   const insets = useSafeAreaInsets();
+@@ -188,7 +191,34 @@ export function EncabezadoFom({
+     }, [cuentaPropia, companyId]),
+   );
+ 
+-  const avisos = sinLeer ?? (cuentaPropia ? contados.total : 0);
++  /*
++   * EL CONDUCTOR: si la pantalla no trae la cuenta (Mi perfil, Inspección), la
++   * saca del mismo panel que Mi unidad y Mantenimiento —lo pendiente de SU
++   * unidad, sus órdenes y sus alertas—. Antes la campana de Mi perfil salía sin
++   * número aunque en Mi unidad hubiera avisos. El panel se recuerda un minuto:
++   * no se arma de nuevo en cada pestaña.
++   */
++  const cuentaConductor = sinLeer === undefined && contexto === 'conductor' && !!user;
++  const [delConductor, setDelConductor] = useState<number>(() =>
++    cuentaConductor && user ? (noLeidasEnMemoria(unidad ?? null, user) ?? 0) : 0,
++  );
++  useFocusEffect(
++    useCallback(() => {
++      if (!cuentaConductor || !user) return;
++      let activo = true;
++      getPanelMantenimientoConductor(unidad ?? null, user)
++        .then((p) => {
++          if (activo) setDelConductor(p.noLeidas);
++        })
++        // Sin poder contarlos, la campana se queda sin número.
++        .catch(() => undefined);
++      return () => {
++        activo = false;
++      };
++    }, [cuentaConductor, user, unidad]),
++  );
++
++  const avisos = sinLeer ?? (cuentaPropia ? contados.total : cuentaConductor ? delConductor : 0);
+   const avisosMas = sinLeer === undefined && cuentaPropia && contados.mas;
+   const conCampana = contexto === 'conductor' || !!companyId;
+   const irAvisos = () => {
+diff --git a/src/services/notiConductorService.ts b/src/services/notiConductorService.ts
+index 359a715..566d728 100644
+--- a/src/services/notiConductorService.ts
++++ b/src/services/notiConductorService.ts
+@@ -250,7 +250,14 @@ type PanelArmado = { panel: PanelMantenimientoConductor; completo: boolean };
+  * (marcar una acción realizada, una inspección, una orden) o un cambio de
+  * sesión la sube, y el panel guardado deja de valer.
+  */
+-type EntradaPanel = { gen: number; api: number; en: number | null; promesa: Promise<PanelArmado> };
++type EntradaPanel = {
++  gen: number;
++  api: number;
++  en: number | null;
++  promesa: Promise<PanelArmado>;
++  /** El panel ya llegado y completo: la campana lo lee sin esperar. */
++  listo?: PanelMantenimientoConductor;
++};
+ const paneles = new Map<string, EntradaPanel>();
+ /** Sube con cada olvido: un panel que estaba en camino ya no se guarda. */
+ let panelesGen = 0;
+@@ -264,6 +271,30 @@ export function olvidarPanelConductor(): void {
+   paneles.clear();
+ }
+ 
++/** El nombre entra en la clave: con él se decide qué ODT son suyas. */
++function clavePanel(vehicle: Vehicle | null, user: User): string {
++  return `${user.id}|${user.companyId ?? ''}|${user.name}|${vehicle?.id ?? ''}`;
++}
++
++/** Sigue valiendo: nada lo olvidó, FOM no cambió y no ha pasado el minuto. */
++function panelVigente(e: EntradaPanel): boolean {
++  return (
++    e.gen === panelesGen &&
++    e.api === generacionLecturas() &&
++    (e.en === null || Date.now() - e.en < PANEL_VIGENTE_MS)
++  );
++}
++
++/**
++ * Los avisos sin leer del panel que ya está en memoria y vale, sin pedir nada;
++ * `null` si no lo hay. La campana arranca con él: al cambiar de pestaña no
++ * parpadea de 0 a N.
++ */
++export function noLeidasEnMemoria(vehicle: Vehicle | null, user: User): number | null {
++  const e = paneles.get(clavePanel(vehicle, user));
++  return e?.listo && panelVigente(e) ? e.listo.noLeidas : null;
++}
++
+ /**
+  * Carga ÚNICA del tab de Mantenimiento: pide las ODT de la empresa y las
+  * alertas UNA vez, y de ahí deriva tanto las acciones (vista principal) como
+@@ -276,27 +307,23 @@ export async function getPanelMantenimientoConductor(
+   vehicle: Vehicle | null,
+   user: User,
+ ): Promise<PanelMantenimientoConductor> {
+-  // El nombre entra en la clave: con él se decide qué ODT son suyas.
+-  const clave = `${user.id}|${user.companyId ?? ''}|${user.name}|${vehicle?.id ?? ''}`;
++  const clave = clavePanel(vehicle, user);
+   const guardado = paneles.get(clave);
+-  if (
+-    guardado &&
+-    guardado.gen === panelesGen &&
+-    guardado.api === generacionLecturas() &&
+-    (guardado.en === null || Date.now() - guardado.en < PANEL_VIGENTE_MS)
+-  ) {
++  if (guardado && panelVigente(guardado)) {
+     return (await guardado.promesa).panel;
+   }
+   const gen = panelesGen;
+   const entrada: EntradaPanel = { gen, api: generacionLecturas(), en: null, promesa: armarPanel(vehicle, user) };
+   paneles.set(clave, entrada);
+   entrada.promesa.then(
+-    ({ completo }) => {
++    ({ panel, completo }) => {
+       if (paneles.get(clave) !== entrada) return;
+       // Con una lectura caída no se recuerda: la próxima pantalla reintenta,
+       // como antes, en vez de enseñar el hueco un minuto entero.
+-      if (completo && gen === panelesGen) entrada.en = Date.now();
+-      else paneles.delete(clave);
++      if (completo && gen === panelesGen) {
++        entrada.en = Date.now();
++        entrada.listo = panel;
++      } else paneles.delete(clave);
+     },
+     () => {
+       if (paneles.get(clave) === entrada) paneles.delete(clave);
+-- 
+2.55.0.windows.3
+

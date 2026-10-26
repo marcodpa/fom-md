@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useSesion } from '../useSesion'
 import { entrarEmpresa, salirEmpresa } from '../auth'
-import { esAdminFom } from '../roles'
+import { areaDe, esAdminFom } from '../roles'
+import AlertasConductor from './AlertasConductor'
 import { useDatos } from '../useDatos'
 import { Cabecera, Campo, Cargando, Chips, ErrorCarga, Pestanas, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
@@ -21,6 +22,8 @@ const TIPOS_EVENTO = [{ v: 'exceso_velocidad', t: 'Exceso de velocidad' }, { v: 
 
 export default function Alertas() {
   const sesion = useSesion()
+  // El conductor ve SUS avisos (los mismos que cuenta su campana), como en la app.
+  if (areaDe(sesion?.perfil) === 'conductor') return <AlertasConductor />
   return esAdminFom(sesion?.perfil) && !sesion?.perfil?.empresaGestion
     ? <ElegirEmpresaAlertas /> : <BandejaAlertas />
 }
