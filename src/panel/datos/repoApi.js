@@ -1918,18 +1918,7 @@ Object.assign(repoApi, {
     },
     async emergencias({ estado = '' } = {}) {
       const r = await api.emergencias({ status: estado })
-      return (r?.items ?? []).map((e) => ({
-        id: e.id,
-        vehiculoId: e.vehicleId ?? null,
-        reportadaPor: e.reportedByUserId,
-        tipo: e.kind,
-        tipoOtro: e.kindOther ?? null,
-        detalle: e.detail,
-        estado: e.status,
-        reportadaEn: e.reportedAt,
-        ubicacionReportante: e.reporterLocation ?? null,
-        ubicacionVehiculo: e.vehicleLocation ?? null,
-      }))
+      return (r?.items ?? []).map(emergenciaParaConsola)
     },
     async reconocerEmergencia(id) {
       await api.reconocerEmergencia(id)
@@ -2719,5 +2708,237 @@ export const inspeccionConductor = {
 }
 
 repoApi.inspeccionConductor = inspeccionConductor
+
+// ============================================================
+// EL SOS DEL CONDUCTOR (T-167b)
+// ------------------------------------------------------------
+// Copia de src/services/emergencyService.ts de la app: el aviso viaja UNA vez
+// y completo —quién, en qué unidad, qué pasa y dónde— y llega al supervisor
+// en «Eventos y SOS». Nace ACTIVO; el supervisor lo TOMA (va ayuda) y, tomado,
+// se RESUELVE. Quien lo mandó puede retirarlo mientras nadie lo haya tomado.
+//
+// Las piezas exportadas las usa también la demostración (repoSemilla.js).
+// ============================================================
+
+/** Cómo nombra la consola del supervisor un aviso (forma de `seguridad.emergencias`). */
+export function emergenciaParaConsola(e) {
+  return {
+    id: e.id,
+    vehiculoId: e.vehicleId ?? null,
+    reportadaPor: e.reportedByUserId,
+    tipo: e.kind,
+    tipoOtro: e.kindOther ?? null,
+    detalle: e.detail,
+    estado: e.status,
+    reportadaEn: e.reportedAt,
+    ubicacionReportante: e.reporterLocation ?? null,
+    ubicacionVehiculo: e.vehicleLocation ?? null,
+  }
+}
+
+/** Los tipos de la app y su nombre en FOM. */
+export const TIPO_SOS_FOM = { accidente: 'accident', mecanica: 'mechanical', salud: 'medical', seguridad: 'security', otro: 'other' }
+const TIPO_SOS_APP = Object.fromEntries(Object.entries(TIPO_SOS_FOM).map(([app, fom]) => [fom, app]))
+const ESTADO_SOS_APP = { active: 'activa', acknowledged: 'atendida', resolved: 'terminada', cancelled: 'cancelada' }
+
+/** Etiqueta legible de cada tipo, como EMERGENCIA_LABEL de la app. */
+export const ETIQUETA_SOS = { accidente: 'Accidente', mecanica: 'Falla mecánica', salud: 'Salud', seguridad: 'Seguridad', otro: 'Otro' }
+
+/** Con «Otro» manda lo que escribió el conductor: «Otro» a secas no le dice nada a quien va a ir. */
+export function etiquetaEmergencia(e) {
+  const libre = String(e?.tipoOtro ?? '').trim()
+  return e?.tipo === 'otro' && libre ? libre : ETIQUETA_SOS[e?.tipo] ?? 'Emergencia'
+}
+
+/**
+ * FOM guarda las coordenadas, no la dirección en palabras: la dirección viaja
+ * al final del detalle —quien lo lee en la consola la ve ahí— y de ahí se lee.
+ */
+const DONDE_SOS = '\nDónde: '
+
+export function detalleParaFom(detalle, ubicacionTexto) {
+  const texto = String(ubicacionTexto ?? '').trim()
+  return (texto ? `${String(detalle).trim()}${DONDE_SOS}${texto}` : String(detalle).trim()).slice(0, 2000)
+}
+
+function separarDetalle(detail) {
+  const texto = String(detail ?? '')
+  const corte = texto.lastIndexOf(DONDE_SOS)
+  return corte < 0
+    ? { detalle: texto, ubicacionTexto: '' }
+    : { detalle: texto.slice(0, corte), ubicacionTexto: texto.slice(corte + DONDE_SOS.length) }
+}
+
+const puntoSos = (p) => (p && p.latitude != null && p.longitude != null ? { lat: Number(p.latitude), lng: Number(p.longitude) } : null)
+
+/** El cuerpo de `POST /mobile/emergencies`, como `enviarSOS` de la app. */
+export function cuerpoEmergencia({ vehiculoId, tipo, tipoOtro, detalle, ubicacionTexto, coords }) {
+  // Seis decimales: medio metro basta para llegar.
+  const seis = (x) => Math.round(x * 1e6) / 1e6
+  const libre = String(tipoOtro ?? '').trim()
+  return {
+    ...(vehiculoId ? { vehicleId: vehiculoId } : {}),
+    kind: TIPO_SOS_FOM[tipo],
+    // Solo cuenta con «Otro»: en los demás el tipo ya se nombra solo.
+    ...(tipo === 'otro' && libre ? { kindOther: libre.slice(0, 120) } : {}),
+    detail: detalleParaFom(detalle, ubicacionTexto),
+    ...(coords ? { reporterLatitude: seis(coords.lat), reporterLongitude: seis(coords.lng) } : {}),
+  }
+}
+
+/**
+ * Un aviso de FOM en el vocabulario de la pantalla del conductor (`Emergencia`
+ * de la app). `nombres` pone quién lo tomó; sin él, «Tu supervisor».
+ */
+export function emergenciaDelConductor(e, nombres = new Map()) {
+  const { detalle, ubicacionTexto } = separarDetalle(e.detail)
+  return {
+    id: e.id,
+    tipo: TIPO_SOS_APP[e.kind] ?? 'otro',
+    tipoOtro: e.kindOther ?? null,
+    estado: ESTADO_SOS_APP[e.status] ?? 'activa',
+    detalle,
+    ubicacionTexto,
+    creadaEn: e.reportedAt,
+    coords: puntoSos(e.reporterLocation),
+    coordsUnidad: puntoSos(e.vehicleLocation),
+    creadorId: e.reportedByUserId,
+    vehiculoId: e.vehicleId ?? null,
+    atendidaPor: e.acknowledgedByUserId ? nombres.get(e.acknowledgedByUserId) ?? 'Tu supervisor' : null,
+    atendidaEn: e.acknowledgedAt ?? null,
+  }
+}
+
+/** Lo que contesta FOM sobre un aviso, dicho para quien lo lee (errorDeSOS de la app). */
+function errorDeSos(e, porDefecto) {
+  if (/todavía no está en el servidor publicado/u.test(String(e?.message))) return new Error('Esa acción todavía no está publicada en FOM.')
+  switch (e?.estado) {
+    case 403: return new Error('Eso lo hace el supervisor.')
+    case 404: return new Error('Ese aviso ya no está a tu alcance.')
+    case 409: return new Error(/cancel/iu.test(String(e?.message)) ? 'Tu supervisor ya lo tomó: ya no se puede retirar.' : 'El aviso cambió mientras lo tenías abierto. Vuelve a abrirlo.')
+    case undefined: return new Error(e?.message || porDefecto)
+    default: return new Error(`${porDefecto} ${e?.message ?? ''}`.trim())
+  }
+}
+
+/** Lo más que el envío espera a la lectura previa (ms): con mala señal, el aviso sale igual. */
+const TOPE_SOS_MS = 4_000
+function conTope(lectura, respaldo) {
+  let reloj
+  const tope = new Promise((listo) => { reloj = setTimeout(() => listo(respaldo), TOPE_SOS_MS) })
+  return Promise.race([lectura.catch(() => respaldo), tope]).finally(() => clearTimeout(reloj))
+}
+
+/** Activos y tomados, el más nuevo primero (`enCurso` de la app). */
+async function avisosEnCurso() {
+  const [activas, tomadas] = await Promise.all(['active', 'acknowledged'].map((s) => api.emergenciasDelConductor(s)))
+  return [...(activas?.items ?? []), ...(tomadas?.items ?? [])].sort((a, b) => String(b.reportedAt).localeCompare(String(a.reportedAt)))
+}
+
+/**
+ * El aviso propio entre los que devuelve FOM. Al conductor FOM solo le da los
+ * suyos; si la sesión web no trae su id (solo el correo), el primero es suyo.
+ */
+const elMio = (filas, usuarioId) => (usuarioId ? filas.find((e) => e.reportedByUserId === usuarioId) ?? null : filas[0] ?? null)
+
+export const sosConductor = {
+  /** Mi aviso en curso (activo o tomado), o `null`. Para reanudar la pantalla. */
+  async miEmergencia({ usuarioId = null } = {}) {
+    const mia = elMio(await avisosEnCurso(), usuarioId)
+    return mia ? emergenciaDelConductor(mia) : null
+  },
+
+  /**
+   * Manda el aviso y devuelve la emergencia ya creada. Si ya hay uno en curso,
+   * es ESE: dos avisos de la misma persona son la misma emergencia contada dos
+   * veces. Falla A LA CARA: nunca se dice que va ayuda si no salió.
+   */
+  async enviar(entrada, { usuarioId = null } = {}) {
+    const previa = elMio(await conTope(avisosEnCurso(), []), usuarioId)
+    if (previa) return emergenciaDelConductor(previa)
+    try {
+      const r = await api.enviarEmergencia(cuerpoEmergencia(entrada), entrada.idempotencia)
+      return emergenciaDelConductor(r.emergency)
+    } catch (e) {
+      throw errorDeSos(e, 'No pudimos enviar el aviso. Intenta de nuevo.')
+    }
+  },
+
+  async cancelar(emergencia) {
+    try {
+      await api.cancelarEmergencia(emergencia.id)
+    } catch (e) {
+      throw errorDeSos(e, 'No pudimos retirar el aviso.')
+    }
+  },
+
+  async terminar(emergencia) {
+    try {
+      await api.terminarEmergencia(emergencia.id)
+    } catch (e) {
+      throw errorDeSos(e, 'No pudimos cerrar el aviso.')
+    }
+  },
+}
+
+// ============================================================
+// OTRA UNIDAD CON PIN (T-167b)
+// ------------------------------------------------------------
+// Copia de pin-unidad.tsx con asignacionService/fomConduccion de la app: la
+// lista es la de SUS unidades como secundario (`/drivers/me`), el PIN abre la
+// sesión de conducción y «Dejar el vehículo» la cierra.
+// ============================================================
+
+/** Lo que dice FOM al tomar una unidad, para quien lo lee (tomarUnidadFom de la app). */
+export function errorDeTomarUnidad(e) {
+  if (e?.codigo === 'invalid_driver_pin') return new Error('PIN incorrecto para esta unidad. Verifica con tu supervisor.')
+  if (e?.estado === 403) return new Error('No estás autorizado en esta unidad.')
+  if (e?.estado === 409) return new Error(/vehicle/iu.test(String(e?.message)) ? 'Otra persona está usando esa unidad.' : 'Ya estás usando otra unidad: déjala primero.')
+  return e instanceof Error ? e : new Error('No se pudo activar el PIN.')
+}
+
+/** Una asignación de `/drivers/me` en el vocabulario de la pantalla. */
+export function unidadParaPin(f) {
+  return { vehiculoId: f.vehicleId, nombre: f.vehicleCode ?? 'Unidad', placa: f.vehiclePlate ?? null }
+}
+
+/** La sesión de conducción de FOM, si está abierta. */
+export function sesionDeConduccion(s) {
+  return s?.status === 'active' ? { id: s.id, vehiculoId: s.vehicleId, rol: s.assignmentRole } : null
+}
+
+export const otraUnidad = {
+  /** MIS unidades como secundario. */
+  async unidades() {
+    const { items: filas } = await leerTodasLasPaginas(
+      (offset, limit) => api.misAsignaciones({ limit, offset }),
+      { limite: 100, clave: (f) => f?.assignmentId },
+    )
+    return filas.filter((f) => f.role === 'secundario').map(unidadParaPin)
+  },
+
+  /** La unidad que estoy usando ahora (`{ id, vehiculoId, rol }`), o `null`. */
+  async sesionActual() {
+    const r = await api.sesionDeConduccion()
+    return sesionDeConduccion(r?.session)
+  },
+
+  async usar(vehiculoId, pin) {
+    try {
+      await api.tomarUnidad(vehiculoId, String(pin).trim())
+    } catch (e) {
+      throw errorDeTomarUnidad(e)
+    }
+  },
+
+  /** Deja la unidad: cierra la sesión abierta, si la hay. */
+  async dejar() {
+    const sesion = await otraUnidad.sesionActual()
+    if (sesion) await api.terminarSesionDeConduccion(sesion.id)
+  },
+}
+
+repoApi.sos = sosConductor
+repoApi.otraUnidad = otraUnidad
 
 export default repoApi

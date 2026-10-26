@@ -35,6 +35,12 @@ function hash(texto) {
  */
 function checklistDe(insp) {
   if (CONECTADO) return insp.respuestas ?? []
+  // La que el conductor envió desde la web (T-167a) trae lo que respondió de
+  // verdad en `detalle`: eso manda sobre el checklist reconstruido.
+  const enviadas = insp.detalle?.respuestas
+  if (enviadas?.length) {
+    return enviadas.map((r) => ({ id: r.itemId ?? r.id, categoria: r.categoria, nombre: r.nombre, critico: Boolean(r.critico), nota: r.nota ?? null, estadoItem: r.estado }))
+  }
   const items = repo.inspecciones.itemsPlantilla(insp.tipoVehiculo)
   const porHash = (arr) => [...arr].sort((a, b) => hash(insp.id + a.id) - hash(insp.id + b.id))
 
@@ -323,7 +329,7 @@ function DetalleInspeccion({ inspeccion, imp, alCerrar, alHallazgos }) {
     {detalle.estado === 'error' && <ErrorCarga error={detalle.error} onReintentar={detalle.recargar}/>}
     {detalle.estado === 'ok' && !grupos.length && <Vacio icono="documento" titulo="Sin respuestas disponibles" texto="No se completa el checklist con datos supuestos."/>}
     {grupos.map(g=><Fragment key={g.categoria}><h3 className="insp-category">{g.categoria || 'General'}</h3>{g.items.map(it=><div className="insp-check" key={it.id}><Icono nombre={it.estadoItem==='falla'?'alerta':it.estadoItem==='observacion'?'editar':'check'}/><div><b>{it.nombre}</b>{it.critico && <small>Punto crítico</small>}{it.nota && <p>{it.nota}</p>}</div><Tag color={color('inspeccion_item_estado',it.estadoItem)}>{etiqueta('inspeccion_item_estado',it.estadoItem)}</Tag></div>)}</Fragment>)}
-    <p className="insp-info">Respuestas registradas desde la app. El supervisor no modifica el resultado.</p></div></div>
+    <p className="insp-info">Respuestas registradas por el conductor, desde la app o la web. El supervisor no modifica el resultado.</p></div></div>
     {imp && <AvisoImpresion aviso={imp.aviso}/>}
     {/* Imprimir reusa las respuestas que ya están en pantalla: no se vuelven a pedir. */}
     <div className="insp-actions"><button className="pnl-btn sutil" type="button" onClick={alCerrar}>Cerrar</button>{imp && <button className="pnl-btn sutil" type="button" disabled={imp.ocupado || detalle.estado === 'cargando'} onClick={() => imp.imprimir([inspeccion], detalle.estado === 'ok' ? new Map([[inspeccion.id, detalle.datos ?? []]]) : undefined)}><Icono nombre="reporte" tam={18}/>{imp.ocupado ? 'Armando…' : 'Imprimir'}</button>}<button className="pnl-btn primario" type="button" onClick={alHallazgos}>Ver hallazgos →</button></div></Modal>

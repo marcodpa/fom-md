@@ -1,0 +1,138 @@
+/* ============================================================
+   EMERGENCIA (SOS) DEL CONDUCTOR — igual que la app (T-167b)
+   ------------------------------------------------------------
+   Medidas de FOM-DRIVER: emergencia.tsx, sos-piezas.tsx (BloqueSOS, DatoSOS),
+   boton-destacado.tsx y el botón flotante de (driver)/index.tsx. Valores de
+   tokens-app.css: los mismos en el teléfono y en la computadora (allí en una
+   columna de 640 px, como el `maxWidth` de la app).
+   ============================================================ */
+.sos {
+  font-family: var(--app-fuente);
+  color: var(--app-texto);
+}
+.sos-cuerpo { display: flex; flex-direction: column; gap: var(--app-esp-lg); width: 100%; max-width: 640px; padding: var(--app-esp-lg) 0 var(--app-esp-xxl); }
+.sos-movil .sos-cuerpo { max-width: none; padding: var(--app-esp-lg) var(--app-esp-lg) var(--app-esp-xxl); }
+.sos:not(.sos-movil) > .sos-cuerpo { max-width: calc(640px + 2 * var(--e-xl)); padding: var(--e-lg) var(--e-xl) var(--e-xl); }
+
+/* ---- Piezas comunes ---- */
+.sos-tarjeta { display: flex; flex-direction: column; gap: var(--app-esp-md); padding: var(--app-tarjeta-pad); border: var(--app-borde-fino) solid var(--app-borde); border-radius: var(--app-tarjeta-radio); background: var(--app-sup); box-shadow: var(--app-sombra-tarjeta); }
+.sos-titulo { margin: 0; font: var(--app-title); text-align: center; color: var(--app-texto); }
+.sos-titulo.peligro { color: var(--app-peligro); }
+.sos-texto { margin: 0; font: var(--app-body); color: var(--app-texto-2); }
+.sos-nota { margin: 0; font: var(--app-caption); color: var(--app-texto-3); text-align: center; }
+.sos-error { margin: 0; font: var(--app-caption); color: var(--app-peligro); }
+.sos-error.centro { text-align: center; }
+.sos-centro { display: grid; gap: var(--app-esp-xs); text-align: center; }
+.sos-divisor { display: block; height: var(--app-borde-hairline); background: var(--app-borde); opacity: .6; }
+.sos-overline { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: var(--app-overline); letter-spacing: var(--app-track-amplio); text-transform: uppercase; color: var(--app-texto-2); }
+
+/* Botón destacado (boton-destacado.tsx) y el de siempre (button.tsx): píldora. */
+.sos-boton { width: 100%; min-height: 56px; display: inline-flex; align-items: center; justify-content: center; gap: var(--app-esp-sm); padding: var(--app-boton-pad); border: var(--app-borde-fino) solid transparent; border-radius: var(--app-r-pill); font: var(--app-button); cursor: pointer; transition: transform var(--app-d-rapido) var(--app-curva), filter var(--app-d-rapido) ease; -webkit-tap-highlight-color: transparent; }
+.sos-boton.peligro { background: var(--app-peligro); color: var(--app-sobre-peligro); box-shadow: 0 8px 22px color-mix(in srgb, var(--app-peligro) 35%, transparent); }
+.sos-boton.primario { min-height: var(--app-boton-alto); background: var(--app-primario); color: var(--app-sobre-primario); }
+.sos-boton.secundario { min-height: var(--app-boton-alto); background: var(--app-sup-alta); border-color: var(--app-borde-fuerte); color: var(--app-texto); }
+.sos-boton:active:not(:disabled) { transform: scale(var(--app-escala-press)); }
+.sos-boton:hover:not(:disabled) { filter: brightness(1.06); }
+.sos-boton:disabled { cursor: progress; opacity: .8; }
+.sos-enlace-centro { align-self: center; padding: 4px 8px; border: 0; background: none; color: var(--app-texto-3); font: var(--app-caption); cursor: pointer; }
+.sos-enlace-centro:hover { color: var(--app-texto-2); text-decoration: underline; }
+.sos-enlace { align-self: flex-start; font: var(--app-caption); color: var(--app-primario); }
+
+/* ---- Pedir ayuda ---- */
+/* El disco necesita aire arriba: el anillo crece hasta 1,7. */
+.sos-heroe { display: grid; justify-items: center; gap: var(--app-esp-lg); padding-top: 40px; }
+.sos-disco-caja { position: relative; width: 112px; height: 112px; display: grid; place-items: center; }
+.sos-disco { width: 112px; height: 112px; display: grid; place-items: center; border-radius: 50%; background: var(--app-peligro); color: var(--app-sobre-peligro); font: 800 34px/42px var(--app-fuente); letter-spacing: 1px; }
+.sos-halo { position: absolute; inset: 0; border: 2px solid var(--app-peligro); border-radius: 50%; opacity: 0; animation: sos-halo 2.4s cubic-bezier(.25, .46, .45, .94) infinite; pointer-events: none; }
+@keyframes sos-halo { from { opacity: .5; transform: scale(1); } to { opacity: 0; transform: scale(1.7); } }
+
+.sos-grupo { display: flex; flex-direction: column; gap: var(--app-esp-sm); }
+/* Tres por fila; la última queda suelta y no se estira de más. */
+.sos-tipos { display: flex; flex-wrap: wrap; gap: var(--app-esp-sm); }
+.sos-tipo { position: relative; flex: 1 1 30%; min-width: 0; height: 74px; display: grid; place-content: center; justify-items: center; gap: 7px; padding: 0 4px; overflow: hidden; border: var(--app-borde-hairline) solid var(--app-borde); border-radius: var(--app-r-lg); background: var(--app-sup-baja); color: var(--app-texto-3); font: var(--app-caption); cursor: pointer; transition: transform var(--app-d-rapido) ease; -webkit-tap-highlight-color: transparent; }
+.sos-tipo > span { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--app-texto-2); }
+.sos-tipo.on { border: 1.5px solid var(--app-peligro); background: color-mix(in srgb, var(--app-peligro) 12%, var(--app-sup-baja)); color: var(--app-peligro); }
+.sos-tipo.on > span { color: var(--app-peligro); }
+.sos-tipo:active { transform: scale(var(--app-escala-press)); }
+
+/* Campo de texto (text-field.tsx). */
+.sos-campo { display: flex; flex-direction: column; gap: var(--app-esp-xs); }
+.sos-campo > span { font: var(--app-caption); color: var(--app-texto-2); }
+.sos-campo :is(input, textarea) { padding: var(--app-campo-pad); border: var(--app-borde-fino) solid var(--app-borde); border-radius: var(--app-r-md); background: var(--app-sup-baja); color: var(--app-texto); font: var(--app-body); outline: none; }
+.sos-campo input { min-height: var(--app-campo-alto); }
+.sos-campo textarea { min-height: 92px; resize: vertical; }
+.sos-campo :is(input, textarea)::placeholder { color: var(--app-texto-3); }
+.sos-campo :is(input, textarea):focus { border-color: var(--app-primario); }
+.sos-campo :is(input, textarea)[aria-invalid] { border-color: var(--app-peligro); }
+.sos-campo em { font: var(--app-caption); font-style: normal; color: var(--app-peligro); }
+
+/* Lo que viaja solo. */
+.sos-auto { display: flex; align-items: center; gap: var(--app-esp-md); color: var(--app-texto-3); }
+.sos-auto > span { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: var(--app-body); color: var(--app-texto-2); }
+.sos-ubicacion { display: flex; align-items: center; gap: var(--app-esp-md); color: var(--app-texto-3); }
+.sos-ubicacion.exito { --tono: var(--app-exito); }
+.sos-ubicacion.primario { --tono: var(--app-primario); }
+.sos-ubicacion.lista > svg { color: var(--tono); }
+.sos-ubicacion-txt { flex: 1; min-width: 0; display: grid; }
+.sos-ubicacion-txt small { font: var(--app-caption); color: var(--app-texto-3); }
+.sos-ubicacion-txt span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: var(--app-body); color: var(--app-texto-2); font-variant-numeric: tabular-nums; }
+.sos-listo { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 9px; border-radius: var(--app-r-pill); background: color-mix(in srgb, var(--tono) 10%, transparent); color: var(--tono); font: var(--app-overline); letter-spacing: var(--app-track-amplio); }
+.sos-listo > i { width: 5px; height: 5px; border-radius: 50%; background: var(--tono); animation: sos-latido 1.6s ease-in-out infinite; }
+
+/* ---- Enviada ---- */
+.sos-activo { align-self: flex-end; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border: var(--app-borde-hairline) solid var(--app-peligro); border-radius: var(--app-r-pill); background: color-mix(in srgb, var(--app-peligro) 12%, transparent); color: var(--app-peligro); font: var(--app-overline); letter-spacing: var(--app-track-amplio); }
+.sos-activo > i { width: 7px; height: 7px; border-radius: 50%; background: var(--app-peligro); animation: sos-latido 1.6s ease-in-out infinite; }
+
+/* El bloque (BloqueSOS): franja y mapa soldados. Rojo mientras nadie lo toma; ámbar cuando ya va ayuda. */
+.sos-bloque { --tono: var(--app-peligro); --tono-sup: var(--app-peligro-sup); overflow: hidden; border: var(--app-borde-fino) solid var(--tono); border-radius: var(--app-r-lg); background: var(--app-sup); box-shadow: var(--app-sombra-tarjeta); transition: border-color 420ms var(--app-curva); }
+.sos-bloque.atendida { --tono: var(--app-aviso); --tono-sup: var(--app-aviso-sup); }
+.sos-franja { display: grid; gap: 2px; padding: var(--app-esp-lg); background: var(--tono-sup); transition: background-color 420ms var(--app-curva); }
+.sos-fila { display: flex; align-items: center; gap: var(--app-esp-sm); }
+.sos-punto { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--tono); }
+.sos-punto.late { animation: sos-latido 1.6s ease-in-out infinite; }
+.sos-cuanto { font: var(--app-caption); color: var(--app-texto); font-variant-numeric: tabular-nums; }
+.sos-estado { font: var(--app-title); color: var(--tono); }
+.sos-mapa { position: relative; overflow: hidden; }
+.sos-mapa .pnl-mapa { border: 0; border-radius: 0; }
+.sos-parte { margin: 0; font: var(--app-body); color: var(--app-texto); overflow-wrap: anywhere; }
+.sos-dato { display: flex; align-items: center; gap: var(--app-esp-md); color: var(--app-texto-3); }
+.sos-dato-k { width: 62px; flex: none; font: var(--app-caption); color: var(--app-texto-3); }
+.sos-dato-v { flex: 1; min-width: 0; font: var(--app-body); color: var(--app-texto); overflow-wrap: anywhere; }
+
+/* ---- Cerrada ---- */
+.sos-cerrada { display: flex; flex-direction: column; align-items: center; gap: var(--app-esp-xl); width: 100%; max-width: 480px; margin: 0 auto; padding-top: var(--app-esp-xxl); }
+.sos-cerrada > .sos-tarjeta, .sos-cerrada > .sos-boton { align-self: stretch; }
+.sos-cerrada .sos-tarjeta { gap: var(--app-esp-sm); }
+.sos-disco-ok { width: 104px; height: 104px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--app-exito) 35%, transparent); border-radius: 50%; background: var(--app-exito-sup); color: var(--app-exito); }
+
+/* ---- Esqueleto ---- */
+.sos-esqueleto { display: flex; flex-direction: column; gap: var(--app-esp-lg); padding-top: 40px; }
+.sos-esqueleto i { display: block; width: 100%; border-radius: var(--app-r-lg); background: var(--app-sup-alta); animation: sos-esqueleto 1.4s ease-in-out infinite; }
+@keyframes sos-esqueleto { 50% { opacity: .55; } }
+@keyframes sos-latido { 50% { opacity: .35; } }
+
+/* ---- El botón flotante de Mi unidad (solo en el teléfono) ----
+   64 px, a 14 del borde y 92 por encima del final del mapa, que es donde
+   asoma la lengüeta. Late despacio para que se encuentre sin mirar. */
+.sos-fab { position: absolute; right: 14px; bottom: calc(var(--mvu-dock, 80px) + 92px); z-index: 15; width: 64px; height: 64px; display: grid; place-items: center; border: 1px solid rgb(255 255 255 / .10); border-radius: 50%;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--app-peligro) 78%, #fff) 0%, var(--app-peligro) 50%, color-mix(in srgb, var(--app-peligro) 82%, #000) 100%);
+  color: var(--app-sobre-peligro); font: 800 17px/1 var(--app-fuente); letter-spacing: 1.5px; text-decoration: none;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--app-peligro) 45%, transparent); animation: sos-fab 3s ease-in-out infinite; -webkit-tap-highlight-color: transparent; }
+.sos-fab:hover { color: var(--app-sobre-peligro); }
+.sos-fab-punto { width: 16px; height: 16px; border-radius: 50%; background: var(--app-sobre-peligro); animation: sos-latido 1.2s ease-in-out infinite; }
+@keyframes sos-fab { 50% { transform: scale(1.06); } }
+
+/* ---- La entrada de escritorio: en el menú del conductor y en Mi unidad ---- */
+.pnl-nav-item.sos-nav { color: var(--app-peligro, #ff6369); }
+.pnl-nav-item.sos-nav .ico { color: inherit; }
+.sos-cab-boton { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; background: var(--app-peligro, #ff6369); color: var(--app-sobre-peligro, #2a0a0b); font-weight: 800; letter-spacing: .5px; text-decoration: none; box-shadow: 0 8px 20px color-mix(in srgb, var(--app-peligro, #ff6369) 35%, transparent); }
+.sos-cab-boton:hover { filter: brightness(1.06); color: var(--app-sobre-peligro, #2a0a0b); }
+
+.pnl.fom-dark[data-diseno] :is(.sos-tipo, .sos-boton, .sos-enlace-centro, .sos-fab, .sos-cab-boton):focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sos-halo, .sos-fab, .sos-punto.late, .sos-listo > i, .sos-activo > i, .sos-fab-punto, .sos-esqueleto i { animation: none; }
+  .sos-halo { display: none; }
+  .sos-boton, .sos-tipo, .sos-bloque, .sos-franja { transition: none; }
+  .sos-boton:active:not(:disabled), .sos-tipo:active { transform: none; }
+}

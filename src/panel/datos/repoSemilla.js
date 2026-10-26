@@ -23,8 +23,9 @@ import { comoEventoManejo } from './eventosManejo'
 import { calificacionManejo } from './manejo'
 import { empresaGestionActualId } from './api'
 import {
-  AVISO_BLOQUEADA, AVISO_OTRA_UNIDAD, InspeccionYaHecha, argumentosDeFormato, cuerpoPlantilla, detalleDeEnvio,
-  guardarDiaria, leerDiariaGuardada, plantillaDeFormato, publicarSiHaceFalta, resultadoDeEnvio,
+  AVISO_BLOQUEADA, AVISO_OTRA_UNIDAD, InspeccionYaHecha, argumentosDeFormato, cuerpoEmergencia, cuerpoPlantilla, detalleDeEnvio,
+  emergenciaDelConductor, emergenciaParaConsola, guardarDiaria, leerDiariaGuardada, plantillaDeFormato, publicarSiHaceFalta,
+  resultadoDeEnvio,
 } from './repoApi'
 import { perfilActual } from '../auth'
 
@@ -1826,6 +1827,139 @@ export const inspeccionConductorSemilla = {
 
   async pedirOtraUnidad(vehiculoId) {
     avisoDemo(AVISO_OTRA_UNIDAD, todosVehiculos().find((v) => v.id === vehiculoId))
+    return responder(true, 250)
+  },
+}
+
+// ---------------- El SOS del conductor (T-167b) ----------------
+// Misma forma que repoApi.sos (lo que ve el conductor) y que
+// repoApi.seguridad.emergencias (lo que ve su supervisor en «Eventos y SOS»):
+// el aviso se guarda con la forma de FOM y cada lado lo lee con su traductor,
+// así lo que manda el conductor de la demo le llega al supervisor de la demo.
+// Aparte de `repo`, como la inspección: conectado no debe colarse nada de aquí.
+
+function todasEmergencias() {
+  return agregados('emergencias')
+    .map((e) => aplicar('emergencias', e))
+    .sort((a, b) => String(b.reportedAt).localeCompare(String(a.reportedAt)))
+}
+const EN_CURSO = new Set(['active', 'acknowledged'])
+const yoDemo = (usuarioId) => usuarioId ?? perfilActual()?.id ?? null
+
+/** Quién es quién en la demo, para decir quién tomó el aviso. */
+function nombresDemo() {
+  return new Map(todosPerfiles().map((p) => [p.id, p.nombre]))
+}
+
+/** Pasa un aviso de un estado a otro, con la misma regla que FOM (409 si ya cambió). */
+function moverEmergencia(id, desde, cambio, mensaje) {
+  const e = todasEmergencias().find((x) => x.id === id)
+  if (!e) throw new Error('Ese aviso ya no está a tu alcance.')
+  if (!desde.includes(e.status)) throw new Error(mensaje)
+  guardarParche('emergencias', id, cambio)
+}
+
+export const sosSemilla = {
+  async miEmergencia({ usuarioId = null } = {}) {
+    const yo = yoDemo(usuarioId)
+    const mia = todasEmergencias().find((e) => EN_CURSO.has(e.status) && e.reportedByUserId === yo)
+    return responder(mia ? emergenciaDelConductor(mia, nombresDemo()) : null, 150)
+  },
+
+  async enviar(entrada, { usuarioId = null } = {}) {
+    const yo = yoDemo(usuarioId)
+    const previa = todasEmergencias().find((e) => EN_CURSO.has(e.status) && e.reportedByUserId === yo)
+    if (previa) return responder(emergenciaDelConductor(previa, nombresDemo()), 200)
+    const cuerpo = cuerpoEmergencia(entrada)
+    // La posición de la unidad la pone FOM con su GPS: aquí, la última conocida.
+    const veh = cuerpo.vehicleId ? todosVehiculos().find((v) => v.id === cuerpo.vehicleId) : null
+    const fila = {
+      id: `sos-${Date.now().toString(36)}`,
+      empresaId: EMPRESA.id,
+      vehicleId: cuerpo.vehicleId ?? null,
+      reportedByUserId: yo,
+      kind: cuerpo.kind,
+      kindOther: cuerpo.kindOther ?? null,
+      detail: cuerpo.detail,
+      reporterLocation: cuerpo.reporterLatitude != null ? { latitude: cuerpo.reporterLatitude, longitude: cuerpo.reporterLongitude } : null,
+      vehicleLocation: veh?.lat != null ? { latitude: veh.lat, longitude: veh.lng } : null,
+      status: 'active',
+      acknowledgedByUserId: null,
+      acknowledgedAt: null,
+      reportedAt: new Date().toISOString(),
+    }
+    agregar('emergencias', fila)
+    return responder(emergenciaDelConductor(fila, nombresDemo()), 350)
+  },
+
+  async cancelar(emergencia) {
+    moverEmergencia(emergencia.id, ['active'], { status: 'cancelled' }, 'Tu supervisor ya lo tomó: ya no se puede retirar.')
+    return responder(true, 200)
+  },
+
+  async terminar(emergencia) {
+    moverEmergencia(emergencia.id, ['acknowledged'], { status: 'resolved' }, 'El aviso cambió mientras lo tenías abierto. Vuelve a abrirlo.')
+    return responder(true, 200)
+  },
+}
+
+/** Las emergencias en «Eventos y SOS» del supervisor de la demo (el resto de la pantalla sigue pidiendo la base real). */
+export const seguridadSemilla = {
+  async emergencias({ estado = '' } = {}) {
+    return responder(() => todasEmergencias().filter((e) => !estado || e.status === estado).map(emergenciaParaConsola))
+  },
+  async reconocerEmergencia(id) {
+    moverEmergencia(id, ['active'], { status: 'acknowledged', acknowledgedByUserId: perfilActual()?.id ?? null, acknowledgedAt: new Date().toISOString() },
+      'Alguien más cambió esto mientras lo mirabas. Recarga y vuelve a intentarlo.')
+    return responder(true, 200)
+  },
+  async resolverEmergencia(id) {
+    moverEmergencia(id, ['active', 'acknowledged'], { status: 'resolved' }, 'Alguien más cambió esto mientras lo mirabas. Recarga y vuelve a intentarlo.')
+    return responder(true, 200)
+  },
+}
+
+// ---------------- Otra unidad con PIN (T-167b) ----------------
+// Misma forma que repoApi.otraUnidad. En la demo, el conductor es secundario
+// de las dos unidades que siguen a la suya, y cualquier PIN de 4 a 8 dígitos
+// abre: no hay un servidor que guarde el PIN de verdad.
+
+/** Las unidades donde la persona es secundaria en la demo. */
+function secundariasDemo(usuarioId) {
+  const vehiculos = todosVehiculos()
+  const n = vehiculos.findIndex((v) => v.conductorPrincipalId === usuarioId)
+  if (n < 0) return []
+  return [1, 2].map((k) => vehiculos[(n + k) % vehiculos.length]).filter((v) => v && v.conductorPrincipalId !== usuarioId)
+}
+
+export const otraUnidadSemilla = {
+  async unidades() {
+    return responder(() => secundariasDemo(perfilActual()?.id).map((v) => ({
+      vehiculoId: v.id,
+      nombre: v.numero && v.numero !== '—' ? v.numero : v.alias,
+      placa: v.placa && v.placa !== '—' ? v.placa : null,
+    })))
+  },
+  async sesionActual() {
+    const yo = perfilActual()?.id
+    return responder(() => (cambios.sesionConduccion?.[yo] ?? null), 100)
+  },
+  async usar(vehiculoId, pin) {
+    const yo = perfilActual()?.id
+    if (!secundariasDemo(yo).some((v) => v.id === vehiculoId)) throw new Error('No estás autorizado en esta unidad.')
+    if (!/^\d{4,8}$/u.test(String(pin).trim())) throw new Error('PIN incorrecto para esta unidad. Verifica con tu supervisor.')
+    if (cambios.sesionConduccion?.[yo]) throw new Error('Ya estás usando otra unidad: déjala primero.')
+    cambios.sesionConduccion = { ...(cambios.sesionConduccion ?? {}), [yo]: { id: `ses-${Date.now().toString(36)}`, vehiculoId, rol: 'secundario' } }
+    guardar()
+    return responder(true, 300)
+  },
+  async dejar() {
+    const yo = perfilActual()?.id
+    if (cambios.sesionConduccion?.[yo]) {
+      const { [yo]: _fuera, ...resto } = cambios.sesionConduccion
+      cambios.sesionConduccion = resto
+      guardar()
+    }
     return responder(true, 250)
   },
 }

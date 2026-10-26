@@ -22,7 +22,9 @@
 import { HAY_API } from './api'
 import repoApi from './repoApi'
 import { pagosApi } from './pagosApi'
-import repoSemilla, { alCambiarDatos, reiniciarDatos } from './repoSemilla'
+import repoSemilla, {
+  alCambiarDatos, inspeccionConductorSemilla, otraUnidadSemilla, reiniciarDatos, seguridadSemilla, sosSemilla,
+} from './repoSemilla'
 
 /** ¿Qué módulos están leyendo de la base real? Útil para avisarlo en pantalla. */
 export const FUENTE_REAL = HAY_API
@@ -166,6 +168,11 @@ const repo = HAY_API
       empresa: () => Promise.resolve(null),
       // Paridad con la consola de Juan (18 sep 2026): reales, sin semilla.
       seguridad: repoApi.seguridad,
+      // Lo del conductor en su teléfono, por las mismas rutas que la app
+      // (`/api/v1/mobile`): su inspección diaria, su SOS y otra unidad con PIN.
+      inspeccionConductor: repoApi.inspeccionConductor,
+      sos: repoApi.sos,
+      otraUnidad: repoApi.otraUnidad,
       jornadas: repoApi.jornadas,
       planes: repoApi.planes,
       transferencias: repoApi.transferencias,
@@ -289,7 +296,12 @@ const repo = HAY_API
   : {
       ...repoSemilla,
       personal: { ...repoSemilla.personal, guardarCredencial: faltaEnElServidor(SOLO_CON_BASE_REAL) },
-      seguridad: soloConBaseReal(repoApi.seguridad),
+      // Las emergencias sí tienen demo: el SOS que manda el conductor de la
+      // demostración le llega a su supervisor. Los eventos de alerta, no.
+      seguridad: { ...soloConBaseReal(repoApi.seguridad), ...seguridadSemilla },
+      inspeccionConductor: inspeccionConductorSemilla,
+      sos: sosSemilla,
+      otraUnidad: otraUnidadSemilla,
       jornadas: soloConBaseReal(repoApi.jornadas),
       planes: soloConBaseReal(repoApi.planes),
       transferencias: soloConBaseReal(repoApi.transferencias),

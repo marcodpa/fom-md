@@ -8,6 +8,7 @@ import { useApariencia } from './useApariencia'
 import { estaLeida } from './modulos/alertas-presentacion'
 import { Icono } from './Iconos'
 import repo, { alCambiarDatos, CONECTADO } from './datos/repo'
+import { useAvisosConductor } from './datos/useAvisosConductor'
 import '../styles/apariencia.css'
 import { accesosDe, esPestana, MovilContexto, pestanasDe, tituloDe, useEsMovil } from './comp/movil-navegacion'
 import { MovilBarra, MovilEncabezado, MovilPantalla } from './comp/movil-piezas'
@@ -32,6 +33,8 @@ import AdminAuditoria from './modulos/AdminAuditoria'
 import MiUnidad from './modulos/MiUnidad'
 import MapaConductor from './modulos/MapaConductor'
 import InspeccionConductor from './modulos/InspeccionConductor'
+import SosConductor from './modulos/SosConductor'
+import OtraUnidad from './modulos/OtraUnidad'
 import MiPerfil from './modulos/MiPerfil'
 import Configuracion from './modulos/Configuracion'
 import Seguridad from './modulos/Seguridad'
@@ -116,6 +119,9 @@ const MENU_POR_AREA = {
         { a: '/panel/mapa', icono: 'mapa', texto: 'Mapa' },
         { a: '/panel/mantenimiento', icono: 'llave', texto: 'Mantenimiento' },
         { a: '/panel/alertas', icono: 'alerta', texto: 'Alertas' },
+        // El SOS, como en la app (T-167b). En el teléfono no va en «Accesos»:
+        // allí es el botón rojo que flota sobre el mapa de Mi unidad.
+        { a: '/panel/sos', icono: 'llamar', texto: 'Emergencia (SOS)', clase: 'sos-nav', soloEscritorio: true },
       ],
     },
   ],
@@ -136,8 +142,15 @@ const RUTAS_POR_AREA = {
   admin: null, // todas
   operativo: ['', 'mapa', 'alertas', 'seguridad', 'flota', 'jornadas', 'mantenimiento', 'inspecciones', 'documentos', 'personal', 'reportes'],
   gerencial: ['personal', 'reportes'],
-  conductor: ['', 'inspeccion', 'mapa', 'alertas', 'mantenimiento'],
+  // Más el SOS y otra unidad con PIN (T-167b), que se abren desde Mi unidad y Mi perfil.
+  conductor: ['', 'inspeccion', 'mapa', 'alertas', 'mantenimiento'].concat(['sos', 'otra-unidad']),
   personal: ['mapa', 'alertas', 'documentos', 'personal'],
+}
+
+/** Pantallas del conductor que no están en el menú del teléfono: su nombre en la cápsula, como el ScreenHeader de la app. */
+const TITULOS_PROPIOS = {
+  '/panel/sos': 'Emergencia',
+  '/panel/otra-unidad': 'Usar otra unidad (PIN)',
 }
 
 function inicioDe(area) {
@@ -182,7 +195,7 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
                 to={it.a}
                 end={it.fin}
                 onClick={cerrar}
-                className={({ isActive }) => `pnl-nav-item${isActive ? ' activo' : ''}`}
+                className={({ isActive }) => `pnl-nav-item${it.clase ? ` ${it.clase}` : ''}${isActive ? ' activo' : ''}`}
               >
                 <Icono nombre={it.icono} />
                 {it.texto}
@@ -230,6 +243,11 @@ export default function Consola() {
   const esMovil = useEsMovil()
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [sinLeer, setSinLeer] = useState(0)
+  // Al conductor la campana le cuenta SUS avisos (su unidad, sus órdenes y sus
+  // papeles), como la app y como la campana del teléfono; no los de toda la
+  // empresa. Los demás roles, sin cambios.
+  const esConductor = areaDe(sesion?.perfil) === 'conductor' && !sesion?.perfil?.empresaGestion
+  const suyos = useAvisosConductor(sesion?.perfil, { activo: esConductor, refresco: pathname })
 
   useEffect(() => {
     const raiz = document.documentElement
@@ -247,7 +265,7 @@ export default function Consola() {
 
   // Contador del globo de alertas: se recalcula al navegar y cuando algo cambia.
   useEffect(() => {
-    if (!sesion?.perfil || esAdminFom(sesion.perfil) && !sesion.perfil.empresaGestion) { setSinLeer(0); return }
+    if (!sesion?.perfil || esConductor || esAdminFom(sesion.perfil) && !sesion.perfil.empresaGestion) { setSinLeer(0); return }
     let vivo = true
     const leer = () =>
       repo.alertas.listar({}).then((l) => vivo && setSinLeer(l.filter(n => !estaLeida(n)).length)).catch(() => {})
@@ -257,7 +275,7 @@ export default function Consola() {
       vivo = false
       baja()
     }
-  }, [pathname, sesion?.perfil?.id, sesion?.perfil?.empresaGestion?.id])
+  }, [pathname, esConductor, sesion?.perfil?.id, sesion?.perfil?.empresaGestion?.id])
 
   useEffect(() => {
     document.title = 'Consola FOM'
@@ -297,11 +315,14 @@ export default function Consola() {
   const menu = menuDe(perfil)
   const pestanas = pestanasDe(perfil, area)
   const enPestana = esPestana(pathname, pestanas)
-  const titulo = tituloDe(pathname, menu, pestanas)
-  const etiquetaCampana = esAdminFom(perfil) && !perfil.empresaGestion ? 'Alertas: elegir empresa' : `Alertas: ${sinLeer} sin leer`
+  const titulo = TITULOS_PROPIOS[pathname.replace(/\/+$/u, '')] ?? tituloDe(pathname, menu, pestanas)
+  const avisos = esConductor ? suyos.noLeidas : sinLeer
+  const etiquetaCampana = esAdminFom(perfil) && !perfil.empresaGestion ? 'Alertas: elegir empresa' : `Alertas: ${avisos} sin leer`
   // Sin historial (se abrió el enlace directo) atrás lleva al inicio: nadie se queda encerrado.
   const volver = () => (window.history.state?.idx > 0 ? navegar(-1) : navegar(inicioDe(area)))
-  const movil = { esMovil, accesos: accesosDe(menu, pestanas), sinLeer, perfil }
+  // Lo que es solo de la computadora (el SOS del menú) no va a «Accesos» del teléfono.
+  const menuTelefono = menu.map((g) => ({ ...g, items: g.items.filter((it) => !it.soloEscritorio) }))
+  const movil = { esMovil, accesos: accesosDe(menuTelefono, pestanas), sinLeer: avisos, perfil }
 
   return (
     <MovilContexto.Provider value={movil}>
@@ -310,7 +331,7 @@ export default function Consola() {
         perfil={perfil}
         abierto={menuAbierto}
         cerrar={() => setMenuAbierto(false)}
-        sinLeer={sinLeer}
+        sinLeer={avisos}
       />
       {menuAbierto && (
         <button
@@ -327,7 +348,7 @@ export default function Consola() {
           <div className="pnl-topbar-derecha">
             <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={etiquetaCampana}>
               <Icono nombre="campana" tam={21} />
-              {sinLeer > 0 && <span>{sinLeer}</span>}
+              {avisos > 0 && <span>{avisos}</span>}
             </Link>
             <Link to="/panel/mi-perfil" className="pnl-topbar-perfil" aria-label="Mi perfil"><span className="pnl-topbar-identidad"><b>{perfil.nombre}</b><small>{perfil.rolNombre}</small></span><i className="pnl-avatar">{perfil.iniciales}</i></Link>
           </div>
@@ -348,7 +369,7 @@ export default function Consola() {
               // Como encabezado-fom de la app: el conductor ve solo la sección
               // (su empresa ya está en Mi perfil); los demás, la empresa.
               nombre={area === 'conductor' ? '' : perfil.empresaGestion?.nombre || (esAdminFom(perfil) ? '' : perfil.empresa)}
-              sinLeer={sinLeer}
+              sinLeer={avisos}
               etiquetaCampana={etiquetaCampana}
               iniciales={perfil.iniciales}
             />
@@ -371,6 +392,9 @@ export default function Consola() {
           <Route path="inspecciones" element={<Inspecciones />} />
           {/* La diaria del conductor; quien gestiona la flota las ve todas en Inspecciones. */}
           <Route path="inspeccion" element={area === 'conductor' ? <InspeccionConductor /> : <Navigate to="/panel/inspecciones" replace />} />
+          {/* El SOS y otra unidad con PIN: del conductor, como en la app (T-167b). */}
+          <Route path="sos" element={area === 'conductor' ? <SosConductor /> : <Navigate to="/panel/seguridad" replace />} />
+          <Route path="otra-unidad" element={area === 'conductor' ? <OtraUnidad /> : <Navigate to="/panel" replace />} />
           <Route path="inspecciones/programa" element={<Navigate to="/panel/inspecciones?vista=plantillas" replace />} />
           <Route path="documentos" element={<Documentos />} />
           <Route path="personal" element={<AdminUsuarios />} />

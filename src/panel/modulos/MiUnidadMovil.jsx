@@ -15,6 +15,7 @@ import { textoSinSenal, textoUltimoReporte } from '../datos/sinSenal'
 import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
 import { color, etiqueta } from '../datos/catalogos'
+import { BotonSos } from './SosConductor'
 import '../../styles/mi-unidad-movil.css'
 
 // ============================================================
@@ -25,9 +26,9 @@ import '../../styles/mi-unidad-movil.css'
 // (o tocándola) con todo lo demás: avisos de detenido o sin señal, la unidad
 // con su retrato y su ficha, y el índice de manejo con el anillo.
 //
-// Lo que la app tiene y la web no: el botón SOS (la web no puede crear una
-// emergencia) y los avisos de compañeros que pidieron ayuda. No se pintan:
-// un botón de emergencia que no avisa a nadie es peor que no tenerlo.
+// El botón SOS rojo flota sobre el mapa, como en la app (T-167b): abre la
+// pantalla de emergencia, que avisa al supervisor por la misma ruta que la app.
+// Lo que la app tiene y la web no: los avisos de compañeros que pidieron ayuda.
 // ============================================================
 
 /** El saludo de la cápsula, como `saludoPorHora` de la app. */
@@ -395,12 +396,10 @@ function FilaHoy({ icono, tono, titulo, detalle, pastilla }) {
 
 /**
  * HOY: la inspección del día y el mantenimiento pendiente de la unidad. En la
- * app viven en sus pestañas; la web del conductor no tiene la de Inspección,
- * así que aquí es su única entrada.
+ * app viven en sus pestañas; aquí se resumen y llevan a la suya.
  *
- * La inspección se HACE desde la app: la web no tiene cómo crearla y el
- * servidor exige rol de gestor. Se dice, en vez de ofrecer un botón que va a
- * fallar. Hecha, se puede ver su resultado aquí mismo.
+ * Pendiente, la inspección se hace en la pestaña «Inspección» de la web
+ * (T-167a), con las mismas rutas que la app. Hecha, se ve su resultado aquí.
  */
 function TarjetaHoy({ unidad }) {
   const [verResultado, setVerResultado] = useState(false)
@@ -425,7 +424,7 @@ function TarjetaHoy({ unidad }) {
           titulo="Inspección del día"
           detalle={inspeccion
             ? [cuando ? `Hecha a las ${cuando}` : 'Hecha hoy', inspeccion.fallasCriticas > 0 ? f.cantidad(inspeccion.fallasCriticas, 'falla crítica', 'fallas críticas') : null].filter(Boolean).join(' · ')
-            : 'Hazla en la app FOM antes de salir'}
+            : 'Hazla antes de salir'}
           pastilla={inspeccion ? etiqueta('inspeccion_resultado', inspeccion.resultado) : 'Pendiente'}
         />
         {inspeccion ? (
@@ -447,7 +446,10 @@ function TarjetaHoy({ unidad }) {
             )}
           </>
         ) : (
-          <p className="mvu-hoy-nota">La inspección se llena en la app FOM de tu teléfono: desde la web no se puede registrar.</p>
+          <Link className="mvu-hoy-accion" to="/panel/inspeccion">
+            Hacer la inspección
+            <IconoApp nombre="chevron" tam={16} />
+          </Link>
         )}
       </div>
 
@@ -622,6 +624,9 @@ export default function MiUnidadMovil({ perfil, unidad, enMapa, cargando, error,
           iniciales={perfil?.iniciales}
         />
       </div>
+
+      {/* Emergencia: el SOS sobre el mapa, con aire por encima de la lengüeta. */}
+      <BotonSos usuarioId={perfil?.userId ?? null} />
 
       <Lengueta cabecera={cabecera}>
         {contenido}

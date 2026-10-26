@@ -173,6 +173,9 @@ async function pedirUnaVez(rutaPedida, { metodo = 'GET', cuerpo, señal, idempot
     // diciendo «tu sesion expiro» a alguien que nunca llego a entrar.
     const error = new Error(traducir(respuesta.status, datos))
     error.estado = respuesta.status
+    // El código de FOM (`invalid_driver_pin`…): dice QUÉ falló cuando el
+    // estado solo no basta, como `ErrorFom.code` de la app.
+    error.codigo = typeof datos?.code === 'string' ? datos.code : null
     throw error
   }
   return datos
@@ -626,6 +629,46 @@ Object.assign(api, {
   ordenDeInspeccion: (id) => pedir(`${MOVIL}/work-orders/${encodeURIComponent(id)}`),
   /** Aviso del conductor a su supervisor: unidad bloqueada o «pide otra unidad». */
   avisarAlSupervisor: (cuerpo) => pedir(`${MOVIL}/notices`, { metodo: 'POST', cuerpo }),
+})
+
+// ============================================================
+// EL SOS DEL CONDUCTOR (T-167b): las MISMAS rutas que la app
+// (src/services/emergencyService.ts de FOM-DRIVER). El supervisor sigue
+// leyendo y atendiendo por la consola (`emergencias`, más arriba): es el mismo
+// aviso visto desde el otro lado.
+// ============================================================
+Object.assign(api, {
+  /** Los avisos en curso que ve quien tiene la sesión (al conductor, solo los suyos): `{ items }`. */
+  emergenciasDelConductor: (status) => pedir(`${MOVIL}/emergencies${consulta({ status, limit: 100 })}`),
+  /**
+   * Manda el aviso: `{ vehicleId?, kind, kindOther?, detail, reporterLatitude?, reporterLongitude? }`
+   * → `{ emergency }`. La clave es la del intento: si el conductor reintenta tras
+   * un corte, FOM devuelve el mismo aviso en vez de crear otro.
+   */
+  enviarEmergencia: (cuerpo, clave) =>
+    pedir(`${MOVIL}/emergencies`, { metodo: 'POST', cuerpo, idempotente: true, idempotencia: clave }),
+  /** Falsa alarma: la retira quien la creó, mientras nadie la haya tomado. */
+  cancelarEmergencia: (id) => pedir(`${MOVIL}/emergencies/${encodeURIComponent(id)}/cancel`, { metodo: 'POST' }),
+  /** Ya pasó: la cierra quien la mandó (o quien la tomó), una vez tomada. */
+  terminarEmergencia: (id) => pedir(`${MOVIL}/emergencies/${encodeURIComponent(id)}/resolve`, { metodo: 'POST' }),
+})
+
+// ============================================================
+// OTRA UNIDAD CON PIN (T-167b): las rutas de pin-unidad.tsx de la app
+// (fomConduccion.ts). El conductor secundario elige una de SUS unidades, da
+// su PIN y FOM abre su sesión de conducción; al dejarla, todo vuelve al titular.
+// ============================================================
+Object.assign(api, {
+  /** MIS asignaciones vigentes, en páginas: `{ items: [{ assignmentId, role, vehicleId, vehicleCode, vehiclePlate }], page }`. */
+  misAsignaciones: ({ limit = 100, offset = 0 } = {}) => pedir(`${MOVIL}/drivers/me${consulta({ limit, offset })}`),
+  /** La sesión de conducción abierta de quien tiene la sesión: `{ session }` (o `null`). */
+  sesionDeConduccion: () => pedir(`${MOVIL}/driver-sessions/current`),
+  /** Toma la unidad: el secundario da su PIN. */
+  tomarUnidad: (vehicleId, pin) =>
+    pedir(`${MOVIL}/vehicles/${encodeURIComponent(vehicleId)}/driver-sessions`, { metodo: 'POST', cuerpo: pin ? { pin } : {} }),
+  /** Deja la unidad: cierra esa sesión. */
+  terminarSesionDeConduccion: (sesionId) =>
+    pedir(`${MOVIL}/driver-sessions/${encodeURIComponent(sesionId)}/end`, { metodo: 'POST' }),
 })
 
 export default api

@@ -1,0 +1,45 @@
+/* ============================================================
+   OTRA UNIDAD CON PIN — igual que la app (T-167b)
+   ------------------------------------------------------------
+   Medidas de FOM-DRIVER: pin-unidad.tsx, card.tsx, chip.tsx, text-field.tsx,
+   option-picker.tsx (PickerField) y button.tsx. Columna de 640 px.
+   ============================================================ */
+.ou { font-family: var(--app-fuente); color: var(--app-texto); }
+.ou-cuerpo { display: flex; flex-direction: column; gap: var(--app-esp-lg); width: 100%; max-width: 640px; padding: var(--app-esp-lg) 0 var(--app-esp-xxl); }
+.ou-movil .ou-cuerpo { max-width: none; padding: var(--app-esp-lg) var(--app-esp-lg) var(--app-esp-xxl); }
+.ou:not(.ou-movil) > .ou-cuerpo { max-width: calc(640px + 2 * var(--e-xl)); padding: var(--e-lg) var(--e-xl) var(--e-xl); }
+
+.ou-tarjeta { display: flex; flex-direction: column; gap: var(--app-esp-md); margin: 0; padding: var(--app-tarjeta-pad); border: var(--app-borde-fino) solid var(--app-borde); border-radius: var(--app-tarjeta-radio); background: var(--app-sup); box-shadow: var(--app-sombra-tarjeta); }
+.ou-subtitulo { font: var(--app-subtitle); color: var(--app-texto); overflow-wrap: anywhere; }
+.ou-chip { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: var(--app-chip-pad, 4px 10px); border-radius: var(--app-r-pill); background: color-mix(in srgb, var(--app-info) 14%, transparent); color: var(--app-info); font: var(--app-chip-texto, var(--app-caption)); }
+.ou-chip > i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.ou-campo { display: flex; flex-direction: column; gap: var(--app-esp-xs); }
+.ou-campo > span { font: var(--app-caption); color: var(--app-texto-2); }
+.ou-campo :is(input, select) { min-height: var(--app-campo-alto); padding: var(--app-campo-pad); border: var(--app-borde-fino) solid var(--app-borde); border-radius: var(--app-r-md); background: var(--app-sup-baja); color: var(--app-texto); font: var(--app-body); outline: none; }
+.ou-campo input { letter-spacing: 4px; }
+.ou-campo input::placeholder { color: var(--app-texto-3); }
+.ou-campo :is(input, select):focus { border-color: var(--app-primario); }
+
+.ou-boton { width: 100%; min-height: var(--app-boton-alto); display: inline-flex; align-items: center; justify-content: center; padding: var(--app-boton-pad); border: var(--app-borde-fino) solid transparent; border-radius: var(--app-r-pill); background: var(--app-primario); color: var(--app-sobre-primario); font: var(--app-button); cursor: pointer; transition: transform var(--app-d-rapido) var(--app-curva); }
+.ou-boton.secundario { width: auto; background: var(--app-sup-alta); border-color: var(--app-borde-fuerte); color: var(--app-texto); }
+.ou-boton:active:not(:disabled) { transform: scale(var(--app-escala-press)); }
+.ou-boton:disabled { background: var(--app-borde); color: var(--app-texto-2); cursor: not-allowed; }
+.ou-boton[aria-busy] { cursor: progress; }
+
+.ou-error { margin: 0; font: var(--app-caption); color: var(--app-peligro); }
+.ou-aviso { margin: 0; padding: 10px 12px; border-radius: var(--app-r-md); background: var(--app-exito-sup); color: var(--app-exito); font: var(--app-caption); }
+.ou-vacio { display: grid; justify-items: center; gap: var(--app-esp-sm); padding: var(--app-esp-xxl) var(--app-esp-lg); text-align: center; }
+.ou-vacio b { font: var(--app-subtitle); color: var(--app-texto); }
+.ou-vacio small { max-width: 460px; font: var(--app-body); color: var(--app-texto-2); }
+
+.ou-esqueleto { display: flex; flex-direction: column; gap: var(--app-esp-lg); }
+.ou-esqueleto i { display: block; width: 100%; border-radius: var(--app-r-lg); background: var(--app-sup-alta); animation: ou-latido 1.4s ease-in-out infinite; }
+@keyframes ou-latido { 50% { opacity: .55; } }
+
+.pnl.fom-dark[data-diseno] .ou :is(.ou-boton, input, select):focus-visible { outline: 2px solid var(--app-primario); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .ou-boton { transition: none; }
+  .ou-boton:active:not(:disabled) { transform: none; }
+  .ou-esqueleto i { animation: none; }
+}

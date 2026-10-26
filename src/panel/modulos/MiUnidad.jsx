@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -15,6 +16,7 @@ import FichaUnidad from '../comp/FichaUnidad'
 import ManejoConductor from '../comp/ManejoConductor'
 import { useVistaTelefono } from '../comp/movil-navegacion'
 import MiUnidadMovil from './MiUnidadMovil'
+import './sos-conductor.css'
 
 // ============================================================
 // MI UNIDAD — el inicio del conductor
@@ -28,9 +30,9 @@ import MiUnidadMovil from './MiUnidadMovil'
 // una franja de identidad arriba, el mapa en medio con los números encima, y
 // abajo «Hoy» como lista de tareas junto a la ficha.
 //
-// Reportar una falla y hacer la inspección son trabajo de campo y se hacen
-// desde la app: el servidor exige rol de gestor para abrirlas desde la
-// consola. Aquí se dice, en vez de ofrecer un botón que va a fallar.
+// La inspección del día se hace en la web (T-167a), en «Inspección del día»;
+// reportar una falla, en Mantenimiento. El SOS está a un toque, arriba a la
+// derecha y en el menú (T-167b), como el botón rojo de la app.
 // ============================================================
 
 /**
@@ -200,7 +202,11 @@ export default function MiUnidad() {
       <Cabecera
         titulo="Mi unidad"
         bajada={unidad ? 'Dónde está, cómo está y qué te toca hoy.' : 'La unidad que tienes asignada hoy.'}
-      />
+      >
+        <Link to="/panel/sos" className="sos-cab-boton" aria-label="Pedir ayuda de emergencia (SOS)">
+          <Icono nombre="llamar" tam={18} />SOS
+        </Link>
+      </Cabecera>
 
       {cargando && <Cargando filas={6} />}
       {!cargando && error && <ErrorCarga onReintentar={() => { asignaciones.recargar(); vehiculos.recargar() }} error={error} />}
@@ -289,7 +295,11 @@ export default function MiUnidad() {
                   </span>
                   <span className="mu-hoy-txt">
                     <b>Inspección del día</b>
-                    <span>{inspeccionHoy ? `${etiqueta('inspeccion_resultado', inspeccionHoy.resultado)} · registrada desde la app` : 'Pendiente · se hace desde la app'}</span>
+                    <span>
+                      {inspeccionHoy
+                        ? `${etiqueta('inspeccion_resultado', inspeccionHoy.resultado)} · ya registrada hoy`
+                        : <>Pendiente · <Link to="/panel/inspeccion" className="pnl-link">hazla antes de salir</Link></>}
+                    </span>
                   </span>
                   <Tag color={inspeccionHoy ? 'verde' : 'ambar'}>{inspeccionHoy ? 'Hecha' : 'Pendiente'}</Tag>
                 </li>
@@ -317,13 +327,13 @@ export default function MiUnidad() {
                   </li>
                 ))}
               </ul>
-              {/* Se dice, en vez de ofrecer un botón que el servidor va a
-                  rechazar: abrir una orden desde la consola exige rol de
-                  gestor. El conductor la reporta desde la app, sobre su
-                  unidad, que es como está pensado. */}
+              {/* Las dos cosas que le tocan hoy, cada una a su pantalla de la web. */}
               <p className="mu-nota">
-                <Icono nombre="llamar" tam={16} />
-                <span>Para reportar una falla o hacer la inspección del día usa la <b>app FOM</b> en tu teléfono.</span>
+                <Icono nombre="inspeccion" tam={16} />
+                <span>
+                  La inspección del día se hace en <Link to="/panel/inspeccion" className="pnl-link">Inspección del día</Link>;
+                  {' '}una falla se reporta en <Link to="/panel/mantenimiento" className="pnl-link">Mantenimiento</Link>.
+                </span>
               </p>
             </Tarjeta>
 

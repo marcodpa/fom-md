@@ -1,0 +1,34 @@
+From 8e531f0f84279f4561df6e1cc3845b4398ce6d23 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Mon, 26 Oct 2026 09:00:11 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20la=20inspecci=C3=B3n=20no=20repite=20?=
+ =?UTF-8?q?=C2=ABRevisa=20tu=20unidad=20antes=20de=20salir=C2=BB=20(T-167b?=
+ =?UTF-8?q?)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/inspeccion.tsx | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/app/(driver)/inspeccion.tsx b/src/app/(driver)/inspeccion.tsx
+index 1ffc715..c8893fd 100644
+--- a/src/app/(driver)/inspeccion.tsx
++++ b/src/app/(driver)/inspeccion.tsx
+@@ -273,9 +273,9 @@ export default function InspeccionScreen() {
+               showsVerticalScrollIndicator={false}>
+               <Escalonado indice={0}>{titulo}</Escalonado>
+               <Escalonado indice={1} style={{ gap: spacing.xs }}>
++                {/* «Revisa tu unidad antes de salir» ya es la bajada del título: aquí no se repite. */}
+                 <ThemedText variant="body" color="textSecondary">
+-                  Revisa tu unidad antes de salir. Si algo crítico falla, detenemos la salida y
+-                  avisamos a tu empresa. Que llegues bien.
++                  Si algo crítico falla, detenemos la salida y avisamos a tu empresa. Que llegues bien.
+                 </ThemedText>
+               </Escalonado>
+ 
+-- 
+2.55.0.windows.3
+

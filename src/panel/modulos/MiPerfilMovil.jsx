@@ -4,6 +4,7 @@ import { cerrarSesion } from '../auth'
 import Avatar from '../comp/Avatar'
 import { Modal } from '../comp/ui'
 import { useMovil } from '../comp/movil-navegacion'
+import { useAvisosConductor } from '../datos/useAvisosConductor'
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
 import { ManejoAnillo } from './MiUnidadMovil'
@@ -17,9 +18,12 @@ import '../../styles/perfil-movil.css'
 // el índice de manejo con el anillo, las tres cifras, «Mi información», los
 // accesos y «Cerrar sesión» (con pregunta).
 //
-// Lo que la app tiene y la web no: «Otra unidad» (activarse en otra unidad
-// con el PIN, pin-unidad.tsx) y cambiar la contraseña. No se ofrecen: serían
-// botones que no llevan a nada.
+// «Otra unidad» (activarse en otra unidad con el PIN, pin-unidad.tsx) lleva a
+// su pantalla de la web, con las mismas rutas que la app (T-167b). Lo que la
+// app tiene y la web no: cambiar la contraseña desde aquí.
+//
+// El globo de «Alertas» cuenta SUS avisos (useAvisosConductor), el mismo
+// número que la campana de arriba.
 //
 // El punto verde del retrato es el «en línea» de perfil-hero.tsx: en la app
 // se enciende si tiene sesión de manejo; aquí, si tiene unidad asignada.
@@ -33,6 +37,7 @@ const TRAZOS = {
   personal: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><path d="M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" /></>,
   gps: <><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>,
   editar: <><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></>,
+  flota: <><path d="M3 6h11v9H3z" /><path d="M14 9h4l3 3v3h-7z" /><circle cx="7" cy="17.5" r="1.6" /><circle cx="17" cy="17.5" r="1.6" /></>,
 }
 function IconoApp({ nombre, tam = 20 }) {
   if (!TRAZOS[nombre]) return <Icono nombre={nombre} tam={tam} />
@@ -87,10 +92,15 @@ export default function MiPerfilMovil({ persona, sesion, aviso, alEditar, docume
   const acciones = [
     { icono: 'reportar', tono: 'peligro', texto: 'Reportar falla', alTocar: () => navegar('/panel/mantenimiento?reportar=1') },
     { icono: 'inspeccion', tono: 'primario', texto: 'Documentos', globo: porAtender, alTocar: alVerDocumentos },
+    // Solo para quien conduce, como en la app: sin unidad no hay PIN con el que activarse.
+    ...(persona.conduce !== false
+      ? [{ icono: 'flota', tono: 'exito', texto: 'Otra unidad', estado: 'Actívate con tu PIN', alTocar: () => navegar('/panel/otra-unidad') }]
+      : []),
   ]
   // Lo que no está en la barra de abajo (Alertas, Configuración…), como en el menú lateral.
   const accesos = movil?.accesos ?? []
-  const sinLeer = movil?.sinLeer ?? 0
+  const suyos = useAvisosConductor(sesion)
+  const sinLeer = suyos.noLeidas
 
   return (
     <div className="mvp mvu-tonos">
@@ -123,7 +133,7 @@ export default function MiPerfilMovil({ persona, sesion, aviso, alEditar, docume
         <div className="mvp-acciones">
           {acciones.map((a) => (
             <button key={a.texto} type="button" className={`mvp-accion ${a.tono}`} onClick={a.alTocar}
-              aria-label={a.globo ? `${a.texto}, ${a.globo} por atender` : a.texto}>
+              aria-label={a.globo ? `${a.texto}, ${a.globo} por atender` : a.estado ? `${a.texto}. ${a.estado}` : a.texto}>
               <span className="mvp-accion-boton">
                 <IconoApp nombre={a.icono} tam={22} />
                 {a.globo > 0 && <em className="mvp-globo">{a.globo}</em>}
