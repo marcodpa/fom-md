@@ -124,7 +124,8 @@
     box-shadow: var(--app-sombra-hoja);
     border-bottom: 0;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    animation: mv-hoja var(--app-d-lento) var(--app-curva);
+    /* Sube desde abajo con el resorte de movimiento.css (T-184). */
+    animation: mov-hoja-entra var(--mov-hoja, 520ms) var(--mov-resorte-hoja, var(--app-curva)) both;
   }
   /* El asa de la hoja, como la de la app. */
   .pnl.fom-dark[data-diseno] .pnl-modal::before {
@@ -479,10 +480,6 @@
   .pnl.fom-dark[data-diseno='glass'] table.mv-lista > tbody > tr { border-top-color: rgb(255 255 255 / .1); }
 }
 
-@keyframes mv-hoja {
-  from { transform: translateY(28px); opacity: 0.4; }
-  to { transform: none; opacity: 1; }
-}
 @media (prefers-reduced-motion: reduce) {
   .pnl.fom-dark[data-diseno] .pnl-modal { animation: none; }
 }

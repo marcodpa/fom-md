@@ -47,12 +47,14 @@
   --e-track-amplio: 0.8px;
 
   /* --- Movimiento (motion). Curvas cúbicas, entradas que desaceleran --- */
-  --e-d-micro: 100ms;
-  --e-d-rapido: 120ms;
-  --e-d-base: 220ms;
-  --e-d-lento: 360ms;
-  --e-curva: cubic-bezier(0.33, 1, 0.68, 1);
-  --e-curva-enfasis: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Salen de movimiento.css (T-184), los mismos de la app; el número es
+     el respaldo para donde ese archivo no se haya cargado (la entrada). */
+  --e-d-micro: var(--mov-rapido, 140ms); /* al tocar, 140 ms como la app */
+  --e-d-rapido: var(--mov-rapido, 140ms);
+  --e-d-base: var(--mov-normal, 240ms);
+  --e-d-lento: var(--mov-lento, 380ms);
+  --e-curva: var(--mov-curva, cubic-bezier(0.22, 1, 0.36, 1));
+  --e-curva-enfasis: var(--mov-curva-enfasis, cubic-bezier(0.65, 0, 0.35, 1));
   --e-escala-press: 0.97;
 
   /* --- Bordes y opacidades de estado --- */
@@ -688,10 +690,11 @@ button.pnl-kpi:active { transform: scale(var(--e-escala-press)); }
   50% { opacity: 1; }
 }
 
-/* appear.tsx: entrada de 360 ms, desvanecido más subida de 14 px, con
-   escalonado solo en los primeros elementos (regla de 3 a 5 del sistema). */
+/* appear.tsx: entrada lenta (380 ms), desvanecido más subida de 8 px
+   (movimiento.css), con escalonado solo en los primeros elementos (regla de
+   3 a 5 del sistema). */
 @keyframes pnl-aparecer {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(var(--mov-desplazamiento, 8px)); }
   to { opacity: 1; transform: none; }
 }
 .pnl-cuerpo > *,

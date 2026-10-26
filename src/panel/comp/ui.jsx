@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Icono } from '../Iconos'
+import { MOV, curvaSalida, sinMovimiento } from '../movimiento'
 
 // ============================================================
 // PIEZAS COMUNES DE LA CONSOLA
@@ -118,35 +119,45 @@ export function Tarjeta({ titulo, accion, children, sinCuerpo = false }) {
 }
 
 /**
- * Cifra que sube desde cero al aparecer, como animated-number.tsx de la app:
- * 900 ms con la curva estándar. Si el valor no es un número, o la persona
+ * Cifra que cuenta con suavidad, como animated-number.tsx de la app
+ * (CONTEO.tablero, 500 ms, curva de salida): la primera vez sube desde cero
+ * y, cuando el valor cambia, va del número anterior al nuevo. Nunca vuelve a
+ * cero en un refresco. Si el valor no es un número, o la persona
  * pidió menos movimiento, se muestra tal cual.
  */
 function Cifra({ valor }) {
-  const numero = typeof valor === 'number' ? valor : null
+  const numero = typeof valor === 'number' && Number.isFinite(valor) ? valor : null
   const [mostrado, setMostrado] = useState(numero === null ? valor : 0)
   const cuadro = useRef(0)
+  const actual = useRef(0)
 
   useEffect(() => {
     if (numero === null) {
       setMostrado(valor)
       return undefined
     }
-    const quieto = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     // En una pestaña de fondo el navegador congela requestAnimationFrame: la
     // cuenta nunca arranca y el indicador se queda clavado en 0. Quien abre la
     // consola en segundo plano vería toda la flota en cero. Sin animación que
     // valga la pena, se muestra el número y ya.
-    if (quieto || document.hidden) {
+    const desde = actual.current
+    if (sinMovimiento() || document.hidden || desde === numero) {
+      actual.current = numero
       setMostrado(numero)
       return undefined
     }
+    const duracion = MOV.conteo
+    // Los decimales del valor (4,5 se queda en 4,5; no se redondea a 5).
+    const decimales = Math.min(2, (String(numero).split('.')[1] || '').length)
+    const escala = 10 ** decimales
     const inicio = performance.now()
     const paso = (ahora) => {
-      const t = Math.min(1, (ahora - inicio) / 900)
-      // Curva estándar del tema: salida cúbica
-      const suave = 1 - Math.pow(1 - t, 3)
-      setMostrado(Math.round(numero * suave))
+      const t = Math.min(1, (ahora - inicio) / duracion)
+      // CURVA.salida de la app, la --mov-curva-salida de movimiento.css.
+      const suave = curvaSalida(t)
+      const v = t < 1 ? Math.round((desde + (numero - desde) * suave) * escala) / escala : numero
+      actual.current = v
+      setMostrado(v)
       if (t < 1) cuadro.current = requestAnimationFrame(paso)
     }
     cuadro.current = requestAnimationFrame(paso)
@@ -224,8 +235,22 @@ export function Barra({ valor, tono = '' }) {
   )
 }
 
-/** Ventana modal accesible (Escape y clic fuera cierran). */
+/**
+ * Ventana modal accesible (Escape y clic fuera cierran). En la computadora
+ * es una ventana; en el teléfono, una hoja que sube desde abajo (T-184: con
+ * resorte, y al cerrar se queda --mov-normal con `.saliendo` para irse).
+ */
 export function Modal({ titulo, abierto, alCerrar, children, ancho = 520 }) {
+  const [montado, setMontado] = useState(abierto)
+  // Mientras se va, se ve lo último que tuvo (quien la usa suele vaciarla al cerrar).
+  const ultimo = useRef({ titulo, children })
+  if (abierto) ultimo.current = { titulo, children }
+  useEffect(() => {
+    if (abierto) { setMontado(true); return undefined }
+    if (sinMovimiento()) { setMontado(false); return undefined }
+    const reloj = setTimeout(() => setMontado(false), MOV.normal)
+    return () => clearTimeout(reloj)
+  }, [abierto])
   const dialogo = useRef(null)
   const cerrarRef = useRef(alCerrar)
   cerrarRef.current = alCerrar
@@ -255,17 +280,19 @@ export function Modal({ titulo, abierto, alCerrar, children, ancho = 520 }) {
     }
   }, [abierto])
 
-  if (!abierto) return null
+  if (!abierto && !montado) return null
+  const saliendo = !abierto
+  const vista = saliendo ? ultimo.current : { titulo, children }
   return (
-    <div className="pnl-modal-fondo" onMouseDown={(e) => e.target === e.currentTarget && alCerrar()}>
-      <div ref={dialogo} tabIndex={-1} className="pnl-modal" role="dialog" aria-modal="true" aria-label={titulo} style={{ maxWidth: ancho }}>
+    <div className={`pnl-modal-fondo${saliendo ? ' saliendo' : ''}`} aria-hidden={saliendo || undefined} onMouseDown={(e) => !saliendo && e.target === e.currentTarget && alCerrar()}>
+      <div ref={dialogo} tabIndex={-1} className="pnl-modal" role="dialog" aria-modal={saliendo ? undefined : 'true'} aria-label={vista.titulo} style={{ maxWidth: ancho }}>
         <div className="pnl-modal-cab">
-          <h2>{titulo}</h2>
+          <h2>{vista.titulo}</h2>
           <button type="button" className="pnl-modal-x" onClick={alCerrar} aria-label="Cerrar">
             <Icono nombre="cerrar" tam={16} />
           </button>
         </div>
-        <div className="pnl-modal-cuerpo">{children}</div>
+        <div className="pnl-modal-cuerpo">{vista.children}</div>
       </div>
     </div>
   )

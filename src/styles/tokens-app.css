@@ -80,11 +80,12 @@
   --app-button: 600 16px/24px var(--app-fuente);
 
   /* ---------- Movimiento (tokens.ts · motion) ---------- */
-  --app-d-micro: 100ms;
-  --app-d-rapido: 120ms;
-  --app-d-base: 220ms;
-  --app-d-lento: 360ms;
-  --app-curva: cubic-bezier(0.33, 1, 0.68, 1);        /* Easing.out(Easing.cubic) */
+  /* T-184/T-185: los mismos de movimiento.css (y de la app). */
+  --app-d-micro: var(--mov-rapido, 140ms);
+  --app-d-rapido: var(--mov-rapido, 140ms);
+  --app-d-base: var(--mov-normal, 240ms);
+  --app-d-lento: var(--mov-lento, 380ms);
+  --app-curva: var(--mov-curva-salida, cubic-bezier(0.22, 1, 0.36, 1)); /* CURVA.salida */
   --app-curva-enfasis: cubic-bezier(0.65, 0, 0.35, 1); /* Easing.inOut(Easing.cubic) */
   --app-escala-press: 0.97;
 

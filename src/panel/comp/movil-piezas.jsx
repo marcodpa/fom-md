@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import LogoFom from '../../components/LogoFom'
 import { Icono } from '../Iconos'
@@ -93,11 +94,48 @@ export function MovilPantalla({ titulo, alVolver }) {
 /**
  * EL DOCK: la barra de pestañas flotante, con el nombre bajo cada ícono y la
  * píldora del activo (#173553, texto #8BC6FF) detrás del ícono.
+ *
+ * La píldora es UNA sola pieza que se desliza de pestaña en pestaña (T-184):
+ * se mide dónde está el ícono activo y se mueve con transform. La primera
+ * vez se coloca sin animar; después, con el resorte de movimiento.css.
  */
 export function MovilBarra({ pestanas }) {
+  const { pathname } = useLocation()
+  const dock = useRef(null)
+  const indicador = useRef(null)
+
+  useLayoutEffect(() => {
+    const caja = dock.current
+    const pieza = indicador.current
+    if (!caja || !pieza) return undefined
+    let cuadro = 0
+    const colocar = () => {
+      const activa = caja.querySelector('.mv-pestana.activa .mv-pildora')
+      if (!activa) { caja.removeAttribute('data-indicador'); return }
+      // Con offsets y no con getBoundingClientRect: la escala del toque no la descuadra.
+      let x = 0
+      let y = 0
+      for (let el = activa; el && el !== caja; el = el.offsetParent) { x += el.offsetLeft; y += el.offsetTop }
+      const estado = caja.getAttribute('data-indicador')
+      // Ya estaba colocada: la transición se enciende ANTES de moverla.
+      if (estado === 'medido') caja.setAttribute('data-indicador', 'listo')
+      pieza.style.transform = `translate3d(${x}px, ${y}px, 0)`
+      if (!estado) {
+        // Primera vez: en su sitio sin deslizarse; el resorte, desde el próximo cambio.
+        caja.setAttribute('data-indicador', 'medido')
+        cuadro = requestAnimationFrame(() => { cuadro = requestAnimationFrame(() => caja.setAttribute('data-indicador', 'listo')) })
+      }
+    }
+    colocar()
+    const observador = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(colocar)
+    observador?.observe(caja)
+    return () => { observador?.disconnect(); cancelAnimationFrame(cuadro) }
+  }, [pathname, pestanas.length])
+
   return (
     <nav className="mv-dock-zona" aria-label="Pestañas">
-      <div className="mv-dock">
+      <div className="mv-dock" ref={dock}>
+        <span className="mv-dock-indicador" ref={indicador} aria-hidden="true" />
         {pestanas.map(p => (
           <NavLink
             key={p.a}

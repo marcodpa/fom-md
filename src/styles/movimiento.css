@@ -1,0 +1,304 @@
+/* ============================================================
+   MOVIMIENTO DE LA CONSOLA (T-184) — la misma sensación que la app (T-185)
+   ------------------------------------------------------------
+   Todos los tiempos y curvas salen de aquí. La tabla para la app está en
+   src/styles/MOVIMIENTO.md: si cambias un valor, cámbialo en los dos lados.
+
+   Reglas que no se rompen:
+   - Solo se anima transform y opacity (60 fps, nada mueve el diseño).
+   - Con «reducir movimiento» del equipo, todo se apaga (al final).
+   - Lo que entra llega rápido y se posa (curva de salida); lo que se va
+     arranca suave y se acelera (curva de entrada) y dura menos.
+   Copia de fom-driver-juan/src/theme/movimiento.ts (DURACION, CURVA,
+   RESORTE, ESCALA_PRESION, VELO, ESCALONADO, CONTEO).
+   ============================================================ */
+
+/* Los resortes de la app (RESORTE en movimiento.ts) no existen en CSS: se
+   simulan (masa-resorte) y se muestrean con linear(). Sin linear(), la curva
+   de salida. */
+:root {
+  /* DURACION */
+  --mov-rapido: 140ms;  /* toques, lo que se va, cambios pequeños */
+  --mov-normal: 240ms;  /* fundidos, pestañas, bloques que entran */
+  --mov-lento: 380ms;   /* pantallas, hojas, cambio de tema */
+  --mov-hoja: 520ms;    /* lo que tarda en posarse el resorte de la hoja */
+
+  /* CURVA (los mismos cuatro números que en la app) */
+  --mov-curva-salida: cubic-bezier(0.22, 1, 0.36, 1);  /* llega rápido y se posa: lo que ENTRA */
+  --mov-curva-entrada: cubic-bezier(0.4, 0, 1, 1);     /* arranca suave y acelera: lo que SE VA */
+  --mov-curva-enfasis: cubic-bezier(0.65, 0, 0.35, 1); /* ida y vuelta pareja: tema, lo que late */
+  --mov-curva: var(--mov-curva-salida);                /* atajo: la de todo lo que entra */
+
+  /* RESORTE: respaldo sin linear() */
+  --mov-resorte-hoja: var(--mov-curva-salida);
+  --mov-resorte-ventana: var(--mov-curva-salida);
+  --mov-resorte-toque: var(--mov-curva-salida);
+
+  /* ESCALA_PRESION, ESCALONADO */
+  --mov-escala-toque: 0.97;
+  --mov-desplazamiento: 10px; /* lo que sube un bloque o una fila al entrar */
+  --mov-escalon: 45ms;        /* entre una fila y la siguiente (hasta 12) */
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    /* hoja { damping 30, stiffness 230, mass 1 }: sin rebote, en 520 ms */
+    --mov-resorte-hoja: linear(0, 0.045, 0.143, 0.262, 0.382, 0.493, 0.591, 0.675, 0.744, 0.8, 0.845, 0.881, 0.909, 0.93, 0.947, 0.96, 0.97, 0.978, 0.983, 0.988, 0.991, 0.993, 0.995, 0.996, 1);
+    /* ventana { damping 22, stiffness 260, mass 0.9 }: un pelo de rebote, en 380 ms */
+    --mov-resorte-ventana: linear(0, 0.033, 0.113, 0.22, 0.34, 0.46, 0.574, 0.677, 0.766, 0.841, 0.901, 0.947, 0.982, 1.007, 1.023, 1.033, 1.038, 1.038, 1.037, 1.033, 1.029, 1.024, 1.02, 1.016, 1);
+    /* toque { damping 18, stiffness 320, mass 0.6 }: al soltar, en 380 ms */
+    --mov-resorte-toque: linear(0, 0.059, 0.194, 0.363, 0.536, 0.692, 0.821, 0.92, 0.99, 1.035, 1.059, 1.068, 1.066, 1.058, 1.047, 1.035, 1.024, 1.015, 1.007, 1.002, 0.998, 0.996, 0.995, 0.995, 1);
+  }
+}
+
+/* ---------- Fotogramas comunes ---------- */
+@keyframes mov-fundido-entra { from { opacity: 0; } }
+@keyframes mov-fundido-sale { to { opacity: 0; } }
+@keyframes mov-subir-entra {
+  from { opacity: 0; transform: translate3d(0, var(--mov-desplazamiento), 0); }
+}
+@keyframes mov-ventana-entra {
+  from { opacity: 0; transform: translate3d(0, 16px, 0) scale(0.98); }
+}
+@keyframes mov-ventana-sale {
+  to { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.98); }
+}
+@keyframes mov-hoja-entra { from { transform: translate3d(0, 100%, 0); } }
+@keyframes mov-hoja-sale { to { transform: translate3d(0, 100%, 0); } }
+@keyframes mov-dock-entra { from { opacity: 0; transform: translate3d(0, 100%, 0); } }
+@keyframes mov-dock-sale { to { opacity: 0; transform: translate3d(0, 100%, 0); } }
+@keyframes mov-fila-entra {
+  from { opacity: 0; transform: translate3d(0, var(--mov-desplazamiento), 0); }
+}
+
+/* ============================================================
+   1. CAMBIO DE PANTALLA (View Transitions)
+   ------------------------------------------------------------
+   movimiento.js pone `mov-vt-ruta` en <html> mientras dura. Las piezas
+   fijas (lateral, barra de arriba, encabezado y dock del teléfono) llevan
+   nombre propio para quedarse quietas; solo la pantalla se funde y sube.
+   Sin View Transitions, movimiento.js hace la misma entrada con la Web
+   Animations API (sin la salida).
+   ============================================================ */
+html.mov-vt-ruta .pnl .pnl-main { view-transition-name: mov-pantalla; }
+html.mov-vt-ruta .pnl .pnl-side { view-transition-name: mov-lateral; }
+html.mov-vt-ruta .pnl .pnl-topbar { view-transition-name: mov-barra-sup; }
+html.mov-vt-ruta .pnl .mv-barra { view-transition-name: mov-encabezado; }
+html.mov-vt-ruta .pnl .mv-dock-zona { view-transition-name: mov-dock; }
+
+html.mov-vt-ruta::view-transition-group(*) {
+  animation-duration: var(--mov-normal);
+  animation-timing-function: var(--mov-curva);
+}
+/* El fondo de la página no se anima: cambia de golpe debajo de todo. */
+html.mov-vt-ruta::view-transition-old(root),
+html.mov-vt-ruta::view-transition-new(root) { animation: none; }
+html.mov-vt-ruta::view-transition-old(root) { opacity: 0; }
+
+/* La pantalla: la vieja se apaga rápido, la nueva entra y sube 8 px. Sin
+   estirar el grupo: si cambia el alto, la nueva ya está en su sitio. */
+html.mov-vt-ruta::view-transition-group(mov-pantalla) { animation: none; }
+html.mov-vt-ruta::view-transition-old(mov-pantalla) {
+  animation: mov-fundido-sale var(--mov-rapido) var(--mov-curva-entrada) both;
+}
+html.mov-vt-ruta::view-transition-new(mov-pantalla) {
+  animation: mov-subir-entra var(--mov-normal) var(--mov-curva) both;
+}
+
+/* Lateral, barra de arriba y dock: la vista nueva en vivo, sin fundido (así
+   el indicador del dock se desliza de verdad y no se cruzan dos dibujos). */
+html.mov-vt-ruta::view-transition-group(mov-lateral),
+html.mov-vt-ruta::view-transition-group(mov-barra-sup),
+html.mov-vt-ruta::view-transition-group(mov-dock),
+html.mov-vt-ruta::view-transition-new(mov-lateral),
+html.mov-vt-ruta::view-transition-new(mov-barra-sup),
+html.mov-vt-ruta::view-transition-new(mov-dock) { animation: none; }
+html.mov-vt-ruta::view-transition-old(mov-lateral),
+html.mov-vt-ruta::view-transition-old(mov-barra-sup),
+html.mov-vt-ruta::view-transition-old(mov-dock) { animation: none; opacity: 0; }
+/* El dock solo se mueve cuando aparece (volver a una pestaña) o se va
+   (entrar a una ficha): baja o sube entero. */
+html.mov-vt-ruta::view-transition-old(mov-dock):only-child {
+  opacity: 1;
+  animation: mov-dock-sale var(--mov-normal) var(--mov-curva-entrada) both;
+}
+html.mov-vt-ruta::view-transition-new(mov-dock):only-child {
+  animation: mov-dock-entra var(--mov-hoja) var(--mov-resorte-hoja) both;
+}
+/* El encabezado del teléfono cambia de forma (pestaña ↔ ficha): fundido
+   cruzado en el sitio, sin estirarse. */
+html.mov-vt-ruta::view-transition-group(mov-encabezado) { animation: none; }
+html.mov-vt-ruta::view-transition-old(mov-encabezado) {
+  animation: mov-fundido-sale var(--mov-rapido) var(--mov-curva-entrada) both;
+}
+html.mov-vt-ruta::view-transition-new(mov-encabezado) {
+  animation: mov-fundido-entra var(--mov-normal) var(--mov-curva) both;
+}
+
+/* ---------- Cambio de tema (Azul FOM ↔ Glass gris): fundido entero ---------- */
+html.mov-vt-tema::view-transition-old(root),
+html.mov-vt-tema::view-transition-new(root) {
+  animation-duration: var(--mov-lento);
+  animation-timing-function: var(--mov-curva-enfasis);
+}
+
+/* ============================================================
+   2. PESTAÑAS DE ABAJO (teléfono): el indicador se desliza
+   ------------------------------------------------------------
+   MovilBarra mide la pestaña activa y mueve `.mv-dock-indicador` con
+   transform. Mientras no se mida, cada pestaña pinta su propia píldora.
+   ============================================================ */
+.mv-dock { position: relative; }
+.mv-dock-indicador {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--app-dock-pildora-ancho);
+  height: var(--app-dock-pildora-alto);
+  border-radius: calc(var(--app-dock-pildora-alto) / 2);
+  background: var(--app-activo-sup);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.mv-dock[data-indicador] .mv-dock-indicador { opacity: 1; }
+.mv-dock[data-indicador='listo'] .mv-dock-indicador {
+  transition: transform var(--mov-lento) var(--mov-curva-salida), opacity var(--mov-rapido) var(--mov-curva);
+}
+.mv-dock[data-indicador] .mv-pestana { position: relative; z-index: 1; }
+.mv-dock[data-indicador] .mv-pestana.activa .mv-pildora { background: transparent; }
+.mv-pestana { transition: color var(--mov-rapido) var(--mov-curva); }
+.mv-pestana .mv-pildora { transition: transform var(--mov-lento) var(--mov-resorte-toque); }
+.mv-pestana:active .mv-pildora { transition: transform var(--mov-rapido) var(--mov-curva-salida); }
+.mv-pestana:active .mv-pildora { transform: scale(0.94); }
+
+/* ============================================================
+   3. HOJAS Y VENTANAS (Modal de ui.jsx)
+   ------------------------------------------------------------
+   Escritorio: la ventana sube 16 px y crece de 0,98 con resorte.
+   Teléfono (movil-modulos.css): la hoja sube desde abajo con resorte.
+   El fondo se oscurece con fundido. Al cerrar, Modal deja la pieza
+   montada --mov-normal con `.saliendo` para que se vaya.
+   ============================================================ */
+.pnl-modal-fondo { animation: mov-fundido-entra var(--mov-normal) var(--mov-curva) both; }
+.pnl-modal { animation: mov-ventana-entra var(--mov-lento) var(--mov-resorte-ventana) both; }
+.pnl-modal-fondo.saliendo {
+  pointer-events: none;
+  /* VELO: se abre en normal y se cierra en rápido. */
+  animation: mov-fundido-sale var(--mov-rapido) var(--mov-curva-entrada) both;
+}
+.pnl-modal-fondo.saliendo .pnl-modal {
+  /* capa-centrada.tsx: la ventana se va en rápido con la curva de entrada. */
+  animation: mov-ventana-sale var(--mov-rapido) var(--mov-curva-entrada) both;
+}
+@media (max-width: 767px) {
+  .pnl.fom-dark[data-diseno] .pnl-modal-fondo.saliendo .pnl-modal {
+    animation: mov-hoja-sale var(--mov-normal) var(--mov-curva-entrada) both;
+  }
+  /* Por si acaso (el resorte de la hoja no rebota): la hoja sigue un poco
+     por debajo del borde y nunca asoma el velo entre ella y el borde. */
+  .pnl.fom-dark[data-diseno] .pnl-modal::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 32px;
+    background: inherit;
+    pointer-events: none;
+  }
+}
+/* El velo del menú lateral (computadora angosta) se funde al abrir. */
+.pnl-velo { animation: mov-fundido-entra var(--mov-normal) var(--mov-curva) both; }
+
+/* ============================================================
+   4. LISTAS: las filas aparecen escalonadas UNA sola vez
+   ------------------------------------------------------------
+   movimiento.js marca cada fila con `data-mov-visto` al terminar su
+   entrada. Una fila marcada ya no vuelve a animarse aunque React la mueva
+   de sitio (reordenar, refresco con lo más nuevo arriba) o la vuelva a
+   pintar. Las filas nuevas que llegan con un refresco entran solas.
+   ============================================================ */
+:is(
+  .pnl-tabla > tbody > tr,
+  table.mv-lista > tbody > tr,
+  .pnl-filas > .pnl-fila,
+  .pnl-kanban-lista > *,
+  .pnl-lista-avisos > *,
+  .doc-filas > *,
+  .emp-lista > *,
+  .em-lista > *,
+  .insp-pp-lista > *,
+  .ic-lista > *,
+  .arch-lista > *,
+  .hje-filas > *,
+  .adm-item,
+  .av-fila,
+  .sos-fila,
+  .mv-accesos li,
+  .mv-lista-card > *
+):not([data-mov-visto]) {
+  animation: mov-fila-entra var(--mov-lento) var(--mov-curva) backwards;
+}
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(2) { animation-delay: calc(var(--mov-escalon) * 1); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(3) { animation-delay: calc(var(--mov-escalon) * 2); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(4) { animation-delay: calc(var(--mov-escalon) * 3); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(5) { animation-delay: calc(var(--mov-escalon) * 4); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(6) { animation-delay: calc(var(--mov-escalon) * 5); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(7) { animation-delay: calc(var(--mov-escalon) * 6); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(8) { animation-delay: calc(var(--mov-escalon) * 7); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(9) { animation-delay: calc(var(--mov-escalon) * 8); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(10) { animation-delay: calc(var(--mov-escalon) * 9); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(11) { animation-delay: calc(var(--mov-escalon) * 10); }
+:is(.pnl-tabla > tbody > tr, table.mv-lista > tbody > tr, .pnl-filas > .pnl-fila, .pnl-kanban-lista > *, .pnl-lista-avisos > *, .doc-filas > *, .emp-lista > *, .em-lista > *, .insp-pp-lista > *, .ic-lista > *, .arch-lista > *, .hje-filas > *, .adm-item, .av-fila, .sos-fila, .mv-accesos li, .mv-lista-card > *):not([data-mov-visto]):nth-child(n + 12) { animation-delay: calc(var(--mov-escalon) * 11); }
+
+/* ============================================================
+   5. CARGA → CONTENIDO
+   ------------------------------------------------------------
+   El esqueleto espera 120 ms antes de asomarse: si los datos llegan antes,
+   no parpadea. Lo que llega en su lugar dentro de una tarjeta se funde
+   (las secciones de la pantalla ya suben con pnl-aparecer, panel.css).
+   ============================================================ */
+.pnl-skeleton { animation: mov-fundido-entra var(--mov-rapido) var(--mov-curva) 120ms backwards; }
+.pnl-card-cuerpo > :not(.pnl-skeleton) { animation: mov-fundido-entra var(--mov-normal) var(--mov-curva) backwards; }
+
+/* ============================================================
+   6. AL TOCAR: escala 0,97 rápida
+   ------------------------------------------------------------
+   Botones, chips, cifras y tarjetas que se abren ya la tienen en
+   panel.css; aquí las piezas que faltaban.
+   ============================================================ */
+:is(a.pnl-fila, button.pnl-fila, a.pnl-card, .mv-acceso, a.mv-fila, button.mv-fila, .pnl-tab, .mvs-tocada-botones > *, .pnl-modal-x) {
+  /* Al soltar vuelve con el resorte del toque (RESORTE.toque de la app). */
+  transition: transform var(--mov-lento) var(--mov-resorte-toque),
+    background-color var(--mov-rapido) var(--mov-curva), border-color var(--mov-rapido) var(--mov-curva), color var(--mov-rapido) var(--mov-curva);
+}
+:is(a.pnl-fila, button.pnl-fila, a.pnl-card, .mv-acceso, a.mv-fila, button.mv-fila, .pnl-tab, .mvs-tocada-botones > *, .pnl-modal-x):active {
+  /* Al apretar: 0,97 en 140 ms con la curva de salida. */
+  transform: scale(var(--mov-escala-toque));
+  transition-duration: var(--mov-rapido);
+  transition-timing-function: var(--mov-curva-salida);
+}
+.mv-circulo { transition: transform var(--mov-lento) var(--mov-resorte-toque); }
+.mv-circulo:active { transition: transform var(--mov-rapido) var(--mov-curva-salida); }
+
+/* ============================================================
+   7. REDUCIR MOVIMIENTO: todo se apaga
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mov-rapido: 0ms;
+    --mov-hoja: 0ms;
+    --mov-normal: 0ms;
+    --mov-lento: 0ms;
+    --mov-escalon: 0ms;
+    --mov-desplazamiento: 0px;
+    --mov-escala-toque: 1;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+  .mv-dock-indicador,
+  .mv-dock[data-indicador='listo'] .mv-dock-indicador { transition: none; }
+  /* El resto de la consola ya lo apaga panel.css (.pnl * a 0,001 ms). */
+}

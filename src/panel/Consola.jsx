@@ -1,6 +1,6 @@
 import LogoFom from '../components/LogoFom'
-import { useEffect, useState } from 'react'
-import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, Navigate, Route, Routes, UNSAFE_NavigationContext, useLocation, useNavigate } from 'react-router-dom'
 import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
@@ -12,6 +12,7 @@ import { useAvisosConductor } from './datos/useAvisosConductor'
 import '../styles/apariencia.css'
 import { accesosDe, esPestana, MovilContexto, pestanasDe, tituloDe, useEsMovil } from './comp/movil-navegacion'
 import { MovilBarra, MovilEncabezado, MovilPantalla } from './comp/movil-piezas'
+import { conTransicion, useEntradaPantalla, useFilasUnaVez, useNavegacionSuave } from './movimiento'
 
 import Resumen from './modulos/Resumen'
 import CentroControl from './modulos/CentroControl'
@@ -44,6 +45,8 @@ import Plataforma from './modulos/Plataforma'
 import AdminVehiculos from './modulos/AdminVehiculos'
 // Al final: el teléfono manda sobre los estilos de escritorio de los módulos.
 import '../styles/movil-app.css'
+// El movimiento de toda la consola (T-184), después de todo lo demás.
+import '../styles/movimiento.css'
 
 // Módulos de la consola, agrupados como en la arquitectura FOM-WEB.
 const MENU = [
@@ -251,6 +254,12 @@ export default function Consola() {
   // empresa. Los demás roles, sin cambios.
   const esConductor = areaDe(sesion?.perfil) === 'conductor' && !sesion?.perfil?.empresaGestion
   const suyos = useAvisosConductor(sesion?.perfil, { activo: esConductor, refresco: pathname })
+  // Transiciones suaves (T-184): toda navegación que cambia de pantalla pasa
+  // por una View Transition; sin la API, la pantalla nueva entra igual.
+  const navegacionSuave = useNavegacionSuave()
+  const principal = useRef(null)
+  useEntradaPantalla(principal)
+  useFilasUnaVez()
 
   useEffect(() => {
     const raiz = document.documentElement
@@ -322,12 +331,13 @@ export default function Consola() {
   const avisos = esConductor ? suyos.noLeidas : sinLeer
   const etiquetaCampana = esAdminFom(perfil) && !perfil.empresaGestion ? 'Alertas: elegir empresa' : `Alertas: ${avisos} sin leer`
   // Sin historial (se abrió el enlace directo) atrás lleva al inicio: nadie se queda encerrado.
-  const volver = () => (window.history.state?.idx > 0 ? navegar(-1) : navegar(inicioDe(area)))
+  const volver = () => (window.history.state?.idx > 0 ? navegacionSuave.navigator.go(-1) : conTransicion(() => navegar(inicioDe(area))))
   // Lo que es solo de la computadora (el SOS del menú) no va a «Accesos» del teléfono.
   const menuTelefono = menu.map((g) => ({ ...g, items: g.items.filter((it) => !it.soloEscritorio) }))
   const movil = { esMovil, accesos: accesosDe(menuTelefono, pestanas), sinLeer: avisos, perfil }
 
   return (
+    <UNSAFE_NavigationContext.Provider value={navegacionSuave}>
     <MovilContexto.Provider value={movil}>
     <div className="pnl fom-dark" data-diseno={diseno} data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'} data-movil={esMovil ? (enPestana ? 'pestana' : 'pila') : undefined}>
       <Lateral
@@ -345,7 +355,7 @@ export default function Consola() {
         />
       )}
 
-      <main className="pnl-main" id="contenido">
+      <main className="pnl-main" id="contenido" ref={principal}>
         <div className="pnl-topbar">
           <div className="pnl-topbar-contexto"><span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{esAdminFom(perfil) && pathname.includes('/admin/') ? 'Administración global FOM' : perfil.empresa || 'FOM · Administración'}</span><span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span></div>
           <div className="pnl-topbar-derecha">
@@ -422,5 +432,6 @@ export default function Consola() {
       {esMovil && enPestana && <MovilBarra pestanas={pestanas} />}
     </div>
     </MovilContexto.Provider>
+    </UNSAFE_NavigationContext.Provider>
   )
 }

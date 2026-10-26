@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { cuentaApariencia, crearPreferenciasApariencia } from './apariencia-store'
+import { conTransicion } from './movimiento'
 
 const preferencias = crearPreferenciasApariencia(
   () => typeof window === 'undefined' ? null : window.localStorage,
@@ -13,8 +14,11 @@ export function useApariencia(perfil) {
   const [aviso, setAviso] = useState('')
   useEffect(() => setAviso(''), [cuenta])
   const cambiar = valor => {
-    const guardado = preferencias.cambiar(cuenta, valor)
-    setAviso(guardado ? 'Diseño guardado para tu cuenta en este navegador.' : 'Diseño aplicado. Este navegador no permite guardarlo; al cerrar la sesión puede perderse.')
+    // El cambio de diseño se funde entero (T-184), no salta de golpe.
+    conTransicion(() => {
+      const guardado = preferencias.cambiar(cuenta, valor)
+      setAviso(guardado ? 'Diseño guardado para tu cuenta en este navegador.' : 'Diseño aplicado. Este navegador no permite guardarlo; al cerrar la sesión puede perderse.')
+    }, 'tema')
   }
   return { diseno, cambiar, aviso }
 }
