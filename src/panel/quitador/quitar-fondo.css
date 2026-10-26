@@ -1,0 +1,30 @@
+/* Ventana «Foto sin fondo» (T-179): carga, vista previa al estilo de la maqueta y avisos. */
+.qf { display: grid; gap: 14px; }
+.qf-carga { display: grid; gap: 8px; justify-items: center; text-align: center; padding: 18px 4px 6px; }
+.qf-titulo { margin: 0; font-size: 17px; font-weight: 600; color: var(--e-texto); }
+.qf-nota { margin: 0; max-width: 420px; font-size: 13px; color: var(--e-texto-2); }
+.qf-cifra { margin: 0; font-size: 12px; color: var(--e-texto-3); font-variant-numeric: tabular-nums; }
+.qf-barra { width: min(420px, 90%); height: 8px; margin-top: 6px; border-radius: 999px; background: var(--e-sup-baja); border: 1px solid var(--e-borde); overflow: hidden; }
+.qf-barra span { display: block; height: 100%; background: var(--e-primario); transition: width .3s; }
+/* Sin cifra que mostrar: un tramo que va y viene. */
+.qf-barra.indefinida span { width: 35%; animation: qf-va-y-viene 1.4s ease-in-out infinite; }
+@keyframes qf-va-y-viene { 0% { transform: translateX(-100%); } 100% { transform: translateX(290%); } }
+@media (prefers-reduced-motion: reduce) { .qf-barra.indefinida span { animation: none; width: 100%; opacity: .5; } }
+
+/* La maqueta: franja oscura (#0a0d12) y la unidad encima, que se sale por arriba. La sombra ya viene en el recorte. */
+.qf-maqueta { position: relative; height: 270px; margin-top: 4px; }
+.qf-franja { position: absolute; inset: 96px 0 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px;
+  padding: 14px 18px; border: 1px solid #262e39; border-radius: 24px; background: linear-gradient(180deg, #0f141b 0%, #0a0d12 100%); color: #e8edf3; }
+.qf-franja b { font-size: 16px; }
+.qf-franja small { font-size: 12px; color: #8b96a5; }
+.qf-foto { position: absolute; left: 50%; top: 0; width: min(100%, 352px); height: auto; aspect-ratio: 8 / 5; transform: translateX(-50%); object-fit: contain; }
+
+.qf-avisos { margin: 0; padding: 10px 12px 10px 30px; border-radius: 12px; border: 1px solid var(--e-aviso);
+  background: var(--e-aviso-sup); color: var(--e-texto); font-size: 13px; display: grid; gap: 4px; }
+.qf-acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.qf-acciones .pnl-btn { min-height: 44px; }
+@media (max-width: 480px) {
+  .qf-maqueta { height: 220px; }
+  .qf-franja { inset: 78px 0 0; }
+  .qf-acciones .pnl-btn { flex: 1 1 100%; }
+}

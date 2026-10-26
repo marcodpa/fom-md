@@ -32,6 +32,8 @@ export const ids = {
   avatar: (userId) => `fom/avatar/${userId}`,
   /** Un documento tiene dos caras: «frente» y «reverso». */
   documento: (id, cara) => `fom/documento/${id}/${cara}`,
+  /** La misma foto de la unidad sin fondo (T-179): `<base>/<n>` lleva el MISMO n que la original. */
+  vehiculoSinFondo: (id) => `fom/vehiculo-sin-fondo/${id}`,
 }
 
 /** Etiquetas (tags) que también se ponen al subir: la app del conductor las usa para encontrar sus fotos. */
@@ -39,6 +41,8 @@ export const etiquetas = {
   documento: (id) => `fom_documento_${id}`,
   vehiculo: (id) => `fom_vehiculo_${id}`,
   avatar: (userId) => `fom_avatar_${userId}`,
+  // Aparte de `fom_vehiculo_<id>`: quien busca las fotos de la unidad por etiqueta no debe confundirla con el recorte.
+  vehiculoSinFondo: (id) => `fom_vehiculo_sin_fondo_${id}`,
 }
 
 // Cuando se reemplaza una foto, el navegador y la red de Cloudinary pueden seguir mostrando la anterior. Un número
@@ -121,29 +125,20 @@ export function huboSubidaReciente(ms = 45_000) {
   return Date.now() - ultimaSubida < ms
 }
 
-// Quitar el fondo lo hace Cloudinary AI (`e_background_removal`, un complemento de la cuenta). Si la cuenta no lo
-// tiene activo o la foto no se puede procesar (por ejemplo, menos de 64x64), Cloudinary responde con error: la web lo
-// detecta una vez, deja de pedirlo y muestra la foto normal. Nunca se queda sin foto.
-// OJO: es un complemento de PAGO (consume cupo/créditos de la cuenta). Por eso viene APAGADO y se enciende a propósito con
-// VITE_CLOUDINARY_SIN_FONDO=1. Apagado, la ficha muestra la foto normal en un marco ordenado y no gasta nada.
-let fondoDisponible = ['1', 'si', 'true'].includes(String(import.meta.env?.VITE_CLOUDINARY_SIN_FONDO ?? '').toLowerCase())
+// Quitar el fondo ya no lo hace Cloudinary (`e_background_removal` era un complemento de PAGO y estaba apagado): desde
+// T-179 lo hace el propio navegador (src/panel/quitador) y el recorte se sube como otra foto, `ids.vehiculoSinFondo`.
+// Estas dos quedan solo para quien todavía las llama (FotoFija y su prueba): nunca piden nada a Cloudinary AI.
 export function quitarFondoDisponible() {
-  return fondoDisponible
+  return false
 }
-export function desactivarQuitarFondo() {
-  fondoDisponible = false
-}
+export function desactivarQuitarFondo() {}
 
 /**
  * La URL pública optimizada. `ajuste: 'contener'` limita el tamaño sin recortar la imagen ni aumentar la resolución.
- * El valor predeterminado conserva el recorte de los avatares. Con `sinFondo`, el
- * carro viene recortado sobre fondo transparente (sin recorte al marco: se respeta su silueta completa).
+ * El valor predeterminado conserva el recorte de los avatares.
  */
-export function urlDe(publicId, ancho = 480, alto = 0, { sinFondo = false, ajuste = 'recortar' } = {}) {
+export function urlDe(publicId, ancho = 480, alto = 0, { ajuste = 'recortar' } = {}) {
   if (!nube || !publicId) return ''
-  if (sinFondo && fondoDisponible) {
-    return `https://res.cloudinary.com/${nube}/image/upload/e_background_removal/f_auto,q_auto,w_${ancho},c_limit/${publicId}?v=${version}`
-  }
   const t = ['f_auto', 'q_auto', `w_${ancho}`, ...(alto ? [`h_${alto}`] : []),
     ...(alto && ajuste !== 'contener' ? ['c_fill', 'g_auto'] : ['c_limit'])].join(',')
   return `https://res.cloudinary.com/${nube}/image/upload/${t}/${publicId}?v=${version}`
@@ -422,4 +417,55 @@ export async function subirImagen(archivo, { publicId: base, etiqueta, titulo, p
     return json.secure_url
   }
   throw new Error('No se pudo guardar la foto: hubo cambios al mismo tiempo. Inténtalo de nuevo.')
+}
+
+// --- Recortes sin fondo (T-179) ------------------------------------------------
+// El navegador quita el fondo (src/panel/quitador) y el recorte se guarda en `fom/vehiculo-sin-fondo/<id>/<n>`, con el
+// MISMO n que la foto original: así se sabe de qué foto es, y si luego se sube otra original sin recortarla, el
+// recorte viejo deja de valer solo (no se borra nada). Es un WebP con transparencia que sale de un lienzo: sin EXIF.
+
+/** ¿Existe esa foto en Cloudinary? Una consulta liviana (solo cabeceras). */
+export function existeFoto(publicId) {
+  if (!nube || !publicId) return Promise.resolve(false)
+  return existe(publicId)
+}
+
+/**
+ * Sube el recorte sin fondo de la foto `n` de la unidad. Lanza un Error en llano si no se pudo.
+ * No pasa por `limpiarFoto`: ya son solo píxeles de un lienzo, y volver a codificarlo le bajaría la calidad.
+ */
+export async function subirRecorte(blob, { vehiculoId, n, titulo } = {}) {
+  if (!cloudinaryConfigurado()) throw new Error('Cloudinary no está configurado en esta web.')
+  if (!vehiculoId || !n) throw new Error('Falta saber de qué foto es el recorte.')
+  if (!blob?.size) throw new Error('El recorte salió vacío.')
+  const base = ids.vehiculoSinFondo(vehiculoId)
+  const cuerpo = new FormData()
+  const extension = /png/i.test(blob.type) ? 'png' : 'webp'
+  cuerpo.append('file', blob, `sin-fondo-${n}.${extension}`)
+  cuerpo.append('upload_preset', preset)
+  cuerpo.append('public_id', `${base}/${n}`)
+  cuerpo.append('tags', etiquetas.vehiculoSinFondo(vehiculoId))
+  if (titulo) cuerpo.append('context', `caption=${String(titulo).replace(/[|=]/g, ' ')} sin fondo`)
+
+  const corte = new AbortController()
+  const reloj = setTimeout(() => corte.abort(), TIEMPO_LIMITE)
+  let respuesta
+  try {
+    respuesta = await fetch(`https://api.cloudinary.com/v1_1/${nube}/image/upload`, { method: 'POST', body: cuerpo, signal: corte.signal })
+  } catch {
+    throw new Error('No se pudo guardar la foto sin fondo. Revisa tu conexión e inténtalo de nuevo.')
+  } finally {
+    clearTimeout(reloj)
+  }
+  if (!respuesta.ok) {
+    const detalle = await respuesta.json().then((j) => j?.error?.message).catch(() => null)
+    throw new Error(detalle ? `Cloudinary rechazó la foto sin fondo: ${detalle}` : 'Cloudinary rechazó la foto sin fondo.')
+  }
+  const json = await respuesta.json()
+  // Una subida sin firma no reemplaza: si ya había recorte de esa foto, se queda el que había.
+  if (json.existing) throw new Error('Esta foto ya tenía su versión sin fondo. Para cambiarla, sube la foto otra vez.')
+  if (!json.secure_url) throw new Error('Cloudinary no devolvió la dirección de la foto sin fondo.')
+  // Los recortes no siguen la cuenta 1, 2, 3… (solo hay de las fotos que se recortaron): no se usa `ultimaVersion`.
+  avisarCambio()
+  return `${base}/${n}`
 }
