@@ -157,7 +157,10 @@ async function abrirHoja() {
     await s(30);
     el.dispatchEvent(new PointerEvent('pointerup', { ...o, clientY: y - 450, buttons: 0 }));
     await s(900);
-    return el.parentElement.parentElement.style.transform;
+    // La hoja es el primer antepasado que se mueve (desde T-170 la franja va dentro de su scroll).
+    let h = el.parentElement;
+    while (h && !h.style.transform) h = h.parentElement;
+    return h?.style.transform ?? null;
   })()`)
   if (t !== 'translateY(0px)') throw new Error(`la hoja no abrió (${t})`)
 }
@@ -187,7 +190,13 @@ async function pantallaLarga(extra = 0) {
   await esperar(1000)
 }
 
+/** app-expo.mjs corre la app en modo desarrollo (T-183): su aviso de la esquina (LogBox, en un
+ *  shadow DOM fuera de #root) no es de la pantalla y se oculta antes de la foto. */
+const sinAvisoDev = () =>
+  ev(`(() => { let n = 0; for (const d of document.querySelectorAll('body > div')) { if (d.shadowRoot && d.id !== 'root') { d.style.display = 'none'; n++ } } return n })()`)
+
 async function foto(nombre) {
+  await sinAvisoDev()
   await ajustarKpi()
   await esperar(400)
   await orden('foto', { archivo: join(DIR, `${nombre}.png`).replaceAll('\\', '/') })

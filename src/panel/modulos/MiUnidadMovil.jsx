@@ -12,6 +12,7 @@ import { conSenalAlDia, textoSinSenal, transmitiendo } from '../datos/sinSenal'
 import { colaReciente } from '../datos/recorrido'
 import { horasDeHoy, partesTiempo, resumenDeHoy, textoKm, textoTiempo } from '../datos/recorridoHoy'
 import { fotoSinFondo } from '../datos/fotoSinFondo'
+import { pendientesDeMiUnidad } from '../datos/mantenimientoPendiente'
 import * as f from '../datos/formato'
 import { BotonSos } from './SosConductor'
 import '../../styles/mi-unidad-movil.css'
@@ -614,8 +615,18 @@ export default function MiUnidadMovil({ perfil, unidad: asignada, enMapa: enMapa
   }, [unidad?.id, perfil?.empresaId])
   const inspeccionHoy = inspeccion.datos?.id === unidad?.id ? inspeccion.datos : null
 
-  // Mantenimiento pendiente: sus órdenes abiertas o en taller.
-  const pendientes = unidad?.odts ? unidad.odts.filter((o) => o.estado === 'abierta' || o.estado === 'en_revision').length : null
+  // Mantenimiento pendiente, con la misma regla que la app: sus órdenes sin resolver (abiertas o en
+  // revisión) + lo programado en FOM que ya venció. Sin poder leer lo programado, solo las órdenes.
+  const programado = useDatos(
+    async () => ({ id, acciones: id ? await repo.planes.acciones({ vehiculoId: id }).catch(() => null) : null }),
+    [id],
+    CINCO_MINUTOS,
+  )
+  const acciones = programado.datos?.id === id ? programado.datos.acciones : null
+  const pendientes = useMemo(
+    () => pendientesDeMiUnidad({ odts: unidad?.odts ?? null, acciones, odometroKm: unidad?.km ?? null, ahora: ahora ?? Date.now() }),
+    [unidad?.odts, unidad?.km, acciones, ahora],
+  )
 
   // Dónde queda el borde de la hoja: el mapa se sube para que la unidad quede en medio de lo que se ve.
   const [borde, setBorde] = useState(null)

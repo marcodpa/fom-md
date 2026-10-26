@@ -1,0 +1,310 @@
+From 6121375e993da03d533f91b63cd10a1b5ab0247d Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Mon, 26 Oct 2026 11:10:34 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20Mi=20unidad=20con=20la=20l=C3=ADnea=20de?=
+ =?UTF-8?q?l=20recorrido=20azul=20y=20continua,=20y=20=C2=ABMantenimiento?=
+ =?UTF-8?q?=20pendiente=C2=BB=20contado=20igual=20que=20en=20la=20web=20(T?=
+ =?UTF-8?q?-183)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/(driver)/index.tsx              |  6 +++++-
+ src/components/map-vehiculo-clasico.tsx | 15 +++++++++++++--
+ src/components/map-vehiculo-dom.tsx     |  2 ++
+ src/components/map-vehiculo-mapbox.tsx  | 15 +++++++++++----
+ src/components/mapa-fom-dom.tsx         | 21 +++++++++++++++++----
+ src/components/mapbox-nativo-ruta.tsx   | 18 +++++++++++++-----
+ src/services/maintenanceService.ts      | 18 ++++++++++++++++++
+ 7 files changed, 79 insertions(+), 16 deletions(-)
+
+diff --git a/src/app/(driver)/index.tsx b/src/app/(driver)/index.tsx
+index cb1754e..75fb851 100644
+--- a/src/app/(driver)/index.tsx
++++ b/src/app/(driver)/index.tsx
+@@ -48,6 +48,7 @@ import {
+ import { telemetriaDePosicion } from '@/services/fleetService';
+ import { getMiManejoFom } from '@/services/fomMetricasConductor';
+ import { getDiariaDeHoy } from '@/services/inspeccionService';
++import { pendientesDeMiUnidad } from '@/services/maintenanceService';
+ import {
+   DEFAULT_BRAND,
+   darken,
+@@ -219,7 +220,8 @@ export default function InicioScreen() {
+             if (!active) return;
+             setSinLeer(p.noLeidas);
+             // Lo que falta por cerrar de su unidad: la casilla «Mantenimiento».
+-            setPendientes(p.acciones.filter((a) => a.estado !== 'realizada').length);
++            // Misma regla que la web: órdenes sin resolver + lo programado ya vencido.
++            setPendientes(pendientesDeMiUnidad(p.acciones));
+           })
+           // Sin poder contarlos, la campana se queda sin punto: mejor eso que
+           // una caja roja encima de la pantalla.
+@@ -447,6 +449,8 @@ export default function InicioScreen() {
+           }
+           encuadreClave={vehicle.id}
+           hideOverlays
++          // Su estela, azul FOM y continua como en la maqueta (la flota sigue punteada).
++          estelaFom
+           // Los controles van ARRIBA, bajo el encabezado: abajo manda la hoja.
+           controlesArriba
+           margenArriba={margenMapa - corrimiento}
+diff --git a/src/components/map-vehiculo-clasico.tsx b/src/components/map-vehiculo-clasico.tsx
+index 5c9c78d..8ec39ff 100644
+--- a/src/components/map-vehiculo-clasico.tsx
++++ b/src/components/map-vehiculo-clasico.tsx
+@@ -107,8 +107,17 @@ export type MapaVehiculoProps = {
+    * Mapbox; el mapa clásico lo ignora.
+    */
+   llegadaClave?: number;
++  /**
++   * La estela en azul FOM y continua, como en la maqueta de Mi unidad del
++   * conductor. Sin ella, punteada y del color de cada unidad (los mapas de la
++   * flota del supervisor).
++   */
++  estelaFom?: boolean;
+ };
+ 
++/** El azul FOM de la estela de Mi unidad (`estelaFom`). */
++export const AZUL_ESTELA_FOM = '#3D9BF5';
++
+ type Coords = { latitude: number; longitude: number };
+ /** `error`: el GPS falló (no el permiso). Sin él, la ruedita giraba para siempre. */
+ type Permiso = 'pendiente' | 'ok' | 'denegado' | 'error';
+@@ -498,6 +507,7 @@ export function MapaVehiculoClasico({
+   markers: markersCrudos,
+   vehicleCoords: vehicleCoordsCrudas,
+   interactivo = true,
++  estelaFom = false,
+ }: MapaVehiculoProps) {
+   const { colors, radii, spacing } = useTheme();
+   // Solo lo dibujable (ver `coordsValidas`): un NaN o un (0, 0) no llegan al mapa nativo.
+@@ -751,8 +761,9 @@ export function MapaVehiculoClasico({
+               <Polyline
+                 key={`estela-${m.id}`}
+                 coordinates={m.estela!.map((p) => ({ latitude: p.lat, longitude: p.lng }))}
+-                strokeColor={colorDe(m)}
+-                strokeWidth={3}
++                // Aquí la estela ya es continua; en Mi unidad, además azul FOM.
++                strokeColor={estelaFom ? AZUL_ESTELA_FOM : colorDe(m)}
++                strokeWidth={estelaFom ? 4 : 3}
+                 lineCap="round"
+                 lineJoin="round"
+               />
+diff --git a/src/components/map-vehiculo-dom.tsx b/src/components/map-vehiculo-dom.tsx
+index af17e53..882f34c 100644
+--- a/src/components/map-vehiculo-dom.tsx
++++ b/src/components/map-vehiculo-dom.tsx
+@@ -45,6 +45,7 @@ export function MapaVehiculoDom({
+   eventosManejo = null,
+   eventoActivo = null,
+   alElegirEvento,
++  estelaFom = false,
+ }: MapaVehiculoProps & PropsEventosMapa) {
+   const { colors, colorScheme } = useTheme();
+   // Los eventos cruzan a la vista web solo cuando cambian de verdad (no en cada
+@@ -221,6 +222,7 @@ export function MapaVehiculoDom({
+         eventoActivo={eventoActivo}
+         onEvento={async (id) => alElegirEvento?.(id)}
+         interactivo={interactivo}
++        estelaFom={estelaFom}
+         dom={{ style: styles.web, scrollEnabled: false, containerStyle: styles.web } as never}
+       />
+       <LlegadaTarjeta llegada={llegada} abajo={abajo} onAlto={setAltoTarjeta} />
+diff --git a/src/components/map-vehiculo-mapbox.tsx b/src/components/map-vehiculo-mapbox.tsx
+index 3571718..c6049e6 100644
+--- a/src/components/map-vehiculo-mapbox.tsx
++++ b/src/components/map-vehiculo-mapbox.tsx
+@@ -16,7 +16,13 @@ import { useTheme } from '@/theme';
+ import type { MapMarker } from '@/types';
+ import { colorApagado } from '@/utils/paleta-flota';
+ 
+-import { coordsValidas, estilosMapa as styles, marcadoresValidos, type MapaVehiculoProps } from './map-vehiculo-clasico';
++import {
++  AZUL_ESTELA_FOM,
++  coordsValidas,
++  estilosMapa as styles,
++  marcadoresValidos,
++  type MapaVehiculoProps,
++} from './map-vehiculo-clasico';
+ import { EventosNativos } from './mapbox-nativo-eventos';
+ import { UnidadesNativas, type UnidadMapa } from './mapbox-nativo-marcador';
+ import {
+@@ -87,6 +93,7 @@ export function MapaVehiculoMapbox({
+   eventosManejo = null,
+   eventoActivo = null,
+   alElegirEvento,
++  estelaFom = false,
+ }: MapaVehiculoProps & PropsEventosMapa) {
+   const { colors, radii, spacing, colorScheme } = useTheme();
+   // Solo lo dibujable: un NaN en `centerCoordinate` o en una estela tumba el
+@@ -372,8 +379,8 @@ export function MapaVehiculoMapbox({
+     () =>
+       (markers ?? [])
+         .filter((m) => (m.estela?.length ?? 0) > 1)
+-        .map((m) => ({ id: m.id, color: colorDe(m), coords: m.estela!.map(enLngLat) })),
+-    [markers, colorDe],
++        .map((m) => ({ id: m.id, color: estelaFom ? AZUL_ESTELA_FOM : colorDe(m), coords: m.estela!.map(enLngLat) })),
++    [markers, colorDe, estelaFom],
+   );
+ 
+   const coloresCapas = useMemo<ColoresCapas>(
+@@ -424,7 +431,7 @@ export function MapaVehiculoMapbox({
+       {rutaVisible ? (
+         <RutaNativa ruta={rutaVisible} viajeActivo={viajeActivo} onElegirViaje={onElegirViaje} colores={coloresCapas} />
+       ) : null}
+-      <EstelasNativas estelas={estelas} />
++      <EstelasNativas estelas={estelas} continua={estelaFom} />
+     </>
+   );
+   // Los eventos de manejo, encima de las unidades: son lo que se está mirando.
+diff --git a/src/components/mapa-fom-dom.tsx b/src/components/mapa-fom-dom.tsx
+index 3598761..8de82d2 100644
+--- a/src/components/mapa-fom-dom.tsx
++++ b/src/components/mapa-fom-dom.tsx
+@@ -134,6 +134,8 @@ type Props = {
+    * puntos y `onMapa` siguen; al destacar una unidad la cámara va sola a ella.
+    */
+   interactivo?: boolean;
++  /** Estela azul FOM y continua (Mi unidad del conductor); sin ella, punteada y del color de la unidad. */
++  estelaFom?: boolean;
+   /** Eventos de manejo ya filtrados: una capa de símbolos (los cercanos, en grupo). */
+   eventos?: EventoEnMapa[];
+   /** El evento (o grupo `g:…`) con su globo abierto: el mapa lo centra. */
+@@ -193,6 +195,9 @@ const puntoValido = (lat: unknown, lng: unknown): boolean =>
+   !(lat === 0 && lng === 0);
+ const coordValida = (c: Coord) => puntoValido(c[1], c[0]);
+ 
++/** El azul FOM de la estela de Mi unidad (el mismo de `map-vehiculo-clasico`). */
++const AZUL_ESTELA_FOM = "#3D9BF5";
++
+ /**
+  * Huella de un recorrido por su contenido: cuántos puntos y el primero y el
+  * último. Si no cambia, es el mismo recorrido (ver `rutaEncuadrada`).
+@@ -621,6 +626,8 @@ export default function MapaFomDom(props: Props) {
+   }, [marcadores, props.resaltadoId, colores, estiloListo]);
+ 
+   // Estelas (la cola reciente de cada unidad), por debajo de los marcadores.
++  // En Mi unidad (`estelaFom`), azul FOM y continua, como la maqueta.
++  const estelaFom = props.estelaFom ?? false;
+   useEffect(() => {
+     const m = mapa.current;
+     if (!m || !estiloListo || estiloCargando.current) return;
+@@ -631,7 +638,7 @@ export default function MapaFomDom(props: Props) {
+           .filter((p) => (p.estela?.length ?? 0) > 1)
+           .map((p) => ({
+             type: "Feature" as const,
+-            properties: { color: p.color },
++            properties: { color: estelaFom ? AZUL_ESTELA_FOM : p.color },
+             geometry: { type: "LineString" as const, coordinates: p.estela! },
+           })),
+       };
+@@ -648,18 +655,24 @@ export default function MapaFomDom(props: Props) {
+           layout: { "line-cap": "round", "line-join": "round" },
+           paint: {
+             "line-color": ["get", "color"],
+-            "line-width": 4,
+             "line-opacity": 0.9,
+-            "line-dasharray": [0.1, 1.8],
+             "line-emissive-strength": 1,
+           },
+         } as never);
+       }
++      // Grosor y guiones, también al cambiar `estelaFom` con la capa ya puesta
++      // (sin guiones —`null` los quita—, la línea es continua).
++      m.setPaintProperty("fom-estelas", "line-width", estelaFom ? 5 : 4);
++      m.setPaintProperty(
++        "fom-estelas",
++        "line-dasharray",
++        (estelaFom ? null : [0.1, 1.8]) as never,
++      );
+     } catch (e) {
+       // El estilo se cambió a mitad: `style.load` vuelve a correr esto.
+       console.warn("[mapa]", e);
+     }
+-  }, [marcadores, estiloListo]);
++  }, [marcadores, estiloListo, estelaFom]);
+ 
+   // EVENTOS DE MANEJO: una fuente y capas de símbolos, como la web. Se compara
+   // por contenido (las props cruzan el puente como objetos nuevos): el refresco
+diff --git a/src/components/mapbox-nativo-ruta.tsx b/src/components/mapbox-nativo-ruta.tsx
+index 860aae4..5e050e7 100644
+--- a/src/components/mapbox-nativo-ruta.tsx
++++ b/src/components/mapbox-nativo-ruta.tsx
+@@ -143,21 +143,29 @@ const ESTILO_LLEGADA: LineLayerStyle = {
+ 
+ // ── Estelas ─────────────────────────────────────────────────────────────────
+ 
+-const ESTILO_ESTELA: LineLayerStyle = {
++/** La estela de Mi unidad: continua y un poco más gruesa, como en la maqueta. */
++const ESTILO_ESTELA_CONTINUA: LineLayerStyle = {
+   lineCap: 'round',
+   lineJoin: 'round',
+   lineColor: ['get', 'color'],
+-  lineWidth: 4,
++  lineWidth: 5,
+   lineOpacity: 0.9,
+-  lineDasharray: [0.1, 1.8],
+   lineEmissiveStrength: 1,
+ };
+ 
+-/** Las estelas (la cola reciente de cada unidad), punteadas y debajo de los marcadores. */
++/** La de la flota: punteada. */
++const ESTILO_ESTELA: LineLayerStyle = { ...ESTILO_ESTELA_CONTINUA, lineWidth: 4, lineDasharray: [0.1, 1.8] };
++
++/**
++ * Las estelas (la cola reciente de cada unidad), debajo de los marcadores:
++ * punteadas, o continuas con `continua` (Mi unidad del conductor).
++ */
+ export const EstelasNativas = memo(function EstelasNativas({
+   estelas,
++  continua = false,
+ }: {
+   estelas: { id: string; color: string; coords: Posicion[] }[];
++  continua?: boolean;
+ }) {
+   const datos = useMemo<GeoJSON.FeatureCollection>(
+     () => ({
+@@ -176,7 +184,7 @@ export const EstelasNativas = memo(function EstelasNativas({
+   if (datos.features.length === 0) return null;
+   return (
+     <ShapeSource id="fom-estelas" shape={datos}>
+-      <LineLayer id="fom-estelas" slot="top" style={ESTILO_ESTELA} />
++      <LineLayer id="fom-estelas" slot="top" style={continua ? ESTILO_ESTELA_CONTINUA : ESTILO_ESTELA} />
+     </ShapeSource>
+   );
+ });
+diff --git a/src/services/maintenanceService.ts b/src/services/maintenanceService.ts
+index 952946b..c9ffa40 100644
+--- a/src/services/maintenanceService.ts
++++ b/src/services/maintenanceService.ts
+@@ -385,6 +385,24 @@ export function getResumenUnidad(vehicle: Vehicle, acciones: AccionMantenimiento
+   };
+ }
+ 
++/**
++ * Lo PENDIENTE de la unidad para la casilla «Mantenimiento» de Mi unidad. La
++ * misma regla que la web (`pendientesDeMiUnidad` en `datos/mantenimientoPendiente.js`):
++ *  - sus órdenes sin resolver: abiertas o en revisión (en el taller);
++ *  - el mantenimiento programado VENCIDO que está registrado en FOM (pendiente o
++ *    en curso, sin orden propia: esa ya cuenta arriba).
++ * No cuentan lo próximo (aún no vence), lo hecho, ni las alertas de un control
++ * que la app calcula y FOM aún no registró: la web no las ve y los dos números
++ * tienen que ser el mismo. Siguen saliendo en la pestaña de Mantenimiento.
++ */
++export function pendientesDeMiUnidad(acciones: AccionMantenimiento[]): number {
++  return acciones.filter((a) => {
++    if (a.estado === 'realizada') return false;
++    if (a.odtId) return true;
++    return a.vencida && !aunSinGuardar(a);
++  }).length;
++}
++
+ /**
+  * Las acciones de un vehículo.
+  *
+-- 
+2.55.0.windows.3
+
