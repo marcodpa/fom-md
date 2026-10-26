@@ -24,6 +24,7 @@ import { cambiosGps } from './metadatosGps'
 import { LIMITE_EVENTOS, comoEventoManejo, diasServidor } from './eventosManejo'
 import { cloudinaryConfigurado, subirImagen } from './cloudinary'
 import { carpetaDe } from './archivos'
+import { alCambiar, perfilActual } from '../auth'
 
 /**
  * Une el vehículo con su estado en vivo en la forma que consumen los módulos.
@@ -382,6 +383,29 @@ function scoreDe(s, aunSinIndice = false) {
 const RANKING_MS = 5 * 60_000
 const rankingsGuardados = new Map()
 
+/**
+ * Olvida lo guardado en memoria (rankings, asignaciones, flota y unidades sin
+ * posición). Pasa solo al cerrar la sesión o cambiar de persona: lo de una
+ * cuenta no se le muestra a la siguiente en el mismo navegador.
+ */
+export function olvidarMemorias() {
+  rankingsGuardados.clear()
+  asignacionesGuardadas = null
+  enVuelo = null
+  enVueloEmpresa = null
+  sinPosicionHasta.clear()
+}
+
+let personaDeLaMemoria = perfilActual()?.id ?? null
+alCambiar((s) => {
+  // null = sin sesión (salió o expiró). Sin perfil pero con algo = resolviendo o sin conexión: no cambia de quién es.
+  if (s === null) { olvidarMemorias(); personaDeLaMemoria = null; return }
+  const persona = s?.perfil?.id
+  if (!persona) return
+  if (personaDeLaMemoria && persona !== personaDeLaMemoria) olvidarMemorias()
+  personaDeLaMemoria = persona
+})
+
 function puntosDe(filas) {
   return quitarSaltos(filas
     .filter((p) => p.positionValid && p.latitude != null && p.longitude != null)
@@ -466,7 +490,8 @@ export const repoApi = {
      * la pastilla de cada conductor en vez de pedir una por persona.
      */
     ranking({ dias = 7, fresco = false } = {}) {
-      const clave = `${empresaGestionActualId() || ''}:${dias}`
+      // Por persona además de empresa: otra cuenta en el mismo navegador no ve lo de la anterior.
+      const clave = `${empresaGestionActualId() || ''}:${perfilActual()?.id || ''}:${dias}`
       const g = rankingsGuardados.get(clave)
       if (!fresco && g && Date.now() - g.desde < RANKING_MS) return g.peticion
       const peticion = api.scoresManejo(dias).then((r) =>

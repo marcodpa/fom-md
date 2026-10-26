@@ -18,7 +18,7 @@
 // lo de los dos lados.
 // ============================================================
 import { HAY_API, pedir } from './api'
-import { cloudinaryConfigurado, problemaDelArchivo, subirImagen, ultimaVersion, urlDe, urlOriginal } from './cloudinary'
+import { cloudinaryConfigurado, limpiarFoto, problemaDelArchivo, subirImagen, ultimaVersion, urlDe, urlOriginal } from './cloudinary'
 import { masNuevoPrimero } from './orden'
 
 const CONSOLA = '/api/v1/console'
@@ -94,10 +94,12 @@ export async function subirArchivo({ coleccion, padreId, proposito, archivo, tit
   if (!PROPOSITOS[coleccion]?.includes(proposito)) throw new Error('Ese tipo de archivo no corresponde aquí.')
   const mal = problemaDe(archivo, coleccion)
   if (mal) throw new Error(mal)
+  // Las fotos salen sin EXIF (ni GPS) vayan al servidor o a Cloudinary; los PDF pasan tal cual.
+  const limpio = await limpiarFoto(archivo)
 
   if (HAY_API && !almacenApagado) {
     try {
-      const id = await subirAlServidor({ coleccion, padreId, proposito, archivo })
+      const id = await subirAlServidor({ coleccion, padreId, proposito, archivo: limpio })
       return { via: 'servidor', id }
     } catch (e) {
       if (!esApagado(e)) throw e
@@ -107,7 +109,7 @@ export async function subirArchivo({ coleccion, padreId, proposito, archivo, tit
   if (!cloudinaryConfigurado()) {
     throw new Error('No hay dónde guardar archivos: el almacén del servidor está apagado y Cloudinary no está configurado en esta web.')
   }
-  const url = await subirImagen(archivo, {
+  const url = await subirImagen(limpio, {
     publicId: carpetaDe(coleccion, padreId, proposito),
     etiqueta: etiquetaDe(coleccion, padreId),
     titulo: titulo || archivo.name,

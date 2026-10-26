@@ -22,6 +22,8 @@
 import { api, HAY_API, fijarEmpresaGestion } from './datos/api'
 import { iniciales as inicialesDe } from './datos/formato'
 import { esAdminFom, etiquetaRolSesion, rolCanonico, tipoEmpresaDe } from './roles'
+import { olvidarFotos } from './datos/cloudinary'
+import { CUENTAS as CUENTAS_VITRINA } from './cuentasDemo'
 
 const CLAVE_SESION = 'fom.panel.sesion'
 
@@ -32,55 +34,10 @@ const CLAVE_SESION = 'fom.panel.sesion'
  * valores, después se migran las filas, y solo al final se retiran los viejos.
  */
 // --- Cuentas de demostración (solo sin API) --------------------------------
-const CUENTAS = [
-  {
-    usuario: import.meta.env?.VITE_PANEL_USUARIO || 'supervisor@fom.com.ve',
-    clave: import.meta.env?.VITE_PANEL_CLAVE || 'FlotaFOM2026',
-    perfil: {
-      id: 'usr-001',
-      nombre: 'Yeison Márquez',
-      correo: 'supervisor@fom.com.ve',
-      rol: 'supervisor',
-      rolNombre: 'Supervisor',
-      empresaTipo: 'estandar',
-      empresa: 'Transporte Lago Sur, C.A.',
-      empresaId: 'transporte-lago-sur',
-      sede: 'Costa Oriental del Lago',
-      iniciales: 'YM',
-    },
-  },
-  {
-    usuario: 'conductor@fom.com.ve',
-    clave: 'ConductorFOM2026',
-    perfil: {
-      id: 'usr-002',
-      nombre: 'Carlos Méndez',
-      correo: 'conductor@fom.com.ve',
-      rol: 'conductor',
-      rolNombre: 'Conductor',
-      empresaTipo: 'estandar',
-      empresa: 'Transporte Lago Sur, C.A.',
-      empresaId: 'transporte-lago-sur',
-      sede: 'Costa Oriental del Lago',
-      iniciales: 'CM',
-    },
-  },
-  {
-    usuario: 'admin@fom.com.ve',
-    clave: 'AdminFOM2026',
-    perfil: {
-      id: 'usr-000',
-      nombre: 'Marco Pacheco',
-      correo: 'admin@fom.com.ve',
-      rol: 'admin_fom',
-      rolNombre: 'Administrador FOM',
-      empresa: 'FOM · Administración',
-      empresaId: null, // multiempresa: no pertenece a un ente
-      sede: 'Todas las empresas',
-      iniciales: 'MP',
-    },
-  },
-]
+// Vite cambia `import.meta.env.VITE_FOM_API` por su valor al construir. Con la
+// API puesta queda `"/fom-api" ? [] : …`, Rollup descarta la otra rama y el
+// módulo con las claves de la vitrina no entra al paquete publicado.
+const CUENTAS = import.meta.env.VITE_FOM_API ? [] : CUENTAS_VITRINA
 
 const oyentes = new Set()
 
@@ -312,18 +269,89 @@ export async function iniciarSesion({ usuario, clave, recordar = true }) {
   }
 }
 
+// --- Salir sin dejar rastro ------------------------------------------------
+
+export const AVISO_SALIDA_FALLIDA =
+  'No pudimos cerrar tu sesión en el servidor. Revisa tu conexión e inténtalo de nuevo.'
+
+/**
+ * Lo que se queda aunque salga alguien: preferencias de pantalla de este
+ * navegador y los datos de la vitrina (sin API, lo que manda el conductor le
+ * llega al supervisor por `fom.panel.cambios`).
+ */
+const SE_QUEDAN = new Set(['fom.panel.modo', 'fom.mapa.prefs', 'fom.demo.estres', 'fom.panel.cambios', 'fom.panel.cambios.estres'])
+const seQueda = (clave) => SE_QUEDAN.has(clave) || clave.startsWith('fom.apariencia.')
+
+/** Claves del panel (`fom…`) y los avisos del conductor (`notis:…`, la misma clave que la app). */
+export const esClaveDeSesion = (clave) => typeof clave === 'string' && /^(fom|notis:)/u.test(clave) && !seQueda(clave)
+
+/** Borra de un almacén (localStorage o sessionStorage) lo que dejó la sesión. */
+export function borrarClavesDeSesion(almacen) {
+  if (!almacen) return
+  try {
+    const claves = []
+    for (let i = 0; i < almacen.length; i += 1) claves.push(almacen.key(i))
+    // Se juntan primero: borrar mientras se recorre corre los índices.
+    claves.filter(esClaveDeSesion).forEach((clave) => almacen.removeItem(clave))
+  } catch {
+    /* almacenamiento bloqueado: no hay nada que borrar */
+  }
+}
+
+/**
+ * Borra la base de las hojas de inspección (`fom-hojas`). Si la página aún la
+ * tiene abierta, el navegador la borra al cerrar esa conexión (la recarga a
+ * /entrar): no se espera más de `espera` ms.
+ */
+export function borrarBaseHojas(idb = globalThis.indexedDB, espera = 1500) {
+  if (!idb?.deleteDatabase) return Promise.resolve()
+  return new Promise((listo) => {
+    const reloj = setTimeout(listo, espera)
+    const fin = () => { clearTimeout(reloj); listo() }
+    try {
+      const pedido = idb.deleteDatabase('fom-hojas')
+      pedido.onsuccess = fin
+      pedido.onerror = fin
+      pedido.onblocked = fin
+    } catch {
+      fin()
+    }
+  })
+}
+
+async function borrarRastros() {
+  borrarClavesDeSesion(globalThis.localStorage)
+  borrarClavesDeSesion(globalThis.sessionStorage)
+  // Las memorias de `repoApi` se borran solas al quedar la sesión en null (ver `alCambiar` allí).
+  olvidarFotos()
+  await borrarBaseHojas()
+}
+
+/**
+ * Cierra la sesión y deja el navegador limpio para el siguiente: claves del
+ * panel, hojas guardadas y memorias. Luego recarga en /entrar para que no
+ * quede nada en memoria. Si el servidor no confirma la salida, la sesión
+ * sigue abierta y se avisa: decir «saliste» sin serlo es peor en una
+ * computadora compartida.
+ * @returns {Promise<{ok: true} | {ok: false, error: string}>}
+ */
 export async function cerrarSesion() {
   if (HAY_API) {
     try {
       await api.salir()
-    } catch {
-      /* la sesión ya no existía del lado del servidor */
+    } catch (error) {
+      // 401: el servidor ya no tenía esa sesión, así que salir es cierto.
+      if (error?.estado !== 401) {
+        // Los botones de «Cerrar sesión» no leen la respuesta: el aviso se muestra aquí.
+        globalThis.alert?.(AVISO_SALIDA_FALLIDA)
+        return { ok: false, error: AVISO_SALIDA_FALLIDA }
+      }
     }
-    fijar(null)
-    return
   }
-  localStorage.removeItem(CLAVE_SESION)
   fijar(null)
+  await borrarRastros()
+  globalThis.location?.replace?.('/entrar')
+  return { ok: true }
 }
 
 /** ¿La sesión es del administrador de FOM? (rango 4, ve todo el sistema) */

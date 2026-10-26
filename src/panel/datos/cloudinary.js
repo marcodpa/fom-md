@@ -111,7 +111,7 @@ export async function idVigente(base) {
   return n ? `${base}/${n}` : null
 }
 
-/** Solo para pruebas: olvida lo recordado. */
+/** Olvida lo recordado (al cerrar sesión, y en las pruebas). */
 export function olvidarFotos() {
   memoria.clear()
 }
@@ -172,6 +172,209 @@ export function problemaDelArchivo(archivo, { permitirPdf = false } = {}) {
   return null
 }
 
+// --- Fotos sin ubicación -----------------------------------------------------
+// Una foto de teléfono lleva EXIF: dónde se tomó (GPS), con qué equipo y cuándo. Antes de subirla se vuelve a dibujar
+// en un lienzo, que solo guarda los píxeles: sale sin EXIF, derecha (se respeta la orientación que traía) y con 1600 px
+// de lado como mucho. Si el navegador no puede dibujarla, se le quitan los metadatos byte a byte; si tampoco, no se
+// sube. Los PDF (y lo que no es JPEG, PNG o WebP) pasan tal cual.
+
+const LADO_MAXIMO = 1600
+const CALIDAD = 0.85
+const REDIBUJABLES = /^image\/(jpeg|png|webp)$/i
+const EXTENSIONES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
+// Lo ya limpiado no se vuelve a re-codificar (archivos.js limpia antes de elegir servidor o Cloudinary).
+const limpias = new WeakSet()
+
+function unir(partes) {
+  const total = partes.reduce((s, p) => s + p.length, 0)
+  const salida = new Uint8Array(total)
+  let i = 0
+  for (const p of partes) { salida.set(p, i); i += p.length }
+  return salida
+}
+const ascii = (b, i, n) => String.fromCharCode(...b.subarray(i, i + n))
+const malFormada = () => new Error('La imagen no tiene un formato que se pueda leer.')
+
+/** JPEG: fuera APP1 (EXIF y XMP, con el GPS), APP2 que no sea perfil de color, APP3–APP15, comentarios y lo que venga tras el fin. */
+function jpegSinMetadatos(b) {
+  if (b[0] !== 0xff || b[1] !== 0xd8) throw malFormada()
+  const partes = [b.subarray(0, 2)]
+  let i = 2
+  while (i + 1 < b.length) {
+    if (b[i] !== 0xff) throw malFormada()
+    const marca = b[i + 1]
+    if (marca === 0xff) { i += 1; continue } // relleno entre marcas
+    if (marca === 0xd9) { partes.push(b.subarray(i, i + 2)); return unir(partes) } // fin de la imagen
+    if ((marca >= 0xd0 && marca <= 0xd7) || marca === 0x01) { partes.push(b.subarray(i, i + 2)); i += 2; continue }
+    if (i + 4 > b.length) throw malFormada()
+    const fin = i + 2 + ((b[i + 2] << 8) | b[i + 3])
+    if (fin > b.length || fin < i + 4) throw malFormada()
+    const perfilDeColor = marca === 0xe2 && ascii(b, i + 4, 11) === 'ICC_PROFILE'
+    const quitar = marca === 0xe1 || (marca === 0xe2 && !perfilDeColor) || (marca >= 0xe3 && marca <= 0xef) || marca === 0xfe
+    if (!quitar) partes.push(b.subarray(i, fin))
+    i = fin
+    if (marca === 0xda) {
+      // Datos de la imagen: siguen hasta una marca de verdad (FF seguido de algo que no es 00 ni un reinicio).
+      let j = i
+      while (j + 1 < b.length && !(b[j] === 0xff && b[j + 1] !== 0x00 && !(b[j + 1] >= 0xd0 && b[j + 1] <= 0xd7))) j += 1
+      if (j + 1 >= b.length) throw malFormada()
+      partes.push(b.subarray(i, j))
+      i = j
+    }
+  }
+  throw malFormada()
+}
+
+/** PNG: fuera los trozos de EXIF, textos y fecha. */
+const QUITAR_PNG = new Set(['eXIf', 'tEXt', 'zTXt', 'iTXt', 'tIME'])
+function pngSinMetadatos(b) {
+  if (ascii(b, 1, 3) !== 'PNG' || b[0] !== 0x89) throw malFormada()
+  const partes = [b.subarray(0, 8)]
+  let i = 8
+  while (i + 12 <= b.length) {
+    const largo = ((b[i] << 24) >>> 0) + (b[i + 1] << 16) + (b[i + 2] << 8) + b[i + 3]
+    const tipo = ascii(b, i + 4, 4)
+    const fin = i + 12 + largo
+    if (fin > b.length) throw malFormada()
+    if (!QUITAR_PNG.has(tipo)) partes.push(b.subarray(i, fin))
+    i = fin
+    if (tipo === 'IEND') return unir(partes)
+  }
+  throw malFormada()
+}
+
+/** WebP: fuera los trozos EXIF y XMP, y se apagan sus banderas en VP8X. */
+function webpSinMetadatos(b) {
+  if (ascii(b, 0, 4) !== 'RIFF' || ascii(b, 8, 4) !== 'WEBP') throw malFormada()
+  const partes = []
+  let i = 12
+  while (i + 8 <= b.length) {
+    const tipo = ascii(b, i, 4)
+    const largo = (b[i + 4] | (b[i + 5] << 8) | (b[i + 6] << 16) | (b[i + 7] << 24)) >>> 0
+    if (i + 8 + largo > b.length) throw malFormada()
+    const fin = Math.min(b.length, i + 8 + largo + (largo & 1)) // los trozos impares llevan un byte de relleno
+    if (tipo !== 'EXIF' && tipo !== 'XMP ') {
+      const trozo = b.slice(i, fin)
+      if (tipo === 'VP8X') trozo[8] &= ~0x0c
+      partes.push(trozo)
+    }
+    i = fin
+  }
+  const cuerpo = unir(partes)
+  const salida = new Uint8Array(12 + cuerpo.length)
+  salida.set(b.subarray(0, 12))
+  new DataView(salida.buffer).setUint32(4, 4 + cuerpo.length, true)
+  salida.set(cuerpo, 12)
+  return salida
+}
+
+/** Los mismos bytes de imagen sin metadatos. Lanza si el archivo no es el formato que dice. */
+export function quitarMetadatos(bytes, tipo) {
+  const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)
+  const t = String(tipo || '').toLowerCase()
+  if (t === 'image/jpeg') return jpegSinMetadatos(b)
+  if (t === 'image/png') return pngSinMetadatos(b)
+  if (t === 'image/webp') return webpSinMetadatos(b)
+  throw malFormada()
+}
+
+/** La imagen lista para dibujar, ya girada según su EXIF. `null` si este navegador no puede leerla. */
+async function decodificar(archivo) {
+  if (typeof globalThis.createImageBitmap === 'function') {
+    try {
+      const mapa = await globalThis.createImageBitmap(archivo, { imageOrientation: 'from-image' })
+      return { fuente: mapa, ancho: mapa.width, alto: mapa.height, cerrar: () => mapa.close?.() }
+    } catch {
+      /* navegadores viejos no aceptan la opción: se prueba con <img> */
+    }
+  }
+  if (typeof globalThis.Image !== 'function' || typeof globalThis.URL?.createObjectURL !== 'function') return null
+  const url = URL.createObjectURL(archivo)
+  const img = new globalThis.Image()
+  try {
+    img.src = url
+    await img.decode()
+  } catch {
+    URL.revokeObjectURL(url)
+    return null
+  }
+  // <img> ya respeta la orientación del EXIF (image-orientation: from-image).
+  return { fuente: img, ancho: img.naturalWidth, alto: img.naturalHeight, cerrar: () => URL.revokeObjectURL(url) }
+}
+
+function crearLienzo(ancho, alto) {
+  if (typeof globalThis.document?.createElement === 'function') {
+    const lienzo = globalThis.document.createElement('canvas')
+    lienzo.width = ancho
+    lienzo.height = alto
+    return lienzo
+  }
+  if (typeof globalThis.OffscreenCanvas === 'function') return new globalThis.OffscreenCanvas(ancho, alto)
+  return null
+}
+
+function aBlob(lienzo, tipo, calidad) {
+  if (typeof lienzo.convertToBlob === 'function') return lienzo.convertToBlob({ type: tipo, quality: calidad })
+  return new Promise((listo) => lienzo.toBlob(listo, tipo, calidad))
+}
+
+/** Vuelve a dibujar la imagen en un lienzo (solo píxeles). `null` si no se pudo. */
+async function redibujar(archivo, tipo, lado, calidad) {
+  const imagen = await decodificar(archivo)
+  if (!imagen) return null
+  try {
+    if (!imagen.ancho || !imagen.alto) return null
+    const escala = Math.min(1, lado / Math.max(imagen.ancho, imagen.alto))
+    const ancho = Math.max(1, Math.round(imagen.ancho * escala))
+    const alto = Math.max(1, Math.round(imagen.alto * escala))
+    const lienzo = crearLienzo(ancho, alto)
+    const ctx = lienzo?.getContext('2d')
+    if (!ctx) return null
+    ctx.drawImage(imagen.fuente, 0, 0, ancho, alto)
+    const blob = await aBlob(lienzo, tipo, calidad)
+    return blob?.size ? blob : null
+  } finally {
+    imagen.cerrar()
+  }
+}
+
+function comoArchivo(blob, original) {
+  const tipo = blob.type || original.type
+  const nombre = String(original.name || 'foto')
+  // Si el navegador no sabe escribir WebP, entrega PNG: el nombre lo dice.
+  const final = tipo === original.type || !EXTENSIONES[tipo] ? nombre : nombre.replace(/(\.[^.]*)?$/u, `.${EXTENSIONES[tipo]}`)
+  return new File([blob], final, { type: tipo, lastModified: Date.now() })
+}
+
+/**
+ * La foto lista para subir: sin EXIF (GPS, equipo, fecha), con la orientación aplicada y como mucho `lado` px de
+ * lado. Los PDF y otros tipos se devuelven tal cual. Lanza si no se puede limpiar: mejor no subirla que subirla con
+ * la ubicación.
+ */
+export async function limpiarFoto(archivo, { lado = LADO_MAXIMO, calidad = CALIDAD } = {}) {
+  if (!REDIBUJABLES.test(archivo?.type || '')) return archivo
+  // Solo un Blob tiene bytes que limpiar (las pruebas de subida usan objetos sueltos).
+  if (typeof Blob === 'undefined' || !(archivo instanceof Blob)) return archivo
+  if (limpias.has(archivo)) return archivo
+  const tipo = archivo.type.toLowerCase()
+  let limpio = null
+  try {
+    limpio = await redibujar(archivo, tipo, lado, calidad)
+  } catch {
+    limpio = null
+  }
+  if (!limpio) {
+    try {
+      limpio = new Blob([quitarMetadatos(new Uint8Array(await archivo.arrayBuffer()), tipo)], { type: tipo })
+    } catch {
+      throw new Error(`No pudimos preparar «${archivo.name}» para subirla. Prueba con otra foto.`)
+    }
+  }
+  const final = comoArchivo(limpio, archivo)
+  limpias.add(final)
+  return final
+}
+
 /**
  * Sube UNA imagen como la versión siguiente de su dirección base (`publicId`) y la deja como la vigente. Lanza un
  * Error con el motivo si no se pudo: la pantalla no debe decir «guardado» si la foto no llegó.
@@ -181,12 +384,14 @@ export async function subirImagen(archivo, { publicId: base, etiqueta, titulo, p
   if (!base) throw new Error('Falta saber a qué pertenece la foto.')
   const mal = problemaDelArchivo(archivo, { permitirPdf })
   if (mal) throw new Error(mal)
+  // Sin EXIF: la foto no viaja con el lugar donde se tomó.
+  const limpio = await limpiarFoto(archivo)
 
   let n = (await ultimaVersion(base)) + 1
   // Si alguien subió otra foto al mismo tiempo, Cloudinary devuelve la que ya existía (`existing`): se pasa a la siguiente.
   for (let intento = 0; intento < 4; intento += 1, n += 1) {
     const cuerpo = new FormData()
-    cuerpo.append('file', archivo)
+    cuerpo.append('file', limpio)
     cuerpo.append('upload_preset', preset)
     cuerpo.append('public_id', `${base}/${n}`)
     if (etiqueta) cuerpo.append('tags', etiqueta)
