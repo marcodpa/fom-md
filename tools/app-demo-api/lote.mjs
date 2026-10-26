@@ -10,8 +10,9 @@
 // Antes de cada captura deja el servidor falso como al arrancar (/__demo/reiniciar) y entra con
 // la cuenta que toque, así cada una sale igual aunque se saque sola.
 //
-// Fotos de órdenes: datos.mjs las busca en fotos/ (falla-1.jpg, falla-2.jpg, taller.jpg); si no
-// están, las órdenes salen sin fotos. Hoy no están (las hechas con IA se quitaron, T-147/T-161).
+// Fotos de órdenes: datos.mjs las busca en fotos/ (falla-1.jpg, falla-2.jpg, luz-trasera.jpg,
+// taller.jpg: fotos reales con licencia de comparativa/fotos-ordenes, T-169); si no están, las
+// órdenes salen sin fotos. Las de la Galería (inspección, reportar) salen de esa misma carpeta.
 import { mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -45,6 +46,22 @@ const ir = (url, espera = 4000) => orden('ir', { url, espera })
 const pulsar = (texto, { n = 0, contiene = false, espera = 1500 } = {}) =>
   orden('pulsar', { texto, n, contiene: contiene ? 1 : 0, espera })
 const ruta = () => ev('location.pathname + location.search')
+/** La próxima vez que la app abra la Galería recibe estas fotos de fotos/. */
+const fotosParaGaleria = (...nombres) =>
+  orden('archivos', { rutas: nombres.map((n) => join(AQUI, 'fotos', n).replaceAll('\\', '/')).join(',') })
+/** Pulsa «Galería» (la n-ésima visible) con las fotos dadas y espera a que salga la miniatura. */
+async function galeria(n, ...nombres) {
+  await fotosParaGaleria(...nombres)
+  const antes = await ev(`document.querySelectorAll('[aria-label^="Ver la foto"],img[src^="blob:"]').length`)
+  await pulsar('Galería', { n, espera: 1500 })
+  const fin = Date.now() + 10000
+  while (Date.now() < fin) {
+    const ahora = await ev(`document.querySelectorAll('[aria-label^="Ver la foto"],img[src^="blob:"]').length`)
+    if (ahora > antes) return esperar(1200)
+    await esperar(400)
+  }
+  throw new Error('la Galería no devolvió la foto')
+}
 
 /** El botón o fila visible más pequeño que contiene `texto` (por debajo del encabezado). */
 async function abrir(texto, espera = 3000) {
@@ -228,10 +245,13 @@ C['m-cond-insp-foto'] = [CONDUCTOR, 'pendiente', async () => {
   await pulsar('Conforme', { contiene: true, n: 1, espera: 500 })
   await pulsar('Falla', { contiene: true, n: 2, espera: 800 })
   await escribir(0, 'No enciende la luz trasera izquierda.')
-  await desplazar(825)
+  // La foto de la luz rota (luz-trasera.jpg), desde la Galería.
+  await desplazarA('Luces', 110)
+  await galeria(0, 'luz-trasera.jpg')
+  await desplazarA('Cruces y direccionales', 8)
   await pulsar('Observaci', { contiene: true, n: 0, espera: 800 })
   await escribir(1, 'La direccional derecha parpadea rápido.')
-  await desplazar(485)
+  await desplazarA('Luces delanteras y traseras', 8)
 }]
 
 C['m-insp-bloqueada'] = [CONDUCTOR, 'bloqueada', async () => {
@@ -267,6 +287,11 @@ C['m-orden-historial'] = [CONDUCTOR, 'pendiente', async () => {
   await ordenResueltaCarlos()
   await desplazar('fin')
 }]
+// La misma orden desde «La unidad»: fotos del reporte (disco de freno) y del cierre (taller).
+C['m-cond-orden-fotos'] = [CONDUCTOR, 'pendiente', async () => {
+  await ordenResueltaCarlos()
+  await desplazarA('La unidad', 8)
+}]
 /** Reportar una falla lleno: frenos, alta y la descripción (sin fotos). */
 async function reportarLleno() {
   await pestana(2)
@@ -277,12 +302,27 @@ async function reportarLleno() {
   await escribir(0, 'Las pastillas delanteras chillan al frenar y el pedal se siente largo.')
 }
 C['m-cond-reportar'] = [CONDUCTOR, 'pendiente', reportarLleno]
-// Sin fotos el formulario cabe sin desplazarse, pero «Crear ODT» (fijo abajo) tapa los botones
-// de Evidencia: la larga alarga la ventana lo justo para que se vean. m-cond-reportar-fotos no
-// se saca mientras no haya fotos de órdenes: saldría igual que m-cond-reportar.
-C['m-cond-reportar-larga'] = [CONDUCTOR, 'pendiente', async () => {
+/** Como con KpiResumen: react-native-web deja que `padding` pise el `paddingBottom: 120` del
+ *  formulario (en el teléfono gana el de un solo lado) y «Crear ODT», fijo abajo, tapa la
+ *  Evidencia. Se le pone el relleno que pide el código. */
+const rellenoFormulario = () =>
+  ev(`(() => { for (const d of document.querySelectorAll('div')) { const s = getComputedStyle(d);
+    if (s.maxWidth === '640px' && parseFloat(s.paddingBottom) < 120 && d.innerText.includes('Evidencia')) d.style.paddingBottom = '120px' } })()`)
+/** Reportar lleno y con la foto del disco de freno (falla-2.jpg) con su título. */
+async function reportarConFoto() {
   await reportarLleno()
-  await pantallaLarga(80)
+  await galeria(0, 'falla-2.jpg')
+  await escribir(1, 'Disco de freno delantero')
+  await rellenoFormulario()
+}
+// El formulario entero, de la unidad a la foto, en una pantalla larga.
+C['m-cond-reportar-larga'] = [CONDUCTOR, 'pendiente', async () => {
+  await reportarConFoto()
+  await pantallaLarga()
+}]
+C['m-cond-reportar-fotos'] = [CONDUCTOR, 'pendiente', async () => {
+  await reportarConFoto()
+  await desplazar('fin')
 }]
 
 // Supervisor. Pestañas: 0 Resumen · 1 Vehículos · 2 Usuarios · 3 Mantenimiento · 4 Mi perfil.
@@ -349,6 +389,10 @@ C['m-sup-orden'] = [SUPERVISOR, 'pendiente', async () => {
 }]
 C['m-sup-resuelta'] = [SUPERVISOR, 'pendiente', async () => {
   await ir(`/orden?id=${D.ORDEN_RESUELTA_ID}&companyId=${D.ENTE_ID}`, 8000)
+}]
+C['m-sup-fotos'] = [SUPERVISOR, 'pendiente', async () => {
+  await ir(`/orden?id=${D.ORDEN_RESUELTA_ID}&companyId=${D.ENTE_ID}`, 8000)
+  await desplazarA('La unidad', 8)
 }]
 C['m-sup-nueva-odt'] = [SUPERVISOR, 'pendiente', async () => {
   await mantenimientoSup()

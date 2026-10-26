@@ -13,8 +13,12 @@
 #                       La app la pinta con «contain» sobre la tarjeta oscura: mejor recortada al
 #                       vehículo entero, 3/4 delantero mirando a la izquierda, con poco aire.
 #                       Si trae fondo, se ve como un rectángulo: lo ideal es fondo transparente.
-# - falla-1.jpg / falla-2.jpg  fotos del reporte de una orden de frenos (rueda, caucho).
-# - taller.jpg                 foto del trabajo terminado (la camioneta en el taller).
+# - falla-1.jpg     caucho gastado (órdenes de neumáticos).
+# - falla-2.jpg     disco de freno delantero (órdenes de frenos).
+# - luz-trasera.jpg luz trasera rota (la orden de la luz y la falla de luces de la inspección).
+# - taller.jpg      rueda montada en el taller (cierre de frenos y neumáticos).
+#   Las cuatro salen de comparativa/fotos-ordenes/recortes (fotos reales con licencia libre,
+#   créditos en su CREDITOS.md), ya en 4:3: sin caja.
 import sys
 from pathlib import Path
 
@@ -27,6 +31,7 @@ TAMANOS = {
     'toyota-hilux.png': (1360, 820),
     'falla-1.jpg': (1000, 750),
     'falla-2.jpg': (1000, 750),
+    'luz-trasera.jpg': (1000, 750),
     'taller.jpg': (1000, 750),
 }
 

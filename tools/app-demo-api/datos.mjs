@@ -387,7 +387,9 @@ export const ORDENES = s.ODTS.map((o) => {
     }),
     base(2, {
       status: 'asignada',
-      description: 'Revisar la luz de cruce derecha, se apaga sola.',
+      // La foto del reporte es una luz trasera rota (luz-trasera.jpg): la descripción dice eso
+      // mismo, y es la falla que Carlos marcó en la inspección («No enciende la luz trasera…»).
+      description: 'Luz trasera izquierda rota: se cayó la mica y no enciende.',
       severity: 'media',
       failureType: 'electrico',
       createdAt: new Date(AHORA_SEMILLA - 2 * DIA - 5 * 3600000).toISOString(),
@@ -421,6 +423,7 @@ export const ORDENES = s.ODTS.map((o) => {
 }
 export const ORDEN_RESUELTA_ID = uuid('odt', 'odt-990')
 export const ORDEN_ASIGNADA_ID = uuid('odt', 'odt-91')
+export const ORDEN_LUZ_ID = uuid('odt', 'odt-92')
 
 export function eventosDeOrden(o) {
   const ev = [{ sequence: 1, fromStatus: null, toStatus: 'abierta', note: null, occurredAt: o.createdAt, actorName: o.createdByName }]
@@ -733,13 +736,24 @@ export function fotoDeVehiculo(marca, modelo) {
   return null
 }
 
+// Fotos reales con licencia libre (comparativa/fotos-ordenes, créditos en su CREDITOS.md). Cada
+// orden lleva solo la foto que cuadra con su falla, con un pie que dice lo que se ve; las que no
+// tienen foto que les cuadre (motor, carrocería, freno de mano, luces de cruce…) van sin fotos.
+const FOTO_DE_FALLA = {
+  frenos: ['falla-2.jpg', 'Disco de freno delantero'],
+  neumaticos: ['falla-1.jpg', 'Caucho gastado por el borde'],
+}
 for (const o of ORDENES) {
-  if (!['frenos', 'neumaticos'].includes(o.failureType)) continue
   const base = `fom/work-orders/${o.id}`
   const etiqueta = `fom_work_orders_${o.id}`
-  registrarFoto(`${base}/work_order_opening/1`, 'falla-1.jpg', 'Rueda delantera izquierda', etiqueta)
-  registrarFoto(`${base}/work_order_opening/2`, 'falla-2.jpg', 'Caucho delantero', etiqueta)
-  if (o.status === 'cerrada') registrarFoto(`${base}/work_order_closure/1`, 'taller.jpg', 'Trabajo terminado en el taller', etiqueta)
+  let foto = FOTO_DE_FALLA[o.failureType]
+  // El disco no dice nada del freno de mano.
+  if (o.failureType === 'frenos' && /estacionamiento/i.test(o.description)) foto = null
+  if (o.id === ORDEN_LUZ_ID) foto = ['luz-trasera.jpg', 'Luz trasera izquierda rota']
+  if (!foto) continue
+  registrarFoto(`${base}/work_order_opening/1`, foto[0], foto[1], etiqueta)
+  // Cierre: la rueda montada otra vez (frenos y cauchos se cambian con la rueda quitada).
+  if (o.status === 'cerrada' && FOTO_DE_FALLA[o.failureType]) registrarFoto(`${base}/work_order_closure/1`, 'taller.jpg', 'Rueda montada en el taller', etiqueta)
 }
 // Por si la app un día lee la foto propia de la unidad (hoy usa el render de su catálogo:
 // capturar.mjs lo cambia por fotoDeVehiculo vía /__demo/foto-vehiculo).

@@ -1,4 +1,4 @@
-# Capturas de la APP real (T-147, repetidas en T-161)
+# Capturas de la APP real (T-147, repetidas en T-161 y T-169)
 
 La app de Juan (`fom-driver-juan`, Expo web) con datos de demostración del servidor falso
 `tools/app-demo-api` (Transporte Lago Sur, Zulia). Teléfono 390 × 844 px CSS a 3x (1170 × 2532),
@@ -22,58 +22,78 @@ Ajuste en las capturas: en la web de la app, react-native-web ignora el `padding
 teléfono salen bien. Antes de cada foto se les pone el relleno que pide el código
 (70 px arriba / 80 px a la izquierda). Afecta a m-sup-resumen y m-sup-resumen-cifras.
 
+**T-169 (26 oct 2026):** fotos de órdenes REALES con licencia libre (originales y créditos en
+`comparativa/fotos-ordenes/`, copias de 1000 × 750 en `tools/app-demo-api/fotos/`). Cada orden
+lleva solo la foto que cuadra con su falla:
+
+| Foto | Pie en la app | Va en |
+|---|---|---|
+| falla-2.jpg (disco de freno oxidado) | Disco de freno delantero | fotos del reporte de las órdenes de frenos por pastillas (la resuelta de Carlos ODT-B68429A6, su asignada «Cambiar las pastillas…», U-019 y U-023); también la que Carlos adjunta en Reportar una falla |
+| falla-1.jpg (caucho gastado en el hombro) | Caucho gastado por el borde | fotos del reporte de las órdenes de neumáticos (U-007, U-008, U-026) |
+| luz-trasera.jpg (luz trasera sin mica) | Luz trasera izquierda rota | la orden asignada de la luz de Carlos (ODT-633D5AB7) y la falla de luces en la inspección |
+| taller.jpg (rueda montada en el taller) | Rueda montada en el taller | fotos del trabajo terminado de las órdenes de frenos y neumáticos cerradas |
+
+Sin fotos (no hay ninguna que les cuadre): motor, carrocería, el freno de estacionamiento, las
+luces de cruce de U-010 y los servicios por kilometraje.
+La orden de la luz decía «Revisar la luz de cruce derecha, se apaga sola.»; ahora dice «Luz trasera
+izquierda rota: se cayó la mica y no enciende.» para que cuadre con su foto (y con la falla de la
+inspección). Por eso se repitieron también las pantallas que la listan.
+Repetidas en T-169: m-cond-insp-foto, m-cond-reportar-fotos, m-cond-reportar-larga,
+m-cond-orden-fotos, m-cond-orden-larga, m-orden-historial, m-sup-fotos, m-sup-resuelta,
+m-cond-asignadas, m-cond-mantenimiento, m-cond-mantenimiento-lista, m-sup-mantenimiento y
+m-sup-mantenimiento-lista. Las 44 se sacan con `lote.mjs` (antes faltaban las 3 de fotos).
+
 ## Cada captura
 
-Columna «T-161»: **sí** = repetida; **NO** = no se repitió y el archivo que hay es el viejo de
-T-147 (con la Hilux del disco y fotos de orden hechas con IA): no usar hasta que haya fotos de
-órdenes con licencia.
+Columna «Última vez»: T-161 (23 oct, sin fotos de órdenes) o T-169 (26 oct, con fotos reales).
+Ya no queda ninguna del T-147 con fotos hechas con IA.
 
-| Archivo (3x/) | Rol | Pantalla | Reemplaza a (web) | T-161 |
+| Archivo (3x/) | Rol | Pantalla | Reemplaza a (web) | Última vez |
 |---|---|---|---|---|
-| m-cond-inicio.png | Conductor | Mi unidad, hoja abierta: Hilux (foto con licencia), 61 km/h, placa | cap-movil-cond-inicio | sí |
-| m-cond-inicio-indice.png | Conductor | Mi unidad: índice 83/100 «Puedes mejorar» | — (extra) | sí |
-| m-cond-inicio-telemetria.png | Conductor | Mi unidad: telemetría y odómetro | — (extra) | sí |
-| m-cond-mapa.png | Conductor | Mi mapa (la unidad en el mapa, SOS) | cap-movil-cond-mapa | sí |
-| m-cond-perfil.png | Conductor | Mi perfil: índice 83/100 y eventos por 100 km | cap-movil-cond-perfil | sí |
-| m-cond-inspeccion.png | Conductor | Inspección diaria (hoja por llenar) | — (extra) | sí |
-| m-cond-insp-foto.png | Conductor | Inspección: falla crítica (luces) con nota y observación, sin foto | — (extra) | sí |
-| m-insp-resultado.png | Conductor | Resultado de inspección bloqueada (2 fallas críticas, 1 observación) | cap-movil-insp-resultado | sí |
-| m-insp-bloqueada.png | Conductor | Inspección bloqueada (no puede salir) | cap-movil-insp-bloqueada | sí |
-| m-cond-mantenimiento.png | Conductor | Mantenimiento de mi unidad: cifras, U-001, buscador y filtros | cap-movil-cond-mantenimiento | sí |
-| m-cond-mantenimiento-lista.png | Conductor | Mantenimiento: lista de órdenes y realizadas | — (extra) | sí |
-| m-cond-asignadas.png | Conductor | Asignadas a ti (2 órdenes) | cap-movil-mnt-asignadas | sí |
-| m-cond-reportar.png | Conductor | Reportar una falla (frenos, alta), Hilux con licencia | cap-movil-mnt-reportar | sí |
-| m-cond-reportar-fotos.png | Conductor | Reportar una falla con fotos | cap-movil-mnt-reportar-fotos | NO: sin fotos sale igual que m-cond-reportar |
-| m-cond-reportar-larga.png | Conductor | Reportar una falla, un poco más alta: se ven Tomar foto / Galería sin fotos | — (extra) | sí |
-| m-cond-orden-resuelta.png | Conductor | Orden resuelta (cierre y costo) | — (extra) | sí |
-| m-cond-orden-fotos.png | Conductor | Orden: fotos del reporte y del cierre | — (extra) | NO: sin fotos solo enseña dos recuadros vacíos (lo mismo sale en m-orden-historial) |
-| m-cond-orden-larga.png | Conductor | Orden resuelta entera, pantalla larga (fotos: «Sin fotos adjuntas») | — (extra) | sí |
-| m-orden-historial.png | Conductor | Orden: la unidad, fotos vacías e historial | — (extra) | sí |
-| m-sup-resumen.png | Supervisor | Resumen: flota 26 · 15 en marcha, ODT, alertas, mapa | cap-movil-sup-resumen | sí |
-| m-sup-resumen-unidad.png | Supervisor | Resumen: vehículo seleccionado (U-001 con foto con licencia) | — (extra) | sí |
-| m-sup-resumen-cifras.png | Supervisor | Resumen: inspecciones, mantenimiento, documentos, manejo | — (extra) | sí |
-| m-sup-vehiculos.png | Supervisor | Vehículos: cifras y mapa | cap-movil-sup-vehiculos | sí |
-| m-sup-vehiculos-lista.png | Supervisor | Vehículos: No pueden salir / Atención | — (extra) | sí |
-| m-sup-unidad.png | Supervisor | Ficha de la Unidad U-001 (con foto con licencia) | — (extra) | sí |
-| m-sup-mapa.png | Supervisor | Mapa de la flota (26 unidades) | cap-movil-sup-mapa | sí |
-| m-sup-mapa-unidad.png | Supervisor | Mapa con U-001 elegida | cap-movil-sup-mapa-unidad | sí |
-| m-sup-recorrido.png | Supervisor | Recorrido de U-001 (viajes y paradas) | — (extra) | sí |
-| m-sup-mantenimiento.png | Supervisor | Mantenimiento: abiertas, en revisión, resueltas | cap-movil-sup-mantenimiento | sí |
-| m-sup-mantenimiento-lista.png | Supervisor | Mantenimiento: «Atender ahora», lo más nuevo arriba | — (extra) | sí |
-| m-sup-orden.png | Supervisor | Orden abierta (frenos U-019) | — (extra) | sí |
-| m-sup-nueva-odt.png | Supervisor | Nueva ODT llena (U-004, motor, alta) | — (extra) | sí |
-| m-sup-planes.png | Supervisor | Control de la flota: planes de mantenimiento | — (extra) | sí |
-| m-sup-plan.png | Supervisor | Plan «Cambio de aceite y filtro» por unidad | cap-movil-mnt-plan (la web muestra «Nuevo plan») | sí |
-| m-sup-fotos.png | Supervisor | Orden: fotos del reporte y del cierre | cap-movil-mnt-fotos | NO: sin fotos no enseña nada propio |
-| m-sup-resuelta.png | Supervisor | Orden resuelta (con «Reabrir») | cap-movil-mnt-resuelta | sí |
-| m-sup-inspecciones.png | Supervisor | Inspecciones: 17 de 26 hoy, requiere atención | cap-movil-sup-inspecciones | sí |
-| m-sup-insp-historial.png | Supervisor | Inspecciones: historial por persona | cap-movil-insp-historial | sí |
-| m-sup-usuarios.png | Supervisor | Usuarios | — (extra) | sí |
-| m-sup-conductor.png | Supervisor | Perfil de Carlos Méndez (índice y eventos) | cap-movil-sup-conductor | sí |
-| m-sup-reportes.png | Supervisor | Reportes (tipo, período, alcance) | cap-movil-sup-reportes | sí |
-| m-sup-alertas.png | Supervisor | Alertas (8 sin leer) | cap-movil-sup-alertas | sí |
-| m-sup-perfil.png | Supervisor | Mi perfil (Más) | — (extra) | sí |
-| m-sup-areas.png | Supervisor | Áreas de la empresa | cap-movil-areas-vehiculos (parcial) | sí |
+| m-cond-inicio.png | Conductor | Mi unidad, hoja abierta: Hilux (foto con licencia), 61 km/h, placa | cap-movil-cond-inicio | T-161 |
+| m-cond-inicio-indice.png | Conductor | Mi unidad: índice 83/100 «Puedes mejorar» | — (extra) | T-161 |
+| m-cond-inicio-telemetria.png | Conductor | Mi unidad: telemetría y odómetro | — (extra) | T-161 |
+| m-cond-mapa.png | Conductor | Mi mapa (la unidad en el mapa, SOS) | cap-movil-cond-mapa | T-161 |
+| m-cond-perfil.png | Conductor | Mi perfil: índice 83/100 y eventos por 100 km | cap-movil-cond-perfil | T-161 |
+| m-cond-inspeccion.png | Conductor | Inspección diaria (hoja por llenar) | — (extra) | T-161 |
+| m-cond-insp-foto.png | Conductor | Inspección: falla crítica (luces) con nota y la foto de la luz trasera rota; observación en cruces | — (extra) | T-169 |
+| m-insp-resultado.png | Conductor | Resultado de inspección bloqueada (2 fallas críticas, 1 observación) | cap-movil-insp-resultado | T-161 |
+| m-insp-bloqueada.png | Conductor | Inspección bloqueada (no puede salir) | cap-movil-insp-bloqueada | T-161 |
+| m-cond-mantenimiento.png | Conductor | Mantenimiento de mi unidad: cifras, U-001, buscador y filtros | cap-movil-cond-mantenimiento | T-169 |
+| m-cond-mantenimiento-lista.png | Conductor | Mantenimiento: lista de órdenes y realizadas | — (extra) | T-169 |
+| m-cond-asignadas.png | Conductor | Asignadas a ti (2 órdenes: pastillas y luz trasera rota) | cap-movil-mnt-asignadas | T-169 |
+| m-cond-reportar.png | Conductor | Reportar una falla (frenos, alta), Hilux con licencia | cap-movil-mnt-reportar | T-161 |
+| m-cond-reportar-fotos.png | Conductor | Reportar una falla (frenos, alta) con la foto del disco y su título «Disco de freno delantero» | cap-movil-mnt-reportar-fotos | T-169 |
+| m-cond-reportar-larga.png | Conductor | Reportar una falla entero, pantalla larga: la Hilux, frenos, alta, descripción y la foto del disco con su título | — (extra) | T-169 |
+| m-cond-orden-resuelta.png | Conductor | Orden resuelta (cierre y costo) | — (extra) | T-161 |
+| m-cond-orden-fotos.png | Conductor | Orden resuelta: la unidad, foto del reporte (disco de freno) y del trabajo terminado (rueda en el taller) | — (extra) | T-169 |
+| m-cond-orden-larga.png | Conductor | Orden resuelta entera, pantalla larga, con sus dos fotos e historial | — (extra) | T-169 |
+| m-orden-historial.png | Conductor | Orden: fotos (disco y taller) e historial | — (extra) | T-169 |
+| m-sup-resumen.png | Supervisor | Resumen: flota 26 · 15 en marcha, ODT, alertas, mapa | cap-movil-sup-resumen | T-161 |
+| m-sup-resumen-unidad.png | Supervisor | Resumen: vehículo seleccionado (U-001 con foto con licencia) | — (extra) | T-161 |
+| m-sup-resumen-cifras.png | Supervisor | Resumen: inspecciones, mantenimiento, documentos, manejo | — (extra) | T-161 |
+| m-sup-vehiculos.png | Supervisor | Vehículos: cifras y mapa | cap-movil-sup-vehiculos | T-161 |
+| m-sup-vehiculos-lista.png | Supervisor | Vehículos: No pueden salir / Atención | — (extra) | T-161 |
+| m-sup-unidad.png | Supervisor | Ficha de la Unidad U-001 (con foto con licencia) | — (extra) | T-161 |
+| m-sup-mapa.png | Supervisor | Mapa de la flota (26 unidades) | cap-movil-sup-mapa | T-161 |
+| m-sup-mapa-unidad.png | Supervisor | Mapa con U-001 elegida | cap-movil-sup-mapa-unidad | T-161 |
+| m-sup-recorrido.png | Supervisor | Recorrido de U-001 (viajes y paradas) | — (extra) | T-161 |
+| m-sup-mantenimiento.png | Supervisor | Mantenimiento: abiertas, en revisión, resueltas | cap-movil-sup-mantenimiento | T-169 |
+| m-sup-mantenimiento-lista.png | Supervisor | Mantenimiento: «Atender ahora», lo más nuevo arriba | — (extra) | T-169 |
+| m-sup-orden.png | Supervisor | Orden abierta (frenos U-019) | — (extra) | T-161 |
+| m-sup-nueva-odt.png | Supervisor | Nueva ODT llena (U-004, motor, alta) | — (extra) | T-161 |
+| m-sup-planes.png | Supervisor | Control de la flota: planes de mantenimiento | — (extra) | T-161 |
+| m-sup-plan.png | Supervisor | Plan «Cambio de aceite y filtro» por unidad | cap-movil-mnt-plan (la web muestra «Nuevo plan») | T-161 |
+| m-sup-fotos.png | Supervisor | Orden resuelta: la unidad, foto del reporte y del trabajo terminado (con «+ Agregar» en las dos) | cap-movil-mnt-fotos | T-169 |
+| m-sup-resuelta.png | Supervisor | Orden resuelta (con «Reabrir»); las fotos quedan más abajo, fuera de la pantalla | cap-movil-mnt-resuelta | T-169 |
+| m-sup-inspecciones.png | Supervisor | Inspecciones: 17 de 26 hoy, requiere atención | cap-movil-sup-inspecciones | T-161 |
+| m-sup-insp-historial.png | Supervisor | Inspecciones: historial por persona | cap-movil-insp-historial | T-161 |
+| m-sup-usuarios.png | Supervisor | Usuarios | — (extra) | T-161 |
+| m-sup-conductor.png | Supervisor | Perfil de Carlos Méndez (índice y eventos) | cap-movil-sup-conductor | T-161 |
+| m-sup-reportes.png | Supervisor | Reportes (tipo, período, alcance) | cap-movil-sup-reportes | T-161 |
+| m-sup-alertas.png | Supervisor | Alertas (8 sin leer) | cap-movil-sup-alertas | T-161 |
+| m-sup-perfil.png | Supervisor | Mi perfil (Más) | — (extra) | T-161 |
+| m-sup-areas.png | Supervisor | Áreas de la empresa | cap-movil-areas-vehiculos (parcial) | T-161 |
 
 ## Las 23 cap-movil-* de la web y su pareja
 
@@ -88,10 +108,10 @@ T-147 (con la Hilux del disco y fotos de orden hechas con IA): no usar hasta que
 | cap-movil-insp-historial | m-sup-insp-historial |
 | cap-movil-insp-resultado | m-insp-resultado |
 | cap-movil-mnt-asignadas | m-cond-asignadas |
-| cap-movil-mnt-fotos | m-sup-fotos (vieja, con fotos IA: no usar; falta decidir las fotos de órdenes) |
+| cap-movil-mnt-fotos | m-sup-fotos |
 | cap-movil-mnt-plan | m-sup-plan (la web enseña el formulario «Nuevo plan»; la app, el plan con sus unidades) |
 | cap-movil-mnt-reportar | m-cond-reportar |
-| cap-movil-mnt-reportar-fotos | m-cond-reportar-fotos (vieja, con fotos IA: no usar; mientras, m-cond-reportar-larga) |
+| cap-movil-mnt-reportar-fotos | m-cond-reportar-fotos (una sola foto: la web dice «cada una con su título» y sus puntos van a otra altura) |
 | cap-movil-mnt-resuelta | m-sup-resuelta |
 | cap-movil-sup-alertas | m-sup-alertas |
 | cap-movil-sup-conductor | m-sup-conductor |
@@ -103,8 +123,7 @@ T-147 (con la Hilux del disco y fotos de orden hechas con IA): no usar hasta que
 | cap-movil-sup-resumen | m-sup-resumen |
 | cap-movil-sup-vehiculos | m-sup-vehiculos |
 
-Todas tienen pareja; la de áreas y la de plan son parciales, y la de fotos y reportar-fotos esperan
-las fotos de órdenes.
+Todas tienen pareja; la de áreas y la de plan son parciales.
 
 ## Fotos con mano (INDICE.md) y qué captura de la app llevan
 
@@ -156,5 +175,9 @@ Las demás unidades (p. ej. la Ford F-150 de m-sup-nueva-odt) salen con la silue
 - m-sup-inspecciones: «Abre el resultado para ver fallas y observaciones -…».
 - Mi perfil del conductor (más abajo de lo que sale en m-cond-perfil): «documentos al d…».
 - m-cond-perfil: la campana no lleva el número de avisos (en Mi unidad sí sale «3»).
-- Reportar una falla: sin fotos el formulario cabe sin desplazarse y el botón fijo «Crear ODT»
-  tapa los botones Tomar foto / Galería (por eso m-cond-reportar-larga es un poco más alta).
+- Reportar una falla: en la web de la app, react-native-web deja que `padding` pise el
+  `paddingBottom: 120` del formulario y el botón fijo «Crear ODT» tapa la Evidencia; en el teléfono
+  sale bien. Como con las cifras, `lote.mjs` le pone el relleno que pide el código antes de la foto
+  (m-cond-reportar-fotos, m-cond-reportar-larga).
+- La foto de la luz trasera es de un carro rojo, no de la Hilux gris de Carlos (es la única real
+  con licencia que hay de una luz rota).
