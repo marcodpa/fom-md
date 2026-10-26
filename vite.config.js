@@ -34,24 +34,16 @@ function fueraDeLaWeb(ruta) {
 // ============================================================
 // PUENTE DE DESARROLLO HACIA LA API REAL DE FOM
 // ------------------------------------------------------------
-// La API de `fom-core` es estrictamente servidor a servidor: cada petición
-// exige un token interno, y una sesión self-hosted como credencial de actor.
-// Un sitio estático no puede guardar ese token — viajaría en el bundle y lo
-// leería cualquiera con las herramientas de desarrollo.
+// En desarrollo la web llama a `/fom-api/...` y este puente lo reenvía a la
+// consola pública de FOM (`/api/v1/console`, detrás de nginx), la misma que usa
+// el panel publicado. Esa superficie se autentica SOLO con la cookie de sesión:
+// no hace falta ningún token interno, y el `.env` ya no lleva ninguno (T-175).
 //
-// Este proxy hace de intermediario, igual que la carpeta `app/api` de
-// `gps-web`: el token vive aquí, del lado del servidor de desarrollo, y el
-// navegador nunca lo ve. La web solo llama a `/fom-api/...`.
+// SOLO SIRVE PARA DESARROLLO (`npm run dev` y `vite preview`).
 //
-// SOLO SIRVE PARA DESARROLLO. En producción esto lo reemplaza la superficie
-// pública `/api/v1/*` con autenticación por cookie, que todavía no existe.
-//
-// Requiere un túnel SSH abierto contra el servidor de aplicación:
-//   ssh -N -L 3000:127.0.0.1:3000 fomadmin@10.20.30.10
-//
-// Y un `.env` local (ver `.env.example`):
-//   FOM_API_URL=http://127.0.0.1:3000
-//   FOM_INTERNAL_TOKEN=<el valor de FOM_MAP_INTERNAL_AUTH_TOKEN del servidor>
+// `.env` local (ver `.env.example`):
+//   FOM_API_URL=https://<servidor de la consola pública>
+//   VITE_FOM_API=/fom-api
 // ============================================================
 
 /** Nombre de la cookie de sesión que emite la API. */
@@ -77,126 +69,69 @@ function extraerSesion(setCookie) {
   return undefined // la respuesta no traía cookie de sesión
 }
 
+/** Nombres con los que el propio equipo se llama a sí mismo. */
+const NOMBRES_LOCALES = new Set(['localhost', '127.0.0.1', '[::1]'])
+
+/**
+ * ¿La petición viene de la página que sirve este mismo servidor?
+ *
+ * El puente lleva la sesión de quien entró, así que cualquier página abierta
+ * en el navegador podría usarla mandando peticiones a `localhost` (CSRF), o
+ * alguien de la red local podría llamarlo directamente. Por eso solo se acepta
+ * lo que llega a `localhost`/`127.0.0.1` y cuyo `Origin` o `Referer` es
+ * exactamente esa misma dirección (mismo puerto). Sin ninguna de las dos
+ * cabeceras tampoco pasa: el navegador manda al menos el `Referer` en las
+ * peticiones de la propia página.
+ */
+export function peticionLocal(peticion) {
+  const host = String(peticion.headers?.host || '').toLowerCase()
+  const nombre = host.startsWith('[') ? host.slice(0, host.indexOf(']') + 1) : host.split(':')[0]
+  if (!NOMBRES_LOCALES.has(nombre)) return false
+
+  const propios = [`http://${host}`, `https://${host}`]
+  const deAqui = (valor) => {
+    try {
+      return propios.includes(new URL(valor).origin.toLowerCase())
+    } catch {
+      return false
+    }
+  }
+  const origen = peticion.headers?.origin
+  const referer = peticion.headers?.referer
+  if (!origen && !referer) return false
+  if (origen && !deAqui(origen)) return false
+  if (referer && !deAqui(referer)) return false
+  return true
+}
+
 function puenteFom(env) {
   const destino = env.FOM_API_URL || 'http://127.0.0.1:3000'
-  const token = env.FOM_INTERNAL_TOKEN || ''
-
-  /**
-   * MODO SIN LOGIN — solo desarrollo.
-   *
-   * La API admite dos credenciales de actor: una sesión (`x-fom-auth-session`)
-   * o directamente un correo (`x-fom-map-actor-email`). La segunda es la vía
-   * servidor a servidor: quien tiene el token interno ya es de confianza, así
-   * que puede declarar en nombre de quién actúa.
-   *
-   * Con `FOM_DEV_ACTOR_EMAIL` puesto, el puente usa esa vía y la consola abre
-   * con datos reales sin pasar por la pantalla de acceso. Es cómodo para
-   * desarrollar, y es también un atajo de seguridad: cualquiera que abra
-   * localhost ve la flota. Por eso es una variable aparte, hay que ponerla a
-   * mano, y no existe en producción — allí el único camino será la sesión.
-   *
-   * Si hay una sesión de verdad, manda la sesión: este atajo solo cubre el
-   * hueco cuando nadie ha entrado.
-   */
-  const actorDev = env.FOM_DEV_ACTOR_EMAIL || ''
-
-  // La consola lee de `/api/v1/console`, que solo acepta sesión. Mientras esa
-  // sea la fuente de la flota, el atajo por correo no alcanza y hay que entrar.
-  const exigeSesionReal = true
 
   return {
     target: destino,
     changeOrigin: true,
-    // El servidor de producción presenta un certificado autofirmado; el puente
-    // lo acepta porque la IP destino está fijada aquí mismo, no la elige nadie.
-    secure: false,
+    // El servidor presenta un certificado válido para su dirección: se
+    // verifica como cualquier otro. Si falla, es mejor un error que hablar
+    // con quien se haga pasar por él.
+    secure: true,
     rewrite: (ruta) => ruta.replace(/^\/fom-api/, ''),
 
-    // ATAJO DE DESARROLLO, y su límite.
-    //
-    // Con `FOM_DEV_ACTOR_EMAIL` puesto, el puente responde que hay sesión sin
-    // molestar a la API, y la consola abre sin pasar por la pantalla de acceso.
-    // Eso sigue valiendo para la superficie interna, que acepta el correo del
-    // actor como credencial servidor a servidor.
-    //
-    // NO VALE para `/api/v1/console`: ahí la única credencial es la sesión, y
-    // una sesión fingida por el puente no existe del lado del servidor. Con el
-    // atajo activo esas rutas responden 401 y media consola se queda vacía.
-    //
-    // Por eso el atajo se desactiva en cuanto la web pide algo de la consola:
-    // más vale ver la pantalla de acceso y entrar una vez —el puente guarda la
-    // sesión de verdad— que trabajar sobre un espejismo que en producción no
-    // se sostiene.
+    // Antes de reenviar nada: solo la página de este servidor puede usar el
+    // puente (y con él la sesión guardada). El resto recibe 403.
     bypass(peticion, respuesta) {
-      if (!actorDev || sesionDev) return undefined
-      if ((peticion.url || '').startsWith('/fom-api/api/v1/console')) {
-        return undefined
-      }
-      const ruta = (peticion.url || '').split('?')[0]
-      // Sin sesión real no se finge una: la consola necesita entrar de verdad
-      // para que `/api/v1/console` funcione. Fingirla aquí dejaría al panel
-      // creyendo que está dentro mientras cada consulta de flota devuelve 401.
-      const rutaDeSesion =
-        ruta === '/fom-api/auth/session' ||
-        ruta === '/fom-api/api/v1/console/auth/session'
-      if (rutaDeSesion && !exigeSesionReal) {
-        respuesta.setHeader('content-type', 'application/json')
-        respuesta.end(
-          JSON.stringify({
-            authenticated: true,
-            user: {
-              email: actorDev,
-              displayName: 'Modo desarrollo',
-              // El rol de la sesión de desarrollo. `GET /auth/session` de la API
-              // interna no devuelve rol; el endpoint público
-              // `/api/v1/mobile/auth/me` sí (`tenant: { id, name, role }`), y es
-              // ahí donde la consola debe leerlo cuando se migre a esa puerta.
-              // Hasta entonces se declara aquí, del lado del servidor de
-              // desarrollo, para poder trabajar en el panel de administración.
-              // Se controla con FOM_DEV_ROL en el .env.
-              role: env.FOM_DEV_ROL || 'admin_fom',
-            },
-          })
-        )
-        return false
-      }
-      return undefined
+      if (peticionLocal(peticion)) return undefined
+      respuesta.writeHead(403, { 'content-type': 'application/json' })
+      respuesta.end(JSON.stringify({ error: 'Origen no permitido para el puente de desarrollo.' }))
+      return false
     },
 
     configure(proxy) {
       proxy.on('proxyReq', (peticion) => {
-        // La superficie `/api/v1/console` (Issue #173) se autentica SOLO con
-        // la cookie de sesión, igual que hará en producción. No recibe el
-        // token interno a propósito: si aquí se lo mandáramos, funcionaría en
-        // local y fallaría al publicar, que es la peor forma de enterarse.
-        const rutaConsola = (peticion.path || '').startsWith('/api/v1/console')
-
-        // Para el resto, el mismo valor viaja con dos nombres: `authentication`
-        // valida uno y `maps` / `gps-console` el otro. Se mandan los dos para
-        // no tener que adivinar a qué módulo va cada ruta.
-        if (token && !rutaConsola) {
-          peticion.setHeader('x-fom-auth-internal-token', token)
-          peticion.setHeader('x-fom-map-internal-token', token)
-        }
-        // Credencial de actor. La API exige EXACTAMENTE una: o sesión, o
-        // correo. Mandar las dos es un 401.
-        peticion.removeHeader('x-fom-auth-session')
-        peticion.removeHeader('x-fom-map-actor-email')
+        // La única credencial es la cookie de sesión, igual que en el panel
+        // publicado. La del navegador no se reenvía nunca: la sesión vive aquí.
+        peticion.removeHeader('cookie')
         if (sesionDev) {
-          // La cookie va siempre; la cabecera de sesión solo a la superficie
-          // interna, que es la que la lee.
           peticion.setHeader('cookie', `${COOKIE_SESION}=${sesionDev}`)
-          if (!rutaConsola) {
-            peticion.setHeader('x-fom-auth-session', sesionDev)
-          }
-        } else {
-          peticion.removeHeader('cookie')
-          // El atajo por correo no existe en `/api/v1/console`: ahí la sesión
-          // es obligatoria. Sin haber entrado, esas rutas responden 401, que es
-          // exactamente lo que harán en producción.
-          if (actorDev && !rutaConsola) {
-            peticion.setHeader('x-fom-map-actor-email', actorDev)
-          }
         }
       })
 
@@ -215,10 +150,7 @@ function puenteFom(env) {
       proxy.on('error', (error, _peticion, respuesta) => {
         const mensaje =
           error.code === 'ECONNREFUSED'
-            ? 'No hay nadie escuchando en ' +
-              destino +
-              '. ¿Está abierto el túnel SSH? ' +
-              'ssh -N -L 3000:127.0.0.1:3000 fomadmin@10.20.30.10'
+            ? 'No hay nadie escuchando en ' + destino + '. Revisa FOM_API_URL en el .env.'
             : error.message
         console.error(`\n[fom-api] ${mensaje}\n`)
         if (respuesta?.writableEnded === false) {

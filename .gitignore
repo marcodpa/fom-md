@@ -60,3 +60,4 @@ output/mantenimiento-supervisor/web-build.log
 # Archivos de subida grandes (se rehacen desde la carpeta del paquete)
 ops/deploy-*.tar
 ops/deploy-*.tar.sha256
+control-flotas-main/
