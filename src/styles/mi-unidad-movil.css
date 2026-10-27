@@ -127,6 +127,7 @@
   .mvu-f-cifras .k { font-size: 12px; line-height: 16px; font-weight: 500; color: #8c97a7; }
 
   /* La foto sin fondo (ya trae su sombra): se sale de la franja y pisa la hoja (posición de la maqueta). */
+  .mvu-foto-capa { position: absolute; inset: 0; pointer-events: none; transition: opacity var(--mov-hoja, 520ms) var(--mov-resorte-hoja, var(--app-curva)); }
   .mvu-foto { position: absolute; top: 55px; right: -21px; z-index: 5; width: 220px; height: auto; pointer-events: none; }
 
   /* La hoja «Resumen», montada sobre los últimos 50 px de la franja. */

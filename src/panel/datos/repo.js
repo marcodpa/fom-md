@@ -19,7 +19,12 @@
 // Ver `infra/MAPA-DOMINIO-FOM02.md` para el orden previsto de esa mudanza.
 // ============================================================
 
-import { HAY_API } from './api'
+import { HAY_API, empresaGestionActualId } from './api'
+import { perfilActual } from '../auth'
+import {
+  avisosSinSenal, descartarAvisoGps, descartarAvisosGpsLeidos, esAvisoGps, fijarEmpresaDeAvisos, marcarAvisoGpsLeido,
+  marcarAvisosGpsLeidos,
+} from './avisosSinSenal'
 import repoApi from './repoApi'
 import { pagosApi } from './pagosApi'
 import repoSemilla, {
@@ -313,6 +318,36 @@ const repo = HAY_API
       },
     }
 
+// «GPS sin señal»: la base todavía no lo genera, así que se suma a las alertas desde este
+// navegador (ver avisosSinSenal.js). Sale en la campana y en la bandeja, lo más nuevo primero.
+fijarEmpresaDeAvisos(() => empresaGestionActualId() ?? perfilActual()?.empresaId ?? null)
+const alertasBase = repo.alertas
+repo.alertas = {
+  ...alertasBase,
+  async listar(opciones = {}) {
+    const propios = avisosSinSenal().filter((n) => !opciones.soloSinLeer || !n.leida)
+    const base = await alertasBase.listar(opciones)
+    return [...propios, ...base].sort((a, b) => Date.parse(b.creadaEn) - Date.parse(a.creadaEn) || 0)
+  },
+  async marcarLeida(id) {
+    if (esAvisoGps(id)) { marcarAvisoGpsLeido(id); return true }
+    return alertasBase.marcarLeida(id)
+  },
+  async marcarTodasLeidas() {
+    marcarAvisosGpsLeidos()
+    return alertasBase.marcarTodasLeidas()
+  },
+  async descartar(id) {
+    if (esAvisoGps(id)) { descartarAvisoGps(id); return true }
+    return alertasBase.descartar(id)
+  },
+  async descartarLeidos() {
+    descartarAvisosGpsLeidos()
+    return alertasBase.descartarLeidos()
+  },
+}
+
 export { alCambiarDatos, reiniciarDatos }
+export { alCambiarAvisosGps } from './avisosSinSenal'
 export { repo }
 export default repo

@@ -7,7 +7,7 @@ import { useSesion } from './useSesion'
 import { useApariencia } from './useApariencia'
 import { estaLeida } from './modulos/alertas-presentacion'
 import { Icono } from './Iconos'
-import repo, { alCambiarDatos, CONECTADO } from './datos/repo'
+import repo, { alCambiarAvisosGps, alCambiarDatos, CONECTADO } from './datos/repo'
 import { useAvisosConductor } from './datos/useAvisosConductor'
 import '../styles/apariencia.css'
 import { accesosDe, esPestana, MovilContexto, pestanasDe, tituloDe, useEsMovil } from './comp/movil-navegacion'
@@ -283,9 +283,12 @@ export default function Consola() {
       repo.alertas.listar({}).then((l) => vivo && setSinLeer(l.filter(n => !estaLeida(n)).length)).catch(() => {})
     leer()
     const baja = alCambiarDatos(leer)
+    // Un aviso nuevo de «GPS sin señal» mueve el globo de la campana en cuanto llega.
+    const bajaGps = alCambiarAvisosGps(leer)
     return () => {
       vivo = false
       baja()
+      bajaGps()
     }
   }, [pathname, esConductor, sesion?.perfil?.id, sesion?.perfil?.empresaGestion?.id])
 

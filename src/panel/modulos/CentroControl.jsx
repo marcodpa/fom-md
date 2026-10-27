@@ -107,9 +107,9 @@ export default function CentroControl() {
   // Cada minuto se recalcula la señal (5 min sin reportar = «Sin señal»), sin pedir nada más.
   const ahora = useMinuto()
   const lista = useMemo(
-    () => (datosFlota ?? []).filter((v) =>
-      (!areaId || v.areaId === areaId) && (!estadoMarcha || v.estadoMarcha === estadoMarcha) && coincide(v, texto))
-      .map((v) => conSenalAlDia(v, ahora)),
+    // Primero la señal y la marcha al día (por posición), y con eso el filtro.
+    () => (datosFlota ?? []).map((v) => conSenalAlDia(v, ahora)).filter((v) =>
+      (!areaId || v.areaId === areaId) && (!estadoMarcha || (v.estadoMarcha === estadoMarcha && v.conectado !== false)) && coincide(v, texto)),
     [datosFlota, areaId, estadoMarcha, texto, ahora]
   )
   const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length

@@ -112,14 +112,28 @@ const ARRIBA_HOJA = 112
 const VISIBLE_INICIAL = 446
 /** Aire bajo el Resumen a media altura, antes de la barra de pestañas. */
 const AIRE_ABAJO = 12
-/** Lo que asoma de la hoja abajo: la franja entera (nombre, velocidad y cifras de hoy). */
-const VISIBLE_BAJO = ALTO_FRANJA - SOLAPE
+/**
+ * Lo que asoma de la hoja abajo: solo la primera fila de la franja (nombre, placa y km/h).
+ * Medido en el CSS de `.mvu-franja2`: borde 1 + aire 10 + tirador 4 + 12 = la fila empieza en 27 y
+ * mide 44 (velocidad 28 + «EN VIVO» 2+14) → acaba en 71; las cifras de hoy empiezan en 87.
+ * 86 deja la fila entera con 15 de aire y nada de la segunda (igual que la app).
+ */
+const VISIBLE_BAJO = 86
+/** La foto sin fondo se apaga en este último tramo (px) al bajar, para que no asome bajo la primera fila. */
+const TRAMO_FOTO = 90
 /** La franja compacta aparece cuando la grande ya se fue por arriba. */
 const UMBRAL_COMPACTA = ALTO_FRANJA - SOLAPE - 65
 /** Velocidad (px/s) a partir de la cual el lanzamiento manda sobre la posición. */
 const VELOCIDAD_SNAP = 550
+/** Un gesto corto cambia de altura si recorre al menos esto (px) o va a esta velocidad (px/s). */
+const DISTANCIA_CORTA = 22
+const VELOCIDAD_CORTA = 260
+/** Lo que se tolera de desplazamiento (px) para seguir contando como «arriba del todo». */
+const TOLERANCIA_ARRIBA = 2
 /** Cuánto hay que mover el dedo (px) para decidir si arrastra la hoja o el contenido. */
 const UMBRAL_DECIDIR = 6
+/** Solo se rinde por horizontal si el gesto va así de más ancho que alto (un dedo en diagonal baja la hoja). */
+const FACTOR_HORIZONTAL = 1.6
 /** Segundos de impulso que se proyectan al soltar para elegir la altura. */
 const PROYECCION = 0.18
 
@@ -137,9 +151,12 @@ const destinoDe = (nivel, media, bajo) => (nivel === NIVEL.arriba ? 0 : nivel ==
 /**
  * A qué altura cae la hoja al soltarla: la más cercana, o —con impulso— la
  * siguiente en el sentido del lanzamiento (y más lejos si el impulso da para
- * tanto), como la hoja de Mapas. Es la misma regla de la app.
+ * tanto), como la hoja de Mapas. Un gesto corto (poco recorrido pero firme, o
+ * algo de impulso) no vuelve a donde estaba: pasa a la altura de al lado en el
+ * sentido en que se movió el dedo. `inicio` es donde estaba la hoja al agarrarla.
+ * Es la misma regla de la app.
  */
-function alturaAlSoltar(y, velocidad, media, bajo) {
+function alturaAlSoltar(y, velocidad, media, bajo, inicio) {
   const puntos = [0, media, bajo]
   const sentido = velocidad < 0 ? -1 : 1
   let objetivo = y
@@ -151,7 +168,21 @@ function alturaAlSoltar(y, velocidad, media, bajo) {
       objetivo = y + velocidad * PROYECCION
     }
   }
-  return candidatos.reduce((mejor, i) => (Math.abs(puntos[i] - objetivo) < Math.abs(puntos[mejor] - objetivo) ? i : mejor), candidatos[0])
+  let mejor = candidatos.reduce((m, i) => (Math.abs(puntos[i] - objetivo) < Math.abs(puntos[m] - objetivo) ? i : m), candidatos[0])
+  // Si iba a volver a la altura de donde salió, un gesto corto la mueve una altura.
+  const desde = [0, 1, 2].reduce((m, i) => (Math.abs(puntos[i] - inicio) < Math.abs(puntos[m] - inicio) ? i : m), 0)
+  if (mejor === desde || puntos[mejor] === puntos[desde]) {
+    const movido = y - inicio
+    const empuje =
+      Math.abs(movido) >= DISTANCIA_CORTA ? (movido < 0 ? -1 : 1)
+        : Math.abs(velocidad) >= VELOCIDAD_CORTA && movido * velocidad >= 0 ? (velocidad < 0 ? -1 : 1)
+          : 0
+    let siguiente = desde + empuje
+    // En pantallas sin lugar a media altura la mitad cae sobre arriba: se salta.
+    if (empuje !== 0 && siguiente >= 0 && siguiente <= 2 && puntos[siguiente] === puntos[desde]) siguiente += empuje
+    if (empuje !== 0 && siguiente >= 0 && siguiente <= 2) mejor = siguiente
+  }
+  return mejor
 }
 
 /** Dónde está la hoja ahora mismo (si va en camino, no donde irá). */
@@ -186,6 +217,7 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
   const hoja = useRef(null)
   const sosRef = useRef(null)
   const cuerpo = useRef(null)
+  const fotoRef = useRef(null)
   const medida = useRef(null)
   const gesto = useRef(null)
   const huboArrastre = useRef(false)
@@ -234,6 +266,13 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
       // Se apaga al subir la hoja: la maqueta no lo deja sobre la franja.
       sosEl.style.opacity = a.media > 0 ? String(Math.max(0, Math.min(1, (y / a.media - 0.55) / 0.45))) : '1'
     }
+    // La foto sale de la franja y asomaría bajo la primera fila con la hoja abajo: se apaga en el último tramo.
+    const fotoEl = fotoRef.current
+    if (fotoEl && a.bajo > 0) {
+      const desde = Math.max(a.media, a.bajo - TRAMO_FOTO)
+      fotoEl.style.transition = arrastrando ? 'none' : ''
+      fotoEl.style.opacity = String(Math.max(0, Math.min(1, (a.bajo - y) / Math.max(1, a.bajo - desde))))
+    }
   }, [])
 
   // Quieta: la hoja está en la altura elegida. La primera vez se coloca sin animar; si cambia
@@ -280,18 +319,24 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
   }, [subida, ir])
 
   /** Empieza a seguir un dedo (o el ratón). Todavía no mueve nada: espera a que pase del umbral. */
-  const empezar = useCallback((clientY, t, origen, extra = {}) => {
-    gesto.current = { origen, y0: clientY, desde: yVisual(hoja.current), ultimoY: clientY, ultimoT: t, v: 0, arrastrando: false, cuadro: 0, siguiente: 0, ...extra }
+  const empezar = useCallback((clientX, clientY, t, origen, extra = {}) => {
+    gesto.current = { origen, x0: clientX, y0: clientY, yPrimero: clientY, desde: yVisual(hoja.current), ultimoY: clientY, ultimoT: t, v: 0, arrastrando: false, cuadro: 0, siguiente: 0, ...extra }
     huboArrastre.current = false
   }, [])
 
   /** Mueve la hoja con el dedo. En cuanto pasa el umbral, la hoja es del gesto. */
-  const mover = useCallback((clientY, t) => {
+  const mover = useCallback((clientX, clientY, t) => {
     const g = gesto.current
     if (!g) return
+    const dx = clientX - g.x0
     const dy = clientY - g.y0
     if (!g.arrastrando) {
-      if (Math.abs(dy) < UMBRAL_DECIDIR) return
+      if (Math.abs(dx) < UMBRAL_DECIDIR && Math.abs(dy) < UMBRAL_DECIDIR) return
+      // Solo un gesto claramente horizontal se aparta: en diagonal (el pulgar casi nunca va recto) baja la hoja.
+      if (Math.abs(dx) > Math.abs(dy) * FACTOR_HORIZONTAL) {
+        gesto.current = null
+        return
+      }
       g.arrastrando = true
       huboArrastre.current = true
       // Si iba en camino, el dedo la agarra donde esté.
@@ -312,15 +357,16 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
     }
   }, [poner])
 
-  /** Suelta el dedo: la hoja cae a la altura más cercana (con el impulso con que se soltó). */
-  const soltar = useCallback(() => {
+  /** Suelta el dedo: la hoja cae a la altura más cercana (con el impulso con que se soltó). Cancelado: sin impulso ni avance. */
+  const soltar = useCallback((cancelado = false) => {
     const g = gesto.current
     gesto.current = null
     if (!g) return
     if (g.cuadro) cancelAnimationFrame(g.cuadro)
     if (!g.arrastrando) return
     const a = actual.current
-    ir(alturaAlSoltar(g.siguiente, g.v, a.media, a.bajo))
+    // El recorrido cuenta desde donde el dedo tocó, también los px que se gastaron en decidir el gesto.
+    ir(cancelado ? alturaAlSoltar(g.siguiente, 0, a.media, a.bajo, g.siguiente) : alturaAlSoltar(g.siguiente, g.v, a.media, a.bajo, g.desde - (g.y0 - g.yPrimero)))
   }, [ir])
 
   // Arriba, el contenido se desplaza con el dedo (touch-action: pan-y): para que la hoja baje
@@ -331,33 +377,36 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
     if (!el) return undefined
     const alTocar = (e) => {
       if (actual.current.nivel !== NIVEL.arriba || e.touches.length !== 1 || e.target.closest?.(ASAS)) return
-      empezar(e.touches[0].clientY, e.timeStamp, 'toque', { scrollInicio: el.scrollTop })
+      empezar(e.touches[0].clientX, e.touches[0].clientY, e.timeStamp, 'toque', { scrollInicio: el.scrollTop })
     }
     const alMoverToque = (e) => {
       const g = gesto.current
       if (!g || g.origen !== 'toque') return
+      const x = e.touches[0].clientX
       const y = e.touches[0].clientY
       if (!g.arrastrando) {
-        if (Math.abs(y - g.y0) < UMBRAL_DECIDIR) return
-        // Solo baja la hoja si el desplazamiento empezó arriba del todo y el dedo baja; si no, manda el contenido.
-        if (g.scrollInicio > 0 || y < g.y0 || el.scrollTop > 0 || !e.cancelable) {
+        if (Math.abs(x - g.x0) < UMBRAL_DECIDIR && Math.abs(y - g.y0) < UMBRAL_DECIDIR) return
+        // Solo baja la hoja si el desplazamiento empezó arriba del todo (2 px de tolerancia) y el dedo baja
+        // (en diagonal también); si no, manda el contenido.
+        if (Math.abs(x - g.x0) > Math.abs(y - g.y0) * FACTOR_HORIZONTAL || g.scrollInicio > TOLERANCIA_ARRIBA || y <= g.y0 || el.scrollTop > TOLERANCIA_ARRIBA || !e.cancelable) {
           gesto.current = null
           return
         }
       }
       e.preventDefault()
-      mover(y, e.timeStamp)
+      mover(x, y, e.timeStamp)
     }
     const alTerminar = () => { if (gesto.current?.origen === 'toque') soltar() }
+    const alCancelar = () => { if (gesto.current?.origen === 'toque') soltar(true) }
     el.addEventListener('touchstart', alTocar, { passive: true })
     el.addEventListener('touchmove', alMoverToque, { passive: false })
     el.addEventListener('touchend', alTerminar)
-    el.addEventListener('touchcancel', alTerminar)
+    el.addEventListener('touchcancel', alCancelar)
     return () => {
       el.removeEventListener('touchstart', alTocar)
       el.removeEventListener('touchmove', alMoverToque)
       el.removeEventListener('touchend', alTerminar)
-      el.removeEventListener('touchcancel', alTerminar)
+      el.removeEventListener('touchcancel', alCancelar)
     }
   }, [empezar, mover, soltar])
 
@@ -365,17 +414,20 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
     if (e.button !== undefined && e.button !== 0) return
     // Arriba, solo la franja arrastra con el puntero: lo demás se desplaza (el dedo, ver arriba).
     if (actual.current.nivel === NIVEL.arriba && !e.target.closest?.(ASAS)) return
-    empezar(e.clientY, e.timeStamp, 'puntero')
+    empezar(e.clientX, e.clientY, e.timeStamp, 'puntero')
   }
   function alMover(e) {
     const g = gesto.current
     if (!g || g.origen !== 'puntero') return
     const eraArrastre = g.arrastrando
-    mover(e.clientY, e.timeStamp)
+    mover(e.clientX, e.clientY, e.timeStamp)
     if (!eraArrastre && g.arrastrando) e.currentTarget.setPointerCapture?.(e.pointerId)
   }
   function alSoltar() {
     if (gesto.current?.origen === 'puntero') soltar()
+  }
+  function alCancelar() {
+    if (gesto.current?.origen === 'puntero') soltar(true)
   }
   function alTocarAsa() {
     // El arrastre ya decidió: el clic que llega al soltar no vuelve a cambiarla.
@@ -399,7 +451,7 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
         </div>
       )}
       <section ref={hoja} className={`mvu-h${subida ? ' subida' : ''}`} aria-label="Tu unidad" style={{ top: ARRIBA_HOJA }}
-        onPointerDown={alBajar} onPointerMove={alMover} onPointerUp={alSoltar} onPointerCancel={alSoltar}>
+        onPointerDown={alBajar} onPointerMove={alMover} onPointerUp={alSoltar} onPointerCancel={alCancelar}>
         <div ref={cuerpo} className={`mvu-h-cuerpo${subida ? ' subida' : ''}`}
           onScroll={(e) => setConCompacta(e.currentTarget.scrollTop > UMBRAL_COMPACTA)}>
           <button type="button" className="mvu-asa" aria-expanded={!abajo} onKeyDown={alTeclaAsa}
@@ -411,7 +463,7 @@ function HojaUnidad({ franja, foto, resumen, resto, compacta, sos, alBorde }) {
             {/* Lo de abajo solo se alcanza con la hoja subida: a media altura no se ve. */}
             <div {...(subida ? {} : { inert: '' })}>{resto}</div>
           </div>
-          {foto}
+          {foto && <div ref={fotoRef} className="mvu-foto-capa">{foto}</div>}
         </div>
         {/* Desplazada: la franja encogida queda fija arriba. Tocarla vuelve al principio. */}
         <button type="button" className={`mvu-compacta-boton${conCompacta ? ' visible' : ''}`} tabIndex={conCompacta ? 0 : -1}

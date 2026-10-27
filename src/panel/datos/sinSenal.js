@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fechaCorta, fechaHora } from './formato.js'
+import { marchaPorPosicion } from './movimiento.js'
+import { registrarCorte } from './avisosSinSenal.js'
 
 // ============================================================
 // SIN SEÑAL — cuánto lleva callado el GPS de una unidad
@@ -41,13 +43,19 @@ export function transmitiendo(ultimoReporte, ahora = Date.now()) {
  * «Sin señal» sin esperar otra lectura del servidor. Solo en las unidades que traen la señal
  * (las del servidor, con `conectado` booleano): la demostración no la lleva y sus horas son
  * fijas, así que se deja como está. Si nada cambia, devuelve el MISMO objeto.
+ *
+ * De paso: si reporta, decide «En marcha» o «Detenida» por su posición (movimiento.js); si se
+ * calló, anota el aviso de «GPS sin señal» para la campana (avisosSinSenal.js).
  */
 export function conSenalAlDia(v, ahora = Date.now()) {
   if (!v || typeof v.conectado !== 'boolean') return v
   const conectado = transmitiendo(v.ultimoReporte, ahora)
   const conexion = conectado ? 'reportando' : 'sin_senal'
-  if (conectado === v.conectado && conexion === v.conexion) return v
-  return { ...v, conectado, conexion }
+  let estadoMarcha = v.estadoMarcha
+  if (conectado) estadoMarcha = marchaPorPosicion(v, ahora) ?? v.estadoMarcha
+  else registrarCorte(v, new Date(v.ultimoReporte).getTime() + SIN_SENAL_MS, ahora)
+  if (conectado === v.conectado && conexion === v.conexion && estadoMarcha === v.estadoMarcha) return v
+  return { ...v, conectado, conexion, estadoMarcha }
 }
 
 /**
