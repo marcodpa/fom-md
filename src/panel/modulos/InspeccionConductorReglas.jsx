@@ -119,3 +119,82 @@ export function esMia(inspeccion, yo) {
   if (!inspeccion || !yo) return false
   return inspeccion.conductorId ? inspeccion.conductorId === yo.id : plano(inspeccion.conductor) === plano(yo.nombre)
 }
+
+// ---- La entrada «Tus planillas de hoy» (T-202), igual que inspeccion-planillas.tsx ----
+
+const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+/** «Martes 27 de octubre». */
+export function fechaLarga(d = new Date()) {
+  return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`
+}
+
+/** Cuántos puntos, secciones y críticos tiene una planilla. */
+export function medidaDePlanilla(plantilla) {
+  const items = itemsDe(plantilla)
+  return { puntos: items.length, secciones: plantilla?.categorias?.length ?? 0, criticos: items.filter((i) => i.critico).length }
+}
+
+/** «14 puntos · 5 secciones · 6 críticos», con el plural bien puesto. */
+export function textoMedida({ puntos, secciones, criticos }) {
+  return [
+    `${puntos} ${puntos === 1 ? 'punto' : 'puntos'}`,
+    `${secciones} ${secciones === 1 ? 'sección' : 'secciones'}`,
+    criticos > 0 ? `${criticos} ${criticos === 1 ? 'crítico' : 'críticos'}` : null,
+  ].filter(Boolean).join(' · ')
+}
+
+/** Bien / Observación / Falla contados, para el resumen de «ya está hecha». */
+export function cuentaRespuestas(respuestas = []) {
+  return {
+    bien: respuestas.filter((r) => r.estado === 'conforme').length,
+    observacion: respuestas.filter((r) => r.estado === 'observacion').length,
+    falla: respuestas.filter((r) => r.estado === 'falla').length,
+  }
+}
+
+// ---- Varias planillas por día (T-200) ----
+// Cada planilla de la lista llega como `{ id, plantilla, dueToday, hecha }`;
+// `hecha` es `null` o `{ inspeccion, detalle }` (la inspección que la llenó hoy).
+
+/** Las que se ven en «Tus planillas de hoy»: las que tocan hoy y, si ya está llena, aunque no toque. */
+export function planillasVisibles(planillas = []) {
+  return planillas.filter((p) => p.dueToday || p.hecha)
+}
+
+/** Cuántas van hechas y cuántas son, de las que se ven. */
+export function cuentaPlanillas(planillas = []) {
+  const vistas = planillasVisibles(planillas)
+  return { hechas: vistas.filter((p) => p.hecha).length, total: vistas.length }
+}
+
+/** La unidad queda «Lista para salir» solo cuando TODAS las de hoy están hechas (y hay al menos una). */
+export function todasHechas(planillas = []) {
+  const { hechas, total } = cuentaPlanillas(planillas)
+  return total > 0 && hechas === total
+}
+
+/** ¿Alguna de hoy salió bloqueada? Entonces la unidad no sale, estén hechas o no las demás. */
+export function hayBloqueada(planillas = []) {
+  return planillasVisibles(planillas).some((p) => p.hecha?.inspeccion?.resultado === 'bloqueada')
+}
+
+/** Cómo se ve la unidad arriba de la lista: pastilla con su tono. `enCurso`: puntos ya respondidos sin enviar. */
+export function estadoDeUnidad(planillas = [], enCurso = 0) {
+  const { hechas, total } = cuentaPlanillas(planillas)
+  if (hayBloqueada(planillas)) return { tono: 'peligro', texto: 'Bloqueada' }
+  if (total > 0 && hechas === total) return { tono: 'exito', texto: 'Lista para salir' }
+  return hechas > 0 || enCurso > 0 ? { tono: 'primario', texto: 'En curso' } : { tono: 'aviso', texto: 'Pendiente' }
+}
+
+/** «Lo hiciste a las 08:30», «La hizo Ana a las 08:30» o, sin saber quién, «Se hizo a las 08:30». */
+export function textoDeQuien(inspeccion, yo, hora) {
+  const cuando = hora ? `a las ${hora}` : 'hoy'
+  if (!inspeccion) return null
+  // La hora ya puede terminar en punto («1:11 p. m.»): un solo punto al final.
+  const frase = esMia(inspeccion, yo) ? `La hiciste ${cuando}`
+    : inspeccion.conductor && inspeccion.conductor !== 'Sin conductor' ? `La hizo ${inspeccion.conductor} ${cuando}`
+      : `Se hizo ${cuando}`
+  return frase.replace(/\.?$/u, '.')
+}

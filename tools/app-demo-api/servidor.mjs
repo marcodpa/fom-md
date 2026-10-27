@@ -14,6 +14,13 @@
 // Modo de la inspección de HOY de la Unidad 01 (para las capturas):
 //   GET /__demo/modo?inspeccion=pendiente|aprobada|observaciones|bloqueada
 // Volver al estado del arranque (sin reiniciar el proceso): GET /__demo/reiniciar
+//
+// Planillas por días (T-200), qué servidor finge la demo:
+//   GET /__demo/modo?planillas=una     (por defecto) servidor VIEJO: un solo formato, sin 409
+//   GET /__demo/modo?planillas=una409  servidor VIEJO con su regla de una diaria por unidad y día
+//   GET /__demo/modo?planillas=dos     servidor NUEVO: «Inspección preoperacional» (todos los días),
+//                                      «Inicio de turno» (hoy) y «Revisión del domingo» (solo domingos),
+//                                      con dueToday / submittedToday y 409 por planilla
 import { createServer } from 'node:http'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -28,7 +35,7 @@ const VERSION = '/api/v1/mobile'
 
 // --- Estado de la demo ---------------------------------------------------------------
 const sesiones = new Map() // token → { personaId, tipo }
-const modo = { inspeccion: 'pendiente' }
+const modo = { inspeccion: 'pendiente', planillas: 'una' }
 const inspeccionesNuevas = [] // las que se envían desde la app mientras corre
 const leidas = new Set()
 const descartadas = new Set()
@@ -65,6 +72,52 @@ function inspeccionDeHoyCarlos() {
       notas: { [luces.id]: 'No enciende la luz trasera izquierda.', [cruces.id]: 'La direccional derecha parpadea rápido.', [pedal.id]: 'El pedal llega casi al piso.' },
     }
   return null
+}
+
+// --- Planillas por días (T-200) ----------------------------------------------------------
+const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
+const FORMATO_TURNO_ID = D.uuid('formato', 'inicio-turno')
+const FORMATO_DOMINGO_ID = D.uuid('formato', 'revision-domingo')
+
+/** Los formatos de la unidad con servidor nuevo: dos que tocan hoy y uno que solo toca los domingos. */
+function formatosDos(u) {
+  const base = D.formatoPara(u)
+  const propios = (id, name, items) => ({
+    id, name, items: items.map((it, i) => ({ ...it, id: D.uuid('item-' + id, it.id), displayOrder: i + 1 })),
+  })
+  let turno = base.items.filter((it) => ['Luces', 'Cabina y seguridad'].includes(it.category))
+  if (turno.length < 3) turno = base.items.slice(0, 6)
+  return [
+    base,
+    propios(FORMATO_TURNO_ID, 'Inicio de turno', turno),
+    propios(FORMATO_DOMINGO_ID, 'Revisión del domingo', base.items.slice(0, 5)),
+  ]
+}
+
+/** La diaria de hoy de esa unidad y planilla (la más reciente), si ya se llenó. */
+function hechaHoy(u, templateId) {
+  const hoy = diaHoy()
+  return todasLasInspecciones().find(
+    (i) => i.vehicleId === u.id && i.inspectionDate === hoy && i.kind === 'daily' && (i.templateId ?? D.FORMATO_ID) === templateId,
+  )
+}
+
+/** La respuesta de `inspection-templates` del servidor nuevo. */
+function plantillasDeHoy(u) {
+  const hoy = diaHoy()
+  const dia = DIAS_SEMANA[new Date().getDay()]
+  const dias = { [FORMATO_TURNO_ID]: [dia], [FORMATO_DOMINGO_ID]: ['domingo'] }
+  const items = formatosDos(u).map((f) => {
+    const weekdays = dias[f.id] ?? []
+    const h = hechaHoy(u, f.id)
+    return {
+      ...f, code: f.id.slice(0, 8), version: 1, description: null, weekdays,
+      dueToday: weekdays.length === 0 || weekdays.includes(dia),
+      submittedToday: !!h, inspectionId: h?.id ?? null, result: h?.result ?? null, submittedAt: h?.submittedAt ?? null,
+    }
+  })
+  // Las de hoy primero, como el servidor.
+  return { date: hoy, weekday: dia, timezone: 'America/Caracas', items: [...items.filter((p) => p.dueToday), ...items.filter((p) => !p.dueToday)] }
 }
 
 function todasLasInspecciones() {
@@ -356,7 +409,9 @@ async function atender(req, res, url) {
       const filas = D.diasEntre(q.get('from'), q.get('to')).map((f) => D.metricaDelDia(u, f)).filter(Boolean)
       return json(res, 200, lista(filas, q))
     }
-    if (resto === '/inspection-templates') return json(res, 200, { items: [D.formatoPara(u)] })
+    if (resto === '/inspection-templates') {
+      return json(res, 200, modo.planillas === 'dos' ? plantillasDeHoy(u) : { items: [D.formatoPara(u)] })
+    }
     if (resto === '/inspections' && metodo === 'POST') return enviarInspeccion(req, res, u, yo)
     if (resto === '/work-orders' && metodo === 'POST') {
       const b = await cuerpoDe(req)
@@ -512,7 +567,16 @@ async function atender(req, res, url) {
 
 async function enviarInspeccion(req, res, u, yo) {
   const b = await cuerpoDe(req)
-  const items = new Map(D.formatoPara(u).items.map((it) => [it.id, it]))
+  // Servidor nuevo: la planilla sale de `templateId` y se cuenta por unidad + planilla + día.
+  const formatos = modo.planillas === 'dos' ? formatosDos(u) : [D.formatoPara(u)]
+  const formato = formatos.find((f) => f.id === b.templateId) ?? formatos[0]
+  if (modo.planillas === 'dos' && hechaHoy(u, formato.id)) {
+    return error(res, 409, 'conflict', 'You already submitted today inspection for that template and vehicle')
+  }
+  if (modo.planillas === 'una409' && todasLasInspecciones().some((i) => i.vehicleId === u.id && i.inspectionDate === diaHoy())) {
+    return error(res, 409, 'conflict', 'You already submitted today inspection for that vehicle')
+  }
+  const items = new Map(formato.items.map((it) => [it.id, it]))
   const respuestas = Array.isArray(b.answers) ? b.answers : []
   const fallaCritica = respuestas.some((r) => r.itemState === 'falla' && items.get(r.templateItemId)?.isCritical)
   const conAlgo = respuestas.some((r) => r.itemState !== 'conforme')
@@ -520,7 +584,8 @@ async function enviarInspeccion(req, res, u, yo) {
   const id = randomUUID()
   inspeccionesNuevas.unshift({
     id, kind: 'daily', result, inspectionDate: diaHoy(), location: b.location ?? u.ubicacion, submittedAt: new Date().toISOString(),
-    vehicleId: u.id, vehicleCode: u.code, vehiclePlate: u.plate, driverName: yo.nombre, driverUserId: yo.id, templateName: D.FORMATO_NOMBRE,
+    vehicleId: u.id, vehicleCode: u.code, vehiclePlate: u.plate, driverName: yo.nombre, driverUserId: yo.id,
+    templateId: formato.id, templateName: formato.name,
     hallazgos: respuestas.map((r, n) => {
       const it = items.get(r.templateItemId)
       return { id: randomUUID(), templateItemId: r.templateItemId, category: it?.category ?? '', name: it?.name ?? '', displayOrder: it?.displayOrder ?? n, itemState: r.itemState, isCritical: !!it?.isCritical, note: r.note ?? null }
@@ -543,12 +608,14 @@ const servidor = createServer(async (req, res) => {
     }
     if (url.pathname === '/__demo/modo') {
       if (url.searchParams.get('inspeccion')) modo.inspeccion = url.searchParams.get('inspeccion')
+      if (url.searchParams.get('planillas')) modo.planillas = url.searchParams.get('planillas')
       return json(res, 200, modo)
     }
     // Vuelve al estado del arranque (lo usa lote.mjs antes de cada captura): sin inspecciones ni
     // ODT nuevas y con todos los avisos sin leer.
     if (url.pathname === '/__demo/reiniciar') {
       modo.inspeccion = 'pendiente'
+      modo.planillas = 'una'
       inspeccionesNuevas.length = 0
       leidas.clear()
       descartadas.clear()

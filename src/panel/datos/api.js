@@ -525,6 +525,8 @@ Object.assign(api, {
   abonarPagoServicio: (tenantId, id, cuerpo) => pedir(`${CONSOLA}/tenants/${tenantId}/service-payments/${id}/receipts`, { metodo: 'POST', cuerpo, idempotente: true }),
   crearPlantillaInspeccion: (cuerpo) => pedir(`${CONSOLA}/inspection-templates`, { metodo: 'POST', cuerpo }),
   moverPlantillaInspeccion: (id, cuerpo) => pedir(`${CONSOLA}/inspection-templates/${id}/status`, { metodo: 'PATCH', cuerpo }),
+  // Días de la semana en que toca la planilla (servidor nuevo; el viejo responde 404).
+  cambiarDiasPlantillaInspeccion: (id, cuerpo) => pedir(`${CONSOLA}/inspection-templates/${id}/weekdays`, { metodo: 'PATCH', cuerpo }),
   // --- Alertas y SOS -------------------------------------------------------
   eventosDeAlerta: ({ status, severity, vehicleId, limit = 100, offset = 0 } = {}) =>
     pedir(`${CONSOLA}/alert-events${consulta({ status, severity, vehicleId, limit, offset })}`),
@@ -614,9 +616,14 @@ Object.assign(api, {
 const MOVIL = '/api/v1/mobile'
 
 Object.assign(api, {
-  /** El formato publicado para el tipo de la unidad: `{ items: [{ id, name, items: [...] }] }`. */
-  formatosDeInspeccion: (vehicleId) =>
-    pedir(`${MOVIL}/vehicles/${encodeURIComponent(vehicleId)}/inspection-templates`),
+  /**
+   * Los formatos publicados para el tipo de la unidad: `{ items: [{ id, name, items: [...] }] }`.
+   * Con `soloHoy` (T-200) pide `?scope=today`: el servidor nuevo manda solo las que tocan hoy,
+   * con `date` y, por planilla, `dueToday` / `submittedToday` / `inspectionId` / `result` /
+   * `submittedAt`; el viejo ignora el parámetro y manda todas, sin esos campos.
+   */
+  formatosDeInspeccion: (vehicleId, { soloHoy = false } = {}) =>
+    pedir(`${MOVIL}/vehicles/${encodeURIComponent(vehicleId)}/inspection-templates${soloHoy ? '?scope=today' : ''}`),
   /** Envía la inspección: `{ templateId, location?, answers }` → `{ inspectionId, result, workOrderIds }`. */
   enviarInspeccionDiaria: (vehicleId, cuerpo) =>
     pedir(`${MOVIL}/vehicles/${encodeURIComponent(vehicleId)}/inspections`, { metodo: 'POST', cuerpo }),

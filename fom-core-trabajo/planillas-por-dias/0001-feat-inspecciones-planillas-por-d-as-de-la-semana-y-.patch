@@ -1,0 +1,1078 @@
+From e0303b07b0c06342adcb989e2b608cf26ac9b16c Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Tue, 27 Oct 2026 11:54:53 -0400
+Subject: [PATCH] =?UTF-8?q?feat(inspecciones):=20planillas=20por=20d=C3=AD?=
+ =?UTF-8?q?as=20de=20la=20semana=20y=20varias=20por=20d=C3=ADa?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Cada plantilla declara los días en que toca (lunes..domingo; vacío = todos).
+Un conductor puede llenar varias planillas el mismo día para su unidad: la
+diaria pasa a ser una por unidad + planilla + día, y el 409 solo salta si
+esa misma planilla ya se llenó hoy.
+
+- Migración 20261027120000000: columna weekdays (jsonb validado por la base),
+  índice inspections_daily_unique_idx por (unidad, plantilla, fecha) y
+  reversión que falla cerrada si ya hay varias planillas el mismo día.
+- Consola: weekdays al crear; PATCH :templateId/weekdays (y su variante
+  /tenants/:tenantId) en borrador o publicada, 409 si está archivada, con
+  auditoría inspection_template.weekdays_changed.
+- Móvil: GET inspection-templates devuelve date, weekday, timezone y, por
+  plantilla, weekdays, dueToday, submittedToday, inspectionId, result y
+  submittedAt; las de hoy primero. ?scope=today deja solo las de hoy. Sin
+  ruta nueva: no cambia el ingreso nginx ni el contrato de 216 operaciones.
+- «Hoy» es la fecha en la zona horaria de la empresa (fom.tenants.timezone),
+  y la entrega guarda inspection_date con esa misma fecha.
+- Pruebas: estáticas nuevas, ruta tenant-scoped en la matriz HTTP y
+  escenario runtime (dos planillas el mismo día, 409 por planilla, zona).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ ...console-inspection-templates.controller.ts |  16 ++
+ .../console-inspection-templates.dto.ts       |  38 +++++
+ .../console-inspection-templates.service.ts   | 102 +++++++++++-
+ .../console-tenant-daily-writes.controller.ts |  12 ++
+ ...chedule_inspection_templates_by_weekday.ts |  73 +++++++++
+ src/mobile/mobile-field.dto.ts                |  17 ++
+ src/mobile/mobile-field.service.ts            | 123 ++++++++++++--
+ .../mobile-inspection-templates.controller.ts |  10 +-
+ test/console-tenant-daily-writes-http.test.js |  12 +-
+ test/inspection-templates-weekdays.test.js    | 141 ++++++++++++++++
+ test/mobile-field-runtime.js                  | 154 ++++++++++++++++++
+ 11 files changed, 672 insertions(+), 26 deletions(-)
+ create mode 100644 src/database/migrations/files/20261027120000000_schedule_inspection_templates_by_weekday.ts
+ create mode 100644 test/inspection-templates-weekdays.test.js
+
+diff --git a/src/console-api/console-inspection-templates.controller.ts b/src/console-api/console-inspection-templates.controller.ts
+index 47b6178..4781658 100644
+--- a/src/console-api/console-inspection-templates.controller.ts
++++ b/src/console-api/console-inspection-templates.controller.ts
+@@ -21,6 +21,7 @@ import {
+   CreateInspectionTemplateDto,
+   InspectionTemplateQueryDto,
+   TransitionInspectionTemplateDto,
++  UpdateInspectionTemplateWeekdaysDto,
+ } from './console-inspection-templates.dto';
+ import { ConsoleInspectionTemplatesService } from './console-inspection-templates.service';
+ import { ConsoleSessionGuard } from './console-session.guard';
+@@ -75,4 +76,19 @@ export class ConsoleInspectionTemplatesController {
+   ) {
+     return this.templates.transition(templateId, dto);
+   }
++
++  @Patch(':templateId/weekdays')
++  @Header('Cache-Control', 'no-store')
++  @ApiOperation({
++    summary: 'Cambiar los días de la semana en que toca la planilla',
++    description:
++      'Vacío o los siete días = todos los días. Se admite en borrador y en ' +
++      'publicada (es calendario, no contenido); una archivada responde 409.',
++  })
++  updateWeekdays(
++    @Param('templateId', new ParseUUIDPipe({ version: '4' })) templateId: string,
++    @Body() dto: UpdateInspectionTemplateWeekdaysDto,
++  ) {
++    return this.templates.updateWeekdays(templateId, dto);
++  }
+ }
+diff --git a/src/console-api/console-inspection-templates.dto.ts b/src/console-api/console-inspection-templates.dto.ts
+index 938a982..988b463 100644
+--- a/src/console-api/console-inspection-templates.dto.ts
++++ b/src/console-api/console-inspection-templates.dto.ts
+@@ -21,6 +21,18 @@ import { ListQueryDto } from './console.dto';
+ const CODE = /^[a-z0-9][a-z0-9._-]{0,49}$/u;
+ export const VEHICLE_TYPES = ['camioneta', 'camion', 'auto', 'otro'] as const;
+ export const TEMPLATE_STATUSES = ['borrador', 'publicada', 'archivada'] as const;
++/** Días en que toca una planilla, de lunes a domingo (sin tildes, como la base). */
++export const WEEKDAYS = [
++  'lunes',
++  'martes',
++  'miercoles',
++  'jueves',
++  'viernes',
++  'sabado',
++  'domingo',
++] as const;
++const WEEKDAYS_DESCRIPTION =
++  'Días en que toca llenar la planilla. Vacío (o los siete) = todos los días.';
+ 
+ export class InspectionTemplateQueryDto extends ListQueryDto {
+   @ApiPropertyOptional({ enum: TEMPLATE_STATUSES })
+@@ -118,6 +130,18 @@ export class CreateInspectionTemplateDto {
+   @Length(1, 500)
+   description?: string;
+ 
++  @ApiPropertyOptional({
++    type: [String],
++    enum: WEEKDAYS,
++    description: WEEKDAYS_DESCRIPTION,
++  })
++  @IsOptional()
++  @IsArray()
++  @ArrayMaxSize(WEEKDAYS.length)
++  @ArrayUnique()
++  @IsIn(WEEKDAYS as unknown as string[], { each: true })
++  weekdays: string[] = [];
++
+   @ApiProperty({ type: [CreateInspectionTemplateItemDto] })
+   @IsArray()
+   @ArrayMinSize(1)
+@@ -136,3 +160,17 @@ export class TransitionInspectionTemplateDto {
+   @IsIn(TEMPLATE_STATUSES as unknown as string[])
+   expectedStatus!: 'borrador' | 'publicada' | 'archivada';
+ }
++
++/** Cambiar los días de una planilla en borrador o publicada (no archivada). */
++export class UpdateInspectionTemplateWeekdaysDto {
++  @ApiProperty({
++    type: [String],
++    enum: WEEKDAYS,
++    description: WEEKDAYS_DESCRIPTION,
++  })
++  @IsArray()
++  @ArrayMaxSize(WEEKDAYS.length)
++  @ArrayUnique()
++  @IsIn(WEEKDAYS as unknown as string[], { each: true })
++  weekdays!: string[];
++}
+diff --git a/src/console-api/console-inspection-templates.service.ts b/src/console-api/console-inspection-templates.service.ts
+index 23c8bf3..3231d26 100644
+--- a/src/console-api/console-inspection-templates.service.ts
++++ b/src/console-api/console-inspection-templates.service.ts
+@@ -8,12 +8,27 @@ import type { PoolClient } from 'pg';
+ import { DatabaseService } from '../database/database.service';
+ import { requireManagerActor } from './console-roles';
+ import { TenantScopeService } from './tenant-scope.service';
+-import type {
+-  CreateInspectionTemplateDto,
+-  InspectionTemplateQueryDto,
+-  TransitionInspectionTemplateDto,
++import {
++  WEEKDAYS,
++  type CreateInspectionTemplateDto,
++  type InspectionTemplateQueryDto,
++  type TransitionInspectionTemplateDto,
++  type UpdateInspectionTemplateWeekdaysDto,
+ } from './console-inspection-templates.dto';
+ 
++/**
++ * Los días se guardan en orden de semana para que comparar sea trivial. Un
++ * día desconocido se rechaza aquí aunque el DTO ya lo filtre: callarlo
++ * convertiría «feriado» en «todos los días».
++ */
++function ordenarDias(weekdays: readonly string[]): string[] {
++  const conocidos: readonly string[] = WEEKDAYS;
++  if (weekdays.some((day) => !conocidos.includes(day))) {
++    throw new BadRequestException('Unknown weekday');
++  }
++  return WEEKDAYS.filter((day) => weekdays.includes(day));
++}
++
+ @Injectable()
+ export class ConsoleInspectionTemplatesService {
+   constructor(
+@@ -37,7 +52,7 @@ export class ConsoleInspectionTemplatesService {
+       : null;
+     const result = await this.database.query<Record<string, unknown>>(
+       `SELECT template.id, template.code, template.version, template.name,
+-              template.description, template.status,
++              template.description, template.status, template.weekdays,
+               template.published_at AS "publishedAt",
+               template.archived_at AS "archivedAt",
+               template.created_at AS "createdAt",
+@@ -98,6 +113,7 @@ export class ConsoleInspectionTemplatesService {
+         'Template item codes and display orders must be unique',
+       );
+     }
++    const weekdays = ordenarDias(dto.weekdays ?? []);
+ 
+     const client = await this.database.getPool().connect();
+     try {
+@@ -113,8 +129,9 @@ export class ConsoleInspectionTemplatesService {
+             ).tenantId;
+       const template = await client.query<{ id: string }>(
+         `INSERT INTO fom.inspection_templates
+-           (tenant_id, code, version, name, description, created_by_user_id)
+-         VALUES ($1, $2, $3, $4, $5, $6)
++           (tenant_id, code, version, name, description, created_by_user_id,
++            weekdays)
++         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
+          RETURNING id`,
+         [
+           tenantId,
+@@ -123,6 +140,7 @@ export class ConsoleInspectionTemplatesService {
+           dto.name,
+           dto.description ?? null,
+           actor.userId,
++          JSON.stringify(weekdays),
+         ],
+       );
+       const templateId = template.rows[0].id;
+@@ -154,6 +172,7 @@ export class ConsoleInspectionTemplatesService {
+           code: dto.code,
+           version: dto.version,
+           itemCount: dto.items.length,
++          weekdays,
+         },
+         tenantId,
+       );
+@@ -241,13 +260,80 @@ export class ConsoleInspectionTemplatesService {
+     }
+   }
+ 
++  /**
++   * Cambia los días en que toca la planilla. Es calendario, no contenido:
++   * se admite en borrador y en publicada; una archivada ya no se llena.
++   */
++  async updateWeekdays(
++    templateId: string,
++    dto: UpdateInspectionTemplateWeekdaysDto,
++    requestedTenantId?: string,
++  ) {
++    const actor = requireManagerActor();
++    const weekdays = ordenarDias(dto.weekdays);
++    const client = await this.database.getPool().connect();
++    try {
++      await client.query('BEGIN');
++      const tenantId =
++        requestedTenantId === undefined
++          ? actor.tenantId
++          : (
++              await this.tenantScope.requireWritable(
++                requestedTenantId,
++                client,
++              )
++            ).tenantId;
++      const current = await client.query<{
++        status: string;
++        weekdays: string[];
++      }>(
++        `SELECT status, weekdays FROM fom.inspection_templates
++          WHERE tenant_id = $1 AND id = $2 FOR UPDATE`,
++        [tenantId, templateId],
++      );
++      if (current.rows.length === 0) {
++        throw new NotFoundException('Not found');
++      }
++      if (current.rows[0].status === 'archivada') {
++        throw new ConflictException(
++          'An archived template cannot change its weekdays',
++        );
++      }
++      await client.query(
++        `UPDATE fom.inspection_templates SET weekdays = $3::jsonb
++          WHERE tenant_id = $1 AND id = $2`,
++        [tenantId, templateId, JSON.stringify(weekdays)],
++      );
++      await this.audit(
++        client,
++        actor,
++        'inspection_template.weekdays_changed',
++        templateId,
++        { fromWeekdays: current.rows[0].weekdays, toWeekdays: weekdays },
++        tenantId,
++      );
++      const response = await this.getWithClient(
++        client,
++        tenantId,
++        templateId,
++      );
++      await client.query('COMMIT');
++      return response;
++    } catch (error) {
++      await client.query('ROLLBACK');
++      throw this.translate(error);
++    } finally {
++      client.release();
++    }
++  }
++
+   private async getWithClient(
+     client: Pick<PoolClient, 'query'>,
+     tenantId: string,
+     templateId: string,
+   ) {
+     const template = await client.query<Record<string, unknown>>(
+-      `SELECT id, code, version, name, description, status,
++      `SELECT id, code, version, name, description, status, weekdays,
+               published_at AS "publishedAt", archived_at AS "archivedAt",
+               created_at AS "createdAt", updated_at AS "updatedAt"
+          FROM fom.inspection_templates
+diff --git a/src/console-api/console-tenant-daily-writes.controller.ts b/src/console-api/console-tenant-daily-writes.controller.ts
+index f4faa1d..c4a14fc 100644
+--- a/src/console-api/console-tenant-daily-writes.controller.ts
++++ b/src/console-api/console-tenant-daily-writes.controller.ts
+@@ -33,6 +33,7 @@ import { ConsoleBrowserMutationGuard } from './console-browser-mutation.guard';
+ import {
+   CreateInspectionTemplateDto,
+   TransitionInspectionTemplateDto,
++  UpdateInspectionTemplateWeekdaysDto,
+ } from './console-inspection-templates.dto';
+ import { ConsoleInspectionTemplatesService } from './console-inspection-templates.service';
+ import {
+@@ -217,6 +218,17 @@ export class ConsoleTenantDailyWritesController {
+     return this.templates.transition(templateId, dto, tenantId);
+   }
+ 
++  @Header('Cache-Control', 'no-store')
++  @Patch('inspection-templates/:templateId/weekdays')
++  @ApiOperation({ operationId: 'consoleTenantInspectionTemplateWeekdaysUpdate' })
++  updateInspectionTemplateWeekdays(
++    @Param('tenantId', new ParseUUIDPipe({ version: '4' })) tenantId: string,
++    @Param('templateId', new ParseUUIDPipe({ version: '4' })) templateId: string,
++    @Body() dto: UpdateInspectionTemplateWeekdaysDto,
++  ) {
++    return this.templates.updateWeekdays(templateId, dto, tenantId);
++  }
++
+   @Header('Cache-Control', 'no-store')
+   @Post('documents')
+   @ApiOperation({ operationId: 'consoleTenantDocumentCreate' })
+diff --git a/src/database/migrations/files/20261027120000000_schedule_inspection_templates_by_weekday.ts b/src/database/migrations/files/20261027120000000_schedule_inspection_templates_by_weekday.ts
+new file mode 100644
+index 0000000..643b416
+--- /dev/null
++++ b/src/database/migrations/files/20261027120000000_schedule_inspection_templates_by_weekday.ts
+@@ -0,0 +1,73 @@
++import type { MigrationBuilder } from 'node-pg-migrate/dist/bundle/index';
++
++/**
++ * Planillas por días de la semana — T-200.
++ *
++ * Cada plantilla declara los días en que toca llenarla. Un conductor puede
++ * deber varias planillas el mismo día para la misma unidad, así que la diaria
++ * deja de ser «una por unidad y día» y pasa a ser «una por unidad, planilla y
++ * día». Los días son configuración de calendario, no contenido del checklist:
++ * por eso pueden cambiarse en una versión publicada sin tocar sus ítems.
++ */
++export const up = (pgm: MigrationBuilder): void => {
++  pgm.sql(`SET LOCAL lock_timeout = '3s';`);
++  pgm.sql(`
++    ALTER TABLE fom.inspection_templates
++      ADD COLUMN weekdays jsonb NOT NULL DEFAULT '[]'::jsonb,
++      ADD CONSTRAINT inspection_templates_weekdays_check CHECK (
++        jsonb_typeof(weekdays) = 'array'
++        AND weekdays <@ '["lunes","martes","miercoles","jueves","viernes","sabado","domingo"]'::jsonb
++      );
++
++    -- La regla nueva es más laxa que la anterior: no puede haber filas que
++    -- la violen, así que no hace falta un guardián en la subida.
++    DROP INDEX fom.inspections_daily_unique_idx;
++    CREATE UNIQUE INDEX inspections_daily_unique_idx
++      ON fom.inspections (tenant_id, vehicle_id, template_id, inspection_date)
++      WHERE kind = 'daily';
++
++    GRANT SELECT (weekdays), INSERT (weekdays), UPDATE (weekdays)
++      ON fom.inspection_templates TO fom_app;
++
++    COMMENT ON COLUMN fom.inspection_templates.weekdays IS
++      'Days of the week the checklist is due (lunes..domingo); an empty array means every day. Calendar configuration, editable while published';
++    COMMENT ON TABLE fom.inspections IS
++      'One daily inspection per vehicle, template and date, bound to a template version';
++  `);
++};
++
++export const down = (pgm: MigrationBuilder): void => {
++  pgm.sql(`SET LOCAL lock_timeout = '3s';`);
++  pgm.sql(`
++    DO $guard$
++    BEGIN
++      IF EXISTS (
++        SELECT 1
++          FROM fom.inspections
++         WHERE kind = 'daily'
++         GROUP BY tenant_id, vehicle_id, inspection_date
++        HAVING count(*) > 1
++      ) THEN
++        RAISE EXCEPTION
++          'cannot restore one daily inspection per vehicle and day while several templates were submitted the same day'
++          USING ERRCODE = '55000';
++      END IF;
++    END
++    $guard$;
++
++    DROP INDEX fom.inspections_daily_unique_idx;
++    CREATE UNIQUE INDEX inspections_daily_unique_idx
++      ON fom.inspections (tenant_id, vehicle_id, inspection_date)
++      WHERE kind = 'daily';
++
++    REVOKE SELECT (weekdays), INSERT (weekdays), UPDATE (weekdays)
++      ON fom.inspection_templates FROM fom_app;
++
++    ALTER TABLE fom.inspection_templates
++      DROP CONSTRAINT inspection_templates_weekdays_check,
++      DROP COLUMN weekdays;
++
++    COMMENT ON TABLE fom.inspections IS
++      'One daily inspection per vehicle, driver and date, bound to a template version';
++  `);
++};
+diff --git a/src/mobile/mobile-field.dto.ts b/src/mobile/mobile-field.dto.ts
+index 15ede67..166c030 100644
+--- a/src/mobile/mobile-field.dto.ts
++++ b/src/mobile/mobile-field.dto.ts
+@@ -178,3 +178,20 @@ export class FieldHistoryQueryDto {
+   @Min(0)
+   offset: number = 0;
+ }
++
++/**
++ * Catálogo de planillas de la unidad. `today` deja solo las que tocan hoy
++ * según los días de cada planilla y la zona horaria de la empresa.
++ */
++export class InspectionTemplateCatalogQueryDto {
++  @ApiPropertyOptional({
++    enum: ['all', 'today'],
++    default: 'all',
++    description:
++      'all = todas las publicadas (las de hoy primero); today = solo las ' +
++      'que tocan hoy.',
++  })
++  @IsOptional()
++  @IsIn(['all', 'today'])
++  scope: 'all' | 'today' = 'all';
++}
+diff --git a/src/mobile/mobile-field.service.ts b/src/mobile/mobile-field.service.ts
+index 006831c..c84d55a 100644
+--- a/src/mobile/mobile-field.service.ts
++++ b/src/mobile/mobile-field.service.ts
+@@ -16,8 +16,9 @@ import type {
+ import { MobileMutationReceiptService } from './mobile-mutation-receipt.service';
+ 
+ /**
+- * Lo que la aplicación de campo ESCRIBE: reportar una falla, entregar la
+- * inspección diaria y anotar el odómetro (FOM-02 §4).
++ * Lo que la aplicación de campo ESCRIBE: reportar una falla, entregar las
++ * inspecciones del día (una por planilla que toque) y anotar el odómetro
++ * (FOM-02 §4).
+  *
+  * QUIÉN PUEDE ESCRIBIR SOBRE UNA UNIDAD. No es el rol: es la ASIGNACIÓN
+  * vigente. Conducir no es una condición de la persona sino un hecho con
+@@ -44,6 +45,19 @@ type Vinculo = {
+ type InspectionKind = 'daily' | 'scheduled';
+ type InspectionAttemptOutcome = 'accepted' | 'replayed' | 'rejected';
+ 
++type HoyDelEnte = { fecha: string; diaSemana: string; zonaHoraria: string };
++
++/** Mismo orden que `extract(isodow)`: 1 = lunes … 7 = domingo. */
++const DIAS_SEMANA = [
++  'lunes',
++  'martes',
++  'miercoles',
++  'jueves',
++  'viernes',
++  'sabado',
++  'domingo',
++] as const;
++
+ const ROLES_GESTORES = new Set(['admin_fom', 'supervisor']);
+ const ROL_CANONICO: Record<string, string> = {
+   owner: 'supervisor',
+@@ -67,8 +81,16 @@ export class MobileFieldService {
+    * Reutiliza la misma comprobación de asignación y el mismo filtro por tipo
+    * de vehículo que `submitInspection`, de modo que la app nunca reciba un
+    * ítem que después el servidor rechace ni omita uno que vaya a exigir.
++   *
++   * Cada formato dice qué días toca y si ya se llenó hoy para esta unidad:
++   * un conductor puede deber varias planillas el mismo día. Las de hoy van
++   * primero, así una app que solo mira la primera sigue llenando una que toca.
+    */
+-  async listInspectionTemplates(actor: Actor, vehicleId: string) {
++  async listInspectionTemplates(
++    actor: Actor,
++    vehicleId: string,
++    scope: 'all' | 'today' = 'all',
++  ) {
+     const client = await this.database.getPool().connect();
+     try {
+       await client.query('BEGIN');
+@@ -78,12 +100,18 @@ export class MobileFieldService {
+         vehicleId,
+         true,
+       );
++      const hoy = await this.hoyDelEnte(client, actor.tenantId);
+       const result = await client.query<{
+         template_id: string;
+         template_code: string;
+         template_version: number;
+         template_name: string;
+         template_description: string | null;
++        template_weekdays: string[];
++        due_today: boolean;
++        done_id: string | null;
++        done_result: string | null;
++        done_submitted_at: Date | null;
+         item_id: string;
+         item_code: string;
+         item_category: string;
+@@ -97,6 +125,11 @@ export class MobileFieldService {
+            template.version AS template_version,
+            template.name AS template_name,
+            template.description AS template_description,
++           template.weekdays AS template_weekdays,
++           (template.weekdays = '[]'::jsonb OR template.weekdays ? $4)
++             AS due_today,
++           done.id AS done_id, done.result AS done_result,
++           done.submitted_at AS done_submitted_at,
+            item.id AS item_id, item.code AS item_code,
+            item.category AS item_category, item.name AS item_name,
+            item.is_critical AS item_is_critical,
+@@ -106,12 +139,18 @@ export class MobileFieldService {
+          JOIN fom.inspection_template_items item
+            ON item.tenant_id = template.tenant_id
+           AND item.template_id = template.id
++         LEFT JOIN fom.inspections done
++           ON done.tenant_id = template.tenant_id
++          AND done.vehicle_id = $3
++          AND done.template_id = template.id
++          AND done.kind = 'daily'
++          AND done.inspection_date = $5::date
+         WHERE template.tenant_id = $1
+           AND template.status = 'publicada'
+           AND (item.vehicle_types = '[]'::jsonb OR item.vehicle_types ? $2)
+-        ORDER BY template.code, template.version DESC, template.id,
+-                 item.display_order, item.id`,
+-        [actor.tenantId, vehicleType],
++        ORDER BY due_today DESC, template.code, template.version DESC,
++                 template.id, item.display_order, item.id`,
++        [actor.tenantId, vehicleType, vehicleId, hoy.diaSemana, hoy.fecha],
+       );
+       const templates = new Map<
+         string,
+@@ -121,6 +160,12 @@ export class MobileFieldService {
+           version: number;
+           name: string;
+           description: string | null;
++          weekdays: string[];
++          dueToday: boolean;
++          submittedToday: boolean;
++          inspectionId: string | null;
++          result: string | null;
++          submittedAt: Date | null;
+           items: Array<Record<string, unknown>>;
+         }
+       >();
+@@ -133,6 +178,12 @@ export class MobileFieldService {
+             version: row.template_version,
+             name: row.template_name,
+             description: row.template_description,
++            weekdays: row.template_weekdays,
++            dueToday: row.due_today,
++            submittedToday: row.done_id !== null,
++            inspectionId: row.done_id,
++            result: row.done_result,
++            submittedAt: row.done_submitted_at,
+             items: [],
+           };
+           templates.set(row.template_id, template);
+@@ -148,7 +199,15 @@ export class MobileFieldService {
+         });
+       }
+       await client.query('COMMIT');
+-      return { items: [...templates.values()] };
++      const items = [...templates.values()].filter(
++        (template) => scope === 'all' || template.dueToday,
++      );
++      return {
++        date: hoy.fecha,
++        weekday: hoy.diaSemana,
++        timezone: hoy.zonaHoraria,
++        items,
++      };
+     } catch (error) {
+       await client.query('ROLLBACK');
+       throw error;
+@@ -157,6 +216,40 @@ export class MobileFieldService {
+     }
+   }
+ 
++  /**
++   * «Hoy» para la empresa: la fecha y el día de la semana en SU zona horaria
++   * (la de `fom.tenants`; si faltara, la del servidor). Con la fecha del
++   * servidor, una planilla llenada de noche quedaba anotada al día siguiente.
++   */
++  private async hoyDelEnte(
++    cliente: PoolClient,
++    tenantId: string,
++  ): Promise<HoyDelEnte> {
++    const fila = await cliente.query<{
++      zona: string;
++      fecha: string;
++      dia: number;
++    }>(
++      `SELECT zona,
++              (transaction_timestamp() AT TIME ZONE zona)::date::text AS fecha,
++              extract(isodow FROM transaction_timestamp() AT TIME ZONE zona)::integer
++                AS dia
++         FROM (
++           SELECT coalesce(
++             (SELECT timezone FROM fom.tenants WHERE id = $1),
++             current_setting('TimeZone')
++           ) AS zona
++         ) AS ente`,
++      [tenantId],
++    );
++    const { zona, fecha, dia } = fila.rows[0];
++    return {
++      fecha,
++      diaSemana: DIAS_SEMANA[Number(dia) - 1],
++      zonaHoraria: zona,
++    };
++  }
++
+   /**
+    * Resuelve el vínculo del actor con la unidad. Devuelve el rol de su
+    * asignación vigente, o `null` si no conduce pero sí gestiona el ente.
+@@ -379,6 +472,7 @@ export class MobileFieldService {
+         vehicleId,
+         true,
+       );
++      const hoy = await this.hoyDelEnte(cliente, actor.tenantId);
+ 
+       if (dto.scheduleId) {
+         const schedule = await cliente.query<{ scheduled_for: string }>(
+@@ -397,10 +491,7 @@ export class MobileFieldService {
+           ],
+         );
+         if (!schedule.rows[0]) throw new NotFoundException('Not found');
+-        const today = await cliente.query<{ today: string }>(
+-          `SELECT CURRENT_DATE::text AS today`,
+-        );
+-        if (schedule.rows[0].scheduled_for !== today.rows[0].today) {
++        if (schedule.rows[0].scheduled_for !== hoy.fecha) {
+           throw new ConflictException('Inspection schedule is not due today');
+         }
+       }
+@@ -459,10 +550,13 @@ export class MobileFieldService {
+         );
+       }
+ 
++      // La fecha es la de la empresa: la diaria es una por unidad, planilla
++      // y día, y ese día es el mismo que ve el conductor en su teléfono.
+       const inspeccion = await cliente.query<{ id: string }>(
+         `INSERT INTO fom.inspections
+-           (tenant_id, vehicle_id, driver_user_id, template_id, kind, location)
+-         VALUES ($1, $2, $3, $4, $5, $6)
++           (tenant_id, vehicle_id, driver_user_id, template_id, kind, location,
++            inspection_date)
++         VALUES ($1, $2, $3, $4, $5, $6, $7::date)
+          RETURNING id`,
+         [
+           actor.tenantId,
+@@ -471,6 +565,7 @@ export class MobileFieldService {
+           dto.templateId,
+           inspectionKind,
+           dto.location ?? null,
++          hoy.fecha,
+         ],
+       );
+       const inspectionId = inspeccion.rows[0].id;
+@@ -780,7 +875,7 @@ export class MobileFieldService {
+       const restriccion = (pg as { constraint?: string }).constraint ?? '';
+       if (restriccion === 'inspections_daily_unique_idx') {
+         return new ConflictException(
+-          'You already submitted today inspection for that vehicle',
++          'You already submitted today inspection for that template and vehicle',
+         );
+       }
+       if (restriccion.startsWith('vehicle_odometer_readings')) {
+diff --git a/src/mobile/mobile-inspection-templates.controller.ts b/src/mobile/mobile-inspection-templates.controller.ts
+index c31e20d..07fd595 100644
+--- a/src/mobile/mobile-inspection-templates.controller.ts
++++ b/src/mobile/mobile-inspection-templates.controller.ts
+@@ -4,6 +4,7 @@ import {
+   Header,
+   Param,
+   ParseUUIDPipe,
++  Query,
+   UseGuards,
+ } from '@nestjs/common';
+ import {
+@@ -14,6 +15,7 @@ import {
+   ApiTags,
+ } from '@nestjs/swagger';
+ import type { MobileActorIdentity } from '../authentication/mobile-authentication.service';
++import { InspectionTemplateCatalogQueryDto } from './mobile-field.dto';
+ import { MobileFieldService } from './mobile-field.service';
+ import { MobileActor, MobileSessionGuard } from './mobile-session.guard';
+ 
+@@ -38,13 +40,17 @@ export class MobileInspectionTemplatesController {
+     description:
+       'Devuelve exactamente los ítems que exige la entrega de inspección. ' +
+       'Una lista vacía significa que el ente aún no publicó un formato ' +
+-      'aplicable al tipo de esa unidad.',
++      'aplicable al tipo de esa unidad. Cada formato dice qué días toca, ' +
++      'si toca hoy y si ya se llenó hoy para esta unidad (con su id); los ' +
++      'de hoy van primero. Con scope=today solo vienen los de hoy. «Hoy» ' +
++      'es la fecha en la zona horaria de la empresa.',
+   })
+   @ApiOkResponse({ description: 'Formatos e ítems aplicables, ordenados.' })
+   list(
+     @MobileActor() actor: MobileActorIdentity,
+     @Param('vehicleId', new ParseUUIDPipe({ version: '4' })) vehicleId: string,
++    @Query() query: InspectionTemplateCatalogQueryDto,
+   ) {
+-    return this.field.listInspectionTemplates(actor, vehicleId);
++    return this.field.listInspectionTemplates(actor, vehicleId, query.scope);
+   }
+ }
+diff --git a/test/console-tenant-daily-writes-http.test.js b/test/console-tenant-daily-writes-http.test.js
+index 25d1af4..a241b6f 100644
+--- a/test/console-tenant-daily-writes-http.test.js
++++ b/test/console-tenant-daily-writes-http.test.js
+@@ -147,6 +147,13 @@ const routes = [
+     operation: 'consoleTenantInspectionTemplateTransition',
+     body: { status: 'publicada', expectedStatus: 'borrador' },
+   },
++  {
++    name: 'template-weekdays', method: 'PATCH',
++    path: `/inspection-templates/${RESOURCE}/weekdays`,
++    openapi: '/inspection-templates/{templateId}/weekdays',
++    operation: 'consoleTenantInspectionTemplateWeekdaysUpdate',
++    body: { weekdays: ['lunes', 'jueves'] },
++  },
+   {
+     name: 'document-create', method: 'POST', path: '/documents',
+     openapi: '/documents', operation: 'consoleTenantDocumentCreate',
+@@ -263,6 +270,7 @@ async function application(actor = ADMIN, realCsrf = false) {
+   const templates = {
+     create: (_dto, tenantId) => record('template-create', tenantId),
+     transition: (id, _dto, tenantId) => record('template-transition', tenantId, id),
++    updateWeekdays: (id, _dto, tenantId) => record('template-weekdays', tenantId, id),
+   };
+   const plans = {
+     put: (id, _dto, tenantId) => record('plan-put', tenantId, id),
+@@ -323,7 +331,7 @@ async function callRoute(base, route) {
+   });
+ }
+ 
+-test('las veintitrés mutaciones delegan el tenant, preservan idempotencia y conservan el actor', async (t) => {
++test('las veinticuatro mutaciones delegan el tenant, preservan idempotencia y conservan el actor', async (t) => {
+   const { app, calls } = await application();
+   t.after(async () => app.close());
+   const port = app.getHttpServer().address().port;
+@@ -365,7 +373,7 @@ test('la matriz permite escrituras propias/plataforma y niega contratistas, ajen
+   }
+ });
+ 
+-test('OpenAPI publica las veintitrés mutaciones con identificadores únicos', async (t) => {
++test('OpenAPI publica las veinticuatro mutaciones con identificadores únicos', async (t) => {
+   const { app } = await application();
+   t.after(async () => app.close());
+   const document = SwaggerModule.createDocument(
+diff --git a/test/inspection-templates-weekdays.test.js b/test/inspection-templates-weekdays.test.js
+new file mode 100644
+index 0000000..8d03580
+--- /dev/null
++++ b/test/inspection-templates-weekdays.test.js
+@@ -0,0 +1,141 @@
++'use strict';
++
++const assert = require('node:assert/strict');
++const { readFileSync } = require('node:fs');
++const { join } = require('node:path');
++const { test } = require('node:test');
++require('reflect-metadata');
++const { plainToInstance } = require('class-transformer');
++const { validateSync } = require('class-validator');
++const {
++  CreateInspectionTemplateDto,
++  UpdateInspectionTemplateWeekdaysDto,
++} = require('../dist/console-api/console-inspection-templates.dto.js');
++const {
++  InspectionTemplateCatalogQueryDto,
++} = require('../dist/mobile/mobile-field.dto.js');
++
++// ============================================================
++// Planillas por días de la semana — T-200
++// ------------------------------------------------------------
++// Cada planilla dice qué días toca; un conductor puede deber varias el mismo
++// día y la diaria pasa a ser una por unidad, planilla y día.
++// ============================================================
++
++const root = join(__dirname, '..');
++const read = (path) => readFileSync(join(root, path), 'utf8');
++const migration = read(
++  'src/database/migrations/files/' +
++    '20261027120000000_schedule_inspection_templates_by_weekday.ts',
++);
++const field = read('src/mobile/mobile-field.service.ts');
++const templates = read('src/console-api/console-inspection-templates.service.ts');
++const consoleController = read(
++  'src/console-api/console-inspection-templates.controller.ts',
++);
++const tenantWrites = read('src/console-api/console-tenant-daily-writes.controller.ts');
++const mobileController = read('src/mobile/mobile-inspection-templates.controller.ts');
++
++const errores = (Clase, cuerpo) =>
++  validateSync(plainToInstance(Clase, cuerpo), {
++    whitelist: true,
++    forbidNonWhitelisted: true,
++  });
++
++const item = {
++  code: 'frenos', category: 'Seguridad', name: 'Frenos', displayOrder: 1,
++};
++
++test('la migración agrega días validados por la base y es reversible', () => {
++  const up = migration.slice(0, migration.indexOf('export const down'));
++  const down = migration.slice(migration.indexOf('export const down'));
++  assert.match(up, /ADD COLUMN weekdays jsonb NOT NULL DEFAULT '\[\]'::jsonb/u);
++  assert.match(
++    up,
++    /weekdays <@ '\["lunes","martes","miercoles","jueves","viernes","sabado","domingo"\]'::jsonb/u,
++  );
++  assert.match(
++    up,
++    /ON fom\.inspections \(tenant_id, vehicle_id, template_id, inspection_date\)\s*\n\s*WHERE kind = 'daily'/u,
++  );
++  assert.match(up, /GRANT SELECT \(weekdays\), INSERT \(weekdays\), UPDATE \(weekdays\)/u);
++  // El reverso falla cerrado antes de restaurar la unicidad más estricta.
++  assert.match(down, /HAVING count\(\*\) > 1/u);
++  assert.match(down, /RAISE EXCEPTION/u);
++  assert.ok(
++    down.indexOf('RAISE EXCEPTION') < down.indexOf('DROP INDEX'),
++    'el guardián va antes de tocar el índice',
++  );
++  assert.match(
++    down,
++    /ON fom\.inspections \(tenant_id, vehicle_id, inspection_date\)\s*\n\s*WHERE kind = 'daily'/u,
++  );
++  assert.match(down, /DROP COLUMN weekdays/u);
++});
++
++test('crear acepta días válidos y opcionales; rechaza repetidos y desconocidos', () => {
++  const base = { code: 'diaria', version: 1, name: 'Diaria', items: [item] };
++  assert.deepEqual(errores(CreateInspectionTemplateDto, base), []);
++  const sinDias = plainToInstance(CreateInspectionTemplateDto, base);
++  assert.deepEqual(sinDias.weekdays, [], 'sin días = todos los días');
++  assert.deepEqual(
++    errores(CreateInspectionTemplateDto, { ...base, weekdays: ['lunes', 'viernes'] }),
++    [],
++  );
++  for (const weekdays of [['lunes', 'lunes'], ['feriado'], 'lunes', ['Lunes']]) {
++    assert.notDeepEqual(
++      errores(CreateInspectionTemplateDto, { ...base, weekdays }),
++      [],
++      JSON.stringify(weekdays),
++    );
++  }
++});
++
++test('editar días exige la lista (vacía vale) y no admite campos ajenos', () => {
++  assert.deepEqual(errores(UpdateInspectionTemplateWeekdaysDto, { weekdays: [] }), []);
++  assert.deepEqual(
++    errores(UpdateInspectionTemplateWeekdaysDto, { weekdays: ['sabado', 'domingo'] }),
++    [],
++  );
++  assert.notDeepEqual(errores(UpdateInspectionTemplateWeekdaysDto, {}), []);
++  assert.notDeepEqual(
++    errores(UpdateInspectionTemplateWeekdaysDto, { weekdays: [], status: 'publicada' }),
++    [],
++  );
++});
++
++test('la consola edita días en borrador o publicada, nunca en archivada, con auditoría', () => {
++  assert.match(consoleController, /@Patch\(':templateId\/weekdays'\)/u);
++  assert.match(tenantWrites, /@Patch\('inspection-templates\/:templateId\/weekdays'\)/u);
++  assert.match(tenantWrites, /consoleTenantInspectionTemplateWeekdaysUpdate/u);
++  const metodo = templates.slice(templates.indexOf('async updateWeekdays'));
++  assert.match(metodo, /requireManagerActor\(\)/u);
++  assert.match(metodo, /FOR UPDATE/u);
++  assert.match(metodo, /status === 'archivada'/u);
++  assert.match(metodo, /'inspection_template\.weekdays_changed'/u);
++  assert.match(templates, /Unknown weekday/u);
++});
++
++test('el móvil filtra por hoy con la zona de la empresa y marca lo ya llenado', () => {
++  assert.match(mobileController, /@Query\(\) query: InspectionTemplateCatalogQueryDto/u);
++  assert.match(field, /AT TIME ZONE zona/u);
++  assert.match(field, /SELECT timezone FROM fom\.tenants WHERE id = \$1/u);
++  assert.match(field, /template\.weekdays = '\[\]'::jsonb OR template\.weekdays \? \$4/u);
++  assert.match(field, /done\.template_id = template\.id/u);
++  assert.match(field, /done\.kind = 'daily'/u);
++  assert.match(field, /ORDER BY due_today DESC/u);
++  assert.deepEqual(errores(InspectionTemplateCatalogQueryDto, {}), []);
++  assert.deepEqual(errores(InspectionTemplateCatalogQueryDto, { scope: 'today' }), []);
++  assert.notDeepEqual(errores(InspectionTemplateCatalogQueryDto, { scope: 'ayer' }), []);
++});
++
++test('la entrega fecha con el día de la empresa y el 409 es por planilla', () => {
++  const entrega = field.slice(field.indexOf('async submitInspection'));
++  assert.match(entrega, /inspection_date\)\s*\n\s*VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7::date\)/u);
++  assert.match(entrega, /hoy\.fecha/u);
++  assert.doesNotMatch(entrega, /SELECT CURRENT_DATE/u);
++  assert.match(
++    field,
++    /already submitted today inspection for that template and vehicle/u,
++  );
++});
+diff --git a/test/mobile-field-runtime.js b/test/mobile-field-runtime.js
+index c58c35b..1f23622 100644
+--- a/test/mobile-field-runtime.js
++++ b/test/mobile-field-runtime.js
+@@ -670,6 +670,160 @@ async function main() {
+     },
+   ]);
+ 
++  // ── 11c · Planillas por días: varias el mismo día, una por planilla ─────
++  const DIAS = [
++    'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo',
++  ];
++  const hoyEnte = await adminPool.query(
++    `SELECT (transaction_timestamp() AT TIME ZONE timezone)::date::text AS fecha,
++            extract(isodow FROM transaction_timestamp() AT TIME ZONE timezone)::integer AS dia
++       FROM fom.tenants WHERE id = $1`,
++    [T_UNO],
++  );
++  const diaHoy = DIAS[Number(hoyEnte.rows[0].dia) - 1];
++  const otroDia = DIAS[Number(hoyEnte.rows[0].dia) % 7];
++
++  // Los días se cambian en una versión publicada sin tocar sus ítems.
++  const soloOtroDia = await comoActor(supervisor, () =>
++    formatos.updateWeekdays(borrador.template.id, { weekdays: [otroDia] }),
++  );
++  assert.equal(soloOtroDia.template.status, 'publicada');
++  assert.deepEqual(soloOtroDia.template.weekdays, [otroDia]);
++  assert.equal(soloOtroDia.items.length, 2, 'los items no cambian');
++
++  const deHoy = await campo.listInspectionTemplates(conductor, VEHICULO, 'today');
++  assert.equal(deHoy.date, hoyEnte.rows[0].fecha);
++  assert.equal(deHoy.weekday, diaHoy);
++  assert.equal(deHoy.timezone, 'UTC');
++  assert.deepEqual(deHoy.items.map((template) => template.id), [PLANTILLA]);
++  assert.equal(deHoy.items[0].submittedToday, true);
++  assert.equal(deHoy.items[0].inspectionId, aprobada.inspectionId);
++  assert.equal(deHoy.items[0].result, 'aprobada');
++  const todas = await campo.listInspectionTemplates(conductor, VEHICULO);
++  assert.deepEqual(
++    todas.items.map((template) => [template.id, template.dueToday]),
++    [[PLANTILLA, true], [borrador.template.id, false]],
++    'las de hoy van primero y las demas siguen disponibles',
++  );
++  assert.equal(todas.items[1].submittedToday, false);
++  assert.equal(todas.items[1].inspectionId, null);
++
++  // Ahora toca también hoy: la misma unidad llena una SEGUNDA planilla.
++  await comoActor(supervisor, () =>
++    formatos.updateWeekdays(borrador.template.id, {
++      weekdays: [otroDia, diaHoy],
++    }),
++  );
++  const dosHoy = await campo.listInspectionTemplates(conductor, VEHICULO, 'today');
++  assert.equal(dosHoy.items.length, 2);
++  const segunda = dosHoy.items.find((t) => t.id === borrador.template.id);
++  assert.equal(segunda.submittedToday, false);
++  const cuerpoSegunda = {
++    templateId: borrador.template.id,
++    answers: segunda.items.map((item) => ({
++      templateItemId: item.id,
++      itemState: 'conforme',
++    })),
++  };
++  const segundaHecha = await submitInspection(conductor, VEHICULO, cuerpoSegunda);
++  assert.equal(segundaHecha.kind, 'daily');
++  assert.equal(segundaHecha.result, 'aprobada');
++  await rechaza(
++    submitInspection(secundario, VEHICULO, cuerpoSegunda),
++    409,
++    'la misma planilla dos veces el mismo dia',
++  );
++  const ambas = await campo.listInspectionTemplates(conductor, VEHICULO, 'today');
++  assert.deepEqual(
++    ambas.items.map((t) => [t.id, t.submittedToday, t.inspectionId]).sort(),
++    [
++      [PLANTILLA, true, aprobada.inspectionId],
++      [borrador.template.id, true, segundaHecha.inspectionId],
++    ].sort(),
++  );
++  const fechaGuardada = await adminPool.query(
++    `SELECT inspection_date::text AS fecha FROM fom.inspections WHERE id = $1`,
++    [segundaHecha.inspectionId],
++  );
++  assert.equal(fechaGuardada.rows[0].fecha, hoyEnte.rows[0].fecha);
++  const auditoriaDias = await adminPool.query(
++    `SELECT changes FROM fom.audit_log
++      WHERE tenant_id = $1 AND entity_id = $2
++        AND action = 'inspection_template.weekdays_changed'
++      ORDER BY occurred_at, id`,
++    [T_UNO, borrador.template.id],
++  );
++  assert.equal(auditoriaDias.rows.length, 2);
++
++  // Crear con días los guarda en orden de semana; la base rechaza un día
++  // que no existe y una archivada ya no cambia sus días.
++  const conDias = await comoActor(supervisor, () =>
++    formatos.create({
++      code: `cierre-turno-${SUFIJO}`,
++      version: 1,
++      name: 'Cierre de turno',
++      weekdays: ['viernes', 'lunes'],
++      items: [{
++        code: 'limpieza', category: 'operacion', name: 'Limpieza',
++        isCritical: false, vehicleTypes: [], displayOrder: 1,
++      }],
++    }),
++  );
++  assert.deepEqual(conDias.template.weekdays, ['lunes', 'viernes']);
++  await rechaza(
++    comoActor(supervisor, () =>
++      formatos.updateWeekdays(conDias.template.id, { weekdays: ['feriado'] }),
++    ),
++    400,
++    'dia de la semana inexistente',
++  );
++  try {
++    await runtimePool.query(
++      `UPDATE fom.inspection_templates SET weekdays = '["feriado"]'::jsonb
++        WHERE id = $1`,
++      [conDias.template.id],
++    );
++    assert.fail('la base debia rechazar un dia inexistente');
++  } catch (error) {
++    assert.equal(error.code, '23514', error.message);
++  }
++  await comoActor(supervisor, () =>
++    formatos.transition(conDias.template.id, {
++      expectedStatus: 'borrador',
++      status: 'archivada',
++    }),
++  );
++  await rechaza(
++    comoActor(supervisor, () =>
++      formatos.updateWeekdays(conDias.template.id, { weekdays: [] }),
++    ),
++    409,
++    'una archivada no cambia sus dias',
++  );
++  await rechaza(
++    comoActor({ ...conductorDos, role: 'supervisor' }, () =>
++      formatos.updateWeekdays(borrador.template.id, { weekdays: [] }),
++    ),
++    404,
++    'dias de una planilla de otra empresa',
++  );
++
++  // «Hoy» es el de la empresa: con otra zona horaria cambia la fecha.
++  await adminPool.query(
++    `UPDATE fom.tenants SET timezone = 'Pacific/Kiritimati' WHERE id = $1`,
++    [T_UNO],
++  );
++  const lejos = await campo.listInspectionTemplates(conductor, VEHICULO);
++  const fechaLejos = await adminPool.query(
++    `SELECT (transaction_timestamp() AT TIME ZONE 'Pacific/Kiritimati')::date::text AS fecha`,
++  );
++  assert.equal(lejos.timezone, 'Pacific/Kiritimati');
++  assert.equal(lejos.date, fechaLejos.rows[0].fecha);
++  await adminPool.query(
++    `UPDATE fom.tenants SET timezone = 'UTC' WHERE id = $1`,
++    [T_UNO],
++  );
++
+   // ── 12 · Odómetro: se anota como manual, con autor e instante ────────────
+   const lectura = await recordOdometer(conductor, VEHICULO, {
+     odometerKm: 154320.5,
+-- 
+2.55.0.windows.3
+

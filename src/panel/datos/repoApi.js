@@ -16,6 +16,7 @@ import { api, empresaGestionActualId, escriturasHechas, pedir } from './api'
 import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
+import { AVISO_SIN_DIAS_EN_SERVIDOR, diasParaEnviar, normalizarDias } from './diasPlanilla'
 import { quitarSaltos } from './recorrido'
 import { transmitiendo } from './sinSenal.js'
 import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
@@ -2189,9 +2190,9 @@ Object.assign(repoApi, {
 
   /** Programa de inspecciones: plantillas, citas y hallazgos con seguimiento. */
   programaInspecciones: {
-    async crearPlantilla({ codigo, nombre, version = 1, descripcion, puntos }) {
-      const cuerpo = cuerpoPlantilla({ codigo, nombre, version, descripcion, puntos })
-      const r = await api.crearPlantillaInspeccion(cuerpo)
+    async crearPlantilla({ codigo, nombre, version = 1, descripcion, puntos, dias }) {
+      const cuerpo = cuerpoPlantilla({ codigo, nombre, version, descripcion, puntos, dias })
+      const r = await crearPlantillaConDias(cuerpo, { estricto: true })
       return { id: r?.template?.id ?? r?.id ?? r?.templateId }
     },
     /**
@@ -2209,7 +2210,7 @@ Object.assign(repoApi, {
       let creada = false
       if (!actual) {
         try {
-          const r = await api.crearPlantillaInspeccion(cuerpoPlantilla(argumentosDeFormato(formato)))
+          const r = await crearPlantillaConDias(cuerpoPlantilla(argumentosDeFormato(formato)), { estricto: false })
           actual = { id: r?.template?.id ?? r?.id ?? r?.templateId, estado: 'borrador' }
           creada = true
         } catch (e) {
@@ -2224,11 +2225,32 @@ Object.assign(repoApi, {
     async cambiarPlantilla(plantilla, estado) {
       return api.moverPlantillaInspeccion(plantilla.id, { expectedStatus: plantilla.estado, status: estado })
     },
+    /** Días en que toca la planilla. El servidor viejo no tiene la ruta (404): se avisa en llano. */
+    async cambiarDias(plantilla, dias) {
+      try {
+        const r = await api.cambiarDiasPlantillaInspeccion(plantilla.id, { weekdays: diasParaEnviar(dias) })
+        return { dias: normalizarDias(r?.template?.weekdays ?? dias) }
+      } catch (e) {
+        if (e?.estado === 404 && plantilla.soportaDias === false) {
+          servidorConDias = false
+          const error = new Error(AVISO_SIN_DIAS_EN_SERVIDOR)
+          error.estado = 404
+          throw error
+        }
+        if (e?.estado === 409) {
+          const error = new Error('Una plantilla archivada ya no puede cambiar sus días.')
+          error.estado = 409
+          throw error
+        }
+        throw e
+      }
+    },
     async plantillas({ estado = '' } = {}) {
       const r = await api.plantillasDeInspeccion({ status: estado })
-      return (r?.items ?? []).map((t) => ({
-        id: t.id, codigo: t.code, version: t.version, nombre: t.name, estado: t.status, puntos: t.itemCount ?? 0,
-      }))
+      const items = r?.items ?? []
+      // El servidor con días trae `weekdays` en cada plantilla; el viejo no lo trae.
+      if (items.length) servidorConDias = items.some((t) => Array.isArray(t.weekdays))
+      return items.map(plantillaDelServidor)
     },
     async citas({ estado = '', vehiculoId = '' } = {}) {
       const r = await api.programasDeInspeccion({ status: estado, vehicleId: vehiculoId })
@@ -2289,12 +2311,51 @@ Object.assign(repoApi, {
 
 // --- Plantillas de inspección: piezas compartidas con la semilla -----------
 
+/** null = aún no se sabe; false = el servidor viejo (no guarda días de la semana). */
+let servidorConDias = null
+
+/** Una plantilla del servidor en la forma del panel. `soportaDias` dice si ese servidor ya guarda días. */
+export function plantillaDelServidor(t) {
+  const soportaDias = Array.isArray(t.weekdays)
+  return {
+    id: t.id, codigo: t.code, version: t.version, nombre: t.name, estado: t.status, puntos: t.itemCount ?? 0,
+    dias: normalizarDias(t.weekdays), soportaDias,
+  }
+}
+
+function errorSinDias() {
+  const error = new Error('Este servidor todavía no guarda los días de la semana. Quita los días marcados o espera a que se actualice.')
+  error.estado = 400
+  return error
+}
+
+/**
+ * Crea la plantilla. El servidor viejo rechaza `weekdays` con 400: si ya sabemos que es el viejo
+ * (o lo descubrimos ahora) no se manda. `estricto`: avisar en vez de crear sin los días pedidos.
+ */
+async function crearPlantillaConDias(cuerpo, { estricto }) {
+  if (!cuerpo.weekdays) return api.crearPlantillaInspeccion(cuerpo)
+  const { weekdays: _dias, ...sinDias } = cuerpo
+  if (servidorConDias === false) {
+    if (estricto) throw errorSinDias()
+    return api.crearPlantillaInspeccion(sinDias)
+  }
+  try {
+    return await api.crearPlantillaInspeccion(cuerpo)
+  } catch (e) {
+    if (e?.estado !== 400 || !/weekdays/iu.test(e.message || '')) throw e
+    servidorConDias = false
+    if (estricto) throw errorSinDias()
+    return api.crearPlantillaInspeccion(sinDias)
+  }
+}
+
 /**
  * Cuerpo de POST /inspection-templates. Lo opcional (descripción, código del
  * punto, ayuda, tipos de vehículo, orden) se manda tal cual si viene; si no,
  * se genera como siempre.
  */
-export function cuerpoPlantilla({ codigo, nombre, version = 1, descripcion, puntos }) {
+export function cuerpoPlantilla({ codigo, nombre, version = 1, descripcion, puntos, dias }) {
   const code = normalizarCodigoPlan(codigo).slice(0, 50)
   if (!code || String(nombre ?? '').trim().length < 2 || !puntos?.length) throw new Error('Completa código, nombre y al menos un punto de inspección.')
   const cuerpo = {
@@ -2312,6 +2373,9 @@ export function cuerpoPlantilla({ codigo, nombre, version = 1, descripcion, punt
     })),
   }
   if (descripcion) cuerpo.description = descripcion
+  // Sin días (o todos) no se manda: el servidor viejo rechaza el campo y el nuevo ya lo toma como «todos».
+  const semana = diasParaEnviar(dias)
+  if (semana.length) cuerpo.weekdays = semana
   return cuerpo
 }
 
@@ -2322,6 +2386,7 @@ export function argumentosDeFormato(formato) {
     nombre: formato.name,
     version: formato.version,
     descripcion: formato.description,
+    dias: formato.weekdays,
     puntos: [...formato.items].sort((a, b) => a.displayOrder - b.displayOrder).map((i) => ({
       codigo: i.code,
       categoria: i.category,
@@ -2466,6 +2531,36 @@ export function plantillaDeFormato(formato, tipo = 'otro') {
 }
 
 /**
+ * Las planillas de la unidad para hoy, de la respuesta de `GET …/inspection-templates` (T-200).
+ * Servidor nuevo (trae `date`): cada una con `dueToday` y, si ya se llenó, `hecha` con su
+ * inspección; las de hoy primero. Servidor viejo (sin `date`): UNA planilla —la primera, como
+ * antes— que toca hoy y sin estado de hecha (se sabe aparte, con `diariaDeHoy`).
+ * Una planilla sin puntos para el tipo de la unidad no se puede llenar y no sale.
+ * Devuelve `{ nuevo, fecha, planillas: [{ id, plantilla, dueToday, hecha }] }`; `hecha`
+ * es `{ resultado, inspeccionId, enviadaEn }` o `null`.
+ */
+export function planillasDeRespuesta(respuesta, tipo = 'otro') {
+  const nuevo = typeof respuesta?.date === 'string'
+  const formatos = Array.isArray(respuesta?.items) ? respuesta.items : []
+  const lista = (nuevo ? formatos : formatos.slice(0, 1))
+    .map((f, orden) => ({ orden, f, plantilla: plantillaDeFormato(f, tipo) }))
+    .filter(({ plantilla }) => plantilla.categorias.length > 0)
+    .map(({ orden, f, plantilla }) => ({
+      orden,
+      id: plantilla.formatoId ?? `formato-${orden}`,
+      plantilla,
+      dueToday: nuevo ? f.dueToday !== false : true,
+      hecha: nuevo && f.submittedToday
+        ? { resultado: RESULTADOS_DIARIA.includes(f.result) ? f.result : 'pendiente', inspeccionId: f.inspectionId ?? null, enviadaEn: f.submittedAt ?? null }
+        : null,
+    }))
+    // Las de hoy primero; entre iguales, el orden en que las manda el servidor.
+    .sort((a, b) => Number(b.dueToday) - Number(a.dueToday) || a.orden - b.orden)
+    .map(({ orden, ...planilla }) => planilla)
+  return { nuevo, fecha: nuevo ? respuesta.date : null, planillas: lista }
+}
+
+/**
  * El cuerpo de `POST /mobile/vehicles/{id}/inspections`, como `enviar` de la app:
  * las fallas en ítems CRÍTICOS piden su orden siempre; las demás, si el
  * conductor respondió «Sí, crear ODT».
@@ -2531,17 +2626,20 @@ export function detalleDeEnvio({ id, resultado, enviadaEn, vehiculo, plantilla, 
  * hecha», que es lo que de verdad ocurre.
  */
 export class InspeccionYaHecha extends Error {
-  constructor() {
-    super('La inspección de hoy de esta unidad ya está hecha.')
+  /** `porPlanilla`: el servidor nuevo (T-200) dice que ESA planilla ya se llenó, no que la unidad ya cumplió. */
+  constructor({ porPlanilla = false } = {}) {
+    super(porPlanilla ? 'Esta planilla ya se llenó hoy.' : 'La inspección de hoy de esta unidad ya está hecha.')
     this.name = 'InspeccionYaHecha'
     this.yaHecha = true
+    this.porPlanilla = porPlanilla
   }
 }
 
 /** Lo que contesta FOM sobre una inspección, dicho para quien lo lee (errorDeInspeccion de la app). */
 function errorDeInspeccion(e) {
   const texto = String(e?.message ?? '')
-  if (e?.estado === 409 && /already submitted today/iu.test(texto)) return new InspeccionYaHecha()
+  // «…inspection for that template and vehicle» es del servidor nuevo; el viejo dice «…for this vehicle».
+  if (e?.estado === 409 && /already submitted today/iu.test(texto)) return new InspeccionYaHecha({ porPlanilla: /for that template/iu.test(texto) })
   if (e?.estado === 403 && !/contraseña/u.test(texto)) return new Error('No estás asignado a esta unidad.')
   if (e?.estado === 404 && texto === 'Ese recurso no existe en el servidor.') return new Error('Esta unidad o su formato de inspección ya no están disponibles.')
   if (e?.estado === 400 && /every item/iu.test(texto)) return new Error('Responde todos los ítems antes de enviar.')
@@ -2632,6 +2730,47 @@ export const inspeccionConductor = {
   },
 
   /**
+   * TODAS las planillas de hoy de la unidad, cada una con su estado (T-200).
+   * Devuelve `{ nuevo, planillas: [{ id, plantilla, dueToday, hecha }], motivo }`, con
+   * `hecha` = `null` o `{ inspeccion, detalle }`.
+   *  · Servidor nuevo: el estado de cada planilla viene en la misma respuesta (lo ve
+   *    también el conductor); de cada hecha se pide el detalle para ver quién y cómo.
+   *  · Servidor viejo: una planilla, hecha o no según `diariaDeHoy` (una por unidad y día).
+   * `motivo` solo si no se pudo comprobar si ya está hecha: se deja hacer y se avisa.
+   */
+  async planillasDeHoy(vehiculo, { empresaId = null } = {}) {
+    let r
+    try {
+      r = await api.formatosDeInspeccion(vehiculo.id, { soloHoy: true })
+    } catch (e) {
+      throw errorDeInspeccion(e)
+    }
+    const { nuevo, fecha, planillas } = planillasDeRespuesta(r, vehiculo.tipo)
+    if (nuevo) {
+      const completas = await Promise.all(planillas.map(async (p) => {
+        if (!p.hecha) return p
+        const { resultado, inspeccionId, enviadaEn } = p.hecha
+        // Quién y cómo salió: si no se puede leer, queda lo que ya dijo la lista.
+        const detalle = inspeccionId ? await inspeccionConductor.detalle(inspeccionId).catch(() => null) : null
+        const inspeccion = detalle ?? {
+          id: inspeccionId, resultado, clase: 'daily', fecha, enviadaEn, vehiculoId: vehiculo.id,
+          ...unidadDeVehiculo(vehiculo), conductor: null, conductorId: null, ubicacion: null, formato: p.plantilla.nombre,
+        }
+        return { ...p, hecha: { inspeccion, detalle } }
+      }))
+      return { nuevo, planillas: completas, motivo: null }
+    }
+    if (planillas.length === 0) return { nuevo, planillas, motivo: null }
+    const diaria = await inspeccionConductor.diariaDeHoy(vehiculo.id, { empresaId })
+    const [unica] = planillas
+    return {
+      nuevo,
+      planillas: [{ ...unica, hecha: diaria.estado === 'hecha' ? { inspeccion: diaria.inspeccion, detalle: diaria.detalle } : null }],
+      motivo: diaria.estado === 'sin_comprobar' ? diaria.motivo : null,
+    }
+  },
+
+  /**
    * ¿La unidad ya tiene su DIARIA de hoy? Como getDiariaDeHoy de la app, mira
    * en dos sitios: la lista de la unidad en FOM (ve también la que hizo otra
    * persona) y lo enviado desde este navegador (cubre al conductor, a quien FOM
@@ -2702,7 +2841,8 @@ export const inspeccionConductor = {
       enviada = await api.enviarInspeccionDiaria(vehiculo.id, cuerpoInspeccion({ plantilla, respuestas, ubicacion }))
     } catch (e) {
       const error = errorDeInspeccion(e)
-      if (error instanceof InspeccionYaHecha) guardarDiaria(quien.empresaId, vehiculo.id, null)
+      // Con el servidor nuevo la lista de hoy ya dice cuál se llenó; el recuerdo es del viejo (una por unidad y día).
+      if (error instanceof InspeccionYaHecha && !error.porPlanilla) guardarDiaria(quien.empresaId, vehiculo.id, null)
       throw error
     }
     const fotos = await subirFotosDeInspeccion(enviada.inspectionId, plantilla, respuestas)

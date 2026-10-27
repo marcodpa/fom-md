@@ -26,13 +26,19 @@
   :is(.mvu, .mvu-tonos) .apagado { --tono: var(--app-texto-3); --tono-sup: var(--app-sup-baja); }
 
   /* ---- Mapa: la unidad en medio de lo que se ve (el lienzo sube, no cambia de alto) ---- */
-  .mvu-mapa { position: absolute; top: 0; left: 0; right: 0; bottom: var(--mvu-dock); overflow: hidden; }
+  /* z-index 0: el mapa es su propio mundo de capas. Sin él, los paneles de Leaflet (400 a 1000) pintaban POR ENCIMA de la hoja (z 20) y su borde de abajo tapaba el tirador y el contador. */
+  .mvu-mapa { position: absolute; z-index: 0; isolation: isolate; top: 0; left: 0; right: 0; bottom: var(--mvu-dock); overflow: hidden; }
   .mvu-mapa-lienzo { position: absolute; left: 0; right: 0; transition: top var(--app-d-lento) var(--app-curva); }
   .mvu-mapa-lienzo > .pnl-mapa { border: 0; border-radius: 0; height: 100%; }
   /* Los controles arriba, bajo el encabezado, aunque el lienzo esté subido (controlesArriba de la app). */
   .mvu .mapa-capas { top: calc(78px + env(safe-area-inset-top) + var(--mvu-corrimiento, 0px)); right: 14px; bottom: auto; }
   .mvu .pnl-mapa .mapboxgl-ctrl-bottom-right,
   .mvu .pnl-mapa .leaflet-bottom.leaflet-right { top: calc(128px + env(safe-area-inset-top) + var(--mvu-corrimiento, 0px)); bottom: auto; margin: 0 14px 0 0; }
+  /* Con Leaflet la atribución de OpenStreetMap cruzaba el mapa justo sobre la unidad: va arriba a la izquierda, a la altura del zoom, y se parte en líneas si no cabe. */
+  .mvu .pnl-mapa .leaflet-bottom.leaflet-right { left: 14px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .mvu .pnl-mapa .leaflet-bottom.leaflet-right .leaflet-control { margin: 0; }
+  .mvu .pnl-mapa .leaflet-bottom.leaflet-right .leaflet-control-attribution { order: -1; flex: 0 1 auto; max-width: calc(100% - 64px); padding: 2px 6px; border-radius: 6px; background: rgb(20 26 34 / .78); color: var(--app-texto-3); font-size: 8px; line-height: 11px; white-space: normal; pointer-events: none; }
+  .mvu .pnl-mapa .leaflet-bottom.leaflet-right .leaflet-control-attribution a { color: var(--app-texto-2); pointer-events: auto; }
   /* La pastilla «MAPA»/«SAT» de la app, bajo el encabezado (la del supervisor vive en supervisor-movil.css). */
   .mvu .mapa-pildora-vista { position: absolute; top: calc(78px + env(safe-area-inset-top) + var(--mvu-corrimiento, 0px)); right: 14px; z-index: 5; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 14px; background: rgb(20 26 34 / .94); color: var(--app-texto-2); font: 700 11px/1 var(--app-fuente, system-ui, sans-serif); letter-spacing: .6px; cursor: pointer; }
   .mvu .mapa-pildora-vista.on { color: var(--app-primario); }

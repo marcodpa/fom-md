@@ -63,7 +63,7 @@ const ESPEJOS = {
   PATCH: [
     '/users/:u/credentials',
     '/users/:u', '/users/:u/profile', '/vehicles/:v', '/driver-assignments/:a/revoke', '/driver-assignments/:a/pin', '/areas/:a',
-    '/work-orders/:w/status', '/inspection-templates/:t/status', '/documents/:d', '/alert-rules/:r',
+    '/work-orders/:w/status', '/inspection-templates/:t/status', '/inspection-templates/:t/weekdays', '/documents/:d', '/alert-rules/:r',
     '/maintenance/plans/:p', '/maintenance/actions/:a/status',
     '/notifications/:n/read', '/notifications/:n/dismiss',
     '/gps-devices/:d', '/gps-installations/:a/remove',

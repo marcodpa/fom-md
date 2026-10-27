@@ -257,3 +257,12 @@ button.insp-cal-dia:hover { filter:brightness(1.2); }
   .insp-imp-barra { padding:16px; }
   .insp-imp-barra>.pnl-btn { flex:1; justify-content:center; }
 }
+
+/* Días de la semana en que toca una planilla (T-200). */
+.insp-dias-sel { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
+.insp-dia { width:44px; height:44px; border-radius:50%; border:1px solid var(--e-borde); background:transparent; color:var(--e-texto); font:inherit; font-weight:700; cursor:pointer; }
+.insp-dia[aria-pressed=true] { background:var(--e-primario-base); border-color:var(--e-primario-base); color:#04111c; }
+.insp-root .insp-dias-resumen { font-size:13px; color:var(--e-texto-2); margin:0 0 18px; }
+.insp-root .insp-dias-fila { font-size:12px; color:var(--e-texto-2); margin-top:5px; }
+.insp-dias-aviso { font-size:12px; color:var(--e-texto-2); padding:0 22px 14px; }
+@media(max-width:768px) { .insp-dias-sel { gap:6px; } .insp-dia { width:40px; height:40px; } .insp-inline-actions { flex-wrap:wrap; } }

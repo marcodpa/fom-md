@@ -19,6 +19,7 @@ import {
   estadoDocumento, etiquetaRol, puedeGestionarA, validarRolEmpresa,
 } from './catalogos'
 import { hoyISO } from './formato'
+import { DIAS_SEMANA, diasParaEnviar, normalizarDias, tocaTodosLosDias } from './diasPlanilla'
 import { comoEventoManejo } from './eventosManejo'
 import { calificacionManejo } from './manejo'
 import { empresaGestionActualId } from './api'
@@ -342,7 +343,7 @@ function crearPlantillaSemilla(datos) {
   const id = `pla-n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
   agregar('plantillasInspeccion', {
     id, empresaId: empresaDePlantillas(), codigo: cuerpo.code, version: cuerpo.version, nombre: cuerpo.name,
-    descripcion: cuerpo.description ?? null, estado: 'borrador', items: cuerpo.items, creadaEn: new Date().toISOString(),
+    descripcion: cuerpo.description ?? null, estado: 'borrador', items: cuerpo.items, dias: normalizarDias(cuerpo.weekdays), creadaEn: new Date().toISOString(),
   })
   return id
 }
@@ -357,6 +358,15 @@ function moverPlantillaSemilla(id, esperado, destino) {
     throw conflicto('Ya hay otra versión de esta plantilla publicada en esta empresa. Archívala antes de publicar esta.')
   }
   guardarParche('plantillasInspeccion', id, { estado: destino })
+}
+/** Cambia los días en que toca la planilla (borrador o publicada; la archivada no). */
+function cambiarDiasSemilla(id, dias) {
+  const t = plantillasDeLaEmpresa().find((x) => x.id === id)
+  if (!t) throw new Error('Ese elemento ya no existe.')
+  if (t.estado === 'archivada') throw conflicto('Una plantilla archivada ya no puede cambiar sus días.')
+  const nuevos = diasParaEnviar(dias)
+  guardarParche('plantillasInspeccion', id, { dias: nuevos })
+  return nuevos
 }
 function todasEmpresas() {
   return [...EMPRESAS, ...agregados('empresas')]
@@ -949,13 +959,16 @@ export const repo = {
     plantillas: ({ estado = '' } = {}) =>
       responder(() => plantillasDeLaEmpresa()
         .filter((t) => !estado || t.estado === estado)
-        .map(({ id, codigo, version, nombre, estado: e, items }) => ({ id, codigo, version, nombre, estado: e, puntos: items.length }))),
+        .map(({ id, codigo, version, nombre, estado: e, items, dias }) => ({ id, codigo, version, nombre, estado: e, puntos: items.length, dias: normalizarDias(dias), soportaDias: true }))),
     async crearPlantilla(datos) {
       return responder({ id: crearPlantillaSemilla(datos) }, 200)
     },
     async cambiarPlantilla(plantilla, estado) {
       moverPlantillaSemilla(plantilla.id, plantilla.estado, estado)
       return responder(true, 200)
+    },
+    async cambiarDias(plantilla, dias) {
+      return responder({ dias: cambiarDiasSemilla(plantilla.id, dias) }, 200)
     },
     async publicarFormato(formato) {
       const igual = () => plantillasDeLaEmpresa().find((t) => t.codigo === formato.code && Number(t.version) === Number(formato.version))
@@ -1654,8 +1667,8 @@ export const repo = {
 
 /** El orden de la hoja de la demo: frenos y luces primero, como el formato de la app. */
 const ORDEN_CATEGORIAS_DEMO = ['Frenos', 'Luces']
-function formatoDemo(tipo) {
-  const publicada = plantillasDeLaEmpresa().find((t) => t.estado === 'publicada')
+function formatoDemo(tipo, elegida = null) {
+  const publicada = elegida ?? plantillasDeLaEmpresa().find((t) => t.estado === 'publicada')
   if (publicada) {
     return {
       id: publicada.id,
@@ -1674,6 +1687,38 @@ function formatoDemo(tipo) {
     .map(({ i }, n) => ({ id: i.id, category: i.categoria, name: i.nombre, isCritical: i.critico, helpText: null, displayOrder: n + 1 }))
   return { id: 'formato-demo', name: 'Inspección preoperacional', items }
 }
+
+/**
+ * Las planillas de la unidad para hoy (T-200), cada una con `dueToday`; las de hoy primero.
+ * Sin plantillas publicadas por el supervisor, la demo trae dos: la preoperacional de siempre y
+ * «Inicio de turno». Con publicadas, las de la empresa, según los días en que tocan.
+ */
+function formatosDemo(tipo) {
+  const hoy = DIAS_SEMANA[(new Date().getDay() + 6) % 7].valor
+  const publicadas = plantillasDeLaEmpresa().filter((t) => t.estado === 'publicada')
+  const lista = publicadas.length
+    ? publicadas.map((t) => {
+        const f = formatoDemo(tipo, t)
+        return { ...f, dueToday: tocaTodosLosDias(t.dias) || normalizarDias(t.dias).includes(hoy) }
+      })
+    : [
+        { ...formatoDemo(tipo), dueToday: true },
+        {
+          id: 'formato-demo-turno',
+          name: 'Inicio de turno',
+          dueToday: true,
+          items: ITEMS_INSPECCION
+            .filter((i) => ['Cabina y seguridad', 'Documentos'].includes(i.categoria) && (i.tipos.length === 0 || i.tipos.includes(tipo)))
+            // Ids propios: lo respondido en una planilla no se marca en la otra.
+            .map((i, n) => ({ id: `turno-${i.id}`, category: i.categoria, name: i.nombre, isCritical: i.critico, helpText: null, displayOrder: n + 1 })),
+        },
+      ]
+  return lista.sort((a, b) => Number(b.dueToday) - Number(a.dueToday))
+}
+
+/** ¿Esta inspección de hoy es de esa planilla? Las de la semilla no dicen cuál: cuentan para la primera. */
+const esDePlanilla = (i, formatoId, nombre, primera) =>
+  i.plantillaId ? i.plantillaId === formatoId : i.plantilla ? i.plantilla === nombre : primera
 
 /** FOM decide el resultado: un crítico en falla bloquea; cualquier otra no conformidad, observaciones. */
 function resultadoDemo(plantilla, respuestas) {
@@ -1695,41 +1740,64 @@ function avisoDemo(aviso, veh) {
   })
 }
 
+/** Una inspección de hoy de la demo en la forma de «hecha»: `{ inspeccion, detalle }`. */
+function hechaDeDemo(fila, vehiculoId, guardada) {
+  const veh = todosVehiculos().find((v) => v.id === vehiculoId)
+  const detalle = guardada?.detalle?.id === fila.id ? guardada.detalle : fila.detalle ?? null
+  return {
+    detalle,
+    inspeccion: detalle ?? {
+      id: fila.id,
+      resultado: fila.resultado,
+      clase: fila.clase ?? 'daily',
+      fecha: fila.fecha,
+      enviadaEn: fila.creadaEn,
+      vehiculoId,
+      unidad: veh?.numero ?? veh?.alias ?? 'Unidad',
+      placa: veh?.placa ?? null,
+      conductor: todosPerfiles().find((p) => p.id === fila.conductorId)?.nombre ?? 'Sin conductor',
+      conductorId: fila.conductorId ?? null,
+      ubicacion: fila.ubicacion ?? null,
+      formato: fila.plantilla ?? 'Inspección preoperacional',
+    },
+  }
+}
+
 export const inspeccionConductorSemilla = {
   async plantilla(vehiculo) {
     return responder(() => plantillaDeFormato(formatoDemo(vehiculo.tipo), vehiculo.tipo))
   },
 
+  /** TODAS las planillas de hoy de la unidad y cuáles ya están hechas (misma forma que repoApi). */
+  async planillasDeHoy(vehiculo, { empresaId = null } = {}) {
+    const hoy = hoyISO()
+    const guardada = leerDiariaGuardada(empresaId, vehiculo.id, hoy)
+    const hechas = todasInspecciones()
+      .filter((i) => i.vehiculoId === vehiculo.id && i.fecha === hoy && i.clase !== 'scheduled')
+      .sort((a, b) => String(b.creadaEn).localeCompare(String(a.creadaEn)))
+    const planillas = formatosDemo(vehiculo.tipo)
+      .map((f, n) => ({ ...f, plantilla: plantillaDeFormato(f, vehiculo.tipo), primera: n === 0 }))
+      .filter((f) => f.plantilla.categorias.length > 0)
+      .map((f) => {
+        const fila = hechas.find((i) => esDePlanilla(i, f.id, f.name, f.primera))
+        return {
+          id: f.id,
+          plantilla: f.plantilla,
+          dueToday: f.dueToday,
+          hecha: fila ? hechaDeDemo(fila, vehiculo.id, guardada) : null,
+        }
+      })
+    return responder({ nuevo: true, planillas, motivo: null })
+  },
+
   async diariaDeHoy(vehiculoId, { empresaId = null } = {}) {
     const hoy = hoyISO()
     const guardada = leerDiariaGuardada(empresaId, vehiculoId, hoy)
-    const perfiles = todosPerfiles()
-    const veh = todosVehiculos().find((v) => v.id === vehiculoId)
     // La demo ve la lista entera, como un supervisor: también la que hizo otra persona.
     const diaria = todasInspecciones()
       .filter((i) => i.vehiculoId === vehiculoId && i.fecha === hoy && i.clase !== 'scheduled')
       .sort((a, b) => String(b.creadaEn).localeCompare(String(a.creadaEn)))[0]
-    if (diaria) {
-      const detalle = guardada?.detalle?.id === diaria.id ? guardada.detalle : diaria.detalle ?? null
-      return responder({
-        estado: 'hecha',
-        detalle,
-        inspeccion: detalle ?? {
-          id: diaria.id,
-          resultado: diaria.resultado,
-          clase: diaria.clase ?? 'daily',
-          fecha: diaria.fecha,
-          enviadaEn: diaria.creadaEn,
-          vehiculoId,
-          unidad: veh?.numero ?? veh?.alias ?? 'Unidad',
-          placa: veh?.placa ?? null,
-          conductor: perfiles.find((p) => p.id === diaria.conductorId)?.nombre ?? 'Sin conductor',
-          conductorId: diaria.conductorId ?? null,
-          ubicacion: diaria.ubicacion ?? null,
-          formato: diaria.plantilla ?? 'Inspección preoperacional',
-        },
-      })
-    }
+    if (diaria) return responder({ estado: 'hecha', ...hechaDeDemo(diaria, vehiculoId, guardada) })
     if (guardada) return responder({ estado: 'hecha', inspeccion: guardada.detalle, detalle: guardada.detalle })
     return responder({ estado: 'pendiente' })
   },
@@ -1743,10 +1811,11 @@ export const inspeccionConductorSemilla = {
   async enviar({ vehiculo, plantilla, respuestas, ubicacion }, quien) {
     if (!plantilla?.formatoId) throw new Error('Tu empresa no tiene un formato de inspección publicado.')
     const hoy = hoyISO()
-    // Una por unidad y día, como la regla de FOM (409).
-    if (todasInspecciones().some((i) => i.vehiculoId === vehiculo.id && i.fecha === hoy && i.clase !== 'scheduled')) {
-      guardarDiaria(quien.empresaId, vehiculo.id, null)
-      throw new InspeccionYaHecha()
+    // Una por unidad, planilla y día, como la regla de FOM (409).
+    const primera = formatosDemo(vehiculo.tipo)[0]?.id === plantilla.formatoId
+    if (todasInspecciones().some((i) => i.vehiculoId === vehiculo.id && i.fecha === hoy && i.clase !== 'scheduled'
+      && esDePlanilla(i, plantilla.formatoId, plantilla.nombre, primera))) {
+      throw new InspeccionYaHecha({ porPlanilla: true })
     }
     const veh = todosVehiculos().find((v) => v.id === vehiculo.id) ?? vehiculo
     const items = new Map(plantilla.categorias.flatMap((c) => c.items).map((i) => [i.id, i]))
@@ -1813,6 +1882,7 @@ export const inspeccionConductorSemilla = {
       clase: 'daily',
       ubicacion: detalle.ubicacion,
       creadaEn: ahora,
+      plantillaId: plantilla.formatoId,
       plantilla: plantilla.nombre,
       observaciones: respuestas.filter((r) => r.estado !== 'conforme').length - resultado.fallasCriticas,
       fallasCriticas: resultado.fallasCriticas,
