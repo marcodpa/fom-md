@@ -1,9 +1,13 @@
-import { useMemo, useState } from 'react'
-import MapaLibre from './MapaLibre'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import MapaMapbox, { HAY_MAPBOX } from './MapaMapbox'
 import FichaUnidad from './FichaUnidad'
 import { vehicleMarkerUrl } from './vehicleMarker'
-import MapaGoogle, { hayClaveMaps } from './MapaGoogle'
+
+// Leaflet y Google Maps solo se bajan si de verdad hacen falta (sin token de
+// Mapbox, o si Mapbox falla): con Mapbox no pasan por el camino de entrada.
+const MapaLibre = lazy(() => import('./MapaLibre'))
+const MapaGoogle = lazy(() => import('./MapaGoogle'))
+const hayClaveMaps = Boolean(import.meta.env?.VITE_GOOGLE_MAPS_API_KEY)
 
 // ============================================================
 // MAPA DE FLOTA
@@ -82,11 +86,13 @@ function colorEstado(v) {
  */
 export default function Mapa(props) {
   const [, rehacer] = useState(0)
-  if (hayClaveMaps) return <MapaGoogle {...props} />
+  // Mientras llega el proveedor, un lienzo vacío del mismo alto: el diseño no salta.
+  const espera = <div className="pnl-mapa fleet-map oscuro" style={{ height: props.alto ?? 'clamp(320px, 52vh, 560px)' }} />
+  if (hayClaveMaps) return <Suspense fallback={espera}><MapaGoogle {...props} /></Suspense>
   if (HAY_MAPBOX && !mapboxFallo) {
     return <MapaMapbox {...props} alFallar={() => { mapboxFallo = true; rehacer((n) => n + 1) }} />
   }
-  return <MapaLibre {...props} />
+  return <Suspense fallback={espera}><MapaLibre {...props} /></Suspense>
 }
 
 /** Plano esquemático de reserva, sin red. Se exporta por si hace falta. */

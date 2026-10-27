@@ -9,7 +9,7 @@ import Mapa from '../comp/Mapa'
 import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
 import PanelRecorrido from '../comp/PanelRecorrido'
 import { analizar, COLA_MIN, colaReciente } from '../datos/recorrido'
-import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
+import { ordenarSinSenal, textoSinSenal, useMinuto, useUnidadesAlDia } from '../datos/sinSenal'
 import { leerEnlaceEvento } from '../datos/eventosManejo'
 import { BloqueManejoBrusco, useManejoBrusco } from '../comp/ManejoBrusco'
 import * as f from '../datos/formato'
@@ -104,13 +104,15 @@ export default function CentroControl() {
   const datosFlota = useEstable(flota.datos, firmaFlota)
   // Diferido: el campo responde al instante y el mapa se filtra cuando React tiene un respiro.
   const texto = useDeferredValue(q.trim().toLowerCase())
-  // Cada minuto se recalcula la señal (5 min sin reportar = «Sin señal»), sin pedir nada más.
-  const ahora = useMinuto()
+  // Cada minuto se recalcula la señal (5 min sin reportar = «Sin señal»), sin pedir nada más;
+  // la pantalla solo se vuelve a pintar si alguna unidad cambió de estado (los «hace …» se
+  // renuevan solos en la lista y en la ficha, que llevan su propio reloj).
+  const alDia = useUnidadesAlDia(datosFlota)
   const lista = useMemo(
     // Primero la señal y la marcha al día (por posición), y con eso el filtro.
-    () => (datosFlota ?? []).map((v) => conSenalAlDia(v, ahora)).filter((v) =>
+    () => alDia.filter((v) =>
       (!areaId || v.areaId === areaId) && (!estadoMarcha || (v.estadoMarcha === estadoMarcha && v.conectado !== false)) && coincide(v, texto)),
-    [datosFlota, areaId, estadoMarcha, texto, ahora]
+    [alDia, areaId, estadoMarcha, texto]
   )
   const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
 

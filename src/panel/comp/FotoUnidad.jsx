@@ -46,7 +46,7 @@ function Referencia({ unidad, variante }) {
   }
   return variante === 'cabecera'
     ? <span className="eu-foto-sin-imagen"><Icono nombre="camion" tam={24} /><span>Sin foto</span></span>
-    : <img src="/images/maps/vehicle-reference.png" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="1536" height="1024" />
+    : <img src="/images/maps/vehicle-reference.webp" alt="Camioneta ilustrativa; no representa necesariamente esta unidad" width="800" height="533" loading="lazy" decoding="async" />
 }
 
 /**

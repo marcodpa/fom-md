@@ -21,10 +21,20 @@
     <!-- Space Grotesk y Plus Jakarta Sans: sitio de marketing.
          Spline Sans: la fuente que usa la app de flotas en web (su
          --font-display), para que la consola y la app se vean iguales. -->
+    <!-- No bloquea el primer pintado: la hoja se pide como «print» y se activa al
+         llegar (display=swap muestra el texto con la fuente del sistema mientras tanto). -->
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Spline+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Spline+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <!-- La pantalla de carga: se pinta desde el primer cuadro, antes de React. -->
     <link rel="stylesheet" href="/carga-fom.css" />
     <title>FOM — Control total de tu flota</title>

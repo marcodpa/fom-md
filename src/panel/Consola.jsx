@@ -1,7 +1,7 @@
 import LogoFom from '../components/LogoFom'
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, UNSAFE_NavigationContext, useLocation, useNavigate } from 'react-router-dom'
-import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa } from './auth'
+import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa, sesionActual } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
 import { useApariencia } from './useApariencia'
@@ -14,39 +14,155 @@ import { accesosDe, esPestana, MovilContexto, pestanasDe, tituloDe, useEsMovil }
 import { MovilBarra, MovilEncabezado, MovilPantalla } from './comp/movil-piezas'
 import { conTransicion, useEntradaPantalla, useFilasUnaVez, useNavegacionSuave } from './movimiento'
 
-import Resumen from './modulos/Resumen'
-import CentroControl from './modulos/CentroControl'
-import Flota from './modulos/Flota'
-import ExpedienteVehiculo from './modulos/ExpedienteVehiculo'
-import Mantenimiento from './modulos/Mantenimiento'
-import MantenimientoConductor from './modulos/MantenimientoConductor'
-import Inspecciones from './modulos/Inspecciones'
-import ExpedienteConductor from './modulos/ExpedienteConductor'
-import Alertas from './modulos/Alertas'
-import Documentos from './modulos/Documentos'
-import Reportes from './modulos/Reportes'
-import AdminEmpresas from './modulos/AdminEmpresas'
-import AdminPagos from './modulos/AdminPagos'
-import AdminGps from './modulos/AdminGps'
+import { Cargando } from './comp/ui'
 import { ReceptorMenu } from './comp/GpsPiezas'
-import AdminUsuarios from './modulos/AdminUsuarios'
-import AdminAuditoria from './modulos/AdminAuditoria'
-import MiUnidad from './modulos/MiUnidad'
-import MapaConductor from './modulos/MapaConductor'
-import InspeccionConductor from './modulos/InspeccionConductor'
-import SosConductor from './modulos/SosConductor'
-import OtraUnidad from './modulos/OtraUnidad'
-import MiPerfil from './modulos/MiPerfil'
-import Configuracion from './modulos/Configuracion'
-import Seguridad from './modulos/Seguridad'
-import Jornadas from './modulos/Jornadas'
-import Transferencias from './modulos/Transferencias'
-import Plataforma from './modulos/Plataforma'
-import AdminVehiculos from './modulos/AdminVehiculos'
+// Los estilos de los módulos, fijos y en su orden de siempre (ver el archivo).
+import './estilos-consola'
 // Al final: el teléfono manda sobre los estilos de escritorio de los módulos.
 import '../styles/movil-app.css'
 // El movimiento de toda la consola (T-184), después de todo lo demás.
 import '../styles/movimiento.css'
+
+// Cada módulo se baja cuando se entra a su pantalla (o un poco antes, en los
+// ratos libres): el primer pintado de la consola ya no carga Reportes, Admin,
+// GPS, Planes... de quien solo viene a ver su unidad. Los `import()` quedan en
+// una tabla para poder pedirlos por adelantado sin duplicar la ruta.
+const CARGADORES = {
+  Resumen: () => import('./modulos/Resumen'),
+  CentroControl: () => import('./modulos/CentroControl'),
+  Flota: () => import('./modulos/Flota'),
+  ExpedienteVehiculo: () => import('./modulos/ExpedienteVehiculo'),
+  Mantenimiento: () => import('./modulos/Mantenimiento'),
+  MantenimientoConductor: () => import('./modulos/MantenimientoConductor'),
+  Inspecciones: () => import('./modulos/Inspecciones'),
+  ExpedienteConductor: () => import('./modulos/ExpedienteConductor'),
+  Alertas: () => import('./modulos/Alertas'),
+  Documentos: () => import('./modulos/Documentos'),
+  Reportes: () => import('./modulos/Reportes'),
+  AdminEmpresas: () => import('./modulos/AdminEmpresas'),
+  AdminPagos: () => import('./modulos/AdminPagos'),
+  AdminGps: () => import('./modulos/AdminGps'),
+  AdminUsuarios: () => import('./modulos/AdminUsuarios'),
+  AdminAuditoria: () => import('./modulos/AdminAuditoria'),
+  MiUnidad: () => import('./modulos/MiUnidad'),
+  MapaConductor: () => import('./modulos/MapaConductor'),
+  InspeccionConductor: () => import('./modulos/InspeccionConductor'),
+  SosConductor: () => import('./modulos/SosConductor'),
+  OtraUnidad: () => import('./modulos/OtraUnidad'),
+  MiPerfil: () => import('./modulos/MiPerfil'),
+  Configuracion: () => import('./modulos/Configuracion'),
+  Seguridad: () => import('./modulos/Seguridad'),
+  Jornadas: () => import('./modulos/Jornadas'),
+  Transferencias: () => import('./modulos/Transferencias'),
+  Plataforma: () => import('./modulos/Plataforma'),
+  AdminVehiculos: () => import('./modulos/AdminVehiculos'),
+}
+const Resumen = lazy(CARGADORES.Resumen)
+const CentroControl = lazy(CARGADORES.CentroControl)
+const Flota = lazy(CARGADORES.Flota)
+const ExpedienteVehiculo = lazy(CARGADORES.ExpedienteVehiculo)
+const Mantenimiento = lazy(CARGADORES.Mantenimiento)
+const MantenimientoConductor = lazy(CARGADORES.MantenimientoConductor)
+const Inspecciones = lazy(CARGADORES.Inspecciones)
+const ExpedienteConductor = lazy(CARGADORES.ExpedienteConductor)
+const Alertas = lazy(CARGADORES.Alertas)
+const Documentos = lazy(CARGADORES.Documentos)
+const Reportes = lazy(CARGADORES.Reportes)
+const AdminEmpresas = lazy(CARGADORES.AdminEmpresas)
+const AdminPagos = lazy(CARGADORES.AdminPagos)
+const AdminGps = lazy(CARGADORES.AdminGps)
+const AdminUsuarios = lazy(CARGADORES.AdminUsuarios)
+const AdminAuditoria = lazy(CARGADORES.AdminAuditoria)
+const MiUnidad = lazy(CARGADORES.MiUnidad)
+const MapaConductor = lazy(CARGADORES.MapaConductor)
+const InspeccionConductor = lazy(CARGADORES.InspeccionConductor)
+const SosConductor = lazy(CARGADORES.SosConductor)
+const OtraUnidad = lazy(CARGADORES.OtraUnidad)
+const MiPerfil = lazy(CARGADORES.MiPerfil)
+const Configuracion = lazy(CARGADORES.Configuracion)
+const Seguridad = lazy(CARGADORES.Seguridad)
+const Jornadas = lazy(CARGADORES.Jornadas)
+const Transferencias = lazy(CARGADORES.Transferencias)
+const Plataforma = lazy(CARGADORES.Plataforma)
+const AdminVehiculos = lazy(CARGADORES.AdminVehiculos)
+
+/**
+ * Qué módulo(s) pide cada ruta. Sirve para empezar a bajar la pantalla antes de
+ * que se pinte (al abrir el enlace, o al pasar el dedo/ratón por el menú).
+ */
+const MODULOS_ADMIN = { empresas: 'AdminEmpresas', plataforma: 'Plataforma', vehiculos: 'AdminVehiculos', transferencias: 'Transferencias', pagos: 'AdminPagos', gps: 'AdminGps', auditoria: 'AdminAuditoria', usuarios: 'AdminUsuarios' }
+function modulosDeRuta(pathname, area) {
+  const [tramo = '', sub] = pathname.replace(/^\/panel\/?/u, '').replace(/\/+$/u, '').split('/')
+  const conductor = area === 'conductor'
+  switch (tramo) {
+    case '': return area ? [conductor ? 'MiUnidad' : 'Resumen'] : []
+    case 'mapa': return area ? [conductor ? 'MapaConductor' : 'CentroControl'] : []
+    case 'alertas': return ['Alertas']
+    case 'flota': return [sub ? 'ExpedienteVehiculo' : 'Flota']
+    case 'seguridad': return ['Seguridad']
+    case 'jornadas': return ['Jornadas']
+    case 'mantenimiento': return area ? [conductor ? 'MantenimientoConductor' : 'Mantenimiento'] : []
+    case 'inspecciones': return ['Inspecciones']
+    case 'inspeccion': return ['InspeccionConductor']
+    case 'sos': return ['SosConductor']
+    case 'otra-unidad': return ['OtraUnidad']
+    case 'documentos': return ['Documentos']
+    case 'personal': return [sub ? 'ExpedienteConductor' : 'AdminUsuarios']
+    case 'reportes': return ['Reportes']
+    case 'mi-perfil': return ['MiPerfil']
+    case 'configuracion': return ['Configuracion']
+    case 'admin': return MODULOS_ADMIN[sub] ? [MODULOS_ADMIN[sub]] : []
+    default: return []
+  }
+}
+
+/** Pide ya los módulos de una ruta. Si falla, no pasa nada: se reintenta al entrar. */
+function precargarRuta(pathname, area) {
+  modulosDeRuta(pathname, area).forEach((k) => { CARGADORES[k]().catch(() => {}) })
+}
+
+// En los ratos libres, tras pintar la primera pantalla, se bajan los demás
+// módulos que esa persona puede abrir (de uno en uno, sin competir con el
+// mapa), para que cambiar de pantalla no espere a la red.
+const PRECARGA_POR_AREA = {
+  conductor: ['InspeccionConductor', 'MapaConductor', 'MantenimientoConductor', 'Alertas', 'MiPerfil', 'SosConductor', 'OtraUnidad', 'Configuracion'],
+  operativo: ['Flota', 'CentroControl', 'Alertas', 'Seguridad', 'Mantenimiento', 'Jornadas', 'Inspecciones', 'Documentos', 'AdminUsuarios', 'MiPerfil', 'Configuracion', 'ExpedienteVehiculo', 'ExpedienteConductor', 'Reportes'],
+  gerencial: ['AdminUsuarios', 'Reportes', 'ExpedienteConductor', 'MiPerfil', 'Configuracion'],
+  personal: ['CentroControl', 'Alertas', 'Documentos', 'AdminUsuarios', 'MiPerfil'],
+  admin: ['Plataforma', 'AdminEmpresas', 'AdminVehiculos', 'Transferencias', 'AdminPagos', 'AdminGps', 'AdminAuditoria', 'Alertas', 'MiPerfil', 'Configuracion'],
+}
+
+function precargaEnReposo(claves) {
+  // Con «ahorro de datos» no se baja nada que nadie haya pedido.
+  if (typeof navigator === 'undefined' || navigator.connection?.saveData) return () => {}
+  let vivo = true
+  let reloj
+  let idle
+  let i = 0
+  const pedir = (f) => {
+    if (globalThis.requestIdleCallback) idle = globalThis.requestIdleCallback(f, { timeout: 4000 })
+    else reloj = setTimeout(f, 300)
+  }
+  const siguiente = () => {
+    if (!vivo || i >= claves.length) return
+    CARGADORES[claves[i++]]().catch(() => {}).finally(() => pedir(siguiente))
+  }
+  reloj = setTimeout(() => pedir(siguiente), 1500)
+  return () => {
+    vivo = false
+    clearTimeout(reloj)
+    if (idle != null) globalThis.cancelIdleCallback?.(idle)
+  }
+}
+
+// Si ya hay sesión guardada, la pantalla de esta ruta empieza a bajar en cuanto
+// se evalúa este archivo, en paralelo con el resto del arranque.
+if (typeof window !== 'undefined') {
+  try {
+    const guardada = sesionActual()
+    precargarRuta(window.location.pathname, guardada?.perfil ? areaDe(guardada.perfil) : null)
+  } catch { /* sin sesión guardada: se pedirá al pintar */ }
+}
 
 // Módulos de la consola, agrupados como en la arquitectura FOM-WEB.
 const MENU = [
@@ -175,6 +291,7 @@ function menuDe(perfil) {
 
 function Lateral({ perfil, abierto, cerrar, sinLeer }) {
   const menu = menuDe(perfil)
+  const area = areaDe(perfil)
   return (
     <aside id="panel-navigation" className={`pnl-side${abierto ? ' abierto' : ''}`} onKeyDown={e => { if (e.key === 'Escape') cerrar() }}>
       <div className="pnl-side-top">
@@ -201,6 +318,8 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
                 to={it.a}
                 end={it.fin}
                 onClick={cerrar}
+                onPointerEnter={() => precargarRuta(it.a, area)}
+                onFocus={() => precargarRuta(it.a, area)}
                 className={({ isActive }) => `pnl-nav-item${it.clase ? ` ${it.clase}` : ''}${isActive ? ' activo' : ''}`}
               >
                 <Icono nombre={it.icono} />
@@ -291,6 +410,16 @@ export default function Consola() {
       bajaGps()
     }
   }, [pathname, esConductor, sesion?.perfil?.id, sesion?.perfil?.empresaGestion?.id])
+
+  // Tras la primera pantalla, el resto de módulos de su rol se baja en reposo.
+  const areaPrecarga = sesion?.perfil ? areaDe(sesion.perfil) : null
+  const gestionando = Boolean(sesion?.perfil?.empresaGestion)
+  useEffect(() => {
+    if (!areaPrecarga) return undefined
+    const claves = [...(PRECARGA_POR_AREA[areaPrecarga] ?? PRECARGA_POR_AREA.conductor)]
+    if (areaPrecarga === 'admin' && gestionando) claves.push(...PRECARGA_POR_AREA.operativo)
+    return precargaEnReposo([...new Set(claves)])
+  }, [areaPrecarga, gestionando])
 
   useEffect(() => {
     document.title = 'Consola FOM'
@@ -391,6 +520,9 @@ export default function Consola() {
             />
           : <MovilPantalla titulo={titulo} alVolver={volver} />)}
 
+        {/* Cada pantalla llega en su propio trozo; mientras baja, el esqueleto de siempre
+            (espera 120 ms antes de asomarse, ver movimiento.css). */}
+        <Suspense fallback={<div className="pnl-cuerpo"><Cargando filas={4} /></div>}>
         <Routes key={perfil.empresaGestion?.id || 'global'}>
           <Route path="mi-perfil" element={<MiPerfil />} />
           <Route path="configuracion" element={<Configuracion />} />
@@ -431,6 +563,7 @@ export default function Consola() {
           {esGestor(perfil) && <Route path="admin/usuarios" element={<AdminUsuarios />} />}
           <Route path="*" element={<Navigate to="/panel" replace />} />
         </Routes>
+        </Suspense>
       </main>
       {esMovil && enPestana && <MovilBarra pestanas={pestanas} />}
     </div>

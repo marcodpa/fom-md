@@ -130,7 +130,7 @@ function FotoFila({ unidad }) {
   if (!e.url) return <Icono nombre="camion" tam={26} />
   return (
     <img className={`vm-foto${e.tipo === 'foto' ? ' con-fondo' : ''}`} src={e.url} alt={e.tipo === 'silueta' ? `Silueta de ${nombre}` : `Foto de ${nombre}`}
-      loading="lazy" decoding="async" onError={() => setFallo(true)} />
+      width="92" height="58" loading="lazy" decoding="async" onError={() => setFallo(true)} />
   )
 }
 

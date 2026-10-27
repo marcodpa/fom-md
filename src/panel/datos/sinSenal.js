@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useRef, useSyncExternalStore } from 'react'
 import { fechaCorta, fechaHora } from './formato.js'
 import { marchaPorPosicion } from './movimiento.js'
 import { registrarCorte } from './avisosSinSenal.js'
@@ -116,15 +116,72 @@ export function ordenarSinSenal(lista, esSinSenal, ahora = Date.now()) {
   return salida
 }
 
+// ------------------------------------------------------------
+// EL RELOJ DEL MINUTO
+// Un solo temporizador para toda la consola (antes cada pantalla tenía el suyo). Se
+// detiene con la pestaña en segundo plano —nadie mira «hace 12 min»— y al volver da la
+// hora al instante. Sin nadie suscrito no corre.
+// ------------------------------------------------------------
+const oyentes = new Set()
+let horaDelReloj = Date.now()
+let temporizador = 0
+
+function dar(hora) {
+  horaDelReloj = hora
+  oyentes.forEach((avisar) => avisar())
+}
+const alVolver = () => { if (typeof document === 'undefined' || !document.hidden) dar(Date.now()) }
+
+function suscribirReloj(avisar) {
+  oyentes.add(avisar)
+  if (oyentes.size === 1) {
+    horaDelReloj = Date.now()
+    temporizador = setInterval(() => { if (typeof document === 'undefined' || !document.hidden) dar(Date.now()) }, MIN_MS)
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', alVolver)
+  }
+  return () => {
+    oyentes.delete(avisar)
+    if (oyentes.size === 0) {
+      clearInterval(temporizador)
+      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', alVolver)
+    }
+  }
+}
+
+/** La hora del último tic. Sin nadie suscrito (primer pintado) no hay tic: se renueva si pasó un minuto. */
+function horaActual() {
+  if (oyentes.size === 0 && Date.now() - horaDelReloj >= MIN_MS) horaDelReloj = Date.now()
+  return horaDelReloj
+}
+
 /**
  * La hora de ahora, renovada cada minuto sin pedir nada al servidor: basta para que
  * «hace 12 min» pase solo a «hace 13 min» con la pantalla abierta.
+ *
+ * OJO: re-renderiza a quien la use cada minuto. En una pantalla entera conviene usarla
+ * solo en el componente que muestra el tiempo, y para recalcular la señal de una flota,
+ * `useUnidadesAlDia` (que solo vuelve a pintar cuando una unidad cambia de verdad).
  */
 export function useMinuto() {
-  const [ahora, setAhora] = useState(() => Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setAhora(Date.now()), MIN_MS)
-    return () => clearInterval(id)
-  }, [])
-  return ahora
+  return useSyncExternalStore(suscribirReloj, horaActual, Date.now)
+}
+
+/**
+ * La flota con la señal y la marcha al día (`conSenalAlDia`), recalculada con el reloj del
+ * minuto. Devuelve el MISMO arreglo mientras ninguna unidad haya cambiado de estado (a los 3
+ * min quieta pasa a detenida; a los 5 sin reportar, a sin señal): la pantalla no se vuelve a
+ * pintar cada minuto para nada, y el mapa no rehace sus marcadores.
+ */
+export function useUnidadesAlDia(lista) {
+  const memo = useRef({ lista: null, hora: 0, salida: null })
+  const leer = () => {
+    const hora = horaActual()
+    const m = memo.current
+    if (m.lista === lista && m.hora === hora && m.salida) return m.salida
+    const nueva = (lista ?? []).map((v) => conSenalAlDia(v, hora))
+    const igual = m.lista === lista && m.salida && m.salida.length === nueva.length && nueva.every((v, i) => v === m.salida[i])
+    memo.current = { lista, hora, salida: igual ? m.salida : nueva }
+    return memo.current.salida
+  }
+  return useSyncExternalStore(suscribirReloj, leer, leer)
 }

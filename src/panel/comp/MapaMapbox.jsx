@@ -181,6 +181,16 @@ const configCompleta = (prefs) => ({ ...configDe(prefs), ...coloresDe(prefs) })
 
 // Lo último que se le dio a `config.basemap` de cada mapa, para tocar solo lo que cambió.
 const configAplicada = new WeakMap()
+// Qué vista (calles o satélite) tiene cargada cada mapa, para saber si al reutilizarlo hay que cambiar de estilo.
+const vistaAplicada = new WeakMap()
+// El control de acercar/alejar que lleva cada mapa (null si lleva la pastilla MAPA/SAT del teléfono).
+const controlNav = new WeakMap()
+// El mapa de la pantalla que se acaba de dejar. Crear un mapa de Mapbox cuesta una «carga de mapa»
+// (dinero), bajar el estilo y repintar todo: al cambiar de pestaña (Mi unidad, Vehículos, Resumen)
+// se guarda aquí y la pantalla siguiente lo reutiliza. Solo cabe uno; si nadie lo pide en cinco
+// minutos se cierra para soltar el contexto WebGL.
+const GUARDADO_MS = 5 * 60 * 1000
+let mapaGuardado = null
 
 /**
  * Pasa al estilo solo las opciones que cambiaron. Al crear el mapa y al cambiar de estilo el
@@ -400,109 +410,173 @@ export default function MapaMapbox({
     setHerr((h) => ({ ...h, eligiendo: false, llegada: null, errorLlegada: null }))
   }
 
-  // Crear el mapa una sola vez
+  // Crear el mapa una sola vez (o recoger el que dejó la pantalla anterior)
   useEffect(() => {
     if (mapa.current || !contenedor.current) return undefined
     let cancelado = false
     let vigilante = 0
+    // Lo que este montaje le puso al mapa (escuchas) y hay que quitarle al salir.
+    let soltar = null
     const deslizadorActivo = deslizador.current
     const marcadoresActivos = marcadores.current
     const destinosActivos = destinos.current
-    const raiz = contenedor.current.parentElement
+    const anfitrion = contenedor.current
+    const raiz = anfitrion.parentElement
 
-    Promise.all([import('mapbox-gl'), import('mapbox-gl/dist/mapbox-gl.css')])
-      .then(([modulo]) => {
-        if (cancelado || !contenedor.current) return
-        const mapboxgl = modulo.default ?? modulo
-        if (!mapboxgl.supported?.({ failIfMajorPerformanceCaveat: false })) throw new Error('Este navegador no puede dibujar el mapa de Mapbox (WebGL 2).')
-        mapboxgl.accessToken = MAPBOX_TOKEN
-        gl.current = mapboxgl
-        const p = prefsRef.current
-        // Todo el config (opciones y colores) va en el constructor: así `style.load` no
-        // tiene que reponerlo.
+    /** Pone en el mapa lo de ESTE montaje. `respondida`: ya cargó antes, no hace falta vigilarlo. */
+    const enganchar = (m, respondida) => {
+      // Si en 25 s no cargó nada, el token o la red fallaron: se avisa para volver a Leaflet.
+      // El estilo llegó = el token sirve; con eso basta. Si la pestaña está en segundo
+      // plano el navegador no dibuja y Mapbox no avanza: se espera a que vuelva al frente
+      // en vez de darlo por caído.
+      let respondio = respondida
+      const vigilar = () => {
+        vigilante = window.setTimeout(() => {
+          if (respondio || cancelado) return
+          if (document.hidden) { vigilar(); return }
+          console.warn('[mapa] Mapbox no respondió a tiempo; se usa el mapa de respaldo.')
+          alFallarRef.current?.()
+        }, 25000)
+      }
+      if (!respondio) vigilar()
+      const alError = (e) => {
+        const error = e?.error
+        const estado = error?.status ?? error?.statusCode
+        const texto = String(error?.message || '')
+        if (estado === 401 || estado === 403 || /access token/iu.test(texto)) {
+          console.warn('[mapa] Mapbox rechazó el token; se usa el mapa de respaldo:', texto)
+          window.clearTimeout(vigilante)
+          alFallarRef.current?.()
+        }
+      }
+      const alCargar = () => { respondio = true; window.clearTimeout(vigilante) }
+      // Cada vez que entra un estilo (al crear el mapa y al cambiar entre calles y satélite)
+      // se quitan niebla y relieve y se avisa para repintar recorrido y cola. El config ya
+      // vino con el estilo: `aplicarConfig` solo toca lo que se haya cambiado mientras cargaba.
+      const alEstilo = () => {
+        alCargar()
+        estiloListo.current = true
+        aplicarConfig(m, prefsRef.current)
+        aplicarEfectos(m)
+        setListo((n) => n + 1)
+      }
+      // Los carros se achican al alejar el mapa y, muy lejos, se apagan las etiquetas.
+      const ajustarMarcadores = () => {
+        const z = m.getZoom()
+        const k = Math.max(0.4, Math.min(0.85, 0.4 + (z - 9) * 0.075))
+        raiz.style.setProperty('--marcador-k', String(k))
+        raiz.dataset.zoom = z <= 12 ? 'lejos' : 'cerca'
+      }
+      // Eligiendo destino: un toque en el mapa es el destino.
+      const alClic = (e) => {
+        if (modoDestino.current) elegirDestinoRef.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng })
+      }
+      m.on('error', alError)
+      m.on('load', alCargar)
+      m.on('style.load', alEstilo)
+      m.on('zoomend', ajustarMarcadores)
+      m.on('click', alClic)
+      ajustarMarcadores()
+      return () => {
+        window.clearTimeout(vigilante)
+        m.off('error', alError)
+        m.off('load', alCargar)
+        m.off('style.load', alEstilo)
+        m.off('zoomend', ajustarMarcadores)
+        m.off('click', alClic)
+      }
+    }
+
+    // El mapa vive en un div propio dentro del contenedor de React, para poder pasarlo de una
+    // pantalla a otra sin que React lo toque.
+    const guardado = mapaGuardado
+    if (guardado) {
+      mapaGuardado = null
+      window.clearTimeout(guardado.temporizador)
+      const { m, mapboxgl, lienzo } = guardado
+      anfitrion.appendChild(lienzo)
+      gl.current = mapboxgl
+      mapa.current = m
+      // El teléfono lleva la pastilla MAPA/SAT; el escritorio, los botones de acercar y alejar.
+      const nav = controlNav.get(m)
+      if (pildoraVista && nav) { m.removeControl(nav); controlNav.set(m, null) }
+      if (!pildoraVista && !nav) {
+        const nuevo = new mapboxgl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: false })
+        m.addControl(nuevo, 'bottom-right')
+        controlNav.set(m, nuevo)
+      }
+      soltar = enganchar(m, true)
+      m.resize()
+      const p = prefsRef.current
+      if (vistaAplicada.get(m) !== p.vista) {
+        // Cambió calles/satélite mientras estaba guardado: `style.load` lo deja listo.
+        estiloListo.current = false
         const config = configCompleta(p)
-        const m = new mapboxgl.Map({
-          container: contenedor.current,
-          style: estiloDe(p),
-          config: { basemap: config },
-          center: CENTRO,
-          zoom: 8,
-          minZoom: 3,
-          maxZoom: 19,
-          // Siempre cenital: sin 3D no se inclina la cámara.
-          pitch: 0,
-          maxPitch: 0,
-          bearing: 0,
-          projection: 'mercator',
-          language: 'es',
-          attributionControl: false,
-          logoPosition: 'bottom-left',
-          // Girar con el botón derecho o con dos dedos. Las teclas de flecha mueven el mapa.
-          dragRotate: true,
-          touchPitch: false,
-          pitchWithRotate: false,
-        })
         configAplicada.set(m, config)
-        mapa.current = m
-        // Solo en desarrollo: para inspeccionar el mapa desde la consola del navegador.
-        if (import.meta.env?.DEV) window.__fomMapa = m
-        m.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right')
-        if (!pildoraVista) m.addControl(new mapboxgl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: false }), 'bottom-right')
-
-        // Si en 25 s no cargó nada, el token o la red fallaron: se avisa para volver a Leaflet.
-        // El estilo llegó = el token sirve; con eso basta. Si la pestaña está en segundo
-        // plano el navegador no dibuja y Mapbox no avanza: se espera a que vuelva al frente
-        // en vez de darlo por caído.
-        let respondio = false
-        const vigilar = () => {
-          vigilante = window.setTimeout(() => {
-            if (respondio || cancelado) return
-            if (document.hidden) { vigilar(); return }
-            console.warn('[mapa] Mapbox no respondió a tiempo; se usa el mapa de respaldo.')
-            alFallarRef.current?.()
-          }, 25000)
-        }
-        vigilar()
-        m.once('style.load', () => { respondio = true; window.clearTimeout(vigilante) })
-        m.on('error', (e) => {
-          const error = e?.error
-          const estado = error?.status ?? error?.statusCode
-          const texto = String(error?.message || '')
-          if (estado === 401 || estado === 403 || /access token/iu.test(texto)) {
-            console.warn('[mapa] Mapbox rechazó el token; se usa el mapa de respaldo:', texto)
-            window.clearTimeout(vigilante)
-            alFallarRef.current?.()
+        vistaAplicada.set(m, p.vista)
+        m.setStyle(estiloDe(p), { config: { basemap: config } })
+      } else {
+        estiloListo.current = true
+        aplicarConfig(m, p)
+        aplicarEfectos(m)
+        setListo((n) => n + 1)
+      }
+      if (import.meta.env?.DEV) window.__fomMapa = m
+    } else {
+      Promise.all([import('mapbox-gl'), import('mapbox-gl/dist/mapbox-gl.css')])
+        .then(([modulo]) => {
+          if (cancelado || !contenedor.current) return
+          const mapboxgl = modulo.default ?? modulo
+          if (!mapboxgl.supported?.({ failIfMajorPerformanceCaveat: false })) throw new Error('Este navegador no puede dibujar el mapa de Mapbox (WebGL 2).')
+          mapboxgl.accessToken = MAPBOX_TOKEN
+          gl.current = mapboxgl
+          const p = prefsRef.current
+          // Todo el config (opciones y colores) va en el constructor: así `style.load` no
+          // tiene que reponerlo.
+          const config = configCompleta(p)
+          const lienzo = document.createElement('div')
+          lienzo.style.cssText = 'width:100%;height:100%'
+          anfitrion.appendChild(lienzo)
+          const m = new mapboxgl.Map({
+            container: lienzo,
+            style: estiloDe(p),
+            config: { basemap: config },
+            center: CENTRO,
+            zoom: 8,
+            minZoom: 3,
+            maxZoom: 19,
+            // Siempre cenital: sin 3D no se inclina la cámara.
+            pitch: 0,
+            maxPitch: 0,
+            bearing: 0,
+            projection: 'mercator',
+            language: 'es',
+            attributionControl: false,
+            logoPosition: 'bottom-left',
+            // Girar con el botón derecho o con dos dedos. Las teclas de flecha mueven el mapa.
+            dragRotate: true,
+            touchPitch: false,
+            pitchWithRotate: false,
+          })
+          configAplicada.set(m, config)
+          vistaAplicada.set(m, p.vista)
+          mapa.current = m
+          // Solo en desarrollo: para inspeccionar el mapa desde la consola del navegador.
+          if (import.meta.env?.DEV) window.__fomMapa = m
+          m.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right')
+          controlNav.set(m, null)
+          if (!pildoraVista) {
+            const nav = new mapboxgl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: false })
+            m.addControl(nav, 'bottom-right')
+            controlNav.set(m, nav)
           }
+          soltar = enganchar(m, false)
         })
-        m.on('load', () => { respondio = true; window.clearTimeout(vigilante) })
-        // Cada vez que entra un estilo (al crear el mapa y al cambiar entre calles y satélite)
-        // se quitan niebla y relieve y se avisa para repintar recorrido y cola. El config ya
-        // vino con el estilo: `aplicarConfig` solo toca lo que se haya cambiado mientras cargaba.
-        m.on('style.load', () => {
-          estiloListo.current = true
-          aplicarConfig(m, prefsRef.current)
-          aplicarEfectos(m)
-          setListo((n) => n + 1)
+        .catch((error) => {
+          console.warn('[mapa] Mapbox no cargó; se usa el mapa de respaldo:', error?.message || error)
+          alFallarRef.current?.()
         })
-
-        // Los carros se achican al alejar el mapa y, muy lejos, se apagan las etiquetas.
-        const ajustarMarcadores = () => {
-          const z = m.getZoom()
-          const k = Math.max(0.4, Math.min(0.85, 0.4 + (z - 9) * 0.075))
-          raiz.style.setProperty('--marcador-k', String(k))
-          raiz.dataset.zoom = z <= 12 ? 'lejos' : 'cerca'
-        }
-        m.on('zoomend', ajustarMarcadores)
-        ajustarMarcadores()
-        // Eligiendo destino: un toque en el mapa es el destino.
-        m.on('click', (e) => {
-          if (modoDestino.current) elegirDestinoRef.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng })
-        })
-      })
-      .catch((error) => {
-        console.warn('[mapa] Mapbox no cargó; se usa el mapa de respaldo:', error?.message || error)
-        alFallarRef.current?.()
-      })
+    }
 
     return () => {
       cancelado = true
@@ -520,9 +594,24 @@ export default function MapaMapbox({
       colaPegada.current = null
       eventosCapa.current?.quitar?.()
       eventosCapa.current = null
-      mapa.current?.remove()
+      soltar?.()
+      const m = mapa.current
       mapa.current = null
       encuadrado.current = false
+      if (!m) return
+      // Con el estilo cargado y el puesto libre, el mapa se guarda para la pantalla que sigue.
+      if (estiloListo.current && !mapaGuardado) {
+        const lienzo = m.getContainer()
+        lienzo.remove()
+        const reserva = { m, mapboxgl: gl.current, lienzo, temporizador: 0 }
+        reserva.temporizador = window.setTimeout(() => {
+          if (mapaGuardado === reserva) mapaGuardado = null
+          m.remove()
+        }, GUARDADO_MS)
+        mapaGuardado = reserva
+      } else {
+        m.remove()
+      }
     }
   }, [])
 
@@ -580,6 +669,7 @@ export default function MapaMapbox({
       estiloListo.current = false
       const config = configCompleta(nuevas)
       configAplicada.set(m, config)
+      vistaAplicada.set(m, nuevas.vista)
       m.setStyle(estiloDe(nuevas), { config: { basemap: config } })
     } else if (estiloListo.current) {
       aplicarConfig(m, nuevas)

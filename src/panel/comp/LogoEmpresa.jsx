@@ -46,6 +46,7 @@ export default function LogoEmpresa({ empresaId, codigo, logoObjectId, nombre = 
         className={`logo-empresa ${className}`.trim()}
         src={estado.src}
         alt={nombre ? `Logo de ${nombre}` : ''}
+        decoding="async"
         onError={() => setEstado({ src: null, esFom: false })}
       />
     )
