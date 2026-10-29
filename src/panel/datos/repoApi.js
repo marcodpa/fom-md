@@ -22,6 +22,7 @@ import { transmitiendo } from './sinSenal.js'
 import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
 import { cuerpoCredencial, credencialesVigentes } from './credencialesPersona'
 import { cambiosGps } from './metadatosGps'
+import { buscarEquipoGps, mensajeInstalarGps } from './instalarGps'
 import { LIMITE_EVENTOS, comoEventoManejo, diasServidor } from './eventosManejo'
 import { cloudinaryConfigurado, subirImagen } from './cloudinary'
 import { carpetaDe } from './archivos'
@@ -1125,8 +1126,9 @@ export const repoApi = {
     },
     /** Un equipo, con su instalación vigente (`GET gps-devices/:id`). */
     async obtener(equipoId) {
-      const r = await api.equipoGps(equipoId)
-      return r?.device ? comoEquipoGps(r.device) : null
+      // Si el detalle da 404 pero el equipo está en el inventario, se toma de la lista (T-208).
+      const d = await buscarEquipoGps(equipoId, { detalle: api.equipoGps, lista: api.equiposGps })
+      return d ? comoEquipoGps(d) : null
     },
     /**
      * Las últimas tramas del equipo, ya saneadas por el servidor: hora, vía,
@@ -1211,7 +1213,9 @@ export const repoApi = {
       })
     },
     /** Instala el equipo en la unidad elegida, por la ruta de su empresa si no es la propia. */
-    async instalar(equipoId, { vehiculoId, empresaId = null, tecnico, ubicacion, notas } = {}) {
+    // `empresaId`: `null` = ruta propia (donde vive el equipo del inventario); un id = la ruta de esa
+    // empresa. El servidor exige equipo y unidad en la misma empresa (ver instalarGps.js).
+    async instalar(equipoId, { vehiculoId, empresaId, tecnico, ubicacion, notas, nombrePropia } = {}) {
       try {
         await api.instalarEquipoGps(equipoId, {
           vehicleId: vehiculoId,
@@ -1220,8 +1224,7 @@ export const repoApi = {
           notes: notas?.trim() || undefined,
         }, empresaId)
       } catch (e) {
-        if (e.estado === 409) throw new Error('Esa unidad ya lleva un GPS, o este equipo ya está instalado en otra.')
-        throw e
+        throw new Error(mensajeInstalarGps(e, { otraEmpresa: Boolean(empresaId), nombrePropia }))
       }
       return true
     },

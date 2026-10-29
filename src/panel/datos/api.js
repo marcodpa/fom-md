@@ -369,12 +369,13 @@ export const api = {
     pedir(`${CONSOLA}/gps-devices`, { metodo: 'POST', cuerpo }),
   actualizarEquipoGps: (equipoId, cuerpo) =>
     pedir(`${CONSOLA}/gps-devices/${equipoId}`, { metodo: 'PATCH', cuerpo }),
-  // `empresaId`: la unidad es de otra empresa; la instalación viaja por su ruta `/tenants/{id}`.
+  // `empresaId`: sin dato, la ruta normal (la de la empresa en gestión, si hay); un id, la ruta
+  // `/tenants/{id}` de esa empresa; `null`, la ruta propia aunque se esté dentro de otra empresa.
   instalarEquipoGps: (equipoId, cuerpo, empresaId) =>
     pedir(`${CONSOLA}/gps-devices/${equipoId}/installation`, {
       metodo: 'POST',
       cuerpo,
-      ...(empresaId ? { empresaContexto: empresaId } : {}),
+      ...(empresaId === undefined ? {} : { empresaContexto: empresaId || null }),
     }),
   // Lecturas del equipo (T-95). El id va en la ruta; el IMEI y el ICCID nunca.
   equipoGps: (equipoId) => pedir(`${CONSOLA}/gps-devices/${equipoId}`),

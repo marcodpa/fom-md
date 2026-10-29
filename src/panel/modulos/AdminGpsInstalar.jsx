@@ -6,6 +6,7 @@ import { useSesion } from '../useSesion'
 import { Cargando, ErrorCarga, Vacio } from '../comp/ui'
 import { Cabeza, IcoGps, Pastilla, RAIZ_GPS, useAhora } from '../comp/GpsPiezas'
 import { estadoEquipo, nombreEquipo, senalDe } from '../datos/gps'
+import { empresaDeInstalacion, empresaPropia } from '../datos/instalarGps'
 import * as f from '../datos/formato'
 import './admin-gps.css'
 
@@ -36,11 +37,16 @@ export default function AdminGpsInstalar() {
   const [error, setError] = useState('')
 
   const listaEmpresas = useMemo(() => empresas.datos ?? [], [empresas.datos])
-  // Por defecto, la empresa propia del administrador (donde vive el inventario); si no, la primera.
+  // Por defecto, la empresa propia del administrador (donde vive el inventario, aunque esté
+  // «dentro» de otra); si no, la primera. El servidor instala un equipo solo en unidades de la
+  // empresa donde está registrado (T-208).
+  const propia = empresaPropia(sesion)
+  const nombrePropia = listaEmpresas.find((e) => e.id === propia)?.nombre || 'tu empresa'
   const empresaId = empresaElegida
-    || listaEmpresas.find((e) => e.id === sesion?.perfil?.empresaId)?.id
+    || listaEmpresas.find((e) => e.id === propia)?.id
     || listaEmpresas[0]?.id
     || ''
+  const rutaEmpresa = empresaDeInstalacion(empresaId, propia)
   const unidades = useDatos(
     () => (empresaId ? repo.admin.gps.unidadesDe(empresaId) : Promise.resolve([])),
     [empresaId],
@@ -62,10 +68,11 @@ export default function AdminGpsInstalar() {
     try {
       await repo.admin.gps.instalar(g.id, {
         vehiculoId: unidad.id,
-        // La propia viaja por la ruta normal; otra empresa, por la suya.
-        empresaId: empresaId && empresaId !== sesion?.perfil?.empresaId ? empresaId : null,
+        // La propia viaja por la ruta propia (null); otra empresa, por la suya.
+        empresaId: rutaEmpresa,
+        nombrePropia,
         tecnico, ubicacion, notas,
-      }, sesion?.perfil)
+      })
       navegar(`${RAIZ_GPS}/${g.id}`, {
         state: {
           aviso: g.ultimaConexion
@@ -88,7 +95,7 @@ export default function AdminGpsInstalar() {
         <section className="gp-card">
           {equipo.estado === 'cargando' && <Cargando filas={4} />}
           {equipo.estado === 'error' && <ErrorCarga onReintentar={equipo.recargar} error={equipo.error} />}
-          {equipo.estado === 'ok' && !g && <Vacio icono="pin" titulo="Ese equipo no está en el inventario" texto="Vuelve al inventario y elige otro." />}
+          {equipo.estado === 'ok' && !g && <Vacio icono="pin" titulo="Ese equipo no está en el inventario" texto="No lo encontramos entre los equipos de tu empresa. Puede estar registrado en otra empresa: desde aquí solo se ven los de la propia. Vuelve al inventario y elige otro." />}
         </section>
       </div>
     )
@@ -106,6 +113,11 @@ export default function AdminGpsInstalar() {
       {yaInstalado && (
         <div className="gp-aviso info">
           Este equipo ya está instalado en {g.vehiculoNombre}. Para llevarlo a otra unidad, desmóntalo primero desde <Link className="gp-enlace" to={`${RAIZ_GPS}/${g.id}`}>su detalle</Link>.
+        </div>
+      )}
+      {rutaEmpresa && (
+        <div className="gp-aviso info" role="note">
+          Este equipo está en el inventario de {nombrePropia}. El servidor solo lo instala en unidades de esa misma empresa; si eliges otra, puede rechazarlo.
         </div>
       )}
       {fueraDeInventario && (

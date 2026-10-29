@@ -1,0 +1,51 @@
+// Reglas de «Instalar en una unidad» (T-208), sin pantalla ni red para poder probarlas.
+//
+// Lo que dice el servidor (fom-core, console-gps-inventory.controller y
+// console-directory.service):
+//  - `GET /console/gps-devices` y `GET /console/gps-devices/:id` sirven SOLO los equipos
+//    de la empresa propia de quien pregunta ("del tenant actual"); no hay lectura por empresa.
+//  - Instalar busca el equipo Y la unidad en la MISMA empresa (`installGpsDevice`): un equipo
+//    del inventario propio no se puede montar en una unidad de otra empresa.
+
+/** La empresa propia del administrador: la de su cuenta, aunque esté «dentro» de otra. */
+export function empresaPropia(sesion) {
+  return sesion?.perfilGlobal?.empresaId ?? sesion?.perfil?.empresaId ?? null
+}
+
+/**
+ * Un equipo por su id. Primero el detalle; si el servidor dice 404, se busca en el inventario
+ * (la lista) antes de rendirse: una fila que se ve en la lista no debe dar «no existe» al abrirla.
+ * Devuelve el equipo del servidor, o `null` si de verdad no está. Otros errores se propagan.
+ */
+export async function buscarEquipoGps(equipoId, { detalle, lista }) {
+  try {
+    const r = await detalle(equipoId)
+    if (r?.device) return r.device
+  } catch (e) {
+    if (e?.estado !== 404) throw e
+  }
+  const r = await lista()
+  return (r?.devices ?? []).find((d) => d?.id === equipoId) ?? null
+}
+
+/**
+ * Por qué ruta viaja la instalación.
+ * `null` = la ruta propia (donde vive el equipo que se ve en el inventario); un id = la ruta de
+ * esa empresa. Importa el `null` explícito: estando «dentro» de otra empresa, la ruta normal se
+ * volvería la de esa empresa y el equipo propio no existiría allí.
+ */
+export function empresaDeInstalacion(empresaElegida, propia) {
+  if (!empresaElegida || !propia || empresaElegida === propia) return null
+  return empresaElegida
+}
+
+/** El mensaje, en llano, cuando el servidor rechaza la instalación. */
+export function mensajeInstalarGps(error, { otraEmpresa = false, nombrePropia = 'tu empresa' } = {}) {
+  if (error?.estado === 409) return 'Esa unidad ya lleva un GPS, o este equipo ya está instalado en otra.'
+  if (error?.estado === 404) {
+    return otraEmpresa
+      ? `Este equipo está en el inventario de ${nombrePropia} y el servidor solo lo instala en unidades de esa misma empresa. Elige una unidad de ${nombrePropia}, o registra el equipo dentro de la otra empresa.`
+      : 'El servidor no encontró el equipo o la unidad. Recarga la pantalla e inténtalo de nuevo.'
+  }
+  return error?.message || 'No se pudo instalar el equipo. Inténtalo de nuevo.'
+}
