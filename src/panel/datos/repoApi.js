@@ -446,7 +446,9 @@ function comoEquipoGps(d) {
     conectado: Boolean(d.connected),
     ultimaConexion: d.lastConnectionAt ?? null,
     panicoProbado: false,
-    empresaNombre: '—',
+    // T-209: el listado global del administrador FOM trae la empresa de cada equipo.
+    empresaId: d.tenantId ?? null,
+    empresaNombre: d.tenantName || '—',
     vehiculoId: d.vehicleId ?? null,
     vehiculoNombre: d.vehicleId ? [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') : null,
     vehiculoPlaca: d.vehiclePlate ?? null,

@@ -1,0 +1,673 @@
+From 817a5d4b737ae42b575fdd05b6f2b25f7ab16421 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 14:26:51 -0400
+Subject: [PATCH] GPS: el administrador FOM ve y opera los equipos de todas las
+ empresas (T-209)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+El administrador FOM no pertenece a ninguna empresa, pero /console/gps-devices
+solo le devolvía la de su sesión: un GPS registrado dentro de otra empresa no
+salía en el inventario.
+
+- GET /console/gps-devices y /page: para el administrador FOM devuelven los
+  equipos de todas las empresas (sin archivados). Cada equipo trae tenantId y
+  tenantName (también para supervisores, con su propia empresa).
+- GET /:deviceId, /telemetry, /position/latest, /positions, POST /commissioning
+  y /gps-commissioning/:id/complete: el servidor resuelve la empresa dueña del
+  equipo (o de la sesión de comisionado) y reutiliza la lógica por empresa;
+  el cliente nunca manda la empresa. Supervisores: sin cambios.
+- /unpaired ya era global (solo IMEI que no están en ninguna empresa).
+- Instalar no cambia: el administrador usa la ruta existente
+  POST /console/tenants/{tenantId}/gps-devices/{id}/installation con el
+  tenantId que ahora trae el equipo.
+
+Pruebas: inventario HTTP (administrador global, supervisor, OpenAPI), paginación
+global con un solo total, y las comprobaciones de SQL ajustadas al nuevo filtro.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ .../console-gps-inventory.controller.ts       |  84 ++++++++++---
+ src/console-api/console-gps-inventory.dto.ts  |   4 +
+ src/gps-console/gps-console.service.ts        |  68 +++++++++-
+ src/gps-console/gps-position-query.service.ts |  12 +-
+ test/console-gps-inventory-http.test.js       | 119 +++++++++++++++---
+ test/gps-console-operations.test.js           |   2 +-
+ test/gps-device-query-timeout.test.js         |   2 +-
+ test/gps-inventory-pagination.test.js         |  23 +++-
+ 8 files changed, 270 insertions(+), 44 deletions(-)
+
+diff --git a/src/console-api/console-gps-inventory.controller.ts b/src/console-api/console-gps-inventory.controller.ts
+index 39f4736..d5f216c 100644
+--- a/src/console-api/console-gps-inventory.controller.ts
++++ b/src/console-api/console-gps-inventory.controller.ts
+@@ -37,7 +37,7 @@ import {
+   ConsoleGpsTelemetryQueryDto,
+   ConsoleUnpairedGpsListDto,
+ } from './console-gps-inventory.dto';
+-import { canonicalRole } from './console-roles';
++import { canonicalRole, isPlatformAdministrator } from './console-roles';
+ import { ConsoleSessionGuard } from './console-session.guard';
+ 
+ type RawGpsDevice = Record<string, unknown> & { id: string };
+@@ -54,6 +54,9 @@ type RawGpsPosition = Record<string, unknown> & {
+ @UseGuards(ConsoleSessionGuard, ConsoleBrowserMutationGuard)
+ @Controller('api/v1/console')
+ export class ConsoleGpsInventoryController {
++  // El administrador FOM no pertenece a ninguna empresa: ve y opera los
++  // equipos de TODAS. La empresa de cada equipo la resuelve el servidor
++  // (nunca el cliente) y se reutiliza la lógica por empresa del servicio.
+   constructor(
+     private readonly gps: GpsConsoleService,
+     private readonly unpaired: GpsUnpairedService,
+@@ -64,14 +67,15 @@ export class ConsoleGpsInventoryController {
+   @Header('Cache-Control', 'no-store')
+   @ApiOperation({
+     operationId: 'consoleGpsDevicesList',
+-    summary: 'Listar inventario GPS del tenant actual',
++    summary: 'Listar inventario GPS (del tenant actual; el administrador FOM recibe el de todas las empresas)',
+   })
+   @ApiOkResponse({ type: ConsoleGpsDeviceListDto })
+   async list(): Promise<ConsoleGpsDeviceListDto> {
+     this.requireManager();
+-    return {
+-      devices: (await this.gps.listDevices()).map((row) => this.device(row)),
+-    };
++    const rows = this.isGlobal()
++      ? await this.gps.listAllDevices()
++      : await this.gps.listDevices();
++    return { devices: rows.map((row) => this.device(row)) };
+   }
+ 
+   @Get('gps-devices/page')
+@@ -81,7 +85,9 @@ export class ConsoleGpsInventoryController {
+   @ApiOkResponse({ type: ConsoleGpsDevicePageDto })
+   async page(@Query() query: GpsInventoryPageQueryDto): Promise<ConsoleGpsDevicePageDto> {
+     this.requireManager();
+-    const result = await this.gps.listDevicesPage(query);
++    const result = this.isGlobal()
++      ? await this.gps.listAllDevicesPage(query)
++      : await this.gps.listDevicesPage(query);
+     return { ...result, items: result.items.map((row) => this.device(row)) };
+   }
+ 
+@@ -114,14 +120,17 @@ export class ConsoleGpsInventoryController {
+   @Header('Cache-Control', 'no-store')
+   @ApiOperation({
+     operationId: 'consoleGpsDeviceDetail',
+-    summary: 'Consultar un equipo GPS del tenant actual',
++    summary: 'Consultar un equipo GPS (del tenant actual; el administrador FOM, de cualquier empresa)',
+   })
+   @ApiOkResponse({ type: ConsoleGpsDeviceEnvelopeDto })
+   async detail(
+     @Param('deviceId', new ParseUUIDPipe({ version: '4' })) deviceId: string,
+   ): Promise<ConsoleGpsDeviceEnvelopeDto> {
+     this.requireManager();
+-    return { device: this.device(await this.gps.device(deviceId)) };
++    const row = this.isGlobal()
++      ? await this.gps.deviceAnywhere(deviceId)
++      : await this.gps.device(deviceId);
++    return { device: this.device(row) };
+   }
+ 
+   @Get('gps-devices/:deviceId/telemetry')
+@@ -136,7 +145,11 @@ export class ConsoleGpsInventoryController {
+     @Query() query: ConsoleGpsTelemetryQueryDto,
+   ): Promise<ConsoleGpsTelemetryDto> {
+     this.requireManager();
+-    const result = await this.gps.telemetry(deviceId, query.limit);
++    const result = await this.gps.telemetry(
++      deviceId,
++      query.limit,
++      await this.deviceContext(deviceId),
++    );
+     return {
+       connected: result.connected,
+       imei: result.imei,
+@@ -164,7 +177,10 @@ export class ConsoleGpsInventoryController {
+     @Param('deviceId', new ParseUUIDPipe({ version: '4' })) deviceId: string,
+   ): Promise<ConsoleGpsLatestPositionDto> {
+     this.requireManager();
+-    const result = await this.positions.latestByDevice(deviceId);
++    const result = await this.positions.latestByDevice(
++      deviceId,
++      (await this.deviceContext(deviceId))?.tenantId,
++    );
+     return {
+       position: result.position
+         ? this.position(result.position as unknown as RawGpsPosition)
+@@ -184,7 +200,11 @@ export class ConsoleGpsInventoryController {
+     @Query() query: ConsoleGpsPositionHistoryQueryDto,
+   ): Promise<ConsoleGpsPositionHistoryDto> {
+     this.requireManager();
+-    const result = await this.positions.historyByDevice(deviceId, query);
++    const result = await this.positions.historyByDevice(
++      deviceId,
++      query,
++      (await this.deviceContext(deviceId))?.tenantId,
++    );
+     return {
+       positions: result.positions.map((row) =>
+         this.position(row as unknown as RawGpsPosition),
+@@ -200,11 +220,14 @@ export class ConsoleGpsInventoryController {
+     summary: 'Iniciar o reanudar el comisionado de un equipo',
+   })
+   @ApiCreatedResponse({ description: 'Sesión de comisionado iniciada o vigente.' })
+-  startCommissioning(
++  async startCommissioning(
+     @Param('deviceId', new ParseUUIDPipe({ version: '4' })) deviceId: string,
+   ) {
+     this.requireManager();
+-    return this.gps.startCommissioning(deviceId);
++    return this.gps.startCommissioning(
++      deviceId,
++      await this.deviceContext(deviceId),
++    );
+   }
+ 
+   @Post('gps-commissioning/:sessionId/complete')
+@@ -214,12 +237,41 @@ export class ConsoleGpsInventoryController {
+     summary: 'Completar una sesión de comisionado',
+   })
+   @ApiCreatedResponse({ description: 'Sesión completada o resultado idempotente.' })
+-  completeCommissioning(
++  async completeCommissioning(
+     @Param('sessionId', new ParseUUIDPipe({ version: '4' })) sessionId: string,
+     @Body() input: CompleteCommissioningDto,
+   ) {
+     this.requireManager();
+-    return this.gps.completeCommissioning(sessionId, input);
++    let context: { tenantId: string; userId: string } | undefined;
++    const actor = currentActor();
++    if (actor && this.isGlobal()) {
++      context = {
++        tenantId: await this.gps.tenantOfCommissioningSession(sessionId),
++        userId: actor.userId,
++      };
++    }
++    return this.gps.completeCommissioning(sessionId, input, context);
++  }
++
++  /** ¿Es el administrador FOM (ve todas las empresas)? */
++  private isGlobal(): boolean {
++    const actor = currentActor();
++    return !!actor && isPlatformAdministrator(actor);
++  }
++
++  /**
++   * Para el administrador FOM, la empresa dueña del equipo (404 si no
++   * existe); para los demás, nada: el servicio usa la empresa de su sesión.
++   */
++  private async deviceContext(
++    deviceId: string,
++  ): Promise<{ tenantId: string; userId: string } | undefined> {
++    const actor = currentActor();
++    if (!actor || !this.isGlobal()) return undefined;
++    return {
++      tenantId: await this.gps.tenantOfDevice(deviceId),
++      userId: actor.userId,
++    };
+   }
+ 
+   private requireManager(): void {
+@@ -272,6 +324,8 @@ export class ConsoleGpsInventoryController {
+       installedAt: this.iso(row.installedAt),
+       technician: this.stringOrNull(row.technician),
+       installationLocation: this.stringOrNull(row.installationLocation),
++      tenantId: this.stringOrNull(row.tenantId),
++      tenantName: this.stringOrNull(row.tenantName),
+     };
+   }
+ 
+diff --git a/src/console-api/console-gps-inventory.dto.ts b/src/console-api/console-gps-inventory.dto.ts
+index 198debc..0878a9b 100644
+--- a/src/console-api/console-gps-inventory.dto.ts
++++ b/src/console-api/console-gps-inventory.dto.ts
+@@ -41,6 +41,10 @@ export class ConsoleGpsDeviceDto {
+   installedAt!: string | null;
+   @ApiProperty({ nullable: true }) technician!: string | null;
+   @ApiProperty({ nullable: true }) installationLocation!: string | null;
++  @ApiProperty({ nullable: true, format: 'uuid', description: 'Empresa dueña del equipo.' })
++  tenantId!: string | null;
++  @ApiProperty({ nullable: true, description: 'Nombre de la empresa dueña del equipo.' })
++  tenantName!: string | null;
+ }
+ 
+ export class ConsoleGpsDeviceListDto {
+diff --git a/src/gps-console/gps-console.service.ts b/src/gps-console/gps-console.service.ts
+index 8aa2602..7f907e0 100644
+--- a/src/gps-console/gps-console.service.ts
++++ b/src/gps-console/gps-console.service.ts
+@@ -239,7 +239,54 @@ export class GpsConsoleService {
+     return this.deviceRows(tenantId, null);
+   }
+ 
++  /**
++   * Inventario de TODAS las empresas, para el administrador FOM (que no
++   * pertenece a ninguna). Cada fila trae `tenantId` y `tenantName`. Quien
++   * llama debe haber comprobado ya que el actor es administrador FOM.
++   */
++  async listAllDevices() {
++    return this.deviceRows(null, null);
++  }
++
++  /** Igual que `listDevicesPage`, pero de todas las empresas. */
++  async listAllDevicesPage(query: GpsInventoryPageQueryDto) {
++    return this.devicesPage(query, null);
++  }
++
++  /**
++   * La empresa dueña de un equipo (no archivado). Permite al administrador
++   * FOM abrir, probar o instalar un equipo sin saber en qué empresa está,
++   * reutilizando la lógica por empresa de este servicio.
++   */
++  async tenantOfDevice(deviceId: string): Promise<string> {
++    const result = await this.database.query<{ tenantId: string }>(
++      `SELECT tenant_id AS "tenantId" FROM fom.gps_devices
++        WHERE id = $1 AND status <> 'archived'`,
++      [deviceId],
++    );
++    if (result.rowCount !== 1) throw new NotFoundException('GPS not found');
++    return result.rows[0]!.tenantId;
++  }
++
++  /** La empresa de una sesión de comisionado. */
++  async tenantOfCommissioningSession(sessionId: string): Promise<string> {
++    const result = await this.database.query<{ tenantId: string }>(
++      `SELECT tenant_id AS "tenantId" FROM fom.gps_commissioning_sessions
++        WHERE id = $1`,
++      [sessionId],
++    );
++    if (result.rowCount !== 1) {
++      throw new NotFoundException('Commissioning session not found');
++    }
++    return result.rows[0]!.tenantId;
++  }
++
+   async listDevicesPage(query: GpsInventoryPageQueryDto, contextOverride?: Context) {
++    const { tenantId } = await this.context(contextOverride);
++    return this.devicesPage(query, tenantId);
++  }
++
++  private async devicesPage(query: GpsInventoryPageQueryDto, tenantId: string | null) {
+     const limit = query.limit ?? 50;
+     const offset = query.offset ?? 0;
+     const to = query.to ? new Date(query.to) : new Date();
+@@ -251,7 +298,6 @@ export class GpsConsoleService {
+         (query.status !== undefined && !['inventory', 'active', 'inactive', 'maintenance', 'lost'].includes(query.status))) {
+       throw new BadRequestException('Invalid inventory page or activity range (maximum 30 days)');
+     }
+-    const { tenantId } = await this.context(contextOverride);
+     const page = { limit, offset, status: query.status ?? null,
+       from: from.toISOString(), to: to.toISOString(), total: 0 };
+     const items = await this.deviceRows(tenantId, null, page);
+@@ -259,6 +305,13 @@ export class GpsConsoleService {
+       filters: { status: page.status, from: page.from, to: page.to } };
+   }
+ 
++  /** Un equipo de cualquier empresa, con su `tenantId` y `tenantName` (administrador FOM). */
++  async deviceAnywhere(deviceId: string) {
++    const rows = await this.deviceRows(null, deviceId);
++    if (rows.length !== 1) throw new NotFoundException('GPS not found');
++    return rows[0];
++  }
++
+   async device(deviceId: string, contextOverride?: Context) {
+     const { tenantId } = await this.context(contextOverride);
+     const rows = await this.deviceRows(tenantId, deviceId);
+@@ -266,8 +319,9 @@ export class GpsConsoleService {
+     return rows[0];
+   }
+ 
++  /** `tenantId` nulo = todas las empresas (solo administrador FOM, decidido por quien llama). */
+   private async deviceRows(
+-    tenantId: string,
++    tenantId: string | null,
+     deviceId: string | null,
+     page?: { limit: number; offset: number; status: string | null; from: string; to: string; total: number },
+   ): Promise<GpsDeviceRecord[]> {
+@@ -278,7 +332,7 @@ export class GpsConsoleService {
+         await client.query("SET LOCAL statement_timeout = '5s'");
+         const count = await client.query<{ total: string }>(`
+           SELECT count(*)::text AS total FROM fom.gps_devices d
+-          WHERE d.tenant_id = $1 AND d.status <> 'archived'
++          WHERE ($1::uuid IS NULL OR d.tenant_id = $1) AND d.status <> 'archived'
+             AND ($2::text IS NULL OR d.status = $2)
+         `, [tenantId, page.status]);
+         page.total = Number(count.rows[0]!.total);
+@@ -307,15 +361,17 @@ export class GpsConsoleService {
+             v.vin AS "vehicleVin", v.model_year AS "vehicleYear",
+             v.make AS "vehicleMake", v.model AS "vehicleModel",
+             a.id AS "installationId", a.installed_at AS "installedAt", a.technician,
+-            a.installation_location AS "installationLocation"
++            a.installation_location AS "installationLocation",
++            d.tenant_id AS "tenantId", tn.name AS "tenantName"
+           FROM (
+             SELECT d.* FROM fom.gps_devices d
+-            WHERE d.tenant_id = $1 AND d.status <> 'archived'
++            WHERE ($1::uuid IS NULL OR d.tenant_id = $1) AND d.status <> 'archived'
+               AND ($2::uuid IS NULL OR d.id = $2)
+               ${page ? 'AND ($5::text IS NULL OR d.status = $5)' : ''}
+             ORDER BY d.created_at DESC, d.id DESC
+             LIMIT ${page ? '$4' : '100'} OFFSET $3
+           ) d
++          JOIN fom.tenants tn ON tn.id = d.tenant_id
+           LEFT JOIN fom.gps_device_assignments a
+             ON a.tenant_id = d.tenant_id AND a.gps_device_id = d.id
+             AND a.removed_at IS NULL
+@@ -332,7 +388,7 @@ export class GpsConsoleService {
+             ORDER BY r.received_at DESC, r.id DESC
+             LIMIT 1
+           ) latest ON true
+-          WHERE d.tenant_id = $1 AND d.status <> 'archived'
++          WHERE ($1::uuid IS NULL OR d.tenant_id = $1) AND d.status <> 'archived'
+             AND ($2::uuid IS NULL OR d.id = $2)
+           ORDER BY d.created_at DESC, d.id DESC
+           `,
+diff --git a/src/gps-console/gps-position-query.service.ts b/src/gps-console/gps-position-query.service.ts
+index d2b7919..b47b682 100644
+--- a/src/gps-console/gps-position-query.service.ts
++++ b/src/gps-console/gps-position-query.service.ts
+@@ -195,8 +195,13 @@ export class GpsPositionQueryService {
+     };
+   }
+ 
+-  async latestByDevice(deviceId: string) {
+-    const { tenantId } = await this.context();
++  /**
++   * `tenantOverride`: la empresa del equipo cuando quien pregunta es el
++   * administrador FOM (que no pertenece a ninguna). Lo resuelve el
++   * controlador tras comprobar el rol; nunca viene del cliente.
++   */
++  async latestByDevice(deviceId: string, tenantOverride?: string) {
++    const { tenantId } = tenantOverride ? { tenantId: tenantOverride } : await this.context();
+     await this.assertTenantEntity(tenantId, 'gps_devices', deviceId);
+     const result = await this.database.query<PositionRow>(
+       `
+@@ -219,6 +224,7 @@ export class GpsPositionQueryService {
+   async historyByDevice(
+     deviceId: string,
+     query: PositionHistoryQueryDto,
++    tenantOverride?: string,
+   ) {
+     if (
+       query.from !== undefined &&
+@@ -228,7 +234,7 @@ export class GpsPositionQueryService {
+       throw new BadRequestException('from must be earlier than or equal to to');
+     }
+ 
+-    const { tenantId } = await this.context();
++    const { tenantId } = tenantOverride ? { tenantId: tenantOverride } : await this.context();
+     await this.assertTenantEntity(tenantId, 'gps_devices', deviceId);
+     const result = await this.database.query<PositionRow>(
+       `
+diff --git a/test/console-gps-inventory-http.test.js b/test/console-gps-inventory-http.test.js
+index d25f411..83fc420 100644
+--- a/test/console-gps-inventory-http.test.js
++++ b/test/console-gps-inventory-http.test.js
+@@ -61,6 +61,19 @@ const rawDevice = {
+   installationLocation: 'tablero',
+ };
+ 
++const OTRO_TENANT = '20000000-0000-4000-8000-000000000002';
++const rawDeviceOtraEmpresa = {
++  ...rawDevice,
++  id: '30000000-0000-4000-8000-000000000002',
++  imei: '490154203237526',
++  vehicleId: null,
++  vehicleCode: null,
++  vehiclePlate: null,
++  installationId: null,
++  tenantId: OTRO_TENANT,
++  tenantName: 'Transportes Sol',
++};
++
+ const rawPosition = {
+   id: '9201',
+   rawMessageId: 'mensaje-que-no-debe-salir',
+@@ -78,7 +91,7 @@ const rawPosition = {
+   telemetry: { speedKph: 35, headingDeg: 246, ignition: true, odometerKm: null },
+ };
+ 
+-async function application(role = 'admin_fom') {
++async function application(role = 'supervisor') {
+   const calls = [];
+   const actor = {
+     userId: USER,
+@@ -94,8 +107,18 @@ async function application(role = 'admin_fom') {
+         filters: { status: query.status ?? null, from: '2026-10-01T00:00:00Z', to: '2026-10-22T00:00:00Z' } };
+     },
+     async device(id) { calls.push(['device', id]); return rawDevice; },
+-    async telemetry(id, limit) {
+-      calls.push(['telemetry', id, limit]);
++    // El administrador FOM ve todas las empresas (T-209): cada equipo trae su empresa.
++    async listAllDevices() { calls.push(['listAllDevices']); return [rawDevice, rawDeviceOtraEmpresa]; },
++    async listAllDevicesPage(query) {
++      calls.push(['listAllDevicesPage', { ...query }]);
++      return { items: [rawDevice, rawDeviceOtraEmpresa], page: { limit: query.limit, offset: query.offset, count: 2, total: 2 },
++        filters: { status: query.status ?? null, from: '2026-10-01T00:00:00Z', to: '2026-10-22T00:00:00Z' } };
++    },
++    async deviceAnywhere(id) { calls.push(['deviceAnywhere', id]); return rawDeviceOtraEmpresa; },
++    async tenantOfDevice(id) { calls.push(['tenantOfDevice', id]); return OTRO_TENANT; },
++    async tenantOfCommissioningSession(id) { calls.push(['tenantOfCommissioningSession', id]); return OTRO_TENANT; },
++    async telemetry(id, limit, contexto) {
++      calls.push(['telemetry', id, limit, contexto && { ...contexto }]);
+       return {
+         connected: true,
+         imei: rawDevice.imei,
+@@ -116,12 +139,12 @@ async function application(role = 'admin_fom') {
+         }],
+       };
+     },
+-    async startCommissioning(id) {
+-      calls.push(['startCommissioning', id]);
++    async startCommissioning(id, contexto) {
++      calls.push(['startCommissioning', id, contexto && { ...contexto }]);
+       return { id: SESSION, status: 'in_progress' };
+     },
+-    async completeCommissioning(id, input) {
+-      calls.push(['completeCommissioning', id, input]);
++    async completeCommissioning(id, input, contexto) {
++      calls.push(['completeCommissioning', id, input, contexto && { ...contexto }]);
+       return { id, status: input.status };
+     },
+   };
+@@ -142,12 +165,12 @@ async function application(role = 'admin_fom') {
+     },
+   };
+   const positions = {
+-    async latestByDevice(id) {
+-      calls.push(['latestByDevice', id]);
++    async latestByDevice(id, tenant) {
++      calls.push(['latestByDevice', id, tenant]);
+       return { position: rawPosition };
+     },
+-    async historyByDevice(id, query) {
+-      calls.push(['historyByDevice', id, { ...query }]);
++    async historyByDevice(id, query, tenant) {
++      calls.push(['historyByDevice', id, { ...query }, tenant]);
+       return {
+         positions: [rawPosition],
+         page: {
+@@ -202,7 +225,7 @@ test('lecturas GPS son acotadas, tenant-scoped y no filtran datos crudos', async
+   const port = app.getHttpServer().address().port;
+   const base = `http://127.0.0.1:${port}/api/v1/console/gps-devices`;
+   const routes = [
+-    '', 'page?limit=100&offset=300', 'unpaired', DEVICE, `${DEVICE}/telemetry?limit=12`,
++    '', 'page?limit=100&offset=300', DEVICE, `${DEVICE}/telemetry?limit=12`,
+     `${DEVICE}/position/latest`,
+     `${DEVICE}/positions?from=2026-09-04T00:00:00Z&to=2026-09-04T23:59:59Z&limit=20`,
+   ];
+@@ -221,7 +244,7 @@ test('lecturas GPS son acotadas, tenant-scoped y no filtran datos crudos', async
+   const detail = await fetch(`${base}/${DEVICE}`);
+   assert.equal((await detail.json()).device.installationId, INSTALLATION);
+   assert.deepEqual(calls.map(([method]) => method), [
+-    'listDevices', 'listDevicesPage', 'unpaired', 'device', 'telemetry',
++    'listDevices', 'listDevicesPage', 'device', 'telemetry',
+     'latestByDevice', 'historyByDevice', 'listDevices', 'device',
+   ]);
+   const paged = await fetch(`${base}/page?limit=100&offset=300`);
+@@ -260,7 +283,7 @@ test('comisionado exige CSRF, rol gestor y cuerpos cerrados', async (t) => {
+     method: 'POST', headers: authorized,
+     body: JSON.stringify({ status: 'passed', tenantId: TENANT }),
+   })).status, 400);
+-  assert.deepEqual(calls.at(-2), ['startCommissioning', DEVICE]);
++  assert.deepEqual(calls.at(-2), ['startCommissioning', DEVICE, undefined]);
+   assert.equal(calls.at(-1)[0], 'completeCommissioning');
+   assert.equal(calls.at(-1)[1], SESSION);
+   assert.deepEqual({ ...calls.at(-1)[2] }, { status: 'passed' });
+@@ -299,7 +322,12 @@ test('OpenAPI publica operaciones GPS paginadas por cookie y sin tenant del clie
+     assert.deepEqual(operation.security, [{ '__Host-fom_session': [] }]);
+   }
+   const serialized = JSON.stringify(document);
+-  for (const forbidden of ['tenantId', 'rawMessageId', 'sourceIp', 'sourcePort', 'payload']) {
++  // La empresa solo sale en la respuesta (tenantId/tenantName); nunca entra como parámetro del cliente.
++  for (const operacion of operations) {
++    const parametros = document.paths[operacion[0]][operacion[1]].parameters ?? [];
++    assert.equal(parametros.some((p) => p.name === 'tenantId'), false, operacion[0]);
++  }
++  for (const forbidden of ['rawMessageId', 'sourceIp', 'sourcePort', 'payload']) {
+     assert.equal(serialized.includes(forbidden), false, forbidden);
+   }
+   const paged = document.paths['/api/v1/console/gps-devices/page'].get;
+@@ -312,3 +340,64 @@ test('OpenAPI publica operaciones GPS paginadas por cookie y sin tenant del clie
+     type: 'string', format: 'uuid', nullable: true,
+   });
+ });
++
++test('el administrador FOM ve los equipos de todas las empresas, cada uno con su empresa', async (t) => {
++  const { app, calls } = await application('admin_fom');
++  t.after(async () => app.close());
++  const port = app.getHttpServer().address().port;
++  const base = `http://127.0.0.1:${port}/api/v1/console/gps-devices`;
++
++  const lista = await (await fetch(base)).json();
++  assert.deepEqual(lista.devices.map((d) => d.tenantName), [null, 'Transportes Sol']);
++  assert.equal(lista.devices[1].tenantId, OTRO_TENANT);
++
++  const pagina = await (await fetch(`${base}/page?limit=50`)).json();
++  assert.equal(pagina.items.length, 2);
++  assert.equal(pagina.page.total, 2);
++
++  const detalle = await (await fetch(`${base}/${rawDeviceOtraEmpresa.id}`)).json();
++  assert.equal(detalle.device.tenantId, OTRO_TENANT);
++
++  // La bandeja de «sin registrar» es global y solo del administrador FOM; no filtra datos crudos.
++  const sinRegistrar = await fetch(`${base}/unpaired`);
++  assert.equal(sinRegistrar.status, 200);
++  assert.equal(JSON.stringify(await sinRegistrar.json()).includes('sourceIp'), false);
++
++  assert.deepEqual(calls.map(([m]) => m), ['listAllDevices', 'listAllDevicesPage', 'deviceAnywhere', 'unpaired']);
++});
++
++test('el administrador FOM prueba y lee un equipo con la empresa del equipo, no la de su sesión', async (t) => {
++  const { app, calls } = await application('admin_fom');
++  t.after(async () => app.close());
++  const port = app.getHttpServer().address().port;
++  const base = `http://127.0.0.1:${port}/api/v1/console`;
++  const authorized = { 'content-type': 'application/json', 'x-fom-csrf': 'ok' };
++  const contexto = { tenantId: OTRO_TENANT, userId: USER };
++
++  assert.equal((await fetch(`${base}/gps-devices/${DEVICE}/telemetry?limit=5`)).status, 200);
++  assert.equal((await fetch(`${base}/gps-devices/${DEVICE}/position/latest`)).status, 200);
++  assert.equal((await fetch(`${base}/gps-devices/${DEVICE}/positions?limit=5`)).status, 200);
++  assert.equal((await fetch(`${base}/gps-devices/${DEVICE}/commissioning`, { method: 'POST', headers: authorized })).status, 201);
++  assert.equal((await fetch(`${base}/gps-commissioning/${SESSION}/complete`, {
++    method: 'POST', headers: authorized, body: JSON.stringify({ status: 'passed' }),
++  })).status, 201);
++
++  const porMetodo = (m) => calls.find(([x]) => x === m);
++  assert.deepEqual(porMetodo('telemetry').slice(1), [DEVICE, 5, contexto]);
++  assert.equal(porMetodo('latestByDevice')[2], OTRO_TENANT);
++  assert.equal(porMetodo('historyByDevice')[3], OTRO_TENANT);
++  assert.deepEqual(porMetodo('startCommissioning').slice(1), [DEVICE, contexto]);
++  assert.deepEqual(porMetodo('completeCommissioning')[3], contexto);
++  assert.equal(porMetodo('tenantOfCommissioningSession')[1], SESSION);
++});
++
++test('un supervisor sigue viendo solo su empresa y sin pedir la empresa del equipo', async (t) => {
++  const { app, calls } = await application('supervisor');
++  t.after(async () => app.close());
++  const port = app.getHttpServer().address().port;
++  const base = `http://127.0.0.1:${port}/api/v1/console/gps-devices`;
++  assert.equal((await fetch(base)).status, 200);
++  assert.equal((await fetch(`${base}/${DEVICE}/telemetry`)).status, 200);
++  assert.deepEqual(calls.map(([m]) => m), ['listDevices', 'telemetry']);
++  assert.equal(calls[1][3], undefined);
++});
+diff --git a/test/gps-console-operations.test.js b/test/gps-console-operations.test.js
+index 9ece496..539667d 100644
+--- a/test/gps-console-operations.test.js
++++ b/test/gps-console-operations.test.js
+@@ -59,7 +59,7 @@ test('installation metadata persists fields collected by the UI and is reversibl
+ test('GPS console resolves tenant on the server and never from request headers', () => {
+   assert.match(service, /requires exactly one active tenant/);
+   assert.doesNotMatch(service, /x-tenant|tenant-id|headers/iu);
+-  assert.match(service, /WHERE d\.tenant_id = \$1/);
++  assert.match(service, /WHERE \(\$1::uuid IS NULL OR d\.tenant_id = \$1\)/);
+ });
+ 
+ test('GPS deletion archives safely and releases the active vehicle assignment', () => {
+diff --git a/test/gps-device-query-timeout.test.js b/test/gps-device-query-timeout.test.js
+index e87945d..d53d73c 100644
+--- a/test/gps-device-query-timeout.test.js
++++ b/test/gps-device-query-timeout.test.js
+@@ -39,7 +39,7 @@ for (const detail of [false, true]) {
+         ]);
+         const select = calls.find(({ sql }) => sql.trimStart().startsWith('SELECT'));
+         assert.deepEqual(select.values, [context.tenantId, detail ? deviceId : null, 0]);
+-        assert.match(select.sql, /WHERE d[.]tenant_id = \$1/u);
++        assert.match(select.sql, /WHERE \(\$1::uuid IS NULL OR d[.]tenant_id = \$1\)/u);
+         assert.match(select.sql, /p[.]tenant_id = d[.]tenant_id/u);
+         assert.match(select.sql, /p[.]gps_device_id = d[.]id/u);
+         assert.equal(calls.at(-1).sql, 'COMMIT');
+diff --git a/test/gps-inventory-pagination.test.js b/test/gps-inventory-pagination.test.js
+index ba3a509..a1a7c55 100644
+--- a/test/gps-inventory-pagination.test.js
++++ b/test/gps-inventory-pagination.test.js
+@@ -24,9 +24,9 @@ function inventory() {
+         if (failure && sql.includes(failure)) throw new Error('synthetic_cancel');
+         if (sql.startsWith('BEGIN')) snapshot = [...records];
+         if (sql.includes('count(*)')) {
+-          assert.match(sql, /d.tenant_id = \$1 AND d.status <> 'archived'/u);
++          assert.match(sql, /\(\$1::uuid IS NULL OR d.tenant_id = \$1\) AND d.status <> 'archived'/u);
+           assert.match(sql, /d.status = \$2/u);
+-          const selected = snapshot.filter(x => x.tenantId === values[0] && x.status !== 'archived' && (!values[1] || x.status === values[1]));
++          const selected = snapshot.filter(x => (values[0] === null || x.tenantId === values[0]) && x.status !== 'archived' && (!values[1] || x.status === values[1]));
+           if (mutate) records = [];
+           return { rows: [{ total: String(selected.length) }] };
+         }
+@@ -42,7 +42,7 @@ function inventory() {
+           assert.match(sql, /r.received_at <= \$7::timestamptz/u);
+           const [tenant, , offset, limit, status, from, to] = values;
+           assert.equal(new Date(to) - new Date(from), new Date(range.to) - new Date(range.from));
+-          return { rows: snapshot.filter(x => x.tenantId === tenant && x.status !== 'archived' && (!status || x.status === status)).slice(offset, offset + limit) };
++          return { rows: snapshot.filter(x => (tenant === null || x.tenantId === tenant) && x.status !== 'archived' && (!status || x.status === status)).slice(offset, offset + limit) };
+         }
+         return { rows: [] };
+       },
+@@ -120,3 +120,20 @@ test('mobile paginated projection uses visible tenant and omits internal invento
+   assert.equal('server' in result.items[0], false); assert.equal('notes' in result.items[0], false);
+   assert.equal(result.page.total, 1);
+ });
++
++test('el administrador FOM pagina el inventario de todas las empresas con un solo total', async () => {
++  const f = inventory();
++  const ids = [];
++  for (let offset = 0; offset < 400; offset += 100) {
++    const result = await f.service.listAllDevicesPage({ ...range, limit: 100, offset });
++    assert.equal(result.page.total, 351);
++    ids.push(...result.items.map(x => x.id));
++  }
++  assert.equal(ids.length, 351);
++  assert.ok(ids.includes('foreign'));
++  assert.ok(!ids.includes('archived'));
++  const select = f.calls.find(c => c.sql.trimStart().startsWith('SELECT d.id'));
++  assert.equal(select.values[0], null);
++  assert.match(select.sql, /tn.name AS "tenantName"/u);
++  assert.match(select.sql, /d.tenant_id AS "tenantId"/u);
++});
+-- 
+2.55.0.windows.3
+

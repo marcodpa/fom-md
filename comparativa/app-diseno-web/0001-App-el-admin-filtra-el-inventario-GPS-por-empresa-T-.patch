@@ -1,0 +1,72 @@
+From 912f504f802712610d8ecfa550ed401d2f7f3354 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 14:31:38 -0400
+Subject: [PATCH] App: el admin filtra el inventario GPS por empresa (T-209)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/gps-inventario.tsx | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/src/app/gps-inventario.tsx b/src/app/gps-inventario.tsx
+index 9339823..45afe21 100644
+--- a/src/app/gps-inventario.tsx
++++ b/src/app/gps-inventario.tsx
+@@ -50,6 +50,8 @@ export default function GpsInventarioScreen() {
+ 
+   const [filtro, setFiltro] = useState<Filtro>('todos');
+   const [q, setQ] = useState('');
++  // Filtro por empresa (T-209): `null` = todas. Las cifras de arriba siempre cuentan el total.
++  const [empresaSel, setEmpresaSel] = useState<string | null>(null);
+ 
+   const {
+     estado,
+@@ -82,7 +84,12 @@ export default function GpsInventarioScreen() {
+     return { todos: equipos.length, con, sin, libres };
+   }, [equipos]);
+ 
+-  const varias = useMemo(() => new Set(equipos.map((g) => g.companyId)).size > 1, [equipos]);
++  const empresas = useMemo(() => {
++    const porId = new Map<string, string>();
++    for (const g of equipos) porId.set(g.companyId, g.empresa);
++    return [...porId].map(([id, nombre]) => ({ id, nombre })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
++  }, [equipos]);
++  const varias = empresas.length > 1;
+ 
+   const lista = useMemo(() => {
+     const n = normalizar(q.trim());
+@@ -90,12 +97,13 @@ export default function GpsInventarioScreen() {
+       if (filtro === 'con' && !g.conectado) return false;
+       if (filtro === 'sin' && !(g.vehicleId && !g.conectado)) return false;
+       if (filtro === 'libres' && g.vehicleId) return false;
++      if (empresaSel && g.companyId !== empresaSel) return false;
+       if (!n) return true;
+       return normalizar(
+         [g.imei, g.linea, g.vehicleCode, g.vehiclePlate, g.equipo, g.empresa].filter(Boolean).join(' '),
+       ).includes(n);
+     });
+-  }, [equipos, filtro, q]);
++  }, [equipos, filtro, q, empresaSel]);
+ 
+   if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
+   // El inventario es de la administración de FOM, no de cada ente.
+@@ -177,6 +185,16 @@ export default function GpsInventarioScreen() {
+             />
+           </ScrollView>
+ 
++          {/* Con varias empresas, se puede acotar a una; el buscador sigue buscando en todas. */}
++          {varias ? (
++            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
++              <PastillaFiltro label="Todas las empresas" activo={!empresaSel} onPress={() => setEmpresaSel(null)} />
++              {empresas.map((e) => (
++                <PastillaFiltro key={e.id} label={e.nombre} activo={empresaSel === e.id} onPress={() => setEmpresaSel(e.id)} />
++              ))}
++            </ScrollView>
++          ) : null}
++
+           <SearchBar value={q} onChangeText={setQ} placeholder="Buscar IMEI, línea o unidad…" />
+ 
+           {estado === 'cargando' ? (
+-- 
+2.55.0.windows.3
+

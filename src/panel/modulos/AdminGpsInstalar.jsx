@@ -42,7 +42,11 @@ export default function AdminGpsInstalar() {
   // empresa donde está registrado (T-208).
   const propia = empresaPropia(sesion)
   const nombrePropia = listaEmpresas.find((e) => e.id === propia)?.nombre || 'tu empresa'
-  const empresaId = empresaElegida
+  // T-209: si el servidor ya dice de qué empresa es el equipo (`tenantId`), la instalación va a SU
+  // empresa —equipo y unidad deben ser de la misma— y la empresa no se puede cambiar.
+  const dueno = equipo.datos?.empresaId || ''
+  const empresaId = dueno
+    || empresaElegida
     || listaEmpresas.find((e) => e.id === propia)?.id
     || listaEmpresas[0]?.id
     || ''
@@ -130,14 +134,14 @@ export default function AdminGpsInstalar() {
         <section className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '22px 24px' }} aria-labelledby="gp-elige">
           <div className="gp-titulo">
             <h2 className="gp-st" id="gp-elige">Elige la unidad</h2>
-            <span className="gp-lbl">Primero la empresa; luego una de sus unidades sin GPS.</span>
+            <span className="gp-lbl">{dueno ? 'Este equipo es de esa empresa: elige una de sus unidades sin GPS.' : 'Primero la empresa; luego una de sus unidades sin GPS.'}</span>
           </div>
           <div className="gp-campos">
             <div className="gp-f">
               <label htmlFor="i-emp">Empresa</label>
               <div className="gp-field">
                 <IcoGps nombre="empresa" />
-                <select id="i-emp" value={empresaId} onChange={(e) => { setEmpresaElegida(e.target.value); setUnidadId('') }} disabled={empresas.estado !== 'ok'}>
+                <select id="i-emp" value={empresaId} onChange={(e) => { setEmpresaElegida(e.target.value); setUnidadId('') }} disabled={empresas.estado !== 'ok' || Boolean(dueno)}>
                   {listaEmpresas.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                 </select>
                 <IcoGps nombre="abajo" />

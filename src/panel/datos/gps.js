@@ -203,7 +203,7 @@ export function buscarEquipos(lista, q) {
   if (!t) return lista
   const digitos = soloDigitos(t)
   return lista.filter((g) => {
-    const textos = [g.imei, g.linea, g.vehiculoNombre, g.modelo, g.fabricante, g.carrier]
+    const textos = [g.imei, g.linea, g.vehiculoNombre, g.modelo, g.fabricante, g.carrier, g.empresaNombre]
     if (textos.some((v) => String(v ?? '').toLowerCase().includes(t))) return true
     return digitos.length >= 4 && [g.imei, g.linea].some((v) => soloDigitos(v).includes(digitos))
   })
