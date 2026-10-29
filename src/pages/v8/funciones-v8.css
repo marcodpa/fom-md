@@ -168,3 +168,23 @@
 
   .funciones-boton-movil { margin-top: 32px; }
 }
+
+/* En la app (T-205): tres grupos (conductor, supervisor, administración) de tarjetas cortas. */
+.funciones-app-grupo { margin-top: 56px; }
+.funciones-app-cab + .funciones-app-grupo { margin-top: 48px; }
+.funciones-app-grupo-titulo { margin-bottom: 20px; }
+.funciones-app-rejilla { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.funciones-app-item { display: flex; }
+.funciones-app-item > .v8-vidrio { width: 100%; }
+.funciones-app-item .v8-h4 { margin-bottom: 8px; }
+@media (max-width: 1023px) {
+  .funciones-app-rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .funciones-app-grupo { margin-top: 44px; }
+}
+@media (max-width: 599px) {
+  .funciones-app-cab.is-centro { text-align: left; }
+  .funciones-app-grupo { margin-top: 32px; }
+  .funciones-app-grupo-titulo { margin-bottom: 12px; }
+  .funciones-app-rejilla { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .funciones-app-item .v8-h4 { margin-bottom: 2px; }
+}

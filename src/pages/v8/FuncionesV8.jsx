@@ -29,37 +29,66 @@ const F = PAGES.funciones
 const seccion = titulo => F.sections.find(s => s.heading.startsWith(titulo))
 
 const LOCAL = [
-  ['gps', 'GPS'], ['telematica', 'Telemática'], ['mantenimiento', 'Mantenimiento'], ['reportes', 'Reportes'], ['alertas', 'Alertas'],
+  ['gps', 'GPS'], ['telematica', 'Telemática'], ['mantenimiento', 'Mantenimiento'], ['reportes', 'Reportes'], ['alertas', 'Alertas'], ['app', 'En la app'],
 ]
 
 const GPS = [
   ['Posición en vivo.', 'Ubicación, rumbo y velocidad de cada unidad.'],
   ['Historial de recorrido.', 'La ruta de cualquier día, con paradas y kilómetros.'],
-  ['Estado de la unidad.', 'En movimiento, detenida con motor encendido o apagada.'],
-  ['Vista de flota completa.', 'Filtros por conductor, placa o tipo de vehículo.'],
+  ['Estado de la unidad.', 'En marcha, detenida o sin señal, y si el motor está encendido.'],
+  ['Vista de flota completa.', 'Búsqueda por unidad, placa, conductor o área.'],
 ]
 const GPS_MOVIL = [
   ['Posición en vivo', 'Cada 10 segundos, con rumbo y velocidad.'],
   ['Historial de recorrido', 'La ruta de cualquier día, con paradas.'],
-  ['Estado de la unidad', 'En movimiento, detenida o apagada.'],
+  ['Estado de la unidad', 'En marcha, detenida o sin señal.'],
 ]
 
+// Telemática: solo lo que el GPS de la flota (Coban 103) entrega y el panel calcula; sin datos del motor.
 const TELEMATICA = [
-  ['Voltaje de batería', 'Avisa ante cortes o caídas de voltaje.'],
-  ['Datos del motor', 'Horas, revoluciones y temperatura.'],
-  ['Kilometraje automático', 'El odómetro se actualiza solo.'],
-  ['Códigos de falla', 'Apenas aparecen, antes de una parada mayor.'],
+  ['Kilometraje automático', 'Se calcula solo con el recorrido del GPS.'],
+  ['Encendido y estado', 'En marcha, detenida o sin señal, con el motor encendido o apagado.'],
+  ['Manejo brusco', 'Excesos de velocidad, frenadas y aceleraciones bruscas.'],
+  ['Recorrido del día', 'La ruta de hoy con sus paradas y kilómetros.'],
 ]
 const TELEMATICA_MOVIL = [
-  ['Voltaje de batería', 'Avisa ante cortes o caídas de voltaje.'],
-  ['Datos del motor y códigos de falla', 'Horas, temperatura y fallas apenas aparecen.'],
+  ['Kilometraje automático', 'Se calcula solo con el recorrido del GPS.'],
+  ['Manejo brusco', 'Excesos de velocidad, frenadas y aceleraciones bruscas.'],
+]
+
+// Lo que se hace desde la app (T-205): tarjetas cortas agrupadas por quién las usa.
+const APP = [
+  { grupo: 'Conductor', tarjetas: [
+    ['Planillas de inspección', 'Varias por día y por días de la semana, antes de salir.'],
+    ['Tomar la unidad con PIN', 'Quien comparte una unidad la toma con su propio PIN.'],
+    ['Papeles al día', 'Licencia, cédula y carta médica con su vencimiento; se escanean con la cámara.'],
+    ['Botón SOS', 'Avisa de un accidente, una falla, un problema de salud o de seguridad, con su ubicación.'],
+    ['Reportar una falla', 'Con foto desde la calle, y seguir el avance de su orden de trabajo.'],
+    ['Avisos propios', 'Papeles por vencer y trabajos pendientes de su unidad.'],
+  ] },
+  { grupo: 'Supervisor', tarjetas: [
+    ['Aptitud de hoy', 'Qué unidades pueden salir y cuáles no, con el porqué.'],
+    ['Inspecciones', 'Quién cumplió su planilla y qué falló.'],
+    ['Costos por unidad', 'Anotar cada gasto y ver el total de cada vehículo.'],
+    ['Kilómetros del período', 'Por unidad y por conductor, con el mismo dato de los reportes.'],
+    ['SOS abiertos', 'Quién pidió ayuda, en qué unidad y dónde está.'],
+    ['Órdenes de trabajo', 'Crearlas, asignarlas y seguirlas hasta que se resuelven.'],
+  ] },
+  { grupo: 'Administración', tarjetas: [
+    ['Usuarios con permisos', 'Cada perfil ve y hace solo lo que le toca.'],
+    ['Áreas', 'Las unidades se agrupan por ubicación, cada área con su color.'],
+    ['Empresas', 'Varias empresas, con sus asociadas, desde una misma cuenta.'],
+    ['Alta de GPS', 'Registrar un equipo nuevo desde el teléfono, en tres pasos.'],
+    ['Comparar empresas', 'El índice de manejo y los kilómetros de cada una, lado a lado.'],
+    ['Registro de actividad', 'Quién hizo qué y cuándo, de lo más nuevo a lo más viejo.'],
+  ] },
 ]
 
 // Recorrido «Del aviso a la decisión»: paso, pestaña y captura real del panel.
 const PASOS = [
-  { titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha, por ejemplo cada 5.000 km o 90 días, y órdenes de trabajo con su historial y costo.' },
-  { titulo: 'Reportes y analítica', texto: 'Costo por kilómetro, uso y disponibilidad. PDF o Excel, con envío programado.' },
-  { titulo: 'Alertas operativas', texto: 'Exceso de velocidad, motor encendido detenido, desconexión del equipo y mantenimiento vencido.' },
+  { titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha, por ejemplo cada 5.000 km o cada 180 días, y órdenes de trabajo con su historial y costo.' },
+  { titulo: 'Reportes y analítica', texto: 'Costo por kilómetro y manejo por unidad o por persona. Se descargan en PDF y CSV.' },
+  { titulo: 'Alertas operativas', texto: 'Exceso de velocidad, frenadas y aceleraciones bruscas, GPS sin señal y mantenimiento vencido.' },
 ]
 const PESTANAS = ['Mantenimiento', 'Reportes', 'Alertas']
 const CAPTURAS = [
@@ -70,7 +99,7 @@ const CAPTURAS = [
 // En el teléfono: dos teléfonos apilados (Mantenimiento y Alertas); Reportes es la sección siguiente.
 const MOVIL = [
   { id: 'funciones-movil-mantenimiento', titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha y órdenes de trabajo con historial y costo.', captura: { nombre: 'cap-movil-sup-mantenimiento', alt: 'Mantenimiento en la app del supervisor: Nueva ODT y órdenes abiertas, en revisión y resueltas. Datos de demostración.' } },
-  { id: 'funciones-movil-alertas', titulo: 'Alertas operativas', texto: 'Exceso de velocidad, ralentí, desconexión y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas en la app del supervisor: excesos de velocidad sin leer, de lo más nuevo a lo más viejo. Datos de demostración.' } },
+  { id: 'funciones-movil-alertas', titulo: 'Alertas operativas', texto: 'Exceso de velocidad, frenadas bruscas, GPS sin señal y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas en la app del supervisor: excesos de velocidad sin leer, de lo más nuevo a lo más viejo. Datos de demostración.' } },
 ]
 const SALTOS_MOVIL = [['#funciones-movil-mantenimiento', 'Mantenimiento'], ['#reportes', 'Reportes'], ['#funciones-movil-alertas', 'Alertas']]
 
@@ -131,8 +160,8 @@ export default function FuncionesV8() {
       kicker={F.eyebrow}
       titulo={['Control diario de tu flota,', 'sin puntos ciegos.']}
       bajada={<>
-        <span className="v8-solo-escritorio">Rastreo GPS en vivo, telemática, mantenimiento preventivo, reportes y alertas. El supervisor los trabaja desde el panel web y el conductor aporta desde la app.</span>
-        <span className="v8-solo-movil">GPS en vivo, telemática, mantenimiento, reportes y alertas.</span>
+        <span className="v8-solo-escritorio">Rastreo GPS en vivo, telemática, mantenimiento preventivo, reportes y alertas. El supervisor los trabaja desde el panel web o la app, y el conductor aporta desde la app.</span>
+        <span className="v8-solo-movil">GPS en vivo, telemática, mantenimiento, reportes, alertas y la app.</span>
       </>}
       bajadaAngosta
       primaria={{ to: rutaV8('contacto'), texto: 'Solicitar demostración' }}
@@ -171,7 +200,7 @@ export default function FuncionesV8() {
 
     <SeccionV8 id="telematica" banda className="funciones-telematica" aria-labelledby="funciones-telematica-titulo">
       <ContenedorV8>
-        <EncabezadoV8 centro className="funciones-telematica-cab" id="funciones-telematica-titulo" kicker="Telemática y diagnóstico"
+        <EncabezadoV8 centro className="funciones-telematica-cab" id="funciones-telematica-titulo" kicker="Telemática de la unidad"
           titulo={<>
             <span className="v8-solo-escritorio"><span className="v8-linea">Cómo se usa cada unidad,</span><span className="v8-linea">no solo dónde está.</span></span>
             <span className="v8-solo-movil">Cómo se usa cada unidad.</span>
@@ -181,7 +210,7 @@ export default function FuncionesV8() {
         {/* T-139 (Marco): foto a sangre, a todo el ancho, sin radio ni marco; la versión -plena
             (sin alfa horneado) y solo un fundido arriba y abajo con el fondo de la sección. */}
         <FotoIntegradaV8 className="funciones-telematica-foto" nombre="telematica" marco="plano" sizes="100vw"
-          alt="Camioneta FOM con el motor a la vista y las señales que toma el equipo: ubicación GPS, kilómetros, voltaje de batería, RPM y temperatura, frenada brusca y combustible." />
+          alt="Camioneta FOM con las señales que toma el equipo GPS: ubicación, kilómetros, encendido, velocidad, frenada brusca y aceleración brusca." />
         <SenalesTelematicaV8 />
       </div>
       <p className="v8-nota-demo funciones-tele-nota">Valores de ejemplo · Datos de demostración</p>
@@ -250,9 +279,29 @@ export default function FuncionesV8() {
         foto={{ nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM en la oficina. Datos de demostración.' }}>
         <p className="v8-kick" data-v8-aparece="">Reportes</p>
         <h2 id="funciones-reportes-titulo" className="v8-h2" data-v8-aparece="">Se leen en minutos.</h2>
-        <p className="v8-lead funciones-reportes-lead v8-solo-escritorio" data-v8-aparece="">Cada indicador se filtra por vehículo, conductor o rango de fechas, y se comparte con la gerencia.</p>
+        <p className="v8-lead funciones-reportes-lead v8-solo-escritorio" data-v8-aparece="">Se eligen por mes o por fechas, para toda la empresa, un área o las unidades que quieras, y se comparten con la gerencia.</p>
         <p className="v8-cifra funciones-reportes-cifra" data-v8-aparece=""><strong>{REPORTES.value}</strong><span>formatos de exportación</span></p>
       </EscenaV8>
+    </SeccionV8>
+
+    <SeccionV8 id="app" className="funciones-app" aria-labelledby="funciones-app-titulo">
+      <ContenedorV8>
+        <EncabezadoV8 centro className="funciones-app-cab" id="funciones-app-titulo" kicker="La app de FOM"
+          titulo={<>
+            <span className="v8-solo-escritorio"><span className="v8-linea">Lo que pasa en la calle</span><span className="v8-linea">también queda en el panel.</span></span>
+            <span className="v8-solo-movil">Lo que pasa en la calle llega al panel.</span>
+          </>}
+          bajada="Cada persona abre la app y ve solo lo suyo: el conductor reporta y revisa, el supervisor controla y el administrador ordena la empresa."
+          anchoBajada={620} />
+        {APP.map(g => <section key={g.grupo} className="funciones-app-grupo" aria-label={g.grupo}>
+          <h3 className="v8-kick funciones-app-grupo-titulo" data-v8-aparece="">{g.grupo}</h3>
+          <ul className="funciones-app-rejilla">
+            {g.tarjetas.map(([t, x]) => <li key={t} className="funciones-app-item" data-v8-aparece="">
+              <TarjetaVidrioV8 radio="tarjeta"><h4 className="v8-h4">{t}</h4><p className="v8-sm v8-t2">{x}</p></TarjetaVidrioV8>
+            </li>)}
+          </ul>
+        </section>)}
+      </ContenedorV8>
     </SeccionV8>
 
     <SeccionV8 id="preguntas" className="funciones-preguntas" aria-labelledby="funciones-faq-titulo">

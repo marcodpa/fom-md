@@ -35,11 +35,11 @@ const RASGOS = [
 
 const FUNCIONES = [
   { titulo: 'Rastreo GPS en tiempo real', texto: 'Posición cada 10 segundos con el vehículo en movimiento.', foto: { nombre: 'operadora-mapa', alt: 'Supervisor de FOM frente al Centro de control actual. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-mapa', alt: 'Mapa de la flota en la app del supervisor: 26 unidades, 15 en marcha. Datos de demostración.' } },
-  { titulo: 'Telemática y diagnóstico', texto: 'Batería, motor, kilometraje y códigos de falla de cada unidad.', foto: { nombre: 'telematica', alt: 'Camioneta FOM con el motor y el equipo de telemática a la vista.' } },
+  { titulo: 'Telemática y diagnóstico', texto: 'Kilometraje automático, encendido y manejo brusco de cada unidad.', foto: { nombre: 'telematica', alt: 'Camioneta FOM con el motor y el equipo de telemática a la vista.' } },
   { titulo: 'Mantenimiento preventivo', texto: 'Avisos por kilómetro o fecha y órdenes de trabajo con historial.', captura: { nombre: 'cap-movil-cond-mantenimiento', alt: 'Mantenimiento en la app, vista del conductor: las órdenes de su unidad con su estado y el botón Reportar una falla. Datos de demostración.' } },
-  { titulo: 'Reportes y analítica', texto: 'Costo por kilómetro, uso y disponibilidad. En PDF o Excel.', foto: { nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-reportes', alt: 'Reportes en la app del supervisor: de vehículos, usuarios o costos, del período que elijas, en PDF. Datos de demostración.' } },
+  { titulo: 'Reportes y analítica', texto: 'Manejo, kilómetros y costos por unidad y por persona. En PDF o CSV.', foto: { nombre: 'oficina-reportes', alt: 'Monitor con los Reportes actuales del panel FOM. Datos de demostración.' }, capturaMovil: { nombre: 'cap-movil-sup-reportes', alt: 'Reportes en la app del supervisor: de vehículos, usuarios o costos, del período que elijas, en PDF. Datos de demostración.' } },
   { titulo: 'Inspección en campo', texto: 'El conductor revisa su unidad con la app antes de salir.', foto: { nombre: 'tecnico-app-unidad', alt: 'Conductor de FOM con su unidad abierta en la app, junto al camión.', posicion: '40% 50%' } },
-  { titulo: 'Alertas operativas', texto: 'Exceso de velocidad, motor encendido detenido y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas en la app del supervisor: excesos de velocidad sin leer, de lo más nuevo a lo más viejo. Datos de demostración.' } },
+  { titulo: 'Alertas operativas', texto: 'Exceso de velocidad, frenadas bruscas, GPS sin señal y mantenimiento vencido.', captura: { nombre: 'cap-movil-sup-alertas', alt: 'Alertas en la app del supervisor: excesos de velocidad sin leer, de lo más nuevo a lo más viejo. Datos de demostración.' } },
 ]
 
 const CHIPS_MAPA = [

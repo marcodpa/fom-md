@@ -187,7 +187,7 @@ export const PAGES = {
   "funciones": {
     "eyebrow": "Funciones operativas",
     "title": "Control diario de tu flota, sin puntos ciegos",
-    "subtitle": "Rastreo GPS en vivo, telemática del vehículo, mantenimiento preventivo, reportes y alertas operativas. El supervisor los trabaja desde el panel web y el conductor aporta desde la app.",
+    "subtitle": "Rastreo GPS en vivo, telemática del vehículo, mantenimiento preventivo, reportes y alertas operativas. El supervisor los trabaja desde el panel web o la app, y el conductor aporta desde la app.",
     "sections": [
       {
         "heading": "Rastreo GPS en tiempo real",
@@ -199,15 +199,15 @@ export const PAGES = {
           },
           {
             "label": "Historial de recorrido",
-            "text": "Reproduce la ruta de cualquier día, con paradas, tiempos de motor encendido y kilómetros recorridos."
+            "text": "Reproduce la ruta de cualquier día, con sus paradas y los kilómetros recorridos."
           },
           {
             "label": "Estado de la unidad",
-            "text": "Distingue de un vistazo los vehículos en movimiento, detenidos con motor encendido y apagados."
+            "text": "Distingue de un vistazo las unidades en marcha, detenidas (quietas por más de 3 minutos) y sin señal (más de 5 minutos sin reportar)."
           },
           {
             "label": "Vista de flota completa",
-            "text": "Sigue 40, 80 o más unidades en un mismo mapa, con filtros por conductor, placa o tipo de vehículo."
+            "text": "Sigue toda la flota en un mismo mapa, con búsqueda por unidad, placa, conductor o área, y filtro por estado."
           }
         ],
         "stat": {
@@ -216,42 +216,42 @@ export const PAGES = {
         }
       },
       {
-        "heading": "Telemática y diagnóstico del vehículo",
-        "body": "Lee los datos que envía el vehículo para saber cómo se está usando, no solo dónde está. El motor, la batería y el kilometraje quedan registrados para cada unidad de forma automática.",
+        "heading": "Telemática de la unidad",
+        "body": "Con lo que reporta el GPS de cada vehículo, FOM sabe cómo se está usando, no solo dónde está. El kilometraje, el encendido y el manejo quedan registrados para cada unidad de forma automática.",
         "bullets": [
           {
-            "label": "Voltaje de batería",
-            "text": "Vigila la alimentación del equipo y avisa ante cortes o caídas de voltaje que delatan manipulación o fallas eléctricas."
-          },
-          {
-            "label": "Datos del motor",
-            "text": "Registra horas de motor, revoluciones y temperatura para vigilar el esfuerzo real de cada unidad."
-          },
-          {
             "label": "Kilometraje automático",
-            "text": "El odómetro se actualiza solo y alimenta el cálculo de rendimiento y los avisos de mantenimiento."
+            "text": "Los kilómetros se calculan solos con el recorrido del GPS, sin que nadie los anote, y alimentan los reportes."
           },
           {
-            "label": "Códigos de falla",
-            "text": "Recibe los códigos de diagnóstico del vehículo apenas aparecen, antes de que se conviertan en una parada mayor."
+            "label": "Encendido y estado",
+            "text": "Se ve si la unidad está en marcha, detenida o sin señal, y si el motor está encendido o apagado."
+          },
+          {
+            "label": "Manejo brusco",
+            "text": "Los excesos de velocidad, las frenadas y las aceleraciones bruscas quedan con hora, lugar y conductor, y se ven en el mapa."
+          },
+          {
+            "label": "Recorrido del día",
+            "text": "La ruta de hoy con sus paradas y los kilómetros recorridos, calculados a partir de las posiciones del GPS."
           }
         ],
         "stat": {
-          "value": "24/7",
-          "label": "Registro continuo de telemática"
+          "value": "5 min",
+          "label": "sin reportar y la unidad pasa a «Sin señal»"
         }
       },
       {
         "heading": "Mantenimiento preventivo",
-        "body": "Programa el servicio por kilometraje o por fecha desde el panel y deja que el sistema avise antes de que se cumpla el plazo. Cuando el conductor detecta una falla, la reporta con foto desde la app y llega al panel como orden de trabajo. Cada intervención queda documentada con su costo y su responsable.",
+        "body": "Programa el servicio por kilometraje o por fecha desde el panel y el sistema marca lo que ya venció. Cuando el conductor detecta una falla, la reporta con foto desde la app y llega al panel como orden de trabajo. Cada intervención queda documentada con su costo y su responsable.",
         "bullets": [
           {
             "label": "Avisos por km o fecha",
-            "text": "Define umbrales, por ejemplo cada 5.000 km o cada 90 días, y recibe la alerta con anticipación configurable."
+            "text": "Define cada cuántos kilómetros o cada cuántos días toca un servicio, por ejemplo cada 5.000 km o cada 180 días, y el panel marca lo que vence."
           },
           {
             "label": "Órdenes de trabajo",
-            "text": "Genera, asigna y cierra órdenes con repuestos, mano de obra y notas del mecánico en un solo registro."
+            "text": "Crea, asigna y cierra órdenes de trabajo con fotos, lo que se hizo y su costo, en un solo registro."
           },
           {
             "label": "Historial por vehículo",
@@ -259,7 +259,7 @@ export const PAGES = {
           },
           {
             "label": "Control de costos",
-            "text": "Suma el gasto de mantenimiento por unidad y por período para ubicar los vehículos más costosos de la flota."
+            "text": "Suma el gasto por unidad y por período, anotado desde el panel o la app, para ubicar los vehículos más costosos de la flota."
           }
         ],
         "stat": {
@@ -269,54 +269,54 @@ export const PAGES = {
       },
       {
         "heading": "Reportes y analítica de operación",
-        "body": "Convierte los datos del día en reportes que se leen en minutos y se comparten con la gerencia. Cada indicador se puede filtrar por vehículo, conductor o rango de fechas.",
+        "body": "Convierte los datos del día en reportes que se leen en minutos y se comparten con la gerencia. Se eligen por mes o por rango de fechas, para toda la empresa, un área o las unidades que quieras.",
         "bullets": [
           {
             "label": "Costo por kilómetro",
-            "text": "Cruza los gastos registrados con el kilometraje real para comparar unidades y detectar desvíos de presupuesto."
+            "text": "Cruza los gastos registrados con los kilómetros recorridos para ver cuánto cuesta cada kilómetro y detectar desvíos de presupuesto."
           },
           {
-            "label": "Uso y disponibilidad",
-            "text": "Mide horas de operación, tiempo detenido y unidades inactivas para aprovechar mejor la flota."
+            "label": "Manejo por unidad y por persona",
+            "text": "Kilómetros, frenadas, aceleraciones y excesos de velocidad, con un índice para comparar y la comparación con el período anterior."
           },
           {
             "label": "Kilometraje por período",
-            "text": "Totaliza los kilómetros recorridos por semana o por mes para planificar servicios y presupuestos."
+            "text": "Totaliza los kilómetros recorridos por mes o por rango de fechas, por unidad y por conductor, para planificar servicios y presupuestos."
           },
           {
-            "label": "Exportación y envío",
-            "text": "Descarga los reportes en PDF o Excel y programa el envío automático al correo de los responsables."
+            "label": "Exportación",
+            "text": "Descarga el reporte en PDF (Vehículos, Usuarios, Costos o Estadístico, o los cuatro juntos) y las tablas en CSV para abrirlas en tu hoja de cálculo."
           }
         ],
         "stat": {
-          "value": "PDF / Excel",
+          "value": "PDF y CSV",
           "label": "Formatos de exportación"
         }
       },
       {
         "heading": "Alertas operativas",
-        "body": "Recibe avisos automáticos cuando algo se sale de lo esperado en la operación diaria. Cada alerta llega al panel del supervisor, y el conductor ve en su app las que le corresponden a su unidad.",
+        "body": "Recibe avisos cuando algo se sale de lo esperado en la operación diaria. Cada alerta llega al panel del supervisor, y el conductor ve en su app las que le corresponden a su unidad.",
         "bullets": [
           {
             "label": "Exceso de velocidad",
             "text": "Notifica cuando una unidad supera el límite configurado, con la hora y el punto exacto del evento."
           },
           {
-            "label": "Motor encendido detenido",
-            "text": "Avisa por ralentí prolongado que gasta combustible sin que el vehículo avance."
+            "label": "Frenadas y aceleraciones bruscas",
+            "text": "Quedan registradas con la hora, el punto y el conductor, para conversar sobre los patrones y no solo sobre un incidente."
           },
           {
-            "label": "Desconexión del equipo",
-            "text": "Genera una alerta si el GPS pierde alimentación o deja de reportar, señal de manipulación o falla eléctrica."
+            "label": "GPS sin señal",
+            "text": "Cuando una unidad pasa más de 5 minutos sin reportar, llega un aviso a la campana del panel con la hora de su último reporte."
           },
           {
             "label": "Mantenimiento vencido",
-            "text": "Marca las unidades que ya cumplieron su umbral de servicio y siguen operando sin atención."
+            "text": "Marca las unidades que ya pasaron su kilómetro o su fecha de servicio sin atención."
           }
         ],
         "stat": {
-          "value": "Panel y correo",
-          "label": "Canales de notificación"
+          "value": "Panel y app",
+          "label": "Dónde llegan las alertas"
         }
       }
     ],
@@ -327,15 +327,15 @@ export const PAGES = {
       },
       {
         "q": "¿Cómo funcionan los avisos de mantenimiento preventivo?",
-        "a": "Usted define el umbral por kilometraje o por fecha para cada tipo de servicio. El sistema toma el odómetro automático y la fecha del último servicio, y envía la alerta con la anticipación que configure para que la orden de trabajo se programe a tiempo."
+        "a": "Usted define cada cuántos kilómetros o cada cuántos días toca cada tipo de servicio. El panel cuenta los kilómetros de cada unidad y la fecha del último servicio, y marca lo que ya venció para que la orden de trabajo se programe a tiempo."
       },
       {
         "q": "¿Qué datos del vehículo puedo monitorear con la telemática?",
-        "a": "Según el dispositivo instalado, puede ver horas y temperatura de motor, revoluciones, voltaje de batería, kilometraje y códigos de falla. Todos estos valores se registran de forma continua y alimentan los reportes y las alertas de la operación."
+        "a": "El GPS de la flota informa la posición, la velocidad y si el motor está encendido. Con eso FOM calcula los kilómetros, el recorrido del día y el estado de cada unidad (en marcha, detenida o sin señal), y detecta excesos de velocidad, frenadas y aceleraciones bruscas. No lee datos internos del motor, como revoluciones, temperatura o códigos de falla."
       },
       {
         "q": "¿Puedo exportar y programar el envío de los reportes?",
-        "a": "Sí. Cada reporte se descarga en PDF o Excel y se puede filtrar por vehículo, conductor o rango de fechas. También puede programar el envío automático al correo de los responsables con la frecuencia que necesite, por ejemplo diario o semanal."
+        "a": "Sí. Cada reporte se descarga en PDF y las tablas se descargan en CSV, con el mes o el rango de fechas que elija y para toda la empresa, un área o las unidades que quiera. Por ahora el envío no es automático: usted lo descarga y lo comparte con los responsables."
       }
     ]
   },

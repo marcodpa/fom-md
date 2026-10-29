@@ -142,11 +142,11 @@ const SENALES = [
     clase: 'is-escritorio', caja: [1672, 941], antena: [1244, 146], punta: [1276, 98],
     puntos: [
       { id: 'gps', p: [1252, 136], e: [1196, 74], lado: 'izq', texto: 'Ubicación GPS' },
-      { id: 'km', p: [1268, 272], e: [1340, 214], lado: 'der', texto: 'Km' },
-      { id: 'voltaje', p: [1143, 430], e: [1262, 520], lado: 'der', texto: 'Voltaje 12,6 V' },
-      { id: 'motor', p: [985, 425], e: [870, 322], lado: 'izq', texto: 'RPM / temperatura' },
+      { id: 'km', p: [1268, 272], e: [1340, 214], lado: 'der', texto: 'Kilómetros' },
+      { id: 'encendido', p: [1143, 430], e: [1262, 520], lado: 'der', texto: 'Encendido' },
+      { id: 'velocidad', p: [985, 425], e: [870, 322], lado: 'izq', texto: 'Velocidad' },
       { id: 'freno', p: [1150, 655], e: [1010, 808], lado: 'izq', texto: 'Frenada brusca' },
-      { id: 'combustible', p: [1440, 600], e: [1395, 766], lado: 'der', texto: 'Combustible' },
+      { id: 'aceleracion', p: [1440, 600], e: [1395, 766], lado: 'der', texto: 'Aceleración brusca' },
     ],
   },
   {
@@ -154,8 +154,8 @@ const SENALES = [
     puntos: [
       { id: 'gps', p: [588, 134], e: [530, 66], lado: 'izq', texto: 'Ubicación GPS' },
       { id: 'km', p: [600, 268] },
-      { id: 'voltaje', p: [485, 420] },
-      { id: 'motor', p: [370, 455], e: [268, 246], lado: 'izq', texto: 'RPM / temperatura' },
+      { id: 'encendido', p: [485, 420] },
+      { id: 'velocidad', p: [370, 455], e: [268, 246], lado: 'izq', texto: 'Velocidad' },
       { id: 'freno', p: [478, 660], e: [420, 892], lado: 'izq', texto: 'Frenada brusca' },
     ],
   },
