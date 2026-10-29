@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { entrarEmpresa } from '../auth'
-import repo from '../datos/repo'
+import repo, { DIRECTORIO_REAL } from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import {
@@ -12,6 +12,9 @@ import { COMPANY_TIPO, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import LogoEmpresa from '../comp/LogoEmpresa'
 import { subirLogoDeEmpresa } from '../datos/logos'
+import {
+  armarUsuarioResponsable, generarClaveTemporal, normalizarTelefono, problemaDelResponsable, textoDeError,
+} from '../datos/responsableEmpresa'
 import './empresas.css'
 
 // ============================================================
@@ -52,7 +55,7 @@ export default function AdminEmpresas() {
       await entrarEmpresa(empresa)
       navegar('/panel')
     } catch (e) {
-      setAviso(e.message)
+      setAviso(textoDeError(e))
     } finally {
       setEntrando(false)
     }
@@ -75,7 +78,7 @@ export default function AdminEmpresas() {
       await recargar()
       setConfirmacion(mensaje)
     } catch (e) {
-      setAviso(e.message)
+      setAviso(textoDeError(e))
     } finally { setOcupado(false) }
   }
   // Cada empresa tiene su logo y se ve de una vez al entrar; FOM Operations usa el de FOM.
@@ -108,7 +111,7 @@ export default function AdminEmpresas() {
         {aviso && <p className="emp-error" role="alert">{aviso}</p>}
         {confirmacion && <p className="emp-confirmacion" role="status"><Icono nombre="check" tam={18} />{confirmacion}</p>}
         {estado === 'cargando' && datos === null && <Cargando filas={6} />}
-        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={error} />}
+        {estado === 'error' && <ErrorCarga onReintentar={recargar} error={{ message: textoDeError(error, 'No pudimos cargar las empresas. Inténtalo de nuevo.') }} />}
         {datos !== null && (
           <Contenido subirLogo={subirLogo}
             lista={lista}
@@ -199,38 +202,111 @@ function ModalNueva({ abierto, alCerrar, alGuardar, actor }) {
   const [prede, setPrede] = useState([])
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
+  // Tras crear la empresa: { empresa, responsable, clave, usuario | null, fallo } (la clave solo vive aquí, en pantalla).
+  const [resultado, setResultado] = useState(null)
+  const [correoNuevo, setCorreoNuevo] = useState('')
   const companias = useDatos(() => abierto ? repo.admin.empresas.listar({tipo:'predefinida'}) : Promise.resolve([]), [abierto])
+  const limpiar = () => {
+    setNombre(''); setRif(''); setContacto(''); setTelefono(''); setEmail('')
+    setTipo('estandar'); setPrede([]); setError(''); setResultado(null); setCorreoNuevo('')
+  }
   const cerrar = () => {
     if (guardando) return
-    setNombre(''); setRif(''); setContacto(''); setTelefono(''); setEmail('')
-    setTipo('estandar'); setPrede([]); setError(''); alCerrar()
+    limpiar(); alCerrar()
   }
+
+  // El responsable queda creado de una vez como usuario SUPERVISOR de la empresa nueva.
+  const crearSupervisor = async (empresa, responsable, clave) => {
+    const peticion = armarUsuarioResponsable({ responsable, empresaId: empresa.id, tipoEmpresa: empresa.tipo, conectado: DIRECTORIO_REAL, clave })
+    const r = await repo.admin.usuarios.crear(peticion, actor)
+    return { nombre: r?.nombre || peticion.nombre, email: peticion.email, clave: r?.clave ?? null, claveCreada: r?.claveCreada !== false }
+  }
+
   const confirmar = async event => {
     event.preventDefault()
     if (guardando) return
     if (!nombre.trim()) { setError('Escribe el nombre de la empresa.'); return }
+    const problema = problemaDelResponsable({ contacto, email, telefono })
+    if (problema) { setError(problema); return }
     setGuardando(true); setError('')
+    const responsable = { contacto: contacto.trim(), email: email.trim(), telefono: normalizarTelefono(telefono) }
+    let empresa
     try {
-      await repo.admin.empresas.crear({ nombre:nombre.trim(), tipo, rif:rif.trim(), contacto:contacto.trim(), telefono:telefono.trim(), email:email.trim(), predefinidas:tipo === 'estandar' ? prede : [] }, actor)
-      await alGuardar()
-      setNombre(''); setRif(''); setContacto(''); setTelefono(''); setEmail(''); setTipo('estandar'); setPrede([]); alCerrar()
-    } catch(e) { setError(e.message || 'No se pudo crear la empresa. Inténtalo de nuevo.') }
-    finally { setGuardando(false) }
+      const r = await repo.admin.empresas.crear({ nombre:nombre.trim(), tipo, rif:rif.trim(), contacto:responsable.contacto, telefono:responsable.telefono, email:responsable.email, predefinidas:tipo === 'estandar' ? prede : [] }, actor)
+      empresa = { id: r?.id ?? null, nombre: nombre.trim(), tipo }
+    } catch(e) {
+      setError(textoDeError(e, 'No se pudo crear la empresa. Inténtalo de nuevo.'))
+      setGuardando(false)
+      return
+    }
+    // Desde aquí la empresa YA existe: si algo falla con el usuario, se avisa y se puede reintentar solo el usuario.
+    const clave = generarClaveTemporal(responsable.email)
+    let usuario = null
+    let fallo = ''
+    if (!empresa.id) {
+      fallo = 'El servidor no dijo cuál es la empresa nueva, así que no se pudo crear el usuario. Búscala en la lista y crea al supervisor desde Usuarios.'
+    } else {
+      try { usuario = await crearSupervisor(empresa, responsable, clave) } catch(e) { fallo = textoDeError(e, 'No se pudo crear el usuario supervisor.') }
+    }
+    try { await alGuardar() } catch { /* la lista se refresca sola en la próxima carga */ }
+    setCorreoNuevo(responsable.email)
+    setResultado({ empresa, responsable, clave, usuario, fallo })
+    setGuardando(false)
   }
+
+  const reintentarUsuario = async () => {
+    if (guardando || !resultado?.empresa.id) return
+    const problema = problemaDelResponsable({ contacto: resultado.responsable.contacto, email: correoNuevo })
+    if (problema) { setResultado(r => ({ ...r, fallo: problema })); return }
+    setGuardando(true)
+    const responsable = { ...resultado.responsable, email: correoNuevo.trim() }
+    try {
+      const usuario = await crearSupervisor(resultado.empresa, responsable, resultado.clave)
+      setResultado(r => ({ ...r, responsable, usuario, fallo: '' }))
+    } catch(e) {
+      setResultado(r => ({ ...r, fallo: textoDeError(e, 'No se pudo crear el usuario supervisor.') }))
+    } finally { setGuardando(false) }
+  }
+
+  if (resultado) {
+    const { empresa, usuario, fallo } = resultado
+    return <Modal titulo="Empresa creada" abierto={abierto} alCerrar={cerrar} ancho={560}>
+      <div className="emp-form" aria-busy={guardando}>
+        <p className="emp-confirmacion" role="status"><Icono nombre="check" tam={18} />{empresa.nombre} ya está creada.</p>
+        {usuario ? <>
+          <p className="emp-ayuda">{usuario.nombre} ya es <b>supervisor</b> de la empresa{usuario.clave
+            ? <> y puede entrar con el correo <b>{usuario.email}</b> y la clave temporal <code>{usuario.clave}</code>.</>
+            : <> con el correo <b>{usuario.email}</b>. Ya pertenecía al sistema y conserva su contraseña actual.</>}</p>
+          {usuario.clave && <p className="emp-ayuda">Entrégasela en persona: deberá cambiarla al entrar. No se volverá a mostrar.</p>}
+          <div className="emp-form-acciones"><button type="button" className="pnl-btn primario" onClick={cerrar}>Entendido</button></div>
+        </> : <>
+          <p className="emp-error" role="alert">La empresa quedó creada, pero no se pudo crear el usuario supervisor de {resultado.responsable.contacto}. {fallo}</p>
+          {empresa.id && <Campo etiqueta="Correo del responsable" ayuda="Si el correo estaba mal, corrígelo antes de reintentar.">
+            <input type="email" autoComplete="email" className="pnl-input" value={correoNuevo} disabled={guardando} onChange={e=>setCorreoNuevo(e.target.value)} />
+          </Campo>}
+          <div className="emp-form-acciones">
+            <button type="button" className="pnl-btn" disabled={guardando} onClick={cerrar}>Cerrar y hacerlo después</button>
+            {empresa.id && <button type="button" className="pnl-btn primario" disabled={guardando} onClick={reintentarUsuario}><Icono nombre="sync" tam={17} />{guardando ? 'Creando…' : 'Reintentar crear el usuario'}</button>}
+          </div>
+        </>}
+      </div>
+    </Modal>
+  }
+
   return <Modal titulo="Nueva empresa" abierto={abierto} alCerrar={cerrar} ancho={760}>
     <form className="emp-form" onSubmit={confirmar} aria-busy={guardando}>
-      <p className="emp-ayuda">Registra la empresa y su contacto. Después podrás entrar a su panel para configurar la operación.</p>
+      <p className="emp-ayuda">Registra la empresa y a su responsable. El responsable queda creado como supervisor de la empresa y entra con su correo.</p>
       {error && <p className="emp-error" role="alert">{error}</p>}
       <fieldset disabled={guardando}><legend>Datos de la empresa</legend><div className="emp-form-grid">
         <Campo etiqueta="Nombre de la empresa *"><input required autoComplete="organization" className="pnl-input" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Nombre o razón social" /></Campo>
         <Campo etiqueta="RIF"><input className="pnl-input" value={rif} onChange={e=>setRif(e.target.value)} placeholder="J-12345678-9" /></Campo>
       </div><Campo etiqueta="Tipo de empresa"><select className="pnl-input" value={tipo} onChange={e=>setTipo(e.target.value)}>{COMPANY_TIPO.map(t=><option key={t} value={t}>{etiqueta('company_tipo',t)}</option>)}</select></Campo>
       <p className="emp-tipo-ayuda"><Icono nombre={tipo === 'personal' ? 'gente' : 'empresa'} tam={21} />{tipo === 'estandar' ? 'Contratista: opera una flota de vehículos.' : tipo === 'predefinida' ? 'Compañía: supervisa las flotas de sus contratistas.' : 'Personal: una cuenta individual.'}</p></fieldset>
-      <fieldset disabled={guardando}><legend>Contacto</legend><div className="emp-form-grid">
-        <Campo etiqueta="Persona de contacto"><input autoComplete="name" className="pnl-input" value={contacto} onChange={e=>setContacto(e.target.value)} /></Campo>
-        <Campo etiqueta="Teléfono"><input type="tel" autoComplete="tel" className="pnl-input" value={telefono} onChange={e=>setTelefono(e.target.value)} placeholder="+58 …" /></Campo>
-        <Campo etiqueta="Correo" ayuda="Opcional. Se usará como contacto de la empresa."><input type="email" autoComplete="email" className="pnl-input" value={email} onChange={e=>setEmail(e.target.value)} placeholder="contacto@empresa.com" /></Campo>
-      </div></fieldset>
+      <fieldset disabled={guardando}><legend>Responsable de la empresa</legend><div className="emp-form-grid">
+        <Campo etiqueta="Nombre y apellido *"><input required autoComplete="name" className="pnl-input" value={contacto} onChange={e=>setContacto(e.target.value)} placeholder="Nombre y apellido" /></Campo>
+        <Campo etiqueta="Correo *" ayuda="Con este correo entrará a FOM."><input required type="email" autoComplete="email" className="pnl-input" value={email} onChange={e=>setEmail(e.target.value)} placeholder="responsable@empresa.com" /></Campo>
+        <Campo etiqueta="Teléfono" ayuda="Opcional. Con + y código del país."><input type="tel" autoComplete="tel" className="pnl-input" value={telefono} onChange={e=>setTelefono(e.target.value)} placeholder="+58 …" /></Campo>
+      </div><p className="emp-tipo-ayuda"><Icono nombre="gente" tam={21} />Se crea como usuario supervisor de la empresa, con una clave temporal que verás una sola vez al terminar.</p></fieldset>
       {tipo === 'estandar' && <section><h3>Compañías asociadas</h3><p className="emp-ayuda">Opcional: compañías para las que trabaja esta contratista.</p><SelectorCompanias fuente={companias} seleccion={prede} alCambiar={setPrede} disabled={guardando} /></section>}
       <div className="emp-form-acciones"><button type="button" className="pnl-btn" disabled={guardando} onClick={cerrar}>Cancelar</button><button type="submit" className="pnl-btn primario" disabled={guardando}><Icono nombre="check" tam={17} />{guardando ? 'Creando…' : 'Crear empresa'}</button></div>
     </form>
@@ -239,7 +315,7 @@ function ModalNueva({ abierto, alCerrar, alGuardar, actor }) {
 
 function SelectorCompanias({fuente, seleccion, alCambiar, disabled}) {
   if (fuente.estado === 'cargando') return <Cargando filas={2} />
-  if (fuente.estado === 'error') return <ErrorCarga error={fuente.error} texto="No se pudieron cargar las compañías." onReintentar={fuente.recargar} />
+  if (fuente.estado === 'error') return <ErrorCarga error={fuente.error && { message: textoDeError(fuente.error) }} texto="No se pudieron cargar las compañías." onReintentar={fuente.recargar} />
   return <div className="emp-companias">{fuente.datos?.length ? fuente.datos.map(c=><label key={c.id}><input type="checkbox" checked={seleccion.includes(c.id)} disabled={disabled} onChange={()=>alCambiar(p=>p.includes(c.id) ? p.filter(id=>id!==c.id) : [...p,c.id])} /><span><strong>{c.nombre}</strong><small>{c.rif || 'Compañía'}</small></span></label>) : <p className="emp-ayuda">No hay compañías registradas para asociar.</p>}</div>
 }
 
@@ -258,7 +334,7 @@ function ModalPredefinidas({ empresa, alCerrar, alGuardar, actor }) {
     try {
       await repo.admin.empresas.asignarPredefinidas(empresa.id, prede, actor)
       await alGuardar(); alCerrar()
-    } catch(e) { setError(e.message || 'No se pudieron guardar las compañías. Inténtalo de nuevo.') }
+    } catch(e) { setError(textoDeError(e, 'No se pudieron guardar las compañías. Inténtalo de nuevo.')) }
     finally { setGuardando(false) }
   }
   return <Modal titulo="Compañías asociadas" abierto alCerrar={cerrar} ancho={620}><form className="emp-form" onSubmit={confirmar} aria-busy={guardando}>

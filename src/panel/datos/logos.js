@@ -2,16 +2,27 @@
 // LOGOS DE EMPRESA
 // ------------------------------------------------------------
 // Regla de Marco: cada empresa tiene su propio logo y se ve de una vez al
-// entrar; FOM Operations usa el logo de FOM. El servidor guarda el logo
-// como un objeto de almacenamiento (`purpose: tenant_logo`) y referencia su
-// id en `fom.tenants.logo_object_id`. Subirlo son tres pasos, los mismos
-// que la app: pedir una carga, subir los bytes a la URL que devuelve, y
-// darla por completa. Luego la empresa apunta al objeto.
+// entrar; FOM Operations usa el logo de FOM.
+//
+// DOS SITIOS donde puede vivir el logo, igual que las demás fotos de FOM:
+//  1. El almacén del servidor: un objeto (`purpose: tenant_logo`) que la
+//     empresa referencia con `logoObjectId` (`fom.tenants.logo_object_id`).
+//     Subirlo son tres pasos, los mismos que la app: pedir una carga, subir
+//     los bytes a la URL que devuelve, y darla por completa.
+//  2. Cloudinary: en producción ese almacén sigue APAGADO (503
+//     `object_storage_unavailable`) y el servidor no tiene ningún campo para
+//     guardar una URL (`logoObjectId` solo acepta un objeto disponible). Por eso,
+//     si el almacén falla, el logo va a Cloudinary bajo una dirección fija que
+//     lleva el id de la empresa (`fom/logo-empresa/<id>/<n>`, con versiones
+//     numeradas como las fotos de unidades y perfiles). No hay que guardar nada
+//     en el servidor: quien muestre el logo calcula la dirección con el id.
 //
 // Estas rutas no se reescriben por empresa (`empresaContexto: null`): la
 // empresa ya viaja en el camino como `parentId`.
 // ============================================================
-import { api, pedir } from './api'
+import { HAY_API, api, pedir } from './api'
+import { cloudinaryConfigurado, idVigente, subirImagen, urlDe } from './cloudinary'
+import { textoDeError } from './responsableEmpresa'
 
 const CONSOLA = '/api/v1/console'
 const TIPOS_PERMITIDOS = ['image/png', 'image/jpeg', 'image/webp']
@@ -69,6 +80,22 @@ export function urlDeLogo(tenantId, objectId) {
   return urls.get(objectId)
 }
 
+// --- El logo en Cloudinary ----------------------------------------------
+/** Dirección fija del logo de una empresa en Cloudinary (sin el número de versión). */
+export const direccionLogo = (tenantId) => `fom/logo-empresa/${tenantId}`
+const etiquetaLogo = (tenantId) => `fom_logo_empresa_${tenantId}`
+
+/** La URL del logo de la empresa en Cloudinary, o `null` si todavía no tiene (o no hay Cloudinary). */
+export async function urlLogoEnNube(tenantId, ancho = 256) {
+  if (!tenantId || !cloudinaryConfigurado()) return null
+  try {
+    const id = await idVigente(direccionLogo(tenantId))
+    return id ? urlDe(id, ancho, 0, { ajuste: 'contener' }) : null
+  } catch {
+    return null
+  }
+}
+
 // --- Subir el logo de una empresa --------------------------------------
 async function sha256Hex(bytes) {
   const resumen = await crypto.subtle.digest('SHA-256', bytes)
@@ -92,11 +119,16 @@ async function esperarDisponible(tenantId, objectId) {
   return false
 }
 
-export async function subirLogoDeEmpresa(tenantId, archivo) {
-  if (!archivo) throw new Error('Elige un archivo de imagen.')
-  if (!TIPOS_PERMITIDOS.includes(archivo.type)) throw new Error('El logo tiene que ser PNG, JPG o WebP.')
-  if (archivo.size > PESO_MAXIMO) throw new Error('El logo no puede pesar más de 2 MB.')
+// Si el servidor ya dijo que su almacén está apagado, no se le vuelve a preguntar en esta sesión.
+let almacenApagado = false
+/** Solo para pruebas: vuelve a preguntarle al servidor. */
+export function olvidarAlmacenApagado() {
+  almacenApagado = false
+}
+const esApagado = (e) => e?.estado === 503 || /object_storage_unavailable/u.test(String(e?.message || ''))
 
+/** Los tres pasos del servidor. Devuelve el id del objeto, o lanza el error del servidor. */
+async function subirAlServidor(tenantId, archivo) {
   const bytes = await archivo.arrayBuffer()
   const alta = await pedir(`${CONSOLA}/tenants/${tenantId}/uploads`, {
     metodo: 'POST',
@@ -125,8 +157,42 @@ export async function subirLogoDeEmpresa(tenantId, archivo) {
 
   await esperarDisponible(tenantId, objectId)
   await api.actualizarEnte(tenantId, { logoObjectId: objectId })
-
   urls.delete(objectId)
-  olvidarLogos()
   return objectId
+}
+
+/**
+ * Sube el logo de una empresa. Primero al almacén del servidor (como la app); si está apagado, a
+ * Cloudinary. Devuelve `{ via: 'servidor', id }` o `{ via: 'cloudinary', url }`. Los errores salen ya en
+ * español llano: el código crudo del servidor (`object_storage_unavailable`) nunca llega a la pantalla.
+ */
+export async function subirLogoDeEmpresa(tenantId, archivo, { hayApi = HAY_API, alServidor = subirAlServidor } = {}) {
+  if (!tenantId) throw new Error('Falta saber de qué empresa es el logo.')
+  if (!archivo) throw new Error('Elige un archivo de imagen.')
+  if (!TIPOS_PERMITIDOS.includes(archivo.type)) throw new Error('El logo tiene que ser PNG, JPG o WebP.')
+  if (archivo.size > PESO_MAXIMO) throw new Error('El logo no puede pesar más de 2 MB.')
+
+  try {
+    if (hayApi && !almacenApagado) {
+      try {
+        const id = await alServidor(tenantId, archivo)
+        olvidarLogos()
+        return { via: 'servidor', id }
+      } catch (e) {
+        if (!esApagado(e)) throw e
+        almacenApagado = true
+      }
+    }
+    if (!cloudinaryConfigurado()) {
+      throw new Error('Por ahora no hay dónde guardar el logo: el almacén del servidor está apagado y Cloudinary no está configurado en esta web.')
+    }
+    const url = await subirImagen(archivo, {
+      publicId: direccionLogo(tenantId),
+      etiqueta: etiquetaLogo(tenantId),
+      titulo: 'Logo de la empresa',
+    })
+    return { via: 'cloudinary', url }
+  } catch (e) {
+    throw new Error(textoDeError(e, 'No se pudo guardar el logo. Inténtalo de nuevo.'))
+  }
 }
