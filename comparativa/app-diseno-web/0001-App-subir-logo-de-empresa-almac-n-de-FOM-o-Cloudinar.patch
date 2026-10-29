@@ -1,0 +1,1196 @@
+From c0b3cbbf5781bbb7e7e563e3d19bbb03f66b719c Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 09:00:53 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20subir=20logo=20de=20empresa=20(almac?=
+ =?UTF-8?q?=C3=A9n=20de=20FOM=20o=20Cloudinary=20si=20est=C3=A1=20apagado)?=
+ =?UTF-8?q?,=20errores=20en=20espa=C3=B1ol=20llano,=20y=20el=20responsable?=
+ =?UTF-8?q?=20de=20una=20empresa=20nueva=20queda=20creado=20como=20supervi?=
+ =?UTF-8?q?sor=20con=20clave=20temporal=20(T-207)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/app/admin/empresas.tsx            |   6 +-
+ src/app/consola-empresa.tsx           |  16 +-
+ src/app/crear-empresa.tsx             | 165 ++++++++++-----
+ src/app/editar-empresa.tsx            |  12 +-
+ src/app/empresas.tsx                  |  10 +-
+ src/app/gerencial/index.tsx           |   9 +-
+ src/components/logo-de-empresa.tsx    |  68 ++++++
+ src/components/subir-logo-empresa.tsx |  91 +++++++++
+ src/lib/cloudinary.ts                 |  19 +-
+ src/lib/responsable-empresa.ts        |  69 +++++++
+ src/lib/sha256.ts                     |  73 +++++++
+ src/services/authService.ts           |   6 +-
+ src/services/fomLogos.ts              | 284 ++++++++++++++++++++++++++
+ 13 files changed, 764 insertions(+), 64 deletions(-)
+ create mode 100644 src/components/logo-de-empresa.tsx
+ create mode 100644 src/components/subir-logo-empresa.tsx
+ create mode 100644 src/lib/responsable-empresa.ts
+ create mode 100644 src/lib/sha256.ts
+ create mode 100644 src/services/fomLogos.ts
+
+diff --git a/src/app/admin/empresas.tsx b/src/app/admin/empresas.tsx
+index dbabe4d..0cb9b01 100644
+--- a/src/app/admin/empresas.tsx
++++ b/src/app/admin/empresas.tsx
+@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/empty-state';
+ import { EncabezadoFom, TituloPantalla } from '@/components/encabezado-fom';
+ import { ErrorState } from '@/components/error-state';
+ import { Escalonado } from '@/components/escalonado';
++import { LogoDeEmpresa } from '@/components/logo-de-empresa';
+ import { EtiquetaSeccion } from '@/components/etiqueta-seccion';
+ import { OptionPickerModal, type PickerOption } from '@/components/option-picker';
+ import { PressableScale } from '@/components/pressable-scale';
+@@ -123,7 +124,10 @@ function Tarjeta({
+         <View style={[styles.fila, { gap: spacing.md }]}>
+           {/* Ícono del tipo, en el color de su flota. */}
+           <View style={[styles.lead, { backgroundColor: tinte(color, 0.14), borderRadius: radii.md }]}>
+-            <TabIcon name={TIPO_ICON[tipo]} color={color} size={21} />
++            {/* Su logo si ya lo tiene (servidor o Cloudinary); si no, el ícono del tipo. */}
++            <LogoDeEmpresa empresaId={ente.id} nombre={ente.name} size={34}>
++              <TabIcon name={TIPO_ICON[tipo]} color={color} size={21} />
++            </LogoDeEmpresa>
+           </View>
+           <View style={styles.flex1}>
+             <ThemedText variant="subtitle" numberOfLines={1} style={styles.nombre}>
+diff --git a/src/app/consola-empresa.tsx b/src/app/consola-empresa.tsx
+index 3089741..78b0860 100644
+--- a/src/app/consola-empresa.tsx
++++ b/src/app/consola-empresa.tsx
+@@ -22,6 +22,7 @@ import { PressableScale } from '@/components/pressable-scale';
+ import { ScreenHeader } from '@/components/screen-header';
+ import { SearchBar, normalizar } from '@/components/search-bar';
+ import { Skeleton } from '@/components/skeleton';
++import { SubirLogoEmpresa } from '@/components/subir-logo-empresa';
+ import { TabIcon } from '@/components/tab-icon';
+ import { TextField } from '@/components/text-field';
+ import { ThemedText } from '@/components/themed-text';
+@@ -29,6 +30,7 @@ import { ThemedView } from '@/components/themed-view';
+ import { useAsyncData } from '@/hooks/use-async-data';
+ import { confirmar } from '@/lib/confirmar';
+ import { compararMasNuevo } from '@/lib/orden';
++import { textoDeError } from '@/lib/responsable-empresa';
+ import {
+   actualizarEstadoPago,
+   actualizarEmpresa,
+@@ -50,7 +52,7 @@ import { TIPO_LABEL } from '@/utils/ente';
+ import { miles } from '@/utils/numero';
+ 
+ /** Qué sección de la administración está abierta. Solo una a la vez. */
+-type SeccionAdmin = 'datos' | 'cobros' | 'servicio' | null;
++type SeccionAdmin = 'logo' | 'datos' | 'cobros' | 'servicio' | null;
+ 
+ /**
+  * ADMINISTRACIÓN DE UNA EMPRESA — solo los admin FOM (su dashboard): editar
+@@ -160,7 +162,7 @@ export default function ConsolaEmpresaScreen() {
+       await accion();
+       recargar();
+     } catch (e) {
+-      setError(e instanceof Error ? e.message : 'No se pudo completar la acción.');
++      setError(textoDeError(e, 'No se pudo completar la acción.'));
+     }
+     // Después del try/catch y no en un `finally`: el compilador de React se salta los componentes con `finally`.
+     setOcupado(false);
+@@ -359,10 +361,18 @@ export default function ConsolaEmpresaScreen() {
+               <View style={{ gap: spacing.sm }}>
+                 <EtiquetaSeccion label="Administración" />
+                 <Card style={styles.plegables}>
++                  <FilaPlegable
++                    icon="galeria"
++                    label="Logo"
++                    primera
++                    abierta={seccion === 'logo'}
++                    onPress={() => abrirSeccion('logo')}>
++                    <SubirLogoEmpresa key={empresa.id} empresaId={empresa.id} nombre={empresa.name} />
++                  </FilaPlegable>
++
+                   <FilaPlegable
+                     icon="editar"
+                     label="Datos"
+-                    primera
+                     abierta={seccion === 'datos'}
+                     onPress={() => abrirSeccion('datos')}>
+                     <EmpresaDatosForm
+diff --git a/src/app/crear-empresa.tsx b/src/app/crear-empresa.tsx
+index a4c3522..c327d3d 100644
+--- a/src/app/crear-empresa.tsx
++++ b/src/app/crear-empresa.tsx
+@@ -19,6 +19,7 @@ import { ThemedView } from '@/components/themed-view';
+ import { useAsyncData } from '@/hooks/use-async-data';
+ import { generarClaveTemporal } from '@/lib/clave-temporal';
+ import { componerRif, componerTelefono, PAIS_POR_DEFECTO, PAISES, paisPorCodigo, TIPOS_RIF, type TipoRif } from '@/lib/paises';
++import { normalizarTelefono, problemaDelResponsable, textoDeError } from '@/lib/responsable-empresa';
+ import { validarEmail, validarRif, validarTelefono } from '@/lib/validate';
+ import { crearEmpresa, crearUsuarioConRol, getEmpresasSistema, getPredefinidas } from '@/services';
+ import { useTheme } from '@/theme';
+@@ -45,8 +46,9 @@ const TIPO_CAPTION: Record<CompanyTipo, string> = {
+ /**
+  * ALTA DE ENTE (FOM-02 §1.1, solo Admin FOM). Tres tipos: COMPAÑÍA (la
+  * general, con asociadas y flota propia), CONTRATISTA (asignable a una
+- * compañía) y PERSONAL (doméstica). Flujo: crear la ente → crear su
+- * ADMINISTRADOR (o supervisor personal) → crear los vehículos (wizard §1.2).
++ * compañía) y PERSONAL (doméstica). Flujo: crear la ente CON su responsable
++ * (que queda creado de una vez como usuario SUPERVISOR, igual que en la web) →
++ * crear los vehículos (wizard §1.2).
+  */
+ export default function CrearEmpresaScreen() {
+   const { spacing } = useTheme();
+@@ -72,12 +74,17 @@ export default function CrearEmpresaScreen() {
+ 
+   const pais = paisPorCodigo(paisCodigo);
+ 
+-  // ── Supervisor (§1.1 paso 2) ──
++  // ── Responsable = usuario supervisor de la empresa (§1.1 paso 2) ──
+   const [supNombre, setSupNombre] = useState('');
+   const [supEmail, setSupEmail] = useState('');
+   const [creandoSup, setCreandoSup] = useState(false);
+   const [supervisor, setSupervisor] = useState<User | null>(null);
+-  // Su clave TEMPORAL, generada: se le entrega y la cambia por la suya al entrar.
++  // `false` = la persona ya existía en FOM y conserva su clave: no se enseña la temporal.
++  const [claveCreada, setClaveCreada] = useState(true);
++  // Por qué no se pudo crear su usuario (la empresa ya quedó creada).
++  const [falloSup, setFalloSup] = useState<string | null>(null);
++  // Su clave TEMPORAL, generada: se le entrega en persona y la cambia por la suya al entrar.
++  // Solo vive en esta pantalla y se muestra una sola vez, al terminar.
+   const [claveSup] = useState(generarClaveTemporal);
+   const [copiada, setCopiada] = useState(false);
+ 
+@@ -114,6 +121,8 @@ export default function CrearEmpresaScreen() {
+     e.rif = validarRif(rifNumero);
+     e.telefono = validarTelefono(telefono, pais.longitud);
+     e.email = validarEmail(email);
++    // El responsable es obligatorio: sin su nombre y correo no se puede crear su usuario.
++    e.responsable = problemaDelResponsable({ contacto: supNombre, email: supEmail });
+     // La compañía es OPCIONAL: una contratista puede existir sola y colgarse
+     // de una compañía después, desde su ficha. Obligarlo aquí impedía dar de
+     // alta a quien todavía no tiene con quién trabajar.
+@@ -126,20 +135,27 @@ export default function CrearEmpresaScreen() {
+     setError(null);
+     if (!validar()) return;
+     setCreandoEmpresa(true);
++    let c: Company;
+     try {
+-      const c = await crearEmpresa({
++      c = await crearEmpresa({
+         name: nombre,
+         rif: componerRif(rifLetra, rifNumero),
+-        telefono: componerTelefono(pais.discado, telefono),
++        // FOM acepta el teléfono solo como «+» y dígitos, sin espacios.
++        telefono: normalizarTelefono(componerTelefono(pais.discado, telefono)),
+         email,
++        contacto: supNombre.trim().replace(/\s+/g, ' '),
+         tipo,
+         predefinidaIds: predefinidaIds.length > 0 ? predefinidaIds : undefined,
+         color: color ?? undefined,
+       });
+-      setEmpresa(c);
+     } catch (e) {
+-      setError(e instanceof Error ? e.message : 'No se pudo crear la empresa.');
++      setError(textoDeError(e, 'No se pudo crear la empresa. Inténtalo de nuevo.'));
++      setCreandoEmpresa(false);
++      return;
+     }
++    // Desde aquí la empresa YA existe: si algo falla con el usuario, se avisa y se puede reintentar solo el usuario.
++    setEmpresa(c);
++    await crearElSupervisor(c, supEmail);
+     // Después del try/catch y no en un `finally`: el compilador de React se salta los componentes con `finally`.
+     setCreandoEmpresa(false);
+   }
+@@ -155,22 +171,33 @@ export default function CrearEmpresaScreen() {
+       ? 'Supervisor de la compañía'
+       : 'Supervisor de la empresa';
+ 
+-  async function onCrearSupervisor() {
+-    if (creandoSup || !empresa) return;
+-    setError(null);
+-    setCreandoSup(true);
++  /** Crea al responsable como supervisor de la empresa recién creada. Un fallo no la deshace: se avisa. */
++  async function crearElSupervisor(destino: Company, correo: string) {
++    setFalloSup(null);
+     try {
+       const s = await crearUsuarioConRol({
+-        companyId: empresa.id,
+-        nombre: supNombre,
+-        email: supEmail,
++        companyId: destino.id,
++        nombre: supNombre.trim().replace(/\s+/g, ' '),
++        email: correo.trim(),
+         password: claveSup,
+-        role: empresa.tipo === 'personal' ? 'supervisor_personal' : 'supervisor_company',
++        role: destino.tipo === 'personal' ? 'supervisor_personal' : 'supervisor_company',
+       });
+       setSupervisor(s);
++      setClaveCreada(s.claveCreada);
+     } catch (e) {
+-      setError(e instanceof Error ? e.message : 'No se pudo crear el usuario.');
++      setFalloSup(textoDeError(e, 'No se pudo crear el usuario supervisor.'));
+     }
++  }
++
++  async function onReintentarSupervisor() {
++    if (creandoSup || !empresa) return;
++    const problema = problemaDelResponsable({ contacto: supNombre, email: supEmail });
++    if (problema) {
++      setFalloSup(problema);
++      return;
++    }
++    setCreandoSup(true);
++    await crearElSupervisor(empresa, supEmail);
+     setCreandoSup(false);
+   }
+ 
+@@ -181,6 +208,11 @@ export default function CrearEmpresaScreen() {
+ 
+         <View style={styles.flex}>
+           <ScrollVisible contentContainerStyle={[styles.content, { padding: spacing.lg, gap: spacing.lg }]}>
++            <ThemedText variant="caption" color="textMuted">
++              Registra la empresa y a su responsable. El responsable queda creado como supervisor de la empresa y
++              entra con su correo.
++            </ThemedText>
++
+             {/* ── 1) CREAR EMPRESA ── */}
+             <Card style={{ gap: spacing.md }}>
+               <View style={styles.rowBetween}>
+@@ -275,6 +307,36 @@ export default function CrearEmpresaScreen() {
+                 </View>
+               ) : null}
+               <SelectorColorFlota valor={color} enUso={coloresEnUso} disabled={!!empresa} onChange={setColor} />
++
++              {/* Responsable: queda creado de una vez como usuario supervisor de la empresa. */}
++              <View style={{ gap: spacing.sm }}>
++                <ThemedText variant="overline" color="textMuted">
++                  Responsable de la empresa
++                </ThemedText>
++                <TextField
++                  label="Nombre y apellido *"
++                  value={supNombre}
++                  onChangeText={setSupNombre}
++                  placeholder="Nombre y apellido"
++                  autoComplete="name"
++                  editable={!empresa}
++                />
++                <TextField
++                  label="Correo *"
++                  value={supEmail}
++                  onChangeText={setSupEmail}
++                  placeholder="responsable@empresa.com"
++                  keyboardType="email-address"
++                  autoCapitalize="none"
++                  autoComplete="email"
++                  editable={!empresa}
++                  error={errores.responsable ?? undefined}
++                />
++                <ThemedText variant="caption" color="textMuted">
++                  Con este correo entrará a FOM. Se crea como usuario supervisor de la empresa, con una clave
++                  temporal que verás una sola vez al terminar.
++                </ThemedText>
++              </View>
+               {!empresa ? (
+                 <Button
+                   label={creandoEmpresa ? 'Creando…' : 'Crear empresa'}
+@@ -284,53 +346,64 @@ export default function CrearEmpresaScreen() {
+               ) : null}
+             </Card>
+ 
+-            {/* ── 2) CREAR AL RESPONSABLE (administrador / supervisor personal) ── */}
++            {/* ── 2) EL RESPONSABLE, ya creado como usuario supervisor ── */}
+             {empresa ? (
+               <Card style={{ gap: spacing.md }}>
+                 <View style={styles.rowBetween}>
+                   <ThemedText variant="overline" color="textMuted">
+                     {`2 · ${tituloResponsable}`}
+                   </ThemedText>
+-                  {supervisor ? <Chip tone="success" label="Invitado" /> : null}
++                  {supervisor ? <Chip tone="success" label="Creado" /> : null}
+                 </View>
+-                {!supervisor ? (
++                <ThemedText variant="caption" color="textSecondary" accessibilityRole="alert">
++                  {`${empresa.name} ya está creada.`}
++                </ThemedText>
++                {supervisor ? (
+                   <>
+-                    <ThemedText variant="caption" color="textMuted">
+-                      {esPersonal
+-                        ? 'Administra la cuenta: sus vehículos y sus usuarios.'
+-                        : 'Crea y edita todo en su ente: vehículos, usuarios, ODT. (El SUPERVISOR de solo lectura se crea después, desde Usuarios.)'}
++                    {claveCreada ? (
++                      <>
++                        <ThemedText variant="caption" color="textSecondary" selectable>
++                          {`${supervisor.name} ya es supervisor de la empresa y puede entrar con el correo ${supervisor.email} y la clave temporal ${claveSup}.`}
++                        </ThemedText>
++                        <ThemedText variant="caption" color="textMuted">
++                          Entrégasela en persona: deberá cambiarla al entrar. No se volverá a mostrar.
++                        </ThemedText>
++                        <Button
++                          label={copiada ? 'Clave copiada' : 'Copiar la clave'}
++                          variant="secondary"
++                          onPress={async () => {
++                            await Clipboard.setStringAsync(claveSup);
++                            setCopiada(true);
++                          }}
++                        />
++                      </>
++                    ) : (
++                      <ThemedText variant="caption" color="textSecondary" selectable>
++                        {`${supervisor.name} ya es supervisor de la empresa con el correo ${supervisor.email}. Ya pertenecía al sistema y conserva su contraseña actual.`}
++                      </ThemedText>
++                    )}
++                  </>
++                ) : (
++                  <>
++                    <ThemedText variant="caption" color="danger" accessibilityRole="alert">
++                      {`La empresa quedó creada, pero no se pudo crear el usuario supervisor de ${supNombre.trim()}. ${falloSup ?? ''}`.trim()}
+                     </ThemedText>
+-                    <TextField label="Nombre" value={supNombre} onChangeText={setSupNombre} placeholder="Yeison" editable={!creandoSup} />
+                     <TextField
+-                      label="Email"
++                      label="Correo del responsable"
+                       value={supEmail}
+                       onChangeText={setSupEmail}
+-                      placeholder="admin@empresa.com"
+                       keyboardType="email-address"
+                       autoCapitalize="none"
++                      autoComplete="email"
+                       editable={!creandoSup}
+                     />
+-                    <Button
+-                      label={creandoSup ? 'Enviando…' : 'Crear e invitar'}
+-                      onPress={onCrearSupervisor}
+-                      loading={creandoSup}
+-                    />
+-                  </>
+-                ) : (
+-                  <>
+-                    <ThemedText variant="caption" color="textSecondary">
+-                      {`${supervisor.name} (${tituloResponsable} · ${empresa.name}) ya tiene su cuenta. Al entrar cambiará la clave por la suya y llenará su perfil: cédula, licencia y carta médica.`}
+-                    </ThemedText>
+-                    <ThemedText variant="caption" color="textSecondary" selectable>
+-                      {`${supervisor.email} · Clave temporal: ${claveSup}`}
++                    <ThemedText variant="caption" color="textMuted">
++                      Si el correo estaba mal, corrígelo antes de reintentar.
+                     </ThemedText>
+                     <Button
+-                      label={copiada ? 'Clave copiada' : 'Copiar la clave'}
+-                      variant="secondary"
+-                      onPress={async () => {
+-                        await Clipboard.setStringAsync(claveSup);
+-                        setCopiada(true);
+-                      }}
++                      label={creandoSup ? 'Creando…' : 'Reintentar crear el usuario'}
++                      onPress={onReintentarSupervisor}
++                      loading={creandoSup}
+                     />
+                   </>
+                 )}
+diff --git a/src/app/editar-empresa.tsx b/src/app/editar-empresa.tsx
+index 6955ff4..225f917 100644
+--- a/src/app/editar-empresa.tsx
++++ b/src/app/editar-empresa.tsx
+@@ -14,9 +14,11 @@ import { ErrorState } from '@/components/error-state';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { ScreenHeader } from '@/components/screen-header';
+ import { Skeleton } from '@/components/skeleton';
++import { SubirLogoEmpresa } from '@/components/subir-logo-empresa';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
+ import { useAsyncData } from '@/hooks/use-async-data';
++import { textoDeError } from '@/lib/responsable-empresa';
+ import { actualizarEmpresa, getEmpresasSistema, getUnidadesFlota } from '@/services';
+ import { useTheme } from '@/theme';
+ 
+@@ -68,7 +70,7 @@ export default function EditarEmpresaScreen() {
+       setGuardado(true);
+       recargar();
+     } catch (e) {
+-      setError(e instanceof Error ? e.message : 'No se pudo guardar.');
++      setError(textoDeError(e, 'No se pudo guardar.'));
+     }
+     // Después del try/catch y no en un `finally`: el compilador de React se salta los componentes con `finally`.
+     setOcupado(false);
+@@ -105,6 +107,14 @@ export default function EditarEmpresaScreen() {
+                 ) : null}
+               </Card>
+ 
++              {/* ── SU LOGO: el mismo que se ve en la web ── */}
++              <Card style={{ gap: spacing.md }}>
++                <ThemedText variant="overline" color="textMuted">
++                  Logo
++                </ThemedText>
++                <SubirLogoEmpresa key={empresa.id} empresaId={empresa.id} nombre={empresa.name} />
++              </Card>
++
+               {/* ── SUS UNIDADES: tocar una abre su CRUD (editar / mover /
+                   eliminar — la RLS valida el alcance en el servidor). ── */}
+               <Card style={{ gap: spacing.sm }}>
+diff --git a/src/app/empresas.tsx b/src/app/empresas.tsx
+index 3327451..328de2c 100644
+--- a/src/app/empresas.tsx
++++ b/src/app/empresas.tsx
+@@ -9,6 +9,7 @@ import { ActionTile } from '@/components/action-tile';
+ import { Appear } from '@/components/appear';
+ import { Card } from '@/components/card';
+ import { ErrorState } from '@/components/error-state';
++import { LogoDeEmpresa } from '@/components/logo-de-empresa';
+ import { PillButton } from '@/components/pill-button';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { Skeleton } from '@/components/skeleton';
+@@ -157,9 +158,12 @@ export default function EmpresasScreen() {
+                     <Card style={[styles.companyCard, { gap: spacing.md }]}>
+                       {/* Logo placeholder con el color de marca de la empresa. */}
+                       <View style={[styles.avatar, { backgroundColor: color, borderRadius: radii.md }]}>
+-                        <ThemedText variant="subtitle" style={{ color: getContrastingTextColor(color) }}>
+-                          {iniciales(company.name)}
+-                        </ThemedText>
++                        {/* Su logo si ya lo tiene; si no, sus iniciales. */}
++                        <LogoDeEmpresa empresaId={company.id} nombre={company.name} size={40}>
++                          <ThemedText variant="subtitle" style={{ color: getContrastingTextColor(color) }}>
++                            {iniciales(company.name)}
++                          </ThemedText>
++                        </LogoDeEmpresa>
+                       </View>
+                       <View style={styles.flex1}>
+                         <ThemedText variant="subtitle">{company.name}</ThemedText>
+diff --git a/src/app/gerencial/index.tsx b/src/app/gerencial/index.tsx
+index adf10df..d5ca08d 100644
+--- a/src/app/gerencial/index.tsx
++++ b/src/app/gerencial/index.tsx
+@@ -10,6 +10,7 @@ import { Card } from '@/components/card';
+ import { EncabezadoFom, TituloPantalla } from '@/components/encabezado-fom';
+ import { EmptyState } from '@/components/empty-state';
+ import { ErrorState } from '@/components/error-state';
++import { LogoDeEmpresa } from '@/components/logo-de-empresa';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { SegmentedControl } from '@/components/segmented-control';
+ import { Skeleton } from '@/components/skeleton';
+@@ -148,9 +149,11 @@ export default function GerencialHomeScreen() {
+                     accessibilityLabel={`Ver capa gerencial de ${company.name}`}>
+                     <Card style={[styles.companyCard, { gap: spacing.md }]}>
+                       <View style={[styles.avatar, { backgroundColor: colors.primary, borderRadius: radii.md }]}>
+-                        <ThemedText variant="subtitle" style={{ color: colors.onPrimary }}>
+-                          {iniciales(company.name)}
+-                        </ThemedText>
++                        <LogoDeEmpresa empresaId={company.id} nombre={company.name} size={40}>
++                          <ThemedText variant="subtitle" style={{ color: colors.onPrimary }}>
++                            {iniciales(company.name)}
++                          </ThemedText>
++                        </LogoDeEmpresa>
+                       </View>
+                       <View style={styles.flex1}>
+                         <ThemedText variant="subtitle">{company.name}</ThemedText>
+diff --git a/src/components/logo-de-empresa.tsx b/src/components/logo-de-empresa.tsx
+new file mode 100644
+index 0000000..2dbf44c
+--- /dev/null
++++ b/src/components/logo-de-empresa.tsx
+@@ -0,0 +1,68 @@
++import { Image } from 'expo-image';
++import { useEffect, useState, type ReactNode } from 'react';
++import { StyleSheet, View } from 'react-native';
++
++import { LogoFomCuadrado } from '@/components/logo-fom';
++import { alCambiarLogos, fuenteLogoDe, type FuenteLogo } from '@/services/fomLogos';
++
++/**
++ * El LOGO de una empresa, para saber de una vez dónde estás (igual que la web).
++ *
++ * - FOM Operations lleva el logo de FOM.
++ * - Si la empresa tiene logo en el almacén de FOM, se pinta ese; si no, el que
++ *   se subió a Cloudinary (su dirección sale del id de la empresa).
++ * - Si no tiene, se pinta `children` (el icono o las iniciales que tenía la
++ *   pantalla), nunca el logo de FOM: una empresa ajena sin logo no es FOM.
++ */
++export function LogoDeEmpresa({
++  empresaId,
++  nombre = '',
++  size = 48,
++  children = null,
++}: {
++  empresaId: string | null | undefined;
++  nombre?: string;
++  size?: number;
++  /** Lo que se ve mientras no hay logo. */
++  children?: ReactNode;
++}) {
++  const [fuente, setFuente] = useState<FuenteLogo>(null);
++  const [fallo, setFallo] = useState(false);
++  // Se subió un logo desde esta app: se vuelve a buscar el de la empresa.
++  const [cambio, setCambio] = useState(0);
++  useEffect(() => alCambiarLogos(() => setCambio((n) => n + 1)), []);
++
++  useEffect(() => {
++    let vivo = true;
++    fuenteLogoDe(empresaId)
++      .catch(() => null)
++      .then((f) => {
++        if (!vivo) return;
++        setFallo(false);
++        setFuente(f);
++      });
++    return () => {
++      vivo = false;
++    };
++  }, [empresaId, cambio]);
++
++  if (fuente === 'fom') return <LogoFomCuadrado size={size} />;
++  if (fuente && !fallo) {
++    return (
++      <View style={{ width: size, height: size }}>
++        <Image
++          source={{ uri: fuente.uri, headers: fuente.headers }}
++          style={styles.imagen}
++          contentFit="contain"
++          accessibilityLabel={nombre ? `Logo de ${nombre}` : undefined}
++          onError={() => setFallo(true)}
++        />
++      </View>
++    );
++  }
++  return <>{children}</>;
++}
++
++const styles = StyleSheet.create({
++  imagen: { width: '100%', height: '100%' },
++});
+diff --git a/src/components/subir-logo-empresa.tsx b/src/components/subir-logo-empresa.tsx
+new file mode 100644
+index 0000000..90da660
+--- /dev/null
++++ b/src/components/subir-logo-empresa.tsx
+@@ -0,0 +1,91 @@
++import * as ImagePicker from 'expo-image-picker';
++import { useState } from 'react';
++import { Alert, StyleSheet, View } from 'react-native';
++
++import { Button } from '@/components/button';
++import { LogoDeEmpresa } from '@/components/logo-de-empresa';
++import { TabIcon } from '@/components/tab-icon';
++import { ThemedText } from '@/components/themed-text';
++import { textoDeError } from '@/lib/responsable-empresa';
++import { subirLogoDeEmpresa } from '@/services/fomLogos';
++import { useTheme } from '@/theme';
++
++/**
++ * El LOGO de una empresa y el botón para cambiarlo. Es lo de «Subir logo» de la
++ * web: el mismo destino (almacén de FOM y, si está apagado, Cloudinary), así que
++ * el logo que se sube aquí se ve en la web y al revés.
++ */
++export function SubirLogoEmpresa({ empresaId, nombre }: { empresaId: string; nombre: string }) {
++  const { colors, radii, spacing } = useTheme();
++  const [subiendo, setSubiendo] = useState(false);
++  const [aviso, setAviso] = useState<string | null>(null);
++  const [error, setError] = useState<string | null>(null);
++
++  async function elegir() {
++    if (subiendo) return;
++    setAviso(null);
++    setError(null);
++    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
++    if (!permiso.granted) {
++      Alert.alert('Permiso necesario', 'Habilita la galería para elegir el logo.');
++      return;
++    }
++    const res = await ImagePicker.launchImageLibraryAsync({
++      mediaTypes: ['images'],
++      quality: 1,
++      // En iOS, un formato que se pueda leer en todas partes (no HEIC).
++      preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
++    });
++    if (res.canceled || !res.assets[0]) return;
++    setSubiendo(true);
++    try {
++      await subirLogoDeEmpresa(empresaId, { uri: res.assets[0].uri });
++      setAviso(`Logo de ${nombre} guardado.`);
++    } catch (e) {
++      setError(textoDeError(e, 'No se pudo guardar el logo. Inténtalo de nuevo.'));
++    }
++    // Después del try/catch y no en un `finally`: el compilador de React se salta los componentes con `finally`.
++    setSubiendo(false);
++  }
++
++  return (
++    <View style={{ gap: spacing.md }}>
++      <View style={[styles.fila, { gap: spacing.md }]}>
++        <View
++          style={[
++            styles.caja,
++            { backgroundColor: colors.surfaceElevated, borderColor: colors.border, borderRadius: radii.md },
++          ]}>
++          <LogoDeEmpresa empresaId={empresaId} nombre={nombre} size={56}>
++            <TabIcon name="empresa" color={colors.textMuted} size={26} />
++          </LogoDeEmpresa>
++        </View>
++        <ThemedText variant="caption" color="textMuted" style={styles.texto}>
++          PNG, JPG o WebP. Se ve en el encabezado de la empresa, también en la web.
++        </ThemedText>
++      </View>
++      <Button
++        label={subiendo ? 'Subiendo…' : 'Subir logo'}
++        variant="secondary"
++        onPress={elegir}
++        loading={subiendo}
++      />
++      {aviso ? (
++        <ThemedText variant="caption" color="success" accessibilityRole="alert">
++          {aviso}
++        </ThemedText>
++      ) : null}
++      {error ? (
++        <ThemedText variant="caption" color="danger" accessibilityRole="alert">
++          {error}
++        </ThemedText>
++      ) : null}
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { flexDirection: 'row', alignItems: 'center' },
++  caja: { width: 72, height: 72, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
++  texto: { flex: 1 },
++});
+diff --git a/src/lib/cloudinary.ts b/src/lib/cloudinary.ts
+index ef6103d..afec049 100644
+--- a/src/lib/cloudinary.ts
++++ b/src/lib/cloudinary.ts
+@@ -66,6 +66,8 @@ export const ids = {
+   persona: (userId: string, doc: DocPersona, cara: CaraFoto) => `fom/persona/${userId}/${doc}/${cara}`,
+   archivo: (coleccion: ColeccionFom, padreId: string, proposito: PropositoFom) =>
+     `fom/${coleccion}/${padreId}/${proposito}`,
++  /** El logo de una empresa: la MISMA dirección que la web (`direccionLogo`). */
++  logoEmpresa: (tenantId: string) => `fom/logo-empresa/${tenantId}`,
+ };
+ 
+ /** Etiquetas que la web pone al subir: aquí se ponen las mismas. */
+@@ -75,6 +77,7 @@ export const etiquetas = {
+   documento: (id: string) => `fom_documento_${id}`,
+   persona: (userId: string) => `fom_persona_${userId}`,
+   archivo: (coleccion: ColeccionFom, padreId: string) => `fom_${coleccion.replace(/-/g, '_')}_${padreId}`,
++  logoEmpresa: (tenantId: string) => `fom_logo_empresa_${tenantId}`,
+ };
+ 
+ /** Dónde va una foto: su dirección base y la etiqueta con que se sube. */
+@@ -527,6 +530,11 @@ export type OpcionesSubida = {
+   exigirRemoto?: boolean;
+   /** Qué muestra la foto; viaja con ella. */
+   titulo?: string;
++  /**
++   * `png`: el archivo ya viene preparado (PNG local) y se sube TAL CUAL, sin pasarlo a JPEG.
++   * Es para los logos, que suelen tener fondo transparente y en JPEG se volverían negros.
++   */
++  formato?: 'png';
+ };
+ 
+ /** Qué hacer cuando la subida no salió: avisar con el motivo, o seguir en local. */
+@@ -561,8 +569,9 @@ async function subirAhora(uri: string, destino: DestinoFoto, opts: OpcionesSubid
+   // Un documento puede llegar en PDF (una póliza). Va por la misma ruta `image`
+   // que usa la web —Cloudinary guarda el PDF tal cual— y con su extensión.
+   const esPdf = /\.pdf($|\?)/i.test(uri);
+-  // Las fotos viajan como JPEG local y reducido; un PDF, tal cual.
+-  const archivo = esPdf ? uri : await prepararFoto(uri);
++  // Las fotos viajan como JPEG local y reducido; un PDF o un PNG ya preparado (logo), tal cual.
++  const png = opts.formato === 'png';
++  const archivo = esPdf || png ? uri : await prepararFoto(uri);
+ 
+   // Se pregunta de nuevo, sin lo recordado: la web pudo subir otra mientras.
+   // (`ultimaVersion` no lanza: sin red da lo último que se vio.)
+@@ -576,8 +585,8 @@ async function subirAhora(uri: string, destino: DestinoFoto, opts: OpcionesSubid
+     // En el teléfono, XMLHttpRequest acepta este objeto {uri, name, type} como
+     // archivo; el `fetch` de Expo NO (falla con «Unsupported FormDataPart
+     // implementation»). En la versión web se manda el archivo de verdad.
+-    const nombre = `foto-${n}.${esPdf ? 'pdf' : 'jpg'}`;
+-    const tipo = esPdf ? 'application/pdf' : 'image/jpeg';
++    const nombre = `foto-${n}.${esPdf ? 'pdf' : png ? 'png' : 'jpg'}`;
++    const tipo = esPdf ? 'application/pdf' : png ? 'image/png' : 'image/jpeg';
+     if (Platform.OS === 'web') {
+       body.append('file', await (await fetch(archivo)).blob(), nombre);
+     } else {
+@@ -611,7 +620,7 @@ async function subirAhora(uri: string, destino: DestinoFoto, opts: OpcionesSubid
+       fotosResueltas.delete(unidadSubida);
+     }
+     guardarDisco();
+-    tipos.set(publicId, esPdf ? 'application/pdf' : 'image/jpeg');
++    tipos.set(publicId, esPdf ? 'application/pdf' : png ? 'image/png' : 'image/jpeg');
+     return urlDeFoto(publicId);
+   }
+   return fallo(uri, opts, `los números ${primero} a ${n - 1} de ${destino.base} ya estaban ocupados`);
+diff --git a/src/lib/responsable-empresa.ts b/src/lib/responsable-empresa.ts
+new file mode 100644
+index 0000000..3d67493
+--- /dev/null
++++ b/src/lib/responsable-empresa.ts
+@@ -0,0 +1,69 @@
++/**
++ * RESPONSABLE DE LA EMPRESA + MENSAJES EN LLANO (alta y logo de una empresa).
++ *
++ * Es lo mismo que hace la web en `src/panel/datos/responsableEmpresa.js`, con los
++ * mismos textos: al crear una empresa se pide su responsable, que queda creado
++ * como usuario SUPERVISOR de la empresa, con una clave temporal que se muestra
++ * una sola vez. Lógica pura, sin pantalla ni red.
++ */
++
++/** El teléfono como lo acepta FOM: «+» y de 7 a 15 dígitos, sin espacios, guiones ni paréntesis. */
++export function normalizarTelefono(telefono: string | null | undefined): string {
++  return String(telefono ?? '').replace(/[\s\-().]/g, '');
++}
++
++const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
++
++/**
++ * Revisa lo que el formulario pide del responsable. Devuelve el aviso en español
++ * del primer problema, o `null` si está todo bien. Nombre, apellido y correo son
++ * obligatorios: sin ellos no se puede crear su usuario.
++ */
++export function problemaDelResponsable(datos: { contacto?: string; email?: string }): string | null {
++  const nombre = String(datos.contacto ?? '').trim().replace(/\s+/g, ' ');
++  if (nombre.length < 2) return 'Escribe el nombre y el apellido del responsable.';
++  if (nombre.split(' ').length < 2) return 'Escribe también el apellido del responsable.';
++  if (nombre.length > 120) return 'El nombre del responsable es demasiado largo.';
++  const email = String(datos.email ?? '').trim();
++  if (!email) return 'Escribe el correo del responsable: con él entrará a FOM.';
++  if (!CORREO.test(email)) return 'Escribe un correo válido para el responsable, por ejemplo nombre@empresa.com.';
++  return null;
++}
++
++// --- Errores en llano ---------------------------------------------------------
++const ERRORES: [RegExp, string][] = [
++  [
++    /object_storage_unavailable|storage[_ ]unavailable/i,
++    'Por ahora el servidor no puede guardar archivos. No es un fallo tuyo: inténtalo más tarde o avisa al equipo técnico.',
++  ],
++  [
++    // Incluye el texto que la app ya traduce del 409 («Esa persona ya pertenece a esta empresa.»).
++    /already has active company access|already belongs to this company|ya pertenece a esta empresa/i,
++    'Ese correo ya tiene acceso a una empresa. Usa otro correo para el responsable.',
++  ],
++  [
++    /code already exists|company with that code/i,
++    'Ya existe una empresa con un nombre parecido. Cambia un poco el nombre.',
++  ],
++  [/phone must be/i, 'El teléfono debe empezar por + y el código del país, por ejemplo +584141234567.'],
++  [/rif must look like/i, 'El RIF debe verse así: J-12345678-9.'],
++  [/email must be an email|must be an email/i, 'El correo no es válido.'],
++];
++
++/**
++ * El texto de un error listo para mostrar. Nunca deja pasar un código crudo del
++ * servidor (`object_storage_unavailable`…): lo cambia por una frase en español.
++ */
++export function textoDeError(
++  error: unknown,
++  porDefecto = 'No se pudo completar la operación. Inténtalo de nuevo.',
++): string {
++  const e = error as { message?: unknown; code?: unknown } | string | null | undefined;
++  const crudo = typeof e === 'string' ? e : typeof e?.message === 'string' ? e.message : '';
++  const codigo = typeof e === 'object' && e && typeof e.code === 'string' ? e.code : '';
++  const conocido = ERRORES.find(([patron]) => patron.test(`${crudo} ${codigo}`));
++  if (conocido) return conocido[1];
++  // Un código suelto en minúsculas con guion bajo (`algo_que_fallo`) no es para una persona.
++  if (/^[a-z0-9]+(_[a-z0-9]+)+$/.test(crudo.trim())) return porDefecto;
++  return crudo.trim() || porDefecto;
++}
+diff --git a/src/lib/sha256.ts b/src/lib/sha256.ts
+new file mode 100644
+index 0000000..374392b
+--- /dev/null
++++ b/src/lib/sha256.ts
+@@ -0,0 +1,73 @@
++/**
++ * SHA-256 de unos bytes, en hexadecimal.
++ *
++ * El almacén de FOM pide la huella (`checksumSha256`) de cada archivo que se
++ * sube. La app no trae una librería de hash y un logo pesa a lo sumo 2 MB, así
++ * que se calcula aquí, a mano y sin dependencias.
++ */
++
++const K = new Uint32Array([
++  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
++  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
++  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
++  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
++  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
++  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
++  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
++  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
++]);
++
++const rotar = (x: number, n: number): number => (x >>> n) | (x << (32 - n));
++
++export function sha256Hex(bytes: Uint8Array): string {
++  const h = new Uint32Array([
++    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
++  ]);
++
++  // Relleno: un 1, ceros y el largo en bits, hasta completar bloques de 64 bytes.
++  const largo = bytes.length;
++  const total = (((largo + 9 + 63) >> 6) << 6) >>> 0;
++  const datos = new Uint8Array(total);
++  datos.set(bytes);
++  datos[largo] = 0x80;
++  const vista = new DataView(datos.buffer);
++  vista.setUint32(total - 8, Math.floor(largo / 0x20000000), false);
++  vista.setUint32(total - 4, (largo << 3) >>> 0, false);
++
++  const w = new Uint32Array(64);
++  for (let bloque = 0; bloque < total; bloque += 64) {
++    for (let i = 0; i < 16; i += 1) w[i] = vista.getUint32(bloque + i * 4, false);
++    for (let i = 16; i < 64; i += 1) {
++      const s0 = rotar(w[i - 15], 7) ^ rotar(w[i - 15], 18) ^ (w[i - 15] >>> 3);
++      const s1 = rotar(w[i - 2], 17) ^ rotar(w[i - 2], 19) ^ (w[i - 2] >>> 10);
++      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
++    }
++    let [a, b, c, d, e, f, g, hh] = h;
++    for (let i = 0; i < 64; i += 1) {
++      const S1 = rotar(e, 6) ^ rotar(e, 11) ^ rotar(e, 25);
++      const ch = (e & f) ^ (~e & g);
++      const t1 = (hh + S1 + ch + K[i] + w[i]) | 0;
++      const S0 = rotar(a, 2) ^ rotar(a, 13) ^ rotar(a, 22);
++      const maj = (a & b) ^ (a & c) ^ (b & c);
++      const t2 = (S0 + maj) | 0;
++      hh = g;
++      g = f;
++      f = e;
++      e = (d + t1) | 0;
++      d = c;
++      c = b;
++      b = a;
++      a = (t1 + t2) | 0;
++    }
++    h[0] += a;
++    h[1] += b;
++    h[2] += c;
++    h[3] += d;
++    h[4] += e;
++    h[5] += f;
++    h[6] += g;
++    h[7] += hh;
++  }
++
++  return [...h].map((x) => x.toString(16).padStart(8, '0')).join('');
++}
+diff --git a/src/services/authService.ts b/src/services/authService.ts
+index 923b5f3..4a3d58b 100644
+--- a/src/services/authService.ts
++++ b/src/services/authService.ts
+@@ -66,7 +66,7 @@ export async function crearUsuarioConRol(input: {
+   password?: string;
+   role: RolAsignable;
+   telefono?: string;
+-}): Promise<User> {
++}): Promise<User & { claveCreada: boolean }> {
+   const nombre = input.nombre.trim();
+   const email = input.email.trim().toLowerCase();
+   const clave = (input.password ?? '').trim();
+@@ -80,7 +80,7 @@ export async function crearUsuarioConRol(input: {
+   const propio = !!input.companyId && input.companyId === enteActivoFom();
+   const ruta = propio ? '/api/v1/mobile/users' : `/api/v1/mobile/tenants/${input.companyId}/users`;
+ 
+-  let creado: { userId: string; email: string; displayName: string; tenantId: string };
++  let creado: { userId: string; email: string; displayName: string; tenantId: string; passwordSet?: boolean };
+   try {
+     creado = (await pedir(ruta, {
+       metodo: 'POST',
+@@ -118,6 +118,8 @@ export async function crearUsuarioConRol(input: {
+     role: input.role,
+     companyId: creado.tenantId,
+     drives: input.role === 'conductor',
++    // `false` = la persona ya existía en FOM y conserva su clave: la temporal no se usó.
++    claveCreada: creado.passwordSet !== false,
+   };
+ }
+ 
+diff --git a/src/services/fomLogos.ts b/src/services/fomLogos.ts
+new file mode 100644
+index 0000000..36eff9c
+--- /dev/null
++++ b/src/services/fomLogos.ts
+@@ -0,0 +1,284 @@
++import { File } from 'expo-file-system';
++import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
++
++import {
++  cloudinaryConfigurado,
++  etiquetas,
++  ids,
++  subirFotoEn,
++  ultimaVersion,
++  urlDe,
++} from '@/lib/cloudinary';
++import { ErrorFom, pedir } from '@/lib/fom-api';
++import { textoDeError } from '@/lib/responsable-empresa';
++import { sha256Hex } from '@/lib/sha256';
++
++import { todoFom } from './fomListas';
++
++/**
++ * LOGO DE LA EMPRESA — igual que la web (`panel/datos/logos.js`).
++ *
++ * Dos sitios donde puede vivir, y se mira en este orden:
++ *  1. El almacén de FOM: un objeto (`purpose: tenant_logo`) que el ente
++ *     referencia con `logoObjectId`. Subirlo son tres pasos: pedir la carga,
++ *     poner los bytes en la URL que devuelve y darla por completa.
++ *  2. Cloudinary: en producción ese almacén sigue APAGADO (503
++ *     `object_storage_unavailable`) y el servidor no tiene dónde guardar una
++ *     URL. Entonces el logo va a Cloudinary bajo una dirección fija con el id de
++ *     la empresa (`fom/logo-empresa/<id>/<n>`, versiones numeradas) que la web
++ *     calcula igual: un logo subido desde la app se ve en la web y al revés.
++ *
++ * Al mostrarlo: primero el del servidor, si no el de Cloudinary, si no el icono.
++ * FOM Operations lleva siempre el logo de FOM.
++ */
++
++const API = '/api/v1/mobile';
++const CODIGO_FOM = 'fom-operations';
++/** Lado mayor del logo: de sobra para una insignia, y el PNG queda muy por debajo de los 2 MB. */
++const LADO_LOGO = 512;
++
++// --- Qué logo tiene cada ente (una lectura, recordada un minuto) -------------
++interface EnteLogo {
++  id: string;
++  name?: string | null;
++  code?: string | null;
++  logoObjectId?: string | null;
++}
++
++interface DatosLogo {
++  logoObjectId: string | null;
++  esFom: boolean;
++}
++
++let entes: Map<string, DatosLogo> | null = null;
++let entesDesde = 0;
++
++async function logosDeEntes(): Promise<Map<string, DatosLogo>> {
++  if (entes && Date.now() - entesDesde < 60_000) return entes;
++  const lista = await todoFom<EnteLogo>('/tenants');
++  entes = new Map(
++    lista.map((t) => {
++      const nombre = (t.name ?? '').trim().toLowerCase();
++      return [
++        t.id,
++        { logoObjectId: t.logoObjectId ?? null, esFom: t.code === CODIGO_FOM || nombre === 'fom operations' },
++      ];
++    }),
++  );
++  entesDesde = Date.now();
++  return entes;
++}
++
++// --- Aviso de cambios: las pantallas con un logo a la vista lo vuelven a pedir ---
++const oyentes = new Set<() => void>();
++export function alCambiarLogos(f: () => void): () => void {
++  oyentes.add(f);
++  return () => {
++    oyentes.delete(f);
++  };
++}
++
++// --- La imagen del servidor: una dirección firmada por logo, recordada un rato ---
++/** Lo que necesita una imagen para pintarse. Las del servidor llevan sus cabeceras. */
++export interface FuenteImagen {
++  uri: string;
++  headers?: Record<string, string>;
++}
++/** `fom` = el logo de FOM; `null` = sin logo (se pinta el icono de respaldo). */
++export type FuenteLogo = FuenteImagen | 'fom' | null;
++
++interface PeticionDescarga {
++  request?: { url?: string; method?: string; requiredHeaders?: Record<string, string> };
++}
++
++// La dirección es firmada y caduca: se vuelve a pedir pasados unos minutos.
++const DURA_DIRECCION = 4 * 60_000;
++const direcciones = new Map<string, { hasta: number; fuente: Promise<FuenteImagen | null> }>();
++
++function fuenteDelServidor(tenantId: string, objectId: string): Promise<FuenteImagen | null> {
++  const guardada = direcciones.get(objectId);
++  if (guardada && guardada.hasta > Date.now()) return guardada.fuente;
++  const fuente = (async () => {
++    try {
++      const r = (await pedir(`${API}/tenants/${tenantId}/objects/${objectId}/downloads`, {
++        metodo: 'POST',
++        cuerpo: {},
++        invalidar: false,
++      })) as PeticionDescarga;
++      const peticion = r?.request;
++      if (!peticion?.url) return null;
++      return { uri: peticion.url, headers: peticion.requiredHeaders };
++    } catch {
++      return null;
++    }
++  })();
++  direcciones.set(objectId, { hasta: Date.now() + DURA_DIRECCION, fuente });
++  return fuente;
++}
++
++/** El logo en Cloudinary, o `null` si todavía no tiene (o no hay Cloudinary). */
++async function fuenteEnNube(tenantId: string): Promise<FuenteImagen | null> {
++  if (!cloudinaryConfigurado()) return null;
++  try {
++    const base = ids.logoEmpresa(tenantId);
++    const n = await ultimaVersion(base);
++    return n ? { uri: urlDe(`${base}/${n}`, 256, 0, { ajuste: 'contener' }) } : null;
++  } catch {
++    return null;
++  }
++}
++
++const fuentes = new Map<string, { hasta: number; fuente: Promise<FuenteLogo> }>();
++
++/** Qué pintar para el logo de una empresa: el del servidor, si no el de Cloudinary, si no nada. */
++export function fuenteLogoDe(tenantId: string | null | undefined): Promise<FuenteLogo> {
++  if (!tenantId) return Promise.resolve(null);
++  const guardada = fuentes.get(tenantId);
++  if (guardada && guardada.hasta > Date.now()) return guardada.fuente;
++  const fuente = (async (): Promise<FuenteLogo> => {
++    const datos = (await logosDeEntes().catch(() => null))?.get(tenantId);
++    if (datos?.esFom) return 'fom';
++    const delServidor = datos?.logoObjectId ? await fuenteDelServidor(tenantId, datos.logoObjectId) : null;
++    return delServidor ?? (await fuenteEnNube(tenantId));
++  })();
++  fuentes.set(tenantId, { hasta: Date.now() + 5 * 60_000, fuente });
++  return fuente;
++}
++
++function olvidarLogoDe(tenantId: string): void {
++  fuentes.delete(tenantId);
++  entes = null;
++  oyentes.forEach((f) => f());
++}
++
++// --- Subir el logo de una empresa -------------------------------------------
++/** ¿El almacén de FOM no está disponible (apagado o la ruta no está publicada)? */
++function esAlmacenApagado(e: unknown): boolean {
++  if (!(e instanceof ErrorFom)) return false;
++  return (
++    e.statusCode === 503 ||
++    e.statusCode === 404 ||
++    e.statusCode === 405 ||
++    e.code === 'respuesta_no_json' ||
++    /object_storage_unavailable/i.test(`${e.code ?? ''} ${e.message}`)
++  );
++}
++
++// Si FOM ya dijo que su almacén está apagado, no se le vuelve a preguntar en esta sesión.
++let almacenApagado = false;
++
++interface PeticionSubida {
++  upload?: { id?: string; request?: { url?: string; method?: string; requiredHeaders?: Record<string, string> } };
++}
++
++async function esperarDisponible(tenantId: string, objectId: string): Promise<void> {
++  // El objeto queda en cuarentena hasta que FOM lo revisa: se espera un rato corto y, si no llega, se intenta igual.
++  for (let i = 0; i < 8; i += 1) {
++    try {
++      const r = (await pedir(`${API}/tenants/${tenantId}/objects`, { fresco: true })) as {
++        items?: { id: string; status?: string; availableAt?: string | null; rejectionCode?: string | null }[];
++      };
++      const o = (r?.items ?? []).find((x) => x.id === objectId);
++      if (o && (o.status === 'available' || o.availableAt)) return;
++      if (o?.rejectionCode) throw new Error(`El servidor rechazó el archivo (${o.rejectionCode}).`);
++    } catch (e) {
++      if (e instanceof Error && /rechaz/i.test(e.message)) throw e;
++    }
++    await new Promise((fin) => setTimeout(fin, 1500));
++  }
++}
++
++/** Los tres pasos del servidor. Lanza el error de FOM si no puede. */
++async function subirAlServidor(tenantId: string, uri: string): Promise<void> {
++  const bytes = await new File(uri).bytes();
++  const alta = (await pedir(`${API}/tenants/${tenantId}/uploads`, {
++    metodo: 'POST',
++    invalidar: false,
++    cuerpo: {
++      contentType: 'image/png',
++      byteSize: bytes.length,
++      checksumSha256: sha256Hex(bytes),
++      purpose: 'tenant_logo',
++    },
++  })) as PeticionSubida;
++  const subida = alta?.upload;
++  const peticion = subida?.request;
++  if (!subida?.id || !peticion?.url) throw new Error('El servidor no dijo dónde subir el archivo.');
++
++  const puesta = await fetch(peticion.url, {
++    method: peticion.method || 'PUT',
++    headers: { 'content-type': 'image/png', ...(peticion.requiredHeaders ?? {}) },
++    body: bytes as unknown as BodyInit,
++  });
++  if (!puesta.ok) throw new Error(`No se pudo subir el archivo (respuesta ${puesta.status}).`);
++
++  const fin = (await pedir(`${API}/uploads/${subida.id}/complete`, {
++    metodo: 'POST',
++    cuerpo: {},
++    invalidar: false,
++  })) as { object?: { id?: string } };
++  const objectId = fin?.object?.id ?? subida.id;
++
++  await esperarDisponible(tenantId, objectId);
++  await pedir(`${API}/tenants/${tenantId}`, { metodo: 'PATCH', cuerpo: { logoObjectId: objectId } });
++  direcciones.delete(objectId);
++}
++
++/** Deja la imagen lista: un PNG local de hasta 512 px (sin perder el fondo transparente). */
++async function prepararLogo(uri: string): Promise<string> {
++  const original = await ImageManipulator.manipulate(uri).renderAsync();
++  const lado = Math.max(original.width, original.height);
++  const lista =
++    lado > LADO_LOGO
++      ? await ImageManipulator.manipulate(uri)
++          .resize(original.width >= original.height ? { width: LADO_LOGO } : { height: LADO_LOGO })
++          .renderAsync()
++      : original;
++  return (await lista.saveAsync({ format: SaveFormat.PNG })).uri;
++}
++
++/**
++ * Sube el logo de una empresa. Primero al almacén de FOM; si está apagado, a
++ * Cloudinary (la misma dirección que usa la web). Los errores salen ya en español
++ * llano: el código crudo del servidor (`object_storage_unavailable`) nunca llega a la pantalla.
++ */
++export async function subirLogoDeEmpresa(
++  tenantId: string,
++  imagen: { uri: string },
++): Promise<{ via: 'servidor' | 'cloudinary' }> {
++  if (!tenantId) throw new Error('Falta saber de qué empresa es el logo.');
++  if (!imagen?.uri) throw new Error('Elige un archivo de imagen.');
++  try {
++    let archivo: string;
++    try {
++      archivo = await prepararLogo(imagen.uri);
++    } catch {
++      throw new Error('No se pudo leer esa imagen. Elige un archivo PNG, JPG o WebP.');
++    }
++
++    if (!almacenApagado) {
++      try {
++        await subirAlServidor(tenantId, archivo);
++        olvidarLogoDe(tenantId);
++        return { via: 'servidor' };
++      } catch (e) {
++        if (!esAlmacenApagado(e)) throw e;
++        almacenApagado = true;
++      }
++    }
++    if (!cloudinaryConfigurado()) {
++      throw new Error(
++        'Por ahora no hay dónde guardar el logo: el almacén del servidor está apagado y Cloudinary no está configurado en esta app.',
++      );
++    }
++    await subirFotoEn(
++      archivo,
++      { base: ids.logoEmpresa(tenantId), etiqueta: etiquetas.logoEmpresa(tenantId) },
++      { exigirRemoto: true, titulo: 'Logo de la empresa', formato: 'png' },
++    );
++    olvidarLogoDe(tenantId);
++    return { via: 'cloudinary' };
++  } catch (e) {
++    throw new Error(textoDeError(e, 'No se pudo guardar el logo. Inténtalo de nuevo.'));
++  }
++}
+-- 
+2.55.0.windows.3
+
