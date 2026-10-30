@@ -22,11 +22,12 @@ import { transmitiendo } from './sinSenal.js'
 import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
 import { cuerpoCredencial, credencialesVigentes } from './credencialesPersona'
 import { cambiosGps } from './metadatosGps'
-import { buscarEquipoGps, mensajeInstalarGps } from './instalarGps'
+import { buscarEquipoGps, empresaPropia, mensajeInstalarGps } from './instalarGps'
+import { empresaDeReinicio, mensajeReiniciarClave } from './reiniciarClave'
 import { LIMITE_EVENTOS, comoEventoManejo, diasServidor } from './eventosManejo'
 import { cloudinaryConfigurado, subirImagen } from './cloudinary'
 import { carpetaDe } from './archivos'
-import { alCambiar, perfilActual } from '../auth'
+import { alCambiar, perfilActual, sesionActual } from '../auth'
 
 /**
  * Une el vehículo con su estado en vivo en la forma que consumen los módulos.
@@ -600,12 +601,21 @@ export const repoApi = {
        * vez para entregarla en mano; el servidor solo guarda su hash y la
        * marca como obligada a cambiarse en el primer ingreso.
        */
-      async cambiarClave(id) {
+      async cambiarClave(id, _actor, { empresaId } = {}) {
         const clave = claveTemporal()
-        await api.reiniciarClave(id, {
-          temporaryPassword: clave,
-          reason: 'reinicio-desde-consola',
-        })
+        // La persona de OTRA empresa se reinicia por la ruta de su empresa; la sin empresa solo
+        // halla a los de la empresa propia (T-210).
+        const propia = empresaPropia(sesionActual())
+        try {
+          await api.reiniciarClave(
+            id,
+            { temporaryPassword: clave, reason: 'reinicio-desde-consola' },
+            empresaDeReinicio(empresaId, propia),
+          )
+        } catch (e) {
+          e.message = mensajeReiniciarClave(e)
+          throw e
+        }
         return { clave, debeCambiarClave: true }
       },
 

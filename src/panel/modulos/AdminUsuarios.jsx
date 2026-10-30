@@ -212,7 +212,7 @@ function useAccionesCuenta({ actor, alCambiar }) {
     if (!window.confirm(pregunta)) return
     setAviso('')
     try {
-      const r = await repo.admin.usuarios.cambiarClave(p.id, actor)
+      const r = await repo.admin.usuarios.cambiarClave(p.id, actor, { empresaId: p.empresaId })
       setClaveDe({ nombre: p.nombre, clave: r.clave })
       await alCambiar?.()
     } catch (e) {

@@ -1,0 +1,33 @@
+From d94918d73cbb1b97d8270db8570300c1913eced5 Mon Sep 17 00:00:00 2001
+From: marcodpa <marcodpa@users.noreply.github.com>
+Date: Fri, 30 Oct 2026 09:18:54 -0400
+Subject: [PATCH] =?UTF-8?q?App:=20restablecer=20la=20clave=20de=20otra=20p?=
+ =?UTF-8?q?ersona=20deja=20el=20motivo=20en=20la=20bit=C3=A1cora,=20igual?=
+ =?UTF-8?q?=20que=20la=20web;=20ya=20iba=20por=20la=20ruta=20m=C3=B3vil=20?=
+ =?UTF-8?q?de=20la=20empresa=20de=20esa=20persona=20(T-210)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/services/authService.ts | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/services/authService.ts b/src/services/authService.ts
+index 4a3d58b..99fb080 100644
+--- a/src/services/authService.ts
++++ b/src/services/authService.ts
+@@ -474,7 +474,8 @@ export async function cambiarClaveUsuario(
+   try {
+     await pedir(rutaDeEnte(`/users/${userId}/credential-reset`, companyId), {
+       metodo: 'POST',
+-      cuerpo: { temporaryPassword: clave },
++      // El motivo queda en la bitácora del ente, igual que el reinicio desde la web (T-210).
++      cuerpo: { temporaryPassword: clave, reason: 'reinicio-desde-app' },
+     });
+   } catch (e) {
+     if (e instanceof ErrorFom) {
+-- 
+2.55.0.windows.3
+

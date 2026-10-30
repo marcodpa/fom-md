@@ -259,11 +259,16 @@ export const api = {
       cuerpo: { role, status, reason },
     }),
 
-  /** Reiniciar la credencial: nace obligada a cambiarse. */
-  reiniciarClave: (userId, { temporaryPassword, reason }) =>
-    pedir(`${CONSOLA}/users/${userId}/credential-reset`, {
+  /**
+   * Reiniciar la credencial: nace obligada a cambiarse. `empresaId` (T-210): sin dato, la ruta
+   * normal; un id, `/tenants/{id}/users/…` (la ruta sin empresa solo halla gente de la empresa
+   * propia y da 404 con la de otra); `null`, la ruta propia aunque se esté dentro de otra empresa.
+   */
+  reiniciarClave: (userId, { temporaryPassword, reason }, empresaId) =>
+    pedir(`${CONSOLA}/users/${encodeURIComponent(userId)}/credential-reset`, {
       metodo: 'POST',
       cuerpo: { temporaryPassword, reason },
+      ...(empresaId === undefined ? {} : { empresaContexto: empresaId || null }),
     }),
 
   /** Alta de vehiculo. */
