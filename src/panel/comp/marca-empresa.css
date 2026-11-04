@@ -1,0 +1,18 @@
+/* Logo + nombre de la empresa (cabecera de la consola y Centro de control). */
+.marca-empresa { --marca-tam: 36px; display: inline-flex; align-items: center; gap: 10px; min-width: 0; max-width: 100%; color: var(--e-texto, #f3f5f8); }
+.marca-empresa-logo {
+  width: var(--marca-tam); height: var(--marca-tam); flex: none; display: grid; place-items: center; overflow: hidden;
+  border-radius: 10px; background: var(--e-sup-baja, #0f141b); border: 1px solid var(--e-borde, #262e39);
+}
+.marca-empresa.gestionando .marca-empresa-logo { border-color: var(--e-primario, #3d9bf5); }
+.marca-empresa-logo .logo-empresa { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: inherit; }
+.marca-empresa-logo .logo-fom { width: 62%; height: auto; }
+.marca-empresa-monograma { font-size: calc(var(--marca-tam) * .38); font-weight: 700; letter-spacing: .02em; color: var(--e-primario, #3d9bf5); line-height: 1; }
+.marca-empresa-texto { display: grid; min-width: 0; line-height: 1.25; }
+.marca-empresa-nombre { font-size: 14px; font-weight: 600; color: var(--e-texto, #f3f5f8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.marca-empresa-nota { font-size: 11px; color: var(--e-primario, #3d9bf5); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 600px) {
+  .marca-empresa { --marca-tam: 32px; gap: 8px; }
+  .marca-empresa-nombre { font-size: 13px; }
+  .marca-empresa-nota { display: none; }
+}

@@ -137,3 +137,9 @@
 .leaflet-popup.ruta-popup span{display:block;color:#b7c7d9}
 .leaflet-popup.ruta-popup a.leaflet-popup-close-button{color:#b7c7d9}
 .ruta-item.activo{border-color:#349bfa;background:#173957;box-shadow:0 0 0 1px #349bfa55}
+
+/* Empresa en la que se está, con su logo, sobre el título (misma pieza que la cabecera). */
+.control-search .control-empresa{margin-bottom:8px;--marca-tam:30px}
+.control-search .control-empresa .marca-empresa-nombre{color:#f3f7fc;font-size:13px}
+.control-search .control-empresa .marca-empresa-nota{color:#8bc6ff}
+@media (max-width:600px){.control-search .control-empresa{margin-bottom:6px;--marca-tam:28px}.control-search .control-empresa .marca-empresa-nota{display:block}}
