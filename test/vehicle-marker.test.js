@@ -4,10 +4,17 @@ import { estadoUnidad } from '../src/panel/datos/estadoUnidad.js'
 import { vehicleMarkerSvg, validPosition } from '../src/panel/comp/vehicleMarker.js'
 
 test('GPS sin señal prevalece sobre la última velocidad y el encendido', () => {
-  assert.equal(estadoUnidad({ conectado: false, ignition: true, velocidadKmh: 54 }).clave, 'sin_senal')
-  assert.equal(estadoUnidad({ conectado: true }).clave, 'reportando')
-  assert.equal(estadoUnidad({ conectado: true, velocidadKmh: 0 }).color, 'ambar')
-  assert.equal(estadoUnidad({ conectado: true, velocidadKmh: 54 }).clave, 'en_marcha')
+  const ahora = Date.now()
+  const hace = (min) => new Date(ahora - min * 60_000).toISOString()
+  const alDia = { ultimoReporte: hace(1), posicionEn: hace(1) }
+  assert.equal(estadoUnidad({ ultimoReporte: hace(10), posicionEn: hace(10), ignition: true, velocidadKmh: 54 }, ahora).clave, 'sin_senal')
+  assert.equal(estadoUnidad({ ...alDia }, ahora).clave, 'parada')
+  assert.equal(estadoUnidad({ ...alDia }, ahora).texto, 'Detenida')
+  assert.equal(estadoUnidad({ ...alDia, velocidadKmh: 0 }, ahora).color, 'verde')
+  assert.equal(estadoUnidad({ ...alDia, velocidadKmh: 54 }, ahora).clave, 'en_marcha')
+  // Ni «Encendido» ni «Apagado» ni «Reportando»: el encendido es un detalle.
+  assert.equal(estadoUnidad({ ...alDia, ignition: true }, ahora).texto, 'Detenida')
+  assert.equal(estadoUnidad({ ...alDia, ignition: false }, ahora).texto, 'Detenida')
 })
 
 test('marcadores no ejecutan placas como HTML y no inventan rumbo', () => {

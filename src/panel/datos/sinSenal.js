@@ -1,91 +1,131 @@
-import { useRef, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { COLOR, ETIQUETA } from './catalogos.js'
 import { fechaCorta, fechaHora } from './formato.js'
-import { marchaPorPosicion } from './movimiento.js'
 import { registrarCorte } from './avisosSinSenal.js'
 
 // ============================================================
-// SIN SEÑAL — cuánto lleva callado el GPS de una unidad
+// LA SEÑAL DE UNA UNIDAD — una sola regla para toda la consola
 // ------------------------------------------------------------
-// El tiempo se cuenta desde `ultimoReporte` (lo que la API llama
-// `lastReportAt`): es la fecha con la que ya se decide si una unidad tiene
-// señal. La app copia estas mismas funciones y textos, para que web y app
-// digan lo mismo de la misma unidad.
+// Antes cada pantalla decidía por su cuenta y el mismo carro salía
+// «Reportando» en una, «Sin señal» en otra y «En marcha» en una tercera.
+// Ahora todas preguntan aquí (`estadoSenal`), y estadoUnidad.js solo le
+// pone encima el nombre de la marcha.
+//
+// Dos fechas del servidor (fom.vehicle_live_state):
+//   ultimoReporte (`lastReportAt`)   → último mensaje de CUALQUIER tipo,
+//                                       también los latidos sin ubicación.
+//   posicionEn    (`lastPositionAt`) → última posición válida.
+// Un GPS que solo late tiene señal, pero no dice dónde está la unidad.
+// La app copia estas mismas reglas y textos.
 // ============================================================
 
+const SEG_MS = 1000
 const MIN_MS = 60_000
-const HORA_MIN = 60
-const DIA_MIN = 24 * HORA_MIN
-const MES_MIN = 30 * DIA_MIN
 
-/**
- * Cuánto puede pasar sin un reporte antes de dar el equipo por callado: la MISMA regla de la
- * app (`SIN_SENAL_MS` en use-flota-fom.ts). Los GPS emiten cada pocos segundos con la unidad
- * encendida: cinco minutos aguantan un bache de cobertura sin pintar de verde una unidad apagada.
- */
+/** Cinco minutos sin ningún mensaje = Sin señal (`SIN_SENAL_MS` de la app). */
 export const SIN_SENAL_MS = 5 * MIN_MS
+/** Con mensajes, pero la última posición tiene media hora o más = Sin ubicación. */
+export const SIN_UBICACION_MS = 30 * MIN_MS
+/** Desde esta velocidad va «En marcha»: el mismo corte que usa el servidor para `motionState`. */
+export const VEL_MARCHA_KMH = 3
 
-/** Milisegundos desde el último reporte; `Infinity` si nunca reportó (o la fecha no se entiende). */
-export function msSinReportar(ultimoReporte, ahora = Date.now()) {
-  if (!ultimoReporte) return Infinity
-  const t = new Date(ultimoReporte).getTime()
+const TONO = { verde: 'ok', ambar: 'warn', gris: 'mute' }
+
+/** Milisegundos desde una fecha; `Infinity` si no hay (o no se entiende). */
+export function msSinReportar(fecha, ahora = Date.now()) {
+  if (!fecha) return Infinity
+  const t = new Date(fecha).getTime()
   if (!Number.isFinite(t)) return Infinity
   // Un reloj adelantado en el equipo no debe dar tiempos negativos.
   return Math.max(0, ahora - t)
 }
 
-/** ¿El equipo sigue transmitiendo? Último reporte de hace menos de 5 min (`transmitiendo()` de la app). */
+/** ¿El equipo sigue transmitiendo? Último mensaje de hace menos de 5 min (`transmitiendo()` de la app). */
 export function transmitiendo(ultimoReporte, ahora = Date.now()) {
   return msSinReportar(ultimoReporte, ahora) < SIN_SENAL_MS
 }
 
 /**
- * La unidad con `conectado`/`conexion` recalculados a la hora de ahora, para que pase sola a
- * «Sin señal» sin esperar otra lectura del servidor. Solo en las unidades que traen la señal
- * (las del servidor, con `conectado` booleano): la demostración no la lleva y sus horas son
- * fijas, así que se deja como está. Si nada cambia, devuelve el MISMO objeto.
- *
- * De paso: si reporta, decide «En marcha» o «Detenida» por su posición (movimiento.js); si se
- * calló, anota el aviso de «GPS sin señal» para la campana (avisosSinSenal.js).
+ * «hace 40 s» · «hace 12 min» · «hace 3 h» · «hace 2 d» · «desde el 12 sep» (30 días o más,
+ * con el año si no es el de ahora) · «Nunca reportó» si no hay fecha. El único «hace cuánto»
+ * de la consola: `desde` (formato.js), los GPS y el SOS lo usan.
  */
-export function conSenalAlDia(v, ahora = Date.now()) {
-  if (!v || typeof v.conectado !== 'boolean') return v
-  const conectado = transmitiendo(v.ultimoReporte, ahora)
-  const conexion = conectado ? 'reportando' : 'sin_senal'
-  let estadoMarcha = v.estadoMarcha
-  if (conectado) estadoMarcha = marchaPorPosicion(v, ahora) ?? v.estadoMarcha
-  else registrarCorte(v, new Date(v.ultimoReporte).getTime() + SIN_SENAL_MS, ahora)
-  if (conectado === v.conectado && conexion === v.conexion && estadoMarcha === v.estadoMarcha) return v
-  return { ...v, conectado, conexion, estadoMarcha }
+export function haceCuanto(fecha, ahora = Date.now()) {
+  const ms = msSinReportar(fecha, ahora)
+  if (ms === Infinity) return 'Nunca reportó'
+  const seg = Math.floor(ms / SEG_MS)
+  if (seg < 60) return `hace ${seg} s`
+  const min = Math.floor(seg / 60)
+  if (min < 60) return `hace ${min} min`
+  const h = Math.floor(min / 60)
+  if (h < 24) return `hace ${h} h`
+  const d = Math.floor(h / 24)
+  if (d < 30) return `hace ${d} d`
+  const dia = new Date(fecha)
+  const otroAnio = dia.getFullYear() !== new Date(ahora).getFullYear()
+  return `desde el ${fechaCorta(fecha)}${otroAnio ? ` ${dia.getFullYear()}` : ''}`
 }
+
+const fechaValida = (x) => (x && Number.isFinite(new Date(x).getTime()) ? x : null)
 
 /**
- * «hace 12 min» · «hace 2 h 15 min» · «hace 3 d 4 h» · «desde el 12 sep» · «nunca reportó».
- * Un mes o más ya no se cuenta en días: se dice la fecha, con el año si no es el de ahora.
+ * LA REGLA. Cuatro estados, en este orden:
+ *   sin_gps       → nunca reportó (o no tiene equipo). Gris.
+ *   sin_senal     → el último mensaje tiene 5 min o más. Gris. Sin marcha ni velocidad: son viejas.
+ *   sin_ubicacion → hay mensajes, pero la última posición falta o tiene 30 min o más. Ámbar.
+ *   reportando    → mensaje y posición recientes. Verde. Solo aquí hay marcha:
+ *                   «En marcha» con ≥3 km/h o `motionState` en_marcha; si no, «Detenida».
+ *
+ * Devuelve { clave, etiqueta, texto, color, tono, ultimoReporte, posicionEn, hace, marcha, velocidadKmh }.
+ * `etiqueta` es el nombre corto («Sin señal»); `texto`, el de la pastilla («Sin señal · hace 12 min»).
  */
-export function tiempoSinSenal(ultimoReporte, ahora = Date.now()) {
-  const ms = msSinReportar(ultimoReporte, ahora)
-  if (ms === Infinity) return 'nunca reportó'
-  const min = Math.floor(ms / MIN_MS)
-  if (min < 1) return 'hace menos de 1 min'
-  if (min < HORA_MIN) return `hace ${min} min`
-  if (min < DIA_MIN) {
-    const h = Math.floor(min / HORA_MIN)
-    const m = min % HORA_MIN
-    return m ? `hace ${h} h ${m} min` : `hace ${h} h`
+export function estadoSenal(v, ahora = Date.now()) {
+  const ultimoReporte = fechaValida(v?.ultimoReporte)
+  const posicionEn = fechaValida(v?.posicionEn)
+  const hace = haceCuanto(ultimoReporte, ahora)
+  const base = { ultimoReporte, posicionEn, hace, marcha: null, velocidadKmh: null }
+  const pinta = (clave, etiqueta, texto = etiqueta) =>
+    ({ ...base, clave, etiqueta, texto, color: COLOR.conexion[clave], tono: TONO[COLOR.conexion[clave]] })
+
+  if (!ultimoReporte) return pinta('sin_gps', v?.sinGps === true ? 'Sin GPS' : ETIQUETA.conexion.sin_gps)
+  if (msSinReportar(ultimoReporte, ahora) >= SIN_SENAL_MS) {
+    return pinta('sin_senal', ETIQUETA.conexion.sin_senal, `${ETIQUETA.conexion.sin_senal} · ${hace}`)
   }
-  if (min < MES_MIN) {
-    const d = Math.floor(min / DIA_MIN)
-    const h = Math.floor((min % DIA_MIN) / HORA_MIN)
-    return h ? `hace ${d} d ${h} h` : `hace ${d} d`
+  if (msSinReportar(posicionEn, ahora) >= SIN_UBICACION_MS) {
+    const ultima = posicionEn ? `última ${haceCuanto(posicionEn, ahora)}` : 'nunca'
+    return pinta('sin_ubicacion', ETIQUETA.conexion.sin_ubicacion, `${ETIQUETA.conexion.sin_ubicacion} · ${ultima}`)
   }
-  const fecha = new Date(ultimoReporte)
-  const otroAnio = fecha.getFullYear() !== new Date(ahora).getFullYear()
-  return `desde el ${fechaCorta(ultimoReporte)}${otroAnio ? ` ${fecha.getFullYear()}` : ''}`
+  const vel = Number.isFinite(v?.velocidadKmh) ? v.velocidadKmh : null
+  const marcha = (vel != null && vel >= VEL_MARCHA_KMH) || v?.estadoMarcha === 'en_marcha' ? 'en_marcha' : 'parada'
+  return { ...pinta('reportando', ETIQUETA.marcha_estado[marcha]), marcha, velocidadKmh: vel }
 }
 
-/** «Sin señal · hace 2 h 15 min» / «Sin señal · nunca reportó». */
-export function textoSinSenal(ultimoReporte, ahora = Date.now()) {
-  return `Sin señal · ${tiempoSinSenal(ultimoReporte, ahora)}`
+/** ¿Se ve la unidad callada o sin equipo? (gris en mapa y listas). */
+export const esCallada = (s) => s?.clave === 'sin_senal' || s?.clave === 'sin_gps'
+
+/**
+ * La unidad con su señal al día (`senal`), recalculada a la hora de ahora para que pase sola a
+ * «Sin señal» sin esperar otra lectura. Por compatibilidad deja también `conectado` (reportando o
+ * sin ubicación) y `conexion` (la clave). Si nada cambia, devuelve el MISMO objeto: los textos con
+ * «hace X» se piden a `estadoSenal(v, ahora)`, que sí cambian cada minuto.
+ */
+export function conSenalAlDia(v, ahora = Date.now()) {
+  if (!v) return v
+  const senal = estadoSenal(v, ahora)
+  const conectado = senal.clave === 'reportando' || senal.clave === 'sin_ubicacion'
+  const antes = v.senal
+  if (antes && antes.clave === senal.clave && antes.marcha === senal.marcha && antes.ultimoReporte === senal.ultimoReporte
+    && antes.posicionEn === senal.posicionEn && antes.velocidadKmh === senal.velocidadKmh
+    && v.conectado === conectado && v.conexion === senal.clave) return v
+  return { ...v, senal, conectado, conexion: senal.clave }
+}
+
+/** Anota en la campana el corte de cada unidad que está Sin señal (solo esas). Va en un efecto, no al pintar. */
+export function anotarCortes(lista, ahora = Date.now()) {
+  for (const v of lista ?? []) {
+    const s = estadoSenal(v, ahora)
+    if (s.clave === 'sin_senal') registrarCorte(v, new Date(s.ultimoReporte).getTime() + SIN_SENAL_MS, ahora)
+  }
 }
 
 /** La línea chica de la ficha: «Último reporte: 21 oct, 9:42 a. m.»; `null` si nunca reportó. */
@@ -168,9 +208,10 @@ export function useMinuto() {
 
 /**
  * La flota con la señal y la marcha al día (`conSenalAlDia`), recalculada con el reloj del
- * minuto. Devuelve el MISMO arreglo mientras ninguna unidad haya cambiado de estado (a los 3
- * min quieta pasa a detenida; a los 5 sin reportar, a sin señal): la pantalla no se vuelve a
- * pintar cada minuto para nada, y el mapa no rehace sus marcadores.
+ * minuto. Devuelve el MISMO arreglo mientras ninguna unidad haya cambiado de estado (a los 5
+ * min sin mensajes pasa a sin señal; a los 30 sin posición, a sin ubicación): la pantalla no se
+ * vuelve a pintar cada minuto para nada, y el mapa no rehace sus marcadores. Las unidades que se
+ * quedan Sin señal se anotan en la campana después de pintar, no mientras.
  */
 export function useUnidadesAlDia(lista) {
   const memo = useRef({ lista: null, hora: 0, salida: null })
@@ -178,10 +219,14 @@ export function useUnidadesAlDia(lista) {
     const hora = horaActual()
     const m = memo.current
     if (m.lista === lista && m.hora === hora && m.salida) return m.salida
-    const nueva = (lista ?? []).map((v) => conSenalAlDia(v, hora))
-    const igual = m.lista === lista && m.salida && m.salida.length === nueva.length && nueva.every((v, i) => v === m.salida[i])
+    // Con la misma lista se recalcula sobre lo ya calculado: si nada cambió, sale el mismo objeto.
+    const misma = m.lista === lista && m.salida
+    const nueva = (lista ?? []).map((v, i) => conSenalAlDia(misma ? m.salida[i] : v, hora))
+    const igual = misma && m.salida.length === nueva.length && nueva.every((v, i) => v === m.salida[i])
     memo.current = { lista, hora, salida: igual ? m.salida : nueva }
     return memo.current.salida
   }
-  return useSyncExternalStore(suscribirReloj, leer, leer)
+  const salida = useSyncExternalStore(suscribirReloj, leer, leer)
+  useEffect(() => { anotarCortes(salida, horaActual()) }, [salida])
+  return salida
 }

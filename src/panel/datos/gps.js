@@ -4,10 +4,10 @@
 // Sin React ni red: validar IMEI e ICCID, armar los comandos SMS del
 // equipo, decir si tiene señal y medir la calidad de recepción. La pantalla
 // (AdminGps*) y las pruebas usan estas mismas funciones.
-// La regla de «con señal» es la de todo FOM: algo del mismo IMEI en los
-// últimos 5 minutos (`transmitiendo` de sinSenal.js, igual que la app).
+// La regla de «con señal» es la de todo FOM (`estadoSenal` de sinSenal.js):
+// un equipo instalado dice lo mismo que la unidad donde va montado.
 // ============================================================
-import { tiempoSinSenal, transmitiendo } from './sinSenal.js'
+import { estadoSenal, haceCuanto, transmitiendo } from './sinSenal.js'
 
 /**
  * Marcas y modelos que el receptor FOM sabe leer. El modelo elige el
@@ -142,33 +142,31 @@ export function armarComandos({ clave = '', apn = '', ip = '', puerto = PUERTO_R
   }))
 }
 
-/** «hace 40 s» bajo el minuto; desde ahí, el mismo texto que el resto de FOM («hace 3 h»). */
-export function haceCuanto(iso, ahora = Date.now()) {
-  if (!iso) return 'nunca reportó'
-  const t = new Date(iso).getTime()
-  if (!Number.isFinite(t)) return 'nunca reportó'
-  const s = Math.max(0, Math.floor((ahora - t) / 1000))
-  if (s < 60) return `hace ${s} s`
-  return tiempoSinSenal(iso, ahora)
-}
+/** «hace 40 s», «hace 3 h», «Nunca reportó»: el único «hace cuánto» de FOM (sinSenal.js). */
+export { haceCuanto }
 
 /**
  * La pastilla de señal de un equipo del inventario.
- *   con    → reportó en los últimos 5 min
- *   sin    → instalado y callado
+ *   con    → instalado y su unidad tiene señal (reportando o sin ubicación)
+ *   sin    → instalado y su unidad está sin señal o nunca reportó
  *   probado→ sin instalar, ya se le oyó alguna vez
- *   nunca  → jamás ha reportado
+ *   nunca  → sin instalar y jamás ha reportado
+ * Un equipo instalado muestra el estado de SU unidad (`unidad`, o `equipo.unidad`), el mismo que
+ * la flota y el mapa. `ultimaConexion` solo cuenta para los equipos sin instalar, o si la unidad no
+ * está a la vista (es de otra empresa): entonces se dice solo si llegan mensajes.
  */
-export function senalDe(equipo, ahora = Date.now()) {
+export function senalDe(equipo, ahora = Date.now(), unidad = equipo?.unidad ?? null) {
   const ultimo = equipo?.ultimaConexion ?? null
-  if (ultimo && transmitiendo(ultimo, ahora)) {
-    return { clave: 'con', tono: 'ok', texto: `Con señal · ${haceCuanto(ultimo, ahora)}` }
-  }
   if (equipo?.vehiculoId) {
-    return { clave: 'sin', tono: 'bad', texto: ultimo ? `Sin señal · ${haceCuanto(ultimo, ahora)}` : 'Sin señal · nunca reportó' }
+    const s = unidad ? estadoSenal(unidad, ahora) : estadoSenal({ ultimoReporte: ultimo, posicionEn: ultimo }, ahora)
+    if (s.clave === 'reportando' || s.clave === 'sin_ubicacion') {
+      const texto = s.clave === 'sin_ubicacion' ? s.texto : `Con señal · ${s.hace}`
+      return { clave: 'con', tono: s.clave === 'sin_ubicacion' ? 'warn' : 'ok', texto }
+    }
+    return { clave: 'sin', tono: 'bad', texto: s.clave === 'sin_gps' ? 'Nunca reportó' : s.texto }
   }
   if (ultimo) return { clave: 'probado', tono: 'mute', texto: `Probado · ${haceCuanto(ultimo, ahora)}` }
-  return { clave: 'nunca', tono: 'mute', texto: 'Nunca ha reportado' }
+  return { clave: 'nunca', tono: 'mute', texto: 'Nunca reportó' }
 }
 
 const ESTADOS_EQUIPO = {

@@ -37,6 +37,7 @@ async function cargar() {
       load: (id) => (id === '\0' + ENTRADA ? [
         `export { default as repo } from '${ruta('src/panel/datos/repoSemilla.js')}'`,
         `export { restarManejo } from '${ruta('src/panel/modulos/reportes-datos.js')}'`,
+        `export { estadoSenal } from '${ruta('src/panel/datos/sinSenal.js')}'`,
       ].join('\n') : null),
     }],
     build: { write: false, minify: false, lib: { entry: ENTRADA, formats: ['es'], fileName: 'prueba' } },
@@ -108,37 +109,44 @@ test('reportes: hay km y eventos del período y del anterior (mes actual contra 
 })
 
 test('mi unidad: la del conductor de la demo va en marcha y reportando, también minutos después', async () => {
-  const { repo } = await cargar()
+  const { repo, estadoSenal } = await cargar()
   const unidadDe = async () => {
     const asignacion = (await repo.conductores()).find((a) => a.id === 'usr-002')
     return repo.vehiculos.obtener(asignacion.vehiculoId)
   }
   const ahora = await unidadDe()
-  assert.equal(ahora.estadoMarcha, 'en_marcha')
-  assert.equal(ahora.conexion, 'reportando')
+  // La regla única (estadoSenal): reportando y en marcha.
+  assert.equal(estadoSenal(ahora).clave, 'reportando')
+  assert.equal(estadoSenal(ahora).marcha, 'en_marcha')
   const original = Date.now
   try {
     const t0 = original()
     Date.now = () => t0 + 20 * MIN
     const despues = await unidadDe()
-    assert.equal(despues.conexion, 'reportando', 'la señal no envejece con la pantalla abierta')
+    assert.equal(estadoSenal(despues).clave, 'reportando', 'la señal no envejece con la pantalla abierta')
     assert.ok(Date.now() - Date.parse(despues.ultimoReporte) < 5 * MIN)
   } finally {
     Date.now = original
   }
 })
 
-test('vehículos: mismos contadores que el Resumen y toda la flota con señal', async () => {
-  const { repo } = await cargar()
+test('vehículos: mismos contadores que el Resumen y toda la flota con GPS con señal', async () => {
+  const { repo, estadoSenal } = await cargar()
   const [resumen, lista] = await Promise.all([repo.resumen(), repo.vehiculos.listar({})])
-  const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
+  const senales = lista.map((v) => estadoSenal(v))
+  const enMarcha = senales.filter((s) => s.marcha === 'en_marcha').length
+  const detenidas = senales.filter((s) => s.marcha === 'parada').length
   assert.equal(lista.length, resumen.totalVehiculos)
   assert.equal(enMarcha, resumen.enMarcha)
-  assert.equal(lista.length - enMarcha, resumen.detenidos)
+  // Las detenidas no incluyen a las que no reportan (aquí, las tres sin GPS de la demo).
+  assert.equal(detenidas, resumen.detenidos)
   assert.equal(lista.length, 26)
-  assert.equal(enMarcha, 15)
-  assert.ok(lista.every((v) => v.conexion === 'reportando'), 'ninguna unidad de la demo sale «Sin señal»')
-  assert.ok(lista.every((v) => Date.now() - Date.parse(v.ultimoReporte) < 5 * MIN))
+  assert.equal(enMarcha + detenidas, 23)
+  // Las tres unidades sin equipo dicen «Sin GPS»; el resto, con señal al día.
+  const sinGps = lista.filter((v) => !v.gps)
+  assert.equal(sinGps.length, 3)
+  assert.ok(sinGps.every((v) => estadoSenal(v).clave === 'sin_gps' && estadoSenal(v).texto === 'Sin GPS'))
+  assert.ok(lista.filter((v) => v.gps).every((v) => estadoSenal(v).clave === 'reportando'), 'ninguna unidad con GPS sale «Sin señal»')
 })
 
 test('la Unidad 18 es una Toyota Hilux, como la foto de referencia', async () => {

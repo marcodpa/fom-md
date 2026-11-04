@@ -1,13 +1,15 @@
-/** Estado comprobable: la falta de señal prevalece sobre telemetría antigua. */
-export function estadoUnidad(v) {
-  if (!v || v.conectado === false) return { clave: 'sin_senal', texto: 'Sin señal', color: 'gris' }
-  if (v.estadoMarcha === 'en_marcha' || (Number.isFinite(v.velocidadKmh) && v.velocidadKmh > 0))
-    return { clave: 'en_marcha', texto: 'En marcha', color: 'verde' }
-  if (v.estadoMarcha === 'parada' || v.velocidadKmh === 0)
-    return { clave: 'parada', texto: 'Detenido', color: 'ambar' }
-  if (v.ignition === true) return { clave: 'encendido', texto: 'Encendido', color: 'verde' }
-  if (v.ignition === false) return { clave: 'apagado', texto: 'Apagado', color: 'ambar' }
-  return v.conectado
-    ? { clave: 'reportando', texto: 'Reportando', color: 'verde' }
-    : { clave: 'sin_senal', texto: 'Sin señal', color: 'gris' }
+import { estadoSenal } from './sinSenal.js'
+
+/**
+ * El estado que se muestra de una unidad: la señal de `estadoSenal` (sinSenal.js), y si reporta,
+ * su marcha. Claves: 'en_marcha' | 'parada' (las dos con señal, verdes) | 'sin_ubicacion' (ámbar)
+ * | 'sin_senal' | 'sin_gps' (grises). Nada de «Encendido», «Apagado» ni «Reportando»: el
+ * encendido es un detalle, no un estado.
+ */
+export function estadoUnidad(v, ahora = Date.now()) {
+  const senal = estadoSenal(v, ahora)
+  return { clave: senal.marcha ?? senal.clave, texto: senal.etiqueta, color: senal.color, tono: senal.tono, senal }
 }
+
+/** La marcha solo de una unidad que reporta: 'en_marcha' | 'parada' | `null` (sin señal, sin ubicación…). */
+export const marchaDe = (v, ahora = Date.now()) => estadoSenal(v, ahora).marcha

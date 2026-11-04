@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 import { vehicleMarkerSvg, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
 import { AZUL_ESTELA_FOM, pintarCola, pintarRuta } from './rutaMapbox'
-import { textoSinSenal } from '../datos/sinSenal'
 import CapasMapa from './CapasMapa'
 import HerramientasRuta from './HerramientasRuta'
 import { limitesDe, mensajeLlegada, pintarEventosManejo, pintarLlegada } from './herramientasMapbox'
@@ -111,9 +110,9 @@ function elementoUnidad() {
  */
 function pintarUnidad(el, v, sel) {
   const estado = estadoUnidad(v)
-  // Sin señal, el texto accesible y el globo del cursor dicen cuánto lleva callada.
-  const sinSenal = estado.clave === 'sin_senal'
-  const texto = sinSenal ? textoSinSenal(v.ultimoReporte) : estado.texto
+  // Sin señal o sin ubicación, el texto accesible y el globo del cursor dicen cuánto lleva así.
+  const sinSenal = estado.clave === 'sin_senal' || estado.clave === 'sin_ubicacion'
+  const texto = sinSenal ? estado.senal.texto : estado.texto
   const firma = [sel ? 1 : 0, v.placa ?? '', v.alias ?? '', v.rumbo ?? '', estado.clave, texto].join('|')
   if (el.dataset.firma === firma) return
   el.dataset.firma = firma
@@ -190,6 +189,8 @@ const controlNav = new WeakMap()
 // se guarda aquí y la pantalla siguiente lo reutiliza. Solo cabe uno; si nadie lo pide en cinco
 // minutos se cierra para soltar el contexto WebGL.
 const GUARDADO_MS = 5 * 60 * 1000
+// Cada cuánto se revisa la luz automática del mapa (no tiene que ver con la señal).
+const REVISAR_LUZ_MS = 5 * 60 * 1000
 let mapaGuardado = null
 
 /**
@@ -643,7 +644,7 @@ export default function MapaMapbox({
         llegadaCapa.current?.tema?.(mapaClaro(prefsRef.current))
         return luz
       })
-    }, 5 * 60 * 1000)
+    }, REVISAR_LUZ_MS)
     return () => clearInterval(t)
   }, [])
 

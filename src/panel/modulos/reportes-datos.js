@@ -1,5 +1,6 @@
 /** Métricas derivadas de registros autorizados, sin convertir ausencias en ceros. */
 import { etiqueta, estadoDocumento } from '../datos/catalogos.js'
+import { estadoSenal } from '../datos/sinSenal.js'
 
 export function numeroValido(valor) {
   return valor !== null && valor !== undefined && valor !== '' && Number.isFinite(Number(valor))
@@ -19,8 +20,9 @@ export function calcularReporte(d, dias, areaId = '', ahora = Date.now()) {
     falla.set(o.tipoFalla || 'otro', (falla.get(o.tipoFalla || 'otro') || 0) + 1)
     estados.set(o.estado || 'sin_dato', (estados.get(o.estado || 'sin_dato') || 0) + 1)
   })
-  const enMarcha = unidades.filter(v => v.estadoMarcha === 'en_marcha').length
-  const detenidas = unidades.filter(v => v.estadoMarcha === 'parada').length
+  // La regla única (estadoSenal): la marcha solo de las que reportan al día; el resto es «sin dato».
+  const enMarcha = unidades.filter(v => estadoSenal(v).marcha === 'en_marcha').length
+  const detenidas = unidades.filter(v => estadoSenal(v).marcha === 'parada').length
   return {
     enMarcha, detenidas, sinDato: unidades.length - enMarcha - detenidas,
     kmTotal: unidades.length && unidades.every(v => numeroValido(v.km)) ? unidades.reduce((s, v) => s + Number(v.km), 0) : null,
@@ -421,8 +423,9 @@ export const tonoScore = n => !numeroValido(n) ? null : n < 1.5 ? 'ok' : n < 3.5
 export const resultadoDe = tono => ({ ok: 'Conforme', warn: 'Alerta', bad: 'Atención' })[tono] || 'Sin dato'
 
 export function vistaActual(unidades, personas) {
-  const enMarcha = unidades.filter(v => v.estadoMarcha === 'en_marcha').length
-  const detenidas = unidades.filter(v => v.estadoMarcha === 'parada').length
+  // La regla única (estadoSenal): la marcha solo de las que reportan al día; el resto es «sin dato».
+  const enMarcha = unidades.filter(v => estadoSenal(v).marcha === 'en_marcha').length
+  const detenidas = unidades.filter(v => estadoSenal(v).marcha === 'parada').length
   const conIndice = unidades.filter(v => indiceValido(v.indiceSeguro))
   const conConductor = unidades.filter(v => v.conductorPrincipalId).length
   const papeles = personas.map(p => papelesPersona(p)).filter(x => x.estado)

@@ -1,4 +1,5 @@
 import { validarEquipo, validarImei } from './gps.js'
+import { SIN_SENAL_MS } from './sinSenal.js'
 
 // La preparación no crea inventario: la identidad se confirma al final.
 export function validarPreparacion(datos) {
@@ -17,7 +18,7 @@ export function coincideDetectado(d, { inicial, sms, transporte, ahora = Date.no
   const imei = identidadConfirmada(inicial, sms)
   const fecha = Date.parse(d?.ultimaVez)
   return !!imei && d?.imei === imei && d.transporte === transporte && d.reportando === true
-    && Number.isFinite(fecha) && fecha <= ahora + 1000 && ahora - fecha < 300000
+    && Number.isFinite(fecha) && fecha <= ahora + 1000 && ahora - fecha < SIN_SENAL_MS
 }
 
 export function testigoInventarioCoban(rows, payload) {

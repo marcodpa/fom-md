@@ -9,7 +9,10 @@
 // y, mientras la base no la guarde, llega nulo. Por eso se decide aquí, en el
 // cliente, con lo que se ve: la última posición de cada unidad y desde cuándo
 // no cambia. Sirve lo que la pantalla alcanza a ver (cada lectura de la flota).
+// OJO: la consola ya no decide la marcha aquí. La regla única vive en
+// sinSenal.js (`estadoSenal`): velocidad ≥3 km/h o `motionState` del servidor.
 // ============================================================
+import { VEL_MARCHA_KMH } from './sinSenal.js'
 
 /** Cuánto tiempo quieta (misma posición) hace falta para decir «Detenida». */
 export const DETENIDA_MS = 3 * 60_000
@@ -52,8 +55,8 @@ export function marchaPorPosicion(v, ahora = Date.now()) {
       h.desde = ahora
     }
   }
-  // Con velocidad real, va rodando.
-  if (Number.isFinite(v.velocidadKmh) && v.velocidadKmh > 0) {
+  // Con velocidad real, va rodando: desde 3 km/h, el mismo corte del servidor (sinSenal.js).
+  if (Number.isFinite(v.velocidadKmh) && v.velocidadKmh >= VEL_MARCHA_KMH) {
     if (h) h.movidoEn = ahora
     return 'en_marcha'
   }

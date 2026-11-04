@@ -14,8 +14,8 @@ import {
 } from '../comp/ui'
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
-import { color, etiqueta } from '../datos/catalogos'
-import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
+import { etiqueta } from '../datos/catalogos'
+import { esCallada, estadoSenal, ordenarSinSenal, useMinuto, useUnidadesAlDia } from '../datos/sinSenal'
 import '../../styles/movil-modulos.css'
 import { useVistaTelefono } from '../comp/movil-navegacion'
 import { BuscadorFiltrosMovil, FilaUnidadMovil, ListaVirtualMovil, MapaFlotaMovil, PastillasRapidasMovil } from './FlotaMovil'
@@ -59,7 +59,7 @@ function valorOrden(v, k) {
     case 'placa': return v.placa
     case 'area': return v.areaNombre
     case 'conductor': return nombreConductor(v)
-    case 'estado': return v.estadoMarcha === 'en_marcha' ? 1 : 0
+    case 'estado': return RANGO_ESTADO[grupoEstado(v)] ?? 0
     case 'documentos': return v.docsVencidos * 100 + v.docsPorVencer
     case 'indice': return v.indiceSeguro
     case 'km': return v.km
@@ -114,17 +114,13 @@ const TRAMOS = [
 ]
 
 /**
- * Cómo está la unidad AHORA en el teléfono (la misma escala que la app):
- * sin señal si calla, en marcha, detenida, o «reportando» si la fuente no sabe
- * de marcha pero el equipo transmite. `null`: nunca reportó.
+ * El grupo de la unidad para chips, pastillas y contadores, sacado de la regla única
+ * (`v.senal`, de estadoSenal): en marcha, detenida, sin ubicación o sin señal (las que nunca
+ * reportaron van con las sin señal). Una unidad sin señal nunca cuenta como en marcha.
  */
-function estadoMovil(v) {
-  if (v.conectado === false) return 'sin-senal'
-  if (v.estadoMarcha === 'en_marcha') return 'marcha'
-  if (v.estadoMarcha === 'parada') return 'detenido'
-  if (v.conectado) return 'reportando'
-  return v.ultimoReporte ? 'sin-senal' : null
-}
+const grupoEstado = (v) => v.senal?.marcha ?? (esCallada(v.senal) ? 'sin_senal' : v.senal?.clave ?? 'sin_senal')
+/** Al ordenar por estado: primero las que van rodando, al final las calladas. */
+const RANGO_ESTADO = { en_marcha: 3, parada: 2, sin_ubicacion: 1, sin_senal: 0 }
 
 /** El número de la unidad («U-003»), como `etiquetaCortaDeUnidad` de la app; sin él, su alias. */
 const numeroDe = (v) => (v.numero && String(v.numero).trim() !== '—' ? String(v.numero).toUpperCase() : v.alias || v.placa || 'Unidad')
@@ -143,7 +139,7 @@ function ListaMovil({ unidades, alAbrir, ahora }) {
       .filter((t) => t.items.length > 0)
   }, [unidades])
   const pintar = useCallback(({ v, n }) => (
-    <FilaUnidadMovil unidad={v} numero={numeroDe(v)} estado={estadoMovil(v)} aviso={n}
+    <FilaUnidadMovil unidad={v} numero={numeroDe(v)} aviso={n}
       conductor={nombreConductor(v)} ahora={ahora} alAbrir={alAbrir} />
   ), [ahora, alAbrir])
   return (
@@ -155,26 +151,18 @@ function ListaMovil({ unidades, alAbrir, ahora }) {
 
 /**
  * El pulso de la flota en el teléfono (TiraEstado de la app): cuatro casillas
- * sobre lo que se ve con el filtro puesto. Si la fuente no sabe de marcha, se
- * cuenta lo que sí consta: quién reporta y quién no.
+ * sobre lo que se ve con el filtro puesto, con la regla única: las cuatro suman
+ * el total y una unidad sin señal nunca cuenta como en marcha ni detenida.
  */
-function TiraMovil({ unidades, sabeMarcha }) {
+function TiraMovil({ unidades }) {
   const total = unidades.length
-  const sinSenal = unidades.filter((v) => v.conectado === false).length
-  const enMarcha = unidades.filter((v) => v.estadoMarcha === 'en_marcha' && v.conectado !== false).length
-  const cifras = sabeMarcha
-    ? [
-        { t: total === 1 ? 'unidad' : 'unidades', n: total },
-        { t: 'en marcha', n: enMarcha, c: 'verde' },
-        { t: 'detenidas', n: total - enMarcha - sinSenal, c: 'ambar' },
-        { t: 'sin señal', n: sinSenal, c: 'gris' },
-      ]
-    : [
-        { t: total === 1 ? 'unidad' : 'unidades', n: total },
-        { t: 'reportando', n: total - sinSenal, c: 'verde' },
-        { t: 'sin señal', n: sinSenal, c: 'gris' },
-        { t: 'sin conductor', n: unidades.filter((v) => !v.conductorPrincipalId).length, c: 'ambar' },
-      ]
+  const cuenta = (g) => unidades.filter((v) => grupoEstado(v) === g).length
+  const cifras = [
+    { t: 'en marcha', n: cuenta('en_marcha'), c: 'verde' },
+    { t: 'detenidas', n: cuenta('parada'), c: 'verde' },
+    { t: 'sin ubicación', n: cuenta('sin_ubicacion'), c: 'ambar' },
+    { t: 'sin señal', n: cuenta('sin_senal'), c: 'gris' },
+  ]
   return (
     <div className="mv-solo-movil mv-tira" aria-label="Estado de la flota">
       {cifras.map((x) => {
@@ -195,7 +183,7 @@ function TiraMovil({ unidades, sabeMarcha }) {
 }
 
 /** Descarga la tabla tal como se ve, sin librerías: Blob + enlace temporal. */
-function exportarCSV(filas) {
+function exportarCSV(filas, ahora = Date.now()) {
   const cabeceras = [
     'Unidad', 'Número', 'Placa', 'Marca', 'Modelo', 'Año', 'Tipo', 'Área', 'Conductor',
     'Estado', 'Velocidad (km/h)', 'Kilometraje', 'Índice seguro', 'Documentos vencidos',
@@ -208,8 +196,9 @@ function exportarCSV(filas) {
       [
         v.alias, v.numero, v.placa, v.marca, v.modelo, v.anio,
         etiqueta('vehiculo_tipo', v.tipo), v.areaNombre, nombreConductor(v),
-        etiqueta('marcha_estado', v.estadoMarcha), v.estadoMarcha === 'en_marcha' ? v.velocidadKmh : 0,
-        Math.round(v.km), v.indiceSeguro, v.docsVencidos, v.docsPorVencer,
+        // La regla única: el estado de la pastilla; velocidad y km vacíos si no hay dato (nunca 0).
+        estadoSenal(v, ahora).texto, estadoSenal(v, ahora).velocidadKmh ?? '',
+        Number.isFinite(v.km) ? Math.round(v.km) : '', v.indiceSeguro, v.docsVencidos, v.docsPorVencer,
         v.ubicacionTexto, f.fechaHora(v.ultimoReporte),
       ]
         .map(celda)
@@ -255,7 +244,7 @@ export default function Flota() {
   // reloj se recalcula la señal: a los 5 min sin reportar la unidad pasa sola a «Sin señal».
   const ahora = useMinuto()
 
-  const lista = useMemo(() => (vehiculos.datos ?? []).map((v) => conSenalAlDia(v, ahora)), [vehiculos.datos, ahora])
+  const lista = useUnidadesAlDia(vehiculos.datos)
   const estado = vehiculos.estado === 'error' || areas.estado === 'error'
     ? 'error'
     : vehiculos.estado === 'ok' && areas.estado === 'ok'
@@ -273,11 +262,9 @@ export default function Flota() {
     if (esMovil) {
       if (rapido === 'todas') return porArea
       if (rapido === 'avisos') return porArea.filter((v) => novedadDe(v))
-      return porArea.filter((v) => estadoMovil(v) === rapido)
+      return porArea.filter((v) => grupoEstado(v) === rapido)
     }
-    if (filtro === 'sin_senal') return porArea.filter((v) => v.conectado === false)
-    if (filtro === 'en_marcha') return porArea.filter((v) => v.estadoMarcha === 'en_marcha')
-    if (filtro === 'parada') return porArea.filter((v) => v.estadoMarcha === 'parada')
+    if (['en_marcha', 'parada', 'sin_ubicacion', 'sin_senal'].includes(filtro)) return porArea.filter((v) => grupoEstado(v) === filtro)
     if (filtro === 'atencion') return porArea.filter(requiereAtencion)
     return porArea
   }, [porArea, filtro, esMovil, rapido])
@@ -291,14 +278,15 @@ export default function Flota() {
       return String(va).localeCompare(String(vb), 'es', { numeric: true }) * dir
     })
     // Al ordenar por estado, dentro de su grupo las sin señal van de más tiempo callada a menos.
-    return orden.k === 'estado' ? ordenarSinSenal(lista, (v) => v.conexion === 'sin_senal', ahora) : lista
+    return orden.k === 'estado' ? ordenarSinSenal(lista, (v) => grupoEstado(v) === 'sin_senal', ahora) : lista
   }, [filtradas, orden, ahora])
 
   const chipsEstado = [
     { v: 'todas', t: 'Todas', n: porArea.length },
-    { v: 'en_marcha', t: 'En marcha', n: porArea.filter((v) => v.estadoMarcha === 'en_marcha').length },
-    { v: 'parada', t: 'Detenidas', n: porArea.filter((v) => v.estadoMarcha === 'parada').length },
-    { v: 'sin_senal', t: 'Sin señal', n: porArea.filter((v) => v.conectado === false).length },
+    { v: 'en_marcha', t: 'En marcha', n: porArea.filter((v) => grupoEstado(v) === 'en_marcha').length },
+    { v: 'parada', t: 'Detenidas', n: porArea.filter((v) => grupoEstado(v) === 'parada').length },
+    { v: 'sin_ubicacion', t: 'Sin ubicación', n: porArea.filter((v) => grupoEstado(v) === 'sin_ubicacion').length },
+    { v: 'sin_senal', t: 'Sin señal', n: porArea.filter((v) => grupoEstado(v) === 'sin_senal').length },
     { v: 'atencion', t: 'Requieren atención', n: porArea.filter(requiereAtencion).length },
   ]
 
@@ -311,25 +299,23 @@ export default function Flota() {
     })),
   ]
 
-  const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
-  // ¿La fuente sabe distinguir marcha de parada? Con la base real todavía no:
-  // no se persiste la velocidad, solo la última vez que el equipo reportó.
-  const sabeMarcha = lista.some((v) => v.estadoMarcha != null)
-  const reportando = lista.filter((v) => v.conectado).length
+  // La regla única: la marcha solo de las que reportan; las sin señal no son «detenidas».
+  const enMarcha = lista.filter((v) => grupoEstado(v) === 'en_marcha').length
+  const detenidas = lista.filter((v) => grupoEstado(v) === 'parada').length
   const atencion = lista.filter(requiereAtencion).length
   const sinConductor = lista.filter((v) => !v.conductorPrincipalId).length
 
   // Las pastillas del teléfono, con lo que dejan la búsqueda y el área.
   const pastillas = useMemo(() => {
-    const cuenta = (e) => porArea.filter((v) => estadoMovil(v) === e).length
-    const base = [{ v: 'todas', t: 'Todas', n: porArea.length }]
-    const estados = sabeMarcha
-      ? [{ v: 'marcha', t: 'En marcha', n: cuenta('marcha'), tono: 'exito' }, { v: 'detenido', t: 'Detenidas', n: cuenta('detenido'), tono: 'aviso' }]
-      : [{ v: 'reportando', t: 'Reportando', n: cuenta('reportando'), tono: 'exito' }]
-    return [...base, ...estados,
-      { v: 'sin-senal', t: 'Sin señal', n: cuenta('sin-senal'), tono: 'apagado' },
+    const cuenta = (e) => porArea.filter((v) => grupoEstado(v) === e).length
+    return [
+      { v: 'todas', t: 'Todas', n: porArea.length },
+      { v: 'en_marcha', t: 'En marcha', n: cuenta('en_marcha'), tono: 'exito' },
+      { v: 'parada', t: 'Detenidas', n: cuenta('parada'), tono: 'exito' },
+      { v: 'sin_ubicacion', t: 'Sin ubicación', n: cuenta('sin_ubicacion'), tono: 'aviso' },
+      { v: 'sin_senal', t: 'Sin señal', n: cuenta('sin_senal'), tono: 'apagado' },
       { v: 'avisos', t: 'Con avisos', n: porArea.filter((v) => novedadDe(v)).length, tono: 'peligro' }]
-  }, [porArea, sabeMarcha])
+  }, [porArea])
 
   function ordenarPor(k) {
     setOrden((o) => (o.k === k ? { k, dir: o.dir === 'asc' ? 'desc' : 'asc' } : { k, dir: 'asc' }))
@@ -345,7 +331,7 @@ export default function Flota() {
         <button
           type="button"
           className="pnl-btn"
-          onClick={() => exportarCSV(ordenadas)}
+          onClick={() => exportarCSV(ordenadas, ahora)}
           disabled={!ordenadas.length}
         >
           <Icono nombre="descargar" tam={16} />
@@ -407,28 +393,16 @@ export default function Flota() {
 
         {estado === 'ok' && (
           <>
-            <TiraMovil unidades={esMovil ? porArea : filtradas} sabeMarcha={sabeMarcha} />
+            <TiraMovil unidades={esMovil ? porArea : filtradas} />
             <div className="pnl-grid k4 mv-solo-escritorio">
               <Kpi titulo="Total de unidades" valor={lista.length} icono="camion" />
-              {sabeMarcha ? (
-                <Kpi
-                  titulo="En marcha"
-                  valor={enMarcha}
-                  icono="velocidad"
-                  tono="ok"
-                  nota={f.cantidad(lista.length - enMarcha, 'detenida', 'detenidas')}
-                />
-              ) : (
-                /* La base no guarda la velocidad: se informa cuántos equipos
-                   están reportando, que es lo que sí consta. */
-                <Kpi
-                  titulo="Reportando"
-                  valor={reportando}
-                  icono="velocidad"
-                  tono={reportando ? 'ok' : 'aviso'}
-                  nota={`${lista.length - reportando} sin señal`}
-                />
-              )}
+              <Kpi
+                titulo="En marcha"
+                valor={enMarcha}
+                icono="velocidad"
+                tono="ok"
+                nota={f.cantidad(detenidas, 'detenida', 'detenidas')}
+              />
               <Kpi
                 titulo="Requieren atención"
                 valor={atencion}
@@ -456,7 +430,7 @@ export default function Flota() {
                 acciones={<>
                   {esGestorDeFlota && <button type="button" className="pnl-btn sutil" onClick={() => setCreandoArea(true)}><Icono nombre="pin" tam={16} />Nueva área</button>}
                   {esGestorDeFlota && <button type="button" className="pnl-btn" onClick={() => setAsignando({ area: areaId })}><Icono nombre="camion" tam={16} />Agregar vehículos a un área</button>}
-                  <button type="button" className="pnl-btn" onClick={() => exportarCSV(ordenadas)} disabled={!ordenadas.length}><Icono nombre="descargar" tam={16} />Exportar CSV</button>
+                  <button type="button" className="pnl-btn" onClick={() => exportarCSV(ordenadas, ahora)} disabled={!ordenadas.length}><Icono nombre="descargar" tam={16} />Exportar CSV</button>
                 </>} />
               <PastillasRapidasMovil opciones={pastillas} valor={rapido} alCambiar={setRapido} />
             </> : <>
@@ -583,30 +557,11 @@ export default function Flota() {
                           <td>{nombreConductor(v)}</td>
                           <td>
                             <div className="pnl-doble">
-                              {v.estadoMarcha ? (
-                                <>
-                                  <Tag color={color('marcha_estado', v.estadoMarcha)}>
-                                    {etiqueta('marcha_estado', v.estadoMarcha)}
-                                  </Tag>
-                                  {v.estadoMarcha === 'en_marcha' && (
-                                    <span>{f.velocidad(v.velocidadKmh)}</span>
-                                  )}
-                                </>
-                              ) : (
-                                /* Sin velocidad en la base no se puede afirmar
-                                   marcha ni parada; se informa la conexión. */
-                                v.conexion === 'sin_senal' ? (
-                                  <Tag color={color('conexion', v.conexion)}>
-                                    {textoSinSenal(v.ultimoReporte, ahora)}
-                                  </Tag>
-                                ) : (
-                                  <>
-                                    <Tag color={color('conexion', v.conexion)}>
-                                      {etiqueta('conexion', v.conexion)}
-                                    </Tag>
-                                    <span>{f.desde(v.ultimoReporte)}</span>
-                                  </>
-                                )
+                              {/* La regla única: con señal, la marcha (y la velocidad si va rodando);
+                                  si no, cómo está y desde cuándo. */}
+                              <Tag color={v.senal.color}>{estadoSenal(v, ahora).texto}</Tag>
+                              {v.senal.marcha === 'en_marcha' && v.senal.velocidadKmh != null && (
+                                <span>{f.velocidad(v.senal.velocidadKmh)}</span>
                               )}
                             </div>
                           </td>

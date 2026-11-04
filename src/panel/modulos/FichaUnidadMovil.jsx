@@ -2,13 +2,12 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import Mapa from '../comp/Mapa'
 import { HAY_MAPBOX } from '../comp/MapaMapbox'
-import { estadoUnidad } from '../datos/estadoUnidad'
 import { enlaceEventoEnMapa } from '../datos/eventosManejo'
 import { useFotoSinFondo } from '../datos/fotoVehiculo'
 import { fotoSinFondo } from '../datos/fotoSinFondo'
 import { colaReciente } from '../datos/recorrido'
 import { horasDeHoy, partesTiempo, resumenDeHoy, textoKm, textoTiempo } from '../datos/recorridoHoy'
-import { conSenalAlDia, textoSinSenal, transmitiendo } from '../datos/sinSenal'
+import { conSenalAlDia, estadoSenal, haceCuanto } from '../datos/sinSenal'
 import { etiqueta } from '../datos/catalogos'
 import * as f from '../datos/formato'
 import repo from '../datos/repo'
@@ -26,13 +25,6 @@ import '../../styles/vehiculos-movil.css'
 // foto sin fondo montada y la hoja «Resumen» con sus cuatro cifras.
 // ============================================================
 
-/** «09:42». */
-function horaCorta(iso) {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
-
 /** Un dato que el servidor manda con «—» cuando no lo tiene: aquí cuenta como vacío. */
 const conValor = (t) => (t && String(t).trim() !== '—' ? String(t).trim() : null)
 
@@ -44,13 +36,8 @@ function tonoVelocidad(kmh) {
   return 'exito'
 }
 
-/** Los tres estados de la app: en marcha, detenida (transmite) o sin señal. */
-function estadoApp(u) {
-  const clave = estadoUnidad(u).clave
-  if (clave === 'sin_senal') return 'sin-senal'
-  if (clave === 'en_marcha') return 'marcha'
-  return 'detenido'
-}
+/** El tono de la pastilla con la regla única (estadoSenal): verde con señal, ámbar sin ubicación, gris callada. */
+const tonoSenal = (s) => (s.clave === 'reportando' ? 'exito' : s.clave === 'sin_ubicacion' ? 'aviso' : 'apagado')
 
 const TRAZOS = {
   camion: <><path d="M3 6h11v10H3z" /><path d="M14 9h4l3 3v4h-7" /><circle cx="7" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></>,
@@ -86,18 +73,20 @@ export function useHoyDeUnidad(v, ahora, activo) {
     const cola = puntos ? colaReciente(puntos).puntos : []
     let unidad = v ? conSenalAlDia(v, ahora) : null
     const p = puntos?.at(-1)
-    // El último punto del día, si es más nuevo que lo que trajo la ficha.
-    if (unidad && p && (!unidad.ultimoReporte || Date.parse(p.hora) > Date.parse(unidad.ultimoReporte))) {
-      const vel = p.velocidadKmh ?? null
+    // El último punto del día, si LLEGÓ después de la última posición que trajo la ficha (hora de
+    // recepción, como `lastPositionAt`). Solo completa posición y velocidad; la señal la decide estadoSenal.
+    const llego = p ? p.recibido ?? p.hora : null
+    if (unidad && p && (!unidad.posicionEn || Date.parse(llego) > Date.parse(unidad.posicionEn))) {
+      const masNueva = !unidad.ultimoReporte || Date.parse(llego) > Date.parse(unidad.ultimoReporte)
       unidad = conSenalAlDia({
         ...unidad,
         lat: p.lat,
         lng: p.lng,
-        ultimoReporte: p.hora,
-        velocidadKmh: vel,
-        estadoMarcha: vel == null ? unidad.estadoMarcha : vel > 0 ? 'en_marcha' : 'parada',
-        conectado: transmitiendo(p.hora, ahora),
-        conexion: transmitiendo(p.hora, ahora) ? 'reportando' : 'sin_senal',
+        posicionEn: llego,
+        ultimoReporte: masNueva ? llego : unidad.ultimoReporte,
+        velocidadKmh: p.velocidadKmh ?? null,
+        // La marcha que dijo el servidor era de una lectura anterior: ahora manda la velocidad del punto.
+        estadoMarcha: null,
       }, ahora)
     }
     return { hoy, cola, puntos: puntos ?? [], unidad }
@@ -111,11 +100,9 @@ export function useHoyDeUnidad(v, ahora, activo) {
  */
 export function UbicacionUnidadMovil({ unidad: u, cola, puntosDia, verRecorrido, alVerRecorrido, ahora }) {
   const conPos = Number.isFinite(u.lat) && Number.isFinite(u.lng)
-  const estado = conPos ? estadoApp(u) : null
-  const vel = u.velocidadKmh ?? 0
+  const senal = estadoSenal(u, ahora)
   const coordenadas = conPos ? `${u.lat.toFixed(5)}, ${u.lng.toFixed(5)}` : null
-  const detalle = [coordenadas, u.ultimoReporte ? horaCorta(u.ultimoReporte) : null].filter(Boolean).join(' · ')
-  const tonoEstado = estado === 'marcha' ? 'exito' : estado === 'detenido' ? 'aviso' : 'apagado'
+  const detalle = [coordenadas, senal.posicionEn ? haceCuanto(senal.posicionEn, ahora) : null].filter(Boolean).join(' · ')
   const zona = conValor(u.areaNombre) && u.areaNombre !== 'Sin área' ? u.areaNombre : null
   const enMapa = conPos ? [u] : []
   const enlaceMapa = `/panel/mapa?unidad=${encodeURIComponent(u.id)}`
@@ -135,12 +122,10 @@ export function UbicacionUnidadMovil({ unidad: u, cola, puntosDia, verRecorrido,
             <b>{zona ?? 'Última ubicación'}</b>
             <small>{detalle || 'Sin posición todavía'}</small>
           </span>
-          {estado && (
-            <span className={`fum-chip ${tonoEstado}`}>
-              <i className={`vm-punto${estado === 'marcha' ? ' late' : ''}`} aria-hidden="true" />
-              <span>{estado === 'sin-senal' ? textoSinSenal(u.ultimoReporte, ahora) : estado === 'marcha' ? 'En marcha' : 'Detenida'}</span>
-            </span>
-          )}
+          <span className={`fum-chip ${tonoSenal(senal)}`}>
+            <i className={`vm-punto${senal.marcha === 'en_marcha' ? ' late' : ''}`} aria-hidden="true" />
+            <span>{senal.texto}</span>
+          </span>
         </div>
         <div className="fum-acciones">
           <button type="button" className={`fum-boton ${verRecorrido ? 'borde on' : 'primario'}`} aria-pressed={verRecorrido} onClick={alVerRecorrido}>
@@ -164,17 +149,17 @@ export function UbicacionUnidadMovil({ unidad: u, cola, puntosDia, verRecorrido,
  * LA FRANJA con la foto montada y la hoja «Resumen». En la hoja van las cuatro
  * cifras de la web (`children`), con sus enlaces y «Corregir el odómetro».
  */
-export function FranjaFichaMovil({ unidad: u, hoy, children }) {
-  const conPos = Number.isFinite(u.lat) && Number.isFinite(u.lng)
-  const estado = conPos ? estadoApp(u) : null
-  const vel = estado === 'marcha' ? u.velocidadKmh ?? 0 : 0
+export function FranjaFichaMovil({ unidad: u, hoy, ahora = Date.now(), children }) {
+  // La regla única: velocidad solo con señal al día; si no, «—» (nunca un 0 viejo).
+  const senal = estadoSenal(u, ahora)
+  const vel = senal.marcha === 'en_marcha' ? senal.velocidadKmh ?? 0 : 0
   const tiempo = partesTiempo(hoy.minutos)
   const titulo = [`${conValor(u.marca) ?? ''} ${conValor(u.modelo) ?? ''}`.trim(), u.anio].filter(Boolean).join(' · ')
   const numero = conValor(u.numero)?.toUpperCase()
   const identidad = [numero, conValor(u.placa) !== numero ? conValor(u.placa) : null, etiqueta('vehiculo_tipo', u.tipo)].filter(Boolean).join(' · ')
   const foto = useFotoSinFondo(u, fotoSinFondo, { ancho: 630 })
   const nombre = `${conValor(u.marca) ?? ''} ${conValor(u.modelo) ?? ''}`.trim() || 'la unidad'
-  const marca = estado === 'sin-senal' ? { t: 'Sin señal', tono: 'apagado' } : estado ? { t: 'En vivo', tono: 'exito' } : null
+  const marca = senal.clave === 'reportando' ? { t: 'En vivo', tono: 'exito' } : { t: senal.etiqueta, tono: tonoSenal(senal) }
   return (
     <section className="fum-unidad mvu-tonos" aria-label={titulo || u.alias}>
       <div className="fum-franja">
@@ -187,7 +172,7 @@ export function FranjaFichaMovil({ unidad: u, hoy, children }) {
             </span>
           </span>
           <span className="mvu-f-vel">
-            <span className={tonoVelocidad(vel)}><b>{estado ? f.numero(Math.round(vel)) : '—'}</b><small>km/h</small></span>
+            <span className={tonoVelocidad(vel)}><b>{senal.marcha ? f.numero(Math.round(vel)) : '—'}</b><small>km/h</small></span>
             {marca && <span className={`mvu-vivo ${marca.tono}`}><i className={`vm-punto${marca.tono === 'exito' ? ' late' : ''}`} aria-hidden="true" />{marca.t}</span>}
           </span>
         </span>
@@ -206,9 +191,9 @@ export function FranjaFichaMovil({ unidad: u, hoy, children }) {
   )
 }
 
-/** «Hoy lleva 42,6 km en 1 h 18 min de marcha. Última posición a las 15:42.» */
-export function textoRecorridoHoy(hoy, unidad) {
-  const ultima = unidad?.ultimoReporte ? ` Última posición a las ${horaCorta(unidad.ultimoReporte)}.` : ''
+/** «Hoy lleva 42,6 km en 1 h 18 min de marcha. Última posición hace 3 min.» */
+export function textoRecorridoHoy(hoy, unidad, ahora = Date.now()) {
+  const ultima = unidad?.posicionEn ? ` Última posición ${haceCuanto(unidad.posicionEn, ahora)}.` : ''
   if (hoy.km == null && hoy.minutos == null) {
     return (Number.isFinite(unidad?.lat) ? 'Todavía no hay recorrido de hoy.' : 'Sin posición del GPS por ahora.') + ultima
   }

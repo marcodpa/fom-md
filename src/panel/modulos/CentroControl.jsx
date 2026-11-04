@@ -9,7 +9,7 @@ import Mapa from '../comp/Mapa'
 import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
 import PanelRecorrido from '../comp/PanelRecorrido'
 import { analizar, COLA_MIN, colaReciente } from '../datos/recorrido'
-import { ordenarSinSenal, textoSinSenal, useMinuto, useUnidadesAlDia } from '../datos/sinSenal'
+import { esCallada, estadoSenal, ordenarSinSenal, useMinuto, useUnidadesAlDia } from '../datos/sinSenal'
 import { leerEnlaceEvento } from '../datos/eventosManejo'
 import { BloqueManejoBrusco, useManejoBrusco } from '../comp/ManejoBrusco'
 import * as f from '../datos/formato'
@@ -40,7 +40,7 @@ function coincide(v, texto) {
 }
 
 // El conductor entra en la firma: el buscador también filtra por su nombre.
-const firmaFlota = (lista) => lista.map((v) => `${v.id}:${v.lat}:${v.lng}:${v.estadoMarcha}:${v.velocidadKmh}:${v.ultimoReporte}:${v.conectado}:${v.conductorNombre}`).join('|') + (lista.incompleta ? '|incompleta' : '')
+const firmaFlota = (lista) => lista.map((v) => `${v.id}:${v.lat}:${v.lng}:${v.estadoMarcha}:${v.velocidadKmh}:${v.ultimoReporte}:${v.posicionEn}:${v.conductorNombre}`).join('|') + (lista.incompleta ? '|incompleta' : '')
 const firmaPuntos = (p) => `${p.length}|${p[0]?.hora}|${p.at(-1)?.hora}|${p.at(-1)?.lat}|${p.at(-1)?.lng}`
 const firmaAnalisis = (a) => `${firmaPuntos(a.puntos)}|${a.viajes.length}|${a.paradas.length}`
 
@@ -109,12 +109,13 @@ export default function CentroControl() {
   // renuevan solos en la lista y en la ficha, que llevan su propio reloj).
   const alDia = useUnidadesAlDia(datosFlota)
   const lista = useMemo(
-    // Primero la señal y la marcha al día (por posición), y con eso el filtro.
+    // Primero la señal y la marcha al día (regla única, `v.senal`), y con eso el filtro:
+    // la marcha solo existe con señal, así que una unidad callada nunca pasa el filtro de marcha.
     () => alDia.filter((v) =>
-      (!areaId || v.areaId === areaId) && (!estadoMarcha || (v.estadoMarcha === estadoMarcha && v.conectado !== false)) && coincide(v, texto)),
+      (!areaId || v.areaId === areaId) && (!estadoMarcha || v.senal.marcha === estadoMarcha) && coincide(v, texto)),
     [alDia, areaId, estadoMarcha, texto]
   )
-  const enMarcha = lista.filter((v) => v.estadoMarcha === 'en_marcha').length
+  const enMarcha = lista.filter((v) => v.senal.marcha === 'en_marcha').length
 
   // Enlace de un evento de manejo (perfil, Alertas, Eventos y SOS, expediente):
   // `?unidad=…&evento=…` elige la unidad en cuanto llega la flota y se limpia de la dirección.
@@ -172,14 +173,9 @@ export default function CentroControl() {
     setAreaId('')
   }
 
-  // Sin velocidad en la base no se puede contar cuántas van en marcha; lo que
-  // sí consta es cuántos equipos están reportando.
-  const sabeMarcha = lista.some((v) => v.estadoMarcha != null)
-  const reportando = lista.filter((v) => v.conectado).length
   const bajada =
     flota.estado === 'ok'
-      ? `${f.numero(lista.length)} ${lista.length === 1 ? 'unidad' : 'unidades'} · ` +
-        (sabeMarcha ? `${enMarcha} en marcha` : `${reportando} reportando`)
+      ? `${f.numero(lista.length)} ${lista.length === 1 ? 'unidad' : 'unidades'} · ${enMarcha} en marcha`
       : 'Dónde está cada unidad, en tiempo real.'
   // La flota pasó del tope de lectura: se dice, para que nadie cuente de menos sin saberlo.
   const incompleta = flota.estado === 'ok' && Boolean(datosFlota?.incompleta)
@@ -285,7 +281,7 @@ export default function CentroControl() {
   )
 }
 
-const esSinSenal = (v) => estadoUnidad(v).clave === 'sin_senal'
+const esSinSenal = (v) => esCallada(v.senal ?? estadoSenal(v))
 
 function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
   // Cada minuto se rehace el «hace …» y el orden de las calladas, sin pedir nada al servidor.
@@ -294,8 +290,9 @@ function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
   return (
     <div className="pnl-filas">
       {filas.map((v) => {
-        const estado = estadoUnidad(v)
-        const viva = estado.color === 'verde'
+        // La regla única: verde solo con señal y posición al día.
+        const s = estadoSenal(v, ahora)
+        const viva = s.clave === 'reportando'
         const abierta = seleccionado === v.id
         const alternar = () => alSeleccionar(abierta ? null : v.id)
         return (
@@ -321,16 +318,9 @@ function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
                 {v.conductorNombre === 'Sin asignar' ? 'Sin conductor' : v.conductorNombre}
               </span>
             </div>
-            {/* Sin señal, cuánto lleva callada. Con velocidad en la base se muestra; sin ella, lo
-                único que consta es cuándo reportó el equipo por última vez. */}
+            {/* En marcha, la velocidad; si no, el estado («Detenida», «Sin señal · hace 2 h»…). */}
             <em>
-              {estado.clave === 'sin_senal'
-                ? textoSinSenal(v.ultimoReporte, ahora)
-                : v.velocidadKmh != null
-                ? f.velocidad(v.velocidadKmh)
-                : v.estadoMarcha === 'parada'
-                  ? 'Detenida'
-                  : f.desde(v.ultimoReporte)}
+              {s.marcha === 'en_marcha' && s.velocidadKmh != null ? f.velocidad(s.velocidadKmh) : s.texto}
             </em>
           </div>
         )

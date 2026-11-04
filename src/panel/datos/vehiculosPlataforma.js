@@ -31,6 +31,8 @@ function comoFila(v, empresa) {
     velocidadKmh: v.speedKph ?? null,
     km: v.odometerKm ?? null,
     ultimoReporte: v.lastReportAt ?? null,
+    posicionEn: v.lastPositionAt ?? null,
+    estadoMarcha: v.motionState === 'en_marcha' || v.motionState === 'parada' ? v.motionState : null,
     lat: v.latitude ?? null,
     lng: v.longitude ?? null,
     conductorNombre: null,
@@ -69,7 +71,7 @@ export async function vehiculosDeLaPlataforma() {
       empresas,
       fallidas: [],
       vehiculos: vs.map((v) => ({
-        ...comoFila({ id: v.id, alias: v.alias, plate: v.placa, fleetNumber: v.numero, make: v.marca, model: v.modelo, modelYear: v.anio, vehicleType: v.tipo, status: v.estado, areaName: v.areaNombre, speedKph: v.velocidadKmh, odometerKm: v.km, lastReportAt: v.ultimoReporte, latitude: v.lat, longitude: v.lng }, empresa),
+        ...comoFila({ id: v.id, alias: v.alias, plate: v.placa, fleetNumber: v.numero, make: v.marca, model: v.modelo, modelYear: v.anio, vehicleType: v.tipo, status: v.estado, areaName: v.areaNombre, speedKph: v.velocidadKmh, odometerKm: v.km, lastReportAt: v.ultimoReporte, lastPositionAt: v.posicionEn, motionState: v.estadoMarcha, latitude: v.lat, longitude: v.lng }, empresa),
         conductorNombre: v.conductorNombre && v.conductorNombre !== 'Sin asignar' ? v.conductorNombre : null,
       })),
     }

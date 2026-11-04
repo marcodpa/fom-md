@@ -8,7 +8,7 @@ import Mapa from '../comp/Mapa'
 import FichaUnidad from '../comp/FichaUnidad'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
-import { conSenalAlDia, msSinReportar, SIN_SENAL_MS, textoSinSenal, useMinuto } from '../datos/sinSenal'
+import { estadoSenal, msSinReportar, useMinuto, useUnidadesAlDia } from '../datos/sinSenal'
 import { Icono } from '../Iconos'
 import RankingManejo from '../comp/RankingManejo'
 import { masNuevoPrimero } from '../datos/orden'
@@ -27,9 +27,6 @@ import { IconoMovil } from '../comp/movil-piezas'
 // seguro, unidades bloqueadas). Una caja con un guion ocupa el mejor sitio
 // de la pantalla para decir «no sé»; cuando haya dato, se pone.
 // ============================================================
-
-/** Una unidad cuenta como «reportando» si mandó algo en los últimos 5 min: la regla de la app. */
-const VIVO_MS = SIN_SENAL_MS
 
 // Cada dato a su ritmo. Antes todo se pedía junto cada 30 s (~8 pedidos más
 // todas las páginas de ODT de la historia) y el servidor limita a cada usuario.
@@ -57,14 +54,6 @@ function cargarEventos() {
     repo.alertas.listar(),
     repo.inspecciones.listar(),
   ]).then(([odts, alertas, inspecciones]) => ({ odts, alertas, inspecciones }))
-}
-
-/** ¿Viva o callada? Con la hora de la última señal, no con «alguna vez reportó». */
-function senalDe(v, ahora) {
-  const hace = msSinReportar(v.ultimoReporte, ahora)
-  const viva = hace < VIVO_MS
-  // Callada: «Sin señal · hace 2 h 15 min» (o «nunca reportó»), con la misma cuenta que la app.
-  return { viva, hace, texto: viva ? f.desde(v.ultimoReporte) : textoSinSenal(v.ultimoReporte, ahora) }
 }
 
 /**
@@ -112,14 +101,14 @@ function eventosDeHoy({ vehiculos, odts, alertas, inspecciones }, hoy, ahora) {
       }),
     )
   vehiculos
-    .filter((v) => v.ultimoReporte && esDeHoy(v.ultimoReporte) && !senalDe(v, ahora).viva)
+    .filter((v) => v.ultimoReporte && esDeHoy(v.ultimoReporte) && estadoSenal(v, ahora).clave === 'sin_senal')
     .forEach((v) =>
       eventos.push({
         id: `senal-${v.id}`,
         en: v.ultimoReporte,
         tono: 'malo',
         texto: `${v.alias} · ${v.placa} dejó de reportar`,
-        detalle: textoSinSenal(v.ultimoReporte, ahora),
+        detalle: estadoSenal(v, ahora).texto,
         a: `/panel/flota/${v.id}`,
       }),
     )
@@ -198,18 +187,21 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
   const ahora = useMinuto()
   const hoy = new Date()
 
+  // La regla única (estadoSenal, en `u.senal`): la misma señal que el mapa y la flota.
+  const alDia = useUnidadesAlDia(vehiculos)
   const unidades = useMemo(
     () =>
-      vehiculos
-        .map((v) => ({ ...conSenalAlDia(v, ahora), senal: senalDe(v, ahora) }))
-        // Las calladas primero, la de más tiempo sin señal arriba: son las que hay que mirar.
-        .sort((a, b) =>
-          Number(a.senal.viva) - Number(b.senal.viva) ||
-          (a.senal.viva ? 0 : (b.senal.hace - a.senal.hace) || 0) ||
-          a.alias.localeCompare(b.alias)),
-    [vehiculos, ahora],
+      [...alDia]
+        // Las que no reportan al día primero, la de más tiempo callada arriba: son las que hay que mirar.
+        .sort((a, b) => {
+          const ca = a.senal.clave !== 'reportando'
+          const cb = b.senal.clave !== 'reportando'
+          return Number(cb) - Number(ca) ||
+            (ca ? (msSinReportar(b.ultimoReporte, ahora) - msSinReportar(a.ultimoReporte, ahora)) || 0 : 0) ||
+            a.alias.localeCompare(b.alias)
+        }),
+    [alDia, ahora],
   )
-  const reportando = unidades.filter((u) => u.senal.viva).length
   const total = unidades.length
 
   // Contadores del servidor. `null` es «no se sabe» y se muestra como guion,
@@ -225,9 +217,10 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
   )
 
   const seleccion = unidades.find(u => u.id === seleccionado) ?? unidades.find(u => u.lat != null) ?? unidades[0]
-  const sabeMarcha = unidades.some(u => u.estadoMarcha != null)
-  const enMarcha = unidades.filter(u => u.estadoMarcha === 'en_marcha').length
-  const activas = sabeMarcha ? enMarcha : reportando
+  // La marcha solo de las que reportan: «detenidas» no incluye a las sin señal.
+  const enMarcha = unidades.filter(u => u.senal.marcha === 'en_marcha').length
+  const detenidas = unidades.filter(u => u.senal.marcha === 'parada').length
+  const sinReportar = total - enMarcha - detenidas
 
   return (
     <div className="pnl-resumen">
@@ -236,10 +229,11 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
           <span className="pnl-metrica-icono"><Icono nombre="camion" tam={28} /></span>
           <div><h2>Flota de vehículos</h2><strong>{total}</strong><small>vehículos</small></div>
           <div className="pnl-flota-desglose">
-            <div className="pnl-flota-barra"><i style={{ '--proporcion': `${total ? activas / total * 100 : 0}%` }} /></div>
+            <div className="pnl-flota-barra"><i style={{ '--proporcion': `${total ? enMarcha / total * 100 : 0}%` }} /></div>
             <div className="pnl-flota-leyenda">
-              <span>{activas} {sabeMarcha ? 'en marcha' : 'reportando'}</span>
-              <span>{total - activas} {sabeMarcha ? 'detenidos' : 'sin señal'}</span>
+              <span>{enMarcha} en marcha</span>
+              <span>{detenidas} {detenidas === 1 ? 'detenida' : 'detenidas'}</span>
+              {sinReportar > 0 && <span>{sinReportar} sin señal o sin ubicación</span>}
             </div>
           </div>
         </Link>
@@ -255,7 +249,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
         <div className="pnl-resumen-unidad">
         <Tarjeta titulo="Vehículo seleccionado" accion={unidades.length > 0 && (
           <select className="pnl-input pnl-resumen-select" aria-label="Seleccionar vehículo" value={seleccion?.id ?? ''} onChange={e => alSeleccionar(e.target.value)}>
-            {unidades.map(u => <option key={u.id} value={u.id}>{u.alias} · {u.placa}{u.senal.viva ? '' : ` — ${u.senal.texto}`}</option>)}
+            {unidades.map(u => <option key={u.id} value={u.id}>{u.alias} · {u.placa}{u.senal.clave === 'reportando' ? '' : ` — ${estadoSenal(u, ahora).texto}`}</option>)}
           </select>
         )}>
           {seleccion ? <FichaUnidad unidad={seleccion} conCabecera={false} /> : <Vacio icono="camion" titulo="Sin unidades todavía" texto="Las unidades registradas aparecerán aquí." accion={<Link className="pnl-btn" to="/panel/flota">Ver vehículos</Link>} />}

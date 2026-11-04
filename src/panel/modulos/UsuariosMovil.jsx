@@ -5,6 +5,7 @@ import { PastillaManejo } from '../comp/ManejoConductor'
 import * as f from '../datos/formato'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
+import { estadoSenal } from '../datos/sinSenal'
 import { BuscadorFiltrosMovil } from './FlotaMovil'
 
 // ============================================================
@@ -25,11 +26,11 @@ const conFaltas = (p) => p.documentoDias != null && p.documentoDias < 0
 
 const CADA_MEDIO_MINUTO = 30_000
 
-/** Quiénes van manejando ahora: el conductor principal de cada unidad en marcha y con señal. */
+/** Quiénes van manejando ahora: el conductor principal de cada unidad en marcha (regla única: solo con señal al día). */
 function useConduciendo() {
   const { datos } = useDatos(() => repo.vehiculos.listar().catch(() => []), [], CADA_MEDIO_MINUTO)
   return useMemo(() => new Set((datos ?? [])
-    .filter((v) => v.conductorPrincipalId && v.estadoMarcha === 'en_marcha' && v.conectado !== false)
+    .filter((v) => v.conductorPrincipalId && estadoSenal(v).marcha === 'en_marcha')
     .map((v) => String(v.conductorPrincipalId))), [datos])
 }
 
@@ -87,7 +88,7 @@ export default function UsuariosMovil({ lista, q, setQ, rol, setRol, opcionesRol
             const id = p.userId ?? p.id
             const falta = conFaltas(p)
             const va = conduce(p)
-            const estado = va ? 'Conduciendo' : 'Detenido'
+            const estado = va ? 'Conduciendo' : 'Sin conducir'
             return (
               <li key={p.id}>
                 <Link to={`/panel/personal/${encodeURIComponent(id)}`} className="mvs-persona"

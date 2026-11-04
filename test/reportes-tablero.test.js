@@ -3,16 +3,22 @@ import assert from 'node:assert/strict'
 import { armarModelo, crearPeriodo, nombrarPeriodo } from '../src/panel/modulos/reportes-datos.js'
 import { chipsDe, graficosDe, marchaAhora, rangoIndice, serieDiaria, seriesDe, tableroDe, textoCifras } from '../src/panel/modulos/reportes-tablero-datos.js'
 
+// Fechas de la señal relativas a la hora real: «Unidades ahora» usa la regla única (estadoSenal).
+const haceMin = (m) => new Date(Date.now() - m * 60_000).toISOString()
+const alDia = { ultimoReporte: haceMin(1), posicionEn: haceMin(1) }
+const callada = { ultimoReporte: haceMin(10), posicionEn: haceMin(10) }
+const soloLatidos = { ultimoReporte: haceMin(1), posicionEn: haceMin(60 * 24) }
+
 const ahora = new Date(2026, 9, 20, 9, 40)
 const dia = (d, mes = 9) => new Date(2026, mes, d, 10).toISOString()
 
 function datos(extra = {}) {
   return {
     vehiculos: [
-      { id: 'v1', alias: 'Unidad 01', estadoMarcha: 'en_marcha', indiceSeguro: 90, conductorPrincipalId: 'p1', docsVencidos: 0, docsPorVencer: 0 },
-      { id: 'v2', alias: 'Unidad 02', estadoMarcha: 'parada', indiceSeguro: 60, conductorPrincipalId: null, docsVencidos: 1, docsPorVencer: 0 },
-      { id: 'v3', alias: 'Unidad 03', estadoMarcha: 'en_marcha', conectado: false, indiceSeguro: 70, conductorPrincipalId: 'p2', docsVencidos: 0, docsPorVencer: 0 },
-      { id: 'v4', alias: 'Unidad 04', estadoMarcha: null, indiceSeguro: 85, conductorPrincipalId: null, docsVencidos: 0, docsPorVencer: 1 },
+      { id: 'v1', alias: 'Unidad 01', ...alDia, estadoMarcha: 'en_marcha', indiceSeguro: 90, conductorPrincipalId: 'p1', docsVencidos: 0, docsPorVencer: 0 },
+      { id: 'v2', alias: 'Unidad 02', ...alDia, estadoMarcha: 'parada', indiceSeguro: 60, conductorPrincipalId: null, docsVencidos: 1, docsPorVencer: 0 },
+      { id: 'v3', alias: 'Unidad 03', ...callada, estadoMarcha: 'en_marcha', indiceSeguro: 70, conductorPrincipalId: 'p2', docsVencidos: 0, docsPorVencer: 0 },
+      { id: 'v4', alias: 'Unidad 04', ...soloLatidos, estadoMarcha: null, indiceSeguro: 85, conductorPrincipalId: null, docsVencidos: 0, docsPorVencer: 1 },
     ],
     conductores: [
       { id: 'p1', nombre: 'Pedro', unidad: 'v1', licenciaEstado: 'vigente', indiceSeguro: 92 },
@@ -73,14 +79,16 @@ test('líneas solo en las cifras con fecha por registro; sin datos, sin línea',
 })
 
 test('vehículos: ODT por estado y unidades ahora (sin señal manda sobre la marcha)', () => {
-  assert.equal(marchaAhora({ conectado: false, estadoMarcha: 'en_marcha' }), 'sin_senal')
-  assert.equal(marchaAhora({ estadoMarcha: null }), 'sin_dato')
+  // La regla única (estadoSenal): sin señal manda aunque la última marcha dijera «en marcha».
+  assert.equal(marchaAhora({ ...callada, estadoMarcha: 'en_marcha' }), 'sin_senal')
+  assert.equal(marchaAhora({ estadoMarcha: null }), 'sin_senal')
+  assert.equal(marchaAhora({ ...soloLatidos }), 'sin_ubicacion')
   const [odt, unidades] = graficosDe('vehiculos', modelo('vehiculos'), nombre)
   assert.deepEqual(odt.partes.map(x => [x.etiqueta, x.valor, x.tono]), [['Abiertas', 1, 'warn'], ['En revisión', 1, 'azul'], ['Resueltas', 2, 'ok']])
   assert.equal(odt.vacio, null)
   assert.equal(odt.pie, '4 ODT creadas del 1–20 oct 2026')
   assert.equal(unidades.ahora, true)
-  assert.deepEqual(unidades.partes.map(x => [x.clave, x.valor]), [['en_marcha', 1], ['parada', 1], ['sin_senal', 1], ['sin_dato', 1]])
+  assert.deepEqual(unidades.partes.map(x => [x.clave, x.valor]), [['en_marcha', 1], ['parada', 1], ['sin_ubicacion', 1], ['sin_senal', 1]])
   assert.equal(unidades.total, 4)
   const [vacio] = graficosDe('vehiculos', modelo('vehiculos', { odts: [] }), nombre)
   assert.equal(vacio.vacio, 'No se crearon ODT en este período.')

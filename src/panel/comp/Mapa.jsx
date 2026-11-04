@@ -2,6 +2,7 @@ import { lazy, Suspense, useMemo, useState } from 'react'
 import MapaMapbox, { HAY_MAPBOX } from './MapaMapbox'
 import FichaUnidad from './FichaUnidad'
 import { vehicleMarkerUrl } from './vehicleMarker'
+import { estadoUnidad } from '../datos/estadoUnidad'
 
 // Leaflet y Google Maps solo se bajan si de verdad hacen falta (sin token de
 // Mapbox, o si Mapbox falla): con Mapbox no pasan por el camino de entrada.
@@ -75,8 +76,9 @@ const VIAS = (() => {
   }
 })()
 
+// La marcha sale de la regla única (estadoUnidad): sin señal nunca va «en marcha».
 function colorEstado(v) {
-  if (v.estadoMarcha === 'en_marcha') return 'marcha'
+  if (estadoUnidad(v).clave === 'en_marcha') return 'marcha'
   return 'parada'
 }
 
@@ -126,7 +128,7 @@ function MapaEsquema({
       .join(' ')
   }, [recorrido])
 
-  const enMarcha = pines.filter((v) => v.estadoMarcha === 'en_marcha').length
+  const enMarcha = pines.filter((v) => estadoUnidad(v).clave === 'en_marcha').length
   const activo = sobre ?? seleccionado
 
   return (
@@ -195,7 +197,7 @@ function MapaEsquema({
               onMouseLeave={() => setSobre(null)}
               role="button"
               tabIndex={0}
-              aria-label={`${v.alias}, ${v.placa}, ${v.estadoMarcha === 'en_marcha' ? 'en marcha' : 'detenida'}`}
+              aria-label={`${v.alias}, ${v.placa}, ${estadoUnidad(v).texto.toLowerCase()}`}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
