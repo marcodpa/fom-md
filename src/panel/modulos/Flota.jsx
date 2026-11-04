@@ -249,7 +249,8 @@ export default function Flota() {
   const ubicacion = useLocation()
   useEffect(() => { if (esAdmin && ubicacion.state?.nuevaUnidad) setCreando(true) }, [esAdmin, ubicacion.state])
 
-  const vehiculos = useDatos(() => repo.vehiculos.listar(), [])
+  // La pantalla dice «estado en vivo»: se vuelve a leer cada 30 s, en silencio.
+  const vehiculos = useDatos(() => repo.vehiculos.listar(), [], 30_000)
   const areas = useDatos(() => repo.areas(), [])
   // «Sin señal · hace …» corre solo cada minuto, sin volver a pedir la flota, y con el mismo
   // reloj se recalcula la señal: a los 5 min sin reportar la unidad pasa sola a «Sin señal».
@@ -689,7 +690,11 @@ export function ModalNuevaUnidad({ abierto, areas, alCerrar, alGuardar, actor })
       setResultado(r)
       try { await alGuardar() } catch { /* Recargar no repite un alta confirmada. */ }
     } catch (e) {
-      setError(`${e.message} Revisa la flota antes de volver a crear esta unidad.`)
+      // Un 4xx es que el servidor la rechazó ANTES de crear nada: se corrige y se reintenta.
+      // Sin respuesta clara (red caída, 5xx, sin id) pudo haberse creado: el botón sigue bloqueado.
+      const rechazada = e?.estado >= 400 && e?.estado < 500
+      if (rechazada) enviado.current = false
+      setError(rechazada ? e.message : `${e.message} Revisa la flota antes de volver a crear esta unidad.`)
     } finally {
       setGuardando(false)
     }

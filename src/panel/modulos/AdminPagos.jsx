@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
@@ -17,14 +17,15 @@ import { useConfirmar } from '../comp/Confirmar'
 // de cada cuota con su estado.
 // ============================================================
 
-function cargar(empresaId, estadoPago) {
+// Se pide UNA vez y los filtros (empresa, estado) se aplican en memoria: antes cada filtro recargaba
+// todo, desmontaba la pantalla y se perdía la cuota seleccionada.
+function cargar() {
   return Promise.all([
     repo.admin.pagos.listar({}),
     repo.admin.empresas.listar({}),
   ]).then(([todos, empresas]) => ({
-    todos,
     // La cuota más nueva arriba, por su período («2026-08»); sin período, por cuándo se registró.
-    lista: masNuevoPrimero(todos.filter(p => (!empresaId || p.empresaId === empresaId) && (!estadoPago || p.estado === estadoPago)), (p) => (p.periodo ? `${p.periodo}-01` : p.creadaEn)),
+    todos: masNuevoPrimero(todos, (p) => (p.periodo ? `${p.periodo}-01` : p.creadaEn)),
     empresas: empresas.filter((e) => !e.respaldo),
   }))
 }
@@ -36,9 +37,13 @@ export default function AdminPagos() {
   const [estadoPago, setEstadoPago] = useState('')
   const [registrando, setRegistrando] = useState(false)
   const [aviso, setAviso] = useState('')
+  // La cuota que se está cambiando (bloquea los botones: un doble clic mandaba dos veces) y el
+  // mensaje de éxito que se queda junto a ella.
+  const [pendienteId, setPendienteId] = useState(null)
+  const [exito, setExito] = useState(null)
   const { confirmar, dialogo } = useConfirmar()
 
-  const { datos, estado, error, recargar } = useDatos(() => cargar(empresaId, estadoPago), [empresaId, estadoPago])
+  const { datos, estado, error, recargar } = useDatos(() => cargar(), [])
 
   const cambiarEstado = async (p, nuevo) => {
     const pagado = nuevo === 'pagado'
@@ -53,9 +58,20 @@ export default function AdminPagos() {
       campo: pagado ? { etiqueta: 'Referencia del abono recibido (no realiza un cobro bancario):', obligatorio: true } : undefined,
     })
     if (!respuesta) return
+    if (pendienteId) return
     const referencia = pagado ? respuesta : undefined
     setAviso('')
-    repo.admin.pagos.actualizarEstado(p.id, nuevo, actor, { ...p, referencia }).then(recargar).catch((e) => setAviso(e.message))
+    setExito(null)
+    setPendienteId(p.id)
+    try {
+      await repo.admin.pagos.actualizarEstado(p.id, nuevo, actor, { ...p, referencia })
+      setExito({ id: p.id, texto: pagado ? 'Marcada como pagada' : 'Marcada como vencida' })
+      await recargar()
+    } catch (e) {
+      setAviso(e.message)
+    } finally {
+      setPendienteId(null)
+    }
   }
 
   return (
@@ -83,6 +99,8 @@ export default function AdminPagos() {
             setEstadoPago={setEstadoPago}
             aviso={aviso}
             cambiarEstado={cambiarEstado}
+            pendienteId={pendienteId}
+            exito={exito}
           />
         )}
       </div>
@@ -100,8 +118,13 @@ export default function AdminPagos() {
   )
 }
 
-function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, aviso, cambiarEstado }) {
-  const { todos, lista, empresas } = datos
+function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, aviso, cambiarEstado, pendienteId, exito }) {
+  const { todos, empresas } = datos
+  const lista = useMemo(
+    () => todos.filter((p) => (!empresaId || p.empresaId === empresaId) && (!estadoPago || p.estado === estadoPago)),
+    [todos, empresaId, estadoPago],
+  )
+  const ocupado = Boolean(pendienteId)
   const [seleccionId, setSeleccionId] = useState(null)
   const seleccion = lista.find(p => p.id === seleccionId) ?? lista[0]
 
@@ -181,16 +204,17 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
                     <td className="num">
                       <div className="pnl-chips">
                         {['pendiente', 'vencido'].includes(p.estado) && (
-                          <button type="button" className="pnl-btn sutil" onClick={() => cambiarEstado(p, 'pagado')}>
+                          <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => cambiarEstado(p, 'pagado')}>
                             <Icono nombre="check" tam={14} />
                             Pagada
                           </button>
                         )}
                         {p.estado === 'pendiente' && (
-                          <button type="button" className="pnl-btn sutil" onClick={() => cambiarEstado(p, 'vencido')}>
+                          <button type="button" className="pnl-btn sutil" disabled={ocupado} onClick={() => cambiarEstado(p, 'vencido')}>
                             Vencida
                           </button>
                         )}
+                        {exito?.id === p.id && <span role="status"><Tag color="verde" plano>{exito.texto}</Tag></span>}
                       </div>
                     </td>
                   </tr>
@@ -202,7 +226,7 @@ function Contenido({ datos, empresaId, setEmpresaId, estadoPago, setEstadoPago, 
       </Tarjeta><aside className="pnl-admin-detalle"><Tarjeta titulo="Detalle de la cuota">
         {seleccion ? <><h3>{seleccion.empresaNombre}</h3><Tag color={color('pago_estado',seleccion.estado)}>{etiqueta('pago_estado',seleccion.estado)}</Tag>
         <Datos items={[{etiqueta:'Período',valor:seleccion.periodo},{etiqueta:'Monto',valor:f.moneda(seleccion.monto)},{etiqueta:'Moneda',valor:seleccion.moneda},{etiqueta:'Pagado el',valor:seleccion.pagadoEn ? f.fecha(seleccion.pagadoEn) : 'Pendiente'},{etiqueta:'Nota',valor:seleccion.nota || '—'}]} />
-        <div className="pnl-chips">{['pendiente', 'vencido'].includes(seleccion.estado) && <button className="pnl-btn primario" onClick={()=>cambiarEstado(seleccion,'pagado')}>Marcar pagada</button>}{seleccion.estado === 'pendiente' && <button className="pnl-btn" onClick={()=>cambiarEstado(seleccion,'vencido')}>Marcar vencida</button>}</div></> : <Vacio icono="costos" titulo="Sin cuota seleccionada" texto="Aquí verás su período, monto y estado." />}
+        <div className="pnl-chips">{['pendiente', 'vencido'].includes(seleccion.estado) && <button className="pnl-btn primario" disabled={ocupado} onClick={()=>cambiarEstado(seleccion,'pagado')}>Marcar pagada</button>}{seleccion.estado === 'pendiente' && <button className="pnl-btn" disabled={ocupado} onClick={()=>cambiarEstado(seleccion,'vencido')}>Marcar vencida</button>}{exito?.id === seleccion.id && <span role="status"><Tag color="verde" plano>{exito.texto}</Tag></span>}</div></> : <Vacio icono="costos" titulo="Sin cuota seleccionada" texto="Aquí verás su período, monto y estado." />}
       </Tarjeta></aside></div>
     </>
   )

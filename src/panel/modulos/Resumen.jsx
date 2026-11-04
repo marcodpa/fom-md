@@ -150,7 +150,7 @@ export default function Resumen() {
   const vivo = estado === 'ok' && (
     <span className="rs-vivo">
       <i />
-      Se actualiza solo cada 30 s
+      El mapa se actualiza cada 30 s
     </span>
   )
 

@@ -689,12 +689,14 @@ export const repoApi = {
       return lectura ? { km: Number(lectura.odometerKm), origen: lectura.source, en: lectura.observedAt } : null
     },
     async listar({ q = '', areaId = '' } = {}) {
+      let conductoresFallo = false
       const [lista, conductores] = await Promise.all([
         flota(q),
         // Los conductores no son imprescindibles para pintar el mapa: si esa
         // llamada falla, la flota se muestra igual y sin nombre en vez de no
         // mostrarse. Salen de lo guardado (5 min), no de un pedido por refresco.
-        asignacionesVigentes().catch(() => []),
+        // Pero se marca el fallo: sin avisar, toda la flota decía «Sin conductor».
+        asignacionesVigentes().catch(() => { conductoresFallo = true; return [] }),
       ])
       const porVehiculo = conductoresPorVehiculo(conductores)
       const salida = lista
@@ -708,6 +710,8 @@ export const repoApi = {
         .sort((a, b) => a.alias.localeCompare(b.alias))
       // La pantalla avisa si la flota no se pudo leer entera.
       if (lista.incompleta) salida.incompleta = true
+      // Los nombres de conductor no se pudieron leer: la pantalla lo dice en vez de «Sin conductor».
+      if (conductoresFallo) salida.conductoresFallo = true
       return salida
     },
 
@@ -730,12 +734,15 @@ export const repoApi = {
       ])
       // El expediente trae ahora sus dominios reales. Cada uno cae a lista
       // vacía por separado: un fallo en documentos no debe dejar el vehículo
-      // sin mapa.
+      // sin mapa. Lo que falló se anota en `faltaron` para que la pantalla lo
+      // diga: una lista vacía por error no puede verse como «no hay nada».
+      const faltaron = []
+      const anotarFallo = (nombre) => () => { faltaron.push(nombre); return [] }
       const [documentos, odts, inspecciones] = await Promise.all([
-        repoApi.documentos.listar({ vehiculoId: id }).catch(() => []),
+        repoApi.documentos.listar({ vehiculoId: id }).catch(anotarFallo('documentos')),
         // Solo las de esta unidad, filtradas por el servidor (`vehicleId`), no las ~3.000 de la empresa.
-        repoApi.odts.listar({ vehiculoId: id }).then((l) => l.filter((o) => o.vehiculoId === id)).catch(() => []),
-        repoApi.inspecciones.listar({ vehiculoId: id }).catch(() => []),
+        repoApi.odts.listar({ vehiculoId: id }).then((l) => l.filter((o) => o.vehiculoId === id)).catch(anotarFallo('órdenes de trabajo')),
+        repoApi.inspecciones.listar({ vehiculoId: id }).catch(anotarFallo('inspecciones')),
       ])
       // La ficha del servidor no trae al conductor: vive en las asignaciones.
       // Sin esto el expediente decia «Sin conductor» aunque la asignacion se
@@ -770,6 +777,7 @@ export const repoApi = {
         documentos,
         odts,
         inspecciones,
+        faltaron,
         eventos: [],
         costos: [],
       }

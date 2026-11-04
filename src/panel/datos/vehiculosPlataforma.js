@@ -41,7 +41,8 @@ async function vehiculosDeEmpresa(empresa) {
   // Todas las páginas: la primera dice el total y las demás se piden a la vez.
   const r = await leerTodasLasPaginas((desplazamiento, limite) => api.vehiculos({ enteId: empresa.id, limite, desplazamiento }))
   const lista = r.items.map((v) => comoFila(v, empresa))
-  // El conductor principal no es imprescindible: si su lectura falla, la unidad sale igual.
+  // El conductor principal no es imprescindible: si su lectura falla, la unidad sale igual,
+  // pero marcada (`conductoresFallo`): sin avisar, toda la flota salía «Sin conductor».
   // También todas las páginas: con más de 200 asignaciones, las últimas unidades salían sin conductor.
   try {
     const asignaciones = await leerTodasLasPaginas(
@@ -54,7 +55,9 @@ async function vehiculosDeEmpresa(empresa) {
       if (c.role === 'principal' || !porVehiculo.has(c.vehicleId)) porVehiculo.set(c.vehicleId, c.displayName)
     }
     for (const v of lista) v.conductorNombre = porVehiculo.get(v.id) ?? null
-  } catch { /* sin conductores */ }
+  } catch {
+    lista.conductoresFallo = true
+  }
   return lista
 }
 
@@ -68,6 +71,7 @@ export async function vehiculosDeLaPlataforma() {
     return {
       empresas,
       fallidas: [],
+      conductoresFallo: [],
       vehiculos: vs.map((v) => ({
         ...comoFila({ id: v.id, alias: v.alias, plate: v.placa, fleetNumber: v.numero, make: v.marca, model: v.modelo, modelYear: v.anio, vehicleType: v.tipo, status: v.estado, areaName: v.areaNombre, speedKph: v.velocidadKmh, odometerKm: v.km, lastReportAt: v.ultimoReporte, latitude: v.lat, longitude: v.lng }, empresa),
         conductorNombre: v.conductorNombre && v.conductorNombre !== 'Sin asignar' ? v.conductorNombre : null,
@@ -77,10 +81,17 @@ export async function vehiculosDeLaPlataforma() {
   const resultados = await Promise.allSettled(empresas.map(vehiculosDeEmpresa))
   const vehiculos = []
   const fallidas = []
+  // Empresas cuyas unidades se leyeron pero no sus conductores.
+  const conductoresFallo = []
   resultados.forEach((r, i) => {
-    if (r.status === 'fulfilled') vehiculos.push(...r.value)
-    else fallidas.push({ empresa: empresas[i], error: r.reason?.message || 'No se pudo leer.' })
+    if (r.status === 'fulfilled') {
+      vehiculos.push(...r.value)
+      if (r.value.conductoresFallo) {
+        conductoresFallo.push(empresas[i])
+        for (const v of r.value) v.conductorFallo = true
+      }
+    } else fallidas.push({ empresa: empresas[i], error: r.reason?.message || 'No se pudo leer.' })
   })
   vehiculos.sort((a, b) => a.empresaNombre.localeCompare(b.empresaNombre) || a.alias.localeCompare(b.alias))
-  return { empresas, fallidas, vehiculos }
+  return { empresas, fallidas, conductoresFallo, vehiculos }
 }

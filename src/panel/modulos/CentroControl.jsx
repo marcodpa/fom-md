@@ -40,9 +40,32 @@ function coincide(v, texto) {
 }
 
 // El conductor entra en la firma: el buscador también filtra por su nombre.
-const firmaFlota = (lista) => lista.map((v) => `${v.id}:${v.lat}:${v.lng}:${v.estadoMarcha}:${v.velocidadKmh}:${v.ultimoReporte}:${v.conectado}:${v.conductorNombre}`).join('|') + (lista.incompleta ? '|incompleta' : '')
+const firmaFlota = (lista) => lista.map((v) => `${v.id}:${v.lat}:${v.lng}:${v.estadoMarcha}:${v.velocidadKmh}:${v.ultimoReporte}:${v.conectado}:${v.conductorNombre}`).join('|') + (lista.incompleta ? '|incompleta' : '') + (lista.conductoresFallo ? '|sinconductores' : '')
 const firmaPuntos = (p) => `${p.length}|${p[0]?.hora}|${p.at(-1)?.hora}|${p.at(-1)?.lat}|${p.at(-1)?.lng}`
 const firmaAnalisis = (a) => `${firmaPuntos(a.puntos)}|${a.viajes.length}|${a.paradas.length}`
+
+// El inventario de equipos GPS casi no cambia: se guarda unos minutos para que abrir la ficha de
+// una unidad tras otra no pida la lista entera cada vez. Si dos fichas lo piden a la vez, comparten
+// la misma petición.
+const VIGENCIA_INVENTARIO_MS = 5 * 60_000
+let inventarioGps = null // { en, equipos } | { promesa }
+/**
+ * Los equipos GPS, o `null` si esta cuenta no tiene permiso para verlos (403): eso no es un error,
+ * la ficha sale sin la sección del GPS. Cualquier otro fallo SÍ llega a la pantalla (con «Reintentar»).
+ */
+function equiposGps() {
+  if (inventarioGps?.en && Date.now() - inventarioGps.en < VIGENCIA_INVENTARIO_MS) return Promise.resolve(inventarioGps.equipos)
+  if (inventarioGps?.promesa) return inventarioGps.promesa
+  const promesa = repo.admin.gps.listar()
+    .then((equipos) => { inventarioGps = { en: Date.now(), equipos }; return equipos })
+    .catch((e) => {
+      inventarioGps = null
+      if (e?.estado === 403) { inventarioGps = { en: Date.now(), equipos: null }; return null }
+      throw e
+    })
+  inventarioGps = { promesa }
+  return promesa
+}
 
 export default function CentroControl() {
   const [q, setQ] = useState('')
@@ -75,8 +98,8 @@ export default function CentroControl() {
   // flota, y el trazo reciente con `cola`.
   const detalle = useDatos(
     () => (seleccionado
-      ? repo.admin.gps.listar().catch(() => []).then((equipos) => {
-          const e = equipos.find((g) => g.vehiculoId === seleccionado)
+      ? equiposGps().then((equipos) => {
+          const e = (equipos ?? []).find((g) => g.vehiculoId === seleccionado)
           return { id: seleccionado, gps: e ? { modelo: e.modelo ?? 'Equipo GPS', imei: e.imei, linea: e.linea, verificado: e.verificado, conectado: e.conectado } : null }
         })
       : Promise.resolve(null)),
@@ -156,10 +179,18 @@ export default function CentroControl() {
   // El manejo brusco se mira unidad por unidad, desde su ficha («Ver manejo brusco»).
   const elegirUnidad = (id) => setSeleccionado(id)
 
-  // Si un filtro deja fuera la unidad abierta, se cierra el detalle.
+  // Si el usuario cambia un filtro y deja fuera la unidad abierta, se cierra el detalle. Un refresco
+  // de la flota NO la cierra (antes, con un filtro activo, la ficha se cerraba sola cada 15 s en
+  // cuanto la unidad dejaba de cumplirlo, p. ej. al detenerse con «En marcha» elegido).
+  const listaVigente = useRef(lista)
+  listaVigente.current = lista
   useEffect(() => {
-    if (seleccionado && !lista.some((v) => v.id === seleccionado)) setSeleccionado(null)
-  }, [lista, seleccionado])
+    setSeleccionado((s) => (s && !listaVigente.current.some((v) => v.id === s) ? null : s))
+  }, [areaId, estadoMarcha, texto])
+  // Y si la unidad ya no existe en la flota (la dieron de baja o la pasaron a otra empresa), se cierra.
+  useEffect(() => {
+    if (seleccionado && flota.estado === 'ok' && !alDia.some((v) => v.id === seleccionado)) setSeleccionado(null)
+  }, [alDia, seleccionado, flota.estado])
 
   const opcionesArea = useMemo(
     () => [{ v: '', t: 'Todas las áreas' }].concat((areas.datos ?? []).map((a) => ({ v: a.id, t: a.nombre }))),
@@ -184,7 +215,8 @@ export default function CentroControl() {
   // La flota pasó del tope de lectura: se dice, para que nadie cuente de menos sin saberlo.
   const incompleta = flota.estado === 'ok' && Boolean(datosFlota?.incompleta)
 
-  const unidadLista = lista.find(v => v.id === seleccionado)
+  // Si el filtro ya no la incluye pero la ficha sigue abierta, los datos vivos salen de la flota entera.
+  const unidadLista = lista.find(v => v.id === seleccionado) ?? alDia.find(v => v.id === seleccionado)
   const unidadDetalle = detalle.datos?.id === seleccionado ? detalle.datos : null
   // La lista va encima: sus datos son de hace menos de 15 s; los del expediente, de cuando se eligió.
   const unidad = unidadLista ? { ...unidadDetalle, ...unidadLista } : null
@@ -236,7 +268,7 @@ export default function CentroControl() {
           alto="100%" ficha={false} leyenda={false} espacioFicha herramientas />
       </div>
       <div className="control-search">
-        <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}</p>{incompleta && <p role="status">Lista incompleta: la flota es más grande de lo que se pudo leer.</p>}</div>
+        <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}</p>{incompleta && <p role="status">Lista incompleta: la flota es más grande de lo que se pudo leer.</p>}{flota.estado === 'ok' && datosFlota?.conductoresFallo && <p role="status">No se pudo leer quién conduce cada unidad. <button type="button" onClick={flota.recargar}>Reintentar</button></p>}</div>
           <div className="control-acciones">
             <button className="pnl-btn" type="button" aria-label="Unidades" aria-expanded={listaAbierta} aria-controls="control-unidades" onClick={() => { setListaAbierta(v => !v); setSeleccionado(null) }}><Icono nombre="camion" tam={18} />Unidades</button>
           </div>
