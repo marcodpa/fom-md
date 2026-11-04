@@ -272,7 +272,7 @@ export default function CentroControl() {
           alto="100%" ficha={false} leyenda={false} espacioFicha herramientas />
       </div>
       <div className="control-search">
-        <div className="control-search-heading"><div><h1>Centro de control</h1><p>{bajada}{sinPunto > 0 && <> · <button type="button" className="control-sin-posicion" onClick={() => { setListaAbierta(true); setSeleccionado(null) }}>{sinPunto} sin posición · Ver unidades</button></>}</p>{incompleta && <p role="status">Lista incompleta: la flota es más grande de lo que se pudo leer.</p>}{flota.estado === 'ok' && datosFlota?.conductoresFallo && <p role="status">No se pudo leer quién conduce cada unidad. <button type="button" onClick={flota.recargar}>Reintentar</button></p>}</div>
+        <div className="control-search-heading"><div><MarcaEmpresa className="control-empresa" /><h1>Centro de control</h1><p>{bajada}{sinPunto > 0 && <> · <button type="button" className="control-sin-posicion" onClick={() => { setListaAbierta(true); setSeleccionado(null) }}>{sinPunto} sin posición · Ver unidades</button></>}</p>{incompleta && <p role="status">Lista incompleta: la flota es más grande de lo que se pudo leer.</p>}{flota.estado === 'ok' && datosFlota?.conductoresFallo && <p role="status">No se pudo leer quién conduce cada unidad. <button type="button" onClick={flota.recargar}>Reintentar</button></p>}</div>
           <div className="control-acciones">
             <button className="pnl-btn" type="button" aria-label="Unidades" aria-expanded={listaAbierta} aria-controls="control-unidades" onClick={() => { setListaAbierta(v => !v); setSeleccionado(null) }}><Icono nombre="camion" tam={18} />Unidades</button>
           </div>

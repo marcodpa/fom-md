@@ -4,6 +4,7 @@ import { Link, NavLink, Navigate, Route, Routes, UNSAFE_NavigationContext, useLo
 import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa, sesionActual } from './auth'
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
+import MarcaEmpresa from './comp/MarcaEmpresa'
 import { useApariencia } from './useApariencia'
 import { useAlertasSinLeer } from './datos/useAlertasSinLeer'
 import { Icono } from './Iconos'
@@ -477,7 +478,7 @@ export default function Consola() {
 
       <main className="pnl-main" id="contenido" ref={principal}>
         <div className="pnl-topbar">
-          <div className="pnl-topbar-contexto"><span className="pnl-contexto"><Icono nombre={esAdminFom(perfil) ? 'empresa' : 'camion'} tam={18} />{esAdminFom(perfil) && pathname.includes('/admin/') ? 'Administración global FOM' : perfil.empresa || 'FOM · Administración'}</span><span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span></div>
+          <div className="pnl-topbar-contexto"><span className="pnl-contexto"><MarcaEmpresa global={esAdminFom(perfil) && pathname.includes('/admin/')} /></span><span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span></div>
           <div className="pnl-topbar-derecha">
             <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={etiquetaCampana}>
               <Icono nombre="campana" tam={21} />
