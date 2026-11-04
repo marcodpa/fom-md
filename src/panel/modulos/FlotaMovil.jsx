@@ -1,4 +1,5 @@
 import { memo, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import { Link } from 'react-router-dom'
 import Mapa from '../comp/Mapa'
 import { Buscador, Chips, Modal, Tag } from '../comp/ui'
@@ -43,10 +44,10 @@ export function MapaFlotaMovil({ unidades, cargando, novedadDe, nombreConductor,
       )}
       {/* La unidad tocada: quién es y, a un toque, el mapa completo o su ficha. */}
       {elegida && (
-        <div className="mvs-tocada" role="dialog" aria-label={`Unidad ${elegida.alias}`}>
+        <div className="mvs-tocada" role="dialog" aria-label={`Unidad ${nombreUnidad(elegida)}`}>
           <div className="mvs-tocada-fila">
             <span className="mvs-tocada-txt">
-              <b>{elegida.alias}</b>
+              <b>{nombreUnidad(elegida)}</b>
               <small>{[elegida.placa, nombreConductor(elegida)].filter(Boolean).join(' · ')}</small>
               {callada && <small>{textoSinSenal(elegida.ultimoReporte, ahora)}</small>}
               {callada && textoUltimoReporte(elegida.ultimoReporte) && <small className="chico">{textoUltimoReporte(elegida.ultimoReporte)}</small>}

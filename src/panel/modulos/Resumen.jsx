@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { etiquetaUnidad } from '../datos/nombreUnidad'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { HAY_API, api } from '../datos/api'
@@ -121,7 +122,7 @@ function eventosDeHoy({ vehiculos, odts, alertas, inspecciones }, hoy, ahora) {
         id: `senal-${v.id}`,
         en: v.ultimoReporte,
         tono: 'malo',
-        texto: `${v.alias} · ${v.placa} dejó de reportar`,
+        texto: `${etiquetaUnidad(v)} dejó de reportar`,
         detalle: textoSinSenal(v.ultimoReporte, ahora),
         a: `/panel/flota/${v.id}`,
       }),
@@ -260,7 +261,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
         <div className="pnl-resumen-unidad">
         <Tarjeta titulo="Vehículo seleccionado" accion={unidades.length > 0 && (
           <select className="pnl-input pnl-resumen-select" aria-label="Seleccionar vehículo" value={seleccion?.id ?? ''} onChange={e => alSeleccionar(e.target.value)}>
-            {unidades.map(u => <option key={u.id} value={u.id}>{u.alias} · {u.placa}{u.senal.viva ? '' : ` — ${u.senal.texto}`}</option>)}
+            {unidades.map(u => <option key={u.id} value={u.id}>{etiquetaUnidad(u)}{u.senal.viva ? '' : ` — ${u.senal.texto}`}</option>)}
           </select>
         )}>
           {seleccion ? <FichaUnidad unidad={seleccion} conCabecera={false} /> : <Vacio icono="camion" titulo="Sin unidades todavía" texto="Las unidades registradas aparecerán aquí." accion={<Link className="pnl-btn" to="/panel/flota">Ver vehículos</Link>} />}

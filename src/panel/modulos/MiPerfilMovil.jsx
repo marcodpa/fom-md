@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import { Link, useNavigate } from 'react-router-dom'
 import { cerrarSesion } from '../auth'
 import Avatar from '../comp/Avatar'
@@ -62,8 +63,7 @@ function FilaDato({ icono, etiqueta, valor }) {
 
 /** El id de la puerta en mayúsculas o, sin él, la placa (como `etiquetaCortaDeUnidad`). */
 function etiquetaCorta(u) {
-  const id = u?.numero && u.numero !== '—' ? u.numero.toUpperCase() : null
-  return id ?? (u?.placa && u.placa !== '—' ? u.placa : null)
+  return u ? nombreUnidad(u) : null
 }
 
 /**

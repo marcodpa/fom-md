@@ -13,7 +13,7 @@ test('GPS sin señal prevalece sobre la última velocidad y el encendido', () =>
 test('marcadores no ejecutan placas como HTML y no inventan rumbo', () => {
   const markup = vehicleMarkerSvg({ placa: '<script>x</script>', conectado: true })
   assert.ok(!markup.includes('<script>'))
-  assert.ok(markup.includes('&lt;script&gt;'))
+  assert.ok(/&lt;script&gt;/i.test(markup)) // la placa sale en mayúsculas: lo que importa es que va escapada
   assert.ok(!markup.includes('M26 4 L32 13'))
   const north = vehicleMarkerSvg({ placa: 'AB538RM', conectado: true, rumbo: 0 }, true)
   assert.ok(north.includes('M26 4 L32 13'))

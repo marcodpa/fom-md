@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 import { vehicleMarkerUrl, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
 import * as f from '../datos/formato'
@@ -150,12 +151,12 @@ export default function MapaGoogle({
           m = new maps.Marker({
             map: mapa.current,
             position: { lat: v.lat, lng: v.lng },
-            title: `${v.placa || v.alias} · ${estadoUnidad(v).texto}`,
+            title: `${nombreUnidad(v)} · ${estadoUnidad(v).texto}`,
             icon: icono,
           })
           marcadores.current.set(v.id, m)
         } else {
-          m.setTitle(`${v.placa || v.alias} · ${estadoUnidad(v).texto}`)
+          m.setTitle(`${nombreUnidad(v)} · ${estadoUnidad(v).texto}`)
           m.setPosition({ lat: v.lat, lng: v.lng })
           m.setIcon(icono)
         }

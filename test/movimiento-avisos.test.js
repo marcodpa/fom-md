@@ -6,6 +6,7 @@ import {
 } from '../src/panel/datos/avisosSinSenal.js'
 import { conSenalAlDia, SIN_SENAL_MS } from '../src/panel/datos/sinSenal.js'
 import { estadoUnidad } from '../src/panel/datos/estadoUnidad.js'
+import { hora as horaDe } from '../src/panel/datos/formato.js'
 
 const MIN = 60_000
 const T0 = Date.UTC(2026, 9, 27, 15, 0, 0)
@@ -54,9 +55,9 @@ test('GPS sin señal: un aviso por unidad y por corte, lo más nuevo primero', (
   const ultimo1 = new Date(T0).toISOString()
   const ahora = T0 + 6 * MIN
   assert.equal(registrarCorte(u({ ultimoReporte: ultimo1 }), T0 + SIN_SENAL_MS, ahora), true)
-  const hora = `${String(new Date(T0).getHours()).padStart(2, '0')}:${String(new Date(T0).getMinutes()).padStart(2, '0')}`
+  const hora = horaDe(new Date(T0).toISOString()) // 12 horas, como todo el panel
   const [a] = avisosSinSenal()
-  assert.equal(a.titulo, `GPS sin señal: U-001 Z69FC7W dejó de reportar a las ${hora}`)
+  assert.equal(a.titulo, `GPS sin señal: U-001 · Z69FC7W dejó de reportar a las ${hora}`)
   assert.equal(a.tipo, 'gps_sin_senal')
   assert.equal(a.leida, false)
   // Mientras siga callada no se repite.

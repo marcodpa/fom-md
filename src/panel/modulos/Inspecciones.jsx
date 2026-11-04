@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
+import { etiquetaUnidad, nombreUnidad } from '../datos/nombreUnidad'
 import { useSearchParams } from 'react-router-dom'
 import repo, { CONECTADO } from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -230,7 +231,7 @@ function Resumen({ cambiarVista }) {
         {pendientes.estado === 'ok' && faltan.incompleta && <p className="insp-ficha-aviso" role="status">No se pudo leer todo lo de hoy: la lista puede no estar completa.</p>}
         {pendientes.estado === 'ok' && (faltan.length ? <>
           <p className="insp-faltan-cifra"><b>{f.numero(faltan.length)}</b> {faltan.length === 1 ? 'unidad sin la diaria' : 'unidades sin la diaria'}</p>
-          <ul className="insp-faltan-lista" aria-label="Unidades sin la inspección diaria">{(faltanTodas ? faltan : faltan.slice(0, 4)).map(v => <li key={v.id} title={[v.alias, v.placa, v.conductorNombre || 'Sin conductor'].filter(Boolean).join(' · ')}>{v.placa || v.alias}</li>)}</ul>
+          <ul className="insp-faltan-lista" aria-label="Unidades sin la inspección diaria">{(faltanTodas ? faltan : faltan.slice(0, 4)).map(v => <li key={v.id} title={[etiquetaUnidad(v), v.conductorNombre || 'Sin conductor'].join(' · ')}>{nombreUnidad(v)}</li>)}</ul>
         </> : <p className="insp-faltan-ok"><Icono nombre="check" tam={18}/>Todas las unidades tienen la diaria de hoy.</p>)}
       </div>
     </Tarjeta>

@@ -1,4 +1,5 @@
 import { distanciaLlegada, extraPorTrafico, horaLlegada, tiempoLlegada } from './herramientasMapbox'
+import { nombreUnidad } from '../datos/nombreUnidad'
 
 // ============================================================
 // LLEGADA (tarjeta sobre el mapa de Mapbox, para la unidad elegida)
@@ -29,7 +30,7 @@ function IconoDestino() {
 
 export default function HerramientasRuta({ unidad, estado, alElegirDestino, alCancelar, alQuitarLlegada }) {
   const { eligiendo, llegada, cargandoLlegada, errorLlegada } = estado
-  const placa = unidad.placa || unidad.alias || 'Unidad'
+  const placa = nombreUnidad(unidad)
   const conDestino = Boolean(llegada) && !eligiendo && !cargandoLlegada
   const extra = conDestino ? extraPorTrafico(llegada.minutos, llegada.minutosNormales) : null
 

@@ -4,6 +4,7 @@ import { Campo, Modal } from './ui'
 import { Icono } from '../Iconos'
 import { empresaDeInstalacion } from '../datos/instalarGps'
 import { TIPOS_UNIDAD, UNIDAD_VACIA, LIMITES_UNIDAD, validarUnidad } from '../datos/unidadEnEmpresa'
+import { normalizarPlaca } from '../datos/placas'
 import { crearUnidadEnEmpresa } from '../datos/unidadEnEmpresaApi'
 import './nueva-unidad-empresa.css'
 
@@ -74,7 +75,8 @@ export default function NuevaUnidadEmpresa({
   const campo = (clave) => ({
     value: datos[clave],
     disabled: Boolean(creada) || guardando,
-    onChange: (e) => { setDatos((d) => ({ ...d, [clave]: e.target.value })); setErrores((x) => ({ ...x, [clave]: undefined })) },
+    // La placa se escribe en mayúsculas, igual que en «Nueva unidad» de la flota.
+    onChange: (e) => { setDatos((d) => ({ ...d, [clave]: clave === 'placa' ? normalizarPlaca(e.target.value) : e.target.value })); setErrores((x) => ({ ...x, [clave]: undefined })) },
   })
   const empresa = empresas.find((e) => e.id === empresaId)
   const gpsElegido = equipoFijo?.id || gpsId || ''

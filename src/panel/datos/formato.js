@@ -5,7 +5,9 @@
 
 import { diasDeCalendario } from './vencimientos.js'
 
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+export const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+export const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+export const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
 // Evita el corrimiento de día en husos negativos (Venezuela es UTC-4):
 // una fecha "2026-07-03" debe leerse como local, no como UTC.
@@ -18,22 +20,25 @@ function parseFecha(iso) {
 export function fecha(iso) {
   if (!iso) return '—'
   const d = parseFecha(iso)
-  return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`
+  if (Number.isNaN(d.getTime())) return '—'
+  return `${d.getDate()} ${MESES_CORTOS[d.getMonth()]} ${d.getFullYear()}`
 }
 
 /** "3 jul" */
 export function fechaCorta(iso) {
   if (!iso) return '—'
   const d = parseFecha(iso)
-  return `${d.getDate()} ${MESES[d.getMonth()]}`
+  if (Number.isNaN(d.getTime())) return '—'
+  return `${d.getDate()} ${MESES_CORTOS[d.getMonth()]}`
 }
 
-/** "8:30 a. m." */
-export function hora(iso) {
+/** "8:30 a. m." — siempre 12 horas ("8:30:05 a. m." con `conSegundos`); una fecha inválida da «—», nunca «NaN». */
+export function hora(iso, conSegundos = false) {
   if (!iso) return '—'
   const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
   const h = d.getHours()
-  const m = String(d.getMinutes()).padStart(2, '0')
+  const m = String(d.getMinutes()).padStart(2, '0') + (conSegundos ? `:${String(d.getSeconds()).padStart(2, '0')}` : '')
   const sufijo = h < 12 ? 'a. m.' : 'p. m.'
   const h12 = h % 12 === 0 ? 12 : h % 12
   return `${h12}:${m} ${sufijo}`
@@ -42,7 +47,19 @@ export function hora(iso) {
 /** "3 jul, 8:30 a. m." */
 export function fechaHora(iso) {
   if (!iso) return '—'
+  if (Number.isNaN(parseFecha(iso).getTime())) return '—'
   return `${fechaCorta(iso)}, ${hora(iso)}`
+}
+
+/** "Martes 27 de octubre" */
+export function fechaLarga(d = new Date()) {
+  return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`
+}
+
+/** "octubre 2026" (o "Octubre 2026" con `capitalizado`). Acepta un Date. */
+export function mesAnio(d = new Date(), capitalizado = false) {
+  const t = `${MESES[d.getMonth()]} ${d.getFullYear()}`
+  return capitalizado ? `${t.charAt(0).toUpperCase()}${t.slice(1)}` : t
 }
 
 /** "55 min" · "1 h" · "1 h 5 min" */
@@ -69,10 +86,19 @@ export function desde(iso) {
   return fechaCorta(iso)
 }
 
-/** Separador de miles con punto, como en toda la app. */
-export function numero(n) {
-  if (n === null || n === undefined || Number.isNaN(n)) return '—'
-  return Number(n).toLocaleString('es')
+/**
+ * Separador de miles con punto y coma decimal, a mano: igual que la app
+ * (utils/numero.ts) y sin depender de los datos de idioma del navegador, que
+ * en «es» no agrupan los de 4 cifras. Sin `decimales`: hasta 3, sin ceros de relleno.
+ */
+export function numero(n, decimales) {
+  if (n === null || n === undefined || !Number.isFinite(Number(n))) return '—'
+  const v = Number(n)
+  const fijo = decimales !== undefined
+  let [entero, fraccion] = Math.abs(v).toFixed(fijo ? decimales : 3).split('.')
+  if (!fijo && fraccion) fraccion = fraccion.replace(/0+$/, '')
+  const cero = Number(`${entero}.${fraccion || 0}`) === 0
+  return `${v < 0 && !cero ? '-' : ''}${entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}${fraccion ? `,${fraccion}` : ''}`
 }
 
 /**
@@ -98,11 +124,6 @@ export function moneda(n, simbolo = '$') {
 /** "82 km/h" */
 export function velocidad(n) {
   return `${numero(Math.round(n ?? 0))} km/h`
-}
-
-/** Normaliza la placa como hace crearVehiculo: sin espacios y en mayúsculas. */
-export function placa(v) {
-  return String(v ?? '').trim().toUpperCase()
 }
 
 /** "+58 4141234567" */

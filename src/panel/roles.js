@@ -16,13 +16,55 @@ const ETIQUETA_ROL = Object.freeze({
   usuario: 'Usuario',
 })
 
+// Los nombres de rol de la demostración sin servidor (semilla) llevan a los de la sesión:
+// así una sola tabla de etiqueta, color y rango sirve a la demo y al servidor real.
+const ROL_DE_SEMILLA = Object.freeze({
+  admin: 'admin_fom',
+  supervisor_company: 'supervisor',
+  supervisor_personal: 'supervisor',
+  usuario_personal: 'usuario',
+})
+
+// Color del tag de cada rol (clases de .pnl-tag).
+const COLOR_ROL = Object.freeze({
+  admin_fom: 'rojo',
+  supervisor: 'azul',
+  operator: 'ambar',
+  conductor: 'verde',
+  usuario: 'gris',
+})
+
+// Jerarquía de mando: cada quien solo gestiona a los de rango MENOR. Lo no listado vale 1.
+const RANGO_ROL = Object.freeze({
+  admin_fom: 4,
+  supervisor: 3,
+  conductor: 1,
+  usuario: 1,
+})
+
 export function rolCanonico(rol) {
   return ROL_CANONICO[rol] ?? rol ?? null
 }
 
-export function etiquetaRolSesion(rol) {
+// El rol de la sesión, también cuando viene con el nombre de la semilla.
+const rolUnico = (rol) => {
   const canonico = rolCanonico(rol)
-  return canonico ? (ETIQUETA_ROL[canonico] ?? canonico) : 'Usuario de la consola'
+  return ROL_DE_SEMILLA[canonico] ?? canonico
+}
+
+export function etiquetaRolSesion(rol) {
+  const unico = rolUnico(rol)
+  return unico ? (ETIQUETA_ROL[unico] ?? unico) : 'Usuario de la consola'
+}
+
+/** Color del tag del rol; gris si no se conoce. */
+export function colorRol(rol) {
+  return COLOR_ROL[rolUnico(rol)] ?? 'gris'
+}
+
+/** Rango de mando del rol (admin_fom 4, supervisor 3, el resto 1). */
+export function rangoRol(rol) {
+  return RANGO_ROL[rolUnico(rol)] ?? 1
 }
 
 export function esAdminFom(perfil) {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import { Link, useSearchParams } from 'react-router-dom'
 import Planes from './Planes'
 import VehicleVisual from '../../components/VehicleVisual'
@@ -290,9 +291,8 @@ function Indicadores({ odts }) {
   // El costo suma solo lo cerrado este mes: una cancelada no tiene gasto.
   const gasto = cerradasMes.reduce((a, o) => a + (Number(o.costo) || 0), 0)
   const conCosto = cerradasMes.filter((o) => o.costo != null).length
-  const mes = hoy.toLocaleDateString('es', { month: 'long', year: 'numeric' })
 
-  return <div className="mnt-summary">{[['Abiertas', cuenta.abierta, 'Reportadas, falta revisarlas', 'ambar'], ['En revisión', cuenta.revision, 'En evaluación o en taller', 'azul'], ['Resueltas este mes', resueltasMes.length, mes.charAt(0).toUpperCase() + mes.slice(1), 'verde'], ['Costo del mes', f.moneda(gasto), `${conCosto} ${conCosto === 1 ? 'cierre' : 'cierres'} con costo`, 'gris']].map(([t,v,d,c]) => <div key={t}><span><i className={c}/>{t}</span><b>{v}</b><small>{d}</small></div>)}</div>
+  return <div className="mnt-summary">{[['Abiertas', cuenta.abierta, 'Reportadas, falta revisarlas', 'ambar'], ['En revisión', cuenta.revision, 'En evaluación o en taller', 'azul'], ['Resueltas este mes', resueltasMes.length, f.mesAnio(hoy, true), 'verde'], ['Costo del mes', f.moneda(gasto), `${conCosto} ${conCosto === 1 ? 'cierre' : 'cierres'} con costo`, 'gris']].map(([t,v,d,c]) => <div key={t}><span><i className={c}/>{t}</span><b>{v}</b><small>{d}</small></div>)}</div>
 }
 
 /**
@@ -798,7 +798,7 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
             return recargar()
           }
         }
-        alCrear(elegido?.placa || elegido?.alias || "la unidad")
+        alCrear(elegido ? nombreUnidad(elegido) : "la unidad")
         alCerrar()
         return recargar()
       })
@@ -816,8 +816,8 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
     {paso === 1 ? <>
       <h3>¿Qué unidad necesita atención?</h3><p>Selecciona el vehículo para continuar.</p>
       <Buscador valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por placa o nombre…"/>
-      <div className="mnt-vehicle-options">{vehiculos.filter(v => [v.alias,v.placa,v.marca,v.modelo].join(' ').toLowerCase().includes(busqueda.trim().toLowerCase())).map(v => <button key={v.id} type="button" aria-pressed={vehiculoId === v.id} onClick={() => setVehiculoId(v.id)}><VehicleVisual modelo={v.modelo ?? ''} compacta/><span><b>{v.placa || v.alias}</b><small>{v.alias} · {v.marca} {v.modelo}</small><small>{v.conductorNombre || 'Sin conductor asignado'}</small></span><i>{vehiculoId === v.id ? '✓' : ''}</i></button>)}</div>
-      <div className="mnt-form-footer"><span>{elegido ? `Seleccionada: ${elegido.placa || elegido.alias}` : 'Selecciona una unidad'}</span><button type="button" className="pnl-btn primario" disabled={!vehiculoId} onClick={() => setPaso(2)}>Continuar →</button></div>
+      <div className="mnt-vehicle-options">{vehiculos.filter(v => [v.alias,v.placa,v.marca,v.modelo].join(' ').toLowerCase().includes(busqueda.trim().toLowerCase())).map(v => <button key={v.id} type="button" aria-pressed={vehiculoId === v.id} onClick={() => setVehiculoId(v.id)}><VehicleVisual modelo={v.modelo ?? ''} compacta/><span><b>{nombreUnidad(v)}</b><small>{v.alias} · {v.marca} {v.modelo}</small><small>{v.conductorNombre || 'Sin conductor asignado'}</small></span><i>{vehiculoId === v.id ? '✓' : ''}</i></button>)}</div>
+      <div className="mnt-form-footer"><span>{elegido ? `Seleccionada: ${nombreUnidad(elegido)}` : 'Selecciona una unidad'}</span><button type="button" className="pnl-btn primario" disabled={!vehiculoId} onClick={() => setPaso(2)}>Continuar →</button></div>
     </> : <div className="mnt-new-layout"><div className="pnl-filas">
       <Campo
         etiqueta="Qué le pasa a la unidad"
@@ -902,7 +902,7 @@ export function NuevaOdt({ vehiculos, creadorId, recargar, alCerrar, alCrear, si
           ← Cambiar unidad
         </button>)}
       </div>
-    </div><aside className="mnt-new-context"><VehicleVisual modelo={elegido?.modelo ?? ''}/><h3>{elegido?.placa || elegido?.alias}</h3><p>{elegido?.marca} {elegido?.modelo}</p><p>{elegido?.conductorNombre || 'Sin conductor asignado'}</p><hr/><b>¿Qué sigue?</b><p>La orden quedará abierta para revisarla y asignar el trabajo.</p></aside></div>}
+    </div><aside className="mnt-new-context"><VehicleVisual modelo={elegido?.modelo ?? ''}/><h3>{elegido && nombreUnidad(elegido)}</h3><p>{elegido?.marca} {elegido?.modelo}</p><p>{elegido?.conductorNombre || 'Sin conductor asignado'}</p><hr/><b>¿Qué sigue?</b><p>La orden quedará abierta para revisarla y asignar el trabajo.</p></aside></div>}
   </div>
 }
 

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import { estadoUnidad } from '../datos/estadoUnidad'
@@ -57,7 +58,7 @@ export default function FichaUnidad({ unidad, variante = 'panel', conCabecera = 
       : 'Sin conductor asignado'],
     ['pin', 'Ubicación', v.ubicacionTexto || (Number.isFinite(v.lat) && Number.isFinite(v.lng) ? `${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}` : 'Sin posición disponible')],
   ]
-  return <article className={`fleet-card ${variante}`} aria-label={`Vehículo ${v.placa || v.alias || ''}`}>
+  return <article className={`fleet-card ${variante}`} aria-label={`Vehículo ${nombreUnidad(v)}`}>
     {conCabecera && <header className="fleet-card-heading"><h2>Vehículo seleccionado</h2>
       {alCerrar && <button type="button" className="fleet-card-close" aria-label="Cerrar ficha del vehículo" onClick={alCerrar}><Icono nombre="cerrar" tam={20} /></button>}
     </header>}

@@ -7,7 +7,9 @@
 //  - `POST /console/tenants/{id}/gps-devices/{equipo}/installation` instala el equipo en una unidad
 //    de esa empresa. Desde el inventario global (#749) el equipo no tiene que ser de la misma empresa.
 
-/** Topes del servidor (CreateVehicleDto). */
+import { normalizarPlaca } from './placas.js'
+
+/** Topes del servidor (CreateVehicleDto). Los usan «Nueva unidad» de la flota y «Crear unidad aquí». */
 export const LIMITES_UNIDAD = { numero: 30, codigo: 60, placa: 20, alias: 80, marca: 80, modelo: 80 }
 
 export const TIPOS_UNIDAD = [
@@ -48,7 +50,7 @@ export function cuerpoUnidad(datos) {
     code: numero.toLowerCase().replace(/\s+/gu, '-').slice(0, LIMITES_UNIDAD.codigo),
     alias: numero.slice(0, LIMITES_UNIDAD.alias),
     fleetNumber: numero.slice(0, LIMITES_UNIDAD.numero),
-    plate: t(datos.placa),
+    plate: normalizarPlaca(datos.placa),
     make: t(datos.marca),
     model: t(datos.modelo),
     modelYear: t(datos.anio) ? Number(t(datos.anio)) : undefined,

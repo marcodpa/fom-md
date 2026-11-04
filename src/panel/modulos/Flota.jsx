@@ -8,6 +8,9 @@ import { useDatos } from '../useDatos'
 import { useSesion } from '../useSesion'
 import { esAdminFom } from '../auth'
 import { esGestor } from '../roles'
+import { nombreUnidad } from '../datos/nombreUnidad'
+import { normalizarPlaca } from '../datos/placas'
+import { LIMITES_UNIDAD } from '../datos/unidadEnEmpresa'
 import VehicleVisual from '../../components/VehicleVisual'
 import {
   Cabecera, Campo, Cargando, Vacio, ErrorCarga, Tag, Tarjeta, Kpi, Buscador, Chips, Modal,
@@ -114,9 +117,6 @@ function estadoMovil(v) {
   return v.ultimoReporte ? 'sin-senal' : null
 }
 
-/** El número de la unidad («U-003»), como `etiquetaCortaDeUnidad` de la app; sin él, su alias. */
-const numeroDe = (v) => (v.numero && String(v.numero).trim() !== '—' ? String(v.numero).toUpperCase() : v.alias || v.placa || 'Unidad')
-
 /**
  * La lista del teléfono, como flota.tsx (T-190): tres tramos por gravedad y
  * dentro de cada uno lo peor primero; cada unidad en su tarjeta con su foto. La
@@ -131,7 +131,7 @@ function ListaMovil({ unidades, alAbrir, ahora }) {
       .filter((t) => t.items.length > 0)
   }, [unidades])
   const pintar = useCallback(({ v, n }) => (
-    <FilaUnidadMovil unidad={v} numero={numeroDe(v)} estado={estadoMovil(v)} aviso={n}
+    <FilaUnidadMovil unidad={v} numero={nombreUnidad(v)} estado={estadoMovil(v)} aviso={n}
       conductor={nombreConductor(v)} ahora={ahora} alAbrir={alAbrir} />
   ), [ahora, alAbrir])
   return (
@@ -547,11 +547,11 @@ export default function Flota() {
                         >
                           <td>
                             <div className="pnl-vehicle-cell"><MiniFoto vehiculoId={v.id}><VehicleVisual modelo={v.modelo ?? ''} compacta /></MiniFoto><div className="pnl-doble">
-                              <b>{v.alias}</b>
-                              <span>{v.numero} · {v.marca} {v.modelo}</span>
+                              <b>{nombreUnidad(v)}</b>
+                              <span>{v.numero || '—'} · {v.marca} {v.modelo}</span>
                             </div></div>
                           </td>
-                          <td className="placa">{v.placa}</td>
+                          <td className="placa">{v.placa || '—'}</td>
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <span>{v.areaNombre}</span>
@@ -700,12 +700,12 @@ export function ModalNuevaUnidad({ abierto, areas, alCerrar, alGuardar, actor })
       ) : (
         <>
           <Campo etiqueta="Placa (opcional)" ayuda="Si no tiene placa, usa un alias o número interno." error={error}>
-            <input type="text" className="pnl-input" value={placa} onChange={(e) => setPlaca(e.target.value.toUpperCase())} placeholder="A12BC3D" />
+            <input type="text" className="pnl-input" value={placa} maxLength={LIMITES_UNIDAD.placa} onChange={(e) => setPlaca(normalizarPlaca(e.target.value))} placeholder="A12BC3D" />
           </Campo>
           <Campo etiqueta="Alias (opcional)" ayuda="Por ejemplo: Manlift 01 o Camión con brazo.">
-            <input type="text" className="pnl-input" value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="Unidad 27" />
+            <input type="text" className="pnl-input" value={alias} maxLength={LIMITES_UNIDAD.alias} onChange={(e) => setAlias(e.target.value)} placeholder="Unidad 27" />
           </Campo>
-          <Campo etiqueta="Número interno de flota (opcional)"><input className="pnl-input" value={numero} maxLength={30} onChange={e => setNumero(e.target.value)} /></Campo>
+          <Campo etiqueta="Número interno de flota (opcional)"><input className="pnl-input" value={numero} maxLength={LIMITES_UNIDAD.numero} onChange={e => setNumero(e.target.value)} /></Campo>
           <Campo etiqueta="Marca">
             <input type="text" className="pnl-input" value={marca} onChange={(e) => setMarca(e.target.value)} placeholder="Toyota" />
           </Campo>
@@ -769,7 +769,7 @@ function ModalArea({ abierto, tenantId, alCerrar, alGuardar }) {
   const [guardando, setGuardando] = useState(false)
   async function confirmar() {
     if (nombre.trim().length < 2) return setError('Ponle nombre al área.')
-    if (!tenantId) return setError('No se sabe el empresa de la sesión: vuelve a entrar.')
+    if (!tenantId) return setError('No se sabe la empresa de la sesión: vuelve a entrar.')
     setGuardando(true)
     setError('')
     try {
@@ -897,8 +897,8 @@ function ModalAsignarArea({ abierto, areas, vehiculos, areaInicial, alCerrar, al
               <label key={v.id} className="pnl-fila" style={{ cursor: 'pointer' }}>
                 <input type="checkbox" checked={marcados.has(v.id)} disabled={trabajando} onChange={() => alternar(v.id)} />
                 <div className="pnl-fila-txt">
-                  <b>{v.alias}</b>
-                  <span>{v.placa} · {v.marca} {v.modelo}</span>
+                  <b>{nombreUnidad(v)}</b>
+                  <span>{v.placa || '—'} · {v.marca} {v.modelo}</span>
                 </div>
                 <em>{v.areaNombre}</em>
               </label>

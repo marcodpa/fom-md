@@ -122,13 +122,8 @@ export function esMia(inspeccion, yo) {
 
 // ---- La entrada «Tus planillas de hoy» (T-202), igual que inspeccion-planillas.tsx ----
 
-const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-
-/** «Martes 27 de octubre». */
-export function fechaLarga(d = new Date()) {
-  return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`
-}
+// «Martes 27 de octubre» vive en datos/formato.js; se reexporta para quien ya la importa de aquí.
+export { fechaLarga } from '../datos/formato.js'
 
 /** Cuántos puntos, secciones y críticos tiene una planilla. */
 export function medidaDePlanilla(plantilla) {

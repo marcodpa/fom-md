@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { haceCuanto } from '../datos/gps'
+import * as f from '../datos/formato'
 import '../modulos/admin-gps.css'
 
 // ============================================================
@@ -123,7 +124,7 @@ export function ReceptorTarjeta({ ahora }) {
             <div><dt>TCP · puerto {r.datos.puerto}</dt><dd>{r.datos.tcp ? 'Escuchando' : 'Cerrado'}</dd></div>
             <div><dt>UDP · puerto {r.datos.puerto}</dt><dd>{r.datos.udp ? 'Escuchando' : 'Cerrado'}</dd></div>
             <div><dt>Último mensaje</dt><dd>{haceCuanto(r.datos.ultimoMensaje, ahora)}</dd></div>
-            <div><dt>Mensajes recientes</dt><dd>{Number(r.datos.mensajesRecientes ?? 0).toLocaleString('es-VE')}</dd></div>
+            <div><dt>Mensajes recientes</dt><dd>{f.numero(Number(r.datos.mensajesRecientes ?? 0))}</dd></div>
             <div><dt>Fallos al guardar</dt><dd>{r.datos.fallosAlGuardar ?? 0}</dd></div>
           </dl>
           <span className="gp-hint">Se actualiza cada 30 segundos.</span>

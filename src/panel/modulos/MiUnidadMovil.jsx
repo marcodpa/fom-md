@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { etiquetaUnidad, nombreUnidad } from '../datos/nombreUnidad'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -53,9 +54,9 @@ function horaCorta(iso) {
 const conValor = (t) => (t && String(t).trim() !== '—' ? String(t).trim() : null)
 
 /** El id de la puerta (en mayúsculas, como en la app) o, sin él, la placa. */
-const etiquetaCorta = (u) => (conValor(u.numero)?.toUpperCase() ?? conValor(u.placa) ?? '')
+const etiquetaCorta = (u) => nombreUnidad(u)
 /** «U-001 · Z69FC7W»: lo que la unidad no tenga, no se escribe. */
-const identidad = (u) => [conValor(u.numero)?.toUpperCase(), conValor(u.placa)].filter(Boolean).join(' · ')
+const identidad = (u) => etiquetaUnidad(u)
 /** «Toyota Hilux». */
 const marcaModelo = (u) => `${conValor(u.marca) ?? ''} ${conValor(u.modelo) ?? ''}`.trim()
 
@@ -512,7 +513,7 @@ function Franja({ unidad, velocidad, enMarcha, vivo, hoy }) {
         <span className="mvu-f-id">
           <span className="mvu-f-ico"><IconoApp nombre="camion" /></span>
           <span className="mvu-f-txt">
-            <b>{titulo || unidad.alias || 'Tu unidad'}</b>
+            <b>{titulo || nombreUnidad(unidad)}</b>
             <small>{identidad(unidad)}</small>
           </span>
         </span>

@@ -8,7 +8,7 @@ import { useDatos } from '../useDatos'
 import { Buscador, Cargando, Datos, ErrorCarga, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { contarEmpresas } from '../datos/contarEmpresas'
-import { etiquetaRolSesion, rolCanonico } from '../roles'
+import { colorRol, etiquetaRolSesion, rolCanonico } from '../roles'
 import { Icono } from '../Iconos'
 import './mantenimiento.css'
 import './admin-rediseno.css'
@@ -25,7 +25,6 @@ import './usuarios-perfil.css'
 // ============================================================
 
 const POR_PAGINA = 50
-const COLOR_ROL = { admin_fom: 'rojo', supervisor: 'azul', operator: 'ambar', conductor: 'verde', usuario: 'gris' }
 const COLOR_ESTADO = { active: 'verde', suspended: 'ambar', invited: 'azul', disabled: 'gris', revoked: 'gris' }
 const ESTADO = { active: 'Activa', suspended: 'Suspendida', invited: 'Invitada', disabled: 'Inactiva', revoked: 'Sin acceso' }
 
@@ -148,7 +147,7 @@ export default function Plataforma() {
                           <span>{p.email}</span>
                         </div></div></td>
                         <td>{rol === 'admin_fom' ? 'Acceso global · FOM' : p.empresaNombre}</td>
-                        <td><Tag color={COLOR_ROL[rol] ?? 'gris'}>{etiquetaRolSesion(rol)}</Tag></td>
+                        <td><Tag color={colorRol(rol)}>{etiquetaRolSesion(rol)}</Tag></td>
                         <td><Tag color={COLOR_ESTADO[p.estado] ?? 'gris'} plano>{ESTADO[p.estado] ?? p.estado}</Tag></td>
                       </tr>
                     )
@@ -173,7 +172,7 @@ export default function Plataforma() {
                     <div><h3>{seleccion.nombre}</h3><p className="usr-email">{seleccion.email}</p></div>
                   </div>
                   <div className="adm-tags">
-                    <Tag color={COLOR_ROL[rolCanonico(seleccion.rol)] ?? 'gris'}>{etiquetaRolSesion(rolCanonico(seleccion.rol))}</Tag>
+                    <Tag color={colorRol(seleccion.rol)}>{etiquetaRolSesion(rolCanonico(seleccion.rol))}</Tag>
                     <Tag color={COLOR_ESTADO[seleccion.estado] ?? 'gris'}>{ESTADO[seleccion.estado] ?? seleccion.estado}</Tag>
                   </div>
                   <Datos items={[

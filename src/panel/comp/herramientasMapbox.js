@@ -1,6 +1,7 @@
 // Dibujo de «Llegada» sobre el mapa de Mapbox: la ruta hasta el destino y su pin,
 // más las cuentas y textos de la tarjeta. Cada función de dibujo devuelve cómo quitarlo.
 // La ruta va de UN color (azul FOM): el tráfico se usa para el tiempo, no se pinta.
+import { hora, numero } from '../datos/formato.js'
 
 const AZUL_FOM = '#3D9BF5'
 // El borde de la ruta: blanco sobre el mapa claro, casi negro sobre el oscuro.
@@ -69,15 +70,12 @@ export function tiempoLlegada(minutos) {
 export function distanciaLlegada(km) {
   const n = Math.max(0, Number(km) || 0)
   const decimales = n < 100 ? 1 : 0
-  return `${n.toLocaleString('es-VE', { maximumFractionDigits: decimales, minimumFractionDigits: decimales })} km`
+  return `${numero(n, decimales)} km`
 }
 
 /** «3:42 p. m.»: la hora en que llega si sale ahora (hora local del navegador). */
 export function horaLlegada(minutos, desde = Date.now()) {
-  const d = new Date(desde + Math.max(0, Number(minutos) || 0) * 60000)
-  const h = d.getHours()
-  const h12 = h % 12 === 0 ? 12 : h % 12
-  return `${h12}:${String(d.getMinutes()).padStart(2, '0')} ${h < 12 ? 'a. m.' : 'p. m.'}`
+  return hora(new Date(desde + Math.max(0, Number(minutos) || 0) * 60000))
 }
 
 /** Minutos que suma el tráfico de ahora sobre lo normal; null si no llega a 2 min y al 10 %. */

@@ -1,4 +1,5 @@
 import { estadoUnidad } from '../datos/estadoUnidad.js'
+import { nombreUnidad } from '../datos/nombreUnidad.js'
 import { tiempoSinSenal } from '../datos/sinSenal.js'
 
 export const MARKER_SIZE = [174, 76]
@@ -16,7 +17,7 @@ export function vehicleMarkerSvg(vehicle, selected = false, ahora = Date.now()) 
   const color = COLORS[status.color]
   const accent = selected ? '#168fff' : color
   const heading = Number.isFinite(vehicle.rumbo) ? ((vehicle.rumbo % 360) + 360) % 360 : null
-  const plate = escapeXml(String(vehicle.placa || vehicle.alias || 'Sin placa').slice(0, 22))
+  const plate = escapeXml(nombreUnidad(vehicle).slice(0, 22))
   const labelSize = plate.length > 11 ? 10 : 13
   // La sombra va dibujada dentro del SVG (formas negras translúcidas, sin <filter>): un
   // `filter: drop-shadow` en CSS obligaba a repintar cada marcador en cada cuadro al mover el mapa.

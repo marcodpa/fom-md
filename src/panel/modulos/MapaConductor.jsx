@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import { Link, useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -91,7 +92,7 @@ export default function MapaConductor() {
         eventosManejo={fichaAbierta ? manejo.visibles : null} eventoActivo={manejo.elegido} alElegirEvento={manejo.elegir} encuadrarEventos={false} />
     </div>
     <div className="control-search">
-      <div className="control-search-heading"><div><h1>Mi mapa</h1><p>{unidad ? `${unidad.placa || unidad.alias} · Tu unidad asignada` : 'Ubicación de tu unidad asignada'}</p></div>
+      <div className="control-search-heading"><div><h1>Mi mapa</h1><p>{unidad ? `${nombreUnidad(unidad)} · Tu unidad asignada` : 'Ubicación de tu unidad asignada'}</p></div>
         <Link className="pnl-btn" to="/panel"><Icono nombre="camion" tam={18} />Mi unidad</Link>
       </div>
     </div>

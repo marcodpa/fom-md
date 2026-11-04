@@ -4,13 +4,14 @@ import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import { Cabeza, IcoGps, Pastilla, RAIZ_GPS, useAhora } from '../comp/GpsPiezas'
 import {
-  CATALOGO_GPS, haceCuanto, huellaCorta, nombreEquipo, validarImei, validarLinea,
+  CATALOGO_GPS, IP_RECEPTOR, haceCuanto, huellaCorta, nombreEquipo, validarImei, validarLinea,
 } from '../datos/gps'
 import {
   AVISO_RUTA_AUSENTE, MEITRACK, armarComandosMeitrack, cuerpoAltaMeitrack, db4Configurado, lecturaDb4,
   listaComandos, mensajeMeitrack, receptorValido, resumenRecepcion, rutaAusente, validarApnMeitrack,
   validarClaveMeitrack, ventanaUsable,
 } from '../datos/gpsMeitrack'
+import { fechaHora, hora } from '../datos/formato'
 import './admin-gps.css'
 
 // ============================================================
@@ -18,16 +19,13 @@ import './admin-gps.css'
 // Cuatro pasos, con el mismo aspecto del alta del Coban:
 //   1 · Equipo y SIM: IMEI, serie y la línea de la tarjeta.
 //   2 · Comandos SMS: los de Juan (fom-core, apps/gps-web) para guardar la
-//       configuración actual y apuntar el equipo al receptor, puerto 5002 por TCP.
+//       configuración actual y apuntar el equipo al receptor, el puerto propio del Meitrack por TCP.
 //       FOM no manda SMS: la persona los copia y los envía desde su teléfono.
 //   3 · Esperando señal: consulta cada 5 s si llegó una trama del mismo IMEI.
 //   4 · Registrar: solo inventario (`meitrack-setup/register`). No instala ni activa.
 // Las rutas son de una rama de fom-core que puede no estar publicada: si el servidor
 // responde «Cannot POST», se avisa en llano y no como error técnico.
 // ============================================================
-
-// IP del receptor para el comando de conexión: sale de la configuración del sitio, no del código.
-const IP_RECEPTOR = String(import.meta.env?.VITE_GPS_RECEPTOR || '').trim()
 
 const PASOS = ['Equipo y SIM', 'Comandos SMS', 'Esperando señal', 'Registrar']
 const SIN_SERVIDOR = 'El registro de Meitrack necesita la conexión con el servidor de FOM.'
@@ -437,7 +435,7 @@ function PasoComandos({ datos, imei, sms, ponerSms, ausente, alAusente, alVolver
         {ventana.estado === 'cargando' && <span className="gp-hint">Consultando la ventana de recepción…</span>}
         {ventana.estado === 'error' && !ausente && <div className="gp-aviso error" role="alert">{mensajeMeitrack(ventana.error)}</div>}
         {ventana.estado === 'ok' && usable && (
-          <div className="gp-aviso" role="status"><IcoGps nombre="check" />Ventana de recepción abierta hasta las {new Date(setup.window.expiresAt).toLocaleTimeString('es-VE', { hour12: false, hour: '2-digit', minute: '2-digit' })}. Quedan {setup.window.remainingConnections} conexiones.</div>
+          <div className="gp-aviso" role="status"><IcoGps nombre="check" />Ventana de recepción abierta hasta las {hora(setup.window.expiresAt)}. Quedan {setup.window.remainingConnections} conexiones.</div>
         )}
         {ventana.estado === 'ok' && !usable && (
           <div className="gp-aviso mute" role="status">La ventana de recepción de FOM todavía no está abierta para este equipo, o está por vencer. El mensaje 05 queda bloqueado; los de lectura y la restauración siguen disponibles.</div>
@@ -491,7 +489,7 @@ function PasoSenal({ imei, ausente, alAusente, alVolver, alSeguir }) {
             <div className="gp-chk"><span className="c"><IcoGps nombre="check" /></span>Llegó una trama del mismo IMEI y se pudo leer.</div>
             {r.mensajes.map((m) => (
               <div className="gp-evidencia" key={m.receiptId}>
-                <b>{new Date(m.receivedAt).toLocaleString('es-VE', { hour12: false })} · {m.bytes} bytes · {m.records} {m.records === 1 ? 'registro' : 'registros'}</b>
+                <b>{fechaHora(m.receivedAt)} · {m.bytes} bytes · {m.records} {m.records === 1 ? 'registro' : 'registros'}</b>
                 <span className="gp-hint gp-mono">SHA-256 {huellaCorta(m.sha256)}</span>
               </div>
             ))}

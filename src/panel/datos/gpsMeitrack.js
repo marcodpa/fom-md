@@ -8,17 +8,17 @@
 // si el servidor cambia un comando, se cambia primero allá.
 // Diferencia con el Coban GPS-403: no hay clave de fábrica (la contraseña
 // SMS de cuatro dígitos la pone quien configura), el receptor es el puerto
-// 5002 por TCP, y antes de apuntar el equipo se guarda su configuración
+// propio (solo TCP), y antes de apuntar el equipo se guarda su configuración
 // para poder devolverla.
 // ============================================================
-import { PUERTO_RECEPTOR, PUNTOS_CLAVE } from './gps.js'
+import { PUERTO_RECEPTOR, PUERTO_RECEPTOR_MEITRACK, PUNTOS_CLAVE } from './gps.js'
 
 export const MEITRACK = {
   marca: 'Meitrack',
   modelo: 'T399L',
   protocolo: 'meitrack-t399',
   firmware: 'T399L-V254',
-  puerto: 5002,
+  puerto: PUERTO_RECEPTOR_MEITRACK,
   transporte: 'tcp',
 }
 
@@ -27,7 +27,7 @@ export const AVISO_RUTA_AUSENTE = 'El registro de Meitrack todavía no está en 
 export const esMeitrack = (marca, modelo) => marca === MEITRACK.marca && modelo === MEITRACK.modelo
 
 /**
- * ¿Este equipo ya registrado es un Meitrack T399L? Basta una pista: marca, modelo, protocolo o puerto 5002
+ * ¿Este equipo ya registrado es un Meitrack T399L? Basta una pista: marca, modelo, protocolo o puerto del Meitrack
  * (T-213). Lo usan la ficha y «Probar» para no darle al Meitrack los comandos ni el puerto del Coban.
  */
 export function esEquipoMeitrack(g) {
@@ -39,7 +39,7 @@ export function esEquipoMeitrack(g) {
     || [g.puerto, g.port].some((p) => Number(p) === MEITRACK.puerto)
 }
 
-/** Puerto del receptor FOM al que debe apuntar este equipo: 5002 el Meitrack, 5001 el resto. */
+/** Puerto del receptor FOM al que debe apuntar este equipo: el propio del Meitrack o el de los demás. */
 export const puertoDelEquipo = (g) => (esEquipoMeitrack(g) ? MEITRACK.puerto : PUERTO_RECEPTOR)
 
 /** Contraseña SMS del equipo: cuatro dígitos. No hay clave de fábrica que suponer. */
@@ -178,7 +178,7 @@ export function armarComandosMeitrack({ clave, anunciados, base, sinUsuarioNiCla
     fila('04', 'Guardar la restauración', (k) => (restauracion ? restauracion.replace(/^\d{4}/u, k) : ''), 'Vuelve al destino y APN de la lectura inicial. Conserva este mensaje en tu teléfono.',
       restauracion ? '' : 'Pega la respuesta de DB4 y confirma el APN sin usuario ni clave.'),
     fila('05', 'Apuntar al receptor FOM', (k) => (conexion ? conexion.replace(/^\d{4}/u, k) : ''), `Manda el equipo al receptor por TCP, puerto ${MEITRACK.puerto}. Espera el OK del equipo.`, faltaConexion),
-    fila('06', 'Comprobar la configuración', (k) => `${k},DB4`, 'Debe decir TCP, la IP del receptor y PORT1:5002. Pega la respuesta abajo.', sinDb4),
+    fila('06', 'Comprobar la configuración', (k) => `${k},DB4`, `Debe decir TCP, la IP del receptor y PORT1:${PUERTO_RECEPTOR_MEITRACK}. Pega la respuesta abajo.`, sinDb4),
   ]
 }
 
@@ -229,7 +229,7 @@ export function mensajeMeitrack(error) {
     return 'Este equipo ya figura en el inventario, o no se pudo confirmar que no exista. Búscalo en el inventario antes de volver a intentarlo.'
   }
   if (/Only Meitrack T399L/iu.test(texto)) {
-    return 'El servidor solo registra aquí el Meitrack T399L con firmware T399L-V254 en el puerto 5002. Revisa los datos del equipo.'
+    return `El servidor solo registra aquí el Meitrack T399L con firmware T399L-V254 en el puerto ${PUERTO_RECEPTOR_MEITRACK}. Revisa los datos del equipo.`
   }
   if (error?.estado === 409) return 'El servidor no aceptó el registro porque ya existe un equipo con esos datos. Búscalo en el inventario.'
   if (error?.estado === 400) return 'El servidor no aceptó los datos del equipo. Revisa el IMEI, el ICCID y la línea SIM.'

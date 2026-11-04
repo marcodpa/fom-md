@@ -2,14 +2,16 @@
 // AVISOS DE «GPS SIN SEÑAL» — a la campana del supervisor y del administrador
 // ------------------------------------------------------------
 // Cuando una unidad pasa a Sin señal (un equipo sin corriente: más de 5 min sin
-// reportar) llega UN aviso: «GPS sin señal: U-001 Z69FC7W dejó de reportar a las
-// 14:32». Un aviso por unidad y por corte: mientras siga callada no se repite;
+// reportar) llega UN aviso: «GPS sin señal: U-001 · Z69FC7W dejó de reportar a las
+// 2:32 p. m.». Un aviso por unidad y por corte: mientras siga callada no se repite;
 // si vuelve y se corta de nuevo, su último reporte es otro y sale un aviso nuevo.
 //
 // La base todavía no genera este aviso, así que se arma aquí con lo que la pantalla
 // ve de la flota y se guarda en este navegador. Solo se avisan los cortes de las
 // últimas 24 h: una unidad callada desde hace semanas no llena la campana.
 // ============================================================
+import { hora } from './formato.js'
+import { etiquetaUnidad } from './nombreUnidad.js'
 
 const CLAVE = 'fom.avisos.gps-sin-senal'
 const VENTANA_MS = 24 * 60 * 60_000
@@ -58,11 +60,6 @@ export function olvidarAvisosGps() {
   oyentes.clear()
 }
 
-const dos = (n) => String(n).padStart(2, '0')
-
-/** «14:32», la hora local del último reporte. */
-const horaDe = (t) => `${dos(new Date(t).getHours())}:${dos(new Date(t).getMinutes())}`
-
 export const esAvisoGps = (id) => String(id ?? '').startsWith(PREFIJO_AVISO_GPS)
 
 /**
@@ -76,12 +73,12 @@ export function registrarCorte(v, corteEn, ahora = Date.now()) {
   const id = `${PREFIJO_AVISO_GPS}${v.id}:${v.ultimoReporte}`
   const lista = cargar()
   if (lista.some((a) => a.id === id)) return false
-  const nombre = [v.alias || v.numero, v.placa].filter((x) => x && x !== '—').join(' ')
+  const nombre = etiquetaUnidad(v)
   lista.unshift({
     id,
     vehiculoId: v.id,
     empresaId: empresaActual() ?? null,
-    titulo: `GPS sin señal: ${nombre} dejó de reportar a las ${horaDe(ultimo)}`,
+    titulo: `GPS sin señal: ${nombre} dejó de reportar a las ${hora(ultimo)}`,
     creadaEn: new Date(corteEn).toISOString(),
     leida: false,
     descartada: false,

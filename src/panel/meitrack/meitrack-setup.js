@@ -1,5 +1,6 @@
 // FOM #727: portado desde fom-core f2a925b; conserva las guardas del recorrido TEST.
 import { parseT399ClosedReadback, parseT399TcpReadback } from "./meitrack-readback.js";
+import { IP_RECEPTOR_CONFIRMADA, PUERTO_RECEPTOR_MEITRACK } from "../datos/gps.js";
 const iso = (value) => typeof value === "string" && Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
 const keys = (v, list) => !!v && !Array.isArray(v) && Object.keys(v).length === list.length && list.every(k => Object.hasOwn(v, k));
 export function parseSetupReadiness(raw) {
@@ -15,7 +16,7 @@ export function parseSetupReadiness(raw) {
         || typeof w.reference !== "string" || !/^issue\/727\/[a-z0-9][a-z0-9/_.-]{0,119}$/.test(w.reference)
         || !iso(w.expiresAt) || Date.parse(w.expiresAt) - Date.parse(s.serverNow) <= 90000 || Date.parse(w.expiresAt) - Date.parse(s.serverNow) > 3600000
         || w.firmware !== "T399L-V254" || !w.destination || !keys(w.destination, ["host", "port", "transport"])
-        || w.destination.host !== "51.81.195.12" || w.destination.port !== 5002 || w.destination.transport !== "tcp"
+        || w.destination.host !== IP_RECEPTOR_CONFIRMADA || w.destination.port !== PUERTO_RECEPTOR_MEITRACK || w.destination.transport !== "tcp"
         || !Number.isSafeInteger(w.remainingConnections) || w.remainingConnections < 1 || w.remainingConnections > 99 || w.acknowledgementAllowed !== false)
         return null;
     return s;

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { etiquetaUnidad } from '../datos/nombreUnidad'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -282,7 +283,7 @@ function ModalRegla({ abierto, alCerrar, guardar }) {
       </Campo>
       <Campo etiqueta="Unidades cubiertas">
         {unidades.estado === 'error' && <ErrorCarga error={unidades.error} onReintentar={unidades.recargar} />}
-        {(unidades.datos ?? []).map(v => <label key={v.id} style={{ display: 'block', marginBottom: 8 }}><input type="checkbox" checked={vehiculoIds.includes(v.id)} onChange={e => setVehiculoIds(ids => e.target.checked ? [...ids, v.id] : ids.filter(id => id !== v.id))} /> {v.alias} · {v.placa}</label>)}
+        {(unidades.datos ?? []).map(v => <label key={v.id} style={{ display: 'block', marginBottom: 8 }}><input type="checkbox" checked={vehiculoIds.includes(v.id)} onChange={e => setVehiculoIds(ids => e.target.checked ? [...ids, v.id] : ids.filter(id => id !== v.id))} /> {etiquetaUnidad(v)}</label>)}
       </Campo>
       <div className="pnl-chips">
         <button type="button" className="pnl-btn primario" onClick={confirmar} disabled={guardando}>{guardando ? 'Guardando…' : 'Crear regla'}</button>

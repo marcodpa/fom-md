@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { etiquetaUnidad } from '../datos/nombreUnidad'
 import { Link, useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -156,7 +157,7 @@ function PestanaVehiculos({ m, csv, filtro, setFiltro }) {
       vacio="Ninguna unidad tiene índice bajo, papeles vencidos, ODT sin resolver ni falta de conductor." sinFilas="No hay unidades en este alcance."
       columnas={[['Unidad'], ['Conductor'], ['Estado ahora'], ['Índice', 1], ['Eventos', 1], ['ODT creadas', 1], ['Sin resolver ahora', 1], ['Papeles']]}
       fila={f => <tr key={f.id}>
-        <td><Link className="rp-fila-link" to={`/panel/flota/${f.v.id}`}><b>{f.v.alias} · {f.v.placa || '—'}</b></Link><span className="s">{[f.v.marca, f.v.modelo, f.v.anio].filter(x => x && x !== '—').join(' ') || '—'}</span></td>
+        <td><Link className="rp-fila-link" to={`/panel/flota/${f.v.id}`}><b>{etiquetaUnidad(f.v)}</b></Link><span className="s">{[f.v.marca, f.v.modelo, f.v.anio].filter(x => x && x !== '—').join(' ') || '—'}</span></td>
         <td>{f.v.conductorPrincipalId ? f.v.conductorNombre : <span className="c-bad b">Sin conductor</span>}<span className="s">{f.v.areaNombre || 'Sin área'}</span></td>
         <td><Etiqueta tono={f.v.estadoMarcha === 'en_marcha' ? 'info' : null}>{f.v.estadoMarcha === 'en_marcha' ? 'En marcha' : f.v.estadoMarcha === 'parada' ? 'Detenida' : 'Sin dato'}</Etiqueta></td>
         <td className={`nr b c-${tonoIndice(f.v.indiceSeguro) || 'none'}`}>{numeroValido(f.v.indiceSeguro) ? f.v.indiceSeguro : '—'}</td>
@@ -224,7 +225,7 @@ function PestanaCostos({ m, csv, filtro, setFiltro }) {
         texto={f => `${f.v.alias} ${f.v.placa}`} buscar="Buscar unidad o placa" vacio="Todas las ODT resueltas tienen su costo registrado." sinFilas="No se resolvieron ODT en el período."
         columnas={[['Unidad'], ['ODT resueltas', 1], ['Con costo', 1], ['Costo registrado', 1]]}
         fila={f => <tr key={f.id}>
-          <td><b>{f.v.alias} · {f.v.placa || '—'}</b><span className="s">{f.v.areaNombre || 'Sin área'}</span></td>
+          <td><b>{etiquetaUnidad(f.v)}</b><span className="s">{f.v.areaNombre || 'Sin área'}</span></td>
           <td className="nr">{f.resueltas}</td><td className={`nr${f.atencion ? ' b c-warn' : ''}`}>{f.conCosto}</td><td className="nr b">{f.costo == null ? 'Sin costo' : dineroVE(f.costo)}</td>
         </tr>} />
     </div>

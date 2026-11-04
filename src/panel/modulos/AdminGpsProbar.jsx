@@ -6,7 +6,7 @@ import { useSesion } from '../useSesion'
 import { Cargando, ErrorCarga } from '../comp/ui'
 import { Cabeza, IcoGps, Pastilla, RAIZ_GPS, useAhora } from '../comp/GpsPiezas'
 import {
-  PUERTO_RECEPTOR, armarComandos, comprobacionesPrueba, coordenadasTexto, haceCuanto, huellaCorta,
+  IP_RECEPTOR, PUERTO_RECEPTOR, armarComandos, comprobacionesPrueba, coordenadasTexto, haceCuanto, huellaCorta,
   lecturaTrama, nombreEquipo, nombreProtocolo,
 } from '../datos/gps'
 import { esEquipoMeitrack } from '../datos/gpsMeitrack'
@@ -25,9 +25,7 @@ import './admin-gps.css'
 // espera a la instalación.
 // ============================================================
 
-// IP del receptor para el comando «adminip»: sale de la configuración del sitio (no es un secreto,
-// pero tampoco se escribe en el código). Sin ella el comando muestra «[IP del receptor]».
-const IP_RECEPTOR = import.meta.env?.VITE_GPS_RECEPTOR || ''
+// Sin la IP del receptor (configuración del sitio, ver datos/gps.js) el comando «adminip» muestra «[IP del receptor]».
 const esMeitrack = (equipo) => equipo?.protocolo === 'meitrack-t399' || equipo?.fabricante?.toLowerCase() === 'meitrack' || equipo?.modelo === 'T399L'
 
 /** Tarjeta de los comandos SMS: los cinco del Coban o, si el equipo es un Meitrack, los suyos (T-213). */
@@ -169,7 +167,7 @@ export function PruebaSenal({ equipo, alTerminar }) {
 
       {ultima && (
         <div className="gp-evidencia">
-          <b>{f.fecha(ultima.recibido)} · {new Date(ultima.recibido).toLocaleTimeString('es-VE', { hour12: false })} · {ultima.via} · {ultima.bytes} bytes</b>
+          <b>{f.fecha(ultima.recibido)} · {f.hora(ultima.recibido, true)} · {ultima.via} · {ultima.bytes} bytes</b>
           <span className="gp-lbl">{lectura}{pos?.valida && Number.isFinite(pos.lat) ? ` · ${coordenadasTexto(pos.lat, pos.lng)}` : ''}</span>
           {(resultado?.huella || ultima.huella) && <span className="gp-hint gp-mono">SHA-256 {huellaCorta(resultado?.huella || ultima.huella)}</span>}
         </div>

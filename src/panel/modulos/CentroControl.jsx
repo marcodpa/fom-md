@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import { useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -347,9 +348,9 @@ function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
           >
             <i className={`pnl-punto ${viva ? 'on' : 'off'}`} />
             <div className="pnl-fila-txt">
-              <b>{v.alias}</b>
+              <b>{nombreUnidad(v)}</b>
               <span>
-                {v.placa} ·{' '}
+                {v.placa || '—'} ·{' '}
                 {v.conductorNombre === 'Sin asignar' ? 'Sin conductor' : v.conductorNombre}
               </span>
             </div>
