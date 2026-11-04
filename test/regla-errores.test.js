@@ -57,8 +57,8 @@ const EXCEPCIONES = {
     motivo: 'La flota solo da la línea chica de la unidad (marca, modelo, año); la lista de equipos sale igual.',
   },
   'src/panel/modulos/AdminGpsDetalle.jsx': {
-    veces: 4,
-    motivo: 'Posiciones, última posición, capacidades y bitácora del equipo: cada bloque es opcional en la ficha del equipo y el resto se ve igual.',
+    veces: 5,
+    motivo: 'Unidad donde está instalado (sin ella la señal sale del equipo), posiciones, última posición, capacidades y bitácora del equipo: cada bloque es opcional en la ficha del equipo y el resto se ve igual.',
   },
   'src/panel/modulos/AdminGpsMeitrack.jsx': {
     veces: 1,

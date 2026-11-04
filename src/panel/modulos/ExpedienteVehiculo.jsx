@@ -21,7 +21,7 @@ import FotoUnidad from '../comp/FotoUnidad'
 import FichaDatosUnidad from './FichaDatosUnidad'
 import UsuariosUnidad from './UsuariosUnidad'
 import { FranjaFichaMovil, UbicacionUnidadMovil, textoRecorridoHoy, useHoyDeUnidad } from './FichaUnidadMovil'
-import { useMinuto } from '../datos/sinSenal'
+import { estadoSenal, useMinuto } from '../datos/sinSenal'
 import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
 import { enlaceEventoEnMapa } from '../datos/eventosManejo'
@@ -357,6 +357,8 @@ export default function ExpedienteVehiculo() {
   const [pinSeleccionado, setPinSeleccionado] = useState(null)
   // En el teléfono (T-190): dónde está ahora y lo de hoy, y si el mapa de arriba enseña el día entero.
   const ahora = useMinuto()
+  // La regla única de la señal: la cabecera, el estado en vivo y el punto del GPS dicen lo mismo que el mapa.
+  const senal = v ? estadoSenal(v, ahora) : null
   const vivo = useHoyDeUnidad(v, ahora, movil && estado === 'ok' && Boolean(v))
   const [verRecorrido, setVerRecorrido] = useState(false)
   useEffect(() => { setVerRecorrido(false) }, [id])
@@ -537,9 +539,7 @@ export default function ExpedienteVehiculo() {
       >
         {v && !movil && (
           <>
-            <Tag color={color('marcha_estado', v.estadoMarcha)}>
-              {etiqueta('marcha_estado', v.estadoMarcha)}
-            </Tag>
+            <Tag color={senal.color}>{senal.texto}</Tag>
             {esGestor(sesion?.perfil) && (
               <button type="button" className="pnl-btn" onClick={() => setArchivando(true)}>
                 <Icono nombre="cerrar" tam={16} />
@@ -608,7 +608,7 @@ export default function ExpedienteVehiculo() {
                 <div className="fum">
                   <UbicacionUnidadMovil unidad={vivo.unidad} cola={vivo.cola} puntosDia={vivo.puntos} ahora={ahora}
                     verRecorrido={verRecorrido} alVerRecorrido={() => setVerRecorrido((x) => !x)} />
-                  <FranjaFichaMovil unidad={vivo.unidad} hoy={vivo.hoy}>{kpis}</FranjaFichaMovil>
+                  <FranjaFichaMovil unidad={vivo.unidad} hoy={vivo.hoy} ahora={ahora}>{kpis}</FranjaFichaMovil>
                 </div>
               )
             })()}
@@ -623,7 +623,7 @@ export default function ExpedienteVehiculo() {
                 {movil ? (
                   // El mapa ya está arriba: aquí, lo de hoy en palabras y el día entero a un toque.
                   <Tarjeta titulo="Recorrido" accion={<button type="button" className="pnl-link eu-ver" onClick={() => { setVerRecorrido(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ver recorrido →</button>}>
-                    <p className="fum-nota">{textoRecorridoHoy(vivo.hoy, vivo.unidad)}</p>
+                    <p className="fum-nota">{textoRecorridoHoy(vivo.hoy, vivo.unidad, ahora)}</p>
                   </Tarjeta>
                 ) : (
                   <div className="pnl-expediente-hero"><Tarjeta titulo="Vehículo"><FichaUnidad unidad={v} conEnlace={false} /></Tarjeta><Tarjeta titulo="Recorrido del día" sinCuerpo><Mapa vehiculos={[v]} seleccionado={pinSeleccionado} alSeleccionar={setPinSeleccionado} recorrido={v.recorrido} alto="470px" ficha={false} /></Tarjeta></div>
@@ -661,11 +661,11 @@ export default function ExpedienteVehiculo() {
                   <Datos
                     items={[
                       { etiqueta: 'Temperatura del motor', valor: v.tempMotorC == null ? 'Sin dato' : `${v.tempMotorC} °C` },
-                      { etiqueta: 'Velocidad actual', valor: f.velocidad(v.velocidadKmh) },
-                      { etiqueta: 'Estado', valor: etiqueta('marcha_estado', v.estadoMarcha) },
+                      { etiqueta: 'Velocidad actual', valor: senal.velocidadKmh == null ? 'Sin dato' : f.velocidad(senal.velocidadKmh) },
+                      { etiqueta: 'Estado', valor: senal.texto },
                       { etiqueta: 'Kilometraje', valor: f.km(v.km) },
                       { etiqueta: 'Ubicación', valor: v.ubicacionTexto || (Number.isFinite(v.lat) && Number.isFinite(v.lng) ? `${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}` : 'Sin posición') },
-                      { etiqueta: 'Último reporte', valor: f.desde(v.ultimoReporte) },
+                      { etiqueta: 'Último reporte', valor: senal.hace },
                     ]}
                   />
                 </Tarjeta>
@@ -681,7 +681,8 @@ export default function ExpedienteVehiculo() {
                 <Tarjeta titulo="Equipo GPS">
                   <div className="pnl-filas">
                     <div className="pnl-fila">
-                      <span className={`pnl-punto ${v.gps?.verificado ? 'on' : 'off'}`} />
+                      {/* El punto dice si el equipo reporta AHORA (no si alguna vez se verificó). */}
+                      <span className={`pnl-punto ${senal.clave === 'reportando' ? 'on' : senal.clave === 'sin_ubicacion' ? 'idle' : 'off'}`} title={senal.texto} />
                       <div className="pnl-fila-txt">
                         <b>{v.gps?.modelo ?? 'Sin equipo'}</b>
                         <span>IMEI {v.gps?.imei ?? 'sin registrar'} · Línea {v.gps?.linea ?? 'sin registrar'}</span>

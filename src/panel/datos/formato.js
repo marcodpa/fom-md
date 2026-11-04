@@ -4,6 +4,7 @@
 // ============================================================
 
 import { diasDeCalendario } from './vencimientos.js'
+import { haceCuanto } from './sinSenal.js'
 
 export const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 export const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
@@ -71,19 +72,10 @@ export function duracion(min) {
   return r === 0 ? `${h} h` : `${h} h ${r} min`
 }
 
-/** Tiempo transcurrido en lenguaje natural: "hace 14 min", "hace 3 días". */
+/** Tiempo transcurrido: «hace 40 s», «hace 12 min», «hace 2 d», «desde el 12 sep». La regla única es `haceCuanto` de sinSenal.js. */
 export function desde(iso) {
   if (!iso) return '—'
-  const seg = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
-  if (seg < 60) return 'ahora'
-  const min = Math.floor(seg / 60)
-  if (min < 60) return `hace ${min} min`
-  const h = Math.floor(min / 60)
-  if (h < 24) return `hace ${h} h`
-  const d = Math.floor(h / 24)
-  if (d === 1) return 'ayer'
-  if (d < 30) return `hace ${d} días`
-  return fechaCorta(iso)
+  return haceCuanto(iso)
 }
 
 /**

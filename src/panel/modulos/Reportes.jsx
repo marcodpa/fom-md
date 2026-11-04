@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { etiquetaUnidad } from '../datos/nombreUnidad'
+import { estadoSenal } from '../datos/sinSenal'
 import { Link, useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -91,7 +92,8 @@ function descargar(nombre, contenido) {
 
 /** Filas del CSV de cada formato: lo mismo que se ve en su tabla, con todas las filas del alcance. */
 function filasCsv(formato, m) {
-  const marcha = v => v.estadoMarcha === 'en_marcha' ? 'En marcha' : v.estadoMarcha === 'parada' ? 'Detenida' : 'Sin dato'
+  // La regla única (estadoSenal): «En marcha», «Detenida», «Sin señal · hace 2 h»…
+  const marcha = v => estadoSenal(v).texto
   if (formato === 'usuarios') return [['Persona', 'Unidad', 'Área', 'Km del período', 'Excesos', 'Frenadas', 'Aceleraciones', 'Eventos por 100 km', 'ODT reportadas', 'Índice actual', 'Papeles', 'Pide atención'],
     ...m.filasP.map(p => [p.nombre, p.unidad || '', p.area || '', csvNum(p.km), p.desglose?.excesos ?? '', p.desglose?.frenadas ?? '', p.desglose?.aceleraciones ?? '', csvNum(p.eventosPor100), p.odts ?? '', p.indice ?? '', p.papeles.texto, p.motivos.join(', ')])]
   if (formato === 'estadistico') return [['Conductor', 'Km del período', 'Aceleraciones', 'Frenadas', 'Excesos', 'Score (eventos por 100 km)', 'Resultado'],
@@ -159,7 +161,7 @@ function PestanaVehiculos({ m, csv, filtro, setFiltro }) {
       fila={f => <tr key={f.id}>
         <td><Link className="rp-fila-link" to={`/panel/flota/${f.v.id}`}><b>{etiquetaUnidad(f.v)}</b></Link><span className="s">{[f.v.marca, f.v.modelo, f.v.anio].filter(x => x && x !== '—').join(' ') || '—'}</span></td>
         <td>{f.v.conductorPrincipalId ? f.v.conductorNombre : <span className="c-bad b">Sin conductor</span>}<span className="s">{f.v.areaNombre || 'Sin área'}</span></td>
-        <td><Etiqueta tono={f.v.estadoMarcha === 'en_marcha' ? 'info' : null}>{f.v.estadoMarcha === 'en_marcha' ? 'En marcha' : f.v.estadoMarcha === 'parada' ? 'Detenida' : 'Sin dato'}</Etiqueta></td>
+        <td><Etiqueta tono={estadoSenal(f.v).marcha === 'en_marcha' ? 'info' : null}>{estadoSenal(f.v).texto}</Etiqueta></td>
         <td className={`nr b c-${tonoIndice(f.v.indiceSeguro) || 'none'}`}>{numeroValido(f.v.indiceSeguro) ? f.v.indiceSeguro : '—'}</td>
         <td className="nr">{f.eventos}</td><td className="nr">{f.odts}</td>
         <td className={`nr${f.sinResolver ? ' b c-warn' : ''}`}>{f.sinResolver}</td>

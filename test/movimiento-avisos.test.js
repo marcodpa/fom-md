@@ -4,7 +4,7 @@ import { DETENIDA_MS, marchaPorPosicion, olvidarMovimiento } from '../src/panel/
 import {
   avisosSinSenal, descartarAvisoGps, marcarAvisoGpsLeido, olvidarAvisosGps, registrarCorte,
 } from '../src/panel/datos/avisosSinSenal.js'
-import { conSenalAlDia, SIN_SENAL_MS } from '../src/panel/datos/sinSenal.js'
+import { anotarCortes, conSenalAlDia, SIN_SENAL_MS } from '../src/panel/datos/sinSenal.js'
 import { estadoUnidad } from '../src/panel/datos/estadoUnidad.js'
 import { hora as horaDe } from '../src/panel/datos/formato.js'
 
@@ -36,18 +36,27 @@ test('la velocidad y lo que dice el servidor mandan cuando están', () => {
   assert.equal(marchaPorPosicion(u({ id: 'u3', estadoMarcha: 'en_marcha' }), T0 + 10 * MIN), 'en_marcha')
 })
 
-test('conSenalAlDia pone la marcha por posición y estadoUnidad la dice; sin reporte, Sin señal', () => {
-  olvidarMovimiento()
+test('conSenalAlDia guarda la señal de la regla única; sin reporte, Sin señal', () => {
   olvidarAvisosGps()
   const ultimo = (min) => new Date(T0 + min * MIN).toISOString()
-  const leida = u({ ultimoReporte: ultimo(0), estadoMarcha: null })
-  assert.equal(estadoUnidad(conSenalAlDia(leida, T0 + MIN)).clave, 'reportando')
-  const quieta = conSenalAlDia({ ...leida, ultimoReporte: ultimo(4) }, T0 + 4 * MIN)
-  assert.equal(estadoUnidad(quieta).clave, 'parada')
-  assert.equal(estadoUnidad(quieta).texto, 'Detenido')
-  // Sin reportar más de 5 minutos: Sin señal (equipo sin corriente).
-  const callada = conSenalAlDia({ ...leida, ultimoReporte: ultimo(4) }, T0 + 4 * MIN + SIN_SENAL_MS)
-  assert.equal(estadoUnidad(callada).clave, 'sin_senal')
+  const leida = u({ ultimoReporte: ultimo(0), posicionEn: ultimo(0), estadoMarcha: null })
+  const quieta = conSenalAlDia(leida, T0 + MIN)
+  assert.equal(quieta.senal.clave, 'reportando')
+  assert.equal(estadoUnidad(quieta, T0 + MIN).clave, 'parada')
+  assert.equal(estadoUnidad(quieta, T0 + MIN).texto, 'Detenida')
+  // Sin reportar 5 minutos o más: Sin señal (equipo sin corriente).
+  const callada = conSenalAlDia(leida, T0 + SIN_SENAL_MS)
+  assert.equal(callada.senal.clave, 'sin_senal')
+  assert.equal(callada.conectado, false)
+  assert.equal(estadoUnidad(callada, T0 + SIN_SENAL_MS).clave, 'sin_senal')
+  // Pintar no anota avisos: eso va en un efecto (anotarCortes), no en conSenalAlDia.
+  assert.equal(avisosSinSenal().length, 0)
+  anotarCortes([callada, leida], T0 + SIN_SENAL_MS)
+  assert.equal(avisosSinSenal().length, 1)
+  // Una que solo manda latidos (sin ubicación) no es un corte: no avisa.
+  olvidarAvisosGps()
+  anotarCortes([u({ ultimoReporte: ultimo(0), posicionEn: ultimo(-120) })], T0 + MIN)
+  assert.equal(avisosSinSenal().length, 0)
 })
 
 test('GPS sin señal: un aviso por unidad y por corte, lo más nuevo primero', () => {

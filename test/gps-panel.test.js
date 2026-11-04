@@ -78,14 +78,26 @@ test('comandos SMS: UDP, clave de fábrica y receptor sin configurar', () => {
 test('señal: la misma regla de 5 minutos y los textos del diseño', () => {
   assert.equal(haceCuanto(hace(40), AHORA), 'hace 40 s')
   assert.equal(haceCuanto(hace(3 * 3600), AHORA), 'hace 3 h')
-  assert.equal(haceCuanto(null, AHORA), 'nunca reportó')
+  assert.equal(haceCuanto(null, AHORA), 'Nunca reportó')
+  // Instalado y sin su unidad a la vista: se dice solo si llegan mensajes del equipo.
   assert.deepEqual(senalDe({ vehiculoId: 'v', ultimaConexion: hace(40) }, AHORA), { clave: 'con', tono: 'ok', texto: 'Con señal · hace 40 s' })
   assert.deepEqual(senalDe({ vehiculoId: 'v', ultimaConexion: hace(3 * 3600) }, AHORA), { clave: 'sin', tono: 'bad', texto: 'Sin señal · hace 3 h' })
   assert.equal(senalDe({ vehiculoId: 'v', ultimaConexion: hace(299) }, AHORA).clave, 'con')
   assert.equal(senalDe({ vehiculoId: 'v', ultimaConexion: hace(300) }, AHORA).clave, 'sin')
-  assert.equal(senalDe({ vehiculoId: 'v', ultimaConexion: null }, AHORA).texto, 'Sin señal · nunca reportó')
+  assert.equal(senalDe({ vehiculoId: 'v', ultimaConexion: null }, AHORA).texto, 'Nunca reportó')
   assert.equal(senalDe({ ultimaConexion: hace(6 * 86400) }, AHORA).texto, 'Probado · hace 6 d')
-  assert.equal(senalDe({}, AHORA).texto, 'Nunca ha reportado')
+  assert.equal(senalDe({}, AHORA).texto, 'Nunca reportó')
+})
+
+test('un GPS instalado dice lo mismo que su unidad, no lo que diga su última conexión', () => {
+  // El equipo se oyó hace 40 s, pero la unidad solo manda latidos sin posición desde ayer.
+  const unidad = { ultimoReporte: hace(40), posicionEn: hace(26 * 3600) }
+  const s = senalDe({ vehiculoId: 'v', ultimaConexion: hace(40), unidad }, AHORA)
+  assert.equal(s.clave, 'con')
+  assert.equal(s.tono, 'warn')
+  assert.equal(s.texto, 'Sin ubicación · última hace 1 d')
+  // Y si la unidad lleva 10 min callada, sin señal aunque el inventario diga otra cosa.
+  assert.equal(senalDe({ vehiculoId: 'v', ultimaConexion: hace(40) }, AHORA, { ultimoReporte: hace(600), posicionEn: hace(600) }).clave, 'sin')
 })
 
 test('cifras y filtros del inventario', () => {

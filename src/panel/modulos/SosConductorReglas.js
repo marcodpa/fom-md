@@ -1,18 +1,11 @@
 // ============================================================
 // LAS REGLAS DEL SOS (T-167b), sin pantalla: se prueban solas.
-// Copia de haceCuanto (utils/date.ts), validarParte (lib/validate.ts) y
-// `duracion` de emergencia.tsx de la app.
+// Copia de validarParte (lib/validate.ts) y `duracion` de emergencia.tsx de
+// la app. El «hace 40 s» es el único de la consola (sinSenal.js).
 // ============================================================
 
-/** «hace 40 s», «hace 3 min»: cuánto lleva, que es lo que cuenta en una emergencia (haceCuanto de la app). */
-export function haceCuanto(iso, ahora = Date.now()) {
-  const seg = Math.max(0, Math.floor((ahora - new Date(iso).getTime()) / 1000))
-  if (seg < 60) return `hace ${seg} s`
-  const min = Math.floor(seg / 60)
-  if (min < 60) return `hace ${min} min`
-  const horas = Math.floor(min / 60)
-  return horas < 24 ? `hace ${horas} h` : `hace ${Math.floor(horas / 24)} d`
-}
+/** «hace 40 s», «hace 3 min»: cuánto lleva, que es lo que cuenta en una emergencia. */
+export { haceCuanto } from '../datos/sinSenal.js'
 
 /** Cuánto duró el aviso, para el recibo: bajo el minuto, en segundos. */
 export function duracionAviso(desde, hasta) {

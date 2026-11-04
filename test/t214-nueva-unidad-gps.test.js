@@ -27,7 +27,7 @@ test('solo los libres: sin unidad, y ni inactivos ni archivados', () => {
   assert.deepEqual(lista.map((g) => g.id).sort(), ['a', 'activo'])
 })
 
-test('el que nunca reportó no se esconde: sale al final, marcado «sin señal todavía»', () => {
+test('el que nunca reportó no se esconde: sale al final, marcado «nunca reportó»', () => {
   const lista = equiposParaNuevaUnidad([
     equipo('nuevo', { verificado: false, ultimaConexion: null }),
     equipo('viejo', { ultimaConexion: hace(600) }),
@@ -35,7 +35,7 @@ test('el que nunca reportó no se esconde: sale al final, marcado «sin señal t
   ], { destino: FOM, propia: FOM })
   assert.deepEqual(lista.map((g) => g.id), ['reciente', 'viejo', 'nuevo'])
   assert.equal(lista[2].sinSenal, true)
-  assert.match(lista[2].modelo, /sin señal todavía/u)
+  assert.match(lista[2].modelo, /nunca reportó/u)
   assert.equal(lista[0].sinSenal, false)
   assert.equal(lista[0].modelo, 'GPS103')
 })
@@ -117,7 +117,7 @@ test('disponibles() lee el inventario real: un Coban sin reportar sale ofrecido 
   const lista = await repoApi.gpsEscritura.disponibles()
   assert.deepEqual(lista.map((g) => g.id), ['1'])
   assert.equal(lista[0].verificado, false)
-  assert.match(lista[0].modelo, /sin señal todavía/u)
+  assert.match(lista[0].modelo, /nunca reportó/u)
 })
 
 test('disponibles() deja pasar el error de lectura: no se confunde con «no hay libres»', async (t) => {

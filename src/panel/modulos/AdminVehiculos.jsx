@@ -11,7 +11,7 @@ import { empresaPropia } from '../datos/instalarGps'
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
 import { etiqueta } from '../datos/catalogos'
-import { ordenarSinSenal, textoSinSenal, textoUltimoReporte, transmitiendo, useMinuto } from '../datos/sinSenal'
+import { esCallada, estadoSenal, ordenarSinSenal, textoUltimoReporte, useMinuto } from '../datos/sinSenal'
 import './mantenimiento.css'
 import './admin-vehiculos.css'
 
@@ -27,12 +27,12 @@ import './admin-vehiculos.css'
 
 const SENALES = [
   { v: 'todas', t: 'Todas' },
-  { v: 'reportando', t: 'Reportando' },
+  { v: 'reportando', t: 'Con señal' },
   { v: 'sin_senal', t: 'Sin señal' },
 ]
 const POR_PAGINA = 60
-// Con señal = reportó hace menos de 5 min, la misma regla de la app y del resto del panel.
-const reportando = (v, ahora) => transmitiendo(v.ultimoReporte, ahora)
+// Con señal = la regla única (estadoSenal): reportando o sin ubicación; el resto, callada.
+const reportando = (v, ahora) => !esCallada(estadoSenal(v, ahora))
 
 export default function AdminVehiculos() {
   const navegar = useNavigate()
@@ -155,7 +155,7 @@ export default function AdminVehiculos() {
                     <td>{v.empresaNombre}</td>
                     <td>{[v.marca, v.modelo, v.anio].filter(Boolean).join(' ') || '—'}<small className="av-sub">{etiqueta('vehiculo_tipo', v.tipo)}</small></td>
                     <td>{v.conductorNombre || <span className="av-tenue">{v.conductorFallo ? 'No se pudo leer' : 'Sin conductor'}</span>}</td>
-                    <td>{reportando(v, ahora) ? <Tag color="verde">{f.desde(v.ultimoReporte)}</Tag> : <Tag color="gris">{textoSinSenal(v.ultimoReporte, ahora)}</Tag>}</td>
+                    <td><Tag color={estadoSenal(v, ahora).color}>{estadoSenal(v, ahora).texto}</Tag></td>
                     <td className="num">{v.km != null ? `${f.numero(Math.round(v.km))} km` : '—'}</td>
                     <td className="num">
                       <button type="button" className="pnl-btn sutil" onClick={(e) => { e.stopPropagation(); setSeleccion(v) }}>Ver ficha</button>
@@ -180,8 +180,8 @@ export default function AdminVehiculos() {
               <div>
                 <b>{seleccion.alias}</b>
                 <span>{seleccion.empresaNombre}</span>
-                {reportando(seleccion, ahora) ? <Tag color="verde">Reportando · {f.desde(seleccion.ultimoReporte)}</Tag> : <Tag color="gris">{textoSinSenal(seleccion.ultimoReporte, ahora)}</Tag>}
-                {!reportando(seleccion, ahora) && textoUltimoReporte(seleccion.ultimoReporte) && <small className="av-ultimo">{textoUltimoReporte(seleccion.ultimoReporte)}</small>}
+                <Tag color={estadoSenal(seleccion, ahora).color}>{estadoSenal(seleccion, ahora).texto}</Tag>
+                {estadoSenal(seleccion, ahora).clave === 'sin_senal' && <small className="av-ultimo">{textoUltimoReporte(seleccion.ultimoReporte)}</small>}
               </div>
             </div>
             <Datos items={[
@@ -194,7 +194,8 @@ export default function AdminVehiculos() {
               { etiqueta: 'Área', valor: seleccion.areaNombre || 'Sin área' },
               { etiqueta: 'Conductor principal', valor: seleccion.conductorNombre || (seleccion.conductorFallo ? 'No se pudo leer' : 'Sin conductor') },
               { etiqueta: 'Kilometraje', valor: seleccion.km != null ? `${f.numero(Math.round(seleccion.km))} km` : '—' },
-              { etiqueta: 'Velocidad', valor: seleccion.velocidadKmh != null ? f.velocidad(seleccion.velocidadKmh) : '—' },
+              // Velocidad solo con señal al día: la de una unidad callada es vieja.
+              { etiqueta: 'Velocidad', valor: estadoSenal(seleccion, ahora).velocidadKmh != null ? f.velocidad(estadoSenal(seleccion, ahora).velocidadKmh) : '—' },
               { etiqueta: 'Último reporte', valor: seleccion.ultimoReporte ? f.fechaHora(seleccion.ultimoReporte) : 'Nunca' },
               { etiqueta: 'Posición', valor: seleccion.lat != null ? `${seleccion.lat.toFixed(5)}, ${seleccion.lng.toFixed(5)}` : '—' },
             ]} />

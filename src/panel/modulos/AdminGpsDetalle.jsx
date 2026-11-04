@@ -42,6 +42,13 @@ export default function AdminGpsDetalle() {
   const posiciones = useDatos(() => repo.admin.gps.posiciones(id, { limite: 50 }).catch(() => []), [id], 30_000)
   const ultimaPos = useDatos(() => repo.admin.gps.ultimaPosicion(id).catch(() => null), [id], 30_000)
   const capacidades = useDatos(() => repo.admin.gps.capacidades(id).catch(() => null), [id])
+  // La unidad donde va montado: su señal es la que se muestra (senalDe). Si no está a la vista, la del equipo.
+  const vehiculoId = equipo.datos?.vehiculoId ?? null
+  const unidad = useDatos(
+    () => (vehiculoId ? repo.vehiculos.listar({}).then((l) => l.find((v) => v.id === vehiculoId) ?? null).catch(() => null) : Promise.resolve(null)),
+    [vehiculoId],
+    30_000,
+  )
 
   const g = equipo.datos
   if (equipo.estado !== 'ok' || !g) {
@@ -88,7 +95,7 @@ export default function AdminGpsDetalle() {
 
       <div role="tabpanel" id={`gp-panel-${pestana}`} aria-labelledby={`gp-tab-${pestana}`} className="gp-pila">
         {pestana === 'diagnostico' && (
-          <Diagnostico g={g} tele={tele} posiciones={posiciones.datos ?? []} ultimaPos={ultimaPos.datos} capacidades={capacidades.datos} ahora={ahora} />
+          <Diagnostico g={g} unidad={unidad.datos} tele={tele} posiciones={posiciones.datos ?? []} ultimaPos={ultimaPos.datos} capacidades={capacidades.datos} ahora={ahora} />
         )}
         {pestana === 'datos' && (
           <DatosEditables g={g} alGuardar={async () => { setAviso('Datos del equipo guardados.'); await equipo.recargar(); setPestana('diagnostico') }} />
@@ -113,8 +120,8 @@ function cuandoFue(iso, ahora) {
   return `el ${f.fechaCorta(iso)} a las ${f.hora(iso)}`
 }
 
-function Diagnostico({ g, tele, posiciones, ultimaPos, capacidades, ahora }) {
-  const senal = senalDe(g, ahora)
+function Diagnostico({ g, unidad, tele, posiciones, ultimaPos, capacidades, ahora }) {
+  const senal = senalDe(g, ahora, unidad)
   const meitrack = esEquipoMeitrack(g)
   const puerto = puertoDelEquipo(g)
   const est = estadoEquipo(g.estado)

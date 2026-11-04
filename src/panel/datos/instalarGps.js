@@ -64,7 +64,7 @@ export function mensajeInstalarGps(error, { otraEmpresa = false, nombrePropia = 
  *
  * «Verificado» con datos reales = el receptor ya lo oyó alguna vez (`verificado`). El servidor
  * deja instalar cualquier equipo del inventario, así que el que nunca reportó NO se esconde:
- * sale al final con `sinSenal: true` y «(sin señal todavía)» en el nombre. Primero van los que
+ * sale al final con `sinSenal: true` y «(nunca reportó)» en el nombre. Primero van los que
  * hablaron más recientemente.
  *
  * `global` (T-215): con el inventario global del servidor (#749) el administrador FOM crea la
@@ -80,7 +80,7 @@ export function equiposParaNuevaUnidad(equipos, { destino = null, propia = null,
     .filter((g) => !meta || (g.empresaId ?? propia ?? meta) === meta)
     .map((g) => {
       const sinSenal = !g.verificado
-      return { ...g, sinSenal, modelo: sinSenal ? `${g.modelo || 'GPS'} (sin señal todavía)` : g.modelo }
+      return { ...g, sinSenal, modelo: sinSenal ? `${g.modelo || 'GPS'} (nunca reportó)` : g.modelo }
     })
     .sort((a, b) => Number(a.sinSenal) - Number(b.sinSenal) || ms(b) - ms(a))
 }

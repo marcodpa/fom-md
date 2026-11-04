@@ -11,7 +11,7 @@ import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
 import { color, etiqueta } from '../datos/catalogos'
 import { estaSinResolver } from '../datos/odtGrupos'
-import { conSenalAlDia, tiempoSinSenal, transmitiendo, useMinuto } from '../datos/sinSenal'
+import { conSenalAlDia, estadoSenal, useMinuto } from '../datos/sinSenal'
 import { Icono } from '../Iconos'
 import FichaUnidad from '../comp/FichaUnidad'
 import ManejoConductor from '../comp/ManejoConductor'
@@ -78,23 +78,23 @@ function kmDeHoy(recorrido, hoy) {
 export function conPosicionFresca(unidad, punto) {
   if (!unidad || !punto) return unidad
   const conPunto = { ...unidad, lat: punto.lat, lng: punto.lng }
-  // Solo si el punto es más nuevo que lo que ya decía la ficha: un punto viejo
-  // no debe pisar una señal más reciente.
-  const nuevo = !unidad.ultimoReporte || Date.parse(punto.hora) > Date.parse(unidad.ultimoReporte)
+  // Solo si el punto LLEGÓ después de la última posición que ya decía la ficha (hora de
+  // recepción, como `lastPositionAt`): un punto viejo no debe pisar algo más reciente.
+  const llego = punto.recibido ?? punto.hora
+  const nuevo = !unidad.posicionEn || Date.parse(llego) > Date.parse(unidad.posicionEn)
   if (!nuevo) return conPunto
-  const v = punto.velocidadKmh ?? null
+  const masNueva = !unidad.ultimoReporte || Date.parse(llego) > Date.parse(unidad.ultimoReporte)
   return {
     ...conPunto,
-    ultimoReporte: punto.hora,
-    posicionEn: punto.hora,
-    velocidadKmh: v,
+    // Un latido posterior al punto no se pisa: el último mensaje es el más nuevo de los dos.
+    ultimoReporte: masNueva ? llego : unidad.ultimoReporte,
+    posicionEn: llego,
+    velocidadKmh: punto.velocidadKmh ?? null,
     rumbo: punto.rumbo ?? unidad.rumbo ?? null,
     ignition: 'ignition' in punto ? punto.ignition : unidad.ignition,
-    // Igual que la base: la marcha se deduce de la velocidad; sin velocidad no se afirma.
-    estadoMarcha: v == null ? null : v > 0 ? 'en_marcha' : 'parada',
-    // Un punto más nuevo no basta: con señal solo si llegó hace menos de 5 min (regla de la app).
-    conectado: transmitiendo(punto.hora),
-    conexion: transmitiendo(punto.hora) ? 'reportando' : 'sin_senal',
+    // La marcha que dijo el servidor era de una lectura anterior: ahora manda la velocidad del
+    // punto. Si hay señal y cuál es la marcha lo decide estadoSenal (sinSenal.js).
+    estadoMarcha: null,
   }
 }
 
@@ -175,7 +175,9 @@ export default function MiUnidad() {
   const abiertas = masNuevoPrimero(unidad?.odts, 'creadaEn').filter(estaSinResolver)
   const hoy = f.hoyISO()
   const inspeccionHoy = (unidad?.inspecciones ?? []).find((i) => String(i.fecha ?? '').slice(0, 10) === hoy)
-  const reportando = unidad?.conexion === 'reportando'
+  // La regla única de la señal (estadoSenal): la misma que el mapa y la flota.
+  const senal = unidad ? estadoSenal(unidad, ahora) : null
+  const reportando = senal?.clave === 'reportando'
   const kmHoy = useMemo(() => kmDeHoy(unidad?.recorrido, hoy), [unidad?.recorrido, hoy])
   const posicion = enMapa[0] ? `${enMapa[0].lat.toFixed(4)}, ${enMapa[0].lng.toFixed(4)}` : null
 
@@ -242,13 +244,11 @@ export default function MiUnidad() {
             </div>
             <div className={`mu-estado${reportando ? ' ok' : ' aviso'}`} role="status">
               <span className="mu-estado-punto" aria-hidden="true" />
-              {reportando ? 'Reportando' : 'Sin señal'}
-              <span className="mu-estado-sep" aria-hidden="true">·</span>
-              <span className="mu-estado-nota">
-                {reportando
-                  ? `última señal ${f.desde(unidad.ultimoReporte)}`
-                  : tiempoSinSenal(unidad.ultimoReporte, ahora)}
-              </span>
+              {senal.etiqueta}
+              {senal.ultimoReporte && <>
+                <span className="mu-estado-sep" aria-hidden="true">·</span>
+                <span className="mu-estado-nota">{`última señal ${senal.hace}`}</span>
+              </>}
             </div>
           </section>
 
@@ -276,11 +276,8 @@ export default function MiUnidad() {
               </div>
             )}
             <div className="pnl-cifras" aria-label="Cifras de la unidad">
-              <Cifra etiqueta="Estado" valor={reportando ? 'Reportando' : 'Sin señal'} tono={reportando ? 'ok' : 'aviso'} />
-              <Cifra
-                etiqueta="Última señal"
-                valor={reportando ? (unidad.ultimoReporte ? f.desde(unidad.ultimoReporte) : '—') : tiempoSinSenal(unidad.ultimoReporte, ahora)}
-              />
+              <Cifra etiqueta="Estado" valor={senal.etiqueta} tono={reportando ? 'ok' : 'aviso'} />
+              <Cifra etiqueta="Última señal" valor={senal.hace} />
               <Cifra etiqueta="Recorrido hoy" valor={kmHoy != null ? `${kmHoy.toFixed(kmHoy < 10 ? 1 : 0).replace('.', ',')} km` : '—'} />
               <Cifra etiqueta="Posición" valor={posicion ?? '—'} />
             </div>

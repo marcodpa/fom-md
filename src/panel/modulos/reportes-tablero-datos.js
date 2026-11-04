@@ -4,6 +4,7 @@
  * tal cual y dibuja lo mismo. Nada se pide al servidor y nada se inventa: si
  * un dato no llega, el gráfico sale vacío con su frase.
  */
+import { estadoSenal } from '../datos/sinSenal.js'
 import { CATEGORIAS, cifrasDe, dineroVE, diasDeVentana, esProducto, grupoOdt, numeroValido, numeroVE, porScore, papelesPersona, tonoIndice, tonoScore, BANDAS_INDICE, UMBRALES_SCORE } from './reportes-datos.js'
 
 const DIA = 86400000
@@ -59,14 +60,12 @@ const grafico = g => ({ ahora: false, total: g.partes.reduce((s, p) => s + (nume
 const parte = (clave, etiqueta, valor, tono, texto) => ({ clave, etiqueta, valor, tono, texto: texto ?? numeroVE(valor) })
 
 /**
- * Estado de una unidad para «Unidades ahora». La falta de señal manda (misma
- * regla que estadoUnidad.js: `conectado === false`); después, la marcha.
+ * Estado de una unidad para «Unidades ahora», con la regla única (estadoSenal): la marcha solo
+ * si reporta al día; si no, sin ubicación o sin señal (las que nunca reportaron, con estas).
  */
-export function marchaAhora(v) {
-  if (v.conectado === false) return 'sin_senal'
-  if (v.estadoMarcha === 'en_marcha') return 'en_marcha'
-  if (v.estadoMarcha === 'parada') return 'parada'
-  return 'sin_dato'
+export function marchaAhora(v, ahora = Date.now()) {
+  const s = estadoSenal(v, ahora)
+  return s.marcha ?? (s.clave === 'sin_ubicacion' ? 'sin_ubicacion' : 'sin_senal')
 }
 
 /** Índice seguro por rangos, de la misma tabla de bandas que el semáforo (85 / 70). Sin índice no entra en ninguno. */
@@ -142,9 +141,9 @@ export function graficosDe(formato, m, nombre) {
       }),
     ]
   }
-  const unidades = alcance.unidades.map(marchaAhora)
+  const unidades = alcance.unidades.map((v) => marchaAhora(v))
   const estado = e => unidades.filter(x => x === e).length
-  const sinDato = estado('sin_dato')
+  const sinUbicacion = estado('sin_ubicacion')
   const otrasOdt = act.odts.length - act.abiertas - act.revision - act.resueltas
   return [
     grafico({
@@ -155,7 +154,7 @@ export function graficosDe(formato, m, nombre) {
     }),
     grafico({
       clave: 'unidades', titulo: 'Unidades ahora', tipo: 'apilada', ahora: true,
-      partes: [parte('en_marcha', 'En marcha', estado('en_marcha'), 'ok'), parte('parada', 'Detenidas', estado('parada'), 'warn'), parte('sin_senal', 'Sin señal', estado('sin_senal'), 'gris'), ...(sinDato ? [parte('sin_dato', 'Sin dato', sinDato, 'vacio')] : [])],
+      partes: [parte('en_marcha', 'En marcha', estado('en_marcha'), 'ok'), parte('parada', 'Detenidas', estado('parada'), 'azul'), ...(sinUbicacion ? [parte('sin_ubicacion', 'Sin ubicación', sinUbicacion, 'warn')] : []), parte('sin_senal', 'Sin señal', estado('sin_senal'), 'gris')],
       vacio: unidades.length ? null : 'No hay unidades en este alcance.',
       pie: plural(unidades.length, 'unidad', 'unidades'),
     }),

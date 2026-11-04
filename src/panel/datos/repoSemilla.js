@@ -22,6 +22,7 @@ import { hoyISO } from './formato'
 import { contarOdt } from './odtGrupos'
 import { contarSinLeer, estaLeida } from '../modulos/alertas-presentacion'
 import { unidadesSinDiariaHoy } from './inspeccionesHoy'
+import { SIN_SENAL_MS, estadoSenal } from './sinSenal'
 import { DIAS_SEMANA, diasParaEnviar, normalizarDias, tocaTodosLosDias } from './diasPlanilla'
 import { comoEventoManejo } from './eventosManejo'
 import { calificacionManejo } from './manejo'
@@ -47,8 +48,6 @@ const CLAVE_CAMBIOS = SEMILLA.claveCambios ?? 'fom.panel.cambios'
 // La flota de siempre (no la de estrés, que ya mueve sus horas con el reloj).
 const ES_BASE = SEMILLA === semillaBase
 const DIA_MS = 86_400_000
-// Cinco minutos sin reportar = «Sin señal»: la misma regla de sinSenal.js (SIN_SENAL_MS).
-const SIN_SENAL_DEMO_MS = 5 * 60_000
 
 /**
  * La última señal de una unidad de la semilla, corrida con el reloj: la semilla fija sus horas al
@@ -58,12 +57,17 @@ const SIN_SENAL_DEMO_MS = 5 * 60_000
 function reporteAlDia(v, ahora = Date.now()) {
   const t = Date.parse(v.ultimoReporte)
   if (!ES_BASE || !Number.isFinite(t)) return v
-  return { ...v, ultimoReporte: new Date(t + (ahora - semillaBase.AHORA_SEMILLA)).toISOString() }
+  const corrida = (iso) => (Number.isFinite(Date.parse(iso)) ? new Date(Date.parse(iso) + (ahora - semillaBase.AHORA_SEMILLA)).toISOString() : iso)
+  return { ...v, ultimoReporte: corrida(v.ultimoReporte), posicionEn: corrida(v.posicionEn) }
 }
-/** `conexion` como la trae el servidor: Mi unidad decide «Reportando» o «Sin señal» con ella. */
-function conConexion(v, ahora = Date.now()) {
-  const t = Date.parse(v.ultimoReporte)
-  return { ...v, conexion: Number.isFinite(t) && ahora - t < SIN_SENAL_DEMO_MS ? 'reportando' : 'sin_senal' }
+/**
+ * `posicionEn` como la trae el servidor (`lastPositionAt`): la semilla no la guarda, y una unidad
+ * con coordenadas las dio en su último reporte. Sin ella, `estadoSenal` diría «Sin ubicación».
+ */
+function conPosicionEn(v) {
+  if (v.posicionEn !== undefined) return v
+  const conPunto = Number.isFinite(v.lat) && Number.isFinite(v.lng)
+  return { ...v, posicionEn: conPunto ? v.ultimoReporte ?? null : null }
 }
 
 /**
@@ -235,8 +239,8 @@ const responder = (valor, ms = 120) =>
 function todosVehiculos() {
   const ahora = Date.now()
   const lista = [...VEHICULOS.map((v) => reporteAlDia(v, ahora)), ...agregados('vehiculos')].map((v) => aplicar('vehiculos', v))
-  // La de estrés se deja tal cual: sus unidades en marcha leen la hora en cada acceso.
-  return conGpsAlDia(ES_BASE ? lista.map((v) => conConexion(v, ahora)) : lista)
+  // La de estrés no se corre: sus unidades en marcha leen la hora en cada acceso.
+  return conGpsAlDia(lista.map(conPosicionEn))
 }
 function todosPerfiles() {
   // Los eliminados definitivamente no existen para nadie.
@@ -456,7 +460,8 @@ function conGpsAlDia(vehiculos) {
   const porUnidad = new Map(inventarioGps().filter((g) => g.vehiculoId).map((g) => [g.vehiculoId, g]))
   return vehiculos.map((v) => {
     const g = porUnidad.get(v.id) ?? null
-    if (!g) return v.gps ? { ...v, gps: null } : v
+    // Sin equipo no hay señal que contar: «Sin GPS» (estadoSenal), aunque la semilla traiga horas.
+    if (!g) return { ...v, gps: null, sinGps: true, ultimoReporte: null, posicionEn: null }
     return { ...v, gps: { ...(v.gps ?? {}), ...g } }
   })
 }
@@ -476,7 +481,7 @@ function ultimaSenalDemo(g, ahora = Date.now()) {
 function alDiaDemo(g, ahora = Date.now()) {
   const t = ultimaSenalDemo(g, ahora)
   if (!t) return g
-  return { ...g, ultimaConexion: new Date(t).toISOString(), conectado: ahora - t < 5 * MIN, verificado: true }
+  return { ...g, ultimaConexion: new Date(t).toISOString(), conectado: ahora - t < SIN_SENAL_MS, verificado: true }
 }
 /** Huella de ejemplo, estable por trama (FNV-1a encadenado). No es SHA-256: es demostración. */
 function huellaDemo(texto) {
@@ -506,7 +511,7 @@ function tramasDemo(g, ahora = Date.now(), limite = 50) {
       via: String(g.transport || 'tcp').toUpperCase(),
       bytes: latido ? 64 : 212,
       diagnostico: `${g.protocolo || 'coban-gps103'} · ${latido ? 'heartbeat' : 'position_valid'}`,
-      fresco: ahora - t < 5 * MIN,
+      fresco: ahora - t < SIN_SENAL_MS,
       imeiCoincide: true,
       huella: huellaDemo(`${g.imei}-${t}`),
     })
@@ -599,7 +604,10 @@ export const repo = {
     const insp = todasInspecciones()
     const hoy = hoyISO()
 
-    const enMarcha = veh.filter((v) => v.estadoMarcha === 'en_marcha').length
+    // La regla única (estadoSenal): la marcha solo de las que reportan; las sin señal no cuentan ni como detenidas.
+    const ahora = Date.now()
+    const marchaDe = (v) => estadoSenal(v, ahora).marcha
+    const enMarcha = veh.filter((v) => marchaDe(v) === 'en_marcha').length
     const inspHoy = insp.filter((i) => i.fecha === hoy)
     const bloqueadas = inspHoy.filter((i) => i.resultado === 'bloqueada')
     const docsVencidos = docs.filter((d) => estadoDocumento(d.venceEn) === 'vencido').length
@@ -622,7 +630,7 @@ export const repo = {
     return responder({
       totalVehiculos: veh.length,
       enMarcha,
-      detenidos: veh.length - enMarcha,
+      detenidos: veh.filter((v) => marchaDe(v) === 'parada').length,
       conductores: perfiles.filter((p) => p.conduce).length,
       odtAbiertas: abiertas,
       odtEnRevision: enRevision,
@@ -640,7 +648,7 @@ export const repo = {
       porArea: AREAS.map((a) => ({
         ...a,
         total: veh.filter((v) => v.areaId === a.id).length,
-        enMarcha: veh.filter((v) => v.areaId === a.id && v.estadoMarcha === 'en_marcha').length,
+        enMarcha: veh.filter((v) => v.areaId === a.id && marchaDe(v) === 'en_marcha').length,
       })).filter((a) => a.total > 0),
     })
   },
@@ -657,7 +665,7 @@ export const repo = {
       const docs = todosDocumentos()
       let lista = todosVehiculos().map((v) => enriquecerVehiculo(v, perfiles, docs))
       if (areaId) lista = lista.filter((v) => v.areaId === areaId)
-      if (estado) lista = lista.filter((v) => v.estadoMarcha === estado)
+      if (estado) lista = lista.filter((v) => estadoSenal(v).marcha === estado)
       if (q) {
         const t = q.toLowerCase()
         lista = lista.filter((v) =>
@@ -1460,7 +1468,7 @@ export const repo = {
         const sesionId = `ses-${id}-${ahora.toString(36)}`
         const ultima = ultimaSenalDemo(g, ahora)
         // Si está callado, la demostración «lo enciende»: la primera trama llega a los pocos segundos.
-        const callado = !ultima || ahora - ultima >= 5 * MIN
+        const callado = !ultima || ahora - ultima >= SIN_SENAL_MS
         guardarParche('gps', id, { sesionPrueba: sesionId, ...(callado ? { pruebaDesde: new Date(ahora).toISOString() } : {}) })
         return responder({ sesionId, existente: false }, 300)
       },

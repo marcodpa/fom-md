@@ -20,7 +20,7 @@ import { clasificarVencimiento, diasDeCalendario } from './vencimientos'
 import { unidadesSinDiariaHoy } from './inspeccionesHoy'
 import { AVISO_SIN_DIAS_EN_SERVIDOR, diasParaEnviar, normalizarDias } from './diasPlanilla'
 import { quitarSaltos } from './recorrido'
-import { transmitiendo } from './sinSenal.js'
+import { estadoSenal } from './sinSenal.js'
 import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
 import { cuerpoCredencial, credencialesVigentes } from './credencialesPersona'
 import { cambiosGps } from './metadatosGps'
@@ -82,12 +82,11 @@ function comoUnidad(v) {
 
     lat: v.latitude ?? null,
     lng: v.longitude ?? null,
+    // Las dos fechas de la señal: último mensaje (también latidos sin ubicación) y última
+    // posición válida. La señal NO se decide aquí: la decide `estadoSenal` (sinSenal.js) en
+    // cada pantalla, a la hora de ahora.
     ultimoReporte: v.lastReportAt ?? null,
     posicionEn: v.lastPositionAt ?? null,
-    // Con señal = reportó hace menos de 5 min, la regla de la app (no «alguna vez reportó»).
-    // Las pantallas la recalculan cada minuto con `conSenalAlDia`.
-    conectado: transmitiendo(v.lastReportAt),
-    conexion: transmitiendo(v.lastReportAt) ? 'reportando' : 'sin_senal',
 
     // Sin respaldo todavía en la superficie de lectura.
     conductorPrincipalId: null,
@@ -257,22 +256,19 @@ async function conPosicionDirecta(lista) {
     if (!posiciones[i]) sinPosicionHasta.set(v.id, ahora + SIN_POSICION_MS)
     else sinPosicionHasta.delete(v.id)
   })
+  // Lo más nuevo de las dos fechas: un latido posterior a la posición no se pisa con ella.
+  const masNueva = (a, b) => (!a ? b ?? null : !b ? a : Date.parse(a) >= Date.parse(b) ? a : b)
   return lista.map((v) => {
     const p = porId.get(v.id)
     if (!p) return v
+    // Solo completa la posición que faltaba (la velocidad y el rumbo de una lectura vieja no se
+    // mezclan con los del estado vivo); la hora es la de RECEPCIÓN, como `lastPositionAt`.
     return {
       ...v,
       lat: p.latitude ?? v.lat,
       lng: p.longitude ?? v.lng,
-      // La fecha que ya traia el listado es la buena si la posicion no trae
-      // una suya: no se pisa un dato cierto con un nulo.
-      ultimoReporte: p.receivedAt ?? v.ultimoReporte ?? null,
-      posicionEn: p.receivedAt ?? v.posicionEn ?? null,
-      rumbo: p.telemetry?.headingDeg ?? null,
-      velocidadKmh: p.telemetry?.speedKph ?? null,
-      conectado: transmitiendo(p.receivedAt ?? v.ultimoReporte),
-      conexion:
-        transmitiendo(p.receivedAt ?? v.ultimoReporte) ? 'reportando' : 'sin_senal',
+      ultimoReporte: masNueva(v.ultimoReporte, p.receivedAt),
+      posicionEn: masNueva(v.posicionEn, p.receivedAt),
     }
   })
 }
@@ -494,6 +490,9 @@ function puntosDe(filas) {
       rumbo: p.telemetry?.headingDeg ?? null,
       ignition: p.telemetry?.ignition ?? null,
       hora: p.eventTime || p.receivedAt,
+      // Para decidir si la unidad sigue al día se mira cuándo LLEGÓ (como `lastPositionAt`), no la
+      // hora del equipo: un punto guardado en el GPS y mandado tarde no es una señal de ahora.
+      recibido: p.receivedAt || p.eventTime,
     }))
     .reverse())
 }
@@ -881,6 +880,7 @@ export const repoApi = {
           velocidadKmh: p.telemetry?.speedKph ?? null,
           rumbo: p.telemetry?.headingDeg ?? null,
           hora: p.eventTime || p.receivedAt,
+          recibido: p.receivedAt || p.eventTime,
         }))
         .reverse()
         .reduce(sinDeriva, [])
@@ -1226,7 +1226,7 @@ export const repoApi = {
     /**
      * Equipos que «Nueva unidad» puede instalar (T-214): libres y de la empresa donde se crea la
      * unidad (la que el administrador «entró», o la propia). Los que nunca reportaron salen al
-     * final marcados «sin señal todavía». Si la lectura falla, el error se propaga: no es lo
+     * final marcados «nunca reportó». Si la lectura falla, el error se propaga: no es lo
      * mismo que «no hay equipos libres».
      */
     // `global` (T-215): para crear la unidad en cualquier empresa sin entrar a ella; los libres del
@@ -1945,21 +1945,18 @@ export const repoApi = {
       // Si los contadores fallan, el panel muestra el resto igual.
       api.resumenOperacion(),
     ])
-    const reportando = lista.filter((v) => v.conectado).length
-    const sabeMarcha = lista.some((v) => v.estadoMarcha != null)
+    // La regla única (estadoSenal): con señal = reportando o sin ubicación; la marcha solo
+    // de las que reportan, así que una unidad sin señal nunca cuenta como en marcha ni detenida.
+    const ahora = Date.now()
+    const senales = lista.map((v) => estadoSenal(v, ahora))
+    const reportando = senales.filter((s) => s.clave === 'reportando' || s.clave === 'sin_ubicacion').length
     return {
       totalVehiculos: lista.length,
       reportando,
       sinSenal: lista.length - reportando,
       conPosicion: lista.filter((v) => v.lat != null).length,
-      // `null` mientras la velocidad no se guarde: contar cero en marcha sería
-      // afirmar que la flota está parada, y lo cierto es que no se sabe.
-      enMarcha: sabeMarcha
-        ? lista.filter((v) => v.estadoMarcha === 'en_marcha').length
-        : null,
-      detenidos: sabeMarcha
-        ? lista.filter((v) => v.estadoMarcha === 'parada').length
-        : null,
+      enMarcha: senales.filter((s) => s.marcha === 'en_marcha').length,
+      detenidos: senales.filter((s) => s.marcha === 'parada').length,
       conductores: null,
       sinConductor: lista.filter((v) => v.conductorNombre === 'Sin asignar').length,
       porArea: areas.map((a) => ({ area: a.nombre, total: a.vehiculos })),

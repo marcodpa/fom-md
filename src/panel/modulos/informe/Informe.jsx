@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom'
 import { nombreUnidad } from '../../datos/nombreUnidad'
+import { estadoSenal } from '../../datos/sinSenal'
 import {
   CATEGORIAS, ETIQUETA_GRUPO, comparar, dineroVE, duracionHoras, esProducto, fechaCortaVE, fechaHoraVE,
   etiquetaFalla, formatoPorId, tonoBanda, grupoOdt, kmVE, numeroValido, numeroVE, porScore, porcentajeVE, resultadoDe, textoCmp, tonoIndice, tonoScore,
@@ -229,7 +230,7 @@ function Vehiculos({ doc, n, s }) {
         <tbody>
           {filasU.map(f => <tr key={f.id}>
             <td className="b w">{nombreUnidad(f.v)}</td><td>{f.v.placa || '—'}</td>
-            <td><i className={`inf-dot ${f.v.estadoMarcha === 'en_marcha' ? 'm' : f.v.estadoMarcha === 'parada' ? 'd' : 'x'}`} />{f.v.estadoMarcha === 'en_marcha' ? 'En marcha' : f.v.estadoMarcha === 'parada' ? 'Detenida' : 'Sin dato'}</td>
+            <td><i className={`inf-dot ${estadoSenal(f.v).marcha === 'en_marcha' ? 'm' : estadoSenal(f.v).marcha === 'parada' ? 'd' : 'x'}`} />{estadoSenal(f.v).texto}</td>
             <td className="w">{f.v.conductorPrincipalId ? f.v.conductorNombre : <span className="inf-si">Sin conductor</span>}</td>
             <td className="r">{n0(f.v.indiceSeguro)}<Mk tono={tonoIndice(f.v.indiceSeguro)} /></td>
             <td className="r">{f.eventos}</td><td className="r">{f.odts}</td>

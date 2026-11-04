@@ -116,7 +116,7 @@ test('modelo: ODT y eventos por ventana, vista actual sin comparar y frase con e
   const p = crearPeriodo({}, ahora)
   const d = {
     vehiculos: [
-      { id: 'v1', alias: 'Unidad 01', areaId: 'a1', estadoMarcha: 'en_marcha', indiceSeguro: 90, conductorPrincipalId: 'p1', docsVencidos: 0, docsPorVencer: 0 },
+      { id: 'v1', alias: 'Unidad 01', areaId: 'a1', ultimoReporte: new Date().toISOString(), posicionEn: new Date().toISOString(), estadoMarcha: 'en_marcha', indiceSeguro: 90, conductorPrincipalId: 'p1', docsVencidos: 0, docsPorVencer: 0 },
       { id: 'v2', alias: 'Unidad 02', areaId: 'a2', estadoMarcha: null, indiceSeguro: 60, conductorPrincipalId: null, docsVencidos: 1, docsPorVencer: 0 },
     ],
     conductores: [{ id: 'p1', nombre: 'Pedro', unidad: 'v1', licenciaEstado: 'vigente' }],

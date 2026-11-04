@@ -34,12 +34,13 @@ export const ETIQUETA = {
     en_marcha: 'En marcha',
     parada: 'Detenida',
   },
-  // Estado de CONEXIÓN del equipo, que no es lo mismo que el de marcha. La
-  // base guarda cuándo reportó por última vez, pero no la velocidad, así que
-  // de una unidad que reporta no se sabe si va rodando o está estacionada.
+  // Estado de la SEÑAL del equipo (estadoSenal de sinSenal.js), que no es lo
+  // mismo que el de marcha: con señal al día se muestra la marcha, no esto.
   conexion: {
-    reportando: 'Reportando',
+    reportando: 'Con señal',
+    sin_ubicacion: 'Sin ubicación',
     sin_senal: 'Sin señal',
+    sin_gps: 'Nunca reportó',
   },
   area_tipo: {
     ubicacion: 'Ubicación',
@@ -94,8 +95,8 @@ export const ETIQUETA = {
 
 /** Color del tag según el estado. Devuelve la clase de .pnl-tag */
 export const COLOR = {
-  marcha_estado: { en_marcha: 'verde', parada: 'gris' },
-  conexion: { reportando: 'verde', sin_senal: 'gris' },
+  marcha_estado: { en_marcha: 'verde', parada: 'verde' },
+  conexion: { reportando: 'verde', sin_ubicacion: 'ambar', sin_senal: 'gris', sin_gps: 'gris' },
   odt_prioridad: { baja: 'gris', media: 'azul', alta: 'rojo' },
   inspeccion_resultado: {
     pendiente: 'gris',

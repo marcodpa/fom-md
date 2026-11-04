@@ -1,6 +1,5 @@
 import { estadoUnidad } from '../datos/estadoUnidad.js'
 import { nombreUnidad } from '../datos/nombreUnidad.js'
-import { tiempoSinSenal } from '../datos/sinSenal.js'
 
 export const MARKER_SIZE = [174, 76]
 export const MARKER_ANCHOR = [26, 40]
@@ -9,11 +8,12 @@ export const escapeXml = value => String(value ?? '').replace(/[&<>"']/g, c => (
 
 /** SVG shared by Leaflet, Google Maps and the schematic fallback. No HTML from API. */
 export function vehicleMarkerSvg(vehicle, selected = false, ahora = Date.now()) {
-  const status = estadoUnidad(vehicle)
-  // Sin señal, el tiempo va en una segunda línea chica debajo (como en la app): el cartel
-  // no se ensancha, las tres líneas se aprietan dentro del mismo alto.
-  const callada = status.clave === 'sin_senal'
-  const tiempo = callada ? escapeXml(tiempoSinSenal(vehicle?.ultimoReporte, ahora)) : ''
+  const status = estadoUnidad(vehicle, ahora)
+  // Sin señal o sin ubicación, el tiempo va en una segunda línea chica debajo (como en la app):
+  // el cartel no se ensancha, las tres líneas se aprietan dentro del mismo alto.
+  const callada = status.clave === 'sin_senal' || status.clave === 'sin_ubicacion'
+  const tiempo = !callada ? ''
+    : escapeXml(status.clave === 'sin_senal' ? status.senal.hace : status.senal.texto.split(' · ')[1])
   const color = COLORS[status.color]
   const accent = selected ? '#168fff' : color
   const heading = Number.isFinite(vehicle.rumbo) ? ((vehicle.rumbo % 360) + 360) % 360 : null

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import Mapa from '../comp/Mapa'
 import { Buscador, Chips, Modal, Tag } from '../comp/ui'
 import { Icono } from '../Iconos'
-import { textoSinSenal, textoUltimoReporte } from '../datos/sinSenal'
+import { estadoSenal, textoUltimoReporte } from '../datos/sinSenal'
 import { elegirFoto, useFotosVehiculo } from '../datos/fotoVehiculo'
 import { fotoSinFondo } from '../datos/fotoSinFondo'
 import '../../styles/supervisor-movil.css'
@@ -28,7 +28,9 @@ export function MapaFlotaMovil({ unidades, cargando, novedadDe, nombreConductor,
   const conPunto = useMemo(() => unidades.filter((v) => Number.isFinite(v.lat) && Number.isFinite(v.lng)), [unidades])
   const elegida = conPunto.find((v) => v.id === tocada) ?? null
   const novedad = elegida ? novedadDe(elegida) : null
-  const callada = elegida && elegida.conectado === false
+  // La regla única (estadoSenal): si no reporta al día, se dice cómo está y desde cuándo.
+  const senal = elegida ? estadoSenal(elegida, ahora) : null
+  const callada = senal && senal.clave !== 'reportando'
   return (
     <section className="mvs-mapa vm-mapa-corto" aria-label="Mapa de la flota">
       <Mapa vehiculos={conPunto} alto="100%" leyenda={false} ficha={false} pildoraVista
@@ -49,8 +51,8 @@ export function MapaFlotaMovil({ unidades, cargando, novedadDe, nombreConductor,
             <span className="mvs-tocada-txt">
               <b>{nombreUnidad(elegida)}</b>
               <small>{[elegida.placa, nombreConductor(elegida)].filter(Boolean).join(' · ')}</small>
-              {callada && <small>{textoSinSenal(elegida.ultimoReporte, ahora)}</small>}
-              {callada && textoUltimoReporte(elegida.ultimoReporte) && <small className="chico">{textoUltimoReporte(elegida.ultimoReporte)}</small>}
+              {callada && <small>{senal.texto}</small>}
+              {senal?.clave === 'sin_senal' && <small className="chico">{textoUltimoReporte(senal.ultimoReporte)}</small>}
             </span>
             {novedad && <Tag color={novedad.color}>{novedad.t}</Tag>}
             <button type="button" className="mvs-tocada-cerrar" aria-label="Cerrar" onClick={() => setTocada(null)}>
@@ -135,22 +137,25 @@ function FotoFila({ unidad }) {
   )
 }
 
-/** «● En marcha  61 km/h», «● Detenida» o «● Sin señal · hace 2 h». */
-function EstadoAhora({ estado, velocidad, ultimoReporte, ahora }) {
-  if (!estado) return <span className="vm-estado apagado">Buscando su posición…</span>
-  const tono = estado === 'marcha' || estado === 'reportando' ? 'exito' : estado === 'detenido' ? 'aviso' : 'apagado'
+/**
+ * «● En marcha  61 km/h», «● Detenida», «● Sin ubicación · última hace 2 h» o «● Sin señal · hace 2 h»:
+ * la regla única (estadoSenal), verde con señal, ámbar sin ubicación, gris callada.
+ */
+function EstadoAhora({ senal: s }) {
+  const tono = s.clave === 'reportando' ? 'exito' : s.clave === 'sin_ubicacion' ? 'aviso' : 'apagado'
+  const enMarcha = s.marcha === 'en_marcha'
   return (
     <span className={`vm-estado ${tono}`}>
-      <i className={`vm-punto${estado === 'marcha' ? ' late' : ''}`} aria-hidden="true" />
-      {estado === 'sin-senal' ? <span className="vm-gris">{textoSinSenal(ultimoReporte, ahora)}</span>
-        : estado === 'marcha' ? <>En marcha <b>{Math.round(velocidad ?? 0)} km/h</b></>
-          : estado === 'reportando' ? 'Reportando' : 'Detenida'}
+      <i className={`vm-punto${enMarcha ? ' late' : ''}`} aria-hidden="true" />
+      {tono === 'apagado' ? <span className="vm-gris">{s.texto}</span>
+        : enMarcha && s.velocidadKmh != null ? <>{s.texto} <b>{Math.round(s.velocidadKmh)} km/h</b></>
+          : s.texto}
     </span>
   )
 }
 
 /** UNA UNIDAD en su tarjeta (TarjetaUnidad de la app). */
-export const FilaUnidadMovil = memo(function FilaUnidadMovil({ unidad: v, numero, estado, aviso, conductor, ahora, alAbrir }) {
+export const FilaUnidadMovil = memo(function FilaUnidadMovil({ unidad: v, numero, aviso, conductor, ahora, alAbrir }) {
   const placa = v.placa && v.placa !== numero ? v.placa : ''
   return (
     <button type="button" className="vm-tarjeta" onClick={() => alAbrir(v.id)}
@@ -161,7 +166,7 @@ export const FilaUnidadMovil = memo(function FilaUnidadMovil({ unidad: v, numero
           <b className="vm-numero">{numero}</b>
           {placa && <span className="vm-placa">{placa}</span>}
         </span>
-        <EstadoAhora estado={estado} velocidad={v.velocidadKmh} ultimoReporte={v.ultimoReporte} ahora={ahora} />
+        <EstadoAhora senal={estadoSenal(v, ahora)} />
         <span className="vm-fila vm-gente">
           <Icono nombre="gente" tam={13} />
           <span className={`vm-detalle${v.conductorPrincipalId ? '' : ' tenue'}`}>{conductor}</span>

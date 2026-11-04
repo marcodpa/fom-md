@@ -66,8 +66,12 @@ function Inventario() {
   const { datos, estado, error, recargar } = useDatos(cargarInventario, [], 30_000)
   const detectados = useDatos(() => repo.admin.gps.sinEmparejar(), [], 30_000)
 
-  const equipos = useMemo(() => datos?.equipos ?? [], [datos])
   const porUnidad = useMemo(() => new Map((datos?.vehiculos ?? []).map((v) => [v.id, v])), [datos])
+  // Cada equipo instalado lleva su unidad: su señal es la de ella (senalDe), la misma de la flota.
+  const equipos = useMemo(
+    () => (datos?.equipos ?? []).map((g) => (g.vehiculoId && porUnidad.has(g.vehiculoId) ? { ...g, unidad: porUnidad.get(g.vehiculoId) } : g)),
+    [datos, porUnidad],
+  )
   const cifras = cifrasInventario(equipos, ahora)
   const global = hayListadoGlobal(equipos)
   const empresas = useMemo(() => empresasDe(equipos), [equipos])

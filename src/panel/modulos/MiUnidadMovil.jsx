@@ -8,8 +8,7 @@ import { MovilEncabezado } from '../comp/movil-piezas'
 import { useMovil } from '../comp/movil-navegacion'
 import { Cargando } from '../comp/ui'
 import { DIAS_MANEJO, calificacionManejo } from '../datos/manejo'
-import { estadoUnidad } from '../datos/estadoUnidad'
-import { conSenalAlDia, textoSinSenal, transmitiendo } from '../datos/sinSenal'
+import { conSenalAlDia, estadoSenal, haceCuanto } from '../datos/sinSenal'
 import { colaReciente } from '../datos/recorrido'
 import { horasDeHoy, partesTiempo, resumenDeHoy, textoKm, textoTiempo } from '../datos/recorridoHoy'
 import { fotoSinFondo } from '../datos/fotoSinFondo'
@@ -17,6 +16,7 @@ import { useFotoSinFondo } from '../datos/fotoVehiculo'
 import { pendientesDeMiUnidad } from '../datos/mantenimientoPendiente'
 import * as f from '../datos/formato'
 import { BotonSos } from './SosConductor'
+import { conPosicionFresca } from './MiUnidad'
 import '../../styles/mi-unidad-movil.css'
 
 // ============================================================
@@ -44,12 +44,6 @@ function saludoPorHora(ahora) {
   return 'Buenas noches'
 }
 
-/** «09:42», como `horaCorta` de la app. */
-function horaCorta(iso) {
-  const d = new Date(iso)
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
-
 /** Un dato que el servidor manda con «—» cuando no lo tiene: aquí cuenta como vacío. */
 const conValor = (t) => (t && String(t).trim() !== '—' ? String(t).trim() : null)
 
@@ -60,13 +54,8 @@ const identidad = (u) => etiquetaUnidad(u)
 /** «Toyota Hilux». */
 const marcaModelo = (u) => `${conValor(u.marca) ?? ''} ${conValor(u.modelo) ?? ''}`.trim()
 
-/** Los tres estados de la app: verde rodando, ámbar parada y transmitiendo, gris callada. */
-function estadoApp(u) {
-  const clave = estadoUnidad(u).clave
-  if (clave === 'sin_senal') return 'sin-senal'
-  if (clave === 'en_marcha') return 'marcha'
-  return 'parada'
-}
+/** El tono con la regla única (estadoSenal): verde con señal, ámbar sin ubicación, gris callada. */
+const tonoSenal = (s) => (s.clave === 'reportando' ? 'exito' : s.clave === 'sin_ubicacion' ? 'aviso' : 'apagado')
 
 /** Color de la velocidad: parada gris, normal verde, rápido ámbar, excesivo rojo. */
 function tonoVelocidad(kmh) {
@@ -494,11 +483,14 @@ function FotoSinFondo({ unidad, ancho, className = '' }) {
   return <img className={className} src={url} width={ancho} height={Math.round(ancho / 1.6)} alt={silueta ? `Silueta de ${nombre}` : nombre} />
 }
 
-/** «● EN VIVO» (o la hora de la última buena, o «SIN SEÑAL»). */
+/**
+ * «● EN VIVO», «● SIN SEÑAL» / «● SIN UBICACIÓN» (la unidad no reporta al día) o «● SIN CONEXIÓN ·
+ * hace 3 min» (el que no pudo leer es el teléfono: falló la carga, no el GPS). Se escriben distinto.
+ */
 function MarcaVivo({ vivo, chip = false }) {
   if (!vivo) return null
   const tono = vivo.tipo === 'vivo' ? 'exito' : 'apagado'
-  const texto = vivo.tipo === 'vivo' ? 'En vivo' : vivo.tipo === 'sin-conexion' ? `Sin conexión · ${vivo.hora}` : 'Sin señal'
+  const texto = vivo.tipo === 'vivo' ? 'En vivo' : vivo.tipo === 'sin-conexion' ? `Sin conexión · ${vivo.hora}` : vivo.texto
   return <span className={`${chip ? 'mvu-chip mini' : 'mvu-vivo'} ${tono}`}><Punto tono={tono} activo={vivo.tipo === 'vivo'} tam={6} />{texto}</span>
 }
 
@@ -546,10 +538,10 @@ function Casilla({ icono, valor, unidad, etiqueta, tono = '' }) {
  * EL RESUMEN: dónde está (zona + coordenadas + hora, con su estado), tres
  * casillas y la inspección de hoy con su botón (que lleva a la pestaña Inspección).
  */
-function Resumen({ unidad, estado, ahora, indice, pendientes, inspeccion }) {
+function Resumen({ unidad, senal, ahora, indice, pendientes, inspeccion }) {
   const coordenadas = Number.isFinite(unidad.lat) && Number.isFinite(unidad.lng) ? `${unidad.lat.toFixed(5)}, ${unidad.lng.toFixed(5)}` : null
-  const detalle = [coordenadas, unidad.ultimoReporte ? horaCorta(unidad.ultimoReporte) : null].filter(Boolean).join(' · ')
-  const tonoEstado = estado === 'marcha' ? 'exito' : estado === 'sin-senal' ? 'apagado' : 'aviso'
+  const detalle = [coordenadas, senal.posicionEn ? haceCuanto(senal.posicionEn, ahora) : null].filter(Boolean).join(' · ')
+  const tonoEstado = tonoSenal(senal)
   const hecha = inspeccion?.hecha ?? false
   return (
     <div className="mvu-resumen">
@@ -561,8 +553,8 @@ function Resumen({ unidad, estado, ahora, indice, pendientes, inspeccion }) {
           <small>{detalle || 'Sin posición todavía'}</small>
         </span>
         <span className={`mvu-chip ${tonoEstado}`}>
-          <Punto tono={tonoEstado} activo={estado === 'marcha'} />
-          <span className="mvu-chip-txt">{estado === 'sin-senal' ? textoSinSenal(unidad.ultimoReporte, ahora) : estado === 'marcha' ? 'En marcha' : 'Detenido'}</span>
+          <Punto tono={tonoEstado} activo={senal.marcha === 'en_marcha'} />
+          <span className="mvu-chip-txt">{senal.texto}</span>
         </span>
       </div>
       <div className="mvu-casillas">
@@ -774,25 +766,13 @@ const TONO_CALIFICACION = { green: 'exito', yellow: 'aviso', red: 'peligro' }
 const CINCO_MINUTOS = 5 * 60_000
 
 /**
- * La unidad que se usa por PIN, con su última posición encima (como hace
- * MiUnidad con la asignada): dónde está, a qué velocidad y si transmite.
+ * La unidad que se usa por PIN, con su última posición encima: la MISMA cuenta que MiUnidad hace
+ * con la asignada (conPosicionFresca); si transmite lo decide estadoSenal.
  */
 function conUltimoPunto(ficha, recorrido, ahora) {
   if (!ficha) return null
   const p = (recorrido ?? []).at(-1)
-  if (!p || (ficha.ultimoReporte && Date.parse(p.hora) <= Date.parse(ficha.ultimoReporte))) return conSenalAlDia(ficha, ahora)
-  const v = p.velocidadKmh ?? null
-  return conSenalAlDia({
-    ...ficha,
-    recorrido,
-    lat: p.lat,
-    lng: p.lng,
-    ultimoReporte: p.hora,
-    velocidadKmh: v,
-    estadoMarcha: v == null ? null : v > 0 ? 'en_marcha' : 'parada',
-    conectado: transmitiendo(p.hora),
-    conexion: transmitiendo(p.hora) ? 'reportando' : 'sin_senal',
-  }, ahora)
+  return conSenalAlDia(p ? { ...conPosicionFresca(ficha, p), recorrido } : ficha, ahora)
 }
 
 /**
@@ -885,14 +865,15 @@ export default function MiUnidadMovil({ perfil, unidad: asignada, enMapa: enMapa
   const ENCABEZADO = 64
   const corrimiento = borde != null && altoMapa > 0 ? Math.min(0, Math.round((ENCABEZADO + borde) / 2 - altoMapa / 2)) : 0
 
-  const estado = unidad ? estadoApp(unidad) : null
-  const enMarcha = estado === 'marcha'
-  const sinSenal = estado === 'sin-senal'
-  const hayLectura = Boolean(unidad?.ultimoReporte)
-  const velocidad = unidad?.velocidadKmh ?? null
+  // La regla única (estadoSenal): marcha y velocidad solo con señal al día.
+  const senal = unidad ? estadoSenal(unidad, ahora) : null
+  const enMarcha = senal?.marcha === 'en_marcha'
+  const hayLectura = Boolean(senal?.ultimoReporte)
+  const velocidad = senal?.velocidadKmh ?? null
   const vivo = hayLectura && lecturaVieja
-    ? { tipo: 'sin-conexion', hora: horaCorta(unidad.ultimoReporte) }
-    : sinSenal ? { tipo: 'sin-senal' } : hayLectura ? { tipo: 'vivo' } : null
+    ? { tipo: 'sin-conexion', hora: senal.hace }
+    : !hayLectura ? null
+      : senal.clave === 'reportando' ? { tipo: 'vivo' } : { tipo: 'sin-senal', texto: senal.etiqueta }
 
   const sinUnidad = cargando || error || !unidad
   let vacio = null
@@ -953,7 +934,7 @@ export default function MiUnidadMovil({ perfil, unidad: asignada, enMapa: enMapa
           sos={<BotonSos usuarioId={perfil?.userId ?? null} />}
           franja={<Franja unidad={unidad} velocidad={velocidad} enMarcha={enMarcha} vivo={vivo} hoy={hoy} />}
           foto={<FotoSinFondo unidad={unidad} ancho={220} className="mvu-foto" />}
-          resumen={<Resumen unidad={unidad} estado={estado} ahora={ahora} indice={indice} pendientes={pendientes} inspeccion={inspeccionHoy} />}
+          resumen={<Resumen unidad={unidad} senal={senal} ahora={ahora} indice={indice} pendientes={pendientes} inspeccion={inspeccionHoy} />}
           resto={
             <>
               <Telemetria unidad={unidad} vivo={vivo} />
