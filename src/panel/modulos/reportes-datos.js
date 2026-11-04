@@ -1,5 +1,7 @@
 /** Métricas derivadas de registros autorizados, sin convertir ausencias en ceros. */
 import { etiqueta, estadoDocumento } from '../datos/catalogos.js'
+import { atencionDeUnidad } from '../datos/atencionUnidad.js'
+import { clasificarVencimiento, fechaLocal } from '../datos/vencimientos.js'
 
 export function numeroValido(valor) {
   return valor !== null && valor !== undefined && valor !== '' && Number.isFinite(Number(valor))
@@ -92,7 +94,8 @@ const dos = n => String(n).padStart(2, '0')
 
 /** «20 oct» · con año: «20 oct 2026». */
 export function fechaCortaVE(fecha, conAnio = false) {
-  const d = new Date(fecha)
+  // Un 'AAAA-MM-DD' pelado es medianoche UTC y en Venezuela caería el día anterior.
+  const d = fechaLocal(fecha)
   return `${d.getDate()} ${MESES_CORTOS[d.getMonth()]}${conAnio ? ` ${d.getFullYear()}` : ''}`
 }
 /** «20 oct 2026, 09:42» (24 horas, como el pie del informe). */
@@ -404,11 +407,18 @@ export function papelesUnidad(v) {
   return { estado: 'al_dia', texto: 'Al día' }
 }
 
+const GRAVEDAD_PAPEL = { vigente: 1, por_vencer: 2, vencido: 3 }
+
+/** El PEOR papel de la persona: licencia, certificado médico y el que más pronto vence según el servidor. */
 export function papelesPersona(p, hoy = new Date()) {
-  let estado = p.licenciaEstado ?? null
-  let vence = p.licenciaVence ?? null
-  if (!estado && p.licenciaVence) estado = estadoDocumento(p.licenciaVence, hoy)
-  if (!estado && numeroValido(p.documentoDias)) { estado = p.documentoDias < 0 ? 'vencido' : p.documentoDias <= 30 ? 'por_vencer' : 'vigente'; vence = p.documentoVence }
+  const candidatos = []
+  const sumar = (estado, vence) => { if (estado in GRAVEDAD_PAPEL) candidatos.push({ estado, vence: vence ?? null }) }
+  sumar(p.licenciaEstado ?? (p.licenciaVence ? estadoDocumento(p.licenciaVence, hoy) : null), p.licenciaVence)
+  sumar(p.medicaEstado ?? (p.cartaMedicaVence ? estadoDocumento(p.cartaMedicaVence, hoy) : null), p.cartaMedicaVence)
+  if (numeroValido(p.documentoDias)) sumar(clasificarVencimiento(p.documentoDias), p.documentoVence)
+  // Más grave primero; a igual gravedad, el que vence antes (sin fecha, al final).
+  candidatos.sort((a, b) => GRAVEDAD_PAPEL[b.estado] - GRAVEDAD_PAPEL[a.estado] || String(a.vence ?? '9999').localeCompare(String(b.vence ?? '9999')))
+  const { estado, vence } = candidatos[0] ?? {}
   if (!estado) return { estado: null, texto: 'Sin dato' }
   if (estado === 'vencido') return { estado, texto: 'Vencido' }
   if (estado === 'por_vencer') return { estado, texto: vence ? `Vence ${fechaCortaVE(vence)}` : 'Por vencer' }
@@ -448,8 +458,9 @@ export function filasUnidades(unidades, act) {
     const papeles = papelesUnidad(v)
     const motivos = []
     if (tonoIndice(v.indiceSeguro) === 'bad') motivos.push('Índice bajo')
-    if (papeles.estado === 'vencido') motivos.push('Papeles vencidos')
-    if (!v.conductorPrincipalId) motivos.push('Sin conductor')
+    const atencion = atencionDeUnidad(v)
+    if (atencion.vencidos) motivos.push('Papeles vencidos')
+    if (atencion.sinConductor) motivos.push('Sin conductor')
     if (sinResolver) motivos.push('ODT sin resolver')
     const resueltas = odts.filter(o => grupoOdt(o.estado) === 'resuelta')
     const conCosto = resueltas.filter(o => numeroValido(o.costo))

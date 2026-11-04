@@ -3,6 +3,8 @@
 // para que el panel web y la app muestren los datos idénticos.
 // ============================================================
 
+import { diasDeCalendario } from './vencimientos.js'
+
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
 // Evita el corrimiento de día en husos negativos (Venezuela es UTC-4):
@@ -125,7 +127,8 @@ export function iniciales(nombre) {
 
 /** Días que faltan, en texto: "vence en 3 días", "vencido hace 2 días". */
 export function vencimiento(iso) {
-  const dias = Math.floor((parseFecha(iso) - new Date()) / 86400000)
+  // Días de calendario local (vence hoy = 0), no milisegundos: ver datos/vencimientos.js.
+  const dias = diasDeCalendario(iso)
   if (dias < 0) return `vencido hace ${Math.abs(dias)} ${Math.abs(dias) === 1 ? 'día' : 'días'}`
   if (dias === 0) return 'vence hoy'
   if (dias === 1) return 'vence mañana'

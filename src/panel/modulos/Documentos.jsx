@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -8,6 +8,7 @@ import {
 import { Barras } from '../comp/Grafico'
 import * as f from '../datos/formato'
 import { color, diasPara, etiqueta } from '../datos/catalogos'
+import { UMBRAL_POR_VENCER_DIAS, UMBRAL_URGENTE_DIAS, esUrgente } from '../datos/vencimientos'
 import { Icono } from '../Iconos'
 import FotosDe from '../comp/FotosDe'
 import { GaleriaArchivos, SelectorArchivos } from '../comp/Archivos'
@@ -176,7 +177,10 @@ function Contenido({ todos, lista, ambito, setAmbito, estadoDoc, setEstadoDoc, q
   const vigentes = todos.filter((d) => d.estado === 'vigente').length
 
   const todosUrgentes = useMemo(
-    () => filtrados.filter((d) => d.estado === 'vencido' || diasPara(d.venceEn) <= 7),
+    // Los que vencen antes (o ya vencieron hace más) van primero.
+    () => filtrados
+      .filter((d) => d.estado === 'vencido' || esUrgente(d.diasParaVencer ?? diasPara(d.venceEn)))
+      .sort((a, b) => String(a.venceEn ?? '9999').localeCompare(String(b.venceEn ?? '9999'))),
     [filtrados]
   )
   const urgentes = todosUrgentes.slice(0, 10)
@@ -199,7 +203,7 @@ function Contenido({ todos, lista, ambito, setAmbito, estadoDoc, setEstadoDoc, q
           nota={vencidos > 0 ? 'Regularízalos cuanto antes' : 'Ninguno vencido'}
         />
         <Kpi
-          titulo="Por vencer en 30 días"
+          titulo={`Por vencer en ${UMBRAL_POR_VENCER_DIAS} días`}
           valor={f.numero(porVencer)}
           icono="reloj"
           tono={porVencer > 0 ? 'aviso' : 'ok'}
@@ -210,7 +214,7 @@ function Contenido({ todos, lista, ambito, setAmbito, estadoDoc, setEstadoDoc, q
           valor={f.numero(vigentes)}
           icono="escudo"
           tono="ok"
-          nota="Con más de 30 días de vigencia"
+          nota={`Con más de ${UMBRAL_POR_VENCER_DIAS} días de vigencia`}
         />
         <Kpi
           titulo="Total"
@@ -258,7 +262,7 @@ function Contenido({ todos, lista, ambito, setAmbito, estadoDoc, setEstadoDoc, q
             <Vacio
               icono="check"
               titulo="Nada urgente"
-              texto={hayFiltro ? 'Con estos filtros no hay documentos vencidos ni por vencer en 7 días.' : 'Ningún documento vence en los próximos 7 días.'}
+              texto={hayFiltro ? `Con estos filtros no hay documentos vencidos ni por vencer en ${UMBRAL_URGENTE_DIAS} días.` : `Ningún documento vence en los próximos ${UMBRAL_URGENTE_DIAS} días.`}
             />
           ) : (
             <div className="doc-filas">
@@ -490,6 +494,9 @@ export function ModalNuevoDocumento({ abierto, alCerrar, alGuardar, fijo = null 
   const [error, setError] = useState({})
   const [guardando, setGuardando] = useState(false)
   const [archivos, setArchivos] = useState([])
+  // Si el documento ya se creó y solo falló la subida de archivos, volver a
+  // pulsar «Registrar» no debe crear un segundo documento: solo reintenta los archivos.
+  const creadoId = useRef(null)
   const vehiculos = useDatos(() => repo.vehiculos.listar({}), [])
   const gente = useDatos(() => repo.admin.usuarios.listar({}), [])
   const set = (k) => (e) => setD((x) => ({ ...x, [k]: e.target.value }))
@@ -497,6 +504,7 @@ export function ModalNuevoDocumento({ abierto, alCerrar, alGuardar, fijo = null 
   const cerrar = () => {
     setError({})
     setArchivos([])
+    creadoId.current = null
     alCerrar()
   }
 
@@ -512,24 +520,28 @@ export function ModalNuevoDocumento({ abierto, alCerrar, alGuardar, fijo = null 
     if (Object.keys(err).length > 0) return
     setGuardando(true)
     try {
-      const creado = await repo.documentos.crear({
-        ambito: d.ambito,
-        vehiculoId: d.ambito === 'vehiculo' ? d.vehiculoId : undefined,
-        personaId: d.ambito === 'persona' ? d.personaId : undefined,
-        tipo,
-        numero: d.numero.trim(),
-        emitidoEn: d.emitidoEn,
-        venceEn: d.venceEn,
-        notas: d.notas.trim(),
-      })
+      if (!creadoId.current) {
+        const creado = await repo.documentos.crear({
+          ambito: d.ambito,
+          vehiculoId: d.ambito === 'vehiculo' ? d.vehiculoId : undefined,
+          personaId: d.ambito === 'persona' ? d.personaId : undefined,
+          tipo,
+          numero: d.numero.trim(),
+          emitidoEn: d.emitidoEn,
+          venceEn: d.venceEn,
+          notas: d.notas.trim(),
+        })
+        creadoId.current = typeof creado === 'string' ? creado : creado?.id ?? null
+      }
       // Los archivos van después: necesitan el número del documento para quedar unidos a él.
-      const docId = typeof creado === 'string' ? creado : creado?.id
+      const docId = creadoId.current
       if (archivos.length && docId) {
         const r = await subirVarios({ coleccion: 'documents', padreId: docId, proposito: 'document_file', archivos })
         if (r.errores.length) {
           await alGuardar()
           setError({ general: `El documento quedó registrado, pero ${r.errores.length} archivo(s) no se subieron: ${r.errores[0]} Puedes subirlos desde «Fotos y PDF».` })
-          setArchivos([])
+          // Si ninguno subió, se conservan para que «Registrar» los reintente sin crear otro documento.
+          if (r.subidos) setArchivos([])
           return
         }
       }

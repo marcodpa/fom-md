@@ -9,6 +9,7 @@ import {
 } from '../comp/ui'
 import * as f from '../datos/formato'
 import { ROLES_ASIGNABLES, etiquetaRol, puedeGestionarA } from '../datos/catalogos'
+import { clasificarVencimiento } from '../datos/vencimientos'
 import { Icono } from '../Iconos'
 import AccionesUsuario from '../comp/AccionesUsuario'
 import { useConfirmar } from '../comp/Confirmar'
@@ -418,7 +419,7 @@ function Contenido({
         <Kpi titulo="Cuentas" valor={lista.length} icono="gente" nota="En el filtro actual" />
         <Kpi titulo="Conductores" valor={lista.filter((p) => p.conduce).length} icono="camion" nota="Con permiso de manejo" />
         <Kpi titulo="Perfiles completos" valor={lista.filter((p) => p.perfilCompleto).length} icono="gente" nota="Información personal completa" />
-        <Kpi titulo="Documentos por atender" valor={lista.filter((p) => p.papelesPendientes > 0 || (p.documentoDias != null && p.documentoDias <= 30)).length} icono="documento" tono="aviso" nota="Personas con vencimientos" />
+        <Kpi titulo="Documentos por atender" valor={lista.filter((p) => p.papelesPendientes > 0 || ['vencido', 'por_vencer'].includes(clasificarVencimiento(p.documentoDias))).length} icono="documento" tono="aviso" nota="Personas con vencimientos" />
       </div>
 
       {aviso && <p className="pnl-campo-error" role="alert">{aviso}</p>}
@@ -454,7 +455,7 @@ function Contenido({
               </thead>
               <tbody>
                 {lista.map((p) => (
-                  <tr key={p.id} className={`mv-ir${p.estado === 'revoked' || (p.documentoDias != null && p.documentoDias < 0) ? ' mv-u1' : p.estado === 'suspended' || p.claveTemporal || (p.documentoDias != null && p.documentoDias <= 30) ? ' mv-u2' : ''}`}>
+                  <tr key={p.id} className={`mv-ir${p.estado === 'revoked' || clasificarVencimiento(p.documentoDias) === 'vencido' ? ' mv-u1' : p.estado === 'suspended' || p.claveTemporal || clasificarVencimiento(p.documentoDias) === 'por_vencer' ? ' mv-u2' : ''}`}>
                     <td className="mv-t">
                       <div className="pnl-persona">
                         <i className="pnl-avatar">{f.iniciales(p.nombre)}</i>
@@ -504,10 +505,10 @@ function Contenido({
                         {/* Los días los cuenta la base con su propia fecha:
                             juzgar un vencimiento con el reloj del navegador
                             cambia la respuesta según quién abra la pantalla. */}
-                        {p.documentoDias !== null && p.documentoDias !== undefined && (
-                          p.documentoDias < 0 ? (
+                        {clasificarVencimiento(p.documentoDias) && (
+                          clasificarVencimiento(p.documentoDias) === 'vencido' ? (
                             <Tag color="rojo">{etiquetaDocumento(p.documentoTipo)} vencida</Tag>
-                          ) : p.documentoDias <= 30 ? (
+                          ) : clasificarVencimiento(p.documentoDias) === 'por_vencer' ? (
                             <Tag color="ambar">
                               {etiquetaDocumento(p.documentoTipo)} vence en {p.documentoDias} d
                             </Tag>

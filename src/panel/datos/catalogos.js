@@ -5,6 +5,8 @@
 // estos mismos strings viajan sin traducción.
 // ============================================================
 
+import { clasificarVencimiento, diasDeCalendario } from './vencimientos.js'
+
 export const VEHICULO_TIPO = ['camioneta', 'camion', 'auto', 'otro']
 export const MARCHA_ESTADO = ['en_marcha', 'parada']
 export const AREA_TIPO = ['ubicacion', 'sector', 'contrato']
@@ -245,15 +247,12 @@ export function etiquetaRol(rol, tipoEmpresa) {
   return ETIQUETA.rol[rol] ?? rol
 }
 
-/** Estado de un documento según su fecha de vencimiento (regla de la app). */
+/** Estado de un documento según su fecha de vencimiento (regla única: datos/vencimientos.js). */
 export function estadoDocumento(venceEn, hoy = new Date()) {
-  const dias = Math.floor((new Date(venceEn) - hoy) / 86400000)
-  if (dias < 0) return 'vencido'
-  if (dias <= 30) return 'por_vencer'
-  return 'vigente'
+  return clasificarVencimiento(diasDeCalendario(venceEn, hoy)) ?? 'vigente'
 }
 
-/** Días que faltan (negativo si ya venció). */
+/** Días de calendario que faltan (0 = vence hoy, negativo si ya venció). */
 export function diasPara(fecha, hoy = new Date()) {
-  return Math.floor((new Date(fecha) - hoy) / 86400000)
+  return diasDeCalendario(fecha, hoy)
 }

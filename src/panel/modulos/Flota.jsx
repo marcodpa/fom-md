@@ -15,6 +15,7 @@ import {
 import { Icono } from '../Iconos'
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
+import { atencionDeUnidad } from '../datos/atencionUnidad'
 import { conSenalAlDia, ordenarSinSenal, textoSinSenal, useMinuto } from '../datos/sinSenal'
 import '../../styles/movil-modulos.css'
 import { useVistaTelefono } from '../comp/movil-navegacion'
@@ -28,14 +29,8 @@ import { BuscadorFiltrosMovil, FilaUnidadMovil, ListaVirtualMovil, MapaFlotaMovi
 // columna, con filtros combinables y salida a CSV para el reporte semanal.
 // ============================================================
 
-/** Una unidad requiere atención si tiene papeles en riesgo o nadie a cargo. */
-function requiereAtencion(v) {
-  // Si la fuente no lleva documentos —hoy, la base real— no hay nada que
-  // afirmar. Marcar «requiere atención» a toda la flota por lo que no sabemos
-  // vuelve inútil el indicador justo cuando más debería significar algo.
-  if (v.docsVencidos == null) return false
-  return v.docsVencidos > 0 || v.docsPorVencer > 0 || !v.conductorPrincipalId
-}
+/** Una unidad requiere atención si tiene papeles en riesgo o nadie a cargo (la regla vive en datos/atencionUnidad.js). */
+const requiereAtencion = (v) => atencionDeUnidad(v).requiere
 
 function nombreConductor(v) {
   return v.conductorPrincipalId ? v.conductorNombre : 'Sin conductor'
@@ -78,8 +73,8 @@ function coincide(v, q) {
 
 /** Celda de documentos: al día, por vencer o vencidos. */
 function TagDocumentos({ v }) {
-  // Con la base real todavía no hay documentos. Se dice que no se sabe, en
-  // vez de pintar un «Al día» que nadie ha comprobado.
+  // Si no se pudieron leer los documentos, se dice que no se sabe, en vez de
+  // pintar un «Al día» que nadie ha comprobado.
   if (v.docsVencidos == null) return <span className="pnl-sin-dato">—</span>
   if (v.docsVencidos > 0) {
     return (
@@ -98,14 +93,7 @@ function TagDocumentos({ v }) {
  * y la única etiqueta que lleva su fila. Solo con lo que la lista ya trae: la
  * web no tiene aquí ni el SOS ni la inspección del día.
  */
-function novedadDe(v) {
-  if (v.docsVencidos > 0) {
-    return { peso: 3, grupo: 'no-salen', color: 'rojo', t: v.docsVencidos === 1 ? 'Documento vencido' : `${v.docsVencidos} vencidos` }
-  }
-  if (v.docsPorVencer > 0) return { peso: 5, grupo: 'atencion', color: 'ambar', t: `${v.docsPorVencer} por vencer` }
-  if (!v.conductorPrincipalId) return { peso: 7, grupo: 'atencion', color: 'ambar', t: 'Sin conductor' }
-  return null
-}
+const novedadDe = (v) => atencionDeUnidad(v).novedad
 
 const TRAMOS = [
   { clave: 'no-salen', t: 'No pueden salir', color: 'rojo' },

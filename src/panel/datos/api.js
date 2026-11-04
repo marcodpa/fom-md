@@ -499,8 +499,8 @@ export const api = {
   },
 
   /** Documentos, del que antes vence al que más tarda. */
-  documentos: ({ vehiculoId = '', limite = 100 } = {}) => {
-    const p = new URLSearchParams({ limit: limite })
+  documentos: ({ vehiculoId = '', limite = 200, desplazamiento = 0 } = {}) => {
+    const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
     if (vehiculoId) p.set('vehicleId', vehiculoId)
     return pedir(`${CONSOLA}/documents?${p}`)
   },

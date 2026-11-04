@@ -265,7 +265,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
       <div className="pnl-resumen-acciones">
         <Kpi titulo="Inspecciones de hoy" valor={num(r.inspeccionesHoy)} icono="inspeccion" nota={sinInspeccion == null ? 'Consulta el historial' : f.cantidad(sinInspeccion, 'unidad pendiente', 'unidades pendientes')} a="/panel/inspecciones" />
         <Kpi titulo="Mantenimiento" valor={odtAbiertas} icono="llave" nota="Órdenes pendientes y en revisión" tono={odtAbiertas ? 'aviso' : ''} a="/panel/mantenimiento" />
-        <Kpi titulo="Documentos por vencer" valor={num(r.docsPorVencer)} icono="documento" nota="Revisa los próximos vencimientos" tono={r.docsPorVencer ? 'aviso' : ''} a="/panel/documentos" />
+        <Kpi titulo="Documentos por atender" valor={r.docsVencidos == null && r.docsPorVencer == null ? '—' : f.numero((r.docsVencidos ?? 0) + (r.docsPorVencer ?? 0))} icono="documento" nota={r.docsVencidos == null && r.docsPorVencer == null ? 'Revisa los próximos vencimientos' : `${f.cantidad(r.docsVencidos ?? 0, 'vencido', 'vencidos')} · ${num(r.docsPorVencer ?? 0)} por vencer`} tono={r.docsVencidos > 0 ? 'malo' : r.docsPorVencer > 0 ? 'aviso' : ''} a="/panel/documentos" />
       </div>
 
       <RankingManejo />

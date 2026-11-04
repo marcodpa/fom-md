@@ -16,6 +16,7 @@ import { api, empresaGestionActualId, escriturasHechas, pedir } from './api'
 import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
+import { clasificarVencimiento, diasDeCalendario } from './vencimientos'
 import { AVISO_SIN_DIAS_EN_SERVIDOR, diasParaEnviar, normalizarDias } from './diasPlanilla'
 import { quitarSaltos } from './recorrido'
 import { transmitiendo } from './sinSenal.js'
@@ -91,6 +92,7 @@ function comoUnidad(v) {
     aceitePct: null,
     tempMotorC: null,
     ubicacionTexto: null,
+    // Se rellenan en vehiculos.listar contando los documentos (una sola lectura).
     docsVencidos: null,
     docsPorVencer: null,
     gps: null,
@@ -107,6 +109,81 @@ const VENTANA_COMPARTIDA_MS = 3000
 let enVuelo = null
 let enVueloDesde = 0
 let enVueloEmpresa = null
+
+/**
+ * Un documento del servidor con el vocabulario de la pantalla. El estado sale
+ * de los días que manda la base (`daysToExpiry`); si no vienen, de la fecha
+ * con la misma regla de calendario local (datos/vencimientos.js).
+ */
+function comoDocumento(d) {
+  const dias = d.daysToExpiry ?? (d.expiresOn ? diasDeCalendario(d.expiresOn) : null)
+  const vigilancia = clasificarVencimiento(dias) ?? 'vigente'
+  const titular = d.scope === 'persona'
+    ? d.holderDisplayName || d.holderName || '—'
+    : [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') || '—'
+  return {
+    id: d.id,
+    ambito: d.scope,
+    tipo: d.documentType,
+    numero: d.documentNumber,
+    emitidoEl: d.issuedOn,
+    emitidoEn: d.issuedOn,
+    venceEl: d.expiresOn,
+    venceEn: d.expiresOn,
+    diasParaVencer: dias,
+    estado: vigilancia,
+    activo: d.status,
+    notas: d.notes,
+    titular,
+    titularId: d.scope === 'persona' ? d.holderUserId ?? null : d.vehicleId ?? null,
+    personaId: d.holderUserId ?? null,
+    vehiculoId: d.vehicleId,
+    vehiculoNombre: [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') || '—',
+    archivos: d.fileCount,
+  }
+}
+
+/** Todos los documentos vigilados (todas las páginas, sin los archivados). */
+async function leerDocumentos({ vehiculoId = '' } = {}) {
+  const r = await leerTodasLasPaginas(
+    (desplazamiento, limite) => api.documentos({ vehiculoId, limite, desplazamiento }),
+    { repetida: 'El servidor repitió una página de documentos. Vuelve a intentarlo.' },
+  )
+  const lista = r.items.filter((d) => d.status !== 'archived').map(comoDocumento)
+  if (r.incompleta) lista.incompleta = true
+  return lista
+}
+
+/**
+ * Cuántos documentos vencidos y por vencer tiene cada unidad. Una sola lectura
+ * para toda la flota; se guarda un minuto (la flota se refresca cada 15–30 s)
+ * y cualquier escritura del panel la da por vieja.
+ */
+const DOCS_UNIDAD_MS = 60_000
+let docsUnidadGuardados = null
+
+function documentosPorUnidad() {
+  const empresa = empresaGestionActualId()
+  const escrituras = escriturasHechas()
+  const g = docsUnidadGuardados
+  if (g && g.empresa === empresa && g.escrituras === escrituras && Date.now() - g.desde < DOCS_UNIDAD_MS) return g.peticion
+  const peticion = leerDocumentos().then((lista) => {
+    const cuentas = new Map()
+    for (const d of lista) {
+      if (d.ambito !== 'vehiculo' || !d.vehiculoId) continue
+      const c = cuentas.get(d.vehiculoId) ?? { vencidos: 0, porVencer: 0 }
+      if (d.estado === 'vencido') c.vencidos += 1
+      else if (d.estado === 'por_vencer') c.porVencer += 1
+      cuentas.set(d.vehiculoId, c)
+    }
+    // Con la lista incompleta, un «0» no es una afirmación honesta: sin dato.
+    return lista.incompleta ? null : cuentas
+  })
+  const guardada = { empresa, escrituras, desde: Date.now(), peticion }
+  docsUnidadGuardados = guardada
+  peticion.catch(() => { if (docsUnidadGuardados === guardada) docsUnidadGuardados = null })
+  return peticion
+}
 
 async function flota(q = '') {
   const ahora = Date.now()
@@ -689,21 +766,25 @@ export const repoApi = {
       return lectura ? { km: Number(lectura.odometerKm), origen: lectura.source, en: lectura.observedAt } : null
     },
     async listar({ q = '', areaId = '' } = {}) {
-      const [lista, conductores] = await Promise.all([
+      const [lista, conductores, docs] = await Promise.all([
         flota(q),
         // Los conductores no son imprescindibles para pintar el mapa: si esa
         // llamada falla, la flota se muestra igual y sin nombre en vez de no
         // mostrarse. Salen de lo guardado (5 min), no de un pedido por refresco.
         asignacionesVigentes().catch(() => []),
+        // Igual con los documentos: si no se pueden leer, la columna dice «—».
+        documentosPorUnidad().catch(() => null),
       ])
       const porVehiculo = conductoresPorVehiculo(conductores)
       const salida = lista
         .filter(v => !areaId || v.areaId === areaId)
         .map((v) => {
           const c = porVehiculo.get(v.id)
-          return c
+          const papeles = docs ? { docsVencidos: docs.get(v.id)?.vencidos ?? 0, docsPorVencer: docs.get(v.id)?.porVencer ?? 0 } : null
+          const con = c
             ? { ...v, conductorPrincipalId: c.userId, conductorNombre: c.displayName }
             : v
+          return papeles ? { ...con, ...papeles } : con
         })
         .sort((a, b) => a.alias.localeCompare(b.alias))
       // La pantalla avisa si la flota no se pudo leer entera.
@@ -1769,40 +1850,14 @@ export const repoApi = {
      */
     async listar({ vehiculoId = '', ambito = '', estado = '', q = '' } = {}) {
       try {
-        const r = await api.documentos({ vehiculoId })
         const t = q.trim().toLowerCase()
-        return (r?.items ?? [])
-          .filter((d) => d.status !== 'archived')
-          .map((d) => {
-            const dias = d.daysToExpiry
-            const vigilancia = dias == null ? 'vigente' : dias < 0 ? 'vencido' : dias <= 30 ? 'por_vencer' : 'vigente'
-            const titular = d.scope === 'persona'
-              ? d.holderDisplayName || d.holderName || '—'
-              : [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') || '—'
-            return {
-              id: d.id,
-              ambito: d.scope,
-              tipo: d.documentType,
-              numero: d.documentNumber,
-              emitidoEl: d.issuedOn,
-              emitidoEn: d.issuedOn,
-              venceEl: d.expiresOn,
-              venceEn: d.expiresOn,
-              diasParaVencer: dias,
-              estado: vigilancia,
-              activo: d.status,
-              notas: d.notes,
-              titular,
-              titularId: d.scope === 'persona' ? d.holderUserId ?? null : d.vehicleId ?? null,
-              personaId: d.holderUserId ?? null,
-              vehiculoId: d.vehicleId,
-              vehiculoNombre: [d.vehicleCode, d.vehiclePlate].filter(Boolean).join(' · ') || '—',
-              archivos: d.fileCount,
-            }
-          })
+        const todos = await leerDocumentos({ vehiculoId })
+        const lista = todos
           .filter((d) => !ambito || d.ambito === ambito)
           .filter((d) => !estado || d.estado === estado)
           .filter((d) => !t || [d.tipo, d.titular, d.numero].join(' ').toLowerCase().includes(t))
+        if (todos.incompleta) lista.incompleta = true
+        return lista
       } catch (error) {
         throw error
       }
