@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom'
+import { nombreUnidad } from '../../datos/nombreUnidad'
 import {
   CATEGORIAS, ETIQUETA_GRUPO, comparar, dineroVE, duracionHoras, esProducto, fechaCortaVE, fechaHoraVE,
   etiquetaFalla, formatoPorId, grupoOdt, kmVE, numeroValido, numeroVE, porScore, porcentajeVE, resultadoDe, textoCmp, tonoIndice, tonoScore,
@@ -226,7 +227,7 @@ function Vehiculos({ doc, n, s }) {
         <thead><tr><th>Unidad</th><th>Placa</th><th>Estado</th><th>Conductor</th><th className="r">Índice</th><th className="r">Eventos</th><th className="r">ODT</th><th>Documentos</th></tr></thead>
         <tbody>
           {filasU.map(f => <tr key={f.id}>
-            <td className="b w">{f.v.alias}</td><td>{f.v.placa || '—'}</td>
+            <td className="b w">{nombreUnidad(f.v)}</td><td>{f.v.placa || '—'}</td>
             <td><i className={`inf-dot ${f.v.estadoMarcha === 'en_marcha' ? 'm' : f.v.estadoMarcha === 'parada' ? 'd' : 'x'}`} />{f.v.estadoMarcha === 'en_marcha' ? 'En marcha' : f.v.estadoMarcha === 'parada' ? 'Detenida' : 'Sin dato'}</td>
             <td className="w">{f.v.conductorPrincipalId ? f.v.conductorNombre : <span className="inf-si">Sin conductor</span>}</td>
             <td className="r">{n0(f.v.indiceSeguro)}<Mk tono={tonoIndice(f.v.indiceSeguro)} /></td>
@@ -297,7 +298,7 @@ function Mantenimiento({ doc, n, s }) {
     </div>
     <div className="inf-kp4b">
       <Kp etiqueta="Resolución promedio" valor={duracionHoras(act.resolucionHoras)} cmp={comparar(act.resolucionHoras, ant.resolucionHoras, { mejor: 'baja', modo: 'pct' })} antes={ant.resolucionHoras == null ? null : `antes ${duracionHoras(ant.resolucionHoras)}`} />
-      <Kp etiqueta="Más antigua sin resolver" valor={vieja ? `${dias(vieja)} ${dias(vieja) === 1 ? 'día' : 'días'}` : '—'} ahora nota={vieja ? `${porId.get(vieja.vehiculoId)?.alias || vieja.vehiculoNombre || '—'} · desde el ${fechaCortaVE(vieja.creadaEn, true)}` : 'Ninguna'} />
+      <Kp etiqueta="Más antigua sin resolver" valor={vieja ? `${dias(vieja)} ${dias(vieja) === 1 ? 'día' : 'días'}` : '—'} ahora nota={vieja ? `${porId.has(vieja.vehiculoId) ? nombreUnidad(porId.get(vieja.vehiculoId)) : vieja.vehiculoNombre || '—'} · desde el ${fechaCortaVE(vieja.creadaEn, true)}` : 'Ninguna'} />
       <Kp etiqueta="Costo en resueltas" valor={dineroVE(act.costoResueltas)} cmp={comparar(act.costoResueltas, ant.costoResueltas, { mejor: 'baja' })} nota={`${act.conCosto} de ${act.resueltas} con costo`} />
       <Kp etiqueta="Costo medio resuelta" valor={act.conCosto ? dineroVE(act.costoResueltas / act.conCosto) : '—'} ahora={false} cmp={null} nota="Solo con costo" />
     </div>
@@ -310,7 +311,7 @@ function Mantenimiento({ doc, n, s }) {
           {ordenes.length ? ordenes.map(o => {
             const g = grupoOdt(o.estado)
             return <tr key={o.id}>
-              <td>{fechaCortaVE(o.creadaEn)}</td><td className="b w">{porId.get(o.vehiculoId)?.alias || o.vehiculoNombre || '—'}</td>
+              <td>{fechaCortaVE(o.creadaEn)}</td><td className="b w">{porId.has(o.vehiculoId) ? nombreUnidad(porId.get(o.vehiculoId)) : o.vehiculoNombre || '—'}</td>
               <td className="w">{o.tipoFalla ? etiquetaFalla(o.tipoFalla) : o.tipo === 'preventiva' ? 'Preventivo' : 'Otro'}</td><td className="w">{o.descripcion || '—'}</td>
               <td>{g === 'abierta' ? <Tg tono="warn">Abierta</Tg> : g === 'revision' ? <Tg clase="az">En revisión</Tg> : g === 'resuelta' ? <Tg tono="ok">Resuelta</Tg> : <Tg clase="ne">{ETIQUETA_GRUPO.otro}</Tg>}</td>
               <td className="r">{dias(o) == null ? <Raya /> : `${dias(o)} d`}</td>
@@ -391,7 +392,7 @@ function Costos({ doc, n, s }) {
         <colgroup><col style={{ width: '24%' }} /><col style={{ width: '18%' }} /><col style={{ width: '18%' }} /><col style={{ width: '18%' }} /><col style={{ width: '22%' }} /></colgroup>
         <thead><tr><th>Unidad</th><th>Placa</th><th className="r">ODT resueltas</th><th className="r">Con costo</th><th className="r">Costo registrado</th></tr></thead>
         <tbody>
-          {conOdt.map(f => <tr key={f.id}><td className="b w">{f.v.alias}</td><td>{f.v.placa || '—'}</td><td className="r">{f.resueltas}</td><td className="r">{f.conCosto}{f.conCosto < f.resueltas && <Mk tono="warn" />}</td><td className="r b">{f.costo == null ? 'Sin costo' : dineroVE(f.costo)}</td></tr>)}
+          {conOdt.map(f => <tr key={f.id}><td className="b w">{nombreUnidad(f.v)}</td><td>{f.v.placa || '—'}</td><td className="r">{f.resueltas}</td><td className="r">{f.conCosto}{f.conCosto < f.resueltas && <Mk tono="warn" />}</td><td className="r b">{f.costo == null ? 'Sin costo' : dineroVE(f.costo)}</td></tr>)}
           {filasU.length - conOdt.length > 0 && <tr className="si"><td>Otras {filasU.length - conOdt.length} unidades</td><td /><td className="r">0</td><td className="r">—</td><td className="r">—</td></tr>}
           <tr className="tot"><td>Total</td><td /><td className="r">{act.resueltas}</td><td className="r">{act.conCosto}</td><td className="r">{dineroVE(act.costoResueltas)}</td></tr>
         </tbody>

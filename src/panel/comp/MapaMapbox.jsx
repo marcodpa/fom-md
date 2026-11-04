@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { etiquetaUnidad, nombreUnidad } from '../datos/nombreUnidad'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
 import { vehicleMarkerSvg, MARKER_SIZE, MARKER_ANCHOR, validPosition } from './vehicleMarker'
 import { AZUL_ESTELA_FOM, pintarCola, pintarRuta } from './rutaMapbox'
@@ -114,14 +115,14 @@ function pintarUnidad(el, v, sel) {
   // Sin señal, el texto accesible y el globo del cursor dicen cuánto lleva callada.
   const sinSenal = estado.clave === 'sin_senal'
   const texto = sinSenal ? textoSinSenal(v.ultimoReporte) : estado.texto
-  const firma = [sel ? 1 : 0, v.placa ?? '', v.alias ?? '', v.rumbo ?? '', estado.clave, texto].join('|')
+  const firma = [sel ? 1 : 0, v.placa ?? '', nombreUnidad(v), v.rumbo ?? '', estado.clave, texto].join('|')
   if (el.dataset.firma === firma) return
   el.dataset.firma = firma
   el.innerHTML = vehicleMarkerSvg(v, sel)
   el.classList.toggle('selected', sel)
   el.style.zIndex = sel ? '1000' : '0'
-  el.title = `${v.alias} · ${v.placa}${sinSenal ? ` · ${texto}` : ''}`
-  el.setAttribute('aria-label', `${v.placa || v.alias || 'Sin placa'}, ${texto}`)
+  el.title = `${etiquetaUnidad(v)}${sinSenal ? ` · ${texto}` : ''}`
+  el.setAttribute('aria-label', `${nombreUnidad(v)}, ${texto}`)
   el.setAttribute('aria-pressed', String(sel))
 }
 
@@ -701,7 +702,7 @@ export default function MapaMapbox({
     const pulsar = (id, conDestino) => {
       if (conDestino && modoDestino.current && id !== seleccionadoRef.current) {
         const u = vehiculosRef.current.find((x) => x.id === id)
-        if (validPosition(u)) elegirDestinoRef.current?.({ lat: u.lat, lng: u.lng, nombre: u.placa || u.alias || 'Otra unidad' })
+        if (validPosition(u)) elegirDestinoRef.current?.({ lat: u.lat, lng: u.lng, nombre: nombreUnidad(u) })
         return
       }
       alSeleccionarRef.current?.(seleccionadoRef.current === id ? null : id)

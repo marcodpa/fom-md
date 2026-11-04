@@ -1,9 +1,9 @@
-import { placaMayuscula } from './placas.js'
+import { normalizarPlaca } from './placas.js'
 
 /** El activo existe independientemente de su telemetría (#767). */
 export function cuerpoNuevaUnidad({ alias, placa, marca, modelo, anio, tipo, numero }) {
   const nombre = alias?.trim() || ''
-  const matricula = placaMayuscula(placa?.trim()) || ''
+  const matricula = normalizarPlaca(placa)
   const interno = numero?.trim() || ''
   const code = (interno || matricula || nombre).toLowerCase().replace(/\s+/gu, '-')
   if (!code) throw new Error('Indica una placa, un alias o un número interno para identificar la unidad.')

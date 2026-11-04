@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { rangoRol } from '../roles'
 import { REGLAS_CLAVE, validarClave } from '../../lib/clave'
 import { Link, useSearchParams } from 'react-router-dom'
 import repo, { DIRECTORIO_REAL } from '../datos/repo'
@@ -578,14 +579,13 @@ export function ModalCambiarRol({ persona, alCerrar, alGuardar }) {
   </Modal>
 }
 
-const RANGO = { admin_fom: 4, supervisor: 3 }
 function puedeAdministrar(actor, objetivo) {
   if (!actor || !objetivo) return false
   if (actor.correo && objetivo.email && actor.correo === objetivo.email) return false
   if (objetivo.rol === 'admin_fom') return false
-  const rangoActor = RANGO[actor.rol] ?? 1
+  const rangoActor = rangoRol(actor.rol)
   if (rangoActor < 3) return false
-  return rangoActor > (RANGO[objetivo.rol] ?? 1)
+  return rangoActor > rangoRol(objetivo.rol)
 }
 
 const GRUPOS_CLAVE = [
@@ -710,7 +710,7 @@ export function ModalCrear({ abierto, empresas, alCerrar, alGuardar, actor, dire
           </Campo>
           {(!directorioReal || global) && <Campo etiqueta="Empresa">
             <select className="pnl-input" value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
-              <option value="">Selecciona el empresa…</option>
+              <option value="">Selecciona la empresa…</option>
               {destinos.map((e) => (
                 <option key={e.id} value={e.id}>{e.nombre} · {e.tipoEtiqueta}</option>
               ))}

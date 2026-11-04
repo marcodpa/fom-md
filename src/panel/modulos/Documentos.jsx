@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { etiquetaUnidad } from '../datos/nombreUnidad'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
@@ -21,8 +22,6 @@ import '../../styles/movil-modulos.css'
 // Vencimientos de vehículos y personas en un solo tablero: lo urgente arriba,
 // el resto filtrable y exportable.
 // ============================================================
-
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
 // Marca de orden de bytes: sin ella Excel abre el CSV con los acentos rotos.
 const BOM = String.fromCharCode(0xfeff)
@@ -71,7 +70,7 @@ function vencimientosPorMes(lista) {
   const meses = []
   for (let i = 0; i < 6; i++) {
     const d = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1)
-    meses.push({ anio: d.getFullYear(), mes: d.getMonth(), etiqueta: MESES[d.getMonth()], valor: 0 })
+    meses.push({ anio: d.getFullYear(), mes: d.getMonth(), etiqueta: f.MESES_CORTOS[d.getMonth()], valor: 0 })
   }
   lista.forEach((doc) => {
     const v = new Date(`${doc.venceEn}T00:00:00`)
@@ -559,7 +558,7 @@ export function ModalNuevoDocumento({ abierto, alCerrar, alGuardar, fijo = null 
           {d.ambito === 'vehiculo' ? (
             <select className="pnl-input" value={d.vehiculoId} onChange={set('vehiculoId')} aria-label="Unidad">
               <option value="">Elige la unidad…</option>
-              {(vehiculos.datos ?? []).map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
+              {(vehiculos.datos ?? []).map((v) => <option key={v.id} value={v.id}>{etiquetaUnidad(v)}</option>)}
             </select>
           ) : (
             <select className="pnl-input" value={d.personaId} onChange={set('personaId')} aria-label="Persona">

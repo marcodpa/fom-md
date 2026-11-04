@@ -23,6 +23,8 @@ import { DIAS_SEMANA, diasParaEnviar, normalizarDias, tocaTodosLosDias } from '.
 import { comoEventoManejo } from './eventosManejo'
 import { calificacionManejo } from './manejo'
 import { empresaGestionActualId } from './api'
+import { PUERTO_RECEPTOR } from './gps'
+import { normalizarPlaca } from './placas'
 import {
   AVISO_BLOQUEADA, AVISO_OTRA_UNIDAD, InspeccionYaHecha, argumentosDeFormato, cuerpoEmergencia, cuerpoPlantilla, detalleDeEnvio,
   emergenciaDelConductor, emergenciaParaConsola, guardarDiaria, leerDiariaGuardada, plantillaDeFormato, publicarSiHaceFalta,
@@ -705,9 +707,9 @@ export const repo = {
      */
     async crear({ alias, placa, marca, modelo, anio, tipo = 'camioneta', gpsId, areaId = null, numero }, actor) {
       if (actor?.rol !== 'admin') return fallo('Solo el Administrador FOM puede crear vehículos.')
-      const placaN = String(placa || '').toUpperCase().replace(/\s+/g, '')
+      const placaN = normalizarPlaca(placa).replace(/\s+/g, '')
       if (!placaN && !alias?.trim() && !numero?.trim()) return fallo('Indica una placa, un alias o un número interno.')
-      if (placaN && todosVehiculos().some((v) => (v.placa || '').toUpperCase().replace(/\s+/g, '') === placaN))
+      if (placaN && todosVehiculos().some((v) => normalizarPlaca(v.placa).replace(/\s+/g, '') === placaN))
         return fallo('Ya existe un vehículo con esa placa.')
       const gps = todosGps().find((g) => g.id === gpsId)
       if (gpsId && !gps) return fallo('Selecciona un GPS del inventario.')
@@ -1483,7 +1485,7 @@ export const repo = {
 
       /** Estado del receptor FOM. Solo en la demostración: el servidor aún no lo publica. */
       async receptor() {
-        return responder({ activo: true, tcp: true, udp: true, puerto: 5001, ultimoMensaje: new Date(Date.now() - 4000).toISOString(), mensajesRecientes: 1284, fallosAlGuardar: 0 })
+        return responder({ activo: true, tcp: true, udp: true, puerto: PUERTO_RECEPTOR, ultimoMensaje: new Date(Date.now() - 4000).toISOString(), mensajesRecientes: 1284, fallosAlGuardar: 0 })
       },
 
       /** Unidades de una empresa para instalar, con el GPS que ya llevan. */

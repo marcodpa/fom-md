@@ -1,5 +1,6 @@
 /** Métricas derivadas de registros autorizados, sin convertir ausencias en ceros. */
 import { etiqueta, estadoDocumento } from '../datos/catalogos.js'
+import { MESES, MESES_CORTOS, hora, numero } from '../datos/formato.js'
 
 export function numeroValido(valor) {
   return valor !== null && valor !== undefined && valor !== '' && Number.isFinite(Number(valor))
@@ -53,11 +54,7 @@ export function crearCsv(filas) {
 // ============================================================
 
 export function numeroVE(n, decimales = 0) {
-  if (!numeroValido(n)) return '—'
-  const v = Number(n)
-  const [entero, fraccion] = Math.abs(v).toFixed(decimales).split('.')
-  const signo = v < 0 && Number(Math.abs(v).toFixed(decimales)) !== 0 ? '-' : ''
-  return signo + entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (fraccion ? `,${fraccion}` : '')
+  return numeroValido(n) ? numero(n, decimales) : '—'
 }
 
 /** Hasta `maximo` decimales, sin ceros de relleno: 8 → «8», 4,70 → «4,7». */
@@ -85,8 +82,6 @@ export function duracionHoras(horas) {
   return h % 24 ? `${d} d ${h % 24} h` : `${d} d`
 }
 
-export const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-export const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 const mayuscula = t => t.charAt(0).toUpperCase() + t.slice(1)
 const dos = n => String(n).padStart(2, '0')
 
@@ -95,12 +90,12 @@ export function fechaCortaVE(fecha, conAnio = false) {
   const d = new Date(fecha)
   return `${d.getDate()} ${MESES_CORTOS[d.getMonth()]}${conAnio ? ` ${d.getFullYear()}` : ''}`
 }
-/** «20 oct 2026, 09:42» (24 horas, como el pie del informe). */
+/** «20 oct 2026, 9:42 a. m.» (12 horas, como todo el panel). */
 export function fechaHoraVE(fecha) {
   const d = new Date(fecha)
-  return `${fechaCortaVE(d, true)}, ${dos(d.getHours())}:${dos(d.getMinutes())}`
+  return `${fechaCortaVE(d, true)}, ${hora(d)}`
 }
-export const horaVE = fecha => { const d = new Date(fecha); return `${dos(d.getHours())}:${dos(d.getMinutes())}` }
+export const horaVE = fecha => hora(new Date(fecha))
 
 // ============================================================
 // PERÍODO — «Mes actual» o «Personalizado» por meses. Las ventanas son

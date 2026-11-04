@@ -47,8 +47,16 @@ export function nombreEquipo(g) {
   return `${marca} ${modelo}`
 }
 
-/** Puerto del receptor FOM (TCP y UDP). La IP sale de la configuración, nunca del código. */
+/**
+ * El receptor FOM, en un solo sitio. Puerto de los equipos Coban (TCP y UDP) y puerto del
+ * Meitrack T399L (solo TCP). La IP para escribir en los comandos sale de la configuración
+ * del sitio (`VITE_GPS_RECEPTOR`), nunca del código; se lee aquí una sola vez.
+ */
 export const PUERTO_RECEPTOR = 5001
+export const PUERTO_RECEPTOR_MEITRACK = 5002
+export const IP_RECEPTOR = String(import.meta.env?.VITE_GPS_RECEPTOR || '').trim()
+/** La IP del receptor que el servidor confirma al preparar un Meitrack: si dice otra, se rechaza. */
+export const IP_RECEPTOR_CONFIRMADA = '51.81.195.12'
 export const IP_RECEPTOR_FALTA = '[IP del receptor]'
 
 const soloDigitos = (v) => String(v ?? '').replace(/\D/gu, '')

@@ -8,7 +8,7 @@ import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
 import { color, estadoDocumento, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
-import { etiquetaRolSesion, rolCanonico } from '../roles'
+import { colorRol, etiquetaRolSesion, rolCanonico } from '../roles'
 import { useSesion } from '../useSesion'
 import EventosManejoPerfil from './ManejoBrusco'
 import { enlaceEventoEnMapa } from '../datos/eventosManejo'
@@ -58,7 +58,7 @@ function Identidad({ persona: p, avatar, acciones }) {
             {` ${p.telefono || 'Sin teléfono'}`}
           </span>
         </div>
-        <Tag color={p.rol === 'conductor' ? 'azul' : 'gris'}>{etiquetaRolSesion(p.rol)}</Tag>
+        <Tag color={colorRol(p.rol)}>{etiquetaRolSesion(p.rol)}</Tag>
         {acciones}
       </div>
     </Tarjeta>

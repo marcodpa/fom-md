@@ -10,6 +10,7 @@
 import { HAY_API, api, pedir } from './api'
 import repo from './repo'
 import { leerTodasLasPaginas } from './listar-odts'
+import { identidadDeUnidad } from './nombreUnidad'
 
 const CONSOLA = '/api/v1/console'
 
@@ -19,9 +20,7 @@ function comoFila(v, empresa) {
     empresaId: empresa.id,
     empresaNombre: empresa.nombre,
     empresa,
-    alias: v.alias || v.fleetNumber || v.code || 'Sin nombre',
-    placa: v.plate || '',
-    numero: v.fleetNumber || v.code || '',
+    ...identidadDeUnidad(v),
     marca: v.make || '',
     modelo: v.model || '',
     anio: v.modelYear ?? null,

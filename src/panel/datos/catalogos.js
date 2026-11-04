@@ -4,6 +4,7 @@
 // Los valores NO se inventan: si mañana el panel se conecta a Supabase,
 // estos mismos strings viajan sin traducción.
 // ============================================================
+import { etiquetaRolSesion, rangoRol } from '../roles.js'
 
 export const VEHICULO_TIPO = ['camioneta', 'camion', 'auto', 'otro']
 export const MARCHA_ESTADO = ['en_marcha', 'parada']
@@ -96,13 +97,6 @@ export const ETIQUETA = {
     vigente: 'Vigente',
     por_vencer: 'Por vencer',
     vencido: 'Vencido',
-  },
-  rol: {
-    admin: 'Administrador FOM',
-    supervisor_company: 'Administrador',
-    conductor: 'Conductor',
-    supervisor_personal: 'Supervisor',
-    usuario_personal: 'Usuario',
   },
 }
 
@@ -203,21 +197,10 @@ export const ROLES_ASIGNABLES = ['conductor', 'supervisor_company', 'supervisor_
 /** Clave de mentira que el modo demo muestra al crear o restablecer una cuenta. No es de ninguna cuenta real. */
 export const CLAVE_POR_DEFECTO = 'Demo-Solo-Ejemplo-1'
 
-/** Jerarquía de mando: cada quien solo gestiona a los de rango MENOR, nunca a sí mismo. */
-export const RANGO = {
-  admin: 4,
-  supervisor_company: 3,
-  supervisor_personal: 3,
-  conductor: 1,
-  usuario_personal: 1,
-  // La sesión de la demo usa los nombres de roles.js (admin_fom, supervisor), no los
-  // de la semilla: sin estos dos, un supervisor quedaba con rango 1 y no podía con nadie.
-  admin_fom: 4,
-  supervisor: 3,
-}
+/** Jerarquía de mando (rangoRol, en roles.js): cada quien solo gestiona a los de rango MENOR, nunca a sí mismo. */
 export function puedeGestionarA(actor, objetivo) {
   if (!actor || !objetivo || actor.id === objetivo.id) return false
-  return (RANGO[objetivo.rol] ?? 1) < (RANGO[actor.rol] ?? 1)
+  return rangoRol(objetivo.rol) < rangoRol(actor.rol)
 }
 
 /**
@@ -235,15 +218,8 @@ export function validarRolEmpresa(rol, tipoEmpresa) {
   return null
 }
 
-/**
- * Etiqueta del rol según el tipo de ente, como etiquetaRol() de la app:
- * supervisor_company es "Supervisor" en una compañía y "Administrador" en
- * una contratista.
- */
-export function etiquetaRol(rol, tipoEmpresa) {
-  if (rol === 'supervisor_company') return tipoEmpresa === 'predefinida' ? 'Supervisor' : 'Administrador'
-  return ETIQUETA.rol[rol] ?? rol
-}
+/** La etiqueta del rol es la de roles.js (única fuente); el tipo de ente ya no la cambia. */
+export const etiquetaRol = (rol) => etiquetaRolSesion(rol)
 
 /** Estado de un documento según su fecha de vencimiento (regla de la app). */
 export function estadoDocumento(venceEn, hoy = new Date()) {

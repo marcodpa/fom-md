@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { etiquetaUnidad } from '../datos/nombreUnidad'
 import { useDatos } from '../useDatos'
 import { Campo, ErrorCarga, Tag, Tarjeta } from './ui'
 import { Icono } from '../Iconos'
@@ -31,9 +32,7 @@ export function formatoReloj(segundos) {
 
 /** «U-001 · Z69FC7W»: el número de puerta y la placa, como `vehicleLabel` de la app. */
 function identidadDe(unidad) {
-  const numero = unidad?.numero && unidad.numero !== '—' ? unidad.numero.toUpperCase() : null
-  const placa = unidad?.placa && unidad.placa !== '—' ? unidad.placa : null
-  return [numero, placa].filter(Boolean).join(' · ')
+  return unidad ? etiquetaUnidad(unidad) : ''
 }
 
 /**

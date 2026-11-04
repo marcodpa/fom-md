@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { etiquetaUnidad } from '../datos/nombreUnidad'
 import { normalizarCodigoPlan, validarCodigoPlan } from '../datos/codigoPlan'
 import { Link } from 'react-router-dom'
 import repo from '../datos/repo'
@@ -261,7 +262,7 @@ function ModalCubrir({ plan, vehiculos, alCerrar, guardar, fallo }) {
       <Campo etiqueta="Unidad" error={error || fallo}>
         <select className="pnl-input" value={vehiculoId} onChange={(e) => setVehiculoId(e.target.value)}>
           <option value="">Elige…</option>
-          {vehiculos.map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
+          {vehiculos.map((v) => <option key={v.id} value={v.id}>{etiquetaUnidad(v)}</option>)}
         </select>
       </Campo>
       <div className="pnl-grid k2">
@@ -318,7 +319,7 @@ function ModalAccion({ abierto, vehiculos, planes, alCerrar, guardar, fallo }) {
       <Campo etiqueta="Unidad" error={error || fallo}>
         <select className="pnl-input" value={d.vehiculoId} onChange={set('vehiculoId')}>
           <option value="">Elige…</option>
-          {vehiculos.map((v) => <option key={v.id} value={v.id}>{v.alias} · {v.placa}</option>)}
+          {vehiculos.map((v) => <option key={v.id} value={v.id}>{etiquetaUnidad(v)}</option>)}
         </select>
       </Campo>
       <Campo etiqueta={d.tipo === 'preventive' ? 'Plan (obligatorio)' : 'Plan (opcional)'}>

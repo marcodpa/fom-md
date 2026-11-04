@@ -26,7 +26,9 @@ import { MEITRACK, cuerpoAltaMeitrack } from './gpsMeitrack'
 import { buscarEquipoGps, empresaDeInstalacion, empresaPropia, equiposParaNuevaUnidad, mensajeInstalarGps } from './instalarGps'
 import { empresaDeReinicio, mensajeReiniciarClave } from './reiniciarClave'
 import { crearUnidad, gpsDisponible } from './altaUnidad'
-import { placaMayuscula } from './placas'
+import { normalizarPlaca } from './placas'
+import { identidadDeUnidad } from './nombreUnidad'
+import { etiquetaRolSesion, rolCanonico } from '../roles'
 import { LIMITE_EVENTOS, comoEventoManejo, diasServidor } from './eventosManejo'
 import { cloudinaryConfigurado, subirImagen } from './cloudinary'
 import { carpetaDe } from './archivos'
@@ -41,7 +43,8 @@ import { alCambiar, perfilActual, sesionActual } from '../auth'
  * ningún punto del camino.
  */
 function comoUnidad(v) {
-  const alias = v.alias || v.fleetNumber || v.code
+  // Lo vacío va como '' (placa y número): el «—» se pinta solo al mostrar.
+  const { alias, placa, numero } = identidadDeUnidad(v)
   return {
     id: v.id,
     vehiculoId: v.id,
@@ -50,8 +53,8 @@ function comoUnidad(v) {
     marca: v.make || '—',
     modelo: v.model || '—',
     anio: v.modelYear ?? null,
-    placa: v.plate || '—',
-    numero: v.fleetNumber || v.code || '—',
+    placa,
+    numero,
     numeroFlota: v.fleetNumber ?? null,
     alias,
     tipo: v.vehicleType || 'otro',
@@ -206,15 +209,6 @@ function claveTemporal() {
   crypto.getRandomValues(bytes)
   const cuerpo = [...bytes].map((b) => alfabeto[b % alfabeto.length]).join('')
   return `Fom-${cuerpo.slice(0, 4)}-${cuerpo.slice(4, 8)}-${cuerpo.slice(8, 12)}`
-}
-
-/** El rol canonico en palabras, como lo ve la gente. */
-const ETIQUETA_ROL = {
-  admin_fom: 'Administrador FOM',
-  supervisor: 'Supervisor',
-  conductor: 'Conductor',
-  operator: 'Operador',
-  usuario: 'Usuario',
 }
 
 /**
@@ -954,8 +948,8 @@ export const repoApi = {
         userId: p.userId,
         nombre: p.displayName,
         email: p.email,
-        rol: p.role,
-        rolEtiqueta: ETIQUETA_ROL[p.role] ?? p.role ?? '—',
+        rol: rolCanonico(p.role),
+        rolEtiqueta: p.role ? etiquetaRolSesion(p.role) : '—',
         estado: p.status,
         activadoEn: p.activatedAt,
         empresaId: enteDeLaLista,
@@ -1230,8 +1224,7 @@ export const repoApi = {
         const d = porUnidad.get(v.id)
         return {
           id: v.id,
-          alias: v.alias || v.fleetNumber || v.code || 'Sin nombre',
-          placa: v.plate || '',
+          ...identidadDeUnidad(v),
           marca: v.make || '',
           modelo: v.model || '',
           anio: v.modelYear ?? null,
@@ -1432,7 +1425,7 @@ export const repoApi = {
 
     async set(id, parche) {
       await api.actualizarVehiculo(id, {
-        plate: placaMayuscula(parche.placa),
+        plate: parche.placa == null ? parche.placa : normalizarPlaca(parche.placa),
         alias: parche.alias,
         fleetNumber: parche.numero === undefined ? undefined : parche.numero?.trim() || null,
         make: parche.marca,

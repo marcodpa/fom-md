@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { etiquetaUnidad, nombreUnidad } from '../datos/nombreUnidad'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import FichaUnidad, { estadoUnidad } from './FichaUnidad'
@@ -260,9 +261,9 @@ export default function MapaLibre({
         if (!m) {
           m = L.marker([v.lat, v.lng], {
             icon: iconoUnidad(v, sel),
-            title: `${v.alias} · ${v.placa}`,
+            title: etiquetaUnidad(v),
             keyboard: true,
-            alt: `${v.alias || v.placa}, ${estadoUnidad(v).texto}`,
+            alt: `${nombreUnidad(v)}, ${estadoUnidad(v).texto}`,
           })
           m.addTo(mapa.current)
           marcadores.current.set(v.id, m)
@@ -278,7 +279,7 @@ export default function MapaLibre({
         m.setZIndexOffset(sel ? 1000 : 0)
         const elemento = m.getElement()
         if (elemento) {
-          elemento.setAttribute('aria-label', `${v.placa || v.alias || 'Sin placa'}, ${estadoUnidad(v).texto}`)
+          elemento.setAttribute('aria-label', `${nombreUnidad(v)}, ${estadoUnidad(v).texto}`)
           elemento.setAttribute('aria-pressed', String(sel))
         }
       })

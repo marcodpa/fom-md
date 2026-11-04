@@ -68,7 +68,7 @@ export function guardarPrefs(prefs) {
 /** La hora en Venezuela (0–23), para la luz automática. */
 function horaEnVenezuela(fecha = new Date()) {
   try {
-    const partes = new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Caracas' }).formatToParts(fecha)
+    const partes = new Intl.DateTimeFormat('en-US', { hour: 'numeric', hourCycle: 'h23', timeZone: 'America/Caracas' }).formatToParts(fecha)
     const h = Number(partes.find((p) => p.type === 'hour')?.value)
     return Number.isFinite(h) ? h % 24 : fecha.getHours()
   } catch {

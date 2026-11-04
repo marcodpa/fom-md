@@ -240,7 +240,7 @@ function ModalRegistrar({ abierto, empresas, alCerrar, alGuardar, actor }) {
     <Modal titulo="Registrar cuota" abierto={abierto} alCerrar={cerrar} ancho={480}>
       <Campo etiqueta="Empresa" error={error}>
         <select className="pnl-input" value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
-          <option value="">Selecciona el empresa…</option>
+          <option value="">Selecciona la empresa…</option>
           {empresas.map((e) => (
             <option key={e.id} value={e.id}>{e.nombre}</option>
           ))}

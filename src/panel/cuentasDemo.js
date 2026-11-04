@@ -10,6 +10,8 @@
 // claves no aparecen en `dist/`.
 // ============================================================
 
+import { etiquetaRolSesion } from './roles.js'
+
 export const CUENTAS = [
   {
     usuario: import.meta.env?.VITE_PANEL_USUARIO || 'supervisor@fom.com.ve',
@@ -19,7 +21,7 @@ export const CUENTAS = [
       nombre: 'Yeison Márquez',
       correo: 'supervisor@fom.com.ve',
       rol: 'supervisor',
-      rolNombre: 'Supervisor',
+      rolNombre: etiquetaRolSesion('supervisor'),
       empresaTipo: 'estandar',
       empresa: 'Transporte Lago Sur, C.A.',
       empresaId: 'transporte-lago-sur',
@@ -35,7 +37,7 @@ export const CUENTAS = [
       nombre: 'Carlos Méndez',
       correo: 'conductor@fom.com.ve',
       rol: 'conductor',
-      rolNombre: 'Conductor',
+      rolNombre: etiquetaRolSesion('conductor'),
       empresaTipo: 'estandar',
       empresa: 'Transporte Lago Sur, C.A.',
       empresaId: 'transporte-lago-sur',
@@ -51,7 +53,7 @@ export const CUENTAS = [
       nombre: 'Marco Pacheco',
       correo: 'admin@fom.com.ve',
       rol: 'admin_fom',
-      rolNombre: 'Administrador FOM',
+      rolNombre: etiquetaRolSesion('admin_fom'),
       empresa: 'FOM · Administración',
       empresaId: null, // multiempresa: no pertenece a un ente
       sede: 'Todas las empresas',

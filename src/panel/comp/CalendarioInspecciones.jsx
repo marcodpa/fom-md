@@ -1,4 +1,5 @@
 import { Icono } from '../Iconos'
+import { mesAnio } from '../datos/formato'
 
 // ============================================================
 // CALENDARIO DE INSPECCIONES DE UNA PERSONA
@@ -70,8 +71,7 @@ export const diaSemana = (iso) => {
 /** «Octubre 2026». */
 export function nombreDelMes(mes) {
   const [a, m] = mes.split('-').map(Number)
-  const t = new Date(a, m - 1, 1).toLocaleDateString('es-VE', { month: 'long' })
-  return `${t.charAt(0).toUpperCase()}${t.slice(1)} ${a}`
+  return mesAnio(new Date(a, m - 1, 1), true)
 }
 
 /** La regla en palabras, igual que en la app. */

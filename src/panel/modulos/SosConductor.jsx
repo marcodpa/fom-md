@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { nombreUnidad as nombreDeUnidad } from '../datos/nombreUnidad'
 import { Link, useNavigate } from 'react-router-dom'
 import repo from '../datos/repo'
 import { claveIdempotente } from '../datos/api'
@@ -175,7 +176,7 @@ export default function SosConductor() {
   const errorOtro = esOtro ? validarTipoOtro(tipoOtro) : null
   const faltaTipo = tipo === null
   const faltaDetalle = detalle.trim().length < 3
-  const nombreUnidad = vehiculo ? etiquetaUnidad(vehiculo) : null
+  const nombreUnidad = vehiculo ? nombreDeUnidad(vehiculo) : null
   // El texto de la persona manda sobre el de la unidad: el aviso es para ir a buscarla a ella.
   const ubicacionTexto = telefono.coords ? enTexto(telefono.coords) : coordsUnidad ? enTexto(coordsUnidad) : ''
 
@@ -390,11 +391,6 @@ export default function SosConductor() {
   )
 }
 
-/** El id de la puerta (o la placa), como `etiquetaCortaDeUnidad` de la app. */
-function etiquetaUnidad(v) {
-  const id = v?.numero && v.numero !== '—' ? v.numero.toUpperCase() : null
-  return id ?? (v?.placa && v.placa !== '—' ? v.placa : v?.alias ?? 'Tu unidad')
-}
 
 /** Una línea de la ficha: ícono, qué es y su valor (DatoSOS de la app). */
 function DatoSos({ icono, etiqueta, valor }) {

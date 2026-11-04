@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import repo from '../datos/repo'
@@ -190,7 +191,7 @@ function ResumenDocumentos({ documentos, verTodo }) {
 /** "octubre 2026": el mes en curso, para decir de qué período es el total. */
 function mesActual() {
   const d = new Date()
-  return `${d.toLocaleDateString('es', { month: 'long' })} ${d.getFullYear()}`
+  return f.mesAnio(d)
 }
 
 /** Total del mes en curso y sus rubros principales, con los costos que la ficha ya trae. */
@@ -320,7 +321,7 @@ function ModalOdometro({ unidad, abierto, alCerrar, alGuardar }) {
     }
   }
   return (
-    <Modal titulo={`Odómetro de ${unidad.alias || unidad.placa}`} abierto={abierto} alCerrar={() => { if (!guardando) alCerrar() }} ancho={460}>
+    <Modal titulo={`Odómetro de ${nombreUnidad(unidad)}`} abierto={abierto} alCerrar={() => { if (!guardando) alCerrar() }} ancho={460}>
       <Campo etiqueta="Kilómetros que marca el tablero hoy" ayuda="Desde ese número, la web suma lo que el GPS vaya registrando para mostrar el total del carro." error={error}>
         <input className="pnl-input" inputMode="decimal" value={km} onChange={(e) => setKm(e.target.value)} placeholder="52340" autoFocus />
       </Campo>

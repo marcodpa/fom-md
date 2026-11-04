@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import { Cargando, Modal } from '../comp/ui'
 import OdtAsignadas from '../comp/OdtAsignadas'
 import * as f from '../datos/formato'
@@ -211,7 +212,7 @@ export default function MantenimientoConductorMovil({
     : vencidas ? f.cantidad(vencidas, 'vencida', 'vencidas')
       : pendientes ? f.cantidad(pendientes, 'pendiente', 'pendientes') : 'Al día'
   const tipoElegido = TIPOS.find((t) => t.id === tipo)
-  const etiquetaUnidad = (unidad?.numero && unidad.numero !== '—' ? unidad.numero.toUpperCase() : null) ?? unidad?.placa ?? unidad?.alias ?? ''
+  const etiquetaUnidad = unidad ? nombreUnidad(unidad) : ''
 
   const titulo = (
     <header className="mvm-titulo">

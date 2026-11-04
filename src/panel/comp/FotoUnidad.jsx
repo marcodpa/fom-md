@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { nombreUnidad } from '../datos/nombreUnidad'
 import { createPortal } from 'react-dom'
 import { etiquetas, huboSubidaReciente, ids, urlDe, urlOriginal } from '../datos/cloudinary'
 import { useFotosVehiculo } from '../datos/fotoVehiculo'
@@ -61,7 +62,7 @@ export default function FotoUnidad({ unidad, puedeEditar = false, variante = 'fi
   const [recorteFallo, setRecorteFallo] = useState(null) // id del recorte que no se pudo mostrar
   const [abierta, setAbierta] = useState(null)
   const [falloOriginal, setFalloOriginal] = useState(false)
-  const nombre = unidad.placa || unidad.alias || 'la unidad'
+  const nombre = nombreUnidad(unidad)
   const alExistir = useCallback((hay, _sinFondo, id) => {
     setFoto(anterior => anterior.hay === hay && anterior.id === id ? anterior : { hay, id })
   }, [])

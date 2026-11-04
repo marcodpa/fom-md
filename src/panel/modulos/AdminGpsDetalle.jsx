@@ -106,13 +106,11 @@ export default function AdminGpsDetalle() {
   )
 }
 
-/** «hoy a las 07:30» / «20 oct, 7:30 a. m.». */
+/** «hoy a las 7:30 a. m.» / «el 20 oct a las 7:30 a. m.». */
 function cuandoFue(iso, ahora) {
   const d = new Date(iso)
-  if (new Date(ahora).toDateString() === d.toDateString()) {
-    return `hoy a las ${d.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', hour12: false })}`
-  }
-  return `el ${f.fechaHora(iso)}`
+  if (new Date(ahora).toDateString() === d.toDateString()) return `hoy a las ${f.hora(iso)}`
+  return `el ${f.fechaCorta(iso)} a las ${f.hora(iso)}`
 }
 
 function Diagnostico({ g, tele, posiciones, ultimaPos, capacidades, ahora }) {
@@ -234,7 +232,7 @@ function Diagnostico({ g, tele, posiciones, ultimaPos, capacidades, ahora }) {
                 {tramas.map((m) => (
                   <tr key={m.id}>
                     <td className="gp-mono" style={{ color: 'var(--e-texto, #f3f5f8)' }}>
-                      {new Date(m.recibido).toLocaleTimeString('es-VE', { hour12: false })}
+                      {f.hora(m.recibido, true)}
                       {new Date(m.recibido).toDateString() !== new Date(ahora).toDateString() && <span className="gp-hint"> · {f.fechaCorta(m.recibido)}</span>}
                     </td>
                     <td>{m.via || '—'}</td>

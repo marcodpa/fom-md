@@ -1,3 +1,9 @@
+/**
+ * La placa para guardar o comparar: sin espacios en los bordes y en mayúsculas. Es la ÚNICA
+ * que pasa una placa a mayúsculas a mano (test/regla-formatos.test.js lo vigila).
+ */
+export const normalizarPlaca = (valor) => String(valor ?? '').trim().toUpperCase()
+
 /** Placa visible/capturada. No normaliza alias, códigos opacos ni números internos. */
 export const placaMayuscula = (valor) => typeof valor === 'string' ? valor.toUpperCase() : valor
 
