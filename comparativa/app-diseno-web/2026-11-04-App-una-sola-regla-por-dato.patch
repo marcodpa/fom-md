@@ -1721,50 +1721,369 @@ index 2c94582..85a63ad 100644
          vehicleId: u.vehicle.id,
          unidad: etiquetaCortaDeUnidad(u.vehicle),
 diff --git a/src/app/mapa-flota.tsx b/src/app/mapa-flota.tsx
-index 76acb87..c89ab1b 100644
+index 76acb87..f3180f6 100644
 --- a/src/app/mapa-flota.tsx
 +++ b/src/app/mapa-flota.tsx
-@@ -22,7 +22,9 @@ import { ThemedText } from '@/components/themed-text';
+@@ -1,9 +1,12 @@
+ import { useLocalSearchParams, useRouter } from 'expo-router';
+-import { useEffect, useMemo, useState, type ComponentType } from 'react';
+-import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
++import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
++import { ScrollView, StyleSheet, TextInput, View, useWindowDimensions } from 'react-native';
+ import { useSafeAreaInsets } from 'react-native-safe-area-context';
+-import Svg, { Path } from 'react-native-svg';
++import Svg, { Circle, Path } from 'react-native-svg';
+ 
++import { ChipsFlota } from '@/components/chips-flota';
++import { agruparPorEstado, chipsVisibles, type FiltroEstado } from '@/components/chips-flota-cuentas';
++import { LogoCapsula } from '@/components/encabezado-fom';
+ import { Flotante } from '@/components/escalonado';
+ import {
+   AvisoEventos,
+@@ -14,24 +17,62 @@ import {
+   useEventosManejo,
+   type EventosManejoEstado,
+ } from '@/components/eventos-manejo';
++import { HojaModal } from '@/components/hoja-modal';
+ import { MapaVehiculo, type MapaVehiculoProps } from '@/components/map-vehiculo';
++import { MarcaEmpresaCompacta, useMarcaEmpresa } from '@/components/marca-empresa-compacta';
+ import { PanelRecorrido, useRecorrido, type Foco, type Rango } from '@/components/panel-recorrido';
+ import { PressableScale } from '@/components/pressable-scale';
++import { normalizar } from '@/components/search-bar';
++import { TabIcon } from '@/components/tab-icon';
+ import { TextoVivo } from '@/components/texto-vivo';
+ import { ThemedText } from '@/components/themed-text';
  import { ThemedView } from '@/components/themed-view';
- import { detalleDeUnidad, estadoDeUnidad, useFlotaFom } from '@/hooks/use-flota-fom';
+-import { detalleDeUnidad, estadoDeUnidad, useFlotaFom } from '@/hooks/use-flota-fom';
++import { detalleDeUnidad, estadoDeUnidad, useFlotaFom, type EstadoFlotaFom, type UnidadFom } from '@/hooks/use-flota-fom';
  import { PERIODOS_MAPA, type PropsEventosMapa } from '@/lib/eventos-manejo';
-+import { esCalladaClave, reportaAlDia } from '@/lib/estado-unidad';
++import { COLOR_ESTADO, esCalladaClave, HEX_COLOR, reportaAlDia } from '@/lib/estado-unidad';
  import { HAY_MAPBOX } from '@/lib/mapbox';
+-import { textoUltimoReporte } from '@/lib/sin-senal';
 +import { etiquetaUnidad } from '@/lib/nombre-unidad';
- import { textoUltimoReporte } from '@/lib/sin-senal';
++import { ordenarSinSenal, textoUltimoReporte } from '@/lib/sin-senal';
  import { etiquetaCortaDeUnidad } from '@/lib/vehiculos';
- import { enteActivoFom, getConductoresDeUnidad } from '@/services';
-@@ -110,12 +112,12 @@ export default function MapaFlotaScreen() {
-       unidades
-         .filter((u) => u.pos)
-         .map((u) => {
+-import { enteActivoFom, getConductoresDeUnidad } from '@/services';
+-import { useTheme } from '@/theme';
+-import type { MapMarker } from '@/types';
++import { enteActivoFom, getAreas, getConductoresDeUnidad } from '@/services';
++import { leerConAviso } from '@/services/leerConAviso';
++import { familiaPorPeso, useTheme } from '@/theme';
++import type { Area, MapMarker } from '@/types';
++import { numero } from '@/utils/numero';
+ 
+ /** Superficie de las piezas que flotan sobre el mapa. */
+ const SOBRE_MAPA = 'rgba(20, 26, 34, 0.94)';
+ 
++/**
++ * Medidas de la parte de arriba en el teléfono, sin el área segura
++ * (`docs/DISENO-CENTRO-CONTROL-MOVIL.md`): la barra acaba a 64, la fila de
++ * chips a 166 y el botón de capas va 12 más abajo. En el recorrido no hay
++ * buscador ni chips: todo acaba con la barra.
++ */
++const FIN_BARRA = 64;
++const FIN_CHIPS = 166;
++/** El marcador de una unidad CON posición: su estado es el de la regla única. */
++function aMarcador(u: UnidadFom, sello: number): MapMarker {
++  const { clave } = estadoDeUnidad(u, sello);
++  return {
++    id: u.vehicle.id,
++    label: etiquetaCortaDeUnidad(u.vehicle),
++    coords: { lat: u.pos!.lat, lng: u.pos!.lng },
++    live: reportaAlDia(clave),
++    estado: clave,
++    rumbo: u.pos?.rumbo ?? null,
++    placa: u.vehicle.placa,
++    ultimoReporte: u.pos?.recibidaEn ?? null,
++  };
++}
++
++/** El buscador filtra por placa, alias, número, marca, modelo y conductor (como la web). */
++function coincide(u: UnidadFom, texto: string): boolean {
++  if (!texto) return true;
++  const v = u.vehicle;
++  return normalizar([v.placa, v.alias, v.numero, v.marca, v.modelo, u.conductor?.nombre].filter(Boolean).join(' ')).includes(texto);
++}
++
+ /**
+  * El mapa con la capa de eventos de manejo. Los tres proveedores (nativo, vista
+  * web y clásico) reciben las props tal cual de `MapaVehiculo`; el tipo común
+@@ -72,7 +113,7 @@ const TRAZOS_BOTON = {
+  * (`?evento=…`, o `?eventos=1`) la ficha abre ya en este modo.
+  */
+ export default function MapaFlotaScreen() {
+-  const { colors, spacing, radii } = useTheme();
++  const { colors, spacing, radii, shadows } = useTheme();
+   const router = useRouter();
+   const insets = useSafeAreaInsets();
+   const ventana = useWindowDimensions();
+@@ -86,7 +127,8 @@ export default function MapaFlotaScreen() {
+     /** `1`: la ficha abre con sus eventos de manejo a la vista. */
+     eventos?: string;
+   }>();
+-  const { unidades, sello: selloFlota, desactualizado } = useFlotaFom();
++  const { unidades, sello: selloFlota, desactualizado, estado: estadoFlota, recargar } = useFlotaFom();
++  const marca = useMarcaEmpresa();
+   // Los puntos se sellan con la hora de la última lectura, no con un reloj: la
+   // flota se relee cada 20 s, y rehacer los marcadores cada segundo solo le
+   // mandaba al mapa arrays nuevos con lo mismo. Lo que corre solo es la ficha.
+@@ -105,37 +147,96 @@ export default function MapaFlotaScreen() {
+   const [pedidoLlegada, setPedidoLlegada] = useState(0);
+   const recorrido = useRecorrido(enRuta?.id ?? null, horas, enRuta?.companyId);
+ 
+-  const todos: MapMarker[] = useMemo(
+-    () =>
+-      unidades
+-        .filter((u) => u.pos)
+-        .map((u) => {
 -          const estado = estadoDeUnidad(u, sello);
-+          const { clave: estado } = estadoDeUnidad(u, sello);
-           return {
-             id: u.vehicle.id,
-             label: etiquetaCortaDeUnidad(u.vehicle),
-             coords: { lat: u.pos!.lat, lng: u.pos!.lng },
+-          return {
+-            id: u.vehicle.id,
+-            label: etiquetaCortaDeUnidad(u.vehicle),
+-            coords: { lat: u.pos!.lat, lng: u.pos!.lng },
 -            live: estado !== 'sin-senal',
-+            live: reportaAlDia(estado),
-             estado,
-             rumbo: u.pos?.rumbo ?? null,
-             placa: u.vehicle.placa,
-@@ -127,11 +129,12 @@ export default function MapaFlotaScreen() {
-   // En el recorrido solo se ve la unidad que se sigue: las demás distraen.
-   const markers = enRuta ? todos.filter((m) => m.id === enRuta.id) : todos;
+-            estado,
+-            rumbo: u.pos?.rumbo ?? null,
+-            placa: u.vehicle.placa,
+-            ultimoReporte: u.pos?.recibidaEn ?? null,
+-          };
+-        }),
+-    [unidades, sello],
++  // ── Los filtros de arriba: buscador, estado (la fila de chips) y área ──
++  const [q, setQ] = useState('');
++  const texto = normalizar(q);
++  const [estado, setEstado] = useState<FiltroEstado>('');
++  const [areaId, setAreaId] = useState('');
++  const [menuArea, setMenuArea] = useState(false);
++  /** «Lista de unidades», abierta desde el buscador o desde «N sin posición · Ver». */
++  const [listaAbierta, setListaAbierta] = useState(false);
++  // Las áreas de la empresa cuya flota se ve (la de la sesión).
++  const empresaFlota = enteActivoFom();
++  const [areas, setAreas] = useState<{ empresa: string; lista: Area[] } | null>(null);
++  useEffect(() => {
++    if (!empresaFlota) return;
++    let vivo = true;
++    // Sin poder leerlas, no hay chip de área: el resto del mapa sigue igual.
++    leerConAviso(getAreas(empresaFlota), [] as Area[]).then(({ datos }) => {
++      if (vivo) setAreas({ empresa: empresaFlota, lista: datos });
++    });
++    return () => {
++      vivo = false;
++    };
++  }, [empresaFlota]);
++  const listaAreas = areas && areas.empresa === empresaFlota ? areas.lista : [];
++  // Un área que ya no está deja de filtrar.
++  const areaElegida = listaAreas.find((a) => a.id === areaId) ?? null;
++  const areaActiva = areaElegida?.id ?? '';
++
++  /**
++   * Las cifras de los chips: la regla única (`estadoSenal` → `estadoUnidad`),
++   * contada sobre la flota ya filtrada por área y buscador, antes del estado.
++   * Así «Todas» es siempre la suma de las demás.
++   */
++  const porEstado = useMemo(
++    () => agruparPorEstado(unidades, sello, (u) => (!areaActiva || u.vehicle.areaId === areaActiva) && coincide(u, texto)),
++    [unidades, sello, areaActiva, texto],
+   );
+-  // En el recorrido solo se ve la unidad que se sigue: las demás distraen.
+-  const markers = enRuta ? todos.filter((m) => m.id === enRuta.id) : todos;
++  const lista = porEstado.get(estado) ?? [];
++  const chips = chipsVisibles(porEstado, estado);
++  const flotaLista = estadoFlota === 'listo';
++  const sinPunto = lista.filter((u) => !u.pos).length;
++
++  const todos: MapMarker[] = useMemo(() => lista.filter((u) => u.pos).map((u) => aMarcador(u, sello)), [lista, sello]);
++  // En el recorrido solo se ve la unidad que se sigue: las demás distraen (aunque el filtro la deje fuera).
++  const sigue: MapMarker[] = useMemo(() => {
++    const u = enRuta ? unidades.find((x) => x.vehicle.id === enRuta.id && x.pos) : undefined;
++    return u ? [aMarcador(u, sello)] : [];
++  }, [enRuta, unidades, sello]);
++  const markers = enRuta ? sigue : todos;
    const encuadreClave = todos.map((m) => m.id).sort().join('|');
 -  const enMarcha = todos.filter((m) => m.estado === 'marcha').length;
-+  const enMarcha = todos.filter((m) => m.estado === 'en_marcha').length;
++
++  // Si al cambiar el estado, el área o el texto la unidad abierta deja de
++  // cumplir el filtro, su ficha se cierra. Un refresco de la flota no la cierra.
++  const claveFiltro = `${estado}|${areaActiva}|${texto}`;
++  const filtroAntes = useRef(claveFiltro);
++  useEffect(() => {
++    if (filtroAntes.current === claveFiltro) return;
++    filtroAntes.current = claveFiltro;
++    if (tocada && !enRuta && !lista.some((u) => u.vehicle.id === tocada)) setTocada(null);
++  }, [claveFiltro, lista, tocada, enRuta]);
++
    const unidad = tocada ? unidades.find((u) => u.vehicle.id === tocada) : undefined;
    /** La tocada está callada: su ficha dice además la fecha de su último reporte. */
 +  const senalTocada = unidad ? estadoDeUnidad(unidad, sello) : null;
    const ultimoReporte =
 -    unidad && estadoDeUnidad(unidad, sello) === 'sin-senal' ? textoUltimoReporte(unidad.pos?.recibidaEn) : null;
+-  const altoPanel = Math.round(ventana.height * 0.42);
 +    senalTocada && esCalladaClave(senalTocada.clave) ? textoUltimoReporte(senalTocada.senal.ultimoReporte) : null;
-   const altoPanel = Math.round(ventana.height * 0.42);
++  // La hoja del recorrido crece como mucho hasta 12 px bajo el botón de capas
++  // (barra 64 + 12 + capas 44 + 12), con sitio para el logo de Mapbox.
++  const altoPanel = Math.max(220, Math.min(Math.round(ventana.height * 0.42), ventana.height - insets.top - insets.bottom - 148));
    /** Lo que mide la ficha de la unidad (crece al abrir sus eventos). */
    const [altoFicha, setAltoFicha] = useState(0);
-@@ -272,7 +275,7 @@ export default function MapaFlotaScreen() {
+-  const abajo = enRuta ? altoPanel + 8 : unidad ? (altoFicha || (ultimoReporte ? 200 : 182)) + 8 : 0;
++  /** La lista de unidades se ve con ella abierta y sin ficha ni recorrido encima. */
++  const verLista = listaAbierta && !unidad && !enRuta;
++  const [altoLista, setAltoLista] = useState(0);
++  const abajo = enRuta
++    ? altoPanel + 8
++    : unidad
++      ? (altoFicha || (ultimoReporte ? 200 : 182)) + 8
++      : verLista
++        ? altoLista + 8
++        : 0;
++  const finArriba = insets.top + (enRuta ? FIN_BARRA : FIN_CHIPS);
++  const limpiar = () => {
++    setQ('');
++    setEstado('');
++    setAreaId('');
++  };
++  const abrirLista = () => {
++    setTocada(null);
++    setListaAbierta(true);
++  };
+ 
+   /**
+    * La unidad con el modo «manejo brusco» encendido (null: ninguna): cada
+@@ -216,7 +317,9 @@ export default function MapaFlotaScreen() {
+         onElegirViaje={setViajeActivo}
+         foco={foco}
+         llegadaClave={pedidoLlegada}
+-        margenArriba={insets.top + 64}
++        // Las capas van arriba a la derecha, 12 px bajo los chips (o bajo la barra en el recorrido).
++        controlesArriba
++        margenArriba={finArriba}
+         margenAbajo={abajo + insets.bottom}
+         style={styles.mapa}
+         // Solo en el modo «manejo brusco»; en el recorrido mandan sus viajes y paradas.
+@@ -225,27 +328,105 @@ export default function MapaFlotaScreen() {
+         alElegirEvento={eventos.elegir}
+       />
+ 
+-      {/* Arriba: volver y qué se está viendo, flotando sobre el mapa. */}
+-      <View style={[styles.arriba, { paddingTop: insets.top + spacing.sm }]} pointerEvents="box-none">
+-        <PressableScale
+-          onPress={volver}
+-          accessibilityRole="button"
+-          accessibilityLabel={enRuta ? 'Volver a la flota' : 'Volver'}
+-          style={[styles.circulo, { backgroundColor: SOBRE_MAPA, borderRadius: radii.pill }]}>
+-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+-            <Path d="M15 18l-6-6 6-6" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+-          </Svg>
+-        </PressableScale>
+-        <View style={[styles.capsula, { backgroundColor: SOBRE_MAPA }]}>
+-          <ThemedText style={[styles.eyebrow, { color: colors.textSecondary }]}>{enRuta ? 'RECORRIDO' : 'MAPA DE LA FLOTA'}</ThemedText>
+-          <ThemedText style={styles.nombre} numberOfLines={1}>
+-            {enRuta
+-              ? enRuta.nombre
+-              : `${todos.length} ${todos.length === 1 ? 'unidad' : 'unidades'} · ${enMarcha} en marcha`}
+-          </ThemedText>
++      {/* Arriba, sin tarjeta que lo envuelva: la barra, el buscador y la fila
++          de chips, que es a la vez filtro, cifra y leyenda del mapa. */}
++      <View style={[styles.arriba, { paddingTop: insets.top + 12 }]} pointerEvents="box-none">
++        <View style={styles.barra} pointerEvents="box-none">
++          <PressableScale
++            onPress={volver}
++            accessibilityRole="button"
++            accessibilityLabel={enRuta ? 'Volver a la flota' : 'Volver'}
++            style={[styles.circulo, { backgroundColor: SOBRE_MAPA, borderColor: colors.border }]}>
++            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
++              <Path d="M15 18l-6-6 6-6" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
++            </Svg>
++          </PressableScale>
++          <View style={[styles.capsula, { backgroundColor: SOBRE_MAPA, borderColor: colors.border }]}>
++            <View style={styles.textos}>
++              <ThemedText style={styles.titulo} numberOfLines={1} accessibilityRole="header">
++                {enRuta ? 'Recorrido' : 'Centro de control'}
++              </ThemedText>
++              {enRuta ? (
++                <ThemedText style={[styles.subtitulo, { color: colors.textSecondary }]} numberOfLines={1}>
++                  {enRuta.nombre}
++                </ThemedText>
++              ) : (
++                <MarcaEmpresaCompacta marca={marca} />
++              )}
++            </View>
++            {/* El logo FOM, como en todas las barras de pila: adorno, el título ya dice dónde estás. */}
++            <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
++              <LogoCapsula />
++            </View>
++          </View>
+         </View>
++
++        {!enRuta ? (
++          <>
++            {/* El buscador en píldora, con la lista de unidades dentro. */}
++            <View style={[styles.buscador, shadows.floating, { backgroundColor: SOBRE_MAPA, borderColor: colors.border }]}>
++              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
++                <Circle cx={11} cy={11} r={7} stroke={colors.textMuted} strokeWidth={2} />
++                <Path d="m20 20-3.6-3.6" stroke={colors.textMuted} strokeWidth={2} strokeLinecap="round" />
++              </Svg>
++              <TextInput
++                value={q}
++                onChangeText={setQ}
++                placeholder="Placa, alias o conductor…"
++                accessibilityLabel="Buscar por placa, alias, número, marca, modelo o conductor"
++                placeholderTextColor={colors.textMuted}
++                autoCapitalize="none"
++                autoCorrect={false}
++                clearButtonMode="while-editing"
++                returnKeyType="search"
++                style={[styles.entrada, { color: colors.text }]}
++              />
++              <PressableScale
++                onPress={() => (verLista ? setListaAbierta(false) : abrirLista())}
++                hitSlop={4}
++                accessibilityRole="button"
++                accessibilityLabel="Lista de unidades"
++                accessibilityState={{ expanded: verLista }}
++                style={[styles.botonLista, { backgroundColor: verLista ? colors.activeSurface : colors.surfaceElevated }]}>
++                <IconoLista color={verLista ? colors.onActive : colors.text} />
++              </PressableScale>
++            </View>
++
++            {/* La fila de chips, de borde a borde. */}
++            <View style={styles.chips}>
++              <ChipsFlota
++                chips={chips}
++                cifra={(v) => (flotaLista ? (porEstado.get(v)?.length ?? 0) : null)}
++                elegido={estado}
++                onElegir={setEstado}
++                area={
++                  listaAreas.length > 0
++                    ? {
++                        nombre: areaElegida?.nombre ?? 'Todas las áreas',
++                        activa: !!areaElegida,
++                        abierto: menuArea,
++                        onPress: () => setMenuArea(true),
++                      }
++                    : null
++                }
++                sinPosicion={flotaLista && sinPunto > 0 ? { n: sinPunto, onPress: abrirLista } : null}
++              />
++            </View>
++          </>
++        ) : null}
+       </View>
+ 
++      {/* Cargando, error o «Ninguna unidad coincide»: 12 px bajo los chips, sin tapar el botón de capas. */}
++      {!enRuta && !unidad ? (
++        <AvisoFlota
++          top={finArriba + 12}
++          estado={estadoFlota}
++          vacia={flotaLista && unidades.length > 0 && lista.length === 0}
++          alLimpiar={limpiar}
++          alReintentar={recargar}
++        />
++      ) : null}
++
+       {enRuta ? (
+         <View style={[styles.abajo, { bottom: insets.bottom + 8 }]}>
+           <PanelRecorrido
+@@ -272,7 +453,7 @@ export default function MapaFlotaScreen() {
            ]}>
            <View>
              <ThemedText variant="button" numberOfLines={1}>
@@ -1773,6 +2092,270 @@ index 76acb87..c89ab1b 100644
              </ThemedText>
              <TextoVivo
                variant="caption"
+@@ -357,11 +538,201 @@ export default function MapaFlotaScreen() {
+           </View>
+           {verManejo ? <EventosDeLaFicha ev={eventos} altoLista={Math.round(ventana.height * 0.26)} /> : null}
+         </Flotante>
++      ) : verLista ? (
++        // La lista de unidades: hoja abajo, con las calladas ordenadas por su silencio.
++        <Flotante
++          onLayout={(e) => setAltoLista(Math.round(e.nativeEvent.layout.height))}
++          style={[
++            styles.ficha,
++            styles.hojaLista,
++            {
++              bottom: insets.bottom + spacing.sm,
++              maxHeight: Math.round(ventana.height * 0.46),
++              backgroundColor: 'rgba(20, 26, 34, 0.96)',
++              borderRadius: radii.lg,
++            },
++          ]}
++          accessibilityLabel="Unidades de la flota">
++          <ListaUnidades
++            unidades={lista}
++            sello={sello}
++            sabido={!desactualizado}
++            alCerrar={() => setListaAbierta(false)}
++            alElegir={setTocada}
++          />
++        </Flotante>
+       ) : null}
++
++      {/* El menú del chip de área: una hoja corta, con filas de 44 y la elegida con ✓. */}
++      <HojaModal visible={menuArea} onClose={() => setMenuArea(false)} titulo="Área de la flota" icon="capas">
++        <View style={styles.menuArea} accessibilityRole="menu">
++          {[{ id: '', nombre: 'Todas las áreas' }, ...listaAreas].map((a) => {
++            const elegida = a.id === areaActiva;
++            return (
++              <PressableScale
++                key={a.id || 'todas'}
++                onPress={() => {
++                  setAreaId(a.id);
++                  setMenuArea(false);
++                }}
++                accessibilityRole="menuitem"
++                accessibilityState={{ checked: elegida }}
++                style={[styles.filaArea, { backgroundColor: elegida ? colors.activeSurface : 'transparent', borderRadius: radii.md }]}>
++                <ThemedText style={[styles.textoArea, { color: elegida ? colors.onActive : colors.text }]} numberOfLines={1}>
++                  {a.nombre}
++                </ThemedText>
++                {elegida ? <TabIcon name="check" color={colors.onActive} size={16} /> : null}
++              </PressableScale>
++            );
++          })}
++        </View>
++      </HojaModal>
+     </ThemedView>
+   );
+ }
+ 
++/** Lista (tres renglones con su viñeta), como la web: se entiende mejor que el camión de antes. */
++function IconoLista({ color }: { color: string }) {
++  return (
++    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
++      <Path d="M9 6h11M9 12h11M9 18h11" stroke={color} strokeWidth={2} strokeLinecap="round" />
++      <Circle cx={4.5} cy={6} r={1} fill={color} />
++      <Circle cx={4.5} cy={12} r={1} fill={color} />
++      <Circle cx={4.5} cy={18} r={1} fill={color} />
++    </Svg>
++  );
++}
++
++/**
++ * El aviso bajo los chips: cargando, sin poder leer la flota, o ningún filtro
++ * coincide. Deja 68 px libres a la derecha para el botón de capas.
++ */
++function AvisoFlota({
++  top,
++  estado,
++  vacia,
++  alLimpiar,
++  alReintentar,
++}: {
++  top: number;
++  estado: EstadoFlotaFom;
++  vacia: boolean;
++  alLimpiar: () => void;
++  alReintentar: () => void;
++}) {
++  const { colors, radii } = useTheme();
++  const caja = [styles.aviso, { top, backgroundColor: SOBRE_MAPA, borderColor: colors.border, borderRadius: radii.lg }];
++  if (estado === 'cargando') {
++    return (
++      <View style={caja} accessibilityRole="progressbar" accessibilityLabel="Cargando la flota">
++        <ThemedText style={[styles.avisoTexto, { color: colors.textSecondary }]}>Cargando la flota…</ThemedText>
++      </View>
++    );
++  }
++  if (estado === 'error') {
++    return (
++      <View style={caja} accessibilityRole="alert">
++        <ThemedText style={styles.avisoTexto}>No se pudo leer la flota.</ThemedText>
++        <PressableScale onPress={alReintentar} accessibilityRole="button" style={styles.avisoBoton}>
++          <ThemedText style={[styles.avisoTexto, { color: colors.primary }]}>Reintentar</ThemedText>
++        </PressableScale>
++      </View>
++    );
++  }
++  if (!vacia) return null;
++  return (
++    <View style={caja} accessibilityRole="alert">
++      <ThemedText style={styles.avisoTitulo}>Ninguna unidad coincide</ThemedText>
++      <ThemedText style={[styles.avisoTexto, { color: colors.textSecondary }]}>
++        Prueba con otra placa o quita los filtros para ver toda la flota.
++      </ThemedText>
++      <PressableScale onPress={alLimpiar} accessibilityRole="button" style={styles.avisoBoton}>
++        <ThemedText style={[styles.avisoTexto, { color: colors.primary }]}>Limpiar filtros</ThemedText>
++      </PressableScale>
++    </View>
++  );
++}
++
++/**
++ * «Unidades»: las del filtro, con su estado de la regla única. Las calladas
++ * van ordenadas por su silencio (`ordenarSinSenal`), como la web. Tocar una
++ * abre su ficha.
++ */
++function ListaUnidades({
++  unidades,
++  sello,
++  sabido,
++  alCerrar,
++  alElegir,
++}: {
++  unidades: UnidadFom[];
++  sello: number;
++  /** `false`: la última vuelta no trajo posiciones; no se afirma que nunca reportó. */
++  sabido: boolean;
++  alCerrar: () => void;
++  alElegir: (id: string) => void;
++}) {
++  const { colors } = useTheme();
++  const filas = useMemo(
++    () =>
++      ordenarSinSenal(
++        unidades,
++        (u) => esCalladaClave(estadoDeUnidad(u, sello).clave),
++        (u) => estadoDeUnidad(u, sello).senal.ultimoReporte,
++        sello,
++      ),
++    [unidades, sello],
++  );
++  return (
++    <>
++      <View style={styles.listaCabeza}>
++        <ThemedText style={styles.titulo} accessibilityRole="header">
++          {'Unidades '}
++          <ThemedText tabular style={[styles.titulo, { color: colors.textSecondary }]}>
++            {numero(unidades.length)}
++          </ThemedText>
++        </ThemedText>
++        <PressableScale
++          onPress={alCerrar}
++          accessibilityRole="button"
++          accessibilityLabel="Cerrar lista de unidades"
++          style={styles.cerrarLista}>
++          <TabIcon name="cerrar" color={colors.textSecondary} size={18} />
++        </PressableScale>
++      </View>
++      <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled">
++        {filas.map((u) => {
++          const e = estadoDeUnidad(u, sello);
++          return (
++            <PressableScale
++              key={u.vehicle.id}
++              onPress={() => alElegir(u.vehicle.id)}
++              accessibilityRole="button"
++              style={[styles.filaUnidad, { borderTopColor: colors.border }]}>
++              <View style={[styles.puntoFila, { backgroundColor: HEX_COLOR[COLOR_ESTADO[e.clave]] }]} />
++              <View style={styles.textos}>
++                <ThemedText style={styles.filaNombre} numberOfLines={1}>
++                  {etiquetaUnidad(u.vehicle)}
++                </ThemedText>
++                <ThemedText style={[styles.filaSub, { color: colors.textSecondary }]} numberOfLines={1}>
++                  {u.pos ? (u.conductor?.nombre ?? 'Sin conductor') : 'Sin posición publicada'}
++                </ThemedText>
++              </View>
++              <TextoVivo
++                variant="caption"
++                color="textSecondary"
++                numberOfLines={1}
++                style={styles.filaEstado}
++                texto={(ahora) => detalleDeUnidad(u, ahora, !!u.pos || sabido)}
++              />
++            </PressableScale>
++          );
++        })}
++      </ScrollView>
++    </>
++  );
++}
++
+ /** El ícono de un botón de la ficha: trazos de 24×24, como los de la web. */
+ function IconoBoton({ trazos, color }: { trazos: readonly string[]; color: string }) {
+   return (
+@@ -405,11 +776,56 @@ function EventosDeLaFicha({ ev, altoLista }: { ev: EventosManejoEstado; altoList
+ const styles = StyleSheet.create({
+   root: { flex: 1 },
+   mapa: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, height: '100%' },
+-  arriba: { position: 'absolute', top: 0, left: 0, right: 64, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14 },
+-  circulo: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+-  capsula: { flex: 1, minWidth: 0, minHeight: 52, justifyContent: 'center', gap: 2, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20 },
+-  eyebrow: { fontSize: 10, lineHeight: 13, letterSpacing: 1.4, fontWeight: '600' },
+-  nombre: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
++  // Arriba: barra (12–64), buscador (72–116) y fila de chips (122–170).
++  arriba: { position: 'absolute', top: 0, left: 0, right: 0 },
++  barra: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14 },
++  circulo: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
++  capsula: {
++    flex: 1,
++    minWidth: 0,
++    minHeight: 52,
++    flexDirection: 'row',
++    alignItems: 'center',
++    gap: 10,
++    paddingVertical: 6,
++    paddingHorizontal: 14,
++    borderRadius: 24,
++    borderWidth: 1,
++  },
++  textos: { flex: 1, minWidth: 0, justifyContent: 'center', gap: 1 },
++  titulo: { fontSize: 15, lineHeight: 18, fontWeight: '600' },
++  subtitulo: { fontSize: 12, lineHeight: 16, fontWeight: '500' },
++  buscador: {
++    marginTop: 8,
++    marginHorizontal: 12,
++    height: 44,
++    borderRadius: 999,
++    borderWidth: 1,
++    flexDirection: 'row',
++    alignItems: 'center',
++    gap: 8,
++    paddingLeft: 16,
++    paddingRight: 4,
++  },
++  entrada: { flex: 1, height: '100%', fontSize: 15, fontFamily: familiaPorPeso('400') },
++  // Círculo de 36 a 4 px del borde; con `hitSlop` llega a 44.
++  botonLista: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
++  chips: { marginTop: 6 },
++  aviso: { position: 'absolute', left: 12, right: 68, padding: 14, gap: 4, borderWidth: 1 },
++  avisoTitulo: { fontSize: 14, lineHeight: 18, fontWeight: '600' },
++  avisoTexto: { fontSize: 13, lineHeight: 17, fontWeight: '500' },
++  avisoBoton: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' },
++  hojaLista: { paddingBottom: 6 },
++  listaCabeza: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
++  cerrarLista: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginRight: -10 },
++  filaUnidad: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 10, borderTopWidth: StyleSheet.hairlineWidth },
++  puntoFila: { width: 8, height: 8, borderRadius: 4 },
++  filaNombre: { fontSize: 14, lineHeight: 18, fontWeight: '600' },
++  filaSub: { fontSize: 12, lineHeight: 16 },
++  filaEstado: { maxWidth: '42%', textAlign: 'right' },
++  menuArea: { gap: 4 },
++  filaArea: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, gap: 8 },
++  textoArea: { flexShrink: 1, fontSize: 15, lineHeight: 20, fontWeight: '500' },
+   abajo: { position: 'absolute', left: 8, right: 8 },
+   // De lado a lado: los controles del mapa suben por encima de la ficha
+   // (`margenAbajo`), así que no hace falta dejarles un hueco a la derecha.
 diff --git a/src/app/mis-notificaciones.tsx b/src/app/mis-notificaciones.tsx
 index f3e4260..9b811a6 100644
 --- a/src/app/mis-notificaciones.tsx
@@ -3183,6 +3766,215 @@ index 6c65a86..d43bd05 100644
                    const activo = iso === value;
                    const esHoy = iso === isoHoy;
                    const ok = permitido(d);
+diff --git a/src/components/chips-flota-cuentas.ts b/src/components/chips-flota-cuentas.ts
+new file mode 100644
+index 0000000..cce91a7
+--- /dev/null
++++ b/src/components/chips-flota-cuentas.ts
+@@ -0,0 +1,71 @@
++/**
++ * LAS CIFRAS DE LOS CHIPS del Centro de control (mapa de la flota).
++ *
++ * Espejo de `ESTADOS` y `porEstado` de `CentroControl.jsx` en la web. Cada chip
++ * es a la vez filtro, cifra y leyenda: su clave es la de `estadoUnidad` (la
++ * regla única de `lib/sin-senal.ts` + `lib/estado-unidad.ts`) y su color, el
++ * mismo del marcador del mapa (`COLOR_ESTADO` → `HEX_COLOR`). Aquí no se decide
++ * ningún estado: solo se agrupa lo que dice la regla.
++ *
++ * Se cuenta sobre la flota ya filtrada por área y buscador, ANTES de aplicar el
++ * estado. Así «Todas» siempre es la suma de las demás.
++ *
++ * Puro y con rutas relativas: `node --test` lo carga tal cual.
++ */
++import { COLOR_ESTADO, HEX_COLOR, estadoDeVehiculo, type ClaveEstado, type SenalDePosicion, type SenalDeVehiculo } from '../lib/estado-unidad';
++
++/** El estado elegido en la fila de chips: `''` es «Todas». */
++export type FiltroEstado = '' | ClaveEstado;
++
++export interface ChipEstado {
++  v: FiltroEstado;
++  /** Lo que dice el chip. */
++  t: string;
++  /** Siempre a la vista; los demás solo si hay alguna (o si están elegidos). */
++  fijo: boolean;
++}
++
++/** Los chips, en su orden. Sin GPS y Sin ubicación solo salen si hay alguna. */
++export const CHIPS_ESTADO: readonly ChipEstado[] = [
++  { v: '', t: 'Todas', fijo: true },
++  { v: 'en_marcha', t: 'En marcha', fijo: true },
++  { v: 'parada', t: 'Detenidas', fijo: true },
++  { v: 'sin_senal', t: 'Sin señal', fijo: true },
++  { v: 'sin_ubicacion', t: 'Sin ubicación', fijo: false },
++  { v: 'sin_gps', t: 'Sin GPS', fijo: false },
++];
++
++/** El color del puntito de un chip: el del marcador del mapa. «Todas» no lleva. */
++export function colorDeChip(v: FiltroEstado): string | null {
++  return v ? HEX_COLOR[COLOR_ESTADO[v]] : null;
++}
++
++/** Lo mínimo de una unidad de la flota para la regla: el vehículo y su última posición. */
++export interface UnidadConSenal {
++  vehicle: SenalDeVehiculo;
++  pos: SenalDePosicion | null;
++}
++
++/**
++ * Agrupa las unidades por su estado. `pasa` es el filtro de área y buscador; el
++ * estado lo pone la regla con la hora `ahora` (el sello de la flota). La clave
++ * `''` lleva todas las que pasan: es la suma de las otras cinco.
++ */
++export function agruparPorEstado<T extends UnidadConSenal>(
++  unidades: readonly T[],
++  ahora: number,
++  pasa: (u: T) => boolean = () => true,
++): Map<FiltroEstado, T[]> {
++  const grupos = new Map<FiltroEstado, T[]>(CHIPS_ESTADO.map((c) => [c.v, []]));
++  for (const u of unidades) {
++    if (!pasa(u)) continue;
++    grupos.get('')!.push(u);
++    grupos.get(estadoDeVehiculo(u.vehicle, u.pos, ahora).clave)!.push(u);
++  }
++  return grupos;
++}
++
++/** Los chips que se ven: los fijos, los que tienen alguna y el elegido. */
++export function chipsVisibles(grupos: Map<FiltroEstado, readonly unknown[]>, elegido: FiltroEstado): ChipEstado[] {
++  return CHIPS_ESTADO.filter((c) => c.fijo || c.v === elegido || (grupos.get(c.v)?.length ?? 0) > 0);
++}
+diff --git a/src/components/chips-flota.tsx b/src/components/chips-flota.tsx
+new file mode 100644
+index 0000000..a604c32
+--- /dev/null
++++ b/src/components/chips-flota.tsx
+@@ -0,0 +1,126 @@
++import { ScrollView, StyleSheet, View } from 'react-native';
++import Svg, { Path } from 'react-native-svg';
++
++import { colorDeChip, type ChipEstado, type FiltroEstado } from '@/components/chips-flota-cuentas';
++import { PressableScale } from '@/components/pressable-scale';
++import { ThemedText } from '@/components/themed-text';
++import { useTheme } from '@/theme';
++import { numero } from '@/utils/numero';
++
++/** El chip elegido: el azul FOM al 24 % sobre `sup`, como la web. */
++const ELEGIDO_FONDO = 'rgba(61, 155, 245, 0.24)';
++const ELEGIDO_TEXTO = '#E4F2FF';
++/** La cifra del chip elegido: su mismo color, al 85 %. */
++const ELEGIDO_CIFRA = 'rgba(228, 242, 255, 0.85)';
++/** 40 a la vista, 44 al dedo. */
++const HIT = { top: 2, bottom: 2, left: 0, right: 0 };
++
++type Props = {
++  /** Los chips de estado que se ven (`chipsVisibles`). */
++  chips: readonly ChipEstado[];
++  /** Cuántas unidades tiene cada chip; `null` mientras la flota no ha llegado. */
++  cifra: (v: FiltroEstado) => number | null;
++  elegido: FiltroEstado;
++  onElegir: (v: FiltroEstado) => void;
++  /** El chip de área, solo si la empresa tiene áreas. */
++  area?: { nombre: string; activa: boolean; abierto: boolean; onPress: () => void } | null;
++  /** «N sin posición · Ver»: abre la lista. Solo si hay unidades sin coordenadas. */
++  sinPosicion?: { n: number; onPress: () => void } | null;
++};
++
++/**
++ * LA FILA DE CHIPS del Centro de control en el teléfono: filtro, cifra y
++ * leyenda a la vez. Una sola fila que se desplaza de lado, de borde a borde, y
++ * el chip cortado al final dice que hay más. Medidas de
++ * `docs/DISENO-CENTRO-CONTROL-MOVIL.md` (web: bloque «TELÉFONO» de `control-map.css`).
++ */
++export function ChipsFlota({ chips, cifra, elegido, onElegir, area, sinPosicion }: Props) {
++  const { colors, shadows } = useTheme();
++  const base = [styles.chip, shadows.floating, { backgroundColor: colors.surfaceSunken, borderColor: colors.border }];
++  const activo = { backgroundColor: ELEGIDO_FONDO, borderColor: colors.primary };
++
++  return (
++    <ScrollView
++      horizontal
++      showsHorizontalScrollIndicator={false}
++      keyboardShouldPersistTaps="handled"
++      contentContainerStyle={styles.fila}
++      accessibilityLabel="Filtrar unidades por estado">
++      {chips.map((c) => {
++        const sel = elegido === c.v;
++        const n = cifra(c.v);
++        const punto = colorDeChip(c.v);
++        return (
++          <PressableScale
++            key={c.v || 'todas'}
++            onPress={() => onElegir(c.v)}
++            hitSlop={HIT}
++            accessibilityRole="button"
++            accessibilityState={{ selected: sel }}
++            accessibilityLabel={n == null ? c.t : `${c.t}: ${n}`}
++            style={[base, sel ? activo : null]}>
++            {punto ? <View style={[styles.punto, { backgroundColor: punto }]} /> : null}
++            <ThemedText style={[styles.texto, { color: sel ? ELEGIDO_TEXTO : colors.text }]} numberOfLines={1}>
++              {c.t}
++            </ThemedText>
++            {n != null ? (
++              <ThemedText tabular style={[styles.cifra, { color: sel ? ELEGIDO_CIFRA : colors.textSecondary }]}>
++                {numero(n)}
++              </ThemedText>
++            ) : null}
++          </PressableScale>
++        );
++      })}
++      {area ? (
++        <PressableScale
++          onPress={area.onPress}
++          hitSlop={HIT}
++          accessibilityRole="button"
++          accessibilityLabel={`Área: ${area.nombre}`}
++          accessibilityState={{ selected: area.activa, expanded: area.abierto }}
++          style={[base, area.activa ? activo : null]}>
++          <ThemedText style={[styles.texto, { color: area.activa ? ELEGIDO_TEXTO : colors.text }]} numberOfLines={1}>
++            {area.nombre}
++          </ThemedText>
++          <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
++            <Path
++              d="m6 9 6 6 6-6"
++              stroke={area.activa ? ELEGIDO_TEXTO : colors.textSecondary}
++              strokeWidth={2.5}
++              strokeLinecap="round"
++              strokeLinejoin="round"
++            />
++          </Svg>
++        </PressableScale>
++      ) : null}
++      {sinPosicion && sinPosicion.n > 0 ? (
++        <PressableScale
++          onPress={sinPosicion.onPress}
++          hitSlop={HIT}
++          accessibilityRole="button"
++          accessibilityHint="Abre la lista de unidades"
++          style={base}>
++          <ThemedText style={[styles.texto, { color: colors.warning }]} numberOfLines={1}>
++            {`${numero(sinPosicion.n)} sin posición · Ver`}
++          </ThemedText>
++        </PressableScale>
++      ) : null}
++    </ScrollView>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { paddingHorizontal: 12, paddingVertical: 4, gap: 6 },
++  chip: {
++    height: 40,
++    paddingHorizontal: 12,
++    borderRadius: 10,
++    borderWidth: 1,
++    flexDirection: 'row',
++    alignItems: 'center',
++    gap: 6,
++  },
++  punto: { width: 8, height: 8, borderRadius: 4 },
++  texto: { fontSize: 13, lineHeight: 17, fontWeight: '500' },
++  cifra: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
++});
 diff --git a/src/components/documentos-empresa.tsx b/src/components/documentos-empresa.tsx
 index d0ddb57..1dd1dc0 100644
 --- a/src/components/documentos-empresa.tsx
@@ -3986,7 +4778,7 @@ index 420079d..3ad24fd 100644
    const acento = elegido ? "#168fff" : color;
    const rumbo =
 diff --git a/src/components/mapbox-nativo-marcador.tsx b/src/components/mapbox-nativo-marcador.tsx
-index 18cab7b..a910c3d 100644
+index 18cab7b..1bf4528 100644
 --- a/src/components/mapbox-nativo-marcador.tsx
 +++ b/src/components/mapbox-nativo-marcador.tsx
 @@ -1,7 +1,9 @@
@@ -4024,12 +4816,12 @@ index 18cab7b..a910c3d 100644
 -  detenido: '#ffbf43',
 -  sinsenal: '#a1afbf',
 +  marcha: HEX_COLOR.verde,
-+  detenido: HEX_COLOR.ambar,
++  detenido: HEX_COLOR.azul,
 +  sinsenal: HEX_COLOR.gris,
    emergencia: '#ff6369',
  } as const;
  type Tono = keyof typeof COLOR_TONO;
-+const PNG_DE_COLOR: Record<ColorSenal, Tono> = { verde: 'marcha', ambar: 'detenido', gris: 'sinsenal' };
++const PNG_DE_COLOR: Record<ColorSenal, Tono> = { verde: 'marcha', azul: 'detenido', ambar: 'detenido', gris: 'sinsenal' };
  
  /** Los PNG están dibujados a 2x: Mapbox los pinta a la mitad de sus píxeles. */
  const a2x = (image: ImageEntry): ImageEntry => ({ image: image as never, scale: 2 });
@@ -4059,6 +4851,138 @@ index 18cab7b..a910c3d 100644
                    : '',
                color: COLOR_TONO[tono],
                sel,
+diff --git a/src/components/marca-empresa-compacta.tsx b/src/components/marca-empresa-compacta.tsx
+new file mode 100644
+index 0000000..1e4f4be
+--- /dev/null
++++ b/src/components/marca-empresa-compacta.tsx
+@@ -0,0 +1,126 @@
++import { useEffect, useState } from 'react';
++import { StyleSheet, View } from 'react-native';
++
++import { esMultiempresa, useAuth } from '@/auth';
++import { LogoDeEmpresa } from '@/components/logo-de-empresa';
++import { ThemedText } from '@/components/themed-text';
++import { enteActivoFom, getCompanyBrandById } from '@/services';
++import { useAdmin } from '@/session';
++import { DEFAULT_BRAND, useTheme } from '@/theme';
++
++/** Lo que oye el lector de pantalla cuando el administrador FOM está dentro de otra empresa. */
++export const NOTA_GESTION = 'Gestionando como administrador FOM';
++
++/** Iniciales del monograma (primera letra de las dos primeras palabras), como `iniciales` de la web. */
++function inicialesDe(nombre: string): string {
++  const palabras = nombre.trim().split(/\s+/).filter(Boolean);
++  return palabras
++    .slice(0, 2)
++    .map((p) => p[0] ?? '')
++    .join('')
++    .toLocaleUpperCase('es');
++}
++
++export interface MarcaEmpresa {
++  empresaId: string | null;
++  /** El nombre de la empresa; `null` mientras no se sabe (no se inventa). */
++  nombre: string | null;
++  /** FOM Operations: lleva el logo de FOM. */
++  esFom: boolean;
++  /** El administrador FOM está dentro de otra empresa (el aro azul). */
++  gestionando: boolean;
++}
++
++/**
++ * La empresa en la que se está: la misma regla que `marcaDe` de la web.
++ *
++ * Es la empresa de la SESIÓN de FOM, la misma cuya flota pinta el mapa
++ * (`useFlotaFom` lee la flota propia). El nombre sale del ente en FOM
++ * (`getCompanyBrandById`) y, si no se puede leer, de la marca del tema.
++ */
++export function useMarcaEmpresa(): MarcaEmpresa {
++  const { user } = useAuth();
++  const { empresaId: elegida } = useAdmin();
++  const { brand } = useTheme();
++  const empresaId = enteActivoFom() ?? elegida ?? user?.companyId ?? null;
++
++  const [delEnte, setDelEnte] = useState<{ id: string; nombre: string; esFom: boolean } | null>(null);
++  useEffect(() => {
++    if (!empresaId) return;
++    let vivo = true;
++    getCompanyBrandById(empresaId)
++      .catch(() => undefined)
++      .then((b) => {
++        if (vivo && b) setDelEnte({ id: empresaId, nombre: b.name, esFom: b.logoKey === 'fom' });
++      });
++    return () => {
++      vivo = false;
++    };
++  }, [empresaId]);
++
++  const ente = delEnte && delEnte.id === empresaId ? delEnte : null;
++  const delTema = brand.name !== DEFAULT_BRAND.name ? brand.name : null;
++  const nombre = ente?.nombre ?? delTema;
++  const esFom = ente?.esFom ?? false;
++  return {
++    empresaId,
++    nombre,
++    esFom,
++    // Solo con la empresa ya sabida: sin ella no se afirma que está gestionando otra.
++    gestionando: !!user && esMultiempresa(user) && !!ente && !esFom,
++  };
++}
++
++/**
++ * LA EMPRESA EN UNA LÍNEA CHICA, para ir bajo un título (la barra del Centro de
++ * control en el teléfono). Espejo de `MarcaEmpresa compacta` de la web:
++ *
++ * - Logo de 20×20 (radio 6, borde 1). Sin logo, el monograma con las iniciales
++ *   en azul FOM. FOM Operations lleva el logo de FOM (`LogoDeEmpresa`).
++ * - El nombre en 12/16, en una línea con «…» si no cabe.
++ * - Administrador FOM dentro de otra empresa: el logo lleva un aro azul y el
++ *   lector de pantalla oye «… · Gestionando como administrador FOM».
++ *
++ * Sin nombre sabido no se pinta nada.
++ */
++export function MarcaEmpresaCompacta({ marca }: { marca: MarcaEmpresa }) {
++  const { colors } = useTheme();
++  if (!marca.nombre) return null;
++  const etiqueta = marca.gestionando ? `${marca.nombre} · ${NOTA_GESTION}` : marca.nombre;
++  return (
++    <View style={styles.fila} accessible accessibilityRole="text" accessibilityLabel={etiqueta}>
++      <View
++        style={[
++          styles.logo,
++          {
++            backgroundColor: colors.surfaceSunken,
++            borderColor: marca.gestionando ? colors.primary : colors.border,
++          },
++        ]}>
++        <LogoDeEmpresa empresaId={marca.empresaId} size={marca.esFom ? 12 : 18}>
++          <ThemedText style={[styles.monograma, { color: colors.primary }]}>{inicialesDe(marca.nombre)}</ThemedText>
++        </LogoDeEmpresa>
++      </View>
++      <ThemedText style={[styles.nombre, { color: colors.textSecondary }]} numberOfLines={1}>
++        {marca.nombre}
++      </ThemedText>
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  fila: { flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 0 },
++  logo: {
++    width: 20,
++    height: 20,
++    borderRadius: 6,
++    borderWidth: 1,
++    overflow: 'hidden',
++    alignItems: 'center',
++    justifyContent: 'center',
++    flexShrink: 0,
++  },
++  // Dibujo, no texto: el nombre va al lado y el lector oye la etiqueta de la fila.
++  monograma: { fontSize: 8, lineHeight: 10, fontWeight: '700', letterSpacing: 0.2 },
++  nombre: { flexShrink: 1, fontSize: 12, lineHeight: 16, fontWeight: '500' },
++});
 diff --git a/src/components/mi-unidad-piezas.tsx b/src/components/mi-unidad-piezas.tsx
 index 3dffb95..2accec6 100644
 --- a/src/components/mi-unidad-piezas.tsx
@@ -5417,15 +6341,15 @@ index ffdf9f9..6c19968 100644
        if (vivo) temporizador = setTimeout(() => void pasada(), REFRESCO_VIVO);
 diff --git a/src/lib/estado-unidad.ts b/src/lib/estado-unidad.ts
 new file mode 100644
-index 0000000..24f1057
+index 0000000..d800c91
 --- /dev/null
 +++ b/src/lib/estado-unidad.ts
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,158 @@
 +/**
 + * EL ESTADO QUE SE MUESTRA DE UNA UNIDAD — espejo de `estadoUnidad.js` de la web.
 + *
 + * La señal la decide `estadoSenal` (`sin-senal.ts`) y aquí solo se le pone
-+ * encima la marcha. Claves: 'en_marcha' | 'parada' (las dos con señal, verdes)
++ * encima la marcha. Claves: 'en_marcha' | 'parada' (con señal: verde en marcha, azul detenida)
 + * | 'sin_ubicacion' (ámbar) | 'sin_senal' | 'sin_gps' (grises).
 + *
 + * También vive aquí la tabla de tono y de texto por clave: ninguna pantalla,
@@ -5450,12 +6374,12 @@ index 0000000..24f1057
 +export const ESTADOS_UNIDAD: readonly ClaveEstado[] = ['en_marcha', 'parada', 'sin_ubicacion', 'sin_senal', 'sin_gps'];
 +
 +/** Los tokens del tema que usan los estados. */
-+export type TonoEstado = Extract<keyof ColorTokens, 'success' | 'warning' | 'textMuted'>;
++export type TonoEstado = Extract<keyof ColorTokens, 'success' | 'info' | 'warning' | 'textMuted'>;
 +
-+/** El color de cada estado, como token del tema. La parada va en verde: tiene señal. */
++/** El color de cada estado, como token del tema. Con señal: verde en marcha, azul detenida (como la web). */
 +export const TONO_ESTADO: Record<ClaveEstado, TonoEstado> = {
 +  en_marcha: 'success',
-+  parada: 'success',
++  parada: 'info',
 +  sin_ubicacion: 'warning',
 +  sin_senal: 'textMuted',
 +  sin_gps: 'textMuted',
@@ -5464,7 +6388,7 @@ index 0000000..24f1057
 +/** El color de catálogo de cada estado (`COLOR.conexion` / `marcha_estado` de la web). */
 +export const COLOR_ESTADO: Record<ClaveEstado, ColorSenal> = {
 +  en_marcha: 'verde',
-+  parada: 'verde',
++  parada: 'azul',
 +  sin_ubicacion: 'ambar',
 +  sin_senal: 'gris',
 +  sin_gps: 'gris',
@@ -5476,6 +6400,7 @@ index 0000000..24f1057
 + */
 +export const HEX_COLOR: Record<ColorSenal, string> = {
 +  verde: '#35e888',
++  azul: '#5aa9ff',
 +  ambar: '#ffbf43',
 +  gris: '#a1afbf',
 +};
@@ -5483,7 +6408,7 @@ index 0000000..24f1057
 +/** El fondo de la pastilla de cada estado, como token del tema. */
 +export const FONDO_ESTADO: Record<ClaveEstado, keyof ColorTokens> = {
 +  en_marcha: 'successSurface',
-+  parada: 'successSurface',
++  parada: 'infoSurface',
 +  sin_ubicacion: 'warningSurface',
 +  sin_senal: 'surfaceSunken',
 +  sin_gps: 'surfaceSunken',
@@ -6216,7 +7141,7 @@ index c7e70a1..3a48479 100644
        { label: 'Productos', valor: usd(r.porClase.producto), sub: pct(r.porClase.producto) },
        { label: 'Servicios', valor: usd(r.porClase.servicio), sub: pct(r.porClase.servicio) },
 diff --git a/src/lib/sin-senal.ts b/src/lib/sin-senal.ts
-index 4c4c63b..ad4007d 100644
+index 4c4c63b..eda2056 100644
 --- a/src/lib/sin-senal.ts
 +++ b/src/lib/sin-senal.ts
 @@ -1,25 +1,64 @@
@@ -6258,9 +7183,9 @@ index 4c4c63b..ad4007d 100644
 +/** La marcha, solo de una unidad que reporta. */
 +export type Marcha = 'en_marcha' | 'parada';
 +/** El color de catálogo de la web (`COLOR.conexion`). */
-+export type ColorSenal = 'verde' | 'ambar' | 'gris';
++export type ColorSenal = 'verde' | 'azul' | 'ambar' | 'gris';
 +/** El tono de la web (`ok` | `warn` | `mute`). */
-+export type TonoSenal = 'ok' | 'warn' | 'mute';
++export type TonoSenal = 'ok' | 'info' | 'warn' | 'mute';
 +
 +const SEG_MS = 1000;
  const MIN_MS = 60_000;
@@ -6293,11 +7218,11 @@ index 4c4c63b..ad4007d 100644
 +  sin_senal: 'gris',
 +  sin_gps: 'gris',
 +};
-+const TONO: Record<ColorSenal, TonoSenal> = { verde: 'ok', ambar: 'warn', gris: 'mute' };
++const TONO: Record<ColorSenal, TonoSenal> = { verde: 'ok', azul: 'info', ambar: 'warn', gris: 'mute' };
  
  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
  
-@@ -42,43 +81,116 @@ function hora(d: Date): string {
+@@ -42,43 +81,118 @@ function hora(d: Date): string {
    return `${h12}:${m} ${sufijo}`;
  }
  
@@ -6427,7 +7352,9 @@ index 4c4c63b..ad4007d 100644
 -  return `desde el ${fechaCorta(fecha)}${otroAnio ? ` ${fecha.getFullYear()}` : ''}`;
 +  const vel = typeof v?.velocidadKmh === 'number' && Number.isFinite(v.velocidadKmh) ? v.velocidadKmh : null;
 +  const marcha: Marcha = (vel != null && vel >= VEL_MARCHA_KMH) || v?.estadoMarcha === 'en_marcha' ? 'en_marcha' : 'parada';
-+  return { ...pinta('reportando', ETIQUETA_MARCHA[marcha]), marcha, velocidadKmh: vel };
++  // Con señal, el color dice la marcha: verde en marcha, azul detenida (como la web).
++  const color: ColorSenal = marcha === 'en_marcha' ? 'verde' : 'azul';
++  return { ...pinta('reportando', ETIQUETA_MARCHA[marcha]), color, tono: TONO[color], marcha, velocidadKmh: vel };
  }
  
 -/** «Sin señal · hace 2 h 15 min» / «Sin señal · nunca reportó». */
@@ -6440,7 +7367,7 @@ index 4c4c63b..ad4007d 100644
  
  /** «21 oct, 9:42 a. m.»; `null` si nunca reportó. */
  export function fechaHoraReporte(ultimoReporte: MomentoReporte): string | null {
-@@ -98,7 +210,8 @@ export function textoUltimoReporte(ultimoReporte: MomentoReporte): string | null
+@@ -98,7 +212,8 @@ export function textoUltimoReporte(ultimoReporte: MomentoReporte): string | null
   * Ordena las unidades sin señal de más tiempo callada a menos (las que nunca
   * reportaron, primero) SIN mover a las demás: cada una ocupa uno de los puestos
   * que ya tenían las sin señal. Así la lista conserva su orden y sus grupos, y
@@ -10487,6 +11414,127 @@ index 0519e86..0000000
 -
 --- ── OPCIONAL: dejar también el buzón del panel en blanco ────────────────────
 --- delete from public.notificaciones;
+diff --git a/test/centro-control-chips.test.mjs b/test/centro-control-chips.test.mjs
+new file mode 100644
+index 0000000..1114763
+--- /dev/null
++++ b/test/centro-control-chips.test.mjs
+@@ -0,0 +1,115 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
++import { registerHooks } from 'node:module';
++import { fileURLToPath } from 'node:url';
++
++// ============================================================
++// LOS CHIPS DEL CENTRO DE CONTROL (mapa de la flota, teléfono)
++// ------------------------------------------------------------
++// Espejo de la web (CentroControl.jsx): cada chip cuenta con la regla única
++// (`estadoSenal` → `estadoUnidad`), sobre la flota ya filtrada por área y
++// buscador, antes del estado. «Todas» es siempre la suma de las demás.
++// docs/DISENO-CENTRO-CONTROL-MOVIL.md
++// ============================================================
++
++// Los .ts de la app se importan sin extensión: Node prueba con «.ts».
++registerHooks({
++  resolve(especificador, contexto, siguiente) {
++    try {
++      return siguiente(especificador, contexto);
++    } catch (e) {
++      if (/^\.\.?\//u.test(especificador) && !/\.[cm]?[jt]s$/u.test(especificador)) {
++        return siguiente(`${especificador}.ts`, contexto);
++      }
++      throw e;
++    }
++  },
++});
++
++const { agruparPorEstado, chipsVisibles, colorDeChip, CHIPS_ESTADO } = await import('../src/components/chips-flota-cuentas.ts');
++const { estadoDeVehiculo, HEX_COLOR } = await import('../src/lib/estado-unidad.ts');
++
++const AHORA = Date.parse('2026-11-04T15:00:00Z');
++const hace = (min) => new Date(AHORA - min * 60_000).toISOString();
++
++/** Una unidad como las de `useFlotaFom`: el vehículo y su última posición. */
++function unidad(id, { min = null, vel = 0, valida = true, sinGps = false, areaId } = {}) {
++  return {
++    vehicle: { id, sinGps, areaId },
++    pos: min == null ? null : { recibidaEn: hace(min), velocidadKmh: vel, valida },
++  };
++}
++
++const FLOTA = [
++  unidad('marcha-1', { min: 1, vel: 42, areaId: 'sur' }),
++  unidad('marcha-2', { min: 0.5, vel: 8, areaId: 'norte' }),
++  unidad('detenida', { min: 2, vel: 0, areaId: 'sur' }),
++  unidad('callada', { min: 90, vel: 50, areaId: 'sur' }),
++  unidad('sin-ubicacion', { min: 1, valida: false, areaId: 'norte' }),
++  unidad('nunca', {}),
++  unidad('sin-equipo', { sinGps: true, areaId: 'sur' }),
++];
++
++const suma = (grupos) => CHIPS_ESTADO.filter((c) => c.v).reduce((n, c) => n + grupos.get(c.v).length, 0);
++
++test('«Todas» es la suma de las demás', () => {
++  const grupos = agruparPorEstado(FLOTA, AHORA);
++  assert.equal(grupos.get('').length, FLOTA.length);
++  assert.equal(suma(grupos), grupos.get('').length);
++});
++
++test('las cifras salen de la regla única, no de otra cuenta', () => {
++  const grupos = agruparPorEstado(FLOTA, AHORA);
++  for (const c of CHIPS_ESTADO.filter((x) => x.v)) {
++    for (const u of grupos.get(c.v)) assert.equal(estadoDeVehiculo(u.vehicle, u.pos, AHORA).clave, c.v);
++  }
++  const ids = (v) => grupos.get(v).map((u) => u.vehicle.id);
++  assert.deepEqual(ids('en_marcha'), ['marcha-1', 'marcha-2']);
++  assert.deepEqual(ids('parada'), ['detenida']);
++  // Callada a 50 km/h: nunca entra en «En marcha» ni en «Detenidas».
++  assert.deepEqual(ids('sin_senal'), ['callada']);
++  assert.deepEqual(ids('sin_ubicacion'), ['sin-ubicacion']);
++  assert.deepEqual(ids('sin_gps'), ['nunca', 'sin-equipo']);
++});
++
++test('se cuenta sobre la flota ya filtrada por área y buscador; la suma sigue cuadrando', () => {
++  const grupos = agruparPorEstado(FLOTA, AHORA, (u) => u.vehicle.areaId === 'sur');
++  assert.equal(grupos.get('').length, 4);
++  assert.equal(suma(grupos), 4);
++  assert.equal(grupos.get('en_marcha').length, 1);
++  assert.equal(grupos.get('sin_ubicacion').length, 0);
++});
++
++test('Sin ubicación y Sin GPS solo se ven si hay alguna o están elegidos', () => {
++  const soloVivas = agruparPorEstado(FLOTA.slice(0, 3), AHORA);
++  assert.deepEqual(
++    chipsVisibles(soloVivas, '').map((c) => c.t),
++    ['Todas', 'En marcha', 'Detenidas', 'Sin señal'],
++  );
++  assert.deepEqual(
++    chipsVisibles(soloVivas, 'sin_gps').map((c) => c.t),
++    ['Todas', 'En marcha', 'Detenidas', 'Sin señal', 'Sin GPS'],
++  );
++  assert.equal(chipsVisibles(agruparPorEstado(FLOTA, AHORA), '').length, 6);
++});
++
++test('el puntito de cada chip es el color del marcador del mapa', () => {
++  assert.equal(colorDeChip(''), null);
++  assert.equal(colorDeChip('en_marcha'), HEX_COLOR.verde);
++  assert.equal(colorDeChip('parada'), '#5aa9ff');
++  assert.equal(colorDeChip('sin_senal'), HEX_COLOR.gris);
++  assert.equal(colorDeChip('sin_ubicacion'), HEX_COLOR.ambar);
++  assert.equal(colorDeChip('sin_gps'), HEX_COLOR.gris);
++});
++
++test('la pantalla no recalcula el estado: usa los chips y la regla', () => {
++  const ruta = fileURLToPath(new URL('../src/app/mapa-flota.tsx', import.meta.url));
++  const pantalla = readFileSync(ruta, 'utf8');
++  assert.match(pantalla, /agruparPorEstado\(/u);
++  // Ni la línea de resumen de antes ni cuentas propias de «en marcha».
++  assert.doesNotMatch(pantalla, /MAPA DE LA FLOTA/u);
++  assert.doesNotMatch(pantalla, /estado\s*===\s*'en_marcha'\)\.length/u);
++  // Ya no se usa el camión para abrir la lista.
++  assert.match(pantalla, /accessibilityLabel="Lista de unidades"/u);
++});
 diff --git a/test/regla-conteos.test.mjs b/test/regla-conteos.test.mjs
 new file mode 100644
 index 0000000..bfe535d
@@ -11094,7 +12142,7 @@ index 0000000..030d5c4
 +});
 diff --git a/test/regla-senal.test.mjs b/test/regla-senal.test.mjs
 new file mode 100644
-index 0000000..fc7dcd4
+index 0000000..71e5dd3
 --- /dev/null
 +++ b/test/regla-senal.test.mjs
 @@ -0,0 +1,242 @@
@@ -11269,18 +12317,18 @@ index 0000000..fc7dcd4
 +  assert.equal(estadoUnidad({}, AHORA).clave, 'sin_gps');
 +});
 +
-+test('a 2 km/h → Detenida (verde); desde 3 km/h o con motionState, En marcha', () => {
++test('a 2 km/h → Detenida (azul); desde 3 km/h o con motionState, En marcha', () => {
 +  const alDia = { ultimoReporte: hace(1), posicionEn: hace(1) };
 +  const lenta = estadoSenal({ ...alDia, velocidadKmh: 2 }, AHORA);
 +  assert.equal(lenta.clave, 'reportando');
 +  assert.equal(lenta.marcha, 'parada');
 +  assert.equal(lenta.texto, 'Detenida');
-+  assert.equal(lenta.color, 'verde');
-+  assert.equal(estadoUnidad({ ...alDia, velocidadKmh: 2 }, AHORA).tono, 'success');
++  assert.equal(lenta.color, 'azul');
++  assert.equal(estadoUnidad({ ...alDia, velocidadKmh: 2 }, AHORA).tono, 'info');
 +  assert.equal(estadoSenal({ ...alDia, velocidadKmh: 3 }, AHORA).marcha, 'en_marcha');
 +  assert.equal(estadoSenal({ ...alDia, estadoMarcha: 'en_marcha' }, AHORA).texto, 'En marcha');
 +  assert.equal(ETIQUETA_ESTADO.parada, 'Detenida');
-+  assert.equal(TONO_ESTADO.parada, TONO_ESTADO.en_marcha);
++  assert.notEqual(TONO_ESTADO.parada, TONO_ESTADO.en_marcha);
 +});
 +
 +test('un solo «hace X»', () => {
