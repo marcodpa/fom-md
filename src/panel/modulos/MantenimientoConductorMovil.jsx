@@ -62,7 +62,7 @@ function accionDe(o) {
     detalle: o.descripcion ?? '',
     generadoPor: delSistema ? 'Sistema · regla de mantenimiento' : o.creadorNombre ? `Reportada por ${o.creadorNombre}` : 'Sistema',
     relevancia: ['alta', 'media', 'baja'].includes(o.prioridad) ? o.prioridad : 'media',
-    vencida: o.estado === 'abierta',
+    vencida: grupo === 'abierta',
     estado,
     grupo,
     creadaEn: o.creadaEn,

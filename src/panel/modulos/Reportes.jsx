@@ -10,7 +10,7 @@ import {
   CATEGORIAS, COMPLETO, FORMATOS, alcanceAlCambiar, armarModelo, cifrasDe, cortesDelPeriodo, crearCsv, crearPeriodo, diasDesde,
   diasServidor, dineroVE, duracionHoras, enVentana, esProducto, formatoPorId, kmVE,
   mesesDisponibles, nombrarPeriodo, numeroValido, numeroVE, porScore, porcentajeVE, rangoPorDefecto, restarCostos,
-  restarManejo, resultadoDe, tonoIndice, tonoScore,
+  restarManejo, resultadoDe, tonoBanda, tonoIndice, tonoScore, UMBRALES_SCORE,
 } from './reportes-datos'
 import { tableroDe, textoCifras } from './reportes-tablero-datos'
 import Tablero from './reportes-tablero.jsx'
@@ -99,7 +99,7 @@ function filasCsv(formato, m) {
     ...(m.act.porCategoria || []).map(x => [CATEGORIAS[x.categoria] || x.categoria, esProducto(x.categoria) ? 'Producto' : 'Servicio', csvNum(x.monto), m.act.gasto ? Math.round(x.monto / m.act.gasto * 100) : '']),
     [], ['Unidad', 'Placa', 'ODT resueltas', 'Con costo', 'Costo registrado en ODT (USD)'],
     ...m.filasU.filter(f => f.resueltas).map(f => [f.v.alias, f.v.placa, f.resueltas, f.conCosto, csvNum(f.costo)])]
-  return [['Unidad', 'Placa', 'Marca', 'Modelo', 'Área', 'Conductor', 'Estado actual', 'Índice actual', 'Eventos del período', 'ODT del período', 'ODT sin resolver', 'Papeles', 'Pide atención'],
+  return [['Unidad', 'Placa', 'Marca', 'Modelo', 'Área', 'Conductor', 'Estado actual', 'Índice actual', 'Eventos del período', 'ODT creadas en el período', 'ODT sin resolver ahora', 'Papeles', 'Pide atención'],
     ...m.filasU.map(f => [f.v.alias, f.v.placa, f.v.marca, f.v.modelo, f.v.areaNombre, f.v.conductorPrincipalId ? f.v.conductorNombre : 'Sin conductor', marcha(f.v), f.v.indiceSeguro ?? '', f.eventos, f.odts, f.sinResolver, f.papeles.texto, f.motivos.join(', ')])]
 }
 
@@ -150,11 +150,11 @@ function TablaFiltrada({ titulo, detalle, accion, filas, texto, buscar: placehol
 function PestanaVehiculos({ m, csv, filtro, setFiltro }) {
   const { act } = m
   return <div className="rp-cuerpo">
-    <TablaFiltrada titulo="Por unidad" detalle="Eventos y ODT del período; estado, índice y papeles de ahora." filas={m.filasU} filtro={filtro} setFiltro={setFiltro}
+    <TablaFiltrada titulo="Por unidad" detalle="Eventos y ODT creadas en el período; estado, índice, papeles y ODT sin resolver de ahora." filas={m.filasU} filtro={filtro} setFiltro={setFiltro}
       accion={<button type="button" className="rp-link rp-con-ico" onClick={csv}><Ico n="descargar" tam={16} />Descargar tabla (CSV)</button>}
       texto={f => `${f.v.alias} ${f.v.placa} ${f.v.marca} ${f.v.modelo} ${f.v.conductorNombre}`} buscar="Buscar unidad o placa" pie="primero las que piden atención"
       vacio="Ninguna unidad tiene índice bajo, papeles vencidos, ODT sin resolver ni falta de conductor." sinFilas="No hay unidades en este alcance."
-      columnas={[['Unidad'], ['Conductor'], ['Estado ahora'], ['Índice', 1], ['Eventos', 1], ['ODT', 1], ['Sin resolver', 1], ['Papeles']]}
+      columnas={[['Unidad'], ['Conductor'], ['Estado ahora'], ['Índice', 1], ['Eventos', 1], ['ODT creadas', 1], ['Sin resolver ahora', 1], ['Papeles']]}
       fila={f => <tr key={f.id}>
         <td><Link className="rp-fila-link" to={`/panel/flota/${f.v.id}`}><b>{f.v.alias} · {f.v.placa || '—'}</b></Link><span className="s">{[f.v.marca, f.v.modelo, f.v.anio].filter(x => x && x !== '—').join(' ') || '—'}</span></td>
         <td>{f.v.conductorPrincipalId ? f.v.conductorNombre : <span className="c-bad b">Sin conductor</span>}<span className="s">{f.v.areaNombre || 'Sin área'}</span></td>
@@ -245,8 +245,8 @@ function PestanaCostos({ m, csv, filtro, setFiltro }) {
 
 function PestanaEstadistico({ m, ant, csv, filtro, setFiltro }) {
   const { act, vista } = m
-  const filas = (act.manejo || []).map(x => ({ ...x, unidad: m.filasP.find(p => p.id === x.id)?.unidad || null, atencion: x.eventosPor100 != null && x.eventosPor100 >= 1.5 })).sort(porScore)
-  const tonoId = vista.identificacion == null ? null : vista.identificacion >= 85 ? 'ok' : vista.identificacion >= 70 ? 'warn' : 'bad'
+  const filas = (act.manejo || []).map(x => ({ ...x, unidad: m.filasP.find(p => p.id === x.id)?.unidad || null, atencion: x.eventosPor100 != null && x.eventosPor100 >= UMBRALES_SCORE.ok })).sort(porScore)
+  const tonoId = vista.identificacion == null ? null : tonoBanda(vista.identificacion)
   const indicadores = [
     ['Score de conducción', 'Eventos ÷ km × 100', n2(act.eventosPor100), 'menor a 1,5', tonoScore(act.eventosPor100), ant.eventosPor100 == null ? 'Sin comparación' : `Antes ${n2(ant.eventosPor100)}`],
     ['Identificación de conductores', 'Unidades con conductor', porcentajeVE(vista.identificacion), '85 % o más', tonoId, 'Ahora'],

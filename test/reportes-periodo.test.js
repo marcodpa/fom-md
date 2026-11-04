@@ -133,7 +133,8 @@ test('modelo: ODT y eventos por ventana, vista actual sin comparar y frase con e
   }
   const m = armarModelo(d, p, { tipo: 'empresa' }, 'vehiculos')
   assert.equal(m.act.odts.length, 3)
-  assert.deepEqual([m.act.abiertas, m.act.revision, m.act.resueltas, m.act.sinResolver], [1, 1, 1, 2])
+  assert.deepEqual([m.act.abiertas, m.act.revision, m.act.resueltas, m.act.sinResolverCreadas, m.act.sinResolverAhora], [1, 1, 1, 2, 3])
+  // Creadas en el período (3) y sin resolver ahora (3, con la o5 de antes del período) son números distintos y se rotulan distinto.
   assert.equal(m.ant.odts.length, 1) // la del 25 sep queda fuera del 1–20 sep
   assert.equal(m.act.costoResueltas, 120); assert.equal(m.act.resolucionHoras, 24)
   assert.equal(m.vista.indice, 75); assert.equal(m.vista.sinDato, 1); assert.equal(m.vista.identificacion, 50)
@@ -146,7 +147,7 @@ test('modelo: ODT y eventos por ventana, vista actual sin comparar y frase con e
   assert.equal(odt.cmp.texto, '2 más'); assert.equal(odt.cmp.tono, 'mal')
   const frase = fraseDe('vehiculos', m, nombrarPeriodo(p))
   assert.equal(frase.texto, 'Las 2 unidades recorrieron 1.086 km, un 8,6 % más que del 1 al 20 de septiembre.')
-  assert.equal(frase.aviso, '2 ODT siguen sin resolver, 2 de ellas en la Unidad 02.')
+  assert.equal(frase.aviso, '3 ODT siguen sin resolver ahora, 2 de ellas en la Unidad 02.')
   // Un área: solo sus unidades y su gente; el gasto de empresa no se divide entre km de un área.
   const area = armarModelo(d, p, { tipo: 'area', areaId: 'a1' }, 'vehiculos')
   assert.deepEqual(area.alcance.unidades.map(v => v.id), ['v1'])
@@ -156,7 +157,7 @@ test('modelo: ODT y eventos por ventana, vista actual sin comparar y frase con e
   assert.deepEqual(m.pendientes.map(o => o.id), ['o5', 'o1', 'o2'])
   // Las cuatro cifras de cada pestaña, en el orden de la app.
   const etiquetas = f => cifrasDe(f, m).map(c => c.etiqueta)
-  assert.deepEqual(etiquetas('vehiculos'), ['Km recorridos', 'Índice seguro prom.', 'Eventos por 100 km', 'ODT del período'])
+  assert.deepEqual(etiquetas('vehiculos'), ['Km recorridos', 'Índice seguro prom.', 'Eventos por 100 km', 'ODT creadas en el período'])
   assert.deepEqual(etiquetas('usuarios'), ['Km con conductor', 'Índice seguro prom.', 'Eventos por 100 km', 'Documentos al día'])
   assert.deepEqual(etiquetas('costos'), ['Gasto del período', 'Gastos registrados', 'Costo por km', 'Costo en ODT resueltas'])
   assert.deepEqual(etiquetas('estadistico'), ['Eventos de alerta', 'Eventos por 100 km', 'Unidades con km', 'Identificación de conductores'])

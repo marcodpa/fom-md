@@ -10,7 +10,7 @@ import { Cabecera, Campo, Cargando, Chips, ErrorCarga, Pestanas, Tag, Tarjeta, V
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
-import { agruparAvisos, esDeHoy, estaLeida } from './alertas-presentacion'
+import { agruparAvisos, contarSinLeer, esDeHoy, estaLeida } from './alertas-presentacion'
 import { masNuevoPrimero } from '../datos/orden'
 import { enlaceEventoEnMapa, tipoDeAlerta } from '../datos/eventosManejo'
 import './perfil-alertas.css'
@@ -74,7 +74,7 @@ function BandejaAlertas() {
   const lista = useMemo(() => notif.datos ?? [], [notif.datos])
   // Lo más nuevo arriba, llegue como llegue del servidor.
   const eventos = useMemo(() => masNuevoPrimero(manejo.datos, 'creadaEn'), [manejo.datos])
-  const sinLeer = lista.filter(n => !estaLeida(n)).length
+  const sinLeer = contarSinLeer(lista)
   const deHoy = lista.filter(n => esDeHoy(n.creadaEn)).length
   const filtrosNotif = [
     { v: 'todas', t: 'Todas', n: lista.length },

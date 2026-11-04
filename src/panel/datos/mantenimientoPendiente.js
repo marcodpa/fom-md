@@ -9,14 +9,13 @@
 //    o en curso, sin orden propia (esa ya cuenta arriba), pasada de km o de fecha.
 // Lo próximo (aún no vence) y lo hecho no cuentan.
 // ============================================================
-import { estadoVisible } from './historial-odt.js'
+import { estaSinResolver } from './odtGrupos.js'
 
 const ABIERTAS = new Set(['pending', 'in_progress'])
 
 /** ¿La orden sigue esperando algo? Abierta o en revisión (los 3 estados de la app). */
 export function ordenSinResolver(o) {
-  const clave = estadoVisible(o?.estado).clave
-  return clave === 'abierta' || clave === 'revision'
+  return estaSinResolver(o)
 }
 
 /** ¿La acción programada ya venció? Pendiente o en curso, sin orden, pasada de km o de fecha. */

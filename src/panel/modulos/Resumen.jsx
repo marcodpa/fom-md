@@ -12,6 +12,8 @@ import { conSenalAlDia, msSinReportar, SIN_SENAL_MS, textoSinSenal, useMinuto } 
 import { Icono } from '../Iconos'
 import RankingManejo from '../comp/RankingManejo'
 import { masNuevoPrimero } from '../datos/orden'
+import { contarSinLeer, estaLeida } from './alertas-presentacion'
+import { diariasHechasHoy, unidadesSinDiariaHoy } from '../datos/inspeccionesHoy'
 import { useVistaTelefono } from '../comp/movil-navegacion'
 import { IconoMovil } from '../comp/movil-piezas'
 
@@ -55,7 +57,8 @@ function cargarEventos() {
   return Promise.all([
     repo.odts.listar({ desde: f.hoyISO() }),
     repo.alertas.listar(),
-    repo.inspecciones.listar(),
+    // El día completo: la cuenta de «faltan» necesita las de la mañana, no solo las últimas 100.
+    repo.inspecciones.listar({ desde: f.hoyISO(), hasta: f.hoyISO() }),
   ]).then(([odts, alertas, inspecciones]) => ({ odts, alertas, inspecciones }))
 }
 
@@ -105,7 +108,7 @@ function eventosDeHoy({ vehiculos, odts, alertas, inspecciones }, hoy, ahora) {
       eventos.push({
         id: `aviso-${n.id}`,
         en: n.creadaEn,
-        tono: n.leidaEn ? 'gris' : 'azul',
+        tono: estaLeida(n) ? 'gris' : 'azul',
         texto: n.titulo,
         detalle: n.detalle,
         a: '/panel/alertas',
@@ -214,7 +217,9 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
 
   // Contadores del servidor. `null` es «no se sabe» y se muestra como guion,
   // nunca como cero: cero afirma algo.
-  const sinInspeccion = r.inspeccionesHoy == null ? null : Math.max(0, total - r.inspeccionesHoy)
+  // Misma cuenta que «Faltan hoy» de Inspecciones: unidades con diaria, no registros restados.
+  const sinInspeccion = unidadesSinDiariaHoy(vehiculos, inspecciones).length
+  const conDiaria = diariasHechasHoy(vehiculos, inspecciones)
   const odtAbiertas = (r.odtAbiertas ?? 0) + (r.odtEnRevision ?? 0)
   const num = (n) => (n == null ? '—' : f.numero(n))
   const tono = (n, cero = 'ok') => (n == null ? '' : n > 0 ? 'aviso' : cero)
@@ -244,7 +249,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
           </div>
         </Link>
         <Kpi titulo="ODT por resolver" valor={odtAbiertas} icono="llave" nota={`${f.cantidad(r.odtAbiertas ?? 0, 'abierta', 'abiertas')} · ${num(r.odtEnRevision ?? 0)} en revisión`} a="/panel/mantenimiento" />
-        <Kpi titulo="Alertas nuevas" valor={num(r.alertasSinLeer)} icono="campana" nota="Pendientes de leer" a="/panel/alertas" />
+        <Kpi titulo="Alertas nuevas" valor={num(contarSinLeer(alertas))} icono="campana" nota="Pendientes de leer" a="/panel/alertas" />
       </div>
       <div className="pnl-resumen-central">
         <div className="pnl-resumen-mapa">
@@ -263,8 +268,7 @@ function Tablero({ resumen: r, vehiculos, odts, alertas, inspecciones, seleccion
         </div>
       </div>
       <div className="pnl-resumen-acciones">
-        <Kpi titulo="Inspecciones de hoy" valor={num(r.inspeccionesHoy)} icono="inspeccion" nota={sinInspeccion == null ? 'Consulta el historial' : f.cantidad(sinInspeccion, 'unidad pendiente', 'unidades pendientes')} a="/panel/inspecciones" />
-        <Kpi titulo="Mantenimiento" valor={odtAbiertas} icono="llave" nota="Órdenes pendientes y en revisión" tono={odtAbiertas ? 'aviso' : ''} a="/panel/mantenimiento" />
+        <Kpi titulo="Inspecciones de hoy" valor={num(conDiaria)} icono="inspeccion" nota={f.cantidad(sinInspeccion, 'unidad pendiente', 'unidades pendientes')} a="/panel/inspecciones" />
         <Kpi titulo="Documentos por atender" valor={r.docsVencidos == null && r.docsPorVencer == null ? '—' : f.numero((r.docsVencidos ?? 0) + (r.docsPorVencer ?? 0))} icono="documento" nota={r.docsVencidos == null && r.docsPorVencer == null ? 'Revisa los próximos vencimientos' : `${f.cantidad(r.docsVencidos ?? 0, 'vencido', 'vencidos')} · ${num(r.docsPorVencer ?? 0)} por vencer`} tono={r.docsVencidos > 0 ? 'malo' : r.docsPorVencer > 0 ? 'aviso' : ''} a="/panel/documentos" />
       </div>
 

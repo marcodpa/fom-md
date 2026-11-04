@@ -22,6 +22,7 @@ import {
 import * as f from '../datos/formato'
 import { color, etiqueta } from '../datos/catalogos'
 import { ESTADOS_VISIBLES, estadoVisible, presentarHistorial } from '../datos/historial-odt'
+import { contarOdt } from '../datos/odtGrupos'
 import { GaleriaArchivos, SelectorArchivos } from '../comp/Archivos'
 import { puedeSubirArchivos, subirArchivo, subirVarios } from '../datos/archivos'
 import { Icono } from '../Iconos'
@@ -43,7 +44,9 @@ import { CifrasMovil, ComoAvanzaMovil, UnidadesAlDiaMovil } from './Mantenimient
 // Etiquetas, filtros y cifras usan los 3 estados visibles (Abierta / En
 // revisión / Resuelta, ver historial-odt). Los pasos de abajo siguen con los
 // nueve estados del servidor: eso es lo que se envía y no cambia.
-const EN_CURSO = ESTADOS_VISIBLES.find(g => g.clave === 'revision').estados
+
+// Flujo (no una cuenta): desde estos estados del servidor se puede resolver sin pasar por el taller.
+const DESDE_DONDE_SE_RESUELVE_SIN_TALLER = ['abierta', 'en_revision', 'aprobada']
 
 /** La etiqueta de estado de una orden, con los 3 estados visibles. */
 function EstadoOdt({ estado }) {
@@ -273,8 +276,7 @@ function PorEstado({ odts, alAbrir, alCrear }) {
 // ---------------- Indicadores ----------------
 
 function Indicadores({ odts }) {
-  const abiertas = odts.filter((o) => o.estado === 'abierta')
-  const enRevision = odts.filter((o) => EN_CURSO.includes(o.estado))
+  const cuenta = contarOdt(odts)
   const hoy = new Date()
   const delMes = (fecha) => {
     if (!fecha) return false
@@ -290,7 +292,7 @@ function Indicadores({ odts }) {
   const conCosto = cerradasMes.filter((o) => o.costo != null).length
   const mes = hoy.toLocaleDateString('es', { month: 'long', year: 'numeric' })
 
-  return <div className="mnt-summary">{[['Abiertas', abiertas.length, 'Reportadas, falta revisarlas', 'ambar'], ['En revisión', enRevision.length, 'En evaluación o en taller', 'azul'], ['Resueltas este mes', resueltasMes.length, mes.charAt(0).toUpperCase() + mes.slice(1), 'verde'], ['Costo del mes', f.moneda(gasto), `${conCosto} ${conCosto === 1 ? 'cierre' : 'cierres'} con costo`, 'gris']].map(([t,v,d,c]) => <div key={t}><span><i className={c}/>{t}</span><b>{v}</b><small>{d}</small></div>)}</div>
+  return <div className="mnt-summary">{[['Abiertas', cuenta.abierta, 'Reportadas, falta revisarlas', 'ambar'], ['En revisión', cuenta.revision, 'En evaluación o en taller', 'azul'], ['Resueltas este mes', resueltasMes.length, mes.charAt(0).toUpperCase() + mes.slice(1), 'verde'], ['Costo del mes', f.moneda(gasto), `${conCosto} ${conCosto === 1 ? 'cierre' : 'cierres'} con costo`, 'gris']].map(([t,v,d,c]) => <div key={t}><span><i className={c}/>{t}</span><b>{v}</b><small>{d}</small></div>)}</div>
 }
 
 /**
@@ -464,7 +466,7 @@ function Detalle({ odt, perfil, vehiculo, recargar, alCerrar }) {
   const pasos = (PASOS_ODT[odt.estado] ?? []).filter((p) => !p.ejecucion || soyResponsable)
   const pasosDelResponsable = (PASOS_ODT[odt.estado] ?? []).filter((p) => p.ejecucion)
   // Antes de llegar al taller, la orden puede resolverse directo (una revisión rápida, un ajuste en sitio…).
-  const sinTaller = ['abierta', 'en_revision', 'aprobada'].includes(odt.estado) ? (PASOS_ODT[odt.estado] ?? []).find((p) => p.a === 'cerrada') : null
+  const sinTaller = DESDE_DONDE_SE_RESUELVE_SIN_TALLER.includes(odt.estado) ? (PASOS_ODT[odt.estado] ?? []).find((p) => p.a === 'cerrada') : null
 
   // Todos los pasos abren su formulario (persona, nota o cierre), menos iniciar y
   // reanudar: no tienen nada que preguntar y se hacen con un clic, como en la app.

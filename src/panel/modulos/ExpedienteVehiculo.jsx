@@ -25,6 +25,7 @@ import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
 import { enlaceEventoEnMapa } from '../datos/eventosManejo'
 import { TIPO_FALLA, color, etiqueta } from '../datos/catalogos'
+import { contarOdt, grupoOdt } from '../datos/odtGrupos'
 import './expediente-unidad.css'
 import '../../styles/movil-modulos.css'
 
@@ -516,8 +517,8 @@ export default function ExpedienteVehiculo() {
   const cargando = estado === 'cargando'
   // En el teléfono se pintan todas las partes, una debajo de otra.
   const ver = (clave) => movil || pestana === clave
-  const abiertas = (v?.odts ?? []).filter((o) => o.estado === 'abierta').length
-  const enRevision = (v?.odts ?? []).filter((o) => o.estado === 'en_revision').length
+  // «En revisión» son los seis estados del grupo, no solo en_revision (misma cuenta que Mantenimiento).
+  const { abierta: abiertas, revision: enRevision } = contarOdt(v?.odts)
 
   return (
     <>
@@ -773,7 +774,7 @@ export default function ExpedienteVehiculo() {
                     {masNuevoPrimero(v.odts, 'creadaEn').map((o) => (
                       <div
                         key={o.id}
-                        className={`pnl-fila${o.estado === 'abierta' ? ' critica' : o.estado === 'en_revision' ? ' aviso' : ''}`}
+                        className={`pnl-fila${grupoOdt(o.estado) === 'abierta' ? ' critica' : grupoOdt(o.estado) === 'revision' ? ' aviso' : ''}`}
                       >
                         <div className="pnl-fila-txt">
                           <b>{o.descripcion}</b>

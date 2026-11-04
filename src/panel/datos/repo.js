@@ -26,9 +26,10 @@ import {
   marcarAvisosGpsLeidos,
 } from './avisosSinSenal'
 import repoApi from './repoApi'
+import { estaLeida } from '../modulos/alertas-presentacion'
 import { pagosApi } from './pagosApi'
 import repoSemilla, {
-  alCambiarDatos, inspeccionConductorSemilla, otraUnidadSemilla, reiniciarDatos, seguridadSemilla, sosSemilla,
+  alCambiarDatos, avisarCambioDatos, inspeccionConductorSemilla, otraUnidadSemilla, reiniciarDatos, seguridadSemilla, sosSemilla,
 } from './repoSemilla'
 
 /** ¿Qué módulos están leyendo de la base real? Útil para avisarlo en pantalla. */
@@ -322,28 +323,34 @@ const repo = HAY_API
 // navegador (ver avisosSinSenal.js). Sale en la campana y en la bandeja, lo más nuevo primero.
 fijarEmpresaDeAvisos(() => empresaGestionActualId() ?? perfilActual()?.empresaId ?? null)
 const alertasBase = repo.alertas
+// Las escrituras reales no avisan solas: sin esto la campana seguía con el número viejo tras marcar como leído.
+// (En la demo cada escritura ya avisa por su cuenta.)
+const avisarTrasEscribir = (resultado) => {
+  if (HAY_API) avisarCambioDatos()
+  return resultado
+}
 repo.alertas = {
   ...alertasBase,
   async listar(opciones = {}) {
-    const propios = avisosSinSenal().filter((n) => !opciones.soloSinLeer || !n.leida)
+    const propios = avisosSinSenal().filter((n) => !opciones.soloSinLeer || !estaLeida(n))
     const base = await alertasBase.listar(opciones)
     return [...propios, ...base].sort((a, b) => Date.parse(b.creadaEn) - Date.parse(a.creadaEn) || 0)
   },
   async marcarLeida(id) {
     if (esAvisoGps(id)) { marcarAvisoGpsLeido(id); return true }
-    return alertasBase.marcarLeida(id)
+    return avisarTrasEscribir(await alertasBase.marcarLeida(id))
   },
   async marcarTodasLeidas() {
     marcarAvisosGpsLeidos()
-    return alertasBase.marcarTodasLeidas()
+    return avisarTrasEscribir(await alertasBase.marcarTodasLeidas())
   },
   async descartar(id) {
     if (esAvisoGps(id)) { descartarAvisoGps(id); return true }
-    return alertasBase.descartar(id)
+    return avisarTrasEscribir(await alertasBase.descartar(id))
   },
   async descartarLeidos() {
     descartarAvisosGpsLeidos()
-    return alertasBase.descartarLeidos()
+    return avisarTrasEscribir(await alertasBase.descartarLeidos())
   },
 }
 

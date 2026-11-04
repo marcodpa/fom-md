@@ -1,14 +1,8 @@
 import { etiqueta } from './catalogos.js'
 
-// La ODT se muestra con 3 estados, igual que la app: Abierta / En revisión /
-// Resuelta. Es SOLO presentación: el servidor sigue con sus nueve estados y
-// lo que se le envía no cambia. Cancelada cuenta como resuelta porque ya no
-// espera nada (la app hace lo mismo).
-export const ESTADOS_VISIBLES = [
-  { clave: 'abierta', etiqueta: 'Abierta', plural: 'Abiertas', color: 'ambar', estados: ['abierta'] },
-  { clave: 'revision', etiqueta: 'En revisión', plural: 'En revisión', color: 'azul', estados: ['en_revision', 'aprobada', 'asignada', 'en_ejecucion', 'pausada', 'en_calidad'] },
-  { clave: 'resuelta', etiqueta: 'Resuelta', plural: 'Resueltas', color: 'verde', estados: ['cerrada', 'cancelada'] },
-]
+// Los 3 estados visibles (Abierta / En revisión / Resuelta) viven en odtGrupos.js.
+import { ESTADOS_VISIBLES } from './odtGrupos.js'
+export { ESTADOS_VISIBLES }
 
 /** El estado visible (de los 3) de un estado del servidor. Uno desconocido se enseña tal cual, en gris. */
 export function estadoVisible(estado) {

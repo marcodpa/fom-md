@@ -5,6 +5,7 @@ import { useDatos } from '../useDatos'
 import { Buscador, Cargando, Chips, Datos, ErrorCarga, Modal, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
 import { masNuevoPrimero } from '../datos/orden'
+import { diariasHechasHoy } from '../datos/inspeccionesHoy'
 import { color, etiqueta } from '../datos/catalogos'
 import { Icono } from '../Iconos'
 import ProgramaInspecciones from './ProgramaInspecciones'
@@ -194,9 +195,6 @@ function ImprimirHallazgos() {
   </div>
 }
 
-/** Solo la diaria cuenta para «Diarias hechas hoy»; las demás se ven como una inspección más. */
-const esDiaria = i => i.clase !== 'scheduled'
-
 function Resumen({ cambiarVista }) {
   const [detalle, setDetalle] = useState(null)
   const [faltanTodas, setFaltanTodas] = useState(false)
@@ -208,13 +206,15 @@ function Resumen({ cambiarVista }) {
   const abrir = i => setDetalle(i)
   // Requiere tu atención: bloqueadas y con observaciones, de la más reciente a la más antigua.
   const atencion = masNuevoPrimero(base.filter(i => i.resultado !== 'aprobada'), CUANDO)
+  // Lo último que pasó, arriba: no se confía en el orden en que llega la lista.
+  const recientes = masNuevoPrimero(base, CUANDO)
   const faltan = pendientes.datos ?? []
   const verTodas = () => cambiarVista('historial', { modo: 'todas' })
   const imp = useImpresion()
   return <>
     <AvisoImpresion aviso={imp.aviso}/>
-    {hoy.estado === 'error' ? <ErrorCarga error={hoy.error} onReintentar={hoy.recargar}/> : hoy.estado !== 'ok' || vehiculos.estado !== 'ok' ? <Cargando filas={1}/> : <div className="insp-summary">
-      {[['Diarias hechas hoy', new Set(base.filter(esDiaria).map(i => i.vehiculoId)).size,'check','info',vehiculos.datos.length],['Aprobadas',base.filter(i => i.resultado === 'aprobada').length,'escudo','ok'],['Con observaciones',base.filter(i => i.resultado === 'aprobada_con_observaciones').length,'editar','aviso'],['Bloqueadas',base.filter(i => i.resultado === 'bloqueada').length,'alerta','malo']].map(([t,n,icono,tono,de]) => <div key={t}><span className={`insp-ibox ${tono}`}><Icono nombre={icono}/></span><span>{t}<b>{n}{de != null && <small> de {de}</small>}</b></span></div>)}
+    {hoy.estado === 'error' ? <ErrorCarga error={hoy.error} onReintentar={hoy.recargar}/> : hoy.estado === 'cargando' || vehiculos.estado === 'cargando' ? <Cargando filas={1}/> : hoy.estado !== 'ok' ? null : <div className="insp-summary">
+      {[['Diarias hechas hoy', vehiculos.estado === 'ok' ? diariasHechasHoy(vehiculos.datos, base) : '—','check','info',vehiculos.estado === 'ok' ? vehiculos.datos.length : null],['Aprobadas',base.filter(i => i.resultado === 'aprobada').length,'escudo','ok'],['Con observaciones',base.filter(i => i.resultado === 'aprobada_con_observaciones').length,'editar','aviso'],['Bloqueadas',base.filter(i => i.resultado === 'bloqueada').length,'alerta','malo']].map(([t,n,icono,tono,de]) => <div key={t}><span className={`insp-ibox ${tono}`}><Icono nombre={icono}/></span><span>{t}<b>{n}{de != null && <small> de {de}</small>}</b></span></div>)}
     </div>}
     {vehiculos.estado === 'error' && <ErrorCarga error={vehiculos.error} onReintentar={vehiculos.recargar}/>}
     <div className="insp-overview"><Tarjeta titulo="Requiere tu atención" sinCuerpo accion={<button className="pnl-link" type="button" onClick={verTodas}>Ver historial →</button>}>
@@ -236,7 +236,7 @@ function Resumen({ cambiarVista }) {
     </Tarjeta>
     <aside className="insp-guide"><h2>Cómo funciona</h2>{[['Diaria', 'Cada conductor llena una cada día, desde la app, antes de salir. Aquí ves quién ya la hizo y quién falta; en Historial, el mes de cada persona.'],['Hallazgos', 'Lo que sale mal en una inspección se convierte en un hallazgo con seguimiento.']].map(([t,p],i) => <div key={t}><b>{i+1}</b><span><strong>{t}</strong><p>{p}</p></span></div>)}</aside></div></div>
     {/* «Imprimir el día»: todas las de hoy, una hoja cada una (en la app, «Día»). */}
-    <Tarjeta titulo="Últimos resultados de hoy" sinCuerpo accion={<div className="insp-cab-acciones">{hoy.estado === 'ok' && base.length > 0 && <button className="pnl-btn sutil" type="button" disabled={imp.ocupado} onClick={() => imp.imprimir(base)}><Icono nombre="reporte" tam={18}/>{imp.ocupado ? 'Armando…' : 'Imprimir el día'}</button>}<button className="pnl-link" type="button" onClick={verTodas}>Ver todos →</button></div>}>{hoy.estado === 'ok' && (base.length ? <TablaResultados lista={base.slice(0,5)} abrir={abrir} imp={imp}/> : <Vacio icono="inspeccion" titulo="Sin resultados hoy" texto="Los resultados aparecerán cuando se registren desde la app."/>)}</Tarjeta>
+    <Tarjeta titulo="Últimos resultados de hoy" sinCuerpo accion={<div className="insp-cab-acciones">{hoy.estado === 'ok' && base.length > 0 && <button className="pnl-btn sutil" type="button" disabled={imp.ocupado} onClick={() => imp.imprimir(base)}><Icono nombre="reporte" tam={18}/>{imp.ocupado ? 'Armando…' : 'Imprimir el día'}</button>}<button className="pnl-link" type="button" onClick={verTodas}>Ver todos →</button></div>}>{hoy.estado === 'ok' && (base.length ? <TablaResultados lista={recientes.slice(0,5)} abrir={abrir} imp={imp}/> : <Vacio icono="inspeccion" titulo="Sin resultados hoy" texto="Los resultados aparecerán cuando se registren desde la app."/>)}</Tarjeta>
     {detalle && <DetalleInspeccion key={detalle.id} inspeccion={detalle} imp={imp} alCerrar={() => setDetalle(null)} alHallazgos={() => {setDetalle(null);cambiarVista('hallazgos')}}/>}
   </>
 }

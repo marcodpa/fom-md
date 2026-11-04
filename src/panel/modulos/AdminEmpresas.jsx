@@ -9,6 +9,7 @@ import {
 } from '../comp/ui'
 import * as f from '../datos/formato'
 import { COMPANY_TIPO, etiqueta } from '../datos/catalogos'
+import { contarEmpresas, soloOperativas } from '../datos/contarEmpresas'
 import { Icono } from '../Iconos'
 import LogoEmpresa from '../comp/LogoEmpresa'
 import { useConfirmar } from '../comp/Confirmar'
@@ -66,7 +67,7 @@ export default function AdminEmpresas() {
   const { datos, estado, error, recargar } = useDatos(() => cargar('', ''), [])
   const lista = useMemo(() => (datos ?? []).filter(e =>
     (!tipo || e.tipo === tipo) &&
-    (!servicio || !e.respaldo && (servicio === 'activo' ? e.servicioActivo : !e.servicioActivo)) &&
+    (!servicio || !e.respaldo && (servicio === 'activo' ? e.servicioActivo === true : e.servicioActivo === false)) &&
     (!q.trim() || [e.nombre, e.rif, e.contacto, e.email, e.telefono].some(v => String(v ?? '').toLocaleLowerCase().includes(q.trim().toLocaleLowerCase())))
   ), [datos, q, tipo, servicio])
 
@@ -156,8 +157,8 @@ export default function AdminEmpresas() {
 
 function Contenido({ lista, todas, q, setQ, tipo, setTipo, servicio, setServicio, ocupado, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando, seleccionId, setSeleccionId, subirLogo }) {
   const seleccion = lista.find(e => e.id === seleccionId) ?? lista[0]
-  const operativas = todas.filter(e => !e.respaldo)
-  const activas = operativas.filter(e => e.servicioActivo).length
+  const operativas = soloOperativas(todas)
+  const { activas, suspendidas } = contarEmpresas(todas)
   const deuda = operativas.length && operativas.every(e => Number.isFinite(e.deuda)) ? operativas.reduce((a, e) => a + e.deuda, 0) : null
   const limpiar = () => { setQ(''); setTipo(''); setServicio('') }
   const fichaProps = { subirLogo, ocupado, alternarServicio, eliminar, abrirPredefinidas, gestionar, entrando }
@@ -166,14 +167,14 @@ function Contenido({ lista, todas, q, setQ, tipo, setTipo, servicio, setServicio
     <section className="emp-resumen" aria-label="Resumen de las empresas disponibles">
       <div><Icono nombre="empresa" tam={25} /><span>Empresas<strong>{f.numero(operativas.length)}</strong></span></div>
       <div><Icono nombre="check" tam={25} /><span>Servicio activo<strong>{f.numero(activas)}</strong></span></div>
-      <div><Icono nombre="reloj" tam={25} /><span>Suspendidas<strong>{f.numero(operativas.length - activas)}</strong></span></div>
+      <div><Icono nombre="reloj" tam={25} /><span>Suspendidas<strong>{f.numero(suspendidas)}</strong></span></div>
       <div><Icono nombre="costos" tam={25} /><span>Deuda acumulada<strong>{deuda === null ? 'Sin dato' : f.moneda(deuda)}</strong></span></div>
     </section>
     <div className="emp-espacio">
       <section className="emp-directorio" aria-label="Directorio de empresas">
         <div className="emp-toolbar"><div><h2>Directorio de empresas</h2><p>{lista.length} {lista.length === 1 ? 'resultado' : 'resultados'} · selecciona para ver los detalles</p></div><Buscador valor={q} alCambiar={setQ} placeholder="Buscar nombre, RIF o contacto" /></div>
         <div className="emp-filtros">
-          <Chips opciones={[{ v: '', t: 'Todas', n: todas.length }, ...COMPANY_TIPO.map(t => ({v:t,t:etiqueta('company_tipo', t),n:todas.filter(e=>e.tipo===t).length}))]} valor={tipo} alCambiar={setTipo} />
+          <Chips opciones={[{ v: '', t: 'Todas', n: operativas.length }, ...COMPANY_TIPO.map(t => ({v:t,t:etiqueta('company_tipo', t),n:operativas.filter(e=>e.tipo===t).length}))]} valor={tipo} alCambiar={setTipo} />
           <label className="emp-estado-filtro"><span>Servicio</span><select className="pnl-input" aria-label="Servicio" value={servicio} onChange={e=>setServicio(e.target.value)}><option value="">Todos los estados</option><option value="activo">Activo</option><option value="suspendido">Suspendido</option></select></label>
         </div>
         {lista.length ? <ul className="emp-lista">{lista.map(e => <li key={e.id}>

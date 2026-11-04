@@ -149,7 +149,7 @@ function Asignada({ item, alHacer, alAbrir, movil = false, nombreUnidad = '' }) 
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
   const notaRef = useRef(null)
-  const momento = MOMENTOS[item.estado] ?? { t: etiqueta('odt_estado', item.estado), ayuda: '' }
+  const momento = MOMENTOS[item.estado] ?? { t: etiqueta('odt_estado_visible', item.estado), ayuda: '' }
   const acciones = accionesDe(item.estado)
 
   useEffect(() => {

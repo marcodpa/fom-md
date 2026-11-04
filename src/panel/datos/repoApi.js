@@ -17,6 +17,7 @@ import { asignarPrincipal } from './asignarConductor'
 import { normalizarCodigoPlan, validarCodigoPlan } from './codigoPlan'
 import { hoyISO } from './formato'
 import { clasificarVencimiento, diasDeCalendario } from './vencimientos'
+import { unidadesSinDiariaHoy } from './inspeccionesHoy'
 import { AVISO_SIN_DIAS_EN_SERVIDOR, diasParaEnviar, normalizarDias } from './diasPlanilla'
 import { quitarSaltos } from './recorrido'
 import { transmitiendo } from './sinSenal.js'
@@ -1795,8 +1796,8 @@ export const repoApi = {
         // grande, las de la mañana quedaban fuera y esas unidades salían «sin la diaria».
         repoApi.inspecciones.listar({ desde: hoy, hasta: hoy }),
       ])
-      const revisadas = new Set(hechas.filter((i) => String(i.fecha ?? '').slice(0, 10) === hoy).map((i) => i.vehiculoId))
-      const faltan = flota.filter((v) => !revisadas.has(v.id))
+      // La cuenta es la de todo el panel (datos/inspeccionesHoy.js): unidades distintas, solo la diaria, día local.
+      const faltan = unidadesSinDiariaHoy(flota, hechas, hoy)
       if (hechas.incompleta || flota.incompleta) faltan.incompleta = true
       return faltan
     },
@@ -1892,8 +1893,12 @@ export const repoApi = {
     },
     async listar({ soloSinLeer = false } = {}) {
       try {
-        const r = await api.notificaciones({ soloSinLeer })
-        return (r?.items ?? []).map((n) => ({
+        // Todas las páginas: con solo las primeras 100 el contador de «sin leer» se quedaba corto.
+        const r = await leerTodasLasPaginas(
+          (desplazamiento, limite) => api.notificaciones({ soloSinLeer, limite, desplazamiento }),
+          { limite: 100 },
+        )
+        const lista = r.items.map((n) => ({
           id: n.id,
           tipo: n.notificationType,
           titulo: n.title,
@@ -1902,6 +1907,8 @@ export const repoApi = {
           leidaEn: n.readAt,
           creadaEn: n.createdAt,
         }))
+        if (r.incompleta) lista.incompleta = true
+        return lista
       } catch (error) {
         throw error
       }

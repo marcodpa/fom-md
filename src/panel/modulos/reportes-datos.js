@@ -2,6 +2,10 @@
 import { etiqueta, estadoDocumento } from '../datos/catalogos.js'
 import { atencionDeUnidad } from '../datos/atencionUnidad.js'
 import { clasificarVencimiento, fechaLocal } from '../datos/vencimientos.js'
+import { grupoOdt, contarOdt, estaSinResolver, ETIQUETA_GRUPO } from '../datos/odtGrupos.js'
+
+// Los grupos de ODT se definen en odtGrupos.js; se reexportan porque Reportes y el informe los piden de aquí.
+export { grupoOdt, ETIQUETA_GRUPO }
 
 export function numeroValido(valor) {
   return valor !== null && valor !== undefined && valor !== '' && Number.isFinite(Number(valor))
@@ -12,6 +16,7 @@ export function calcularReporte(d, dias, areaId = '', ahora = Date.now()) {
   const ids = new Set(unidades.map(v => v.id))
   const corte = ahora - dias * 86400000
   const odts = d.odts.filter(o => ids.has(o.vehiculoId) && new Date(o.creadaEn).getTime() >= corte && new Date(o.creadaEn).getTime() <= ahora)
+  const cuentaOdt = contarOdt(odts)
   const cerradas = odts.filter(o => o.estado === 'cerrada')
   const conCosto = cerradas.filter(o => numeroValido(o.costo))
   const conConductor = unidades.filter(v => v.conductorPrincipalId).length
@@ -27,8 +32,9 @@ export function calcularReporte(d, dias, areaId = '', ahora = Date.now()) {
     enMarcha, detenidas, sinDato: unidades.length - enMarcha - detenidas,
     kmTotal: unidades.length && unidades.every(v => numeroValido(v.km)) ? unidades.reduce((s, v) => s + Number(v.km), 0) : null,
     indice: unidades.length && unidades.every(v => numeroValido(v.indiceSeguro) && Number(v.indiceSeguro) >= 0 && Number(v.indiceSeguro) <= 100) ? Math.round(unidades.reduce((s, v) => s + Number(v.indiceSeguro), 0) / unidades.length) : null,
-    odts, abiertas: odts.filter(o => o.estado === 'abierta').length,
-    enRevision: odts.filter(o => o.estado === 'en_revision').length,
+    // «En revisión» son los seis estados del grupo, no solo en_revision (misma regla que Mantenimiento).
+    odts, abiertas: cuentaOdt.abierta,
+    enRevision: cuentaOdt.revision,
     cerradas: cerradas.length, conCosto: conCosto.length,
     costoOdts: conCosto.length ? conCosto.reduce((s, o) => s + Number(o.costo), 0) : null,
     fallas: [...falla].map(([clave, valor]) => ({ clave, valor })).sort((a, b) => b.valor - a.valor),
@@ -292,19 +298,6 @@ export function restarManejo(a, b) {
   }).filter(x => x.km > 0 || x.eventos > 0)
 }
 
-// ============================================================
-// ODT con 3 estados visibles (Abierta / En revisión / Resuelta). Solo para
-// mostrar: mismos grupos que historial-odt.js.
-// ============================================================
-const REVISION = ['en_revision', 'aprobada', 'asignada', 'en_ejecucion', 'pausada', 'en_calidad']
-export function grupoOdt(estado) {
-  if (estado === 'abierta') return 'abierta'
-  if (REVISION.includes(estado)) return 'revision'
-  if (estado === 'cerrada' || estado === 'cancelada') return 'resuelta'
-  return 'otro'
-}
-export const ETIQUETA_GRUPO = { abierta: 'Abierta', revision: 'En revisión', resuelta: 'Resuelta', otro: 'Otro estado' }
-
 const PRODUCTOS = new Set(['combustible', 'repuestos', 'neumaticos', 'lubricantes'])
 export const CATEGORIAS = { combustible: 'Combustible', repuestos: 'Repuestos', neumaticos: 'Neumáticos', lubricantes: 'Lubricantes', mano_obra: 'Mano de obra', preventivo: 'Mantenimiento preventivo', correctivo: 'Mantenimiento correctivo', peajes: 'Peajes', seguros: 'Seguros' }
 export const esProducto = categoria => PRODUCTOS.has(categoria)
@@ -361,8 +354,9 @@ export function metricasDe(d, ventana, alcance, manejo, costos) {
   const t1 = new Date(ventana.hasta).getTime()
   const dentro = iso => { const t = Date.parse(iso); return t >= t0 && t < t1 }
   const odts = (d.odts || []).filter(o => alcance.ids.has(o.vehiculoId) && dentro(o.creadaEn))
-  const grupo = g => odts.filter(o => grupoOdt(o.estado) === g)
-  const resueltas = grupo('resuelta')
+  const cuentaOdt = contarOdt(odts)
+  const odtsAhora = (d.odts || []).filter(o => alcance.ids.has(o.vehiculoId))
+  const resueltas = odts.filter(o => grupoOdt(o.estado) === 'resuelta')
   const conCosto = resueltas.filter(o => numeroValido(o.costo))
   const tiempos = resueltas.filter(o => o.resueltaEn).map(o => (Date.parse(o.resueltaEn) - Date.parse(o.creadaEn)) / 3600000).filter(h => Number.isFinite(h) && h >= 0)
   const fallas = new Map()
@@ -378,8 +372,13 @@ export function metricasDe(d, ventana, alcance, manejo, costos) {
   const productos = costos ? centavos(costos.porCategoria.filter(x => esProducto(x.categoria)).reduce((s, x) => s + x.monto, 0)) : null
   return {
     odts,
-    abiertas: grupo('abierta').length, revision: grupo('revision').length, resueltas: resueltas.length,
-    sinResolver: grupo('abierta').length + grupo('revision').length,
+    // Dos números que NO son lo mismo y se rotulan distinto:
+    //  - `odts` = las CREADAS en el período; abiertas / revision / resueltas y `sinResolverCreadas` son el
+    //    estado de hoy de esas mismas órdenes («de las creadas, cuántas siguen sin resolver»).
+    //  - `sinResolverAhora` = todo lo que hoy espera algo en el alcance, sea del día que sea.
+    abiertas: cuentaOdt.abierta, revision: cuentaOdt.revision, resueltas: cuentaOdt.resuelta,
+    sinResolverCreadas: cuentaOdt.sinResolver,
+    odtsAhora, sinResolverAhora: contarOdt(odtsAhora).sinResolver,
     conCosto: conCosto.length,
     costoResueltas: conCosto.length ? centavos(conCosto.reduce((s, o) => s + Number(o.costo), 0)) : null,
     resolucionHoras: tiempos.length ? tiempos.reduce((s, h) => s + h, 0) / tiempos.length : null,
@@ -426,8 +425,14 @@ export function papelesPersona(p, hoy = new Date()) {
 }
 
 const indiceValido = v => numeroValido(v) && Number(v) >= 0 && Number(v) <= 100
-export const tonoIndice = n => !indiceValido(n) ? null : n >= 85 ? 'ok' : n >= 70 ? 'warn' : 'bad'
-export const tonoScore = n => !numeroValido(n) ? null : n < 1.5 ? 'ok' : n < 3.5 ? 'warn' : 'bad'
+// Una sola tabla de bandas para el índice seguro (0–100): desde 85 conforme, desde 70 alerta, menos de 70
+// atención. El gráfico de rangos (reportes-tablero-datos.js) y el % de identificación salen de aquí.
+export const BANDAS_INDICE = { ok: 85, warn: 70 }
+export const tonoBanda = n => n >= BANDAS_INDICE.ok ? 'ok' : n >= BANDAS_INDICE.warn ? 'warn' : 'bad'
+export const tonoIndice = n => !indiceValido(n) ? null : tonoBanda(Number(n))
+// Eventos por 100 km: menos de 1,5 conforme, menos de 3,5 alerta, desde 3,5 atención.
+export const UMBRALES_SCORE = { ok: 1.5, warn: 3.5 }
+export const tonoScore = n => !numeroValido(n) ? null : n < UMBRALES_SCORE.ok ? 'ok' : n < UMBRALES_SCORE.warn ? 'warn' : 'bad'
 export const resultadoDe = tono => ({ ok: 'Conforme', warn: 'Alerta', bad: 'Atención' })[tono] || 'Sin dato'
 
 export function vistaActual(unidades, personas) {
@@ -454,7 +459,8 @@ export function vistaActual(unidades, personas) {
 export function filasUnidades(unidades, act) {
   return unidades.map(v => {
     const odts = act.odts.filter(o => o.vehiculoId === v.id)
-    const sinResolver = odts.filter(o => ['abierta', 'revision'].includes(grupoOdt(o.estado))).length
+    // Lo que hoy espera algo en la unidad, aunque la orden sea de antes del período.
+    const sinResolver = contarOdt((act.odtsAhora ?? act.odts).filter(o => o.vehiculoId === v.id)).sinResolver
     const papeles = papelesUnidad(v)
     const motivos = []
     if (tonoIndice(v.indiceSeguro) === 'bad') motivos.push('Índice bajo')
@@ -583,14 +589,14 @@ export function cifrasDe(formato, m) {
     nota: act.km == null ? 'El servidor no entregó km del período' : formato === 'usuarios' ? '' : 'suma de los conductores identificados',
   })
   const ev100 = cifra({
-    clave: 'ev100', etiqueta: 'Eventos por 100 km', pista: 'óptimo < 1,5',
+    clave: 'ev100', etiqueta: 'Eventos por 100 km', pista: `óptimo < ${numeroVE(UMBRALES_SCORE.ok, 1)}`,
     valor: numeroVE(act.eventosPor100, 2), tono: tonoScore(act.eventosPor100),
     cmp: comparar(act.eventosPor100, ant.eventosPor100, { mejor: 'baja', modo: 'abs', decimales: 2 }),
     antes: ant.eventosPor100 == null ? null : `antes ${numeroVE(ant.eventosPor100, 2)}`,
     nota: act.eventosPor100 == null ? 'Sin km del período no se calcula' : '',
   })
   const indice = cifra({ clave: 'indice', etiqueta: 'Índice seguro prom.', pista: '100 = perfecto', valor: numeroVE(vista.indice), unidad: vista.indice == null ? '' : '/ 100', tono: tonoIndice(vista.indice), ahora: true })
-  const ident = cifra({ clave: 'ident', etiqueta: 'Identificación de conductores', valor: numeroVE(vista.identificacion), unidad: vista.identificacion == null ? '' : '%', tono: vista.identificacion == null ? null : vista.identificacion >= 85 ? 'ok' : vista.identificacion >= 70 ? 'warn' : 'bad', ahora: true, nota: `${vista.conConductor} de ${vista.total} unidades` })
+  const ident = cifra({ clave: 'ident', etiqueta: 'Identificación de conductores', valor: numeroVE(vista.identificacion), unidad: vista.identificacion == null ? '' : '%', tono: vista.identificacion == null ? null : tonoBanda(vista.identificacion), ahora: true, nota: `${vista.conConductor} de ${vista.total} unidades` })
   // Mismas cuatro cifras y en el mismo orden que la app, pestaña por pestaña.
   if (formato === 'usuarios') {
     return [km, indice, ev100, cifra({ clave: 'papeles', etiqueta: 'Documentos al día', valor: numeroVE(vista.papelesAlDia), unidad: vista.papelesAlDia == null ? '' : '%', tono: vista.papelesVencidos ? 'bad' : vista.papelesPorVencer ? 'warn' : null, ahora: true, nota: vista.papelesAlDia == null ? 'Sin documentos con fecha' : vista.papelesVencidos ? `${vista.papelesVencidos} vencidos` : '' })]
@@ -613,9 +619,9 @@ export function cifrasDe(formato, m) {
     ]
   }
   return [km, indice, ev100, cifra({
-    clave: 'odt', etiqueta: 'ODT del período', valor: numeroVE(act.odts.length), tono: act.sinResolver ? 'warn' : null,
+    clave: 'odt', etiqueta: 'ODT creadas en el período', valor: numeroVE(act.odts.length), tono: act.sinResolverCreadas ? 'warn' : null,
     cmp: comparar(act.odts.length, ant.odts.length, { mejor: 'baja', modo: 'abs' }), antes: `antes ${numeroVE(ant.odts.length)}`,
-    nota: `${act.sinResolver} sin resolver`,
+    nota: `${act.sinResolverCreadas} de ellas sin resolver`,
   })]
 }
 
@@ -642,20 +648,20 @@ export function fraseDe(formato, m, nombre) {
   }
   if (formato === 'estadistico') {
     if (act.eventosPor100 == null) return { texto: `El servidor aún no entrega km ni eventos de manejo de este período: el score no se califica. Hubo ${numeroVE(act.eventos)} eventos de alerta.`, aviso: '' }
-    const altos = (act.manejo || []).filter(x => x.eventosPor100 != null && x.eventosPor100 >= 1.5).length
+    const altos = (act.manejo || []).filter(x => x.eventosPor100 != null && x.eventosPor100 >= UMBRALES_SCORE.ok).length
     return {
       texto: `El score de conducción fue ${numeroVE(act.eventosPor100, 2)} eventos por cada 100 km${ant.eventosPor100 != null ? ` (antes ${numeroVE(ant.eventosPor100, 2)})` : ''}.`,
-      aviso: altos ? `${altos} ${altos === 1 ? 'conductor pasa' : 'conductores pasan'} de 1,5.` : '',
+      aviso: altos ? `${altos} ${altos === 1 ? 'conductor pasa' : 'conductores pasan'} de ${numeroVE(UMBRALES_SCORE.ok, 1)}.` : '',
     }
   }
   const texto = act.km != null
     ? `Las ${vista.total} unidades recorrieron ${kmVE(act.km)}${kmCmp ? `, ${kmCmp} que ${que}` : ''}.`
     : `${vista.total} ${vista.total === 1 ? 'unidad' : 'unidades'} en este alcance, ${vista.enMarcha} en marcha ahora. Se crearon ${act.odts.length} ODT (antes ${ant.odts.length}).`
   let aviso = ''
-  if (act.sinResolver) {
+  if (act.sinResolverAhora) {
     const porUnidad = (filasU || []).filter(f => f.sinResolver).sort((a, b) => b.sinResolver - a.sinResolver)
     const top = porUnidad[0]
-    aviso = `${act.sinResolver} ODT ${act.sinResolver === 1 ? 'sigue' : 'siguen'} sin resolver${top && top.sinResolver > 1 ? `, ${top.sinResolver} de ellas en la ${top.v.alias}` : ''}.`
+    aviso = `${act.sinResolverAhora} ODT ${act.sinResolverAhora === 1 ? 'sigue' : 'siguen'} sin resolver ahora${top && top.sinResolver > 1 ? `, ${top.sinResolver} de ellas en la ${top.v.alias}` : ''}.`
   }
   return { texto, aviso }
 }
@@ -671,7 +677,7 @@ export function armarModelo(d, periodo, alcanceElegido, formato) {
   const vista = vistaActual(alcance.unidades, alcance.personas)
   const filasU = filasUnidades(alcance.unidades, act)
   // Sin resolver de cualquier fecha (vista actual): la más antigua puede venir de antes del período.
-  const pendientes = (d.odts || []).filter(o => alcance.ids.has(o.vehiculoId) && ['abierta', 'revision'].includes(grupoOdt(o.estado)) && Number.isFinite(Date.parse(o.creadaEn)))
+  const pendientes = (d.odts || []).filter(o => alcance.ids.has(o.vehiculoId) && estaSinResolver(o) && Number.isFinite(Date.parse(o.creadaEn)))
     .sort((a, b) => Date.parse(a.creadaEn) - Date.parse(b.creadaEn))
   return { alcance, act, ant, vista, filasU, pendientes, filasP: filasPersonas(alcance.personas, alcance.unidades, act) }
 }

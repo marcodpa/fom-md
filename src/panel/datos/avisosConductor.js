@@ -121,7 +121,7 @@ export function armarBuzonesConductor({ nombre = '', personaId = null, vehiculoI
   const delSistema = deLaUnidad
     .filter(esDelSistema)
     .map((o) => ({ o, grupo: estadoVisible(o.estado).clave }))
-    .filter(({ o, grupo }) => grupo === 'resuelta' || o.estado === 'abierta')
+    .filter(({ o, grupo }) => grupo === 'resuelta' || grupo === 'abierta')
     .map(({ o, grupo }) => {
       const realizada = grupo === 'resuelta'
       const id = `u-${o.id}`
