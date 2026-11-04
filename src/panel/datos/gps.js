@@ -116,7 +116,7 @@ export function validarLinea({ telefono, iccid, operador, apn, estadoSim, plan =
   else if (String(operador).trim().length > 80) errores.operador = 'El operador admite hasta 80 caracteres.'
   if (!String(apn ?? '').trim()) errores.apn = 'Escribe el APN: lo da el operador para los datos.'
   else if (/\s/u.test(String(apn).trim())) errores.apn = 'El APN no lleva espacios.'
-  else if (String(apn).trim().length > 120) errores.apn = 'El APN admite hasta 120 caracteres.'
+  else if (String(apn).trim().length > 100) errores.apn = 'El APN admite hasta 100 caracteres.'
   if (!ESTADOS_SIM.some(([v]) => v === estadoSim)) errores.estadoSim = 'Elige el estado de la SIM.'
   if (String(plan).trim().length > 120) errores.plan = 'El plan admite hasta 120 caracteres.'
   return errores
