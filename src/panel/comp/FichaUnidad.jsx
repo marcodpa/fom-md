@@ -3,11 +3,12 @@ import { nombreUnidad } from '../datos/nombreUnidad'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import { estadoUnidad } from '../datos/estadoUnidad'
-import { textoUltimoReporte, useMinuto } from '../datos/sinSenal'
+import { soloRecepcion, textoUltimoReporte, useMinuto } from '../datos/sinSenal'
 import FotoUnidad from './FotoUnidad'
 import { PastillaConductor } from './ManejoConductor'
 import { useSesion } from '../useSesion'
 import { esGestor } from '../roles'
+import { locationStatus } from '../meitrack/location-status.js'
 import '../../styles/fleet-map.css'
 export { estadoUnidad } from '../datos/estadoUnidad'
 
@@ -47,6 +48,8 @@ export default function FichaUnidad({ unidad, variante = 'panel', conCabecera = 
   const estado = estadoUnidad(v, ahora)
   const s = estado.senal
   const ultimo = s.clave === 'sin_senal' ? textoUltimoReporte(s.ultimoReporte) : null
+  // Lo que dice el servidor de la ubicación del Meitrack (location-status.js), si ya se pidió.
+  const ubicacionGps = v.ubicacionGps ? locationStatus(v.ubicacionGps) : null
   const descripcion = [v.alias, [v.marca, v.modelo, v.anio].filter(Boolean).join(' ')].filter(Boolean).join(' · ')
   const extras = datosDe(v, s).filter(([k]) => !['Velocidad', 'Última señal', 'Conductor', 'Ubicación', 'Odómetro'].includes(k))
   const filas = [
@@ -65,6 +68,9 @@ export default function FichaUnidad({ unidad, variante = 'panel', conCabecera = 
     <div className="fleet-card-content">
     <span className={`fleet-status ${estado.color}`}><i />{s.texto}</span>
     {ultimo && <small className="fleet-status-nota">{ultimo}</small>}
+    {/* Solo la recepción del equipo está al día (la regla da «Sin ubicación»): se explica por qué el punto del mapa es viejo. */}
+    {s.clave === 'sin_ubicacion' && soloRecepcion(v, ahora) && s.posicionEn && Number.isFinite(v.lat) && Number.isFinite(v.lng) && <p role="status" className="fleet-status-nota">El GPS está reportando. La posición del mapa es histórica: recibida el {f.fechaHora(s.posicionEn)}. No hay una posición reciente para confirmar el movimiento.</p>}
+    {ubicacionGps && !ubicacionGps.available && <div role="status" className="fleet-status-nota"><strong>{ubicacionGps.title}</strong><p>{ubicacionGps.detail}</p></div>}
     <h3 className="fleet-plate">{v.placa || 'Sin placa'}</h3>
     {descripcion && <p className="fleet-description">{descripcion}</p>}
     <FotoUnidad key={v.id} unidad={v} puedeEditar={puedeEditar} />

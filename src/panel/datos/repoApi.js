@@ -21,6 +21,8 @@ import { unidadesSinDiariaHoy } from './inspeccionesHoy'
 import { AVISO_SIN_DIAS_EN_SERVIDOR, diasParaEnviar, normalizarDias } from './diasPlanilla'
 import { quitarSaltos } from './recorrido'
 import { estadoSenal } from './sinSenal.js'
+import { conRecepcionEquipo, conRecepcionFlota } from './recepcionUnidad.js'
+import { leerRecepcionGps } from './leerRecepcionGps.js'
 import { coleccionDePersona, indiceDePersona } from './perfilUsuario'
 import { cuerpoCredencial, credencialesVigentes } from './credencialesPersona'
 import { cambiosGps } from './metadatosGps'
@@ -196,7 +198,11 @@ async function flota(q = '') {
   }
   const peticion = leerTodasLasPaginas((desplazamiento, limite) => api.vehiculos({ q, limite, desplazamiento }))
     .then(async (r) => {
-      const lista = await conPosicionDirecta(r.items.map(comoUnidad))
+      const [unidades, equipos] = await Promise.all([
+        conPosicionDirecta(r.items.map(comoUnidad)),
+        leerRecepcionGps(() => api.equiposGps()),
+      ])
+      const lista = conRecepcionFlota(unidades, equipos, empresaContexto)
       if (r.incompleta) lista.incompleta = true
       return lista
     })
@@ -826,12 +832,12 @@ export const repoApi = {
       const delaUnidad = await repoApi.vehiculos.usuariosAsignados(id).catch(() => { asignacionesError = true; return [] })
       const asignacion = delaUnidad.find(c => c.rol === 'principal') ?? null
       // El detalle del vehículo no trae su GPS: se une desde la lista de equipos por el id de la unidad.
-      const equipo = await api
-        .equiposGps()
-        .then((r) => (r?.devices ?? []).find((d) => d.vehicleId === id) ?? null)
-        .catch(() => null)
+      const equipos = (await leerRecepcionGps(() => api.equiposGps())).filter(d => d.vehicleId === id)
+      const equipo = equipos.length === 1 ? equipos[0] : null
+      const ubicacionGps = equipo?.protocolFamily === 'meitrack-t399'
+        ? await repoApi.gpsEscritura.telemetria(equipo.id, { limite: 1 }).then(r => r.ubicacion).catch(() => ({ state: 'unavailable' })) : null
       return {
-        ...comoUnidad(ficha.vehicle),
+        ...conRecepcionEquipo(comoUnidad(ficha.vehicle), equipo, ubicacionGps),
         conductorPrincipalId: asignacion?.id ?? null,
         asignacionId: asignacion?.asignacionId ?? null,
         conductorNombre: asignacion?.nombre ?? 'Sin asignar',
@@ -1217,9 +1223,9 @@ export const repoApi = {
      * instalados y reportando.
      */
     async listar({ q = '' } = {}) {
-      const r = await api.equiposGps()
+      const equipos = await leerRecepcionGps(() => api.equiposGps(), { opcional: false })
       const t = q.trim().toLowerCase()
-      return (r?.devices ?? [])
+      return equipos
         .map(comoEquipoGps)
         .filter((g) => !t || [g.imei, g.modelo, g.linea, g.vehiculoNombre].some((v) => String(v ?? '').toLowerCase().includes(t)))
     },
@@ -1253,6 +1259,7 @@ export const repoApi = {
         imei: r?.imei ?? null,
         ultimaRecepcion: r?.lastReceivedAt ?? null,
         frescuraS: Number(r?.freshnessSeconds) || 300,
+        ubicacion: r?.location ?? null,
         mensajes: (r?.messages ?? []).map((m) => ({
           id: m.receiptId ?? m.id,
           recibido: m.receivedAt,

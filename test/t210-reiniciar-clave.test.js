@@ -26,10 +26,10 @@ test('persona de la empresa propia: ruta propia, aunque el administrador esté d
   assert.equal(aRutaPorEnte(RUTA, 'POST', null), RUTA)
 })
 
-test('sin empresa de la persona o sin empresa propia: no se decide (ruta normal)', () => {
+test('sin empresa de la persona usa contexto; con destino conocido lo conserva aunque falte la propia', () => {
   assert.equal(empresaDeReinicio(null, PROPIA), undefined)
   assert.equal(empresaDeReinicio('', PROPIA), undefined)
-  assert.equal(empresaDeReinicio(OTRA, null), undefined)
+  assert.equal(empresaDeReinicio(OTRA, null), OTRA)
 })
 
 test('errores del servidor, en llano', () => {

@@ -3,6 +3,7 @@ import test from 'node:test'
 import { join } from 'node:path'
 import { build } from 'vite'
 import { leerTodasLasPaginas, listarTodasOdts } from '../src/panel/datos/listar-odts.js'
+import { estadoSenal } from '../src/panel/datos/sinSenal.js'
 
 // ============================================================
 // Empresas grandes (T-83): 340 unidades, ~3.000 ODT
@@ -107,6 +108,7 @@ function servidorFalso() {
     llamadas.push({ metodo: opciones.method ?? 'GET', ruta, url })
     if ((opciones.method ?? 'GET') !== 'GET') return responder({})
     if (ruta === '/vehicles') return pagina(vehiculos, url)
+    if (ruta === '/gps-devices') return responder({ devices: [] })
     if (ruta === '/drivers') return pagina(asignaciones, url)
     if (ruta === '/work-orders') {
       const v = url.searchParams.get('vehicleId')
@@ -173,4 +175,66 @@ test('repositorio real: flota, conductores, «faltan hoy» y órdenes con una em
   const deUnidad = await repoApi.odts.listar({ vehiculoId: 'v001' })
   assert.ok(deUnidad.length > 0 && deUnidad.every((o) => o.vehiculoId === 'v001'))
   assert.equal(servidor.llamadas.filter((l) => l.ruta === '/work-orders').at(-1).url.searchParams.get('vehicleId'), 'v001')
+})
+
+test('repositorio compartido rechaza lectura fallida y recupera recepción Meitrack sin posición al reintentar', async (t) => {
+  const original = globalThis.fetch
+  const llamadas = []
+  const ahora = Date.now()
+  const recibido = new Date(ahora - 30000).toISOString()
+  let falloInventario = true
+  globalThis.fetch = async (direccion, opciones = {}) => {
+    const ruta = new URL(direccion).pathname.replace('/api/v1/console', '')
+    llamadas.push({ ruta, metodo: opciones.method ?? 'GET' })
+    let cuerpo
+    if (ruta === '/vehicles') cuerpo = { items: [{ id: 'meitrack', alias: 'Unidad sin punto', lastReportAt: null }, { id: 'sin-gps', alias: 'Sin GPS' }], page: { total: 2, limit: 200, offset: 0 } }
+    else if (ruta === '/gps-devices') {
+      if (falloInventario) {
+        falloInventario = false
+        return { ok: false, status: 503, text: async () => JSON.stringify({ message: 'private failure' }) }
+      }
+      cuerpo = { devices: [{ id: 'equipo', vehicleId: 'meitrack', installationId: 'instalacion', protocolFamily: 'meitrack-t399', installedAt: new Date(ahora - 86400000).toISOString(), lastConnectionAt: recibido }] }
+    }
+    else if (ruta === '/drivers') cuerpo = { items: [], page: { total: 0, limit: 200, offset: 0 } }
+    else if (ruta.endsWith('/position/latest')) cuerpo = { position: null }
+    else throw Error('Ruta no prevista: ' + ruta)
+    return { ok: true, status: 200, text: async () => JSON.stringify(cuerpo) }
+  }
+  t.after(() => { globalThis.fetch = original })
+  const { repoApi } = await repositorioReal()
+  await assert.rejects(repoApi.vehiculos.listar({}), /No se pudo comprobar la recepción GPS/)
+  const [a, b] = await Promise.all([repoApi.vehiculos.listar({}), repoApi.vehiculos.listar({})])
+  const conGps = a.find(v => v.id === 'meitrack')
+  const sinGps = a.find(v => v.id === 'sin-gps')
+  assert.equal(conGps.conectado, true)
+  // La regla única: la recepción da señal, pero sin posición publicada es «Sin ubicación».
+  assert.equal(estadoSenal(conGps).clave, 'sin_ubicacion')
+  assert.equal(conGps.ultimoReporte, recibido)
+  assert.equal(conGps.soloRecepcion, true)
+  assert.equal(conGps.lat, null); assert.equal(conGps.lng, null)
+  assert.equal(conGps.velocidadKmh, null); assert.equal(conGps.estadoMarcha, null)
+  // Sin recepción, el repositorio no decide la señal: la decide estadoSenal (nunca reportó).
+  assert.equal(estadoSenal(sinGps).clave, 'sin_gps'); assert.equal(sinGps.ultimoReporte, null)
+  assert.deepEqual(a, b)
+  assert.equal(llamadas.filter(l => l.ruta === '/gps-devices').length, 2)
+  assert.ok(llamadas.every(l => l.metodo === 'GET'))
+})
+
+test('repositorio compilado incorpora heartbeat Coban y conserva la fecha de la posición histórica', async (t) => {
+ const original=globalThis.fetch,ahora=Date.now(),recibido=new Date(ahora-30000).toISOString(),posicion=new Date(ahora-15*3600000).toISOString(),llamadas=[]
+ globalThis.fetch=async(direccion,opciones={})=>{
+  const ruta=new URL(direccion).pathname.replace('/api/v1/console','');llamadas.push(opciones.method??'GET');let cuerpo
+  if(ruta==='/vehicles')cuerpo={items:[{id:'coban',lastReportAt:posicion}],page:{total:1,limit:200,offset:0}}
+  else if(ruta==='/gps-devices')cuerpo={devices:[{id:'gps',vehicleId:'coban',installationId:'inst',protocolFamily:'coban-gps103',installedAt:new Date(ahora-86400000).toISOString(),lastConnectionAt:recibido}]}
+  else if(ruta==='/drivers')cuerpo={items:[],page:{total:0,limit:200,offset:0}}
+  else if(ruta.endsWith('/position/latest'))cuerpo={position:{latitude:1,longitude:2,receivedAt:posicion,telemetry:{speedKph:80}}}
+  else throw Error('Ruta sintética no prevista')
+  return{ok:true,status:200,text:async()=>JSON.stringify(cuerpo)}
+ }
+ t.after(()=>{globalThis.fetch=original})
+ const {repoApi}=await repositorioReal(),[v]=await repoApi.vehiculos.listar({})
+ assert.equal(v.conectado,true);assert.equal(v.soloRecepcion,true);assert.equal(v.ultimoReporte,recibido)
+ assert.equal(v.posicionEn,posicion);assert.equal(v.lat,1);assert.equal(v.lng,2)
+ assert.equal(v.velocidadKmh,null);assert.equal(v.estadoMarcha,null);assert.equal(v.ignition,null)
+ assert.ok(llamadas.every(m=>m==='GET'))
 })

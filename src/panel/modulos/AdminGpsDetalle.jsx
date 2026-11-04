@@ -14,6 +14,7 @@ import { esEquipoMeitrack, puertoDelEquipo } from '../datos/gpsMeitrack'
 import { masNuevoPrimero } from '../datos/orden'
 import * as f from '../datos/formato'
 import './admin-gps.css'
+import { locationStatus } from '../meitrack/location-status.js'
 
 // ============================================================
 // DETALLE Y DIAGNÓSTICO DEL EQUIPO (T-95, tablero GW5)
@@ -121,6 +122,7 @@ function cuandoFue(iso, ahora) {
 }
 
 function Diagnostico({ g, unidad, tele, posiciones, ultimaPos, capacidades, ahora }) {
+  const ubicacion = locationStatus(tele.datos?.ubicacion)
   const senal = senalDe(g, ahora, unidad)
   const meitrack = esEquipoMeitrack(g)
   const puerto = puertoDelEquipo(g)
@@ -135,6 +137,7 @@ function Diagnostico({ g, unidad, tele, posiciones, ultimaPos, capacidades, ahor
 
   return (
     <>
+      {meitrack&&<section className="gp-card gp-col" role="status"><h2 className="gp-st">{ubicacion.title}</h2><p>{ubicacion.detail}</p></section>}
       <div className="gp-grid l400">
         <div className="gp-pila">
           <section className={`gp-card gp-diag ${tonoCard}`} aria-live="polite">
@@ -158,9 +161,7 @@ function Diagnostico({ g, unidad, tele, posiciones, ultimaPos, capacidades, ahor
                       ? <li>¿La unidad está apagada o sin batería? El equipo se alimenta de ella.</li>
                       : <li>¿El equipo está conectado a corriente? Sin instalar, necesita su fuente para transmitir.</li>}
                     <li>{linea ? `Revisa saldo y datos de la línea ${linea}.` : 'Registra la línea SIM del equipo en «Datos del equipo» y revisa que tenga saldo y datos.'}</li>
-                    {meitrack
-                      ? <li>Envía <span className="gp-mono cmdx">{PUNTOS_CLAVE},DB4</span> por SMS: debe decir TCP, la IP del receptor y PORT1:{puerto}. Los mensajes completos están en «Probar señal».</li>
-                      : <li>Envía <span className="gp-mono cmdx">check{PUNTOS_CLAVE}</span> por SMS: debe decir GPRS ON y PORT {puerto}.</li>}
+                    {meitrack?<li>Conserva la lectura DB4 y comprueba la recepción en «Probar señal». Si ya estaba configurado, revisa la causa antes de repetir los SMS de configuración.</li>:<li>Envía <span className="gp-mono cmdx">check{PUNTOS_CLAVE}</span> por SMS: debe decir GPRS ON y PORT {puerto}.</li>}
                   </ol>
                 </>
               )}

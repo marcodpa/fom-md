@@ -16,7 +16,7 @@
  *  - un id: la ruta `/tenants/{id}` de la empresa de la persona.
  */
 export function empresaDeReinicio(empresaDeLaPersona, propia) {
-  if (!empresaDeLaPersona || !propia) return undefined
+  if (!empresaDeLaPersona) return undefined
   return empresaDeLaPersona === propia ? null : empresaDeLaPersona
 }
 

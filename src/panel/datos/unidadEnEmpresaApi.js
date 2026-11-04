@@ -19,9 +19,11 @@ export async function crearUnidadEnEmpresa({ empresaId, propia = null, datos }) 
   } catch (e) {
     const error = new Error(mensajeCrearUnidad(e))
     error.estado = e?.estado
+    error.altaIncierta = !e?.estado || e.estado >= 500
+    if (error.altaIncierta) error.message = 'No se pudo confirmar el alta. Revisa la flota de la empresa antes de volver a crear la unidad.'
     throw error
   }
   const id = r?.vehicleId ?? r?.vehicle?.id ?? null
-  if (!id) throw new Error('El servidor no devolvió el identificador de la unidad creada. Revisa la flota de la empresa antes de reintentar.')
+  if (!id) throw Object.assign(new Error('El servidor no devolvió el identificador de la unidad creada. Revisa la flota de la empresa antes de reintentar.'), { altaIncierta: true })
   return { id, alias: cuerpo.alias }
 }

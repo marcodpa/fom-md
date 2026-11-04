@@ -39,7 +39,7 @@ export async function buscarEquipoGps(equipoId, { detalle, lista }) {
  * volvería la de esa empresa y el equipo propio no existiría allí.
  */
 export function empresaDeInstalacion(empresaElegida, propia) {
-  if (!empresaElegida || !propia || empresaElegida === propia) return null
+  if (!empresaElegida || empresaElegida === propia) return null
   return empresaElegida
 }
 

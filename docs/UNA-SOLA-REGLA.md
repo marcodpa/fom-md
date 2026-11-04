@@ -10,6 +10,7 @@ más de 20 sitios decidían el estado cada uno a su manera.
 | Dato | Único lugar | Prueba que lo vigila |
 |---|---|---|
 | Estado de la unidad: con señal, sin ubicación, sin señal, sin GPS; marcha (En marcha ≥3 km/h, Detenida); «hace X» | `src/panel/datos/sinSenal.js` (`estadoSenal`, `haceCuanto`) y `estadoUnidad.js` | `test/regla-senal.test.js` |
+| Excepción de la señal: si lo único al día es la recepción del equipo (Meitrack/Coban sin posición publicada), «Sin ubicación» llega a los 5 min y no a los 30, porque esa trama no dice dónde está ni si se mueve | `sinSenal.js` (`soloRecepcion`) | `test/recepcion-unidad.test.js` |
 | Vencimientos de documentos (días de calendario local, 30 días por vencer, 7 urgente) y unidades que piden atención | `src/panel/datos/vencimientos.js`, `atencionUnidad.js` | `test/regla-vencimientos.test.js` |
 | Órdenes (Abierta / En revisión / Resuelta), alertas sin leer, inspecciones pendientes de hoy, conteo de empresas | `odtGrupos.js`, `alertas-presentacion.js` (`contarSinLeer`), `inspeccionesHoy.js`, `contarEmpresas.js` | `test/regla-conteos.test.js` |
 | Hora (12 h), fechas, números («1.234»), nombre visible de la unidad, placa, roles, puertos e IP del receptor GPS | `formato.js`, `nombreUnidad.js`, `placas.js`, `roles.js`, `gps.js` | `test/regla-formatos.test.js` |

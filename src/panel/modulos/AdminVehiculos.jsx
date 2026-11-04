@@ -37,7 +37,7 @@ const reportando = (v, ahora) => !esCallada(estadoSenal(v, ahora))
 export default function AdminVehiculos() {
   const navegar = useNavigate()
   const sesion = useSesion()
-  const datos = useDatos(() => vehiculosDeLaPlataforma(), [])
+  const datos = useDatos(() => vehiculosDeLaPlataforma(), [], 30_000)
   const [q, setQ] = useState('')
   const [empresaId, setEmpresaId] = useState('')
   const [senal, setSenal] = useState('todas')

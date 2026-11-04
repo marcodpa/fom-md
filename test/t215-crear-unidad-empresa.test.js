@@ -81,6 +81,7 @@ async function modulos() {
         ? [
           `export { repoApi } from ${JSON.stringify(join(raiz, 'src/panel/datos/repoApi.js'))}`,
           `export { fijarEmpresaGestion } from ${JSON.stringify(join(raiz, 'src/panel/datos/api.js'))}`,
+          `export { api } from ${JSON.stringify(join(raiz, 'src/panel/datos/api.js'))}`,
           `export { crearUnidadEnEmpresa } from ${JSON.stringify(join(raiz, 'src/panel/datos/unidadEnEmpresaApi.js'))}`,
         ].join('\n')
         : null),
@@ -98,15 +99,16 @@ const respuesta = (cuerpo, estado = 200) => ({
   json: async () => cuerpo,
 })
 
-function servidorFalso({ crear = () => respuesta({ vehicleId: 'v-nueva' }), instalar = () => respuesta({ ok: true }), equipos = [] } = {}) {
+function servidorFalso({ crear = () => respuesta({ vehicleId: 'v-nueva' }), instalar = () => respuesta({ ok: true }), equipos = [], inventario = () => respuesta({ devices: equipos }), reiniciar = () => respuesta({ ok: true }) } = {}) {
   const llamadas = []
   const fetch = async (direccion, opciones = {}) => {
     const ruta = new URL(direccion).pathname.replace('/api/v1/console', '')
     const metodo = opciones.method ?? 'GET'
     llamadas.push({ metodo, ruta, cuerpo: opciones.body ? JSON.parse(opciones.body) : null })
-    if (metodo === 'GET' && ruta === '/gps-devices') return respuesta({ devices: equipos })
+    if (metodo === 'GET' && ruta === '/gps-devices') return inventario()
     if (metodo === 'POST' && /\/vehicles$/u.test(ruta)) return crear()
     if (metodo === 'POST' && /\/installation$/u.test(ruta)) return instalar()
+    if (metodo === 'POST' && /\/credential-reset$/u.test(ruta)) return reiniciar()
     throw new Error(`Ruta no prevista en la prueba: ${metodo} ${ruta}`)
   }
   return { fetch, llamadas }
@@ -171,4 +173,38 @@ test('disponibles({ global }) ofrece los equipos libres sin filtrar por empresa'
   const crudo = (id, extra = {}) => ({ id, imei: `86${id}`, model: 'GPS103', protocolFamily: 'coban-gps103', status: 'inventory', connected: true, lastConnectionAt: new Date().toISOString(), vehicleId: null, ...extra })
   const { repoApi } = await conServidor(t, { equipos: [crudo('1', { tenantId: OTRA }), crudo('2'), crudo('3', { vehicleId: 'v9' })] })
   assert.deepEqual((await repoApi.gpsEscritura.disponibles({ global: true })).map((g) => g.id).sort(), ['1', '2'])
+})
+
+test('alta con respuesta incierta exige comprobar la flota antes de reintentar', async (t) => {
+  const { crearUnidadEnEmpresa, servidor } = await conServidor(t, { crear: () => respuesta({}, 503) })
+  await assert.rejects(crearUnidadEnEmpresa({ empresaId: OTRA, propia: FOM, datos: buena }), e => e.altaIncierta === true)
+  assert.equal(posts(servidor).length, 1)
+})
+
+test('alta rechazada por permisos no instala el equipo ni cambia al contexto propio', async (t) => {
+  const { crearUnidadEnEmpresa, servidor } = await conServidor(t, { crear: () => respuesta({}, 403) })
+  await assert.rejects(crearUnidadEnEmpresa({ empresaId: OTRA, propia: FOM, datos: buena }), e => e.estado === 403 && !e.altaIncierta)
+  assert.deepEqual(posts(servidor), [`/tenants/${OTRA}/vehicles`])
+})
+
+test('inventario fallido o malformado no se convierte en GPS libres vacíos', async (t) => {
+  let intento = 0
+  const { repoApi, servidor } = await conServidor(t, { inventario: () => ++intento === 1 ? respuesta({}, 503) : intento === 2 ? respuesta({}) : respuesta({ devices: [] }) })
+  await assert.rejects(repoApi.gpsEscritura.disponibles({ global: true }), /recepción GPS/u)
+  await assert.rejects(repoApi.gpsEscritura.disponibles({ global: true }), /recepción GPS/u)
+  assert.deepEqual(await repoApi.gpsEscritura.disponibles({ global: true }), [])
+  assert.deepEqual(posts(servidor), [])
+})
+
+test('restablecer clave conserva el destino explícito con otra empresa en gestión', async (t) => {
+  const { api, servidor, fijarEmpresaGestion } = await conServidor(t)
+  fijarEmpresaGestion('empresa-en-gestion')
+  await api.reiniciarClave('persona-1', { temporaryPassword: 'SYNTHETIC-ONLY', reason: 'prueba' }, OTRA)
+  assert.deepEqual(posts(servidor), [`/tenants/${OTRA}/users/persona-1/credential-reset`])
+})
+
+test('restablecimiento rechazado no reintenta ni cambia de empresa', async (t) => {
+  const { api, servidor } = await conServidor(t, { reiniciar: () => respuesta({}, 403) })
+  await assert.rejects(api.reiniciarClave('persona-1', { temporaryPassword: 'SYNTHETIC-ONLY', reason: 'prueba' }, OTRA), e => e.estado === 403)
+  assert.deepEqual(posts(servidor), [`/tenants/${OTRA}/users/persona-1/credential-reset`])
 })

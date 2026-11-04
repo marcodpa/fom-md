@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import repo from '../datos/repo'
 import { Campo, Modal } from './ui'
 import { Icono } from '../Iconos'
@@ -44,6 +44,10 @@ export default function NuevaUnidadEmpresa({
   const [datos, setDatos] = useState(UNIDAD_VACIA)
   const [gpsId, setGpsId] = useState('')
   const [libres, setLibres] = useState(null)
+  const [errorGps, setErrorGps] = useState('')
+  const [intentoGps, setIntentoGps] = useState(0)
+  const [altaIncierta, setAltaIncierta] = useState(false)
+  const enviando = useRef(false)
   const [errores, setErrores] = useState({})
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -59,6 +63,7 @@ export default function NuevaUnidadEmpresa({
     setErrores({})
     setError('')
     setCreada(null)
+    setAltaIncierta(false)
     setGuardando(false)
   }, [abierto, empresaInicial])
 
@@ -66,11 +71,13 @@ export default function NuevaUnidadEmpresa({
   useEffect(() => {
     if (!abierto || !ofrecerGps || equipoFijo) return
     let vivo = true
+    setLibres(null)
+    setErrorGps('')
     repo.admin.gps.disponibles({ global: true })
       .then((l) => { if (vivo) setLibres(l) })
-      .catch(() => { if (vivo) setLibres([]) })
+      .catch(() => { if (vivo) setErrorGps('No se pudo consultar el inventario GPS. Reintenta la lectura o crea la unidad sin GPS.') })
     return () => { vivo = false }
-  }, [abierto, ofrecerGps, equipoFijo])
+  }, [abierto, ofrecerGps, equipoFijo, intentoGps])
 
   const campo = (clave) => ({
     value: datos[clave],
@@ -92,12 +99,14 @@ export default function NuevaUnidadEmpresa({
   }
 
   const guardar = async () => {
+    if (enviando.current || altaIncierta) return
     setError('')
     if (!creada) {
       if (!empresa) { setError('Elige la empresa de la unidad.'); return }
       const faltas = validarUnidad(datos)
       if (Object.keys(faltas).length) { setErrores(faltas); setError('Revisa los datos marcados.'); return }
     }
+    enviando.current = true
     setGuardando(true)
     let unidad = creada
     try {
@@ -108,6 +117,8 @@ export default function NuevaUnidadEmpresa({
       }
     } catch (e) {
       setError(e.message)
+      setAltaIncierta(Boolean(e.altaIncierta))
+      enviando.current = false
       setGuardando(false)
       return
     }
@@ -124,17 +135,20 @@ export default function NuevaUnidadEmpresa({
         })
       } catch (e) {
         setError(`La unidad «${unidad.alias}» ya quedó creada en ${empresa?.nombre ?? 'la empresa'}, pero el GPS no se instaló. ${e.message} No vuelvas a crearla: pulsa «Instalar el GPS» para reintentar.`)
+        enviando.current = false
         setGuardando(false)
         return
       }
     }
     setGuardando(false)
+    enviando.current = false
     alListo({ vehiculoId: unidad.id, alias: unidad.alias, empresaId, empresaNombre: empresa?.nombre ?? '', instalado: Boolean(gpsElegido) })
   }
 
   return (
     <Modal titulo={equipoFijo ? 'Crear unidad e instalar el GPS' : 'Nueva unidad'} abierto={abierto} alCerrar={cerrar} ancho={560}>
       <div className="nue">
+        {errorGps && <p role="alert">{errorGps} <button type="button" className="pnl-btn" disabled={guardando} onClick={() => setIntentoGps(n => n + 1)}>Reintentar inventario</button></p>}
         {creada && (
           <p className="nue-hecho" role="status">
             <Icono nombre="check" tam={16} />La unidad «{creada.alias}» ya está creada en {empresa?.nombre ?? 'la empresa'}.
@@ -188,7 +202,7 @@ export default function NuevaUnidadEmpresa({
             etiqueta="GPS libre (opcional)"
             ayuda={libres && libres.length === 0 ? 'No hay equipos libres en el inventario: puedes crear la unidad y instalarlo después.' : 'Si eliges uno, queda instalado al crear la unidad.'}>
             <select className="pnl-input" value={gpsId} onChange={(e) => setGpsId(e.target.value)} disabled={libres === null || guardando}>
-              <option value="">{libres === null ? 'Buscando equipos libres…' : 'Sin GPS por ahora'}</option>
+              <option value="">{errorGps ? 'Inventario no disponible' : libres === null ? 'Buscando equipos libres…' : 'Sin GPS por ahora'}</option>
               {(libres ?? []).map((g) => <option key={g.id} value={g.id}>{g.modelo} · {g.imei}</option>)}
             </select>
           </Campo>
@@ -198,7 +212,7 @@ export default function NuevaUnidadEmpresa({
 
         <div className="nue-acciones">
           <button type="button" className="pnl-btn" onClick={cerrar} disabled={guardando}>{creada ? 'Cerrar sin instalar' : 'Cancelar'}</button>
-          <button type="button" className="pnl-btn primario" onClick={guardar} disabled={guardando}>
+          <button type="button" className="pnl-btn primario" onClick={guardar} disabled={guardando || altaIncierta}>
             <Icono nombre="check" tam={16} />{etiquetaGuardar}
           </button>
         </div>

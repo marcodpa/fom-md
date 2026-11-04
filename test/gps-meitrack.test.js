@@ -9,7 +9,7 @@ import {
 
 // T-211 · Alta del Meitrack T399L: comandos de Juan (fom-core apps/gps-web), ventana y mensajes llanos.
 
-const IMEI = '868166051450012'
+const IMEI = '860000000000001'
 const IP = '203.0.113.7'
 const celdas = (tipo, ip, puerto, apn) => [IMEI, 'DB4', tipo, `IP1:${ip}`, `PORT1:${puerto}`, 'IP2:', 'PORT2:', '30', apn, '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '']
 const db4Antes = celdas('CLOSE', '198.51.100.9', '5000', 'internet.movistar.ve').join(',')
@@ -147,9 +147,9 @@ test('recepción: sin ventana, esperando o recibida', () => {
 })
 
 test('el alta lleva solo inventario: firmware fijo, TCP y nada de vehículo', () => {
-  const c = cuerpoAltaMeitrack({ imei: '868 166 051 450 012', telefono: ' 0414-5523187 ', iccid: '8958 0401 1904 5531 18', operador: 'Digitel', apn: 'gprsweb.digitel.ve', serie: '', plan: '' })
+  const c = cuerpoAltaMeitrack({ imei: '860 000 000 000 001', telefono: ' 0414-0000000 ', iccid: '8900 0000 0000 0000 00', operador: 'Digitel', apn: 'gprsweb.digitel.ve', serie: '', plan: '' })
   assert.deepEqual(c, {
-    imei: IMEI, simPhone: '0414-5523187', iccid: '895804011904553118', carrier: 'Digitel', apn: 'gprsweb.digitel.ve', simStatus: 'active',
+    imei: IMEI, simPhone: '0414-0000000', iccid: '890000000000000000', carrier: 'Digitel', apn: 'gprsweb.digitel.ve', simStatus: 'active',
     manufacturer: 'Meitrack', model: 'T399L', protocolFamily: 'meitrack-t399', firmwareVersion: MEITRACK.firmware, transport: 'tcp',
   })
   assert.ok(!Object.keys(c).some((k) => k.startsWith('vehicle') || k === 'installedAt' || k === 'technician'))

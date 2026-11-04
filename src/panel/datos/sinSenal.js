@@ -69,10 +69,22 @@ export function haceCuanto(fecha, ahora = Date.now()) {
 const fechaValida = (x) => (x && Number.isFinite(new Date(x).getTime()) ? x : null)
 
 /**
+ * ¿La señal al día viene solo de la recepción del equipo? `recepcionGpsAt` lo pone
+ * recepcionUnidad.js cuando el Meitrack o el Coban instalado en la unidad mandó una trama. Esa
+ * trama prueba que el GPS vive, no dónde está ni si se mueve: sin una posición de menos de 5 min
+ * la posición del mapa es histórica y no hay marcha que contar (ni «En marcha» ni «Detenida»).
+ */
+export function soloRecepcion(v, ahora = Date.now()) {
+  return Boolean(fechaValida(v?.recepcionGpsAt)) && msSinReportar(v?.posicionEn, ahora) >= SIN_SENAL_MS
+}
+
+/**
  * LA REGLA. Cuatro estados, en este orden:
  *   sin_gps       → nunca reportó (o no tiene equipo). Gris.
  *   sin_senal     → el último mensaje tiene 5 min o más. Gris. Sin marcha ni velocidad: son viejas.
  *   sin_ubicacion → hay mensajes, pero la última posición falta o tiene 30 min o más. Ámbar.
+ *                   Si lo único al día es la recepción del equipo (`soloRecepcion`), basta con
+ *                   que la posición tenga 5 min: la trama no confirma dónde está ni si se mueve.
  *   reportando    → mensaje y posición recientes. Verde. Solo aquí hay marcha:
  *                   «En marcha» con ≥3 km/h o `motionState` en_marcha; si no, «Detenida».
  *
@@ -91,7 +103,7 @@ export function estadoSenal(v, ahora = Date.now()) {
   if (msSinReportar(ultimoReporte, ahora) >= SIN_SENAL_MS) {
     return pinta('sin_senal', ETIQUETA.conexion.sin_senal, `${ETIQUETA.conexion.sin_senal} · ${hace}`)
   }
-  if (msSinReportar(posicionEn, ahora) >= SIN_UBICACION_MS) {
+  if (msSinReportar(posicionEn, ahora) >= SIN_UBICACION_MS || soloRecepcion(v, ahora)) {
     const ultima = posicionEn ? `última ${haceCuanto(posicionEn, ahora)}` : 'nunca'
     return pinta('sin_ubicacion', ETIQUETA.conexion.sin_ubicacion, `${ETIQUETA.conexion.sin_ubicacion} · ${ultima}`)
   }
