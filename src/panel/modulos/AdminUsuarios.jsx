@@ -80,17 +80,35 @@ function exportarCSV(lista) {
   URL.revokeObjectURL(url)
 }
 
-function cargar(q, empresaId, rol) {
+/**
+ * Búsqueda y chips de rol se aplican AQUÍ, sobre lo ya leído. Antes viajaban al
+ * servidor y estaban en las dependencias de la carga: cada letra pedía de nuevo,
+ * ponía «cargando», desmontaba el buscador y se perdía el foco y lo escrito.
+ * Conserva el `alcance` que viaja pegado a la lista.
+ */
+export function filtrarGente(lista, q, rol) {
+  const t = String(q ?? '').trim().toLowerCase()
+  const salida = lista.filter((p) => {
+    if (rol && p.rol !== rol) return false
+    if (!t) return true
+    return [p.nombre, p.email, p.cedula, p.empresaNombre, p.unidadNombre, p.rolEtiqueta]
+      .filter(Boolean).join(' ').toLowerCase().includes(t)
+  })
+  salida.alcance = lista.alcance
+  return salida
+}
+
+function cargar(empresaId) {
   if (DIRECTORIO_REAL) {
     // El servidor resuelve la empresa desde la sesión, sin un empresa elegible.
     return Promise.all([
-      repo.admin.usuarios.listar({ q, rol }),
+      repo.admin.usuarios.listar({}),
       repo.admin.empresas.listar().catch(() => []),
     ]).then(([lista, empresas]) => ({ lista, empresas }))
   }
   if (!empresaId) return Promise.resolve({ lista: [], empresas: [] })
   return Promise.all([
-    repo.admin.usuarios.listar({ q, empresaId, rol }),
+    repo.admin.usuarios.listar({ empresaId }),
     repo.admin.empresas.listar({}),
   ]).then(([lista, empresas]) => ({ lista, empresas }))
 }
@@ -113,7 +131,7 @@ export default function AdminUsuarios() {
   }
   const esMovil = useVistaTelefono()
 
-  const { datos, estado, error, recargar } = useDatos(() => cargar(q, empresaId, rol), [q, empresaId, rol])
+  const { datos, estado, error, recargar } = useDatos(() => cargar(empresaId), [empresaId])
   const cuenta = useAccionesCuenta({ actor, alCambiar: recargar })
   const { aviso, restablecerClave, aDesempleados, eliminarDefinitivo, suspender, reactivar, revocarAcceso } = cuenta
 
@@ -366,10 +384,12 @@ function Contenido({
   restablecerClave, aDesempleados, eliminarDefinitivo, abrirMover, directorioReal,
   actor, suspender, reactivar, revocarAcceso,
 }) {
-  const { lista } = datos
+  // El filtro se aplica sobre lo leído; el ranking de manejo se decide con la lista completa
+  // para que escribir en el buscador no lo vuelva a pedir.
+  const lista = filtrarGente(datos.lista, q, rol)
   // Una sola lectura del ranking de manejo (7 días, guardada unos minutos) para todas las filas.
   // Si el servidor no lo da, la lista sale igual, sin pastillas.
-  const hayConductores = lista.some((p) => p.conduce)
+  const hayConductores = datos.lista.some((p) => p.conduce)
   const { datos: ranking } = useDatos(() => (hayConductores ? repo.manejo.ranking({ dias: 7 }).catch(() => null) : Promise.resolve(null)), [hayConductores])
   const manejoPorId = new Map((ranking ?? []).map((m) => [m.id, m]))
   const esMovil = useVistaTelefono()

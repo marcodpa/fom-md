@@ -567,6 +567,13 @@ export default function ExpedienteVehiculo() {
 
         {estado === 'ok' && v && (
           <>
+            {/* Si una lectura falló, esa lista vacía no es «no hay nada»: se dice y se deja reintentar. */}
+            {v.faltaron?.length > 0 && (
+              <p className="eu-nota" role="alert">
+                No pudimos leer: {v.faltaron.join(', ')}. Lo que ves puede estar incompleto.{' '}
+                <button type="button" className="pnl-btn sutil" onClick={recargar}>Reintentar</button>
+              </p>
+            )}
             {(() => {
               const kpis = <div className="pnl-grid k4">
               <KpiKilometraje v={v} puedeRegistrar={esGestor(sesion?.perfil)} />

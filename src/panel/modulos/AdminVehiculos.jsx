@@ -122,6 +122,13 @@ export default function AdminVehiculos() {
           No se pudieron leer las unidades de: {datos.datos.fallidas.map((x) => x.empresa.nombre).join(', ')}. Las demás sí se muestran.
         </p>
       )}
+      {datos.datos?.conductoresFallo?.length > 0 && (
+        <p className="av-aviso" role="status">
+          <Icono nombre="alerta" tam={16} />
+          No se pudo leer el conductor de las unidades de: {datos.datos.conductoresFallo.map((e) => e.nombre).join(', ')}. No es que no tengan.{' '}
+          <button type="button" className="pnl-btn sutil" onClick={datos.recargar}>Reintentar</button>
+        </p>
+      )}
       {creada && <p className="av-aviso" role="status"><Icono nombre="check" tam={16} />{creada}</p>}
       {error && <p className="pnl-campo-error" role="alert">{error}</p>}
 
@@ -147,7 +154,7 @@ export default function AdminVehiculos() {
                     </td>
                     <td>{v.empresaNombre}</td>
                     <td>{[v.marca, v.modelo, v.anio].filter(Boolean).join(' ') || '—'}<small className="av-sub">{etiqueta('vehiculo_tipo', v.tipo)}</small></td>
-                    <td>{v.conductorNombre || <span className="av-tenue">Sin conductor</span>}</td>
+                    <td>{v.conductorNombre || <span className="av-tenue">{v.conductorFallo ? 'No se pudo leer' : 'Sin conductor'}</span>}</td>
                     <td>{reportando(v, ahora) ? <Tag color="verde">{f.desde(v.ultimoReporte)}</Tag> : <Tag color="gris">{textoSinSenal(v.ultimoReporte, ahora)}</Tag>}</td>
                     <td className="num">{v.km != null ? `${f.numero(Math.round(v.km))} km` : '—'}</td>
                     <td className="num">
@@ -185,7 +192,7 @@ export default function AdminVehiculos() {
               { etiqueta: 'Año', valor: seleccion.anio ?? '—' },
               { etiqueta: 'Tipo', valor: etiqueta('vehiculo_tipo', seleccion.tipo) },
               { etiqueta: 'Área', valor: seleccion.areaNombre || 'Sin área' },
-              { etiqueta: 'Conductor principal', valor: seleccion.conductorNombre || 'Sin conductor' },
+              { etiqueta: 'Conductor principal', valor: seleccion.conductorNombre || (seleccion.conductorFallo ? 'No se pudo leer' : 'Sin conductor') },
               { etiqueta: 'Kilometraje', valor: seleccion.km != null ? `${f.numero(Math.round(seleccion.km))} km` : '—' },
               { etiqueta: 'Velocidad', valor: seleccion.velocidadKmh != null ? f.velocidad(seleccion.velocidadKmh) : '—' },
               { etiqueta: 'Último reporte', valor: seleccion.ultimoReporte ? f.fechaHora(seleccion.ultimoReporte) : 'Nunca' },
