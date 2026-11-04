@@ -3,7 +3,7 @@ import { nombreUnidad } from '../datos/nombreUnidad.js'
 
 export const MARKER_SIZE = [174, 76]
 export const MARKER_ANCHOR = [26, 40]
-const COLORS = { verde: '#35e888', ambar: '#ffbf43', gris: '#a1afbf' }
+const COLORS = { verde: '#35e888', azul: '#5aa9ff', ambar: '#ffbf43', gris: '#a1afbf' }
 export const escapeXml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]))
 
 /** SVG shared by Leaflet, Google Maps and the schematic fallback. No HTML from API. */

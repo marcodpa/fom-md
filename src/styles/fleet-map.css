@@ -66,8 +66,11 @@
 .fleet-map-legend { position:absolute; bottom:28px; left:50%; transform:translateX(-50%); z-index:450; display:flex; align-items:center; gap:16px; padding:10px 16px; border-radius:12px; background:#0b1927ed; border:1px solid #263b4d; color:#c6d4e3; font:12px 'Spline Sans',sans-serif; white-space:nowrap; }
 .fleet-map-legend span { display:flex; gap:6px; align-items:center; }
 .fleet-map-legend i { width:8px; height:8px; border-radius:50%; background:#35e888; }
-.fleet-map-legend .ambar i { background:#ffbf43; }
-.fleet-map-legend .gris i { background:#a1afbf; }
+/* Colores de estado, los mismos del marcador; también los puntitos de los chips de Centro de control. */
+.fleet-map-legend .verde i, .control-punto.verde { background:#35e888; }
+.fleet-map-legend .azul i, .control-punto.azul { background:#5aa9ff; }
+.fleet-map-legend .ambar i, .control-punto.ambar { background:#ffbf43; }
+.fleet-map-legend .gris i, .control-punto.gris { background:#a1afbf; }
 .pnl-mapa.fleet-map { background:#0b1927; }
 .fom-dark .pnl-mapa.fleet-map.oscuro .leaflet-tile-pane,.fom-site .pnl-mapa.fleet-map.oscuro .leaflet-tile-pane,.pnl-mapa.fleet-map.oscuro .leaflet-tile-pane { filter:invert(1) grayscale(1) sepia(.55) hue-rotate(166deg) saturate(2) brightness(.85) contrast(.92); }
 .fleet-map .leaflet-control-zoom a { background:#0b1927; color:#f3f7fc; border-color:#263b4d; }

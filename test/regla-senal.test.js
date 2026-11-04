@@ -125,7 +125,7 @@ test('en marcha a 2 km/h → Detenida; desde 3 km/h o con motionState, En marcha
   assert.equal(lenta.clave, 'reportando')
   assert.equal(lenta.marcha, 'parada')
   assert.equal(lenta.texto, 'Detenida')
-  assert.equal(lenta.color, 'verde')
+  assert.equal(lenta.color, 'azul')
   assert.equal(estadoSenal({ ...alDia, velocidadKmh: 3 }, AHORA).marcha, 'en_marcha')
   assert.equal(estadoSenal({ ...alDia, estadoMarcha: 'en_marcha' }, AHORA).texto, 'En marcha')
   // El encendido no es un estado.

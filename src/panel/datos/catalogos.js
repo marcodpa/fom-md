@@ -95,7 +95,7 @@ export const ETIQUETA = {
 
 /** Color del tag según el estado. Devuelve la clase de .pnl-tag */
 export const COLOR = {
-  marcha_estado: { en_marcha: 'verde', parada: 'verde' },
+  marcha_estado: { en_marcha: 'verde', parada: 'azul' },
   conexion: { reportando: 'verde', sin_ubicacion: 'ambar', sin_senal: 'gris', sin_gps: 'gris' },
   odt_prioridad: { baja: 'gris', media: 'azul', alta: 'rojo' },
   inspeccion_resultado: {

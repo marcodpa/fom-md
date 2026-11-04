@@ -29,7 +29,7 @@ export const SIN_UBICACION_MS = 30 * MIN_MS
 /** Desde esta velocidad va «En marcha»: el mismo corte que usa el servidor para `motionState`. */
 export const VEL_MARCHA_KMH = 3
 
-const TONO = { verde: 'ok', ambar: 'warn', gris: 'mute' }
+const TONO = { verde: 'ok', azul: 'info', ambar: 'warn', gris: 'mute' }
 
 /** Milisegundos desde una fecha; `Infinity` si no hay (o no se entiende). */
 export function msSinReportar(fecha, ahora = Date.now()) {
@@ -109,7 +109,9 @@ export function estadoSenal(v, ahora = Date.now()) {
   }
   const vel = Number.isFinite(v?.velocidadKmh) ? v.velocidadKmh : null
   const marcha = (vel != null && vel >= VEL_MARCHA_KMH) || v?.estadoMarcha === 'en_marcha' ? 'en_marcha' : 'parada'
-  return { ...pinta('reportando', ETIQUETA.marcha_estado[marcha]), marcha, velocidadKmh: vel }
+  // Con señal, el color dice la marcha: verde en marcha, azul detenida (no dos verdes iguales).
+  const color = COLOR.marcha_estado[marcha]
+  return { ...pinta('reportando', ETIQUETA.marcha_estado[marcha]), color, tono: TONO[color], marcha, velocidadKmh: vel }
 }
 
 /** ¿Se ve la unidad callada o sin equipo? (gris en mapa y listas). */

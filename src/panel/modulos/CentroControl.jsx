@@ -1,13 +1,14 @@
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { nombreUnidad } from '../datos/nombreUnidad'
 import { useSearchParams } from 'react-router-dom'
 import repo from '../datos/repo'
 import { useDatos } from '../useDatos'
 import {
-  Buscador, Cargando, Chips, ErrorCarga, Vacio,
+  Buscador, Cargando, ErrorCarga, Vacio,
 } from '../comp/ui'
 import Mapa from '../comp/Mapa'
 import FichaUnidad, { estadoUnidad } from '../comp/FichaUnidad'
+import { COLOR } from '../datos/catalogos'
 import PanelRecorrido from '../comp/PanelRecorrido'
 import { analizar, COLA_MIN, colaReciente } from '../datos/recorrido'
 import { esCallada, estadoSenal, ordenarSinSenal, useMinuto, useUnidadesAlDia } from '../datos/sinSenal'
@@ -18,10 +19,18 @@ import { Icono } from '../Iconos'
 import MarcaEmpresa from '../comp/MarcaEmpresa'
 import '../../styles/control-map.css'
 
+/**
+ * Los filtros de estado, con su cifra y su color. La clave es la de `estadoUnidad` (la regla única
+ * de sinSenal.js) y el color sale del mismo catálogo que pinta el mapa: el chip ES la leyenda.
+ * Las cuatro primeras siempre se ven; «Sin ubicación» y «Sin GPS», solo si hay alguna (o si están elegidas).
+ */
 const ESTADOS = [
-  { v: '', t: 'Todas' },
-  { v: 'en_marcha', t: 'En marcha' },
-  { v: 'parada', t: 'Detenidas' },
+  { v: '', t: 'Todas', fijo: true },
+  { v: 'en_marcha', t: 'En marcha', color: COLOR.marcha_estado.en_marcha, fijo: true },
+  { v: 'parada', t: 'Detenidas', color: COLOR.marcha_estado.parada, fijo: true },
+  { v: 'sin_senal', t: 'Sin señal', color: COLOR.conexion.sin_senal, fijo: true },
+  { v: 'sin_ubicacion', t: 'Sin ubicación', color: COLOR.conexion.sin_ubicacion },
+  { v: 'sin_gps', t: 'Sin GPS', color: COLOR.conexion.sin_gps },
 ]
 
 /**
@@ -71,8 +80,9 @@ function equiposGps() {
 
 export default function CentroControl() {
   const [q, setQ] = useState('')
-  const [estadoMarcha, setEstadoMarcha] = useState('')
+  const [estado, setEstado] = useState('')
   const [areaId, setAreaId] = useState('')
+  const [menuArea, setMenuArea] = useState(false)
   const [seleccionado, setSeleccionado] = useState(null)
   const [listaAbierta, setListaAbierta] = useState(false)
   const [viendoRecorrido, setViendoRecorrido] = useState(false)
@@ -137,16 +147,20 @@ export default function CentroControl() {
   // la pantalla solo se vuelve a pintar si alguna unidad cambió de estado (los «hace …» se
   // renuevan solos en la lista y en la ficha, que llevan su propio reloj).
   const alDia = useUnidadesAlDia(datosFlota)
-  const lista = useMemo(
-    // Primero la señal y la marcha al día (regla única, `v.senal`), y con eso el filtro:
-    // la marcha solo existe con señal, así que una unidad callada nunca pasa el filtro de marcha.
-    () => alDia.filter((v) =>
-      (!areaId || v.areaId === areaId) && (!estadoMarcha || v.senal.marcha === estadoMarcha) && coincide(v, texto)),
-    [alDia, areaId, estadoMarcha, texto]
-  )
-  const enMarcha = lista.filter((v) => v.senal.marcha === 'en_marcha').length
-  // Con señal = reportando o sin ubicación (la regla única); las calladas no cuentan.
-  const conSenal = lista.filter((v) => !esCallada(v.senal)).length
+  // Área y buscador primero; sobre eso se cuentan los estados (la cifra de cada chip) y se filtra
+  // por el estado elegido. El estado es el de `estadoUnidad` (regla única): la marcha solo existe
+  // con señal, así que una unidad callada nunca pasa el filtro de «En marcha» ni de «Detenidas».
+  const porEstado = useMemo(() => {
+    const grupos = new Map(ESTADOS.map((e) => [e.v, []]))
+    alDia.forEach((v) => {
+      if ((areaId && v.areaId !== areaId) || !coincide(v, texto)) return
+      grupos.get('').push(v)
+      grupos.get(estadoUnidad(v).clave)?.push(v)
+    })
+    return grupos
+  }, [alDia, areaId, texto])
+  const lista = porEstado.get(estado) ?? porEstado.get('')
+  const chipsEstado = ESTADOS.filter((e) => e.fijo || e.v === estado || porEstado.get(e.v).length > 0)
 
   // Enlace de un evento de manejo (perfil, Alertas, Eventos y SOS, expediente):
   // `?unidad=…&evento=…` elige la unidad en cuanto llega la flota y se limpia de la dirección.
@@ -195,7 +209,7 @@ export default function CentroControl() {
   listaVigente.current = lista
   useEffect(() => {
     setSeleccionado((s) => (s && !listaVigente.current.some((v) => v.id === s) ? null : s))
-  }, [areaId, estadoMarcha, texto])
+  }, [areaId, estado, texto])
   // Y si la unidad ya no existe en la flota (la dieron de baja o la pasaron a otra empresa), se cierra.
   useEffect(() => {
     if (seleccionado && flota.estado === 'ok' && !alDia.some((v) => v.id === seleccionado)) setSeleccionado(null)
@@ -208,14 +222,11 @@ export default function CentroControl() {
 
   const limpiar = () => {
     setQ('')
-    setEstadoMarcha('')
+    setEstado('')
     setAreaId('')
   }
-
-  const bajada =
-    flota.estado === 'ok'
-      ? `${f.numero(lista.length)} ${lista.length === 1 ? 'unidad' : 'unidades'} · ${enMarcha} en marcha · ${conSenal} con señal`
-      : 'Dónde está cada unidad, en tiempo real.'
+  const areaElegida = opcionesArea.find((a) => a.v === areaId) ?? opcionesArea[0]
+  const cerrarMenuArea = useCallback(() => setMenuArea(false), [])
   // La flota pasó del tope de lectura: se dice, para que nadie cuente de menos sin saberlo.
   const incompleta = flota.estado === 'ok' && Boolean(datosFlota?.incompleta)
 
@@ -272,17 +283,48 @@ export default function CentroControl() {
           eventoActivo={manejo.elegido} alElegirEvento={manejo.elegir} encuadrarEventos={false}
           alto="100%" ficha={false} leyenda={false} espacioFicha herramientas />
       </div>
+      {/* Arriba, lo justo: el buscador en píldora con la lista dentro y una fila de chips que es a
+          la vez filtro, cifra y leyenda del mapa. En el teléfono la empresa va en la barra de la
+          consola (Consola.jsx), no en una tarjeta aparte. */}
       <div className="control-search">
-        <div className="control-search-heading"><div><MarcaEmpresa className="control-empresa" /><h1>Centro de control</h1><p>{bajada}{sinPunto > 0 && <> · <button type="button" className="control-sin-posicion" onClick={() => { setListaAbierta(true); setSeleccionado(null) }}>{sinPunto} sin posición · Ver unidades</button></>}</p>{incompleta && <p role="status">Lista incompleta: la flota es más grande de lo que se pudo leer.</p>}{flota.estado === 'ok' && datosFlota?.conductoresFallo && <p role="status">No se pudo leer quién conduce cada unidad. <button type="button" onClick={flota.recargar}>Reintentar</button></p>}</div>
-          <div className="control-acciones">
-            <button className="pnl-btn" type="button" aria-label="Unidades" aria-expanded={listaAbierta} aria-controls="control-unidades" onClick={() => { setListaAbierta(v => !v); setSeleccionado(null) }}><Icono nombre="camion" tam={18} />Unidades</button>
-          </div>
+        <div className="control-search-heading">
+          <MarcaEmpresa className="control-empresa" />
+          <h1>Centro de control</h1>
         </div>
-        <Buscador valor={q} alCambiar={setQ} placeholder="Placa, alias o conductor…" />
+        <div className="control-buscador">
+          <Buscador valor={q} alCambiar={setQ} placeholder="Placa, alias o conductor…" />
+          <button className="control-lista-btn" type="button" aria-label="Lista de unidades" title="Lista de unidades" aria-expanded={listaAbierta && !seleccionado} aria-controls="control-unidades" onClick={() => { setListaAbierta(v => !v); setSeleccionado(null) }}>
+            <IconoLista /><span>Unidades</span>
+          </button>
+        </div>
       </div>
       <div className="control-filters">
-        <Chips opciones={ESTADOS} valor={estadoMarcha} alCambiar={setEstadoMarcha} />
-        {opcionesArea.length > 1 && <select className="pnl-input" aria-label="Área de la flota" value={areaId} onChange={e => setAreaId(e.target.value)}>{opcionesArea.map(a => <option key={a.v} value={a.v}>{a.t}</option>)}</select>}
+        <div className="pnl-chips control-chips" role="group" aria-label="Filtrar unidades por estado">
+          {chipsEstado.map((e) => {
+            const n = flota.estado === 'ok' ? porEstado.get(e.v).length : null
+            return (
+              <button key={e.v} type="button" className={`pnl-chip control-chip${estado === e.v ? ' activo' : ''}`} aria-pressed={estado === e.v} onClick={() => setEstado(e.v)}>
+                {e.color && <i className={`control-punto ${e.color}`} aria-hidden="true" />}
+                {e.t}{n != null && <em>{f.numero(n)}</em>}
+              </button>
+            )
+          })}
+          {opcionesArea.length > 1 && (
+            <button type="button" className={`pnl-chip control-chip control-chip-area${areaId ? ' activo' : ''}`} id="control-area-boton"
+              aria-haspopup="menu" aria-expanded={menuArea} aria-controls="control-area-menu" aria-label={`Área: ${areaElegida.t}`}
+              onClick={() => setMenuArea((v) => !v)}>
+              {areaElegida.t}<IconoAbajo />
+            </button>
+          )}
+          {sinPunto > 0 && (
+            <button type="button" className="pnl-chip control-chip control-chip-aviso" onClick={() => { setListaAbierta(true); setSeleccionado(null) }}>
+              {sinPunto} sin posición · Ver
+            </button>
+          )}
+        </div>
+        {menuArea && <MenuArea opciones={opcionesArea} valor={areaId} alElegir={(v) => { setAreaId(v); setMenuArea(false) }} alCerrar={cerrarMenuArea} />}
+        {incompleta && <p className="control-aviso" role="status">Lista incompleta: la flota es más grande de lo que se pudo leer.</p>}
+        {flota.estado === 'ok' && datosFlota?.conductoresFallo && <p className="control-aviso" role="status">No se pudo leer quién conduce cada unidad. <button type="button" onClick={flota.recargar}>Reintentar</button></p>}
       </div>
       {(flota.estado !== 'ok' || lista.length === 0) && <div className="control-panel control-feedback" role="status">
         {flota.estado === 'cargando' && <Cargando filas={3} />}
@@ -323,6 +365,78 @@ export default function CentroControl() {
 }
 
 const esSinSenal = (v) => esCallada(v.senal ?? estadoSenal(v))
+
+/** Lista (tres renglones con su viñeta): abre «Unidades». Se entiende mejor que el camión de antes. */
+function IconoLista() {
+  return (
+    <svg className="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" fill="currentColor" /><circle cx="4.5" cy="12" r="1" fill="currentColor" /><circle cx="4.5" cy="18" r="1" fill="currentColor" />
+    </svg>
+  )
+}
+function IconoAbajo() {
+  return (
+    <svg className="ico control-chip-flecha" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+  )
+}
+
+/**
+ * El menú del chip de área. Va fuera de la fila de chips (que se desplaza de lado y lo cortaría),
+ * justo debajo. Con teclado: flechas, Inicio y Fin para moverse, Esc para cerrar (el foco vuelve
+ * al chip). Un toque fuera también lo cierra.
+ */
+function MenuArea({ opciones, valor, alElegir, alCerrar }) {
+  const caja = useRef(null)
+  // Se abre justo bajo el chip (la fila puede estar desplazada), sin salirse por los lados.
+  useLayoutEffect(() => {
+    const menu = caja.current
+    const boton = document.getElementById('control-area-boton')
+    const padre = menu?.offsetParent
+    if (!menu || !boton || !padre) return
+    const p = padre.getBoundingClientRect()
+    const b = boton.getBoundingClientRect()
+    const min = Math.max(0, 12 - p.left)
+    const max = window.innerWidth - 12 - menu.offsetWidth - p.left
+    menu.style.left = `${Math.round(Math.max(min, Math.min(b.left - p.left, max)))}px`
+    menu.style.top = `${Math.round(b.bottom - p.top + 8)}px`
+  }, [])
+  useEffect(() => {
+    const menu = caja.current
+    if (!menu) return undefined
+    menu.querySelector('[aria-checked="true"]')?.focus()
+    const fuera = (e) => {
+      if (!menu.contains(e.target) && !e.target.closest?.('#control-area-boton')) alCerrar()
+    }
+    document.addEventListener('pointerdown', fuera)
+    return () => document.removeEventListener('pointerdown', fuera)
+  }, [alCerrar])
+  const teclas = (e) => {
+    const items = [...caja.current.querySelectorAll('[role="menuitemradio"]')]
+    const i = items.indexOf(document.activeElement)
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      alCerrar()
+      document.getElementById('control-area-boton')?.focus()
+    } else if (e.key === 'Tab') {
+      alCerrar()
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus()
+    } else if (e.key === 'Home' || e.key === 'End') {
+      e.preventDefault()
+      items[e.key === 'Home' ? 0 : items.length - 1]?.focus()
+    }
+  }
+  return (
+    <div className="control-area-menu" id="control-area-menu" role="menu" aria-label="Área de la flota" ref={caja} onKeyDown={teclas}>
+      {opciones.map((a) => (
+        <button key={a.v} type="button" role="menuitemradio" aria-checked={a.v === valor} tabIndex={a.v === valor ? 0 : -1} onClick={() => { alElegir(a.v); document.getElementById('control-area-boton')?.focus() }}>
+          <span>{a.t}</span>{a.v === valor && <Icono nombre="check" tam={16} />}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 function ListaUnidades({ vehiculos, seleccionado, alSeleccionar }) {
   // Cada minuto se rehace el «hace …» y el orden de las calladas, sin pedir nada al servidor.

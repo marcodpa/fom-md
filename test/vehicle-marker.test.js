@@ -10,7 +10,7 @@ test('GPS sin señal prevalece sobre la última velocidad y el encendido', () =>
   assert.equal(estadoUnidad({ ultimoReporte: hace(10), posicionEn: hace(10), ignition: true, velocidadKmh: 54 }, ahora).clave, 'sin_senal')
   assert.equal(estadoUnidad({ ...alDia }, ahora).clave, 'parada')
   assert.equal(estadoUnidad({ ...alDia }, ahora).texto, 'Detenida')
-  assert.equal(estadoUnidad({ ...alDia, velocidadKmh: 0 }, ahora).color, 'verde')
+  assert.equal(estadoUnidad({ ...alDia, velocidadKmh: 0 }, ahora).color, 'azul')
   assert.equal(estadoUnidad({ ...alDia, velocidadKmh: 54 }, ahora).clave, 'en_marcha')
   // Ni «Encendido» ni «Apagado» ni «Reportando»: el encendido es un detalle.
   assert.equal(estadoUnidad({ ...alDia, ignition: true }, ahora).texto, 'Detenida')

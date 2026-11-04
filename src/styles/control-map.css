@@ -15,23 +15,44 @@
 .control-map-canvas{position:absolute;inset:0;z-index:0}
 .fom-dark .control-map .pnl-mapa{border-radius:0;height:100%;border:0}
 .control-search{position:absolute;z-index:2;top:16px;left:78px;right:20px;display:flex;align-items:center;gap:28px;padding:12px 18px;border:1px solid #263b4d;background:#0b1927f5;border-radius:14px;color:#f3f7fc}
-.control-search-heading{display:flex;justify-content:space-between;gap:18px;align-items:center;flex:1}
+.control-search-heading{display:grid;gap:4px;justify-items:start;flex:1;min-width:0}
 .control-search h1{font-size:21px;letter-spacing:-.025em;margin:0}
-.control-search p{font-size:12px;color:#b7c7d9;margin:3px 0 0}
-.fom-dark .control-search .pnl-btn{min-height:44px;padding:8px 12px;font-size:13px;gap:8px}
-.control-search .pnl-buscar{width:min(36vw,460px)}
-/* «Manejo brusco» (de la flota) y «Unidades», juntos a la derecha del título. */
-.control-acciones{display:flex;gap:8px;flex-shrink:0}
-.fom-dark .control-acciones .pnl-btn[aria-pressed="true"]{background:#173553;border-color:#2D5D88;color:#8BC6FF}
-.control-filters{position:absolute;top:106px;left:20px;right:78px;display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;z-index:2;pointer-events:none}
+
+/* ---- Buscador en píldora, con «Unidades» dentro, a la derecha ---- */
+.control-buscador{position:relative;width:min(36vw,460px);flex:none}
+.control-buscador .pnl-buscar{width:100%;min-width:0}
+.fom-dark .control-buscador .pnl-buscar input{height:44px;border-radius:999px;padding-right:128px}
+.control-lista-btn{position:absolute;top:4px;right:4px;height:36px;min-width:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px 0 10px;border:1px solid var(--e-borde,#263b4d);border-radius:999px;background:var(--e-sup,#141a22);color:var(--e-texto,#f3f5f8);font:500 13px/1 var(--e-fuente,inherit);cursor:pointer;transition:background-color .15s,border-color .15s}
+/* El blanco táctil llega a los 44 px de alto aunque el botón se vea de 36. */
+.control-lista-btn::after{content:"";position:absolute;inset:-4px}
+.control-lista-btn:hover{background:var(--e-sup-alta,#1d2530)}
+.control-lista-btn[aria-expanded="true"]{background:var(--e-activo-sup,#173553);border-color:var(--e-activo-borde,#2d5d88);color:var(--e-activo-texto,#8bc6ff)}
+.control-lista-btn:focus-visible{outline:2px solid var(--e-primario,#3d9bf5);outline-offset:2px}
+
+/* ---- Chips de estado: filtro, cifra y leyenda del mapa en una sola fila ---- */
+.control-filters{position:absolute;top:106px;left:20px;right:78px;z-index:2;pointer-events:none}
 .control-filters>*{pointer-events:auto}
-.control-filters .pnl-chips{flex-wrap:nowrap;gap:6px;margin:0;flex-shrink:0}
-.control-filters .pnl-chip{white-space:nowrap;background:#0b1927;color:#c6d4e3;border-color:#263b4d}
-/* El selector de área se ve como los chips de al lado: misma altura, forma de píldora, mismo borde y tipografía. */
-.fom-dark .control-filters select.pnl-input{min-height:40px;appearance:none;-webkit-appearance:none;max-width:220px;width:auto;height:40px;padding:0 34px 0 var(--e-lg,16px);border-radius:999px;border:1px solid #263b4d;background:#0b1927 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c6d4e3' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 13px center;color:#c6d4e3;font-family:var(--e-fuente,inherit);font-size:var(--e-t-sm,13px);font-weight:500;line-height:1;cursor:pointer;transition:color .15s,border-color .15s}
-.fom-dark .control-filters select.pnl-input:hover{color:#f3f7fc;border-color:#3a5570}
-.fom-dark .control-filters select.pnl-input:focus-visible{outline:2px solid #68baff;outline-offset:2px}
-.fom-dark .control-filters select.pnl-input option{background:#0b1927;color:#f3f7fc}
+/* Con el menú de área abierto, los filtros quedan encima de la lista y de la ficha. */
+.control-filters:has(.control-area-menu){z-index:5}
+.control-filters .control-chips{flex-wrap:nowrap;gap:6px;margin:0;padding:4px;margin:-4px;overflow-x:auto;scrollbar-width:none;width:max-content;max-width:calc(100% + 8px)}
+.control-filters .control-chips::-webkit-scrollbar{display:none}
+.control-filters .pnl-chip{position:relative;flex:none;white-space:nowrap;background:#0b1927;color:#c6d4e3;border-color:#263b4d;height:40px;padding:0 14px;gap:7px;font-size:13px}
+.control-filters .pnl-chip:focus-visible{border-radius:10px}
+.control-chip em{font-size:12px;font-weight:600;color:var(--e-texto-2,#abb3bf);font-variant-numeric:tabular-nums}
+.control-filters .control-chip.activo em{color:inherit;opacity:.85}
+/* El puntito: mismo color que el marcador del mapa (fleet-map.css). */
+.control-punto{width:8px;height:8px;flex:none;border-radius:50%}
+.control-chip-flecha{margin-right:-4px;opacity:.8}
+.control-chip-aviso{color:var(--e-aviso,#f5c242)!important}
+/* Menú del chip de área: debajo de la fila, a la altura del chip (lo coloca CentroControl.jsx). */
+.control-area-menu{position:absolute;top:50px;left:0;width:min(280px,calc(100vw - 24px));max-height:min(50dvh,360px);overflow:auto;overscroll-behavior:contain;padding:6px;display:grid;gap:2px;border:1px solid var(--e-borde,#263b4d);border-radius:20px;background:var(--e-sup,#141a22);box-shadow:var(--e-sombra-flotante,0 6px 18px #0008);font-family:var(--e-fuente,inherit)}
+.control-area-menu button{min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;border:0;border-radius:14px;background:none;color:var(--e-texto,#f3f5f8);font:500 14px/1.3 inherit;text-align:left;cursor:pointer}
+.control-area-menu button:hover{background:var(--e-sup-alta,#1d2530)}
+.control-area-menu button[aria-checked="true"]{background:var(--e-activo-sup,#173553);color:var(--e-activo-texto,#8bc6ff);font-weight:600}
+.control-area-menu button:focus-visible{outline:2px solid var(--e-primario,#3d9bf5);outline-offset:-2px}
+/* Avisos raros (flota incompleta, conductores sin leer): una línea chica bajo los chips. */
+.control-aviso{width:fit-content;max-width:100%;margin:10px 0 0;padding:6px 12px;border:1px solid var(--e-borde,#263b4d);border-radius:12px;background:var(--e-sup,#141a22);color:var(--e-texto-2,#abb3bf);font-size:12px}
+.control-aviso button{min-height:32px;padding:0 4px;border:0;background:none;color:#85c9ff;font:inherit;text-decoration:underline;cursor:pointer}
 .control-panel{position:absolute;left:20px;top:160px;width:352px;max-height:calc(100% - 214px);overflow:auto;overscroll-behavior:contain;border:1px solid #263b4d;background:#0b1927f5;border-radius:14px;z-index:3;padding:18px;scrollbar-width:thin;scrollbar-color:#39566e #0b1927}
 .control-unit{display:flex;flex-direction:column;overflow:hidden;height:calc(100% - 214px)}
 .control-unit .fleet-card{min-height:0;flex:1}
@@ -56,25 +77,15 @@
 @media(max-width:800px){
  .control-search{gap:12px;padding:12px;left:72px;right:12px}
  .control-search h1{font-size:17px}
- .control-search .pnl-buscar{width:32vw}
- .control-search-heading{gap:8px}
+ .control-buscador{width:36vw}
+ /* Angosto: «Unidades» queda en icono para que el buscador respire. */
+ .control-lista-btn{width:36px;padding:0}
+ .control-lista-btn span{display:none}
+ .fom-dark .control-buscador .pnl-buscar input{padding-right:52px}
  .control-map .fleet-map-legend{right:72px;font-size:10px;gap:10px}
 }
 @media(max-width:600px){
  .fom-dark[data-screen="/mapa"] .pnl-menu-btn{top:12px;left:12px;width:44px;height:44px}
- .control-search{top:12px;left:64px;right:12px;width:auto;display:block;padding:10px 12px}
- .control-search h1{font-size:16px}
- .control-search p{font-size:11px}
- .control-search-heading{margin-bottom:8px}
- .control-search .pnl-buscar{width:100%}
- .fom-dark .control-search .pnl-btn{font-size:0;width:44px;padding:8px}
- .control-search .pnl-btn svg{width:20px}
- /* A 390 px los tres chips y el selector de área no caben en una fila: el selector baja a la
-    segunda, entero, en vez de quedar cortado («Todas las área»). */
- .control-filters{top:146px;left:12px;right:12px;flex-wrap:wrap;gap:8px 6px}
- .control-filters .pnl-chips{flex-shrink:1;min-width:0;max-width:100%}
- .fom-dark .control-filters .pnl-chip{font-size:12px;min-height:40px;padding:8px 10px}
- .fom-dark .control-filters select.pnl-input{min-width:150px;max-width:100%;font-size:12px;height:40px;min-height:40px}
  .control-panel{left:12px;right:12px;top:auto;bottom:62px;width:auto;max-height:44dvh;padding:16px}
  .control-feedback{top:246px;bottom:auto;max-height:40dvh}
  .control-live{display:none}
@@ -90,8 +101,46 @@
  .control-unit .fleet-vehicle-image img{height:66px}
  .control-unit .fleet-vehicle-image figcaption{font-size:9px}
  .control-unit .fleet-facts{gap:9px}
- /* Con el recorrido la hoja crece, pero sin llegar a los filtros: encima queda sitio para el logo de Mapbox. */
- .control-map .control-unit.con-ruta{max-height:calc(100% - 332px)}
+}
+
+/* ============================================================
+   TELÉFONO (bajo 768 px, `data-movil`): la parte de arriba en ~160 px
+   ------------------------------------------------------------
+   Barra de la consola (52, con la empresa bajo el título) · buscador en
+   píldora (44) · una fila de chips que se desplaza de lado (40 + aire).
+   Nada de tarjeta: el mapa se ve entre las piezas. La app copia estas
+   medidas: docs/DISENO-CENTRO-CONTROL-MOVIL.md.
+   ============================================================ */
+@media (max-width:767px){
+ .pnl.fom-dark[data-movil] .control-map{--cc-barra:calc(64px + env(safe-area-inset-top));--cc-chips:calc(var(--cc-barra) + 58px);--cc-fin:calc(var(--cc-barra) + 102px)}
+ .pnl.fom-dark[data-diseno][data-movil] .control-map .control-search{top:calc(var(--cc-barra) + 8px);left:12px;right:12px;display:block;min-height:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none}
+ /* La barra de arriba ya dice «Centro de control» y la empresa: aquí solo queda el h1 para el lector. */
+ .pnl.fom-dark[data-movil] .control-map .control-search-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .pnl.fom-dark[data-movil] .control-map .control-search-heading .control-empresa{display:none}
+ .pnl.fom-dark[data-movil] .control-map .control-buscador{width:100%}
+ .pnl.fom-dark[data-diseno][data-movil] .control-map .control-buscador .pnl-buscar input{height:44px;padding-right:52px;border-radius:999px;background:var(--e-sup);border-color:var(--e-borde);box-shadow:var(--app-sombra-flotante,0 6px 18px #0006);backdrop-filter:var(--apariencia-blur)}
+ .pnl.fom-dark[data-diseno="azul"][data-movil] .control-map .control-buscador .pnl-buscar input{background:var(--app-sobre-mapa,var(--e-sup))}
+ .pnl.fom-dark[data-movil] .control-map .control-buscador .pnl-buscar input:focus{border-color:var(--e-primario)}
+ /* «Unidades» queda en icono, dentro de la píldora; su nombre lo lleva aria-label. */
+ .pnl.fom-dark[data-movil] .control-map .control-lista-btn{width:36px;padding:0;border:0;background:var(--e-sup-alta)}
+ .pnl.fom-dark[data-movil] .control-map .control-lista-btn[aria-expanded="true"]{background:var(--e-activo-sup)}
+ .pnl.fom-dark[data-movil] .control-map .control-lista-btn span{display:none}
+ /* La fila de chips va de borde a borde y se desplaza: el chip cortado al final dice que hay más. */
+ .pnl.fom-dark[data-movil] .control-map .control-filters{top:var(--cc-chips);left:0;right:0}
+ .pnl.fom-dark[data-movil] .control-map .control-filters .control-chips{width:auto;max-width:none;margin:0;padding:4px 12px;scroll-padding:0 12px}
+ .pnl.fom-dark[data-diseno][data-movil] .control-map .control-filters .pnl-chip{height:40px;min-height:40px;padding:0 12px;gap:6px;font-size:13px;box-shadow:var(--app-sombra-flotante,0 4px 12px #0005)}
+ /* 40 a la vista, 44 al dedo. */
+ .pnl.fom-dark[data-movil] .control-map .control-filters .pnl-chip::after{content:"";position:absolute;inset:-2px 0}
+ .pnl.fom-dark[data-movil] .control-map .control-aviso{margin:6px 12px 0}
+ /* Capas: un círculo de 44 a la derecha, bajo los chips. */
+ .pnl.fom-dark[data-movil] .control-map .mapa-capas{top:calc(var(--cc-fin) + 12px);right:12px;bottom:auto}
+ .pnl.fom-dark[data-diseno][data-movil] .control-map .mapa-capas-boton{width:44px;height:44px;min-height:44px;padding:0;justify-content:center}
+ /* Cargando o «ninguna coincide»: bajo los chips, sin tapar el botón de capas. */
+ .pnl.fom-dark[data-movil] .control-map .control-feedback{top:calc(var(--cc-fin) + 12px);right:68px;bottom:auto}
+ /* Los chips ya llevan el color de cada estado: la leyenda de abajo sobra en el teléfono. */
+ .pnl.fom-dark[data-movil] .control-map .fleet-map-legend{display:none}
+ /* Con el recorrido la hoja crece hasta 12 px bajo el botón de capas (pie a 62 + 76 de aire): sin tocarlo y con sitio para el logo de Mapbox. */
+ .pnl.fom-dark[data-movil] .control-map .control-unit.con-ruta{max-height:calc(100% - var(--cc-fin) - 138px)}
 }
 
 /* Recorrido: viajes con inicio y fin, paradas y hora de cada punto */
@@ -138,9 +187,8 @@
 .leaflet-popup.ruta-popup a.leaflet-popup-close-button{color:#b7c7d9}
 .ruta-item.activo{border-color:#349bfa;background:#173957;box-shadow:0 0 0 1px #349bfa55}
 
-.control-sin-posicion{font:inherit;color:#85c9ff;border:0;background:none;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-/* Empresa en la que se está, con su logo, sobre el título (misma pieza que la cabecera). */
-.control-search .control-empresa{margin-bottom:8px;--marca-tam:30px}
-.control-search .control-empresa .marca-empresa-nombre{color:#f3f7fc;font-size:13px}
+/* Empresa en la que se está, con su logo, sobre el título (misma pieza que la cabecera). En el
+   teléfono no se ve aquí: va en la barra de la consola, con MarcaEmpresa compacta. */
+.control-search .control-empresa{--marca-tam:30px}
+.control-search .control-empresa .marca-empresa-nombre{color:var(--e-texto,#f3f7fc);font-size:13px}
 .control-search .control-empresa .marca-empresa-nota{color:#8bc6ff}
-@media (max-width:600px){.control-search .control-empresa{margin-bottom:6px;--marca-tam:28px}.control-search .control-empresa .marca-empresa-nota{display:block}}

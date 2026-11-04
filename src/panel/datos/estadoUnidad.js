@@ -2,7 +2,7 @@ import { estadoSenal } from './sinSenal.js'
 
 /**
  * El estado que se muestra de una unidad: la señal de `estadoSenal` (sinSenal.js), y si reporta,
- * su marcha. Claves: 'en_marcha' | 'parada' (las dos con señal, verdes) | 'sin_ubicacion' (ámbar)
+ * su marcha. Claves: 'en_marcha' | 'parada' (con señal: verde en marcha, azul detenida) | 'sin_ubicacion' (ámbar)
  * | 'sin_senal' | 'sin_gps' (grises). Nada de «Encendido», «Apagado» ni «Reportando»: el
  * encendido es un detalle, no un estado.
  */

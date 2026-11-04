@@ -507,7 +507,14 @@ export default function Consola() {
               etiquetaCampana={etiquetaCampana}
               iniciales={perfil.iniciales}
             />
-          : <MovilPantalla titulo={titulo} alVolver={volver} />)}
+          : <MovilPantalla
+              // En Centro de control la empresa va aquí, bajo el título y con su logo, en vez de
+              // una tarjeta aparte sobre el mapa (el administrador FOM ve en cuál entró).
+              titulo={pathname.replace(/\/+$/u, '') === '/panel/mapa' && area !== 'conductor'
+                ? <span className="mv-titulo-doble"><span className="mv-titulo-linea">{titulo}</span><MarcaEmpresa compacta /></span>
+                : titulo}
+              alVolver={volver}
+            />)}
 
         {/* Cada pantalla llega en su propio trozo; mientras baja, el esqueleto de siempre
             (espera 120 ms antes de asomarse, ver movimiento.css). */}
