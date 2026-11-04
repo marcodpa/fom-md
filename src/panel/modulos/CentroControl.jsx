@@ -15,6 +15,7 @@ import { leerEnlaceEvento } from '../datos/eventosManejo'
 import { BloqueManejoBrusco, useManejoBrusco } from '../comp/ManejoBrusco'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
+import MarcaEmpresa from '../comp/MarcaEmpresa'
 import '../../styles/control-map.css'
 
 const ESTADOS = [
