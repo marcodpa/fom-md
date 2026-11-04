@@ -1,8 +1,9 @@
 import { createPortal } from 'react-dom'
 import {
   CATEGORIAS, ETIQUETA_GRUPO, comparar, dineroVE, duracionHoras, esProducto, fechaCortaVE, fechaHoraVE,
-  etiquetaFalla, formatoPorId, grupoOdt, kmVE, numeroValido, numeroVE, porScore, porcentajeVE, resultadoDe, textoCmp, tonoIndice, tonoScore,
+  etiquetaFalla, formatoPorId, tonoBanda, grupoOdt, kmVE, numeroValido, numeroVE, porScore, porcentajeVE, resultadoDe, textoCmp, tonoIndice, tonoScore,
 } from '../reportes-datos'
+import { estaSinResolver } from '../../datos/odtGrupos'
 import './informe.css'
 
 // ============================================================
@@ -53,7 +54,7 @@ const n0 = v => numeroValido(v) ? numeroVE(v) : '—'
 const n2 = v => numeroValido(v) ? numeroVE(v, 2) : '—'
 const lista = xs => xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} y ${xs.at(-1)}`
 /** Identificación de conductores: sin unidades no hay porcentaje y queda «Sin dato». */
-const tonoIdent = n => !numeroValido(n) ? null : n >= 85 ? 'ok' : n >= 70 ? 'warn' : 'bad'
+const tonoIdent = n => !numeroValido(n) ? null : tonoBanda(Number(n))
 /** «(8,3 % más que el período anterior)» · «(igual que el período anterior)». */
 const frenteAnterior = cmp => cmp?.direccion === 'igual' ? ' (igual que el período anterior)' : cmp?.pct != null ? ` (${cmp.texto} que el período anterior)` : ''
 
@@ -152,10 +153,10 @@ function puntosDeAtencion(m) {
   const vencidas = filasU.filter(f => f.papeles.estado === 'vencido')
   if (vencidas.length) puntos.push(['bad', `Documentos vencidos en ${vencidas.length} ${vencidas.length === 1 ? 'unidad' : 'unidades'}`, `${lista(vencidas.slice(0, 6).map(f => f.v.alias))}${vencidas.length > 6 ? ' y otras' : ''}. Renovar antes de circular.`])
   const peor = filasU.filter(f => tonoIndice(f.v.indiceSeguro) === 'bad').sort((a, b) => a.v.indiceSeguro - b.v.indiceSeguro)[0]
-  if (peor) puntos.push(['bad', `${peor.v.alias}: el índice de manejo más bajo`, `Índice ${peor.v.indiceSeguro} de 100${peor.sinResolver ? ` y ${peor.sinResolver} ODT sin resolver` : ''}.`])
+  if (peor) puntos.push(['bad', `${peor.v.alias}: el índice de manejo más bajo`, `Índice ${peor.v.indiceSeguro} de 100${peor.sinResolver ? ` y ${peor.sinResolver} ODT sin resolver ahora` : ''}.`])
   const personas = filasP.filter(p => p.papeles.estado === 'vencido')
   if (personas.length) puntos.push(['bad', `${personas.length} ${personas.length === 1 ? 'conductor con papeles vencidos' : 'conductores con papeles vencidos'}`, `${lista(personas.slice(0, 5).map(p => p.nombre))}.`])
-  if (act.sinResolver) puntos.push(['warn', `${act.sinResolver} ${act.sinResolver === 1 ? 'orden de trabajo sin resolver' : 'órdenes de trabajo sin resolver'}`, `${act.abiertas} abiertas y ${act.revision} en revisión. El período cerró con ${act.odts.length} ODT (antes ${ant.odts.length}).`])
+  if (act.sinResolverAhora) puntos.push(['warn', `${act.sinResolverAhora} ${act.sinResolverAhora === 1 ? 'orden de trabajo sin resolver ahora' : 'órdenes de trabajo sin resolver ahora'}`, `En el período se crearon ${act.odts.length} ODT (antes ${ant.odts.length}); de ellas ${act.abiertas} siguen abiertas y ${act.revision} en revisión.`])
   const sinConductor = filasU.filter(f => !f.v.conductorPrincipalId)
   if (sinConductor.length) puntos.push(['warn', `${sinConductor.length} ${sinConductor.length === 1 ? 'unidad sin conductor asignado' : 'unidades sin conductor asignado'}`, `${lista(sinConductor.slice(0, 6).map(f => f.v.alias))}${sinConductor.length > 6 ? ' y otras' : ''}.`])
   if (vista.sinDato) puntos.push(['warn', `${vista.sinDato} ${vista.sinDato === 1 ? 'unidad sin dato de marcha' : 'unidades sin dato de marcha'}`, 'El GPS no informó si estaba en marcha al generar el informe. Revisar el equipo.'])
@@ -169,12 +170,12 @@ function Resumen({ doc, n, s }) {
   const frases = []
   if (act.km != null) frases.push(`La flota recorrió ${kmVE(act.km)}${frenteAnterior(kmCmp)}${act.eventosPor100 != null ? `, con ${numeroVE(act.eventosPor100, 2)} eventos de manejo por cada 100 km` : ''}.`)
   if (act.gasto != null) frases.push(`El gasto fue de ${dineroVE(act.gasto)}${frenteAnterior(gastoCmp)}.`)
-  const conclusion = `${frases.length ? `${frases.join(' ')} ` : ''}Se crearon ${act.odts.length} ODT (antes ${ant.odts.length}) y ${act.sinResolver} siguen sin resolver. Ahora hay ${vista.enMarcha} de ${vista.total} unidades en marcha.`
+  const conclusion = `${frases.length ? `${frases.join(' ')} ` : ''}Se crearon ${act.odts.length} ODT (antes ${ant.odts.length}) y de ellas ${act.sinResolverCreadas} siguen sin resolver. Ahora hay ${vista.enMarcha} de ${vista.total} unidades en marcha.`
   const kps = [
     { etiqueta: 'Km recorridos', valor: act.km == null ? '—' : numeroVE(Math.round(act.km)), unidad: act.km == null ? '' : 'km', cmp: kmCmp, antes: ant.km == null ? null : `antes ${kmVE(ant.km)}`, nota: act.km == null ? '' : 'De los conductores identificados' },
     { etiqueta: 'Score de conducción', valor: n2(act.eventosPor100), unidad: act.eventosPor100 == null ? '' : 'ev./100 km', cmp: comparar(act.eventosPor100, ant.eventosPor100, { mejor: 'baja', modo: 'abs', decimales: 2 }), antes: ant.eventosPor100 == null ? null : `antes ${n2(ant.eventosPor100)}`, nota: 'óptimo < 1,5' },
     { etiqueta: 'Identificación', valor: n0(vista.identificacion), unidad: vista.identificacion == null ? '' : '%', ahora: true, nota: `${vista.conConductor} de ${vista.total}` },
-    { etiqueta: 'ODT del período', valor: numeroVE(act.odts.length), cmp: comparar(act.odts.length, ant.odts.length, { mejor: 'baja', modo: 'abs' }), antes: `antes ${ant.odts.length}`, nota: `${act.sinResolver} sin resolver` },
+    { etiqueta: 'ODT creadas en el período', valor: numeroVE(act.odts.length), cmp: comparar(act.odts.length, ant.odts.length, { mejor: 'baja', modo: 'abs' }), antes: `antes ${ant.odts.length}`, nota: `${act.sinResolverCreadas} de ellas sin resolver` },
     { etiqueta: 'Gasto del período', valor: dineroVE(act.gasto), cmp: comparar(act.gasto, ant.gasto, { mejor: 'baja' }), antes: ant.gasto == null ? null : `antes ${dineroVE(ant.gasto)}`, nota: act.gasto == null ? 'Costos no disponibles' : `${n0(act.movimientos)} gastos` },
     { etiqueta: 'Costo por km', valor: act.costoPorKm == null ? '—' : dineroVE(act.costoPorKm, 3), cmp: comparar(act.costoPorKm, ant.costoPorKm, { mejor: 'baja', modo: 'abs', decimales: 3, prefijo: '$' }), antes: ant.costoPorKm == null ? null : `antes ${dineroVE(ant.costoPorKm, 3)}` },
   ]
@@ -271,7 +272,7 @@ function Mantenimiento({ doc, n, s }) {
   const vieja = doc.m.pendientes?.[0]
   // Días hasta resolverse; las que siguen sin resolver, hasta hoy. Resuelta sin fecha (p. ej. cancelada): no se sabe.
   const dias = o => {
-    const fin = o.resueltaEn ? Date.parse(o.resueltaEn) : ['abierta', 'revision'].includes(grupoOdt(o.estado)) ? ahora : NaN
+    const fin = o.resueltaEn ? Date.parse(o.resueltaEn) : estaSinResolver(o) ? ahora : NaN
     const d = (fin - Date.parse(o.creadaEn)) / 86400000
     return Number.isFinite(d) ? Math.max(0, Math.round(d)) : null
   }
@@ -287,7 +288,7 @@ function Mantenimiento({ doc, n, s }) {
           <ul className="inf-estados">{partes.map(p => <li key={p.clave}><i style={{ background: p.color }} /><span>{p.etiqueta}</span><b>{p.valor}</b><span className="r">{total ? Math.round(p.valor / total * 100) : 0} %</span></li>)}
             {otros > 0 && <li><i style={{ background: '#FFFFFF' }} /><span>Otro estado</span><b>{otros}</b><span className="r">{Math.round(otros / total * 100)} %</span></li>}</ul>
         </div>
-        <p className="inf-lec"><b>Lectura:</b> {total ? `${act.sinResolver} de ${total} órdenes (${Math.round(act.sinResolver / total * 100)} %) siguen sin resolver.` : 'No se crearon ODT en el período.'}</p>
+        <p className="inf-lec"><b>Lectura:</b> {total ? `${act.sinResolverCreadas} de ${total} órdenes creadas (${Math.round(act.sinResolverCreadas / total * 100)} %) siguen sin resolver.` : 'No se crearon ODT en el período.'}</p>
       </div>
       <div className="inf-box inf-col">
         <Sub titulo="Fallas más frecuentes">N.º de ODT</Sub>
@@ -317,7 +318,7 @@ function Mantenimiento({ doc, n, s }) {
               <td className="r">{numeroValido(o.costo) ? dineroVE(o.costo) : g === 'resuelta' ? 'Sin costo' : <Raya />}</td>
             </tr>
           }) : <tr><td colSpan="7" className="inf-si">No se crearon ODT en el período.</td></tr>}
-          <tr className="tot"><td>Total</td><td>{total} ODT</td><td /><td>{act.sinResolver} sin resolver</td><td>{act.abiertas} · {act.revision} · {act.resueltas}</td><td /><td className="r">{dineroVE(act.costoResueltas)}</td></tr>
+          <tr className="tot"><td>Total</td><td>{total} ODT</td><td /><td>{act.sinResolverCreadas} sin resolver</td><td>{act.abiertas} · {act.revision} · {act.resueltas}</td><td /><td className="r">{dineroVE(act.costoResueltas)}</td></tr>
         </tbody>
       </table>
     </div>

@@ -87,9 +87,9 @@ test('vehículos: ODT por estado y unidades ahora (sin señal manda sobre la mar
 })
 
 test('usuarios: índice por rangos y documentos al día, por vencer y vencidos', () => {
-  assert.deepEqual([rangoIndice(59), rangoIndice(60), rangoIndice(79), rangoIndice(80), rangoIndice(100), rangoIndice(null), rangoIndice(120)], ['bajo', 'medio', 'medio', 'alto', 'alto', null, null])
+  assert.deepEqual([rangoIndice(69), rangoIndice(70), rangoIndice(84), rangoIndice(85), rangoIndice(100), rangoIndice(null), rangoIndice(120)], ['bajo', 'medio', 'medio', 'alto', 'alto', null, null])
   const [indice, docs] = graficosDe('usuarios', modelo('usuarios'), nombre)
-  assert.deepEqual(indice.partes.map(x => [x.etiqueta, x.valor]), [['Menos de 60', 1], ['60 a 79', 1], ['80 a 100', 1]])
+  assert.deepEqual(indice.partes.map(x => [x.etiqueta, x.valor]), [['Menos de 70', 1], ['70 a 84', 1], ['85 a 100', 1]])
   assert.equal(indice.pie, '3 conductores con índice · 1 sin dato')
   assert.deepEqual(docs.partes.map(x => [x.etiqueta, x.valor, x.tono]), [['Al día', 1, 'ok'], ['Por vencer', 1, 'warn'], ['Vencidos', 1, 'bad']])
   assert.equal(docs.pie, '3 conductores con documentos con fecha · 1 sin dato')
@@ -114,7 +114,7 @@ test('estadístico: eventos por tipo y los 5 conductores con más eventos por 10
 
 test('chips de atención con su destino, y ninguno cuando no hay nada', () => {
   const v = chipsDe('vehiculos', modelo('vehiculos'))
-  assert.deepEqual(v.map(c => c.texto), ['2 ODT sin resolver', '1 unidad con papeles vencidos', '2 unidades sin conductor', '2 unidades piden atención'])
+  assert.deepEqual(v.map(c => c.texto), ['3 ODT sin resolver ahora', '1 unidad con papeles vencidos', '2 unidades sin conductor', '3 unidades piden atención'])
   assert.deepEqual(v[0].ir, { ruta: '/panel/mantenimiento' })
   assert.deepEqual(v[1].ir, { tabla: true })
   const u = chipsDe('usuarios', modelo('usuarios'))

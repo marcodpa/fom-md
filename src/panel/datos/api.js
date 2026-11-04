@@ -509,8 +509,8 @@ export const api = {
   reglasAlerta: () => pedir(`${CONSOLA}/alert-rules?limit=200`),
 
   /** Avisos, los no leídos primero. */
-  notificaciones: ({ soloSinLeer = false, limite = 100 } = {}) => {
-    const p = new URLSearchParams({ limit: limite })
+  notificaciones: ({ soloSinLeer = false, limite = 100, desplazamiento = 0 } = {}) => {
+    const p = new URLSearchParams({ limit: limite, offset: desplazamiento })
     if (soloSinLeer) p.set('unreadOnly', 'true')
     return pedir(`${CONSOLA}/notifications?${p}`)
   },

@@ -19,6 +19,9 @@ import {
   estadoDocumento, etiquetaRol, puedeGestionarA, validarRolEmpresa,
 } from './catalogos'
 import { hoyISO } from './formato'
+import { contarOdt } from './odtGrupos'
+import { contarSinLeer, estaLeida } from '../modulos/alertas-presentacion'
+import { unidadesSinDiariaHoy } from './inspeccionesHoy'
 import { DIAS_SEMANA, diasParaEnviar, normalizarDias, tocaTodosLosDias } from './diasPlanilla'
 import { comoEventoManejo } from './eventosManejo'
 import { calificacionManejo } from './manejo'
@@ -182,6 +185,10 @@ function guardar() {
 const oyentes = new Set()
 function avisar() {
   oyentes.forEach((fn) => fn())
+}
+/** Avisa a quien escucha que algo cambió (las escrituras reales no pasan por `guardar`). */
+export function avisarCambioDatos() {
+  avisar()
 }
 /** Suscribirse a cualquier cambio de datos. Devuelve la baja. */
 export function alCambiarDatos(fn) {
@@ -595,8 +602,7 @@ export const repo = {
     const bloqueadas = inspHoy.filter((i) => i.resultado === 'bloqueada')
     const docsVencidos = docs.filter((d) => estadoDocumento(d.venceEn) === 'vencido').length
     const docsPorVencer = docs.filter((d) => estadoDocumento(d.venceEn) === 'por_vencer').length
-    const abiertas = odts.filter((o) => o.estado === 'abierta')
-    const enRevision = odts.filter((o) => o.estado === 'en_revision')
+    const { abierta: abiertas, revision: enRevision } = contarOdt(odts)
     const cerradas = odts.filter((o) => o.estado === 'cerrada')
 
     // Promedio del índice de manejo seguro (media simple, como la app)
@@ -616,8 +622,8 @@ export const repo = {
       enMarcha,
       detenidos: veh.length - enMarcha,
       conductores: perfiles.filter((p) => p.conduce).length,
-      odtAbiertas: abiertas.length,
-      odtEnRevision: enRevision.length,
+      odtAbiertas: abiertas,
+      odtEnRevision: enRevision,
       odtCerradas: cerradas.length,
       costoCerradas: cerradas.reduce((a, o) => a + (o.costo ?? 0), 0),
       horasPromedioResolucion: horasProm,
@@ -627,7 +633,7 @@ export const repo = {
       docsVencidos,
       docsPorVencer,
       indiceSeguroPromedio: indice,
-      alertasSinLeer: todasNotificaciones().filter((n) => !n.leida).length,
+      alertasSinLeer: contarSinLeer(todasNotificaciones()),
       sinConductor: veh.filter((v) => !v.conductorPrincipalId).length,
       porArea: AREAS.map((a) => ({
         ...a,
@@ -939,12 +945,10 @@ export const repo = {
     /** Unidades sin inspección de hoy: lo que el supervisor debe perseguir. */
     async pendientesHoy() {
       const hoy = hoyISO()
-      const hechas = new Set(todasInspecciones().filter((i) => i.fecha === hoy).map((i) => i.vehiculoId))
       const perfiles = todosPerfiles()
       const docs = todosDocumentos()
       return responder(
-        todosVehiculos()
-          .filter((v) => !hechas.has(v.id))
+        unidadesSinDiariaHoy(todosVehiculos(), todasInspecciones(), hoy)
           .map((v) => enriquecerVehiculo(v, perfiles, docs))
       )
     },
@@ -1018,7 +1022,7 @@ export const repo = {
   alertas: {
     async listar({ soloSinLeer = false } = {}) {
       let lista = todasNotificaciones()
-      if (soloSinLeer) lista = lista.filter((n) => !n.leida)
+      if (soloSinLeer) lista = lista.filter((n) => !estaLeida(n))
       return responder(lista)
     },
     async marcarLeida(id) {

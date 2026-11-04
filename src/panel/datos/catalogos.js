@@ -5,6 +5,8 @@
 // estos mismos strings viajan sin traducción.
 // ============================================================
 
+import { ESTADOS_VISIBLES } from './odtGrupos.js'
+
 export const VEHICULO_TIPO = ['camioneta', 'camion', 'auto', 'otro']
 export const MARCHA_ESTADO = ['en_marcha', 'parada']
 export const AREA_TIPO = ['ubicacion', 'sector', 'contrato']
@@ -41,17 +43,6 @@ export const ETIQUETA = {
     ubicacion: 'Ubicación',
     sector: 'Sector',
     contrato: 'Contrato',
-  },
-  odt_estado: {
-    abierta: 'Abierta',
-    en_revision: 'En revisión',
-    aprobada: 'Aprobada',
-    asignada: 'Asignada',
-    en_ejecucion: 'En ejecución',
-    pausada: 'Pausada',
-    en_calidad: 'En calidad',
-    cerrada: 'Cerrada',
-    cancelada: 'Cancelada',
   },
   odt_prioridad: { baja: 'Baja', media: 'Media', alta: 'Alta' },
   odt_tipo: {
@@ -110,17 +101,6 @@ export const ETIQUETA = {
 export const COLOR = {
   marcha_estado: { en_marcha: 'verde', parada: 'gris' },
   conexion: { reportando: 'verde', sin_senal: 'gris' },
-  odt_estado: {
-    abierta: 'ambar',
-    en_revision: 'azul',
-    aprobada: 'azul',
-    asignada: 'azul',
-    en_ejecucion: 'azul',
-    pausada: 'ambar',
-    en_calidad: 'azul',
-    cerrada: 'verde',
-    cancelada: 'gris',
-  },
   odt_prioridad: { baja: 'gris', media: 'azul', alta: 'rojo' },
   inspeccion_resultado: {
     pendiente: 'gris',
@@ -134,16 +114,10 @@ export const COLOR = {
 }
 
 // ODT con 3 estados visibles (Abierta / En revisión / Resuelta), como la app.
-// SOLO presentación: `odt_estado` sigue con los 9 del servidor porque Reportes
-// los cuenta uno a uno. Mismos grupos que ESTADOS_VISIBLES de historial-odt.js
-// (no se importa de allí: ese archivo ya importa este y quedaría en círculo).
-const ODT_GRUPOS = [
-  ['Abierta', 'ambar', ['abierta']],
-  ['En revisión', 'azul', ['en_revision', 'aprobada', 'asignada', 'en_ejecucion', 'pausada', 'en_calidad']],
-  ['Resuelta', 'verde', ['cerrada', 'cancelada']],
-]
-ETIQUETA.odt_estado_visible = Object.fromEntries(ODT_GRUPOS.flatMap(([et, , estados]) => estados.map(e => [e, et])))
-COLOR.odt_estado_visible = Object.fromEntries(ODT_GRUPOS.flatMap(([, col, estados]) => estados.map(e => [e, col])))
+// Los nueve del servidor ya no tienen etiqueta propia: lo que se ve son 3.
+// Los grupos viven en odtGrupos.js (sin imports, por eso se puede traer aquí).
+ETIQUETA.odt_estado_visible = Object.fromEntries(ESTADOS_VISIBLES.flatMap(g => g.estados.map(e => [e, g.etiqueta])))
+COLOR.odt_estado_visible = Object.fromEntries(ESTADOS_VISIBLES.flatMap(g => g.estados.map(e => [e, g.color])))
 
 /** Traduce un valor de enum a su etiqueta visible. */
 export function etiqueta(enumName, valor) {

@@ -1,7 +1,12 @@
 import { masNuevoPrimero } from '../datos/orden.js'
 
 export function estaLeida(aviso) {
-  return Boolean(aviso.leida || aviso.leidaEn)
+  return Boolean(aviso?.leida || aviso?.leidaEn)
+}
+
+/** Cuántos avisos siguen sin leer: la ÚNICA cuenta (campana, globo del teléfono, bandeja y Resumen). */
+export function contarSinLeer(lista) {
+  return (lista ?? []).filter(n => !estaLeida(n)).length
 }
 
 export function esDeHoy(iso, ahora = new Date()) {

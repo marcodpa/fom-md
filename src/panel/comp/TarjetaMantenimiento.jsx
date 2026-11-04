@@ -53,7 +53,7 @@ export default function TarjetaMantenimiento({ odt, alAbrir, unidad = true, chil
   const descripcion = [unidad ? odt.vehiculoNombre : null, falla ? odt.descripcion : odt.tipo ? etiqueta('odt_tipo', odt.tipo) : null].filter(Boolean).join(' · ')
   const resuelta = g.clave === 'resuelta'
   // Sin atender: nadie la ha tomado todavía. El punto late (y se queda quieto si se pidió menos movimiento).
-  const urgente = odt.estado === 'abierta'
+  const urgente = g.clave === 'abierta'
   const contenido = <>
     <div className="mnt-tarjeta-cab">
       <span className="mnt-tarjeta-icono"><IconoFalla tipoFalla={odt.tipoFalla} preventiva={odt.tipo === 'preventiva'} /></span>

@@ -7,6 +7,7 @@ import { ModalCrear, ModalCambiarRol, useAccionesCuenta } from './AdminUsuarios'
 import { useDatos } from '../useDatos'
 import { Buscador, Cargando, Datos, ErrorCarga, Tag, Tarjeta, Vacio } from '../comp/ui'
 import * as f from '../datos/formato'
+import { contarEmpresas } from '../datos/contarEmpresas'
 import { etiquetaRolSesion, rolCanonico } from '../roles'
 import { Icono } from '../Iconos'
 import './mantenimiento.css'
@@ -79,9 +80,9 @@ export default function Plataforma() {
 
   const resumen = [
     ['Membresías', total == null ? '—' : f.numero(total), 'Una por persona y empresa', 'gente'],
-    ['Empresas', (empresas.datos ?? []).length, 'En la plataforma', 'empresa'],
-    ['Activas', lista.filter((p) => p.estado === 'active').length, 'En esta página', 'check'],
-    ['Sin acceso', lista.filter((p) => p.estado === 'revoked').length, 'En esta página', 'alerta'],
+    ['Empresas', contarEmpresas(empresas.datos).operativas, 'En la plataforma', 'empresa'],
+    ['Activas en esta página', lista.filter((p) => p.estado === 'active').length, `De ${lista.length} personas mostradas`, 'check'],
+    ['Sin acceso en esta página', lista.filter((p) => p.estado === 'revoked').length, `De ${lista.length} personas mostradas`, 'alerta'],
   ]
 
   return (
@@ -118,10 +119,11 @@ export default function Plataforma() {
         <div className="mnt-states" aria-label="Filtrar por rol">
           {GRUPOS.map((g) => (
             <button type="button" key={g.clave || 'todos'} aria-pressed={grupo === g.clave} onClick={() => setGrupo(g.clave)}>
-              {g.color && <i className={g.color} />}{g.titulo}<b>{lista.filter(g.filtro).length}</b>
+              {g.color && <i className={g.color} />}{g.titulo}<b title="Personas de esta página">{lista.filter(g.filtro).length}</b>
             </button>
           ))}
         </div>
+        {total != null && total > lista.length && <p className="pnl-ayuda" role="note">Los números de cada rol cuentan solo las {f.numero(lista.length)} personas de esta página, de {f.numero(total)}.</p>}
 
         {personas.estado === 'cargando' && <Cargando filas={8} />}
         {personas.estado === 'error' && <ErrorCarga onReintentar={personas.recargar} error={personas.error} />}

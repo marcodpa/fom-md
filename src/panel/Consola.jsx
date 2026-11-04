@@ -5,9 +5,9 @@ import { cerrarSesion, esAdminFom, resolverSesion, salirEmpresa, sesionActual } 
 import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
 import { useApariencia } from './useApariencia'
-import { estaLeida } from './modulos/alertas-presentacion'
+import { useAlertasSinLeer } from './datos/useAlertasSinLeer'
 import { Icono } from './Iconos'
-import repo, { alCambiarAvisosGps, alCambiarDatos, CONECTADO } from './datos/repo'
+import { CONECTADO } from './datos/repo'
 import { useAvisosConductor } from './datos/useAvisosConductor'
 import '../styles/apariencia.css'
 import { accesosDe, esPestana, MovilContexto, pestanasDe, tituloDe, useEsMovil } from './comp/movil-navegacion'
@@ -367,7 +367,6 @@ export default function Consola() {
   const navegar = useNavigate()
   const esMovil = useEsMovil()
   const [menuAbierto, setMenuAbierto] = useState(false)
-  const [sinLeer, setSinLeer] = useState(0)
   // Al conductor la campana le cuenta SUS avisos (su unidad, sus órdenes y sus
   // papeles), como la app y como la campana del teléfono; no los de toda la
   // empresa. Los demás roles, sin cambios.
@@ -394,22 +393,11 @@ export default function Consola() {
     setMenuAbierto(false)
   }, [pathname])
 
-  // Contador del globo de alertas: se recalcula al navegar y cuando algo cambia.
-  useEffect(() => {
-    if (!sesion?.perfil || esConductor || esAdminFom(sesion.perfil) && !sesion.perfil.empresaGestion) { setSinLeer(0); return }
-    let vivo = true
-    const leer = () =>
-      repo.alertas.listar({}).then((l) => vivo && setSinLeer(l.filter(n => !estaLeida(n)).length)).catch(() => {})
-    leer()
-    const baja = alCambiarDatos(leer)
-    // Un aviso nuevo de «GPS sin señal» mueve el globo de la campana en cuanto llega.
-    const bajaGps = alCambiarAvisosGps(leer)
-    return () => {
-      vivo = false
-      baja()
-      bajaGps()
-    }
-  }, [pathname, esConductor, sesion?.perfil?.id, sesion?.perfil?.empresaGestion?.id])
+  // Contador del globo de alertas: una sola cuenta (useAlertasSinLeer), la misma de la bandeja y de Resumen.
+  const sinLeer = useAlertasSinLeer({
+    activo: Boolean(sesion?.perfil) && !esConductor && !(esAdminFom(sesion.perfil) && !sesion.perfil.empresaGestion),
+    clave: `${pathname}|${sesion?.perfil?.id}|${sesion?.perfil?.empresaGestion?.id}`,
+  })
 
   // Tras la primera pantalla, el resto de módulos de su rol se baja en reposo.
   const areaPrecarga = sesion?.perfil ? areaDe(sesion.perfil) : null

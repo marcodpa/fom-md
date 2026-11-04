@@ -4,7 +4,7 @@
  * tal cual y dibuja lo mismo. Nada se pide al servidor y nada se inventa: si
  * un dato no llega, el gráfico sale vacío con su frase.
  */
-import { CATEGORIAS, cifrasDe, dineroVE, diasDeVentana, esProducto, grupoOdt, numeroValido, numeroVE, porScore, papelesPersona, tonoScore } from './reportes-datos.js'
+import { CATEGORIAS, cifrasDe, dineroVE, diasDeVentana, esProducto, grupoOdt, numeroValido, numeroVE, porScore, papelesPersona, tonoIndice, tonoScore, BANDAS_INDICE, UMBRALES_SCORE } from './reportes-datos.js'
 
 const DIA = 86400000
 const inicioDia = fecha => { const d = new Date(fecha); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() }
@@ -69,10 +69,10 @@ export function marchaAhora(v) {
   return 'sin_dato'
 }
 
-/** Índice seguro por rangos: < 60, 60–79 y 80–100. Sin índice no entra en ninguno. */
+/** Índice seguro por rangos, de la misma tabla de bandas que el semáforo (85 / 70). Sin índice no entra en ninguno. */
 export function rangoIndice(n) {
-  if (!numeroValido(n) || n < 0 || n > 100) return null
-  return n < 60 ? 'bajo' : n < 80 ? 'medio' : 'alto'
+  const tono = tonoIndice(n)
+  return tono ? { bad: 'bajo', warn: 'medio', ok: 'alto' }[tono] : null
 }
 
 /** Los dos gráficos de la pestaña. `nombre` es nombrarPeriodo(periodo). */
@@ -88,7 +88,7 @@ export function graficosDe(formato, m, nombre) {
     return [
       grafico({
         clave: 'indice', titulo: 'Índice seguro', tipo: 'columnas', ahora: true,
-        partes: [parte('bajo', 'Menos de 60', cuenta('bajo'), 'bad'), parte('medio', '60 a 79', cuenta('medio'), 'warn'), parte('alto', '80 a 100', cuenta('alto'), 'ok')],
+        partes: [parte('bajo', `Menos de ${BANDAS_INDICE.warn}`, cuenta('bajo'), 'bad'), parte('medio', `${BANDAS_INDICE.warn} a ${BANDAS_INDICE.ok - 1}`, cuenta('medio'), 'warn'), parte('alto', `${BANDAS_INDICE.ok} a 100`, cuenta('alto'), 'ok')],
         vacio: conIndice.length ? null : 'Ningún conductor de este alcance tiene índice todavía.',
         pie: `${plural(conIndice.length, 'conductor', 'conductores')} con índice${sinIndice ? ` · ${numeroVE(sinIndice)} sin dato` : ''}`,
       }),
@@ -138,7 +138,7 @@ export function graficosDe(formato, m, nombre) {
         clave: 'top', titulo: 'Conductores con más eventos por 100 km', tipo: 'barrasH',
         partes: top.map(x => parte(x.id, x.nombre || 'Sin nombre', x.eventosPor100, tonoScore(x.eventosPor100), numeroVE(x.eventosPor100, 2))),
         vacio: act.manejo == null ? 'El servidor no entregó km ni eventos de manejo de este período.' : top.length ? null : 'Ningún conductor recorrió km en este período.',
-        pie: 'Los 5 más altos · óptimo menos de 1,5',
+        pie: `Los 5 más altos · óptimo menos de ${numeroVE(UMBRALES_SCORE.ok, 1)}`,
       }),
     ]
   }
@@ -183,11 +183,12 @@ export function chipsDe(formato, m) {
   } else if (formato === 'costos') {
     lista = [chip('sinCosto', act.resueltas - act.conCosto, 'ODT resuelta sin costo', 'ODT resueltas sin costo', 'warn', TABLA)]
   } else if (formato === 'estadistico') {
-    const altos = (act.manejo || []).filter(x => x.eventosPor100 != null && x.eventosPor100 >= 1.5)
-    lista = [chip('altos', altos.length, 'conductor pasa de 1,5', 'conductores pasan de 1,5', altos.some(x => x.eventosPor100 >= 3.5) ? 'bad' : 'warn', TABLA)]
+    const altos = (act.manejo || []).filter(x => x.eventosPor100 != null && x.eventosPor100 >= UMBRALES_SCORE.ok)
+    const tope = numeroVE(UMBRALES_SCORE.ok, 1)
+    lista = [chip('altos', altos.length, `conductor pasa de ${tope}`, `conductores pasan de ${tope}`, altos.some(x => x.eventosPor100 >= UMBRALES_SCORE.warn) ? 'bad' : 'warn', TABLA)]
   } else {
     lista = [
-      chip('sinResolver', act.sinResolver, 'ODT sin resolver', 'ODT sin resolver', 'warn', { ruta: '/panel/mantenimiento' }),
+      chip('sinResolver', act.sinResolverAhora, 'ODT sin resolver ahora', 'ODT sin resolver ahora', 'warn', { ruta: '/panel/mantenimiento' }),
       chip('vencidos', vista.conPapelesVencidos, 'unidad con papeles vencidos', 'unidades con papeles vencidos', 'bad', TABLA),
       chip('sinConductor', vista.sinConductor, 'unidad sin conductor', 'unidades sin conductor', 'warn', { ruta: '/panel/flota' }),
       chip('atencion', m.filasU.filter(f => f.atencion).length, 'unidad pide atención', 'unidades piden atención', 'info', TABLA),
