@@ -32,6 +32,10 @@ ejecutas comandos**: solo lees. Tus herramientas son Read, Glob y Grep.
 4. **Coherencia con el proyecto**: componentes y tokens del tema existentes,
    nombres en español, comentarios que explican el porqué, sin código muerto.
 5. **Alcance**: ¿tocó archivos fuera de los reservados? Si sí, es un hallazgo.
+6. **Una sola regla por dato** (`docs/UNA-SOLA-REGLA.md`): ¿la pantalla calcula
+   por su cuenta algo que ya decide un archivo de `src/panel/datos/` (señal,
+   marcha, vencimientos, conteos, hora, nombre de unidad, placa, rol)? ¿Dos
+   pantallas pueden mostrar distinto el mismo dato? Si sí, es un hallazgo grave.
 
 Cada hallazgo, verificado leyendo el código, no supuesto. Si no estás seguro,
 márcalo como «posible» y di qué habría que comprobar.

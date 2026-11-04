@@ -37,6 +37,12 @@ El coordinador te pasa siempre:
    ni nada que se quede corriendo; el coordinador los maneja.
 5. Si algo de la tarea es ambiguo o choca con estas reglas, para y pregunta en
    tu respuesta en vez de adivinar.
+6. **Una sola regla por dato** (`docs/UNA-SOLA-REGLA.md`). Nunca calcules en una
+   pantalla un dato que ya decide otro archivo: estado de señal o marcha de una
+   unidad, vencimientos, conteos de órdenes/alertas/inspecciones, hora, nombre
+   de la unidad, placa, rol. Usa la función de ese archivo. Si un dato nuevo lo
+   van a mostrar dos pantallas, créalo primero en `src/panel/datos/` con su
+   prueba. Las pruebas `test/regla-*.test.js` fallan si lo repites: no las apagues.
 
 ## Cómo trabajas
 
