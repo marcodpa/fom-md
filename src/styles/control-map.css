@@ -187,8 +187,40 @@
 .leaflet-popup.ruta-popup a.leaflet-popup-close-button{color:#b7c7d9}
 .ruta-item.activo{border-color:#349bfa;background:#173957;box-shadow:0 0 0 1px #349bfa55}
 
-/* Empresa en la que se está, con su logo, sobre el título (misma pieza que la cabecera). En el
-   teléfono no se ve aquí: va en la barra de la consola, con MarcaEmpresa compacta. */
-.control-search .control-empresa{--marca-tam:30px}
-.control-search .control-empresa .marca-empresa-nombre{color:var(--e-texto,#f3f7fc);font-size:13px}
-.control-search .control-empresa .marca-empresa-nota{color:#8bc6ff}
+/* Empresa en la que se está: MarcaEmpresa compacta bajo el título (ver «BARRA FLOTANTE»). En el
+   teléfono no se ve aquí: va en la barra de la consola. */
+
+/* ============================================================
+   BARRA FLOTANTE (768 px y más): UNA pieza de 56 px que flota sobre el mapa, con el mismo
+   lenguaje que la barra del teléfono: ☰ dentro, «Centro de control» (600, 16) con la empresa
+   debajo (logo de 20 + nombre en 12 y «Admin FOM» si aplica) y, a la derecha, el buscador en
+   píldora. Ya no hay ☰ suelto en un círculo ni tarjeta de empresa con el título debajo.
+   Radio 28 = 22 de la píldora de 44 + 6 de aire: las esquinas van paralelas.
+   ============================================================ */
+@media (min-width:768px){
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .pnl-main:has(.control-map) > .pnl-menu-btn{display:none}
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-search{top:14px;left:14px;right:14px;height:56px;min-height:0;box-sizing:border-box;gap:12px;padding:5px;border:1px solid var(--e-borde);border-radius:28px;background:var(--e-sup);box-shadow:var(--e-sombra-flotante,0 6px 18px rgb(0 0 0 / .5));backdrop-filter:var(--apariencia-blur)}
+ .pnl.fom-dark[data-diseno="azul"]:not([data-movil]) .control-map .control-search{background:rgb(20 26 34 / .94)}
+ .control-map .control-menu{width:44px;height:44px;flex:none;display:grid;place-items:center;padding:0;border:0;border-radius:999px;background:transparent;color:var(--e-texto,#f3f5f8);cursor:pointer;transition:background-color .14s ease}
+ .control-map .control-menu:hover{background:var(--e-sup-alta,#1d2530)}
+ .control-map .control-menu[aria-expanded="true"]{background:var(--e-activo-sup,#173553);color:var(--e-activo-texto,#8bc6ff)}
+ .control-map .control-menu:focus-visible{outline:2px solid var(--e-primario,#3d9bf5);outline-offset:-2px}
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-search-heading{display:grid;gap:2px;justify-items:start;align-content:center;flex:1;min-width:0}
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-search h1{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:600 16px/20px var(--e-fuente,inherit);letter-spacing:-.012em;color:var(--e-texto,#f3f5f8)}
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-empresa{max-width:100%}
+ /* La píldora del buscador, un tono más hundido que la barra. */
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-buscador .pnl-buscar input{background:var(--e-sup-baja);border-color:var(--e-borde)}
+ /* Lo de abajo sube con la barra: chips a 10 de su pie y la hoja a 12 de los chips. */
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-filters{top:80px;left:14px}
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-panel{left:14px;top:132px;max-height:calc(100% - 186px)}
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-unit:not(.con-ruta){height:calc(100% - 186px)}
+}
+/* Hasta 900 px «Unidades» queda en icono: el buscador conserva su texto de ayuda entero. */
+@media (min-width:768px) and (max-width:900px){
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-lista-btn{width:36px;padding:0}
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-lista-btn span{display:none}
+ .pnl.fom-dark[data-diseno]:not([data-movil]) .control-map .control-buscador .pnl-buscar input{padding-right:52px}
+}
+/* En el teléfono el ☰ ya está en la barra de la consola. */
+.pnl.fom-dark[data-movil] .control-map .control-menu{display:none}
+@media (prefers-reduced-motion:reduce){.control-map .control-menu{transition:none}}

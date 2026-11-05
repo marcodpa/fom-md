@@ -12,13 +12,14 @@ import './marca-empresa.css'
  * - Con logo (almacén del servidor o Cloudinary): se ve el logo.
  * - Sin logo: monograma con las iniciales, del mismo tamaño.
  * - FOM Operations y las pantallas globales de administración: el logo de FOM.
- * - Administrador FOM dentro de otra empresa: además dice que está gestionando.
+ * - Administrador FOM dentro de otra empresa: aro azul de 1 px en el logo y la etiqueta corta
+ *   «Admin FOM». La frase entera («Gestionando como administrador FOM») no se ve: la lee el
+ *   lector de pantalla y va en el `title`. Igual en el teléfono y en la computadora.
  *
  * `global`: la pantalla es de administración global (sin empresa elegida).
- * `nota`: mostrar la línea «Gestionando como administrador FOM» si aplica.
- * `compacta`: una sola línea chica (logo de 18–20 px + nombre), para ir bajo un título, como en la
- *   barra de arriba del teléfono. La nota no se ve, la lee el lector de pantalla y va en el
- *   `title`; a la vista lo dicen el aro azul de 1 px del logo y la etiqueta «Admin FOM».
+ * `nota`: decir que se está gestionando, si aplica.
+ * `compacta`: una sola línea chica (logo de 18–20 px + nombre en 12 px), para ir bajo un título,
+ *   como en la barra de arriba del teléfono y la de Centro de control.
  */
 export default function MarcaEmpresa({ global = false, nota = true, compacta = false, className = '' }) {
   const sesion = useSesion()
@@ -26,7 +27,7 @@ export default function MarcaEmpresa({ global = false, nota = true, compacta = f
   const monograma = <span className="marca-empresa-monograma" aria-hidden="true">{marca.iniciales}</span>
   return (
     <span className={`marca-empresa${marca.nota ? ' gestionando' : ''}${compacta ? ' compacta' : ''} ${className}`.trim()}
-      title={compacta && marca.nota ? `${marca.nombre} · ${marca.nota}` : undefined}>
+      title={nota && marca.nota ? `${marca.nombre} · ${marca.nota}` : undefined}>
       <span className="marca-empresa-logo">
         {marca.esFom
           ? <LogoFom simbolo decorativo className="logo-empresa logo-fom" />
@@ -37,7 +38,7 @@ export default function MarcaEmpresa({ global = false, nota = true, compacta = f
         {nota && marca.nota && <small className="marca-empresa-nota">{marca.nota}</small>}
       </span>
       {/* A la vista, corto: el texto entero ya lo lee el lector de pantalla en la nota. */}
-      {compacta && marca.nota && <em className="marca-empresa-etiqueta" aria-hidden="true">Admin FOM</em>}
+      {nota && marca.nota && <em className="marca-empresa-etiqueta" aria-hidden="true">Admin FOM</em>}
     </span>
   )
 }

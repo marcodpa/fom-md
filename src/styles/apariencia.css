@@ -252,3 +252,27 @@
 .apariencia-aviso:empty { margin: 0; }
 @media (max-width: 600px) { .apariencia-opciones { grid-template-columns: minmax(0, 1fr); } }
 @media print { .apariencia-opciones, .pnl-topbar-contexto { display: none; } }
+
+/* ============================================================
+   BARRA DE ARRIBA EN LA COMPUTADORA (768 px y más): el mismo lenguaje que la del teléfono.
+   Cuando el menú es hoja (bajo 900 px) el ☰ va DENTRO de la pieza de la empresa, no en un
+   círculo suelto a su lado. La empresa: logo con aro azul y «Admin FOM» si el administrador
+   FOM está dentro de otra (MarcaEmpresa). Centro de control tiene su barra flotante
+   (control-map.css, bloque «BARRA FLOTANTE»).
+   ============================================================ */
+.pnl-topbar-menu { display: none; }
+@media (min-width: 768px) and (max-width: 900px) {
+  .pnl.fom-dark[data-diseno]:not([data-movil]):not([data-screen="/mapa"]) .pnl-menu-btn { display: none; }
+  .pnl.fom-dark[data-diseno]:not([data-movil]) .pnl-topbar { margin: 14px 16px 0; }
+  .pnl.fom-dark[data-diseno]:not([data-movil]) .pnl-topbar-contexto { min-height: 52px; padding: 4px 16px 4px 4px; gap: 12px; justify-content: flex-start; }
+  .pnl.fom-dark[data-diseno]:not([data-movil]) .pnl-topbar-contexto .pnl-contexto { flex: 1; min-width: 0; }
+  .pnl.fom-dark[data-diseno]:not([data-movil]) .pnl-topbar-menu {
+    width: 44px; height: 44px; flex: none; display: grid; place-items: center; padding: 0; border: 0;
+    border-radius: 999px; background: transparent; color: var(--e-texto); cursor: pointer;
+    transition: background-color var(--e-d-rapido, .14s) var(--e-curva, ease);
+  }
+  .pnl.fom-dark[data-diseno]:not([data-movil]) .pnl-topbar-menu:hover { background: var(--e-sup-alta); }
+  .pnl.fom-dark[data-diseno]:not([data-movil]) .pnl-topbar-menu[aria-expanded="true"] { background: var(--e-activo-sup); color: var(--e-activo-texto); }
+  .pnl.fom-dark[data-diseno]:not([data-movil]) .pnl-topbar-menu:focus-visible { outline: 2px solid var(--e-primario); outline-offset: -2px; }
+}
+@media (prefers-reduced-motion: reduce) { .pnl-topbar-menu { transition: none !important; } }

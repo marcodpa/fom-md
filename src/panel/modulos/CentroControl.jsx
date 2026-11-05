@@ -17,6 +17,7 @@ import { BloqueManejoBrusco, useManejoBrusco } from '../comp/ManejoBrusco'
 import * as f from '../datos/formato'
 import { Icono } from '../Iconos'
 import MarcaEmpresa from '../comp/MarcaEmpresa'
+import { useMovil } from '../comp/movil-navegacion'
 import '../../styles/control-map.css'
 
 /**
@@ -79,6 +80,8 @@ function equiposGps() {
 }
 
 export default function CentroControl() {
+  // El ☰ va dentro de la barra flotante (abre el menú de Consola).
+  const movil = useMovil()
   const [q, setQ] = useState('')
   const [estado, setEstado] = useState('')
   const [areaId, setAreaId] = useState('')
@@ -283,13 +286,20 @@ export default function CentroControl() {
           eventoActivo={manejo.elegido} alElegirEvento={manejo.elegir} encuadrarEventos={false}
           alto="100%" ficha={false} leyenda={false} espacioFicha herramientas />
       </div>
-      {/* Arriba, lo justo: el buscador en píldora con la lista dentro y una fila de chips que es a
-          la vez filtro, cifra y leyenda del mapa. En el teléfono la empresa va en la barra de la
-          consola (Consola.jsx), no en una tarjeta aparte. */}
+      {/* Arriba, lo justo: UNA barra que flota sobre el mapa (☰, el nombre de la pantalla con la
+          empresa debajo y el buscador en píldora con la lista dentro) y una fila de chips que es a
+          la vez filtro, cifra y leyenda del mapa. En el teléfono el ☰, el título y la empresa van
+          en la barra de la consola (Consola.jsx) y aquí solo queda el buscador. */}
       <div className="control-search">
+        {movil?.abrirMenu && (
+          <button type="button" className="control-menu" aria-label="Abrir menú" aria-expanded={!!movil.menuAbierto}
+            aria-controls="panel-navigation" onClick={movil.abrirMenu}>
+            <Icono nombre="menu" tam={22} />
+          </button>
+        )}
         <div className="control-search-heading">
-          <MarcaEmpresa className="control-empresa" />
           <h1>Centro de control</h1>
+          <MarcaEmpresa compacta className="control-empresa" />
         </div>
         <div className="control-buscador">
           <Buscador valor={q} alCambiar={setQ} placeholder="Placa, alias o conductor…" />

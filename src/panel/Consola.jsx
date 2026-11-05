@@ -482,7 +482,10 @@ export default function Consola() {
 
       <main className="pnl-main" id="contenido" ref={principal}>
         <div className="pnl-topbar">
-          <div className="pnl-topbar-contexto"><span className="pnl-contexto"><MarcaEmpresa global={esAdminFom(perfil) && pathname.includes('/admin/')} /></span><span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span></div>
+          <div className="pnl-topbar-contexto">
+            {/* ☰ dentro de la misma pieza (solo se ve cuando el menú es hoja, bajo 900 px). */}
+            <button type="button" className="pnl-topbar-menu" aria-label="Abrir menú" aria-expanded={menuAbierto} aria-controls="panel-navigation" onClick={() => setMenuAbierto(true)}><Icono nombre="menu" tam={22} /></button>
+            <span className="pnl-contexto"><MarcaEmpresa global={esAdminFom(perfil) && pathname.includes('/admin/')} /></span><span className="pnl-fuente">{CONECTADO ? 'Operación conectada' : 'Datos de demostración'}</span></div>
           <div className="pnl-topbar-derecha">
             <Link to="/panel/alertas" className="pnl-notificaciones" aria-label={etiquetaCampana}>
               <Icono nombre="campana" tam={21} />
