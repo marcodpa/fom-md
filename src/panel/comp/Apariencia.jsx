@@ -1,12 +1,12 @@
 import { useSesion } from '../useSesion'
 import { useApariencia } from '../useApariencia'
-import { DISENOS } from '../apariencia-store'
+import { DISENOS, FONDOS } from '../apariencia-store'
 import { Icono } from '../Iconos'
 import { Tarjeta } from './ui'
 
 export default function Apariencia({ titulo = 'Apariencia de la web' }) {
   const sesion = useSesion()
-  const { diseno, cambiar, aviso } = useApariencia(sesion?.perfil)
+  const { diseno, cambiar, fondo, cambiarFondo, aviso } = useApariencia(sesion?.perfil)
   return <Tarjeta titulo={titulo}>
     <p className="apariencia-ayuda">Escoge cómo quieres ver FOM. El cambio se aplica a todos los apartados de tu plataforma.</p>
     <fieldset className="apariencia-opciones">
@@ -18,7 +18,24 @@ export default function Apariencia({ titulo = 'Apariencia de la web' }) {
         {diseno === d.id && <span className="apariencia-elegida"><Icono nombre="check" tam={17} />Seleccionado</span>}
       </label>)}
     </fieldset>
-    <p className="apariencia-ayuda apariencia-privada">Tu elección se guarda por cuenta en este navegador. No cambia el diseño de otras personas.</p>
+    <fieldset className="apariencia-fondos">
+      <legend className="apariencia-legend">Fondo</legend>
+      <p className="apariencia-ayuda apariencia-fondos-ayuda">Una imagen suave detrás de todo el panel. En el Centro de control se ve solo el mapa.</p>
+      <div className="apariencia-fondos-lista">
+        {FONDOS.map(f => <label key={f.id} className={`apariencia-fondo${fondo === f.id ? ' elegida' : ''}`}>
+          <span className="apariencia-fondo-mini" data-fondo={f.id} data-tono={f.tono || 'ninguno'} aria-hidden="true">
+            {f.miniatura && <img src={f.miniatura} alt="" loading="lazy" decoding="async" width="360" height="203" />}
+            <i /><i /><i />
+          </span>
+          <span className="apariencia-fondo-pie">
+            <input type="radio" name="apariencia-fondo" value={f.id} checked={fondo === f.id} onChange={() => cambiarFondo(f.id)} />
+            <span className="apariencia-fondo-texto"><strong>{f.nombre}</strong><span>{f.descripcion}</span></span>
+          </span>
+          {fondo === f.id && <span className="apariencia-fondo-check"><Icono nombre="check" tam={15} /><span className="sr-only">Seleccionado</span></span>}
+        </label>)}
+      </div>
+    </fieldset>
+    <p className="apariencia-ayuda apariencia-privada">Tu elección se guarda por cuenta en este navegador. No cambia el diseño ni el fondo de otras personas.</p>
     <p className="apariencia-aviso" role="status" aria-live="polite">{aviso}</p>
   </Tarjeta>
 }

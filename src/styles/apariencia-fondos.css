@@ -1,0 +1,334 @@
+/* ============================================================
+   FONDOS DEL PANEL (docs/FONDOS.md)
+   ------------------------------------------------------------
+   Consola.jsx pone data-fondo (el id) y data-fondo-tono («claro» u
+   «oscuro») en .pnl y pinta <FondoPanel> (.pnl-fondo): una capa fija
+   detrás de todo. Sin fondo elegido no hay atributos y nada de esto aplica.
+   El Centro de control (/mapa) queda fuera: ahí manda el mapa.
+   Se importa al final de Consola.jsx: manda sobre el diseño (apariencia.css)
+   y sobre el teléfono (movil-app.css).
+   ============================================================ */
+
+/* ---------- La capa ---------- */
+.pnl.fom-dark[data-fondo-tono]:not([data-screen="/mapa"]) {
+  isolation: isolate;
+  background: transparent;
+}
+.pnl-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+.pnl-fondo::before,
+.pnl-fondo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+/* La foto entra fundida cuando ya bajó (FondoPanel la pide en un rato libre). */
+.pnl-fondo::after {
+  background: var(--fondo-foto, none) center / cover no-repeat;
+  opacity: 0;
+  transition: opacity 520ms var(--e-curva, ease);
+}
+.pnl-fondo[data-lista]::after { opacity: 1; }
+
+/* Debajo de la foto, un degradado del mismo tono: es lo primero que se ve. */
+.pnl-fondo[data-fondo="blanco-carros"]::before {
+  background:
+    radial-gradient(ellipse 60% 55% at 88% 0%, rgb(52 155 250 / .12), transparent 70%),
+    linear-gradient(180deg, #f6f8fb 0%, #f1f4f8 58%, #e8ecf1 100%);
+}
+.pnl-fondo[data-fondo="perla"]::before {
+  background:
+    radial-gradient(ellipse 55% 50% at 90% -5%, rgb(52 155 250 / .13), transparent 70%),
+    radial-gradient(ellipse 60% 60% at -5% 105%, #dfe5ec, transparent 70%),
+    linear-gradient(160deg, #f9fafc 0%, #eef1f5 55%, #e7ebf0 100%);
+}
+.pnl-fondo:is([data-fondo="patio-noche"], [data-fondo="carretera"])::before {
+  background: radial-gradient(ellipse at 70% 0%, #1b2430, transparent 65%), #0b0f15;
+}
+/* Sobre las fotos oscuras, un velo: la letra que va directa encima (títulos) sigue leyéndose. */
+.pnl-fondo:is([data-fondo="patio-noche"], [data-fondo="carretera"])::after {
+  background:
+    linear-gradient(180deg, rgb(10 13 18 / .30), rgb(10 13 18 / .55)),
+    var(--fondo-foto, none) center / cover no-repeat;
+}
+.pnl-fondo[data-fondo="noche-azul"]::before {
+  background:
+    radial-gradient(ellipse 55% 50% at 85% -8%, rgb(52 155 250 / .30), transparent 70%),
+    radial-gradient(ellipse 50% 45% at -5% 108%, rgb(61 155 245 / .16), transparent 70%),
+    linear-gradient(160deg, #0d1626 0%, #0a0d12 58%, #0c1626 100%);
+}
+
+/* ---------- Vidrio claro (tono «claro») ---------- */
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) {
+  --e-bg: #eef1f5;
+  --e-sup: rgb(255 255 255 / .74);
+  --e-sup-alta: rgb(255 255 255 / .92);
+  --e-sup-baja: rgb(244 246 249 / .72);
+  --e-borde: rgb(15 20 27 / .10);
+  --e-borde-fuerte: rgb(15 20 27 / .20);
+  --e-texto: #0f141b;
+  --e-texto-2: #3d4654;
+  --e-texto-3: #555f6d;
+  --e-texto-inv: #ffffff;
+  /* El azul FOM de marca (#3D9BF5) no llega a AA sobre blanco: en claro, uno más hondo. */
+  --e-primario: #1769c2;
+  --e-sobre-primario: #ffffff;
+  --e-exito: #12784a;
+  --e-exito-sup: #e3f5ec;
+  --e-aviso: #8a5a00;
+  --e-aviso-sup: #fdf3d6;
+  --e-peligro: #c42b33;
+  --e-peligro-sup: #fdebec;
+  --e-info: #1769c2;
+  --e-info-sup: #e5f1fd;
+  --e-activo-sup: #dcebfc;
+  --e-activo-texto: #0d4d8f;
+  --e-activo-borde: #a8cdf3;
+  --e-sombra-card: 0 1px 2px rgb(16 24 40 / .05), 0 10px 30px rgb(16 24 40 / .07);
+  --e-sombra-flotante: 0 16px 48px rgb(16 24 40 / .16);
+  --apariencia-sombra: 0 1px 2px rgb(16 24 40 / .05), 0 10px 30px rgb(16 24 40 / .07);
+  --apariencia-blur: blur(20px) saturate(160%);
+  /* Las mismas para las hojas del teléfono, que leen las --app-*. */
+  --app-fondo: #eef1f5;
+  --app-sup: rgb(255 255 255 / .9);
+  --app-sup-alta: #ffffff;
+  --app-sup-baja: rgb(244 246 249 / .9);
+  --app-texto: #0f141b;
+  --app-texto-2: #3d4654;
+  --app-texto-3: #555f6d;
+  --app-texto-inv: #ffffff;
+  --app-borde: rgb(15 20 27 / .10);
+  --app-borde-fuerte: rgb(15 20 27 / .20);
+  --app-primario: #1769c2;
+  --app-sobre-primario: #ffffff;
+  --app-activo-sup: #dcebfc;
+  --app-activo-texto: #0d4d8f;
+  --app-activo-borde: #a8cdf3;
+  --app-exito: #12784a;
+  --app-sobre-exito: #ffffff;
+  --app-exito-sup: #e3f5ec;
+  --app-aviso: #8a5a00;
+  --app-sobre-aviso: #ffffff;
+  --app-aviso-sup: #fdf3d6;
+  --app-peligro: #c42b33;
+  --app-sobre-peligro: #ffffff;
+  --app-peligro-sup: #fdebec;
+  --app-info: #1769c2;
+  --app-sobre-info: #ffffff;
+  --app-info-sup: #e5f1fd;
+  --app-acento: #6b3fe0;
+  --app-sobre-acento: #ffffff;
+  --app-acento-sup: #f0eaff;
+  --app-sombra-tarjeta: 0 1px 2px rgb(16 24 40 / .05), 0 8px 24px rgb(16 24 40 / .07);
+  --app-sombra-flotante: 0 8px 24px rgb(16 24 40 / .14);
+  --app-sombra-hoja: 0 -8px 24px rgb(16 24 40 / .12);
+  --app-avatar-fondo: #dcebfc;
+  --app-avatar-aro: #a8cdf3;
+  --app-avatar-texto: #0d4d8f;
+  --app-hoja-velo: #0f141b;
+  --app-fondo-pantalla: none;
+  color-scheme: light;
+}
+
+/* ---------- Vidrio azul noche (tono «oscuro») ---------- */
+.pnl.fom-dark[data-diseno][data-fondo-tono="oscuro"]:not([data-screen="/mapa"]) {
+  --e-bg: #0a0d12;
+  --e-sup: rgb(20 26 34 / .80);
+  --e-sup-alta: rgb(29 37 48 / .90);
+  --e-sup-baja: rgb(15 20 27 / .70);
+  --e-borde: rgb(255 255 255 / .10);
+  --e-borde-fuerte: rgb(255 255 255 / .20);
+  --e-texto: #f3f5f8;
+  --e-texto-2: #c3cad4;
+  --e-texto-3: #9aa4b2;
+  --apariencia-sombra: 0 8px 28px rgb(0 0 0 / .28);
+  --apariencia-blur: blur(18px) saturate(130%);
+  --app-fondo: #0a0d12;
+  --app-sup: rgb(20 26 34 / .9);
+  --app-sup-alta: rgb(29 37 48 / .94);
+  --app-sup-baja: rgb(15 20 27 / .86);
+  --app-texto: #f3f5f8;
+  --app-texto-2: #c3cad4;
+  --app-texto-3: #9aa4b2;
+  --app-borde: rgb(255 255 255 / .10);
+  --app-borde-fuerte: rgb(255 255 255 / .20);
+  --app-fondo-pantalla: none;
+  color-scheme: dark;
+}
+
+/* ---------- Lo que pintaba un fondo opaco y ahora deja ver el fondo ---------- */
+.pnl.fom-dark[data-fondo-tono]:not([data-screen="/mapa"]) :is(.pnl-cab, .mv-dock-zona, .mvu) { background: transparent; }
+.pnl.fom-dark[data-fondo-tono]:not([data-screen="/mapa"]) :is(.pnl-side, .pnl-topbar-contexto, .pnl-topbar-perfil, .pnl-notificaciones) {
+  background: var(--e-sup);
+  box-shadow: var(--apariencia-sombra);
+  -webkit-backdrop-filter: var(--apariencia-blur);
+  backdrop-filter: var(--apariencia-blur);
+}
+
+/* ---------- Ajustes del vidrio claro sobre colores fijos de los diseños ---------- */
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) :is(.pnl-modal, .pnl-ficha.flotante) { background: #ffffff; }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) :is(.pnl-tabla tbody tr:hover, .pnl-tabla tbody tr.seleccionada) { background: rgb(23 105 194 / .07); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) :is(.pnl-nav-item.activo, .pnl-tab.activo, .pnl-chip.activo) { background: var(--e-activo-sup); color: var(--e-activo-texto); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) :is(.mnt-nav, .insp-nav, .rp-nav) :is(button[aria-selected="true"], button[aria-current]) { color: var(--e-activo-texto); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .apariencia-elegida { color: var(--e-primario); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) :is(button, a, input, select, textarea, summary):focus-visible { outline-color: var(--e-primario); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .apariencia-opcion:focus-within { outline-color: var(--e-primario); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .mv-barra:not(.flotante) { background: rgb(246 248 251 / .84); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) ::selection { background: #1769c2; color: #ffffff; }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .pnl-metrica-icono { background: var(--e-activo-sup); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .pnl-flota-barra { background: #c9d0d9; }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .pnl-fila.aviso { background: var(--e-info-sup); }
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .mp-avatar { border-color: #ffffff; }
+/* El logo de la barra: «FOM» en tinta en vez de blanco. La imagen sale de su caja
+   (object-position) y la misma caja pinta la versión en tinta, sin tocar LogoFom. */
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .fom-logo:not(.fom-logo-simbolo) {
+  object-position: -99999px 0;
+  background: url('../assets/fondos/fom-logo-tinta.svg') left center / contain no-repeat;
+}
+/* Los mapas dentro de las tarjetas siguen oscuros, con sus controles oscuros: el mapa manda. */
+.pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) .pnl-mapa {
+  --e-sup: rgb(20 26 34 / .9);
+  --e-sup-alta: #1d2530;
+  --e-sup-baja: #0f141b;
+  --e-borde: #262e39;
+  --e-borde-fuerte: #39424f;
+  --e-texto: #f3f5f8;
+  --e-texto-2: #abb3bf;
+  --e-texto-3: #8c97a7;
+  --e-primario: #3d9bf5;
+  --e-sobre-primario: #08121c;
+  --e-activo-sup: #173553;
+  --e-activo-texto: #8bc6ff;
+  --e-activo-borde: #2d5d88;
+  --apariencia-sombra: 0 6px 18px rgb(0 0 0 / .3);
+  --app-sup: #141a22;
+  --app-sup-alta: #1d2530;
+  --app-sup-baja: #0f141b;
+  --app-texto: #f3f5f8;
+  --app-texto-2: #abb3bf;
+  --app-texto-3: #8c97a7;
+  --app-borde: #262e39;
+  --app-borde-fuerte: #39424f;
+  --app-primario: #3d9bf5;
+  --app-sobre-primario: #08121c;
+  --app-activo-sup: #173553;
+  --app-activo-texto: #8bc6ff;
+  --app-activo-borde: #2d5d88;
+  color-scheme: dark;
+  color: var(--e-texto);
+}
+
+/* ---------- Teléfono: sin desenfoque en las tarjetas, para que el scroll vaya fluido ----------
+   Las superficies suben de opacidad en lugar del blur. La barra de arriba conserva el suyo. */
+@media (max-width: 767px) {
+  .pnl.fom-dark[data-diseno][data-fondo-tono]:not([data-screen="/mapa"]) { --apariencia-blur: none; }
+  .pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) {
+    --e-sup: rgb(255 255 255 / .9);
+    --e-sup-baja: rgb(244 246 249 / .9);
+  }
+  .pnl.fom-dark[data-diseno][data-fondo-tono="oscuro"]:not([data-screen="/mapa"]) {
+    --e-sup: rgb(20 26 34 / .9);
+    --e-sup-baja: rgb(15 20 27 / .86);
+  }
+}
+
+/* ---------- Reducir transparencia: superficies opacas, sin vidrio ---------- */
+@media (prefers-reduced-transparency: reduce) {
+  .pnl.fom-dark[data-diseno][data-fondo-tono="claro"]:not([data-screen="/mapa"]) {
+    --e-sup: #ffffff; --e-sup-alta: #ffffff; --e-sup-baja: #f1f4f7;
+    --app-sup: #ffffff; --app-sup-baja: #f1f4f7;
+    --apariencia-blur: none;
+  }
+  .pnl.fom-dark[data-diseno][data-fondo-tono="oscuro"]:not([data-screen="/mapa"]) {
+    --e-sup: #141a22; --e-sup-alta: #1d2530; --e-sup-baja: #0f141b;
+    --app-sup: #141a22; --app-sup-baja: #0f141b;
+    --apariencia-blur: none;
+  }
+}
+
+/* ---------- Reducir movimiento: la foto aparece sin fundido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .pnl-fondo::after { transition: none; }
+}
+@media print {
+  .pnl-fondo { display: none; }
+}
+
+/* ============================================================
+   La sección «Fondo» en Configuración › Apariencia
+   ============================================================ */
+.apariencia-fondos { padding: 0; border: 0; margin: 8px 0 16px; min-width: 0; }
+.apariencia-fondos-ayuda { margin-bottom: 14px; }
+.apariencia-fondos-lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.apariencia-fondo {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 8px 8px 12px;
+  border: 1px solid var(--e-borde-fuerte);
+  border-radius: 22px;
+  cursor: pointer;
+  min-width: 0;
+  transition: border-color var(--e-d-rapido, .14s) var(--e-curva, ease), background-color var(--e-d-rapido, .14s) var(--e-curva, ease);
+}
+.apariencia-fondo:hover { background: var(--e-sup-alta); }
+.apariencia-fondo.elegida { border-color: var(--e-primario); box-shadow: inset 0 0 0 1px var(--e-primario); }
+.apariencia-fondo:focus-within { outline: 2px solid #75b9fa; outline-offset: 3px; }
+.pnl[data-fondo-tono="claro"] .apariencia-fondo:focus-within { outline-color: var(--e-primario); }
+.apariencia-fondo-mini {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0a0d12;
+  isolation: isolate;
+}
+.apariencia-fondo-mini img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
+/* Tres piezas de muestra encima: el material que tendrán las tarjetas con ese fondo. */
+.apariencia-fondo-mini i { position: absolute; display: block; border-radius: 7px; background: #141a22; }
+.apariencia-fondo-mini i:nth-of-type(1) { left: 7%; top: 12%; bottom: 12%; width: 20%; }
+.apariencia-fondo-mini i:nth-of-type(2) { left: 32%; right: 7%; top: 12%; height: 30%; }
+.apariencia-fondo-mini i:nth-of-type(3) { left: 32%; right: 30%; top: 50%; bottom: 12%; }
+.apariencia-fondo-mini[data-tono="claro"] i { background: rgb(255 255 255 / .78); box-shadow: 0 2px 8px rgb(16 24 40 / .08); }
+.apariencia-fondo-mini[data-tono="oscuro"] i { background: rgb(20 26 34 / .8); box-shadow: 0 2px 8px rgb(0 0 0 / .25); }
+.apariencia-fondo-mini[data-fondo="perla"] { background: radial-gradient(ellipse 60% 60% at 90% -5%, rgb(52 155 250 / .16), transparent 70%), linear-gradient(160deg, #f9fafc, #e7ebf0); }
+.apariencia-fondo-mini[data-fondo="noche-azul"] { background: radial-gradient(ellipse 60% 60% at 85% -8%, rgb(52 155 250 / .38), transparent 70%), linear-gradient(160deg, #0d1626, #0a0d12 58%, #0c1626); }
+.apariencia-fondo-mini[data-fondo="ninguno"] { background: #0a0d12; outline: 1px solid var(--e-borde); outline-offset: -1px; }
+.apariencia-fondo-mini[data-fondo="ninguno"] i { background: #1d2530; }
+.apariencia-fondo-pie { display: flex; align-items: flex-start; gap: 10px; padding: 0 6px; min-width: 0; }
+.apariencia-fondo-pie input { accent-color: var(--e-primario); width: 18px; height: 18px; margin: 2px 0 0; flex: none; cursor: pointer; }
+.apariencia-fondo-texto { display: grid; gap: 4px; min-width: 0; }
+.apariencia-fondo-texto strong { font-size: 14px; }
+.apariencia-fondo-texto > span { color: var(--e-texto-2); font-size: 12px; line-height: 1.45; }
+.apariencia-fondo-check {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--e-primario);
+  color: var(--e-sobre-primario);
+  box-shadow: 0 2px 8px rgb(0 0 0 / .25);
+}
+.apariencia-fondo .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 900px) { .apariencia-fondos-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) {
+  .apariencia-fondos-lista { gap: 10px; }
+  .apariencia-fondo { padding: 6px 6px 10px; border-radius: 18px; }
+  .apariencia-fondo-mini { border-radius: 13px; }
+  .apariencia-fondo-texto > span { display: none; }
+  .apariencia-fondo-pie { padding: 0 2px; gap: 8px; }
+  .apariencia-fondo-check { top: 12px; right: 12px; width: 22px; height: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .apariencia-fondo { transition: none; } }
+@media print { .apariencia-fondos { display: none; } }

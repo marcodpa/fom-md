@@ -6,6 +6,8 @@ import { areaDe, esGestor } from './roles'
 import { useSesion } from './useSesion'
 import MarcaEmpresa from './comp/MarcaEmpresa'
 import { useApariencia } from './useApariencia'
+import { fondoPorId } from './apariencia-store'
+import FondoPanel from './comp/FondoPanel'
 import { useAlertasSinLeer } from './datos/useAlertasSinLeer'
 import { Icono } from './Iconos'
 import { CONECTADO } from './datos/repo'
@@ -23,6 +25,8 @@ import './estilos-consola'
 import '../styles/movil-app.css'
 // El movimiento de toda la consola (T-184), después de todo lo demás.
 import '../styles/movimiento.css'
+// El fondo elegido y su vidrio (docs/FONDOS.md): al final, para mandar sobre diseño y teléfono.
+import '../styles/apariencia-fondos.css'
 
 // Cada módulo se baja cuando se entra a su pantalla (o un poco antes, en los
 // ratos libres): el primer pintado de la consola ya no carga Reportes, Admin,
@@ -363,7 +367,8 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
 
 export default function Consola() {
   const sesion = useSesion()
-  const { diseno } = useApariencia(sesion?.perfil)
+  const { diseno, fondo } = useApariencia(sesion?.perfil)
+  const tonoFondo = fondoPorId(fondo).tono
   const { pathname } = useLocation()
   const navegar = useNavigate()
   const esMovil = useEsMovil()
@@ -464,7 +469,7 @@ export default function Consola() {
   return (
     <UNSAFE_NavigationContext.Provider value={navegacionSuave}>
     <MovilContexto.Provider value={movil}>
-    <div className="pnl fom-dark" data-diseno={diseno} data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'} data-movil={esMovil ? (enPestana ? 'pestana' : 'pila') : undefined}>
+    <div className="pnl fom-dark" data-diseno={diseno} data-fondo={tonoFondo ? fondo : undefined} data-fondo-tono={tonoFondo || undefined} data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'} data-movil={esMovil ? (enPestana ? 'pestana' : 'pila') : undefined}>
       <Lateral
         perfil={perfil}
         abierto={menuAbierto}
@@ -567,6 +572,8 @@ export default function Consola() {
         </Suspense>
       </main>
       {esMovil && enPestana && <MovilBarra pestanas={pestanas} />}
+      {/* El fondo elegido, detrás de todo; en el Centro de control manda el mapa. */}
+      {tonoFondo && !sobreMapa && <FondoPanel fondo={fondo} />}
     </div>
     </MovilContexto.Provider>
     </UNSAFE_NavigationContext.Provider>
