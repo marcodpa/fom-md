@@ -179,6 +179,8 @@ label.gp-det b { font-size: 14px; font-weight: 600; }
 .gp-diag.ok { border-color: #1f4a31; }
 .gp-diag-ico { width: 56px; height: 56px; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex: none; background: var(--e-peligro-sup, #2a1416); color: var(--e-peligro, #ff6369); }
 .gp-diag.ok .gp-diag-ico { background: var(--e-exito-sup, #13281d); color: var(--e-exito, #3dd68c); }
+.gp-diag.warn { border-color: #4a3a1a; }
+.gp-diag.warn .gp-diag-ico { background: var(--e-aviso-sup, #2a2212); color: var(--e-aviso, #f5c242); }
 .gp-diag.mute .gp-diag-ico { background: var(--e-sup-alta, #1d2530); color: var(--e-texto-2, #abb3bf); }
 .gp-diag-ico .gp-ico { width: 24px; height: 24px; }
 .gp-diag > div { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }

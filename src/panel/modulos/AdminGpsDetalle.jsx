@@ -132,7 +132,8 @@ function Diagnostico({ g, unidad, tele, posiciones, ultimaPos, capacidades, ahor
   const tramas = unirTramasConPosiciones(mensajes.slice(0, 8), posiciones)
   const conHuella = tramas.some((m) => m.huella)
   const linea = g.linea ? `${g.linea}${g.carrier ? ` (${g.carrier})` : ''}` : null
-  const tonoCard = senal.clave === 'con' ? 'ok' : senal.clave === 'sin' ? 'bad' : 'mute'
+  // Con mensajes pero sin posición publicada, la tarjeta va en ámbar, no en verde (misma regla que el mapa).
+  const tonoCard = senal.clave === 'con' ? senal.tono : senal.clave === 'sin' ? 'bad' : 'mute'
   const colorCalidad = calidad.tono === 'ok' ? 'var(--e-exito, #3dd68c)' : calidad.tono === 'warn' ? 'var(--e-aviso, #f5c242)' : 'var(--e-peligro, #ff6369)'
 
   return (
@@ -147,7 +148,10 @@ function Diagnostico({ g, unidad, tele, posiciones, ultimaPos, capacidades, ahor
                 <h2 className="gp-st">{senal.texto}</h2>
                 <Pastilla tono={est.tono}>{est.texto}</Pastilla>
               </div>
-              {senal.clave === 'con' && (
+              {senal.clave === 'con' && senal.tono === 'warn' && (
+                <span className="gp-lbl">Último mensaje {cuandoFue(g.ultimaConexion, ahora)}. El equipo está conectado, pero no hay una posición publicada para la unidad, por eso no sale en el mapa.</span>
+              )}
+              {senal.clave === 'con' && senal.tono !== 'warn' && (
                 <span className="gp-lbl">Última trama {cuandoFue(g.ultimaConexion, ahora)}. Reporta con normalidad: para FOM hay señal si llegó algo del mismo IMEI en los últimos 5 minutos.</span>
               )}
               {senal.clave !== 'con' && (
