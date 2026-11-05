@@ -1,0 +1,163 @@
+/* ============================================================
+   VIDRIO DE LAS TARJETAS (docs/FONDOS.md › Vidrio)
+   ------------------------------------------------------------
+   Configuración › Apariencia › Vidrio: Sólido, Suave, Medio o Intenso, como
+   la transparencia de iOS. Cambia SOLO cuánto se ve el fondo a través de las
+   tarjetas, la barra lateral, la barra de arriba y las hojas (transparencia,
+   desenfoque, un poco de saturación y, con más vidrio, un borde fino claro
+   arriba). Los colores son los del diseño: aquí solo cambia la opacidad de
+   sus superficies (--e-sup*, --app-sup*), nunca su color.
+
+   Consola.jsx pone data-vidrio en .pnl SOLO si la persona eligió uno (o si el
+   sistema pide «reducir transparencia», que fuerza «solido»). Sin atributo,
+   todo queda como hasta hoy: Azul FOM sólido y Glass gris en «medio».
+
+   TOPE DE TRANSPARENCIA: cada --vidrio-alfa está calculado para que la letra
+   del diseño (texto, secundaria y tenue) pase AA (≥ 4,5:1) aun con blanco puro
+   detrás. Lo comprueba test/apariencia-vidrio.test.js con estos mismos números
+   (VIDRIOS en apariencia-store.js). Si cambias uno aquí, cámbialo allí.
+   ============================================================ */
+
+.pnl.fom-dark[data-diseno][data-vidrio] {
+  --e-sup: rgb(var(--vidrio-rgb-sup) / var(--vidrio-alfa));
+  --e-sup-alta: rgb(var(--vidrio-rgb-alta) / var(--vidrio-alfa-alta));
+  --e-sup-baja: rgb(var(--vidrio-rgb-baja) / var(--vidrio-alfa-baja));
+  --app-sup: var(--e-sup);
+  --app-sup-alta: var(--e-sup-alta);
+  --app-sup-baja: var(--e-sup-baja);
+  --apariencia-blur: var(--vidrio-blur);
+  --apariencia-sombra: var(--vidrio-sombra);
+  --app-sombra-tarjeta: var(--vidrio-sombra);
+}
+
+/* El color de cada diseño (el mismo de redesign.css y apariencia.css, sin alfa). */
+.pnl.fom-dark[data-diseno="azul"][data-vidrio] {
+  --vidrio-rgb-sup: 20 26 34;
+  --vidrio-rgb-alta: 29 37 48;
+  --vidrio-rgb-baja: 15 20 27;
+}
+.pnl.fom-dark[data-diseno="glass"][data-vidrio] {
+  --vidrio-rgb-sup: 39 42 48;
+  --vidrio-rgb-alta: 53 56 63;
+  --vidrio-rgb-baja: 32 35 41;
+}
+
+/* ---------- Cuánto vidrio ---------- */
+.pnl.fom-dark[data-diseno][data-vidrio="solido"] {
+  --vidrio-alfa: 1;
+  --vidrio-alfa-alta: 1;
+  --vidrio-alfa-baja: 1;
+  --vidrio-blur: none;
+  --vidrio-sombra: 0 6px 18px rgb(0 0 0 / .16);
+}
+.pnl.fom-dark[data-diseno="azul"][data-vidrio="solido"] { --vidrio-sombra: none; }
+.pnl.fom-dark[data-diseno][data-vidrio="suave"] {
+  --vidrio-blur: blur(12px) saturate(120%);
+  --vidrio-sombra: inset 0 1px 0 rgb(255 255 255 / .04), 0 6px 18px rgb(0 0 0 / .16);
+}
+.pnl.fom-dark[data-diseno][data-vidrio="medio"] {
+  --vidrio-blur: blur(16px) saturate(110%);
+  --vidrio-sombra: inset 0 1px 0 rgb(255 255 255 / .07), 0 6px 18px rgb(0 0 0 / .16);
+}
+.pnl.fom-dark[data-diseno][data-vidrio="intenso"] {
+  /* brightness: el velo mínimo de iOS. Oscurece lo que se ve a través, así la letra de
+     color (azul, verde de estado) sigue legible aunque detrás haya blanco. */
+  --vidrio-blur: blur(28px) saturate(170%) brightness(.6);
+  --vidrio-sombra: inset 0 1px 0 rgb(255 255 255 / .14), 0 8px 24px rgb(0 0 0 / .22);
+}
+/* Topes por diseño: la letra tenue de Azul FOM (#8C97A7) pide más opacidad que la de Glass. */
+.pnl.fom-dark[data-diseno="azul"][data-vidrio="suave"] { --vidrio-alfa: .97; --vidrio-alfa-alta: .98; --vidrio-alfa-baja: .97; }
+.pnl.fom-dark[data-diseno="azul"][data-vidrio="medio"] { --vidrio-alfa: .94; --vidrio-alfa-alta: .96; --vidrio-alfa-baja: .94; }
+.pnl.fom-dark[data-diseno="azul"][data-vidrio="intenso"] { --vidrio-alfa: .91; --vidrio-alfa-alta: .95; --vidrio-alfa-baja: .91; }
+.pnl.fom-dark[data-diseno="glass"][data-vidrio="suave"] { --vidrio-alfa: .94; --vidrio-alfa-alta: .97; --vidrio-alfa-baja: .88; }
+/* «Medio» en Glass es el Glass de siempre (apariencia.css). */
+.pnl.fom-dark[data-diseno="glass"][data-vidrio="medio"] { --vidrio-alfa: .88; --vidrio-alfa-alta: .94; --vidrio-alfa-baja: .78; }
+.pnl.fom-dark[data-diseno="glass"][data-vidrio="intenso"] { --vidrio-alfa: .74; --vidrio-alfa-alta: .84; --vidrio-alfa-baja: .72; }
+
+/* ---------- Lo que pintaba un color fijo del diseño ---------- */
+/* Hojas (modales y ficha flotante): el mismo vidrio, con la superficie alta. */
+.pnl.fom-dark[data-diseno][data-vidrio] :is(.pnl-modal, .pnl-ficha.flotante) {
+  background: var(--e-sup-alta);
+  -webkit-backdrop-filter: var(--apariencia-blur);
+  backdrop-filter: var(--apariencia-blur);
+}
+/* Barra lateral y piezas de la barra de arriba: el mismo material que las tarjetas. */
+.pnl.fom-dark[data-diseno][data-vidrio] :is(.pnl-side, .pnl-topbar-contexto, .pnl-topbar-perfil, .pnl-notificaciones) {
+  -webkit-backdrop-filter: var(--apariencia-blur);
+  backdrop-filter: var(--apariencia-blur);
+}
+.pnl.fom-dark[data-diseno][data-vidrio] .pnl-notificaciones { background: var(--e-sup); }
+/* Barra de arriba del teléfono: conserva su color (el del fondo de pantalla) y toma la opacidad del vidrio. */
+.pnl.fom-dark[data-diseno="azul"][data-vidrio] .mv-barra:not(.flotante) { background: color-mix(in srgb, var(--app-fondo) calc(var(--vidrio-alfa) * 100%), transparent); }
+.pnl.fom-dark[data-diseno="glass"][data-vidrio] .mv-barra:not(.flotante) { background: rgb(93 98 105 / max(var(--vidrio-alfa), .86)); }
+/* El gris de la barra de Glass es claro: con más vidrio, su desenfoque lleva el mismo velo mínimo. */
+.pnl.fom-dark[data-diseno][data-vidrio="intenso"] .mv-barra:not(.flotante) {
+  -webkit-backdrop-filter: blur(18px) saturate(140%) brightness(.6);
+  backdrop-filter: blur(18px) saturate(140%) brightness(.6);
+}
+.pnl.fom-dark[data-diseno][data-vidrio="solido"] .mv-barra:not(.flotante) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* ---------- Teléfono: menos desenfoque, la misma transparencia ----------
+   El blur grande sobre una capa fija cuesta en el scroll de un teléfono. Se baja
+   el radio; la opacidad (y con ella el contraste) no cambia. */
+@media (max-width: 767px) {
+  .pnl.fom-dark[data-diseno][data-vidrio="suave"] { --vidrio-blur: blur(6px) saturate(120%); }
+  .pnl.fom-dark[data-diseno][data-vidrio="medio"] { --vidrio-blur: blur(8px) saturate(110%); }
+  .pnl.fom-dark[data-diseno][data-vidrio="intenso"] { --vidrio-blur: blur(12px) saturate(160%) brightness(.6); }
+}
+@media (pointer: coarse) and (max-width: 1024px) {
+  .pnl.fom-dark[data-diseno][data-vidrio="intenso"] { --vidrio-blur: blur(12px) saturate(160%) brightness(.6); }
+}
+
+/* ---------- Reducir transparencia: siempre sólido ----------
+   Consola.jsx ya pone data-vidrio="solido"; esto lo asegura aunque falle el JS. */
+@media (prefers-reduced-transparency: reduce) {
+  .pnl.fom-dark[data-diseno][data-vidrio] {
+    --vidrio-alfa: 1;
+    --vidrio-alfa-alta: 1;
+    --vidrio-alfa-baja: 1;
+    --vidrio-blur: none;
+  }
+}
+
+/* ============================================================
+   La sección «Vidrio» en Configuración › Apariencia
+   ============================================================ */
+.apariencia-vidrio { padding: 0; border: 0; margin: 8px 0 20px; min-width: 0; }
+.apariencia-vidrio-ayuda { margin-bottom: 12px; }
+.apariencia-vidrio-pasos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--e-borde);
+  border-radius: 999px;
+  background: var(--e-sup-baja);
+  max-width: 560px;
+}
+.apariencia-vidrio-paso { position: relative; display: grid; min-width: 0; cursor: pointer; }
+.apariencia-vidrio-paso input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.apariencia-vidrio-paso span {
+  display: grid;
+  place-items: center;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--e-texto-2);
+  white-space: nowrap;
+  transition: background-color var(--e-d-rapido, .14s) var(--e-curva, ease), color var(--e-d-rapido, .14s) var(--e-curva, ease);
+}
+.apariencia-vidrio-paso:hover span { color: var(--e-texto); }
+.apariencia-vidrio-paso input:checked + span { background: var(--e-activo-sup); color: var(--e-activo-texto); }
+.apariencia-vidrio-paso input:focus-visible + span { outline: 2px solid #75b9fa; outline-offset: 2px; }
+.apariencia-vidrio-paso input:disabled,
+.apariencia-vidrio-paso:has(input:disabled) { cursor: not-allowed; }
+.apariencia-vidrio-paso input:disabled:not(:checked) + span { opacity: .55; }
+.apariencia-vidrio-nota { margin-top: 10px; font-size: 13px; }
+@media (max-width: 420px) {
+  .apariencia-vidrio-paso span { padding: 0 4px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { .apariencia-vidrio-paso span { transition: none; } }
+@media print { .apariencia-vidrio { display: none; } }

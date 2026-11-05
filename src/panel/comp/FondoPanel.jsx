@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { fondoPorId } from '../apariencia-store'
+import { vigilarLetra } from '../letraSobreFondo'
 
 const MOVIL = '(max-width: 767px)'
 
@@ -7,7 +8,8 @@ const MOVIL = '(max-width: 767px)'
  * La capa del fondo elegido (docs/FONDOS.md): fija, detrás de todo el panel y
  * sin recibir clics. La foto se pide cuando el navegador queda libre y entra
  * fundida al cargar; mientras, se ve el degradado del mismo tono. En el
- * teléfono baja la versión vertical y más liviana.
+ * teléfono baja la versión vertical y más liviana. Es lo único que cambia el
+ * fondo: tarjetas, barras y colores siguen siendo los del diseño elegido.
  */
 export default function FondoPanel({ fondo }) {
   const f = fondoPorId(fondo)
@@ -40,9 +42,17 @@ export default function FondoPanel({ fondo }) {
     }
   }, [url])
 
+  // Con fondo claro, la letra que va suelta sobre él pasa a tinta (letraSobreFondo.js).
+  const capa = useRef(null)
+  useLayoutEffect(() => {
+    if (f.tono !== 'claro') return undefined
+    return vigilarLetra(capa.current?.parentElement)
+  }, [f.tono])
+
   if (!f.tono) return null
   const cargada = url && lista === url
   return <div
+    ref={capa}
     className="pnl-fondo"
     data-fondo={f.id}
     data-lista={cargada ? '' : undefined}

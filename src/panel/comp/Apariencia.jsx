@@ -1,12 +1,12 @@
 import { useSesion } from '../useSesion'
 import { useApariencia } from '../useApariencia'
-import { DISENOS, FONDOS } from '../apariencia-store'
+import { DISENOS, FONDOS, VIDRIOS } from '../apariencia-store'
 import { Icono } from '../Iconos'
 import { Tarjeta } from './ui'
 
 export default function Apariencia({ titulo = 'Apariencia de la web' }) {
   const sesion = useSesion()
-  const { diseno, cambiar, fondo, cambiarFondo, aviso } = useApariencia(sesion?.perfil)
+  const { diseno, cambiar, fondo, cambiarFondo, aviso, vidrio, cambiarVidrio, sinTransparencia } = useApariencia(sesion?.perfil)
   return <Tarjeta titulo={titulo}>
     <p className="apariencia-ayuda">Escoge cómo quieres ver FOM. El cambio se aplica a todos los apartados de tu plataforma.</p>
     <fieldset className="apariencia-opciones">
@@ -17,6 +17,17 @@ export default function Apariencia({ titulo = 'Apariencia de la web' }) {
         <span className="apariencia-opcion-texto"><strong>{d.nombre}</strong><span>{d.descripcion}</span></span>
         {diseno === d.id && <span className="apariencia-elegida"><Icono nombre="check" tam={17} />Seleccionado</span>}
       </label>)}
+    </fieldset>
+    <fieldset className="apariencia-vidrio" aria-describedby="apariencia-vidrio-ayuda">
+      <legend className="apariencia-legend">Vidrio</legend>
+      <p id="apariencia-vidrio-ayuda" className="apariencia-ayuda apariencia-vidrio-ayuda">Cuánto se ve el fondo a través de las tarjetas, la barra lateral, la barra de arriba y las hojas. La letra siempre se lee.</p>
+      <div className="apariencia-vidrio-pasos">
+        {VIDRIOS.map(v => <label key={v.id} className="apariencia-vidrio-paso">
+          <input type="radio" name="apariencia-vidrio" value={v.id} checked={vidrio === v.id} disabled={sinTransparencia} onChange={() => cambiarVidrio(v.id)} />
+          <span>{v.nombre}</span>
+        </label>)}
+      </div>
+      {sinTransparencia && <p className="apariencia-ayuda apariencia-vidrio-nota">Tu equipo tiene activado «Reducir transparencia»: el vidrio queda en Sólido.</p>}
     </fieldset>
     <fieldset className="apariencia-fondos">
       <legend className="apariencia-legend">Fondo</legend>
@@ -35,7 +46,7 @@ export default function Apariencia({ titulo = 'Apariencia de la web' }) {
         </label>)}
       </div>
     </fieldset>
-    <p className="apariencia-ayuda apariencia-privada">Tu elección se guarda por cuenta en este navegador. No cambia el diseño ni el fondo de otras personas.</p>
+    <p className="apariencia-ayuda apariencia-privada">Tu elección se guarda por cuenta en este navegador. No cambia el diseño, el vidrio ni el fondo de otras personas.</p>
     <p className="apariencia-aviso" role="status" aria-live="polite">{aviso}</p>
   </Tarjeta>
 }

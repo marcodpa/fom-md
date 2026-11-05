@@ -25,8 +25,10 @@ import './estilos-consola'
 import '../styles/movil-app.css'
 // El movimiento de toda la consola (T-184), después de todo lo demás.
 import '../styles/movimiento.css'
-// El fondo elegido y su vidrio (docs/FONDOS.md): al final, para mandar sobre diseño y teléfono.
+// El fondo elegido (docs/FONDOS.md): solo la capa de atrás; tarjetas y colores son del diseño.
 import '../styles/apariencia-fondos.css'
+// El vidrio de las tarjetas (docs/FONDOS.md › Vidrio): opacidad y desenfoque de las superficies del diseño.
+import '../styles/apariencia-vidrio.css'
 
 // Cada módulo se baja cuando se entra a su pantalla (o un poco antes, en los
 // ratos libres): el primer pintado de la consola ya no carga Reportes, Admin,
@@ -367,7 +369,7 @@ function Lateral({ perfil, abierto, cerrar, sinLeer }) {
 
 export default function Consola() {
   const sesion = useSesion()
-  const { diseno, fondo } = useApariencia(sesion?.perfil)
+  const { diseno, fondo, vidrioAtributo } = useApariencia(sesion?.perfil)
   const tonoFondo = fondoPorId(fondo).tono
   const { pathname } = useLocation()
   const navegar = useNavigate()
@@ -469,7 +471,7 @@ export default function Consola() {
   return (
     <UNSAFE_NavigationContext.Provider value={navegacionSuave}>
     <MovilContexto.Provider value={movil}>
-    <div className="pnl fom-dark" data-diseno={diseno} data-fondo={tonoFondo ? fondo : undefined} data-fondo-tono={tonoFondo || undefined} data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'} data-movil={esMovil ? (enPestana ? 'pestana' : 'pila') : undefined}>
+    <div className="pnl fom-dark" data-diseno={diseno} data-vidrio={vidrioAtributo} data-fondo={tonoFondo ? fondo : undefined} data-fondo-tono={tonoFondo || undefined} data-area={area} data-screen={pathname.replace('/panel', '') || '/resumen'} data-movil={esMovil ? (enPestana ? 'pestana' : 'pila') : undefined}>
       <Lateral
         perfil={perfil}
         abierto={menuAbierto}
