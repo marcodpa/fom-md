@@ -38,6 +38,10 @@ la app.
   `timezoneStatus: unknown`. La última del Camry es del 2 nov a las 15:11 UTC, antes de la
   instalación de las 18:25 UTC. ¿El servidor descarta o no atribuye al vehículo las posiciones
   sin hora? El equipo sigue mandando latidos.
+- **Meitrack AH533FD sin publicar nunca (5 nov):** el T399L 867869061378428 manda 61 tramas por
+  hora (143 B, IMEI coincide) desde el 3 nov, pero el diagnóstico sigue en `clock_pending` y la
+  unidad no tiene ninguna posición publicada. ¿Qué falta para dar la hora por comprobada y
+  publicar? Si hace falta la respuesta DB4, decir cómo se carga.
 - **Meitrack desde la app:** la app llama a `/api/v1/mobile/meitrack-setup/...` y esa ruta no
   existe. O se publica la ruta móvil, o la app esconde el registro Meitrack.
 - **Instalar desde la app:** falta la ruta móvil para instalar un GPS del inventario en una
