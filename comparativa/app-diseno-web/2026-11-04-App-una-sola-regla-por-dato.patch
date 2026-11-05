@@ -4853,10 +4853,10 @@ index 18cab7b..1bf4528 100644
                sel,
 diff --git a/src/components/marca-empresa-compacta.tsx b/src/components/marca-empresa-compacta.tsx
 new file mode 100644
-index 0000000..1e4f4be
+index 0000000..ee9c9b6
 --- /dev/null
 +++ b/src/components/marca-empresa-compacta.tsx
-@@ -0,0 +1,126 @@
+@@ -0,0 +1,137 @@
 +import { useEffect, useState } from 'react';
 +import { StyleSheet, View } from 'react-native';
 +
@@ -4937,8 +4937,9 @@ index 0000000..1e4f4be
 + * - Logo de 20×20 (radio 6, borde 1). Sin logo, el monograma con las iniciales
 + *   en azul FOM. FOM Operations lleva el logo de FOM (`LogoDeEmpresa`).
 + * - El nombre en 12/16, en una línea con «…» si no cabe.
-+ * - Administrador FOM dentro de otra empresa: el logo lleva un aro azul y el
-+ *   lector de pantalla oye «… · Gestionando como administrador FOM».
++ * - Administrador FOM dentro de otra empresa: el logo lleva un aro azul, al lado
++ *   va la etiqueta «Admin FOM» y el lector de pantalla oye «… · Gestionando como
++ *   administrador FOM».
 + *
 + * Sin nombre sabido no se pinta nada.
 + */
@@ -4963,6 +4964,13 @@ index 0000000..1e4f4be
 +      <ThemedText style={[styles.nombre, { color: colors.textSecondary }]} numberOfLines={1}>
 +        {marca.nombre}
 +      </ThemedText>
++      {marca.gestionando && (
++        <View style={[styles.admin, { backgroundColor: colors.infoSurface }]}>
++          <ThemedText style={[styles.adminTexto, { color: colors.info }]} numberOfLines={1}>
++            Admin FOM
++          </ThemedText>
++        </View>
++      )}
 +    </View>
 +  );
 +}
@@ -4982,6 +4990,9 @@ index 0000000..1e4f4be
 +  // Dibujo, no texto: el nombre va al lado y el lector oye la etiqueta de la fila.
 +  monograma: { fontSize: 8, lineHeight: 10, fontWeight: '700', letterSpacing: 0.2 },
 +  nombre: { flexShrink: 1, fontSize: 12, lineHeight: 16, fontWeight: '500' },
++  // «Admin FOM», como en la web: el nombre se corta con «…» y la etiqueta sigue visible.
++  admin: { flexShrink: 0, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 1 },
++  adminTexto: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
 +});
 diff --git a/src/components/mi-unidad-piezas.tsx b/src/components/mi-unidad-piezas.tsx
 index 3dffb95..2accec6 100644
