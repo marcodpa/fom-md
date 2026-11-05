@@ -448,7 +448,7 @@ index b76a45f..c0f8a46 100644
    const tel = separarTelefono(perfil?.telefono ?? '');
    const pais = paisPorCodigo(tel.codigo);
 diff --git a/src/app/_layout.tsx b/src/app/_layout.tsx
-index 61c1279..164a84f 100644
+index 61c1279..83db245 100644
 --- a/src/app/_layout.tsx
 +++ b/src/app/_layout.tsx
 @@ -9,7 +9,7 @@ import { StyleSheet, View } from 'react-native';
@@ -460,15 +460,12 @@ index 61c1279..164a84f 100644
  import { FundidoTema } from '@/components/fundido-tema';
  import { MedidorFom } from '@/components/medidor-fom';
  import { SplashRuta } from '@/components/splash-ruta';
-@@ -97,10 +97,18 @@ const HOJA = opcionesHoja;
-  * por ahí asomaba el gris casi blanco detrás de pantallas oscuras.
+@@ -98,9 +98,16 @@ const HOJA = opcionesHoja;
   */
  function NavigationChrome() {
--  const { colors } = useTheme();
+   const { colors } = useTheme();
 -  const { colorScheme } = useThemeController();
-+  // El esquema del tema EN USO: con un fondo claro, la navegación también es clara.
-+  const { colors, colorScheme } = useTheme();
-+  const { setCuentaFondo } = useThemeController();
++  const { colorScheme, setCuentaFondo } = useThemeController();
    const reducido = useReducedMotion();
  
 +  // El fondo es por cuenta: el tema lee el de quien entró; al salir, sin fondo.
@@ -881,7 +878,7 @@ index ec17735..8c842fe 100644
          avatarTono="neutral"
          conBorde={conBorde}
 diff --git a/src/app/apariencia.tsx b/src/app/apariencia.tsx
-index 90ddc2d..ce3dd51 100644
+index 90ddc2d..9f304e4 100644
 --- a/src/app/apariencia.tsx
 +++ b/src/app/apariencia.tsx
 @@ -1,3 +1,4 @@
@@ -889,34 +886,64 @@ index 90ddc2d..ce3dd51 100644
  import { LinearGradient } from 'expo-linear-gradient';
  import { ScrollView, StyleSheet, View } from 'react-native';
  import { SafeAreaView } from 'react-native-safe-area-context';
-@@ -11,11 +12,14 @@ import { ThemedView } from '@/components/themed-view';
+@@ -5,17 +6,23 @@ import { SafeAreaView } from 'react-native-safe-area-context';
+ import { Card } from '@/components/card';
+ import { PressableScale } from '@/components/pressable-scale';
+ import { ScreenHeader } from '@/components/screen-header';
++import { SegmentedControl } from '@/components/segmented-control';
+ import { TabIcon } from '@/components/tab-icon';
+ import { ThemedText } from '@/components/themed-text';
+ import { ThemedView } from '@/components/themed-view';
  import {
    APARIENCIAS,
    colorSchemes,
 +  FONDOS,
 +  IMAGENES_FONDO,
++  VIDRIOS,
    paletaGlass,
    useTheme,
    useThemeController,
    type Apariencia,
    type ColorTokens,
 +  type Fondo,
++  type VidrioId,
  } from '@/theme';
  
  /** El degradado gris de Glass, el mismo de `ScreenBackground` y de la web. */
-@@ -30,7 +34,7 @@ const GRIS_GLASS = ['#60656C', '#52565E', '#60656C'] as const;
+@@ -30,7 +37,7 @@ const GRIS_GLASS = ['#60656C', '#52565E', '#60656C'] as const;
   */
  export default function AparienciaScreen() {
    const { spacing } = useTheme();
 -  const { apariencia, setApariencia } = useThemeController();
-+  const { apariencia, setApariencia, fondo, setFondo } = useThemeController();
++  const { apariencia, setApariencia, fondo, setFondo, vidrio, setVidrio, sinTransparencia } = useThemeController();
  
    return (
      <ThemedView style={styles.root} ambient>
-@@ -63,6 +67,22 @@ export default function AparienciaScreen() {
+@@ -63,6 +70,43 @@ export default function AparienciaScreen() {
              ))}
            </View>
  
++          <View style={{ gap: spacing.md }}>
++            <View style={styles.cabeceraMuestra}>
++              <ThemedText color="textMuted" style={styles.ceja}>
++                VIDRIO
++              </ThemedText>
++              <ThemedText color="textSecondary" style={styles.bajada}>
++                Cuánto se ve el fondo a través de las tarjetas, las barras y las hojas. La letra siempre se lee.
++              </ThemedText>
++            </View>
++            <SegmentedControl
++              options={VIDRIOS.map((v) => ({ value: v.id, label: v.nombre, disabled: sinTransparencia }))}
++              value={vidrio}
++              onChange={(v: VidrioId) => setVidrio(v)}
++            />
++            {sinTransparencia ? (
++              <ThemedText color="textSecondary" style={styles.nota}>
++                Tu teléfono tiene activado «Reducir transparencia»: el vidrio queda en Sólido.
++              </ThemedText>
++            ) : null}
++          </View>
++
 +          <View accessibilityRole="radiogroup" accessibilityLabel="Fondo" style={{ gap: spacing.md }}>
 +            <View style={styles.cabeceraMuestra}>
 +              <ThemedText color="textMuted" style={styles.ceja}>
@@ -936,23 +963,20 @@ index 90ddc2d..ce3dd51 100644
            <LoQueNoCambia />
            <MuestraGlass />
  
-@@ -130,6 +150,56 @@ function OpcionApariencia({
+@@ -130,6 +174,53 @@ function OpcionApariencia({
    );
  }
  
 +/**
-+ * Un fondo: su miniatura (la foto chica o su degradado) con tres piezas del
-+ * material que tendrán las tarjetas encima, y su nombre. Como en la web.
++ * Un fondo: su miniatura (la foto chica o su degradado) con tres piezas que son
++ * las tarjetas del diseño elegido (el fondo no las cambia), y su nombre. Como en la web.
 + */
 +function OpcionFondo({ fondo, elegida, onPress }: { fondo: Fondo; elegida: boolean; onPress: () => void }) {
 +  const { colors, radii, borderWidths } = useTheme();
 +  const mini = IMAGENES_FONDO[fondo.id]?.miniatura;
-+  const pieza =
-+    fondo.tono === 'claro'
-+      ? { backgroundColor: 'rgba(255, 255, 255, 0.78)' }
-+      : fondo.tono === 'oscuro'
-+        ? { backgroundColor: 'rgba(20, 26, 34, 0.8)' }
-+        : { backgroundColor: '#1D2530' };
++  const pieza = { backgroundColor: colors.surface };
++  // «Sin fondo» muestra el fondo liso del diseño en uso.
++  const liso = fondo.tono ? fondo.degradado : ([colors.background, colors.background] as const);
 +  return (
 +    <PressableScale
 +      onPress={onPress}
@@ -969,10 +993,10 @@ index 90ddc2d..ce3dd51 100644
 +        },
 +      ]}>
 +      <View
-+        style={[styles.fondoMini, { borderRadius: 13, backgroundColor: fondo.degradado[0] }]}
++        style={[styles.fondoMini, { borderRadius: 13, backgroundColor: liso[0] }]}
 +        importantForAccessibility="no-hide-descendants"
 +        accessibilityElementsHidden>
-+        <LinearGradient colors={fondo.degradado} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
++        <LinearGradient colors={liso} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
 +        {mini != null ? <Image source={mini} style={StyleSheet.absoluteFill} contentFit="cover" accessible={false} /> : null}
 +        <View style={[styles.miniPieza, styles.miniPieza1, pieza]} />
 +        <View style={[styles.miniPieza, styles.miniPieza2, pieza]} />
@@ -993,16 +1017,7 @@ index 90ddc2d..ce3dd51 100644
  /**
   * Miniatura de la app con cada tema: cápsula de arriba, dos tarjetas y la
   * barra. Pinta SIEMPRE los colores de su tema, no los del tema en uso: así se
-@@ -186,7 +256,7 @@ function VistaPrevia({ glass }: { glass: boolean }) {
- function LoQueNoCambia() {
-   const { colors, radii, borderWidths } = useTheme();
-   const filas: { texto: string; extra?: 'boton' | 'estados' }[] = [
--    { texto: 'El azul FOM y los botones.', extra: 'boton' },
-+    { texto: 'El azul FOM y los botones (con fondo claro, un azul un poco más oscuro para que se lea).', extra: 'boton' },
-     { texto: 'El logo de tu empresa.' },
-     { texto: 'Los colores de los estados (bien, aviso, peligro).', extra: 'estados' },
-   ];
-@@ -316,4 +386,14 @@ const styles = StyleSheet.create({
+@@ -316,4 +407,14 @@ const styles = StyleSheet.create({
    muestraBoton: { height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
    muestraBotonTexto: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
    nota: { fontSize: 13, lineHeight: 18 },
@@ -4379,23 +4394,52 @@ index d0ddb57..1dd1dc0 100644
                  onPress={() => elegir('vigente')}
                />
 diff --git a/src/components/encabezado-fom.tsx b/src/components/encabezado-fom.tsx
-index 6097611..47c640c 100644
+index 6097611..23a9112 100644
 --- a/src/components/encabezado-fom.tsx
 +++ b/src/components/encabezado-fom.tsx
-@@ -110,10 +110,12 @@ function tieneLogoPropio(logoKey: string | null | undefined): logoKey is string
-  * FOM. Cada empresa solo cambia su logo (nunca el color ni unas iniciales).
-  */
- export function LogoCapsula() {
--  const { brand, colorScheme } = useTheme();
-+  const { brand, colorScheme, fondoTono } = useTheme();
-   if (tieneLogoPropio(brand.logoKey)) {
-     return <LogoEmpresa logoKey={brand.logoKey} size={24} />;
-   }
-+  // Con un fondo claro, el logo completo con «FOM» en tinta, como en la web.
-+  if (fondoTono === 'claro') return <LogoFomCompleto width={67} tinta />;
-   // Las letras del logo completo son blancas: en claro va solo el símbolo.
-   return colorScheme === 'dark' ? <LogoFomCompleto width={67} /> : <LogoFom size={28} />;
- }
+@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
+ 
+ import { useAuth } from '@/auth';
+ import { BarraCarga } from '@/components/barra-carga';
++import { VeloTexto } from '@/components/fondo-pantalla';
+ import { LogoEmpresa, hayLogoEmpresa } from '@/components/logo-empresa';
+ import { LogoFom, LogoFomCompleto } from '@/components/logo-fom';
+ import { PressableScale } from '@/components/pressable-scale';
+@@ -330,15 +331,19 @@ export function TituloPantalla({ titulo, bajada, accion }: { titulo: string; baj
+   const arriba = useAltoEncabezado() + 14;
+   return (
+     <View style={[styles.cabecera, styles.cabeceraSuelta, { gap: spacing.md, paddingTop: arriba }]}>
+-      <View style={[styles.flex1, { gap: 6 }]}>
+-        <ThemedText style={styles.titulo} numberOfLines={2}>
+-          {titulo}
+-        </ThemedText>
+-        {bajada ? (
+-          <ThemedText style={[styles.bajada, { color: colors.textSecondary }]} numberOfLines={2}>
+-            {bajada}
++      <View style={styles.flex1}>
++        {/* La caja mide lo que mide el texto: el velo (con un fondo elegido) lo abraza. */}
++        <View style={[styles.textos, { gap: 6 }]}>
++          <VeloTexto />
++          <ThemedText style={styles.titulo} numberOfLines={2}>
++            {titulo}
+           </ThemedText>
+-        ) : null}
++          {bajada ? (
++            <ThemedText style={[styles.bajada, { color: colors.textSecondary }]} numberOfLines={2}>
++              {bajada}
++            </ThemedText>
++          ) : null}
++        </View>
+       </View>
+       {accion ? <View style={styles.accion}>{accion}</View> : null}
+     </View>
+@@ -384,5 +389,6 @@ const styles = StyleSheet.create({
+   bajada: { fontSize: 14, lineHeight: 20 },
+   accion: { flexShrink: 0 },
+   flex1: { flex: 1, minWidth: 0 },
++  textos: { alignSelf: 'flex-start', maxWidth: '100%' },
+   flotante: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 },
+ });
 diff --git a/src/components/ficha-unidad-vista.tsx b/src/components/ficha-unidad-vista.tsx
 index 8bf4656..f7762bf 100644
 --- a/src/components/ficha-unidad-vista.tsx
@@ -4654,17 +4698,17 @@ index d4fe55f..b527a7d 100644
  export type OpcionTipo = { id: string; label: string; cuenta: number };
 diff --git a/src/components/fondo-pantalla.tsx b/src/components/fondo-pantalla.tsx
 new file mode 100644
-index 0000000..8a65c31
+index 0000000..194a25b
 --- /dev/null
 +++ b/src/components/fondo-pantalla.tsx
-@@ -0,0 +1,68 @@
+@@ -0,0 +1,119 @@
 +import { Image } from 'expo-image';
 +import { LinearGradient } from 'expo-linear-gradient';
 +import { useState } from 'react';
 +import { StyleSheet, View } from 'react-native';
 +import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 +
-+import { fondoPorId, IMAGENES_FONDO, useReducedMotion, type FondoId } from '@/theme';
++import { fondoPorId, IMAGENES_FONDO, useReducedMotion, useTheme, type FondoId } from '@/theme';
 +
 +/** Los fondos cuya foto ya se pintó una vez: después aparecen sin fundido. */
 +const yaVistos = new Set<FondoId>();
@@ -4673,7 +4717,9 @@ index 0000000..8a65c31
 +const LUZ: Partial<Record<FondoId, number>> = { 'blanco-carros': 0.12, perla: 0.13, 'noche-azul': 0.3 };
 +
 +/**
-+ * El FONDO elegido detrás de la pantalla (docs/FONDOS.md): un degradado del
++ * El FONDO elegido detrás de la pantalla (docs/FONDOS.md): es lo ÚNICO que
++ * cambia el fondo; tarjetas, barras, botones y colores siguen siendo los del
++ * diseño elegido. Un degradado del
 + * tono del fondo y, encima, la foto de teléfono ya desenfocada (nada de blur
 + * en vivo). Las fotos oscuras llevan un velo para que los títulos que van
 + * directo encima se lean. Fijo: no se mueve con el scroll y no recibe toques.
@@ -4719,6 +4765,55 @@ index 0000000..8a65c31
 +      {oscura ? (
 +        <LinearGradient colors={['rgba(10, 13, 18, 0.30)', 'rgba(10, 13, 18, 0.55)']} style={StyleSheet.absoluteFill} />
 +      ) : null}
++    </View>
++  );
++}
++
++/**
++ * VELO detrás de la letra que va DIRECTO sobre el fondo (título y bajada de la
++ * pantalla, «Se actualiza solo cada 30 s»), como `.pnl-cab-txt::before` de la
++ * web. No mueve nada: va en absoluto, como primer hijo de la caja del texto, y
++ * se sale un poco por los lados. Sin fondo elegido no pinta nada.
++ *
++ * Toma el color contrario a la letra del diseño (oscuro bajo letra clara,
++ * blanco bajo letra oscura). Cuando la letra y el fondo son del mismo tono
++ * (letra clara sobre Blanco con carros, por ejemplo) sube a 86 %: así la letra
++ * secundaria sigue en AA (≥ 4,5:1) aun sobre blanco puro. Si no, 50 %. Dos capas
++ * (halo al 30 % y núcleo) para que el borde sea suave y no parezca una tarjeta.
++ */
++export function VeloTexto({ radio = 22, alto = 8, ancho = 12 }: { radio?: number; alto?: number; ancho?: number }) {
++  const { fondoTono, colorScheme } = useTheme();
++  if (!fondoTono) return null;
++  const letraClara = colorScheme === 'dark';
++  const choca = (fondoTono === 'claro') === letraClara;
++  const rgb = letraClara ? '10, 13, 18' : '255, 255, 255';
++  const fuerza = choca ? 0.86 : 0.5;
++  const HALO = 0.3;
++  const nucleo = 1 - (1 - fuerza) / (1 - HALO);
++  return (
++    <View pointerEvents="none" style={StyleSheet.absoluteFill} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
++      <View
++        style={{
++          position: 'absolute',
++          top: -alto - 8,
++          bottom: -alto - 8,
++          left: -ancho - 10,
++          right: -ancho - 10,
++          borderRadius: radio + 8,
++          backgroundColor: `rgba(${rgb}, ${HALO})`,
++        }}
++      />
++      <View
++        style={{
++          position: 'absolute',
++          top: -alto,
++          bottom: -alto,
++          left: -ancho,
++          right: -ancho,
++          borderRadius: radio,
++          backgroundColor: `rgba(${rgb}, ${nucleo.toFixed(3)})`,
++        }}
++      />
 +    </View>
 +  );
 +}
@@ -4932,31 +5027,6 @@ index 53a2184..a38a092 100644
        }
      }
      const porId = new Map(roster.map((u) => [u.id, u]));
-diff --git a/src/components/logo-fom.tsx b/src/components/logo-fom.tsx
-index 680a1c9..1d07e28 100644
---- a/src/components/logo-fom.tsx
-+++ b/src/components/logo-fom.tsx
-@@ -24,8 +24,10 @@ export function LogoFom({ size = 40 }: { size?: number }) {
-  * (lienzo de 280×84). Pensado para fondos oscuros (login, espera de entrada).
-  *
-  * `width` es el ancho total; el alto se deriva del lienzo.
-+ * `tinta`: «FOM» en tinta (#0F141B) en vez de blanco, para fondos claros
-+ * (`fom-logo-tinta.svg` de la web).
-  */
--export function LogoFomCompleto({ width = 280 }: { width?: number }) {
-+export function LogoFomCompleto({ width = 280, tinta = false }: { width?: number; tinta?: boolean }) {
-   return (
-     <Svg width={width} height={(width * 84) / 280} viewBox="0 0 280 84">
-       {/* En la web el símbolo va bajado 1 para alinearse con las letras. */}
-@@ -35,7 +37,7 @@ export function LogoFomCompleto({ width = 280 }: { width?: number }) {
-         ))}
-       </G>
-       {WORDMARK_FOM.map((t) => (
--        <Path key={t.d} d={t.d} fill={t.color} fillRule="evenodd" />
-+        <Path key={t.d} d={t.d} fill={tinta ? '#0F141B' : t.color} fillRule="evenodd" />
-       ))}
-     </Svg>
-   );
 diff --git a/src/components/mantenimiento-piezas.tsx b/src/components/mantenimiento-piezas.tsx
 index c483804..c5f7c3a 100644
 --- a/src/components/mantenimiento-piezas.tsx
@@ -5939,10 +6009,17 @@ index 4514859..c747e8b 100644
        </ThemedText>
        {parcial ? (
 diff --git a/src/components/resumen-piezas.tsx b/src/components/resumen-piezas.tsx
-index 66334c8..7ac40cb 100644
+index 66334c8..04d0fc9 100644
 --- a/src/components/resumen-piezas.tsx
 +++ b/src/components/resumen-piezas.tsx
-@@ -9,7 +9,7 @@ import { PressableScale } from '@/components/pressable-scale';
+@@ -3,13 +3,14 @@ import { ScrollView, StyleSheet, View } from 'react-native';
+ import Svg, { Circle, Path } from 'react-native-svg';
+ 
+ import { useConteo } from '@/components/animated-number';
++import { VeloTexto } from '@/components/fondo-pantalla';
+ import { Card } from '@/components/card';
+ import { PastillaManejo, useManejoDelEnte } from '@/components/manejo-conductor';
+ import { PressableScale } from '@/components/pressable-scale';
  import { TabIcon, type TabIconName } from '@/components/tab-icon';
  import { ThemedText } from '@/components/themed-text';
  import { useTheme, type ColorTokens } from '@/theme';
@@ -5951,7 +6028,7 @@ index 66334c8..7ac40cb 100644
  
  /*
   * PIEZAS DEL RESUMEN del supervisor, copia de las del Resumen web en teléfono
-@@ -21,26 +21,13 @@ import { miles } from '@/utils/numero';
+@@ -21,26 +22,13 @@ import { miles } from '@/utils/numero';
  
  // ── Cifras como las escribe la web ───────────────────────────────────────────
  
@@ -5981,7 +6058,15 @@ index 66334c8..7ac40cb 100644
      </ThemedText>
    );
  }
-@@ -408,11 +395,11 @@ export function TarjetaManejo({
+@@ -88,6 +76,7 @@ export function ChipVivo({ texto }: { texto: string }) {
+   const { colors } = useTheme();
+   return (
+     <View style={styles.vivo} accessibilityRole="text">
++      <VeloTexto radio={999} alto={4} ancho={10} />
+       <View style={[styles.vivoPunto, { backgroundColor: colors.success }]} />
+       <ThemedText style={[styles.vivoTexto, { color: colors.textSecondary }]}>{texto}</ThemedText>
+     </View>
+@@ -408,11 +397,11 @@ export function TarjetaManejo({
                  <View style={[styles.td, { width: COLUMNAS[1].ancho, alignItems: 'flex-start' }]}>
                    <PastillaManejo score={s} />
                  </View>
@@ -5998,6 +6083,15 @@ index 66334c8..7ac40cb 100644
                </PressableScale>
              ))}
            </View>
+@@ -472,7 +461,7 @@ const styles = StyleSheet.create({
+   flex1: { flex: 1, minWidth: 0 },
+   fila: { flexDirection: 'row', alignItems: 'center' },
+ 
+-  vivo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
++  vivo: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start' },
+   vivoPunto: { width: 7, height: 7, borderRadius: 4 },
+   vivoTexto: { fontSize: 12, lineHeight: 19 },
+ 
 diff --git a/src/components/screen-background.tsx b/src/components/screen-background.tsx
 index e378c7b..dfd337a 100644
 --- a/src/components/screen-background.tsx
@@ -9772,10 +9866,10 @@ index 176ce9e..acc2400 100644
      id: 'usr-sam-1',
      nombre: 'José Marrufo',
 diff --git a/src/theme/ThemeProvider.tsx b/src/theme/ThemeProvider.tsx
-index b4a774c..26991e9 100644
+index b4a774c..f82f0e0 100644
 --- a/src/theme/ThemeProvider.tsx
 +++ b/src/theme/ThemeProvider.tsx
-@@ -7,13 +7,16 @@
+@@ -7,14 +7,18 @@
   * tema ya combinado para que lo consuman las pantallas vía `useTheme()`.
   */
  
@@ -9788,12 +9882,14 @@ index b4a774c..26991e9 100644
  import { guardarApariencia, leerApariencia } from './apariencia';
  import { DEFAULT_BRAND } from './brand';
  import { createTheme } from './createTheme';
-+import { guardarFondo, leerFondo } from './fondo-guardado';
-+import { FONDO_POR_DEFECTO, type FondoId } from './fondos';
++import { guardarFondo, guardarVidrio, leerFondo, leerVidrio } from './fondo-guardado';
++import { FONDO_POR_DEFECTO, fondoPorId, type FondoId } from './fondos';
  import type { Apariencia, ColorScheme, CompanyBrand, Theme, ThemeMode } from './types';
++import { aplicarVidrio, materialDe, vidrioEfectivo, VIDRIO_POR_DEFECTO, type VidrioId } from './vidrio';
  
  /** Valor expuesto por el contexto: el tema + los controles para mutarlo. */
-@@ -36,6 +39,14 @@ export interface ThemeContextValue {
+ export interface ThemeContextValue {
+@@ -36,6 +40,20 @@ export interface ThemeContextValue {
    setBrand: (brand: CompanyBrand) => void;
    /** Elige la apariencia personal y la guarda en el teléfono. */
    setApariencia: (apariencia: Apariencia) => void;
@@ -9803,12 +9899,18 @@ index b4a774c..26991e9 100644
 +  setFondo: (fondo: FondoId) => void;
 +  /** Avisa qué cuenta está dentro (o '' al salir): su fondo se lee del teléfono. */
 +  setCuentaFondo: (cuenta: string) => void;
-+  /** El mismo tema sin fondo: para el Centro de control y los mapas (`TemaSinFondo`). */
++  /** El vidrio que se ve (Sólido · Suave · Medio · Intenso): el elegido, el del tema o Sólido con «reducir transparencia». */
++  vidrio: VidrioId;
++  /** true si el sistema pide «reducir transparencia»: el vidrio queda en Sólido. */
++  sinTransparencia: boolean;
++  /** Elige el vidrio y lo guarda en el teléfono para la cuenta en uso. */
++  setVidrio: (vidrio: VidrioId) => void;
++  /** El mismo tema sin la capa de fondo: para el Centro de control y los mapas (`TemaSinFondo`). */
 +  temaSinFondo: Theme;
  }
  
  export const ThemeContext = createContext<ThemeContextValue | null>(null);
-@@ -95,22 +106,102 @@ export function ThemeProvider({
+@@ -95,22 +113,137 @@ export function ThemeProvider({
      void guardarApariencia(a);
    }, []);
  
@@ -9838,7 +9940,28 @@ index b4a774c..26991e9 100644
 +    [cuentaFondo],
 +  );
 +
-+  // «Reducir transparencia» (iOS): las tarjetas sobre el fondo pasan a opacas.
++  // Vidrio de la cuenta en uso, como el fondo. Sin elección: `null` (el tema de siempre).
++  const [vidrioGuardado, setVidrioGuardado] = useState<{ cuenta: string; vidrio: VidrioId | null }>({ cuenta: '', vidrio: VIDRIO_POR_DEFECTO });
++  useEffect(() => {
++    if (!cuentaFondo) return;
++    let vigente = true;
++    void leerVidrio(cuentaFondo).then((guardado) => {
++      if (vigente) setVidrioGuardado((prev) => (prev.cuenta === cuentaFondo ? prev : { cuenta: cuentaFondo, vidrio: guardado }));
++    });
++    return () => {
++      vigente = false;
++    };
++  }, [cuentaFondo]);
++  const vidrioElegido = cuentaFondo && vidrioGuardado.cuenta === cuentaFondo ? vidrioGuardado.vidrio : VIDRIO_POR_DEFECTO;
++  const setVidrio = useCallback(
++    (v: VidrioId) => {
++      if (!cuentaFondo) return;
++      setVidrioGuardado({ cuenta: cuentaFondo, vidrio: v });
++      void guardarVidrio(cuentaFondo, v);
++    },
++    [cuentaFondo],
++  );
++  // «Reducir transparencia» (iOS): el vidrio queda en Sólido.
 +  const sinTransparencia = useReducirTransparencia();
 +
    // Resuelve el esquema final: en 'system' usa el del dispositivo (con
@@ -9848,10 +9971,21 @@ index b4a774c..26991e9 100644
  
    // El tema solo se recalcula cuando cambia el esquema, la marca o la apariencia.
 -  const theme = useMemo(() => createTheme(colorScheme, brand, apariencia), [colorScheme, brand, apariencia]);
-+  const temaSinFondo = useMemo(() => createTheme(colorScheme, brand, apariencia), [colorScheme, brand, apariencia]);
++  // El vidrio solo cambia la opacidad de las superficies (nunca su color); sin
++  // elección y sin «reducir transparencia», el tema queda idéntico.
++  const material = materialDe(colorScheme, apariencia);
++  const temaSinFondo = useMemo(() => {
++    const base = createTheme(colorScheme, brand, apariencia);
++    const colors = aplicarVidrio(base.colors, material, vidrioElegido, sinTransparencia);
++    return colors === base.colors ? base : { ...base, colors };
++  }, [colorScheme, brand, apariencia, material, vidrioElegido, sinTransparencia]);
++  const vidrio = vidrioEfectivo(material, vidrioElegido, sinTransparencia);
++  // El fondo NO cambia colores ni material (decisión de Marco: «los fondos son
++  // únicamente el fondo»): es el mismo tema, solo con `fondo` y `fondoTono` para
++  // que `ScreenBackground` pinte la imagen y `VeloTexto` sepa cuánto velo poner.
 +  const theme = useMemo(
-+    () => (fondo === FONDO_POR_DEFECTO ? temaSinFondo : createTheme(colorScheme, brand, apariencia, fondo, sinTransparencia)),
-+    [temaSinFondo, colorScheme, brand, apariencia, fondo, sinTransparencia],
++    () => (fondo === FONDO_POR_DEFECTO ? temaSinFondo : { ...temaSinFondo, fondo, fondoTono: fondoPorId(fondo).tono }),
++    [temaSinFondo, fondo],
 +  );
  
    const toggleColorScheme = useCallback(() => {
@@ -9874,17 +10008,20 @@ index b4a774c..26991e9 100644
 +      fondo,
 +      setFondo,
 +      setCuentaFondo,
++      vidrio,
++      sinTransparencia,
++      setVidrio,
 +      temaSinFondo,
 +    }),
-+    [theme, mode, colorScheme, brand, apariencia, toggleColorScheme, setBrand, setApariencia, fondo, setFondo, setCuentaFondo, temaSinFondo],
++    [theme, mode, colorScheme, brand, apariencia, toggleColorScheme, setBrand, setApariencia, fondo, setFondo, setCuentaFondo, vidrio, sinTransparencia, setVidrio, temaSinFondo],
    );
  
    return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
  }
 +
 +/**
-+ * Lo de adentro se pinta SIN fondo ni su material: el Centro de control y los
-+ * mapas, como en la web (ahí manda el mapa, con sus controles oscuros).
++ * Lo de adentro se pinta SIN la capa de fondo: el Centro de control y los
++ * mapas, como en la web (ahí manda el mapa). Los colores son los mismos.
 + */
 +export function TemaSinFondo({ children, activo = true }: { children: ReactNode; activo?: boolean }) {
 +  const ctx = useContext(ThemeContext);
@@ -9915,49 +10052,21 @@ index b4a774c..26991e9 100644
 +  return activo;
 +}
 diff --git a/src/theme/createTheme.ts b/src/theme/createTheme.ts
-index 1b496de..09ede22 100644
+index 1b496de..152d02b 100644
 --- a/src/theme/createTheme.ts
 +++ b/src/theme/createTheme.ts
-@@ -5,7 +5,21 @@
-  *             + azul FOM fijo + nombre y logo de la empresa.
-  */
- 
--import { borderWidths, buildShadows, colorSchemes, motion, opacity, paletaGlass, radii, spacing, typography } from './tokens';
-+import { fondoPorId, type FondoId } from './fondos';
-+import {
-+  borderWidths,
-+  buildShadows,
-+  colorSchemes,
-+  motion,
-+  opacity,
-+  paletaFondoClaro,
-+  paletaFondoOscuro,
-+  paletaGlass,
-+  radii,
-+  spacing,
-+  superficiesOpacas,
-+  typography,
-+} from './tokens';
- import type { Apariencia, ColorScheme, CompanyBrand, Theme } from './types';
- 
- /** El azul FOM y su texto encima: los mismos en la web y en la app. */
-@@ -20,12 +34,23 @@ const SOBRE_AZUL_FOM = '#08121C';
+@@ -19,6 +19,10 @@ const SOBRE_AZUL_FOM = '#08121C';
+  * `primary` es siempre el azul FOM con texto oscuro encima, que se lee bien
   * (≈7:1); el blanco sobre azul no llegaba al mínimo. Glass gris solo existe en
   * oscuro: en claro se pinta el claro de siempre.
++ *
++ * El fondo elegido (Apariencia › Fondo) NO entra aquí: cambia solo la capa de
++ * atrás (`ScreenBackground`), nunca los colores. `ThemeProvider` solo le pone
++ * `fondo` y `fondoTono` al tema para que esa capa y el velo de los títulos lo sepan.
   */
--export function createTheme(scheme: ColorScheme, brand: CompanyBrand, apariencia: Apariencia = 'azul'): Theme {
-+export function createTheme(
-+  scheme: ColorScheme,
-+  brand: CompanyBrand,
-+  apariencia: Apariencia = 'azul',
-+  fondo: FondoId = 'ninguno',
-+  sinTransparencia = false,
-+): Theme {
-+  const tono = fondoPorId(fondo).tono;
-+  if (tono) return temaConFondo(tono, fondoPorId(fondo).id, brand, apariencia, sinTransparencia);
-+
+ export function createTheme(scheme: ColorScheme, brand: CompanyBrand, apariencia: Apariencia = 'azul'): Theme {
    const base = scheme === 'dark' && apariencia === 'glass' ? paletaGlass : colorSchemes[scheme];
- 
+@@ -26,6 +30,8 @@ export function createTheme(scheme: ColorScheme, brand: CompanyBrand, apariencia
    return {
      colorScheme: scheme,
      apariencia,
@@ -9966,48 +10075,12 @@ index 1b496de..09ede22 100644
      colors: {
        ...base,
        primary: AZUL_FOM,
-@@ -41,3 +66,35 @@ export function createTheme(scheme: ColorScheme, brand: CompanyBrand, apariencia
-     brand,
-   };
- }
-+
-+/**
-+ * Con un fondo elegido manda su material, como en la web (el fondo pisa al
-+ * diseño): vidrio claro con letra oscura y la acción en #1769C2, o vidrio azul
-+ * noche con el azul FOM de siempre. Con «Reducir transparencia», opacas.
-+ */
-+function temaConFondo(
-+  tono: 'claro' | 'oscuro',
-+  fondo: FondoId,
-+  brand: CompanyBrand,
-+  apariencia: Apariencia,
-+  sinTransparencia: boolean,
-+): Theme {
-+  const claro = tono === 'claro';
-+  const base = claro ? paletaFondoClaro : { ...paletaFondoOscuro, primary: AZUL_FOM, onPrimary: SOBRE_AZUL_FOM };
-+  const scheme: ColorScheme = claro ? 'light' : 'dark';
-+  return {
-+    colorScheme: scheme,
-+    apariencia,
-+    fondo,
-+    fondoTono: tono,
-+    colors: sinTransparencia ? { ...base, ...superficiesOpacas[tono] } : base,
-+    spacing,
-+    radii,
-+    typography,
-+    shadows: buildShadows(scheme, 'azul'),
-+    motion,
-+    opacity,
-+    borderWidths,
-+    brand,
-+  };
-+}
 diff --git a/src/theme/fondo-guardado.ts b/src/theme/fondo-guardado.ts
 new file mode 100644
-index 0000000..33a5abe
+index 0000000..7365821
 --- /dev/null
 +++ b/src/theme/fondo-guardado.ts
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,27 @@
 +/**
 + * Dónde se guarda el fondo: en el teléfono, por cuenta, con la misma clave de
 + * la web (`fom.fondo.v1:<cuenta>`). Fuera del prefijo `fom.memoria.`, que se
@@ -10017,6 +10090,7 @@ index 0000000..33a5abe
 +import AsyncStorage from '@react-native-async-storage/async-storage';
 +
 +import { guardarFondoDe, leerFondoDe, type FondoId } from './fondos';
++import { guardarVidrioDe, leerVidrioDe, type VidrioId } from './vidrio';
 +
 +export function leerFondo(cuenta: string): Promise<FondoId> {
 +  return leerFondoDe(AsyncStorage, cuenta);
@@ -10024,6 +10098,15 @@ index 0000000..33a5abe
 +
 +export function guardarFondo(cuenta: string, fondo: FondoId): Promise<boolean> {
 +  return guardarFondoDe(AsyncStorage, cuenta, fondo);
++}
++
++/** El vidrio de las tarjetas, igual: por cuenta y con la clave de la web (`fom.vidrio.v1:<cuenta>`). */
++export function leerVidrio(cuenta: string): Promise<VidrioId | null> {
++  return leerVidrioDe(AsyncStorage, cuenta);
++}
++
++export function guardarVidrio(cuenta: string, vidrio: VidrioId): Promise<boolean> {
++  return guardarVidrioDe(AsyncStorage, cuenta, vidrio);
 +}
 diff --git a/src/theme/fondos-imagenes.ts b/src/theme/fondos-imagenes.ts
 new file mode 100644
@@ -10057,24 +10140,25 @@ index 0000000..b96fb6e
 +};
 diff --git a/src/theme/fondos.ts b/src/theme/fondos.ts
 new file mode 100644
-index 0000000..e18f174
+index 0000000..48b250c
 --- /dev/null
 +++ b/src/theme/fondos.ts
-@@ -0,0 +1,118 @@
+@@ -0,0 +1,119 @@
 +/**
 + * FONDOS DEL PANEL: el mismo catálogo de la web (`apariencia-store.js` ›
 + * `FONDOS`, docs/FONDOS.md), con los mismos ids y nombres.
 + *
 + * Una imagen o un degradado detrás de las pantallas, menos el Centro de
 + * control y los mapas (ahí manda el mapa). Es independiente del tema (Azul FOM
-+ * o Glass gris) y se guarda en ESTE teléfono, por cuenta.
++ * o Glass gris) y cambia SOLO la capa de atrás: tarjetas, barras, botones,
++ * colores y logo son siempre los del tema. Se guarda en ESTE teléfono, por cuenta.
 + *
 + * Este archivo es puro (sin imágenes ni almacenamiento): así lo lee la prueba
 + * en Node. Las imágenes van en `fondos-imagenes.ts` y el guardado en
 + * `fondo-guardado.ts`.
 + */
 +
-+/** Material de las tarjetas encima del fondo: vidrio claro o azul noche. */
++/** Tono de la imagen. Solo decide cuánto velo lleva la letra que va directo encima. */
 +export type TonoFondo = 'claro' | 'oscuro';
 +
 +export type FondoId = 'ninguno' | 'blanco-carros' | 'perla' | 'patio-noche' | 'carretera' | 'noche-azul';
@@ -10101,7 +10185,7 @@ index 0000000..e18f174
 +  {
 +    id: 'blanco-carros',
 +    nombre: 'Blanco con carros',
-+    descripcion: 'Blanco difuminado con la flota al fondo. Tarjetas de vidrio claro.',
++    descripcion: 'Blanco difuminado con la flota al fondo.',
 +    tono: 'claro',
 +    foto: 'blanco-carros',
 +    degradado: ['#F6F8FB', '#F1F4F8', '#E8ECF1'],
@@ -10109,7 +10193,7 @@ index 0000000..e18f174
 +  {
 +    id: 'perla',
 +    nombre: 'Perla',
-+    descripcion: 'Blanco y gris claro, sin foto. Tarjetas de vidrio claro.',
++    descripcion: 'Blanco y gris claro con luz azul FOM, sin foto.',
 +    tono: 'claro',
 +    degradado: ['#F9FAFC', '#EEF1F5', '#E7EBF0'],
 +  },
@@ -10180,10 +10264,10 @@ index 0000000..e18f174
 +  }
 +}
 diff --git a/src/theme/index.ts b/src/theme/index.ts
-index dc4744e..d0d3a45 100644
+index dc4744e..7cb1140 100644
 --- a/src/theme/index.ts
 +++ b/src/theme/index.ts
-@@ -6,15 +6,28 @@
+@@ -6,13 +6,16 @@
   *   import { useTheme, useThemeController, ThemeProvider } from '@/theme';
   */
  
@@ -10197,99 +10281,12 @@ index dc4744e..d0d3a45 100644
  export { APARIENCIAS } from './apariencia';
 +export { FONDO_POR_DEFECTO, FONDOS, fondoPorId, type Fondo, type FondoId, type TonoFondo } from './fondos';
 +export { IMAGENES_FONDO } from './fondos-imagenes';
++export { VIDRIOS, type VidrioId } from './vidrio';
  export { FUENTES_FOM, familiaPorPeso } from './fuentes';
--export { borderWidths, colorSchemes, motion, opacity, paletaGlass, radii, spacing, typography } from './tokens';
-+export {
-+  borderWidths,
-+  colorSchemes,
-+  motion,
-+  opacity,
-+  paletaFondoClaro,
-+  paletaFondoOscuro,
-+  paletaGlass,
-+  radii,
-+  spacing,
-+  typography,
-+} from './tokens';
+ export { borderWidths, colorSchemes, motion, opacity, paletaGlass, radii, spacing, typography } from './tokens';
  export {
-   CONTEO,
-   CURVA,
-diff --git a/src/theme/tokens.ts b/src/theme/tokens.ts
-index 8633d55..4b5f053 100644
---- a/src/theme/tokens.ts
-+++ b/src/theme/tokens.ts
-@@ -238,6 +238,69 @@ export const paletaGlass: ColorTokens = {
-   infoSurface: '#21374A',
- };
- 
-+/**
-+ * VIDRIO CLARO: las tarjetas sobre un fondo claro (Blanco con carros, Perla),
-+ * los mismos valores de la web (`apariencia-fondos.css`, tono «claro», en el
-+ * teléfono). Letra oscura y todo a 4.5:1 o más sobre la superficie. El azul de
-+ * marca #3D9BF5 no llega a AA sobre blanco: en claro la acción va en #1769C2
-+ * (lo fija `createTheme`).
-+ */
-+export const paletaFondoClaro: ColorTokens = {
-+  background: '#EEF1F5',
-+  surface: 'rgba(255, 255, 255, 0.9)',
-+  surfaceElevated: '#FFFFFF',
-+  surfaceSunken: 'rgba(244, 246, 249, 0.9)',
-+  text: '#0F141B',
-+  textSecondary: '#3D4654',
-+  textMuted: '#555F6D',
-+  textInverted: '#FFFFFF',
-+  border: 'rgba(15, 20, 27, 0.10)',
-+  borderStrong: 'rgba(15, 20, 27, 0.20)',
-+  primary: '#1769C2',
-+  onPrimary: '#FFFFFF',
-+  activeSurface: '#DCEBFC',
-+  onActive: '#0D4D8F',
-+  activeBorder: '#A8CDF3',
-+  success: '#12784A',
-+  onSuccess: '#FFFFFF',
-+  successSurface: '#E3F5EC',
-+  warning: '#8A5A00',
-+  onWarning: '#FFFFFF',
-+  warningSurface: '#FDF3D6',
-+  danger: '#C42B33',
-+  onDanger: '#FFFFFF',
-+  dangerSurface: '#FDEBEC',
-+  info: '#1769C2',
-+  onInfo: '#FFFFFF',
-+  infoSurface: '#E5F1FD',
-+  accent: '#6B3FE0',
-+  onAccent: '#FFFFFF',
-+  accentSurface: '#F0EAFF',
-+};
-+
-+/**
-+ * VIDRIO AZUL NOCHE: las tarjetas sobre un fondo oscuro (Patio al anochecer,
-+ * Carretera, Noche azul). Translúcidas al 90 %, sin desenfoque en vivo.
-+ */
-+export const paletaFondoOscuro: ColorTokens = {
-+  ...dark,
-+  background: '#0A0D12',
-+  surface: 'rgba(20, 26, 34, 0.9)',
-+  surfaceElevated: 'rgba(29, 37, 48, 0.94)',
-+  surfaceSunken: 'rgba(15, 20, 27, 0.86)',
-+  text: '#F3F5F8',
-+  textSecondary: '#C3CAD4',
-+  textMuted: '#9AA4B2',
-+  border: 'rgba(255, 255, 255, 0.10)',
-+  borderStrong: 'rgba(255, 255, 255, 0.20)',
-+};
-+
-+/** Con «Reducir transparencia»: las mismas superficies, opacas. */
-+export const superficiesOpacas: Record<'claro' | 'oscuro', Pick<ColorTokens, 'surface' | 'surfaceElevated' | 'surfaceSunken'>> = {
-+  claro: { surface: '#FFFFFF', surfaceElevated: '#FFFFFF', surfaceSunken: '#F1F4F7' },
-+  oscuro: { surface: '#141A22', surfaceElevated: '#1D2530', surfaceSunken: '#0F141B' },
-+};
-+
- /** Paletas indexadas por esquema. */
- export const colorSchemes: Record<ColorScheme, ColorTokens> = { light, dark };
- 
 diff --git a/src/theme/types.ts b/src/theme/types.ts
-index c9affc5..0361543 100644
+index c9affc5..0db4913 100644
 --- a/src/theme/types.ts
 +++ b/src/theme/types.ts
 @@ -7,6 +7,8 @@
@@ -10301,19 +10298,153 @@ index c9affc5..0361543 100644
  /** Esquema de color resuelto que realmente se pinta en pantalla. */
  export type ColorScheme = 'light' | 'dark';
  
-@@ -288,6 +290,12 @@ export interface Theme {
+@@ -288,6 +290,14 @@ export interface Theme {
    colorScheme: ColorScheme;
    /** Apariencia personal en uso (solo cambia algo en oscuro). */
    apariencia: Apariencia;
 +  /**
-+   * Fondo elegido detrás de las pantallas (`fondos.ts`) y el material de las
-+   * tarjetas encima: «claro» o «oscuro»; `null` = sin fondo.
++   * Fondo elegido detrás de las pantallas (`fondos.ts`) y el tono de su imagen
++   * («claro» u «oscuro»; `null` = sin fondo). No cambia ningún color: solo lo
++   * leen la capa de atrás (`ScreenBackground`) y el velo de los títulos que van
++   * directo sobre el fondo (`VeloTexto`).
 +   */
 +  fondo: FondoId;
 +  fondoTono: TonoFondo | null;
    /** Colores ya combinados con la marca. */
    colors: ColorTokens;
    spacing: SpacingScale;
+diff --git a/src/theme/vidrio.ts b/src/theme/vidrio.ts
+new file mode 100644
+index 0000000..1035ef9
+--- /dev/null
++++ b/src/theme/vidrio.ts
+@@ -0,0 +1,126 @@
++/**
++ * VIDRIO DE LAS TARJETAS: el mismo control de la web (Configuración ›
++ * Apariencia › Vidrio, `apariencia-store.js` › `VIDRIOS`, docs/FONDOS.md).
++ *
++ * Sólido · Suave · Medio · Intenso: cuánto se ve el fondo a través de las
++ * tarjetas, barras y hojas, como la transparencia de iOS. Independiente del
++ * tema y del fondo; se guarda en ESTE teléfono, por cuenta.
++ *
++ * Solo cambia la OPACIDAD de `surface`, `surfaceElevated` y `surfaceSunken`,
++ * nunca su color. En la app no hay desenfoque: `expo-blur` no está instalado.
++ *
++ * `alfa` es el TOPE de transparencia: con blanco puro detrás (oscuro) o negro
++ * (claro), la letra del tema sigue en AA. Lo comprueba test/vidrio.test.mjs.
++ * Sin elección (`null`) no se toca nada: el tema de siempre (Azul sólido,
++ * Glass gris «medio»).
++ *
++ * Archivo puro (sin React Native): lo lee la prueba en Node.
++ */
++
++export type VidrioId = 'solido' | 'suave' | 'medio' | 'intenso';
++
++/** El material de las superficies: Azul FOM oscuro, Glass gris o el tema claro. */
++export type MaterialVidrio = 'azul' | 'glass' | 'claro';
++
++/** Opacidad de [surface, surfaceElevated, surfaceSunken]. */
++type Alfas = readonly [number, number, number];
++
++export interface Vidrio {
++  id: VidrioId;
++  nombre: string;
++  alfa: Record<MaterialVidrio, Alfas>;
++}
++
++export const VIDRIOS: readonly Vidrio[] = [
++  { id: 'solido', nombre: 'Sólido', alfa: { azul: [1, 1, 1], glass: [1, 1, 1], claro: [1, 1, 1] } },
++  { id: 'suave', nombre: 'Suave', alfa: { azul: [0.97, 0.98, 0.97], glass: [0.94, 0.97, 0.88], claro: [0.97, 0.97, 0.98] } },
++  { id: 'medio', nombre: 'Medio', alfa: { azul: [0.94, 0.96, 0.94], glass: [0.88, 0.94, 0.78], claro: [0.93, 0.93, 0.95] } },
++  { id: 'intenso', nombre: 'Intenso', alfa: { azul: [0.91, 0.95, 0.91], glass: [0.74, 0.84, 0.72], claro: [0.88, 0.88, 0.92] } },
++];
++
++/** Sin elección guardada: manda el tema, como hasta hoy. */
++export const VIDRIO_POR_DEFECTO = null;
++
++/** El paso que equivale a lo de siempre en cada material. */
++export const VIDRIO_DEL_MATERIAL: Record<MaterialVidrio, VidrioId> = { azul: 'solido', glass: 'medio', claro: 'solido' };
++
++export function esVidrio(valor: unknown): valor is VidrioId {
++  return VIDRIOS.some((v) => v.id === valor);
++}
++
++export function materialDe(scheme: 'light' | 'dark', apariencia: string): MaterialVidrio {
++  if (scheme === 'light') return 'claro';
++  return apariencia === 'glass' ? 'glass' : 'azul';
++}
++
++/** El paso que se ve: «reducir transparencia» manda Sólido; sin elección, el del material. */
++export function vidrioEfectivo(material: MaterialVidrio, elegido: unknown, reducirTransparencia = false): VidrioId {
++  if (reducirTransparencia) return 'solido';
++  return esVidrio(elegido) ? elegido : VIDRIO_DEL_MATERIAL[material];
++}
++
++/** El color con otra opacidad: acepta `#RRGGBB` y `rgb(a)(r, g, b[, a])`. Nunca cambia el tono. */
++export function conAlfa(color: string, alfa: number): string {
++  let rgb: number[] | null = null;
++  const h = /^#([0-9a-f]{6})$/iu.exec(color.trim());
++  if (h) rgb = [0, 2, 4].map((i) => parseInt(h[1].slice(i, i + 2), 16));
++  const f = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/iu.exec(color.trim());
++  if (!rgb && f) rgb = [Number(f[1]), Number(f[2]), Number(f[3])];
++  if (!rgb) return color;
++  return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alfa})`;
++}
++
++type Superficies = { surface: string; surfaceElevated: string; surfaceSunken: string };
++
++/**
++ * Las superficies con el vidrio elegido. Sin elección y sin «reducir
++ * transparencia», devuelve los MISMOS colores (el tema de siempre).
++ */
++export function aplicarVidrio<T extends Superficies>(
++  colors: T,
++  material: MaterialVidrio,
++  elegido: unknown,
++  reducirTransparencia = false,
++): T {
++  if (!reducirTransparencia && !esVidrio(elegido)) return colors;
++  const paso = VIDRIOS.find((v) => v.id === vidrioEfectivo(material, elegido, reducirTransparencia)) ?? VIDRIOS[0];
++  const [sup, alta, baja] = paso.alfa[material];
++  return {
++    ...colors,
++    surface: conAlfa(colors.surface, sup),
++    surfaceElevated: conAlfa(colors.surfaceElevated, alta),
++    surfaceSunken: conAlfa(colors.surfaceSunken, baja),
++  };
++}
++
++/** La misma clave de la web: una por cuenta, nunca por empresa. */
++export function claveVidrio(cuenta: string): string {
++  return `fom.vidrio.v1:${encodeURIComponent(cuenta)}`;
++}
++
++export interface AlmacenVidrio {
++  getItem: (clave: string) => Promise<string | null | undefined>;
++  setItem: (clave: string, valor: string) => Promise<void>;
++}
++
++/** El vidrio guardado de una cuenta; sin cuenta, sin nada, inválido o si falla: `null` (el de siempre). */
++export async function leerVidrioDe(almacen: AlmacenVidrio, cuenta: string): Promise<VidrioId | null> {
++  if (!cuenta) return VIDRIO_POR_DEFECTO;
++  try {
++    const valor = await almacen.getItem(claveVidrio(cuenta));
++    return esVidrio(valor) ? valor : VIDRIO_POR_DEFECTO;
++  } catch {
++    return VIDRIO_POR_DEFECTO;
++  }
++}
++
++/** Guarda la elección de la cuenta. Devuelve si quedó guardada. */
++export async function guardarVidrioDe(almacen: AlmacenVidrio, cuenta: string, vidrio: VidrioId): Promise<boolean> {
++  if (!cuenta || !esVidrio(vidrio)) return false;
++  try {
++    await almacen.setItem(claveVidrio(cuenta), vidrio);
++    return true;
++  } catch {
++    return false;
++  }
++}
 diff --git a/src/types/index.ts b/src/types/index.ts
 index 6f8105e..e128db5 100644
 --- a/src/types/index.ts
@@ -12608,10 +12739,10 @@ index 0000000..1114763
 +});
 diff --git a/test/fondos.test.mjs b/test/fondos.test.mjs
 new file mode 100644
-index 0000000..d97b6d7
+index 0000000..20a7c4f
 --- /dev/null
 +++ b/test/fondos.test.mjs
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,139 @@
 +import { test } from 'node:test';
 +import assert from 'node:assert/strict';
 +import { existsSync, readFileSync, statSync } from 'node:fs';
@@ -12718,6 +12849,38 @@ index 0000000..d97b6d7
 +  assert.match(leer('src/app/mapa-flota.tsx'), /<TemaSinFondo>\s*<MapaFlotaContenido \/>/u);
 +  assert.match(leer('src/components/map-vehiculo.tsx'), /<TemaSinFondo>/u);
 +  assert.match(leer('src/components/map-vehiculo.web.tsx'), /<TemaSinFondo>/u);
++});
++
++// Decisión de Marco (5 nov 2026): «el glass es para todo menos el fondo, y los fondos son
++// únicamente el fondo». El tema (Azul FOM / Glass gris, claro u oscuro) decide tarjetas,
++// barras, botones, colores y logo; el fondo solo pinta la imagen de atrás.
++test('el fondo no cambia tokens de color del diseño', () => {
++  const tokens = leer('src/theme/tokens.ts');
++  assert.doesNotMatch(tokens, /paletaFondo|superficiesOpacas/u, 'tokens.ts no trae paletas por fondo');
++  assert.doesNotMatch(leer('src/theme/index.ts'), /paletaFondo/u);
++
++  const crear = leer('src/theme/createTheme.ts');
++  assert.match(crear, /export function createTheme\(scheme: ColorScheme, brand: CompanyBrand, apariencia: Apariencia = 'azul'\): Theme \{/u, 'createTheme no recibe el fondo');
++  assert.doesNotMatch(crear, /fondoPorId|#1769C2/iu);
++
++  const proveedor = leer('src/theme/ThemeProvider.tsx');
++  // Con fondo, el tema es el MISMO objeto de colores: solo se le suman `fondo` y `fondoTono`.
++  assert.match(proveedor, /\{ \.\.\.temaSinFondo, fondo, fondoTono: fondoPorId\(fondo\)\.tono \}/u);
++  for (const m of proveedor.matchAll(/createTheme\(([^)]*)\)/gu)) {
++    assert.ok(m[1].split(',').length <= 3, `createTheme(${m[1]}) no lleva fondo`);
++  }
++
++  assert.doesNotMatch(leer('src/components/logo-fom.tsx'), /tinta/u, 'el logo no cambia con el fondo');
++  assert.doesNotMatch(leer('src/components/encabezado-fom.tsx'), /fondoTono === 'claro'/u);
++  assert.match(leer('src/app/apariencia.tsx'), /'El azul FOM y los botones\.'/u);
++});
++
++test('la letra que va directo sobre el fondo lleva velo, sin cambiar su color', () => {
++  const capa = leer('src/components/fondo-pantalla.tsx');
++  assert.match(capa, /export function VeloTexto/u);
++  assert.match(capa, /choca \? 0\.86 : 0\.5/u);
++  assert.match(leer('src/components/encabezado-fom.tsx'), /<VeloTexto \/>/u);
++  assert.match(leer('src/components/resumen-piezas.tsx'), /<VeloTexto /u);
 +});
 diff --git a/test/regla-conteos.test.mjs b/test/regla-conteos.test.mjs
 new file mode 100644
@@ -13571,6 +13734,139 @@ index 0000000..71e5dd3
 +  assert.equal(normalizarPlaca(' a12bc3d '), 'A12BC3D');
 +  assert.equal(normalizarPlaca(null), '');
 +  assert.equal(normalizarPlaca(undefined), '');
++});
+diff --git a/test/vidrio.test.mjs b/test/vidrio.test.mjs
+new file mode 100644
+index 0000000..4e6448c
+--- /dev/null
++++ b/test/vidrio.test.mjs
+@@ -0,0 +1,127 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { existsSync, readFileSync } from 'node:fs';
++import { fileURLToPath, pathToFileURL } from 'node:url';
++
++// ============================================================
++// VIDRIO DE LAS TARJETAS (docs/FONDOS.md › Vidrio de la web)
++// Sólido · Suave · Medio · Intenso. Espejo de test/apariencia-vidrio.test.js.
++// ============================================================
++
++const { VIDRIOS, VIDRIO_POR_DEFECTO, VIDRIO_DEL_MATERIAL, aplicarVidrio, conAlfa, vidrioEfectivo, materialDe, claveVidrio, leerVidrioDe, guardarVidrioDe } =
++  await import('../src/theme/vidrio.ts');
++
++const raiz = new URL('..', import.meta.url);
++const leer = (ruta) => readFileSync(new URL(ruta, raiz), 'utf8');
++
++// Las superficies y la letra de cada tema, leídas de tokens.ts (light, dark, paletaGlass).
++const tokens = leer('src/theme/tokens.ts');
++const bloque = (nombre) => tokens.slice(tokens.indexOf(`const ${nombre}`), tokens.indexOf('};', tokens.indexOf(`const ${nombre}`)));
++const color = (b, k) => new RegExp(`\\b${k}: '([^']+)'`, 'u').exec(b)?.[1];
++const paleta = (nombre) => {
++  const b = bloque(nombre);
++  return Object.fromEntries(['surface', 'surfaceElevated', 'surfaceSunken', 'text', 'textSecondary', 'textMuted'].map((k) => [k, color(b, k)]));
++};
++const PALETAS = { claro: paleta('light'), azul: paleta('dark'), glass: paleta('paletaGlass') };
++
++test('los cuatro pasos, con los ids y nombres de la web', () => {
++  assert.deepEqual(VIDRIOS.map((v) => [v.id, v.nombre]), [['solido', 'Sólido'], ['suave', 'Suave'], ['medio', 'Medio'], ['intenso', 'Intenso']]);
++  for (const p of Object.values(PALETAS)) for (const v of Object.values(p)) assert.ok(v, 'color leído de tokens.ts');
++});
++
++const storeWeb = fileURLToPath(new URL('../fom-juntar/src/panel/apariencia-store.js', raiz));
++test('mismos topes que la web para Azul y Glass, si está a mano', { skip: !existsSync(storeWeb) && 'la web no está al lado' }, async () => {
++  const web = await import(pathToFileURL(storeWeb).href);
++  assert.deepEqual(VIDRIOS.map((v) => [v.id, v.alfa.azul, v.alfa.glass]), web.VIDRIOS.map((v) => [v.id, v.alfa.azul, v.alfa.glass]));
++  assert.equal(claveVidrio('a@b'), `fom.vidrio.v1:${encodeURIComponent('a@b')}`);
++});
++
++test('por defecto, el vidrio de hoy: los mismos colores y el paso del tema', async () => {
++  assert.equal(VIDRIO_POR_DEFECTO, null);
++  for (const [m, p] of Object.entries(PALETAS)) assert.equal(aplicarVidrio(p, m, null), p, `${m} sin elección no cambia`);
++  assert.equal(vidrioEfectivo('azul', null), 'solido');
++  assert.equal(vidrioEfectivo('glass', null), 'medio');
++  assert.equal(VIDRIO_DEL_MATERIAL.claro, 'solido');
++  assert.equal(materialDe('dark', 'glass'), 'glass');
++  assert.equal(materialDe('light', 'glass'), 'claro');
++  const almacen = { getItem: async () => null, setItem: async () => undefined };
++  assert.equal(await leerVidrioDe(almacen, 'a'), null);
++  assert.equal(await leerVidrioDe(almacen, ''), null);
++  // «Medio» en Glass son exactamente las superficies de paletaGlass.
++  const medio = aplicarVidrio(PALETAS.glass, 'glass', 'medio');
++  assert.equal(medio.surface, PALETAS.glass.surface);
++  assert.equal(medio.surfaceElevated, PALETAS.glass.surfaceElevated);
++  assert.equal(medio.surfaceSunken, PALETAS.glass.surfaceSunken);
++});
++
++test('un valor inválido cae al valor por defecto', async () => {
++  const datos = new Map([[claveVidrio('b'), 'cristal'], [claveVidrio('c'), 'suave']]);
++  const almacen = { getItem: async (k) => datos.get(k) ?? null, setItem: async (k, v) => void datos.set(k, v) };
++  assert.equal(await leerVidrioDe(almacen, 'b'), null);
++  assert.equal(await leerVidrioDe(almacen, 'c'), 'suave');
++  assert.equal(await guardarVidrioDe(almacen, 'c', '200%'), false);
++  assert.equal(vidrioEfectivo('azul', 'cristal'), 'solido');
++  assert.equal(aplicarVidrio(PALETAS.azul, 'azul', 'cristal'), PALETAS.azul);
++  const roto = { getItem: async () => { throw new Error('sin almacenamiento'); }, setItem: async () => { throw new Error('lleno'); } };
++  assert.equal(await leerVidrioDe(roto, 'c'), null);
++  assert.equal(await guardarVidrioDe(roto, 'c', 'medio'), false);
++});
++
++test('se guarda por cuenta, con la clave de la web', async () => {
++  const datos = new Map();
++  const almacen = { getItem: async (k) => datos.get(k) ?? null, setItem: async (k, v) => void datos.set(k, v) };
++  assert.equal(await guardarVidrioDe(almacen, 'a', 'intenso'), true);
++  assert.equal(await guardarVidrioDe(almacen, '', 'intenso'), false);
++  assert.equal(await leerVidrioDe(almacen, 'a'), 'intenso');
++  assert.equal(await leerVidrioDe(almacen, 'b'), null);
++  assert.deepEqual([...datos.keys()], ['fom.vidrio.v1:a']);
++});
++
++test('«reducir transparencia» fuerza Sólido: superficies opacas', () => {
++  for (const [m, p] of Object.entries(PALETAS)) {
++    for (const v of [null, ...VIDRIOS.map((x) => x.id)]) {
++      assert.equal(vidrioEfectivo(m, v, true), 'solido');
++      const c = aplicarVidrio(p, m, v, true);
++      for (const k of ['surface', 'surfaceElevated', 'surfaceSunken']) assert.match(c[k], /, 1\)$/u, `${m}/${v}/${k} opaca`);
++    }
++  }
++  assert.match(leer('src/theme/ThemeProvider.tsx'), /isReduceTransparencyEnabled/u);
++});
++
++// Contraste WCAG: oscuro con blanco puro detrás, claro con negro puro detrás (el peor caso).
++const lin = (c) => { const x = c / 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; };
++const lum = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
++const rgbDe = (c) => (/^#/u.test(c) ? [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)) : c.match(/[\d.]+/gu).slice(0, 3).map(Number));
++const alfaDe = (c) => (/^rgba/u.test(c) ? Number(c.match(/[\d.]+/gu)[3]) : 1);
++const contraste = (x, y) => { const [a, b] = [lum(x), lum(y)].sort((m, n) => n - m); return (a + 0.05) / (b + 0.05); };
++
++test('con cualquier vidrio, la letra del tema pasa AA (texto y secundaria; la tenue de Azul y Glass también)', () => {
++  for (const [m, p] of Object.entries(PALETAS)) {
++    const detras = m === 'claro' ? 0 : 255;
++    // La tenue del tema claro (#8A919E) ya queda bajo AA sobre blanco opaco: es del tema, no del vidrio.
++    const letras = m === 'claro' ? [p.text, p.textSecondary] : [p.text, p.textSecondary, p.textMuted];
++    for (const v of VIDRIOS) {
++      const c = aplicarVidrio(p, m, v.id);
++      for (const k of ['surface', 'surfaceElevated', 'surfaceSunken']) {
++        const a = alfaDe(c[k]);
++        const fondo = rgbDe(c[k]).map((x) => x * a + detras * (1 - a));
++        for (const l of letras) {
++          const r = contraste(rgbDe(l), fondo);
++          assert.ok(r >= 4.5, `${m} · ${v.id} · ${k}: ${l} queda en ${r.toFixed(2)}:1`);
++        }
++      }
++    }
++  }
++});
++
++test('el vidrio nunca cambia el color, solo la opacidad', () => {
++  assert.equal(conAlfa('#141A22', 0.9), 'rgba(20, 26, 34, 0.9)');
++  assert.equal(conAlfa('rgba(39, 42, 48, 0.88)', 0.74), 'rgba(39, 42, 48, 0.74)');
++  for (const [m, p] of Object.entries(PALETAS)) {
++    const c = aplicarVidrio(p, m, 'intenso');
++    for (const k of Object.keys(p)) {
++      if (k.startsWith('surface')) assert.deepEqual(rgbDe(c[k]), rgbDe(p[k]), `${m}/${k} mismo tono`);
++      else assert.equal(c[k], p[k], `${m}/${k} intacto`);
++    }
++  }
 +});
 diff --git a/tsconfig.json b/tsconfig.json
 index 1d65d1e..2f8c765 100644
