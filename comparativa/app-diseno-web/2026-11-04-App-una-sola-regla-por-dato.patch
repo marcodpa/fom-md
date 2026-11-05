@@ -109,11 +109,70 @@ index 62a93f5..0000000
 -tocar pantallas ni tipos. Orden sugerido: auth → empresas/perfiles → vehículos
 -→ ODT → inspección → reglas/notificaciones. La app cae a mocks automáticamente
 -si `.env` no está, así que la migración puede ser gradual y sin riesgo.
+diff --git a/assets/fondos/blanco-carros-mini.webp b/assets/fondos/blanco-carros-mini.webp
+new file mode 100644
+index 0000000..4c95c2a
+Binary files /dev/null and b/assets/fondos/blanco-carros-mini.webp differ
+diff --git a/assets/fondos/blanco-carros-movil.webp b/assets/fondos/blanco-carros-movil.webp
+new file mode 100644
+index 0000000..98b4d07
+Binary files /dev/null and b/assets/fondos/blanco-carros-movil.webp differ
+diff --git a/assets/fondos/carretera-mini.webp b/assets/fondos/carretera-mini.webp
+new file mode 100644
+index 0000000..3beeb16
+Binary files /dev/null and b/assets/fondos/carretera-mini.webp differ
+diff --git a/assets/fondos/carretera-movil.webp b/assets/fondos/carretera-movil.webp
+new file mode 100644
+index 0000000..50d8469
+Binary files /dev/null and b/assets/fondos/carretera-movil.webp differ
+diff --git a/assets/fondos/patio-noche-mini.webp b/assets/fondos/patio-noche-mini.webp
+new file mode 100644
+index 0000000..e348567
+Binary files /dev/null and b/assets/fondos/patio-noche-mini.webp differ
+diff --git a/assets/fondos/patio-noche-movil.webp b/assets/fondos/patio-noche-movil.webp
+new file mode 100644
+index 0000000..2b8e598
+Binary files /dev/null and b/assets/fondos/patio-noche-movil.webp differ
+diff --git a/src/app/(driver)/_layout.tsx b/src/app/(driver)/_layout.tsx
+index 78731aa..00c492e 100644
+--- a/src/app/(driver)/_layout.tsx
++++ b/src/app/(driver)/_layout.tsx
+@@ -9,7 +9,7 @@ import { PantallaTransicion } from '@/components/pantalla-transicion';
+ import { TabIcon } from '@/components/tab-icon';
+ import { useDriving, useTenant } from '@/session';
+ import { SyncBanner } from '@/sync';
+-import { opcionesPestanas, useReducedMotion } from '@/theme';
++import { opcionesPestanas, TemaSinFondo, useReducedMotion } from '@/theme';
+ import { opcionesPestanaConMapa } from '@/theme/movimiento';
+ 
+ /**
+@@ -85,7 +85,12 @@ export default function DriverTabsLayout() {
+   return (
+     <View style={styles.flex}>
+       <Tabs
+-        tabBar={(props) => <AppTabBar {...props} />}
++        tabBar={(props) => (
++          // Sobre el mapa del Inicio la barra va sin el fondo elegido, como el mapa.
++          <TemaSinFondo activo={props.state.routes[props.state.index]?.name === 'index'}>
++            <AppTabBar {...props} />
++          </TemaSinFondo>
++        )}
+         // Sin esto, el fundido a veces deja la pestaña entrante en blanco/negro
+         // (carrera al desmontar la escena saliente: react-navigation #12755).
+         detachInactiveScreens={false}
 diff --git a/src/app/(driver)/index.tsx b/src/app/(driver)/index.tsx
-index 9aace39..75c3bae 100644
+index 9aace39..0e9f5d5 100644
 --- a/src/app/(driver)/index.tsx
 +++ b/src/app/(driver)/index.tsx
-@@ -60,17 +60,14 @@ import {
+@@ -53,6 +53,7 @@ import {
+   DEFAULT_BRAND,
+   darken,
+   lighten,
++  TemaSinFondo,
+   useReducedMotion,
+   useTheme,
+   useThemeController,
+@@ -60,17 +61,14 @@ import {
  } from '@/theme';
  import type {
    Emergencia,
@@ -134,7 +193,16 @@ index 9aace39..75c3bae 100644
  
  // Telemetría → color del tema.
  function tempColor(c: number): keyof ColorTokens {
-@@ -102,7 +99,8 @@ export default function InicioScreen() {
+@@ -85,7 +83,7 @@ function tempColor(c: number): keyof ColorTokens {
+  * estilo Google/Apple Maps (DISEÑO §1). Sin chip, muestra solo lo que no
+  * depende del vehículo. Todo pasa por la capa de servicios (mock con «TODO API»).
+  */
+-export default function InicioScreen() {
++function InicioContenido() {
+   const { colors, spacing, radii, shadows } = useTheme();
+   const reducido = useReducedMotion();
+   const { setBrand } = useThemeController();
+@@ -102,7 +100,8 @@ export default function InicioScreen() {
    const [vehicle, setVehicle] = useState<Vehicle | null>(null);
    /*
     * DÓNDE Y CÓMO está la unidad, en vivo y con la misma regla que el mapa de la
@@ -144,7 +212,7 @@ index 9aace39..75c3bae 100644
     * pedía la posición UNA vez al abrir y el estado salía de la velocidad —que
     * FOM devuelve en null—, así que el punto se quedaba clavado y siempre gris.
     */
-@@ -125,8 +123,26 @@ export default function InicioScreen() {
+@@ -125,8 +124,26 @@ export default function InicioScreen() {
    const [sosAjenos, setSosAjenos] = useState<Emergencia[]>([]);
    // Avisos sin leer: enciende el punto de la campana del encabezado.
    const [sinLeer, setSinLeer] = useState(0);
@@ -171,7 +239,7 @@ index 9aace39..75c3bae 100644
    /** Lo pendiente de mantenimiento de su unidad (`null`: no se pudo leer). */
    const [pendientes, setPendientes] = useState<number | null>(null);
  
-@@ -205,16 +221,23 @@ export default function InicioScreen() {
+@@ -205,16 +222,23 @@ export default function InicioScreen() {
              if (!active) return;
              setEmergenciaActiva(lista.find((e) => e.creadorId === user.id) ?? null);
              setSosAjenos(lista.filter((e) => e.creadorId !== user.id));
@@ -200,7 +268,7 @@ index 9aace39..75c3bae 100644
        }
        // El punto de la campana solo se enciende si hay algo sin leer (mismo
        // criterio que el tab de Mantenimiento). El panel se recuerda un minuto
-@@ -224,14 +247,17 @@ export default function InicioScreen() {
+@@ -224,14 +248,17 @@ export default function InicioScreen() {
            .then((p) => {
              if (!active) return;
              setSinLeer(p.noLeidas);
@@ -221,7 +289,7 @@ index 9aace39..75c3bae 100644
            });
        }
        return () => {
-@@ -266,20 +292,24 @@ export default function InicioScreen() {
+@@ -266,20 +293,24 @@ export default function InicioScreen() {
  
    if (status !== 'signedIn' || !user) return <Redirect href="/login" />;
  
@@ -253,7 +321,7 @@ index 9aace39..75c3bae 100644
    // ───────── SIN VEHÍCULO ASIGNADO ──────────
    //  Misma vista que la de cualquier conductor (franja + mapa a pantalla
    //  completa + lengüeta), pero SIN nada del vehículo: el mapa muestra solo tu
-@@ -343,6 +373,7 @@ export default function InicioScreen() {
+@@ -343,6 +374,7 @@ export default function InicioScreen() {
                </View>
              </View>
            }>
@@ -261,7 +329,7 @@ index 9aace39..75c3bae 100644
            {/* «No se pudo saber» no es «no tienes»: con la red caída, decirle
                que no tiene vehículo era mentirle y esconderle su unidad. */}
            {errorSesion ? (
-@@ -379,21 +410,20 @@ export default function InicioScreen() {
+@@ -379,21 +411,20 @@ export default function InicioScreen() {
    // sin fondo montada sobre la hoja, y la hoja con el Resumen. Se sube para ver
    // la telemetría y, al desplazarla, la franja se encoge y queda fija.
    const velocidad = telemetry?.velocidadKmh ?? 0;
@@ -291,7 +359,7 @@ index 9aace39..75c3bae 100644
    const score = manejo.data;
    const indice: IndiceCasilla =
      score && calificacionManejo(score) !== 'unavailable'
-@@ -442,8 +472,8 @@ export default function InicioScreen() {
+@@ -442,8 +473,8 @@ export default function InicioScreen() {
                      id: vehicle.id,
                      label: etiquetaCortaDeUnidad(vehicle),
                      coords: { lat: vehicleCoords.lat, lng: vehicleCoords.lng },
@@ -302,7 +370,7 @@ index 9aace39..75c3bae 100644
                      rumbo: vehicleCoords.rumbo ?? null,
                      placa: vehicle.placa,
                      ultimoReporte: vehicleCoords.recibidaEn ?? null,
-@@ -527,6 +557,7 @@ export default function InicioScreen() {
+@@ -527,6 +558,7 @@ export default function InicioScreen() {
            foto={<FotoMontada vehicle={vehicle} />}
            resumen={
              <View style={{ gap: spacing.md }}>
@@ -310,6 +378,19 @@ index 9aace39..75c3bae 100644
                {/* UN COMPAÑERO PIDIÓ AYUDA: antes que nada de la unidad propia. */}
                {sosAjenos.map((e) => (
                  <AvisoEmergencia
+@@ -616,3 +648,12 @@ const styles = StyleSheet.create({
+   mapaUnidad: { position: 'absolute', left: 0, right: 0, overflow: 'hidden' },
+   inline: { flexDirection: 'row', alignItems: 'center' },
+ });
++
++/** El Inicio del conductor es un mapa a pantalla completa: va sin fondo ni su material. */
++export default function InicioScreen() {
++  return (
++    <TemaSinFondo>
++      <InicioContenido />
++    </TemaSinFondo>
++  );
++}
 diff --git a/src/app/(driver)/inspeccion.tsx b/src/app/(driver)/inspeccion.tsx
 index 0d1bbb9..3cb38cc 100644
 --- a/src/app/(driver)/inspeccion.tsx
@@ -366,6 +447,40 @@ index b76a45f..c0f8a46 100644
  
    const tel = separarTelefono(perfil?.telefono ?? '');
    const pais = paisPorCodigo(tel.codigo);
+diff --git a/src/app/_layout.tsx b/src/app/_layout.tsx
+index 61c1279..164a84f 100644
+--- a/src/app/_layout.tsx
++++ b/src/app/_layout.tsx
+@@ -9,7 +9,7 @@ import { StyleSheet, View } from 'react-native';
+ import { GestureHandlerRootView } from 'react-native-gesture-handler';
+ import { SafeAreaProvider } from 'react-native-safe-area-context';
+ 
+-import { AuthProvider } from '@/auth';
++import { AuthProvider, useAuth } from '@/auth';
+ import { FundidoTema } from '@/components/fundido-tema';
+ import { MedidorFom } from '@/components/medidor-fom';
+ import { SplashRuta } from '@/components/splash-ruta';
+@@ -97,10 +97,18 @@ const HOJA = opcionesHoja;
+  * por ahí asomaba el gris casi blanco detrás de pantallas oscuras.
+  */
+ function NavigationChrome() {
+-  const { colors } = useTheme();
+-  const { colorScheme } = useThemeController();
++  // El esquema del tema EN USO: con un fondo claro, la navegación también es clara.
++  const { colors, colorScheme } = useTheme();
++  const { setCuentaFondo } = useThemeController();
+   const reducido = useReducedMotion();
+ 
++  // El fondo es por cuenta: el tema lee el de quien entró; al salir, sin fondo.
++  const { user } = useAuth();
++  const cuenta = user?.id ?? '';
++  useEffect(() => {
++    setCuentaFondo(cuenta);
++  }, [cuenta, setCuentaFondo]);
++
+   const temaNavegacion = useMemo(() => {
+     const base = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
+     return {
 diff --git a/src/app/accion-mantenimiento.tsx b/src/app/accion-mantenimiento.tsx
 index f885675..0e7e552 100644
 --- a/src/app/accion-mantenimiento.tsx
@@ -765,6 +880,143 @@ index ec17735..8c842fe 100644
          }
          avatarTono="neutral"
          conBorde={conBorde}
+diff --git a/src/app/apariencia.tsx b/src/app/apariencia.tsx
+index 90ddc2d..ce3dd51 100644
+--- a/src/app/apariencia.tsx
++++ b/src/app/apariencia.tsx
+@@ -1,3 +1,4 @@
++import { Image } from 'expo-image';
+ import { LinearGradient } from 'expo-linear-gradient';
+ import { ScrollView, StyleSheet, View } from 'react-native';
+ import { SafeAreaView } from 'react-native-safe-area-context';
+@@ -11,11 +12,14 @@ import { ThemedView } from '@/components/themed-view';
+ import {
+   APARIENCIAS,
+   colorSchemes,
++  FONDOS,
++  IMAGENES_FONDO,
+   paletaGlass,
+   useTheme,
+   useThemeController,
+   type Apariencia,
+   type ColorTokens,
++  type Fondo,
+ } from '@/theme';
+ 
+ /** El degradado gris de Glass, el mismo de `ScreenBackground` y de la web. */
+@@ -30,7 +34,7 @@ const GRIS_GLASS = ['#60656C', '#52565E', '#60656C'] as const;
+  */
+ export default function AparienciaScreen() {
+   const { spacing } = useTheme();
+-  const { apariencia, setApariencia } = useThemeController();
++  const { apariencia, setApariencia, fondo, setFondo } = useThemeController();
+ 
+   return (
+     <ThemedView style={styles.root} ambient>
+@@ -63,6 +67,22 @@ export default function AparienciaScreen() {
+             ))}
+           </View>
+ 
++          <View accessibilityRole="radiogroup" accessibilityLabel="Fondo" style={{ gap: spacing.md }}>
++            <View style={styles.cabeceraMuestra}>
++              <ThemedText color="textMuted" style={styles.ceja}>
++                FONDO
++              </ThemedText>
++              <ThemedText color="textSecondary" style={styles.bajada}>
++                Una imagen suave detrás de las pantallas. En el Centro de control y en los mapas se ve solo el mapa.
++              </ThemedText>
++            </View>
++            <View style={[styles.fondos, { gap: spacing.md }]}>
++              {FONDOS.map((f) => (
++                <OpcionFondo key={f.id} fondo={f} elegida={fondo === f.id} onPress={() => setFondo(f.id)} />
++              ))}
++            </View>
++          </View>
++
+           <LoQueNoCambia />
+           <MuestraGlass />
+ 
+@@ -130,6 +150,56 @@ function OpcionApariencia({
+   );
+ }
+ 
++/**
++ * Un fondo: su miniatura (la foto chica o su degradado) con tres piezas del
++ * material que tendrán las tarjetas encima, y su nombre. Como en la web.
++ */
++function OpcionFondo({ fondo, elegida, onPress }: { fondo: Fondo; elegida: boolean; onPress: () => void }) {
++  const { colors, radii, borderWidths } = useTheme();
++  const mini = IMAGENES_FONDO[fondo.id]?.miniatura;
++  const pieza =
++    fondo.tono === 'claro'
++      ? { backgroundColor: 'rgba(255, 255, 255, 0.78)' }
++      : fondo.tono === 'oscuro'
++        ? { backgroundColor: 'rgba(20, 26, 34, 0.8)' }
++        : { backgroundColor: '#1D2530' };
++  return (
++    <PressableScale
++      onPress={onPress}
++      accessibilityRole="radio"
++      accessibilityState={{ checked: elegida }}
++      accessibilityLabel={`${fondo.nombre}. ${fondo.descripcion}`}
++      style={[
++        styles.fondo,
++        {
++          borderRadius: 18,
++          borderWidth: elegida ? 2 : borderWidths.thin,
++          backgroundColor: elegida ? colors.activeSurface : colors.surface,
++          borderColor: elegida ? colors.primary : colors.borderStrong,
++        },
++      ]}>
++      <View
++        style={[styles.fondoMini, { borderRadius: 13, backgroundColor: fondo.degradado[0] }]}
++        importantForAccessibility="no-hide-descendants"
++        accessibilityElementsHidden>
++        <LinearGradient colors={fondo.degradado} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
++        {mini != null ? <Image source={mini} style={StyleSheet.absoluteFill} contentFit="cover" accessible={false} /> : null}
++        <View style={[styles.miniPieza, styles.miniPieza1, pieza]} />
++        <View style={[styles.miniPieza, styles.miniPieza2, pieza]} />
++        <View style={[styles.miniPieza, styles.miniPieza3, pieza]} />
++        {elegida ? (
++          <View style={[styles.fondoCheck, { backgroundColor: colors.primary, borderRadius: radii.pill }]}>
++            <TabIcon name="check" color={colors.onPrimary} size={14} />
++          </View>
++        ) : null}
++      </View>
++      <ThemedText style={styles.fondoNombre} numberOfLines={2}>
++        {fondo.nombre}
++      </ThemedText>
++    </PressableScale>
++  );
++}
++
+ /**
+  * Miniatura de la app con cada tema: cápsula de arriba, dos tarjetas y la
+  * barra. Pinta SIEMPRE los colores de su tema, no los del tema en uso: así se
+@@ -186,7 +256,7 @@ function VistaPrevia({ glass }: { glass: boolean }) {
+ function LoQueNoCambia() {
+   const { colors, radii, borderWidths } = useTheme();
+   const filas: { texto: string; extra?: 'boton' | 'estados' }[] = [
+-    { texto: 'El azul FOM y los botones.', extra: 'boton' },
++    { texto: 'El azul FOM y los botones (con fondo claro, un azul un poco más oscuro para que se lea).', extra: 'boton' },
+     { texto: 'El logo de tu empresa.' },
+     { texto: 'Los colores de los estados (bien, aviso, peligro).', extra: 'estados' },
+   ];
+@@ -316,4 +386,14 @@ const styles = StyleSheet.create({
+   muestraBoton: { height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+   muestraBotonTexto: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
+   nota: { fontSize: 13, lineHeight: 18 },
++  fondos: { flexDirection: 'row', flexWrap: 'wrap' },
++  // Dos por fila en el teléfono (el hueco entre ellas es `spacing.md`, 12).
++  fondo: { width: '47.5%', flexGrow: 1, padding: 6, paddingBottom: 10, gap: 8 },
++  fondoMini: { aspectRatio: 16 / 9, overflow: 'hidden' },
++  miniPieza: { position: 'absolute', borderRadius: 6 },
++  miniPieza1: { left: '7%', top: '12%', bottom: '12%', width: '20%' },
++  miniPieza2: { left: '32%', right: '7%', top: '12%', height: '30%' },
++  miniPieza3: { left: '32%', right: '30%', top: '50%', bottom: '12%' },
++  fondoCheck: { position: 'absolute', top: 8, right: 8, width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
++  fondoNombre: { fontSize: 14, lineHeight: 19, fontWeight: '600', paddingHorizontal: 4 },
+ });
 diff --git a/src/app/aptitud.tsx b/src/app/aptitud.tsx
 index fdedba8..b2d193d 100644
 --- a/src/app/aptitud.tsx
@@ -1721,7 +1973,7 @@ index 2c94582..85a63ad 100644
          vehicleId: u.vehicle.id,
          unidad: etiquetaCortaDeUnidad(u.vehicle),
 diff --git a/src/app/mapa-flota.tsx b/src/app/mapa-flota.tsx
-index 76acb87..f3180f6 100644
+index 76acb87..79c2a43 100644
 --- a/src/app/mapa-flota.tsx
 +++ b/src/app/mapa-flota.tsx
 @@ -1,9 +1,12 @@
@@ -1768,7 +2020,7 @@ index 76acb87..f3180f6 100644
 -import type { MapMarker } from '@/types';
 +import { enteActivoFom, getAreas, getConductoresDeUnidad } from '@/services';
 +import { leerConAviso } from '@/services/leerConAviso';
-+import { familiaPorPeso, useTheme } from '@/theme';
++import { familiaPorPeso, TemaSinFondo, useTheme } from '@/theme';
 +import type { Area, MapMarker } from '@/types';
 +import { numero } from '@/utils/numero';
  
@@ -1808,11 +2060,13 @@ index 76acb87..f3180f6 100644
  /**
   * El mapa con la capa de eventos de manejo. Los tres proveedores (nativo, vista
   * web y clásico) reciben las props tal cual de `MapaVehiculo`; el tipo común
-@@ -72,7 +113,7 @@ const TRAZOS_BOTON = {
+@@ -71,8 +112,8 @@ const TRAZOS_BOTON = {
+  * manejo brusco». Un modo apaga al otro. Desde el perfil con un evento
   * (`?evento=…`, o `?eventos=1`) la ficha abre ya en este modo.
   */
- export default function MapaFlotaScreen() {
+-export default function MapaFlotaScreen() {
 -  const { colors, spacing, radii } = useTheme();
++function MapaFlotaContenido() {
 +  const { colors, spacing, radii, shadows } = useTheme();
    const router = useRouter();
    const insets = useSafeAreaInsets();
@@ -2356,6 +2610,19 @@ index 76acb87..f3180f6 100644
    abajo: { position: 'absolute', left: 8, right: 8 },
    // De lado a lado: los controles del mapa suben por encima de la ficha
    // (`margenAbajo`), así que no hace falta dejarles un hueco a la derecha.
+@@ -424,3 +840,12 @@ const styles = StyleSheet.create({
+   chico: { fontSize: 11, lineHeight: 15 },
+   eventos: { borderTopWidth: StyleSheet.hairlineWidth },
+ });
++
++/** El Centro de control va sin fondo ni su material: aquí manda el mapa. */
++export default function MapaFlotaScreen() {
++  return (
++    <TemaSinFondo>
++      <MapaFlotaContenido />
++    </TemaSinFondo>
++  );
++}
 diff --git a/src/app/mis-notificaciones.tsx b/src/app/mis-notificaciones.tsx
 index f3e4260..9b811a6 100644
 --- a/src/app/mis-notificaciones.tsx
@@ -3677,6 +3944,58 @@ index 9dfbb00..677a791 100644
  /**
   * Etiqueta legible del rol. El `companyTipo` ya no cambia el nombre (el rol
   * operativo es "Supervisor" en toda ente); se conserva el parámetro por
+diff --git a/src/components/app-tab-bar.tsx b/src/components/app-tab-bar.tsx
+index a10ce7f..7781a85 100644
+--- a/src/components/app-tab-bar.tsx
++++ b/src/components/app-tab-bar.tsx
+@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
+ import Svg, { Rect } from 'react-native-svg';
+ 
+ import { PressableScale } from '@/components/pressable-scale';
++import { FondoPantalla } from '@/components/fondo-pantalla';
+ import { FondoGlass } from '@/components/screen-background';
+ import { ThemedText } from '@/components/themed-text';
+ import { curvasUI, DURACION, useReducedMotion, useTheme } from '@/theme';
+@@ -92,10 +93,12 @@ function figura(a: number, b: number, anchoTab: number, radio: number) {
+ 
+ // Expo SDK 58: la barra recibe `emitter` y `navigateToTab` en vez de `navigation`.
+ export function AppTabBar({ state, descriptors, emitter, navigateToTab }: BottomTabBarProps) {
+-  const { colors, colorScheme, apariencia, spacing, radii, shadows, borderWidths } = useTheme();
++  const { colors, colorScheme, apariencia, fondo, fondoTono, spacing, radii, shadows, borderWidths } = useTheme();
+   const insets = useSafeAreaInsets();
+   const ventana = useWindowDimensions();
+   const glass = colorScheme === 'dark' && apariencia === 'glass';
++  // Con un fondo elegido, como con Glass: la zona deja ver el fondo de la pantalla.
++  const conFondo = fondoTono != null;
+   const reducido = useReducedMotion();
+ 
+   const [ancho, setAncho] = useState(0);
+@@ -223,18 +226,22 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab }: Bottom
+         {
+           // Mismo fondo que la pantalla: lo que flota es la píldora, no la zona.
+           // En Glass la zona es transparente y debajo sigue el degradado.
+-          backgroundColor: glass ? 'transparent' : colors.background,
++          backgroundColor: glass || conFondo ? 'transparent' : colors.background,
+           paddingHorizontal: spacing.lg,
+           paddingTop: MARGEN,
+           paddingBottom: insets.bottom + MARGEN,
+         },
+       ]}>
+-      {glass ? (
++      {glass || conFondo ? (
+         // El tramo de abajo del degradado de pantalla completa: anclado al pie
+         // y del alto de la ventana, empalma con el de la pantalla sin corte.
+         <View style={[StyleSheet.absoluteFill, styles.recorte]} pointerEvents="none">
+           <View style={[styles.franja, { height: ventana.height }]}>
+-            <FondoGlass width={ventana.width} height={ventana.height} />
++            {conFondo ? (
++              <FondoPantalla fondo={fondo} width={ventana.width} height={ventana.height} />
++            ) : (
++              <FondoGlass width={ventana.width} height={ventana.height} />
++            )}
+           </View>
+         </View>
+       ) : null}
 diff --git a/src/components/calendario-inspecciones.tsx b/src/components/calendario-inspecciones.tsx
 index ddafdcb..92eb324 100644
 --- a/src/components/calendario-inspecciones.tsx
@@ -4059,6 +4378,24 @@ index d0ddb57..1dd1dc0 100644
                  activo={filtro === 'vigente'}
                  onPress={() => elegir('vigente')}
                />
+diff --git a/src/components/encabezado-fom.tsx b/src/components/encabezado-fom.tsx
+index 6097611..47c640c 100644
+--- a/src/components/encabezado-fom.tsx
++++ b/src/components/encabezado-fom.tsx
+@@ -110,10 +110,12 @@ function tieneLogoPropio(logoKey: string | null | undefined): logoKey is string
+  * FOM. Cada empresa solo cambia su logo (nunca el color ni unas iniciales).
+  */
+ export function LogoCapsula() {
+-  const { brand, colorScheme } = useTheme();
++  const { brand, colorScheme, fondoTono } = useTheme();
+   if (tieneLogoPropio(brand.logoKey)) {
+     return <LogoEmpresa logoKey={brand.logoKey} size={24} />;
+   }
++  // Con un fondo claro, el logo completo con «FOM» en tinta, como en la web.
++  if (fondoTono === 'claro') return <LogoFomCompleto width={67} tinta />;
+   // Las letras del logo completo son blancas: en claro va solo el símbolo.
+   return colorScheme === 'dark' ? <LogoFomCompleto width={67} /> : <LogoFom size={28} />;
+ }
 diff --git a/src/components/ficha-unidad-vista.tsx b/src/components/ficha-unidad-vista.tsx
 index 8bf4656..f7762bf 100644
 --- a/src/components/ficha-unidad-vista.tsx
@@ -4315,6 +4652,80 @@ index d4fe55f..b527a7d 100644
  ];
  
  export type OpcionTipo = { id: string; label: string; cuenta: number };
+diff --git a/src/components/fondo-pantalla.tsx b/src/components/fondo-pantalla.tsx
+new file mode 100644
+index 0000000..8a65c31
+--- /dev/null
++++ b/src/components/fondo-pantalla.tsx
+@@ -0,0 +1,68 @@
++import { Image } from 'expo-image';
++import { LinearGradient } from 'expo-linear-gradient';
++import { useState } from 'react';
++import { StyleSheet, View } from 'react-native';
++import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
++
++import { fondoPorId, IMAGENES_FONDO, useReducedMotion, type FondoId } from '@/theme';
++
++/** Los fondos cuya foto ya se pintó una vez: después aparecen sin fundido. */
++const yaVistos = new Set<FondoId>();
++
++/** Luz de marca arriba a la derecha, la misma de los degradados de la web. */
++const LUZ: Partial<Record<FondoId, number>> = { 'blanco-carros': 0.12, perla: 0.13, 'noche-azul': 0.3 };
++
++/**
++ * El FONDO elegido detrás de la pantalla (docs/FONDOS.md): un degradado del
++ * tono del fondo y, encima, la foto de teléfono ya desenfocada (nada de blur
++ * en vivo). Las fotos oscuras llevan un velo para que los títulos que van
++ * directo encima se lean. Fijo: no se mueve con el scroll y no recibe toques.
++ *
++ * La primera vez la foto entra con un fundido de 520 ms (sin él con «reducir
++ * movimiento»); como cada pantalla pinta el suyo, las siguientes ya la tienen
++ * en memoria y aparece sin fundido.
++ */
++export function FondoPantalla({ fondo, width, height }: { fondo: FondoId; width: number; height: number }) {
++  const f = fondoPorId(fondo);
++  const reducido = useReducedMotion();
++  const [fundir] = useState(() => !yaVistos.has(f.id));
++  const imagen = IMAGENES_FONDO[f.id]?.pantalla;
++  const luz = LUZ[f.id];
++  const oscura = f.tono === 'oscuro' && imagen != null;
++
++  if (!f.tono) return null;
++  return (
++    <View style={[StyleSheet.absoluteFill, styles.recorte]} pointerEvents="none" importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
++      <LinearGradient colors={f.degradado} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
++      {luz != null ? (
++        <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
++          <Defs>
++            <RadialGradient id={`fondo-luz-${f.id}`} cx="88%" cy="0%" rx="60%" ry="40%" fx="88%" fy="0%">
++              <Stop offset="0%" stopColor="#349BFA" stopOpacity={luz} />
++              <Stop offset="100%" stopColor="#349BFA" stopOpacity={0} />
++            </RadialGradient>
++          </Defs>
++          <Rect x={0} y={0} width={width} height={height} fill={`url(#fondo-luz-${f.id})`} />
++        </Svg>
++      ) : null}
++      {imagen != null ? (
++        <Image
++          source={imagen}
++          style={StyleSheet.absoluteFill}
++          contentFit="cover"
++          cachePolicy="memory"
++          transition={fundir && !reducido ? 520 : 0}
++          onLoad={() => yaVistos.add(f.id)}
++          accessible={false}
++        />
++      ) : null}
++      {oscura ? (
++        <LinearGradient colors={['rgba(10, 13, 18, 0.30)', 'rgba(10, 13, 18, 0.55)']} style={StyleSheet.absoluteFill} />
++      ) : null}
++    </View>
++  );
++}
++
++const styles = StyleSheet.create({
++  recorte: { overflow: 'hidden' },
++});
 diff --git a/src/components/gps-instalar-form.tsx b/src/components/gps-instalar-form.tsx
 index c4cd5d8..0fd3f0e 100644
 --- a/src/components/gps-instalar-form.tsx
@@ -4521,6 +4932,31 @@ index 53a2184..a38a092 100644
        }
      }
      const porId = new Map(roster.map((u) => [u.id, u]));
+diff --git a/src/components/logo-fom.tsx b/src/components/logo-fom.tsx
+index 680a1c9..1d07e28 100644
+--- a/src/components/logo-fom.tsx
++++ b/src/components/logo-fom.tsx
+@@ -24,8 +24,10 @@ export function LogoFom({ size = 40 }: { size?: number }) {
+  * (lienzo de 280×84). Pensado para fondos oscuros (login, espera de entrada).
+  *
+  * `width` es el ancho total; el alto se deriva del lienzo.
++ * `tinta`: «FOM» en tinta (#0F141B) en vez de blanco, para fondos claros
++ * (`fom-logo-tinta.svg` de la web).
+  */
+-export function LogoFomCompleto({ width = 280 }: { width?: number }) {
++export function LogoFomCompleto({ width = 280, tinta = false }: { width?: number; tinta?: boolean }) {
+   return (
+     <Svg width={width} height={(width * 84) / 280} viewBox="0 0 280 84">
+       {/* En la web el símbolo va bajado 1 para alinearse con las letras. */}
+@@ -35,7 +37,7 @@ export function LogoFomCompleto({ width = 280 }: { width?: number }) {
+         ))}
+       </G>
+       {WORDMARK_FOM.map((t) => (
+-        <Path key={t.d} d={t.d} fill={t.color} fillRule="evenodd" />
++        <Path key={t.d} d={t.d} fill={tinta ? '#0F141B' : t.color} fillRule="evenodd" />
+       ))}
+     </Svg>
+   );
 diff --git a/src/components/mantenimiento-piezas.tsx b/src/components/mantenimiento-piezas.tsx
 index c483804..c5f7c3a 100644
 --- a/src/components/mantenimiento-piezas.tsx
@@ -4713,6 +5149,53 @@ index c6049e6..43f2402 100644
      const inicio = limitesDe(markers!.map((m) => enLngLat(m.coords)), 0.008);
  
      return (
+diff --git a/src/components/map-vehiculo.tsx b/src/components/map-vehiculo.tsx
+index c0f5d8a..044fa21 100644
+--- a/src/components/map-vehiculo.tsx
++++ b/src/components/map-vehiculo.tsx
+@@ -13,6 +13,7 @@ import type { ComponentType } from 'react';
+ import { NativeModules, TurboModuleRegistry } from 'react-native';
+ 
+ import { HAY_MAPBOX } from '@/lib/mapbox';
++import { TemaSinFondo } from '@/theme';
+ import { MapaVehiculoClasico, type MapaVehiculoProps } from './map-vehiculo-clasico';
+ import { MapaVehiculoDom } from './map-vehiculo-dom';
+ 
+@@ -45,5 +46,10 @@ if (HAY_MAPBOX && mapboxNativoDisponible()) {
+  */
+ export function MapaVehiculo(props: MapaVehiculoProps) {
+   const Mapa = MapaMapbox ?? (HAY_MAPBOX ? MapaVehiculoDom : MapaVehiculoClasico);
+-  return <Mapa {...props} />;
++  // Los mapas no llevan el fondo elegido ni su material: siguen oscuros, con sus controles oscuros.
++  return (
++    <TemaSinFondo>
++      <Mapa {...props} />
++    </TemaSinFondo>
++  );
+ }
+diff --git a/src/components/map-vehiculo.web.tsx b/src/components/map-vehiculo.web.tsx
+index bd45d2c..36511f6 100644
+--- a/src/components/map-vehiculo.web.tsx
++++ b/src/components/map-vehiculo.web.tsx
+@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle
+ import { PulseDot } from '@/components/pulse-dot';
+ import { ThemedText } from '@/components/themed-text';
+ import { HAY_MAPBOX } from '@/lib/mapbox';
+-import { useTheme } from '@/theme';
++import { TemaSinFondo, useTheme } from '@/theme';
+ import type { LatLng, MapMarker } from '@/types';
+ 
+ import type { MapaVehiculoProps as PropsComunes } from './map-vehiculo-clasico';
+@@ -40,7 +40,8 @@ type MapaVehiculoProps = {
+  * recorrido, tráfico y 3D); sin él, el recuadro de siempre.
+  */
+ export function MapaVehiculo(props: PropsComunes) {
+-  return HAY_MAPBOX ? <MapaVehiculoDom {...props} /> : <MapaVehiculoRecuadro {...props} />;
++  // Los mapas no llevan el fondo elegido ni su material: siguen oscuros.
++  return <TemaSinFondo>{HAY_MAPBOX ? <MapaVehiculoDom {...props} /> : <MapaVehiculoRecuadro {...props} />}</TemaSinFondo>;
+ }
+ 
+ /**
 diff --git a/src/components/mapa-fom-dom.tsx b/src/components/mapa-fom-dom.tsx
 index 420079d..3ad24fd 100644
 --- a/src/components/mapa-fom-dom.tsx
@@ -5515,6 +5998,40 @@ index 66334c8..7ac40cb 100644
                </PressableScale>
              ))}
            </View>
+diff --git a/src/components/screen-background.tsx b/src/components/screen-background.tsx
+index e378c7b..dfd337a 100644
+--- a/src/components/screen-background.tsx
++++ b/src/components/screen-background.tsx
+@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
+ import { Animated, AppState, Easing, StyleSheet, useWindowDimensions, View } from 'react-native';
+ import Svg, { Circle, Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+ 
++import { FondoPantalla } from '@/components/fondo-pantalla';
+ import { useReducedMotion, useTheme } from '@/theme';
+ 
+ type OrbConfig = {
+@@ -93,10 +94,10 @@ export function FondoGlass({ width, height }: { width: number; height: number })
+  * (SVG) con un par de orbes que derivan lento. Es la versión calmada del fondo
+  * del login, para dar el mismo aire fresco sin restar legibilidad a las
+  * tarjetas. Sale del tema (claro/oscuro) y no captura toques. Con Glass gris
+- * pinta su degradado gris en su lugar.
++ * pinta su degradado gris en su lugar, y con un fondo elegido, ese fondo.
+  */
+ export function ScreenBackground() {
+-  const { colors, colorScheme, apariencia } = useTheme();
++  const { colors, colorScheme, apariencia, fondo, fondoTono } = useTheme();
+   const { width, height } = useWindowDimensions();
+   const reduced = useReducedMotion();
+   // Las pantallas de las pestañas y de la pila siguen montadas aunque no se
+@@ -105,6 +106,8 @@ export function ScreenBackground() {
+   const appActiva = useAppActiva();
+   const animar = !reduced && enFoco && appActiva;
+ 
++  // Un fondo elegido (Apariencia › Fondo) va en lugar del lavado y de Glass.
++  if (fondoTono) return <FondoPantalla fondo={fondo} width={width} height={height} />;
+   if (colorScheme === 'dark' && apariencia === 'glass') return <FondoGlass width={width} height={height} />;
+ 
+   const orbs: OrbConfig[] = [
 diff --git a/src/components/tarjeta-mantenimiento.tsx b/src/components/tarjeta-mantenimiento.tsx
 index 1f2e283..beba362 100644
 --- a/src/components/tarjeta-mantenimiento.tsx
@@ -9254,6 +9771,549 @@ index 176ce9e..acc2400 100644
    {
      id: 'usr-sam-1',
      nombre: 'José Marrufo',
+diff --git a/src/theme/ThemeProvider.tsx b/src/theme/ThemeProvider.tsx
+index b4a774c..26991e9 100644
+--- a/src/theme/ThemeProvider.tsx
++++ b/src/theme/ThemeProvider.tsx
+@@ -7,13 +7,16 @@
+  * tema ya combinado para que lo consuman las pantallas vía `useTheme()`.
+  */
+ 
+-import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
++import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
++import { AccessibilityInfo } from 'react-native';
+ 
+ import { useColorScheme } from '@/hooks/use-color-scheme';
+ 
+ import { guardarApariencia, leerApariencia } from './apariencia';
+ import { DEFAULT_BRAND } from './brand';
+ import { createTheme } from './createTheme';
++import { guardarFondo, leerFondo } from './fondo-guardado';
++import { FONDO_POR_DEFECTO, type FondoId } from './fondos';
+ import type { Apariencia, ColorScheme, CompanyBrand, Theme, ThemeMode } from './types';
+ 
+ /** Valor expuesto por el contexto: el tema + los controles para mutarlo. */
+@@ -36,6 +39,14 @@ export interface ThemeContextValue {
+   setBrand: (brand: CompanyBrand) => void;
+   /** Elige la apariencia personal y la guarda en el teléfono. */
+   setApariencia: (apariencia: Apariencia) => void;
++  /** Fondo detrás de las pantallas, de la cuenta en uso («ninguno» sin sesión). */
++  fondo: FondoId;
++  /** Elige el fondo y lo guarda en el teléfono para la cuenta en uso. */
++  setFondo: (fondo: FondoId) => void;
++  /** Avisa qué cuenta está dentro (o '' al salir): su fondo se lee del teléfono. */
++  setCuentaFondo: (cuenta: string) => void;
++  /** El mismo tema sin fondo: para el Centro de control y los mapas (`TemaSinFondo`). */
++  temaSinFondo: Theme;
+ }
+ 
+ export const ThemeContext = createContext<ThemeContextValue | null>(null);
+@@ -95,22 +106,102 @@ export function ThemeProvider({
+     void guardarApariencia(a);
+   }, []);
+ 
++  // Fondo de la cuenta en uso. El tema no sabe quién entró (va por fuera del
++  // AuthProvider): `SincronizarFondo` le pasa la cuenta. Sin cuenta, sin fondo.
++  const [cuentaFondo, setCuentaFondoState] = useState('');
++  const [fondoGuardado, setFondoGuardado] = useState<{ cuenta: string; fondo: FondoId }>({ cuenta: '', fondo: FONDO_POR_DEFECTO });
++  useEffect(() => {
++    if (!cuentaFondo) return;
++    let vigente = true;
++    void leerFondo(cuentaFondo).then((guardado) => {
++      // Si la persona ya eligió mientras se leía, manda su elección.
++      if (vigente) setFondoGuardado((prev) => (prev.cuenta === cuentaFondo ? prev : { cuenta: cuentaFondo, fondo: guardado }));
++    });
++    return () => {
++      vigente = false;
++    };
++  }, [cuentaFondo]);
++  const fondo: FondoId = cuentaFondo && fondoGuardado.cuenta === cuentaFondo ? fondoGuardado.fondo : FONDO_POR_DEFECTO;
++  const setCuentaFondo = useCallback((cuenta: string) => setCuentaFondoState(cuenta), []);
++  const setFondo = useCallback(
++    (f: FondoId) => {
++      if (!cuentaFondo) return;
++      setFondoGuardado({ cuenta: cuentaFondo, fondo: f });
++      void guardarFondo(cuentaFondo, f);
++    },
++    [cuentaFondo],
++  );
++
++  // «Reducir transparencia» (iOS): las tarjetas sobre el fondo pasan a opacas.
++  const sinTransparencia = useReducirTransparencia();
++
+   // Resuelve el esquema final: en 'system' usa el del dispositivo (con
+   // 'light' como fallback); si no, el forzado por el usuario.
+   const colorScheme: ColorScheme =
+     mode === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : mode;
+ 
+   // El tema solo se recalcula cuando cambia el esquema, la marca o la apariencia.
+-  const theme = useMemo(() => createTheme(colorScheme, brand, apariencia), [colorScheme, brand, apariencia]);
++  const temaSinFondo = useMemo(() => createTheme(colorScheme, brand, apariencia), [colorScheme, brand, apariencia]);
++  const theme = useMemo(
++    () => (fondo === FONDO_POR_DEFECTO ? temaSinFondo : createTheme(colorScheme, brand, apariencia, fondo, sinTransparencia)),
++    [temaSinFondo, colorScheme, brand, apariencia, fondo, sinTransparencia],
++  );
+ 
+   const toggleColorScheme = useCallback(() => {
+     setMode(colorScheme === 'dark' ? 'light' : 'dark');
+   }, [colorScheme]);
+ 
+   const value = useMemo<ThemeContextValue>(
+-    () => ({ theme, mode, colorScheme, brand, apariencia, setMode, toggleColorScheme, setBrand, setApariencia }),
+-    [theme, mode, colorScheme, brand, apariencia, toggleColorScheme, setBrand, setApariencia],
++    () => ({
++      theme,
++      mode,
++      colorScheme,
++      brand,
++      apariencia,
++      setMode,
++      toggleColorScheme,
++      setBrand,
++      setApariencia,
++      fondo,
++      setFondo,
++      setCuentaFondo,
++      temaSinFondo,
++    }),
++    [theme, mode, colorScheme, brand, apariencia, toggleColorScheme, setBrand, setApariencia, fondo, setFondo, setCuentaFondo, temaSinFondo],
+   );
+ 
+   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+ }
++
++/**
++ * Lo de adentro se pinta SIN fondo ni su material: el Centro de control y los
++ * mapas, como en la web (ahí manda el mapa, con sus controles oscuros).
++ */
++export function TemaSinFondo({ children, activo = true }: { children: ReactNode; activo?: boolean }) {
++  const ctx = useContext(ThemeContext);
++  // `activo` permite apagarlo sin cambiar el árbol (la barra de pestañas no se re-monta).
++  const value = useMemo(
++    () => (activo && ctx && ctx.theme !== ctx.temaSinFondo ? { ...ctx, theme: ctx.temaSinFondo } : ctx),
++    [ctx, activo],
++  );
++  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
++}
++
++/** true con «Reducir transparencia» encendido (solo existe en iOS; en lo demás, false). */
++function useReducirTransparencia(): boolean {
++  const [activo, setActivo] = useState(false);
++  useEffect(() => {
++    let vigente = true;
++    AccessibilityInfo.isReduceTransparencyEnabled?.()
++      .then((v) => {
++        if (vigente) setActivo(Boolean(v));
++      })
++      .catch(() => undefined);
++    const sub = AccessibilityInfo.addEventListener?.('reduceTransparencyChanged', (v: boolean) => setActivo(Boolean(v)));
++    return () => {
++      vigente = false;
++      sub?.remove();
++    };
++  }, []);
++  return activo;
++}
+diff --git a/src/theme/createTheme.ts b/src/theme/createTheme.ts
+index 1b496de..09ede22 100644
+--- a/src/theme/createTheme.ts
++++ b/src/theme/createTheme.ts
+@@ -5,7 +5,21 @@
+  *             + azul FOM fijo + nombre y logo de la empresa.
+  */
+ 
+-import { borderWidths, buildShadows, colorSchemes, motion, opacity, paletaGlass, radii, spacing, typography } from './tokens';
++import { fondoPorId, type FondoId } from './fondos';
++import {
++  borderWidths,
++  buildShadows,
++  colorSchemes,
++  motion,
++  opacity,
++  paletaFondoClaro,
++  paletaFondoOscuro,
++  paletaGlass,
++  radii,
++  spacing,
++  superficiesOpacas,
++  typography,
++} from './tokens';
+ import type { Apariencia, ColorScheme, CompanyBrand, Theme } from './types';
+ 
+ /** El azul FOM y su texto encima: los mismos en la web y en la app. */
+@@ -20,12 +34,23 @@ const SOBRE_AZUL_FOM = '#08121C';
+  * (≈7:1); el blanco sobre azul no llegaba al mínimo. Glass gris solo existe en
+  * oscuro: en claro se pinta el claro de siempre.
+  */
+-export function createTheme(scheme: ColorScheme, brand: CompanyBrand, apariencia: Apariencia = 'azul'): Theme {
++export function createTheme(
++  scheme: ColorScheme,
++  brand: CompanyBrand,
++  apariencia: Apariencia = 'azul',
++  fondo: FondoId = 'ninguno',
++  sinTransparencia = false,
++): Theme {
++  const tono = fondoPorId(fondo).tono;
++  if (tono) return temaConFondo(tono, fondoPorId(fondo).id, brand, apariencia, sinTransparencia);
++
+   const base = scheme === 'dark' && apariencia === 'glass' ? paletaGlass : colorSchemes[scheme];
+ 
+   return {
+     colorScheme: scheme,
+     apariencia,
++    fondo: 'ninguno',
++    fondoTono: null,
+     colors: {
+       ...base,
+       primary: AZUL_FOM,
+@@ -41,3 +66,35 @@ export function createTheme(scheme: ColorScheme, brand: CompanyBrand, apariencia
+     brand,
+   };
+ }
++
++/**
++ * Con un fondo elegido manda su material, como en la web (el fondo pisa al
++ * diseño): vidrio claro con letra oscura y la acción en #1769C2, o vidrio azul
++ * noche con el azul FOM de siempre. Con «Reducir transparencia», opacas.
++ */
++function temaConFondo(
++  tono: 'claro' | 'oscuro',
++  fondo: FondoId,
++  brand: CompanyBrand,
++  apariencia: Apariencia,
++  sinTransparencia: boolean,
++): Theme {
++  const claro = tono === 'claro';
++  const base = claro ? paletaFondoClaro : { ...paletaFondoOscuro, primary: AZUL_FOM, onPrimary: SOBRE_AZUL_FOM };
++  const scheme: ColorScheme = claro ? 'light' : 'dark';
++  return {
++    colorScheme: scheme,
++    apariencia,
++    fondo,
++    fondoTono: tono,
++    colors: sinTransparencia ? { ...base, ...superficiesOpacas[tono] } : base,
++    spacing,
++    radii,
++    typography,
++    shadows: buildShadows(scheme, 'azul'),
++    motion,
++    opacity,
++    borderWidths,
++    brand,
++  };
++}
+diff --git a/src/theme/fondo-guardado.ts b/src/theme/fondo-guardado.ts
+new file mode 100644
+index 0000000..33a5abe
+--- /dev/null
++++ b/src/theme/fondo-guardado.ts
+@@ -0,0 +1,17 @@
++/**
++ * Dónde se guarda el fondo: en el teléfono, por cuenta, con la misma clave de
++ * la web (`fom.fondo.v1:<cuenta>`). Fuera del prefijo `fom.memoria.`, que se
++ * borra al cerrar sesión: el fondo es de la persona en este teléfono.
++ */
++
++import AsyncStorage from '@react-native-async-storage/async-storage';
++
++import { guardarFondoDe, leerFondoDe, type FondoId } from './fondos';
++
++export function leerFondo(cuenta: string): Promise<FondoId> {
++  return leerFondoDe(AsyncStorage, cuenta);
++}
++
++export function guardarFondo(cuenta: string, fondo: FondoId): Promise<boolean> {
++  return guardarFondoDe(AsyncStorage, cuenta, fondo);
++}
+diff --git a/src/theme/fondos-imagenes.ts b/src/theme/fondos-imagenes.ts
+new file mode 100644
+index 0000000..b96fb6e
+--- /dev/null
++++ b/src/theme/fondos-imagenes.ts
+@@ -0,0 +1,24 @@
++/**
++ * Las imágenes de los fondos (`assets/fondos/`), copiadas tal cual de la web
++ * (`src/assets/fondos/`). Solo la versión de teléfono y la miniatura: el
++ * desenfoque viene horneado en el archivo, aquí no se calcula nada.
++ */
++
++import type { FondoId } from './fondos';
++
++type Imagenes = { pantalla: number; miniatura: number };
++
++export const IMAGENES_FONDO: Partial<Record<FondoId, Imagenes>> = {
++  'blanco-carros': {
++    pantalla: require('../../assets/fondos/blanco-carros-movil.webp'),
++    miniatura: require('../../assets/fondos/blanco-carros-mini.webp'),
++  },
++  'patio-noche': {
++    pantalla: require('../../assets/fondos/patio-noche-movil.webp'),
++    miniatura: require('../../assets/fondos/patio-noche-mini.webp'),
++  },
++  carretera: {
++    pantalla: require('../../assets/fondos/carretera-movil.webp'),
++    miniatura: require('../../assets/fondos/carretera-mini.webp'),
++  },
++};
+diff --git a/src/theme/fondos.ts b/src/theme/fondos.ts
+new file mode 100644
+index 0000000..e18f174
+--- /dev/null
++++ b/src/theme/fondos.ts
+@@ -0,0 +1,118 @@
++/**
++ * FONDOS DEL PANEL: el mismo catálogo de la web (`apariencia-store.js` ›
++ * `FONDOS`, docs/FONDOS.md), con los mismos ids y nombres.
++ *
++ * Una imagen o un degradado detrás de las pantallas, menos el Centro de
++ * control y los mapas (ahí manda el mapa). Es independiente del tema (Azul FOM
++ * o Glass gris) y se guarda en ESTE teléfono, por cuenta.
++ *
++ * Este archivo es puro (sin imágenes ni almacenamiento): así lo lee la prueba
++ * en Node. Las imágenes van en `fondos-imagenes.ts` y el guardado en
++ * `fondo-guardado.ts`.
++ */
++
++/** Material de las tarjetas encima del fondo: vidrio claro o azul noche. */
++export type TonoFondo = 'claro' | 'oscuro';
++
++export type FondoId = 'ninguno' | 'blanco-carros' | 'perla' | 'patio-noche' | 'carretera' | 'noche-azul';
++
++export interface Fondo {
++  id: FondoId;
++  nombre: string;
++  descripcion: string;
++  /** Sin tono = sin fondo (manda el tema elegido). */
++  tono: TonoFondo | null;
++  /**
++   * Nombre base de los webp en `assets/fondos/` (`<foto>-movil.webp` y
++   * `<foto>-mini.webp`), ya desenfocados. Sin foto, el fondo es solo degradado.
++   */
++  foto?: string;
++  /** Degradado de base: lo primero que se ve y lo único en los fondos sin foto. */
++  degradado: readonly [string, string, ...string[]];
++}
++
++export const FONDO_POR_DEFECTO: FondoId = 'ninguno';
++
++export const FONDOS: readonly Fondo[] = [
++  { id: 'ninguno', nombre: 'Sin fondo', descripcion: 'El fondo liso del diseño elegido.', tono: null, degradado: ['#0A0D12', '#0A0D12'] },
++  {
++    id: 'blanco-carros',
++    nombre: 'Blanco con carros',
++    descripcion: 'Blanco difuminado con la flota al fondo. Tarjetas de vidrio claro.',
++    tono: 'claro',
++    foto: 'blanco-carros',
++    degradado: ['#F6F8FB', '#F1F4F8', '#E8ECF1'],
++  },
++  {
++    id: 'perla',
++    nombre: 'Perla',
++    descripcion: 'Blanco y gris claro, sin foto. Tarjetas de vidrio claro.',
++    tono: 'claro',
++    degradado: ['#F9FAFC', '#EEF1F5', '#E7EBF0'],
++  },
++  {
++    id: 'patio-noche',
++    nombre: 'Patio al anochecer',
++    descripcion: 'Un patio de flota visto desde arriba, desenfocado.',
++    tono: 'oscuro',
++    foto: 'patio-noche',
++    degradado: ['#1B2430', '#0B0F15', '#0B0F15'],
++  },
++  {
++    id: 'carretera',
++    nombre: 'Carretera',
++    descripcion: 'Camiones en ruta al atardecer, desenfocados.',
++    tono: 'oscuro',
++    foto: 'carretera',
++    degradado: ['#1B2430', '#0B0F15', '#0B0F15'],
++  },
++  {
++    id: 'noche-azul',
++    nombre: 'Noche azul',
++    descripcion: 'Degradado azul noche con luz de marca, sin foto.',
++    tono: 'oscuro',
++    degradado: ['#0D1626', '#0A0D12', '#0C1626'],
++  },
++];
++
++export function esFondo(valor: unknown): valor is FondoId {
++  return FONDOS.some((f) => f.id === valor);
++}
++
++/** El fondo con ese id; cualquier otra cosa (o nada) es «Sin fondo». */
++export function fondoPorId(id: unknown): Fondo {
++  return FONDOS.find((f) => f.id === id) ?? FONDOS[0];
++}
++
++/** La misma clave de la web: una por cuenta, nunca por empresa. */
++export function claveFondo(cuenta: string): string {
++  return `fom.fondo.v1:${encodeURIComponent(cuenta)}`;
++}
++
++/** Lo mínimo del almacenamiento del teléfono (AsyncStorage cumple con esto). */
++export interface AlmacenFondo {
++  getItem: (clave: string) => Promise<string | null | undefined>;
++  setItem: (clave: string, valor: string) => Promise<void>;
++}
++
++/** El fondo guardado de una cuenta; sin cuenta, sin nada guardado, inválido o si falla: «Sin fondo». */
++export async function leerFondoDe(almacen: AlmacenFondo, cuenta: string): Promise<FondoId> {
++  if (!cuenta) return FONDO_POR_DEFECTO;
++  try {
++    const valor = await almacen.getItem(claveFondo(cuenta));
++    return esFondo(valor) ? valor : FONDO_POR_DEFECTO;
++  } catch {
++    return FONDO_POR_DEFECTO;
++  }
++}
++
++/** Guarda la elección de la cuenta. Devuelve si quedó guardada (si no, vale durante esta sesión). */
++export async function guardarFondoDe(almacen: AlmacenFondo, cuenta: string, fondo: FondoId): Promise<boolean> {
++  if (!cuenta || !esFondo(fondo)) return false;
++  try {
++    await almacen.setItem(claveFondo(cuenta), fondo);
++    return true;
++  } catch {
++    return false;
++  }
++}
+diff --git a/src/theme/index.ts b/src/theme/index.ts
+index dc4744e..d0d3a45 100644
+--- a/src/theme/index.ts
++++ b/src/theme/index.ts
+@@ -6,15 +6,28 @@
+  *   import { useTheme, useThemeController, ThemeProvider } from '@/theme';
+  */
+ 
+-export { ThemeProvider, ThemeContext, type ThemeContextValue } from './ThemeProvider';
++export { TemaSinFondo, ThemeProvider, ThemeContext, type ThemeContextValue } from './ThemeProvider';
+ export { useTheme, useThemeController } from './useTheme';
+ export { useReducedMotion } from './useReducedMotion';
+ export { createTheme } from './createTheme';
+ export { getContrastingTextColor, darken, lighten } from './colorUtils';
+ export { DEFAULT_BRAND } from './brand';
+ export { APARIENCIAS } from './apariencia';
++export { FONDO_POR_DEFECTO, FONDOS, fondoPorId, type Fondo, type FondoId, type TonoFondo } from './fondos';
++export { IMAGENES_FONDO } from './fondos-imagenes';
+ export { FUENTES_FOM, familiaPorPeso } from './fuentes';
+-export { borderWidths, colorSchemes, motion, opacity, paletaGlass, radii, spacing, typography } from './tokens';
++export {
++  borderWidths,
++  colorSchemes,
++  motion,
++  opacity,
++  paletaFondoClaro,
++  paletaFondoOscuro,
++  paletaGlass,
++  radii,
++  spacing,
++  typography,
++} from './tokens';
+ export {
+   CONTEO,
+   CURVA,
+diff --git a/src/theme/tokens.ts b/src/theme/tokens.ts
+index 8633d55..4b5f053 100644
+--- a/src/theme/tokens.ts
++++ b/src/theme/tokens.ts
+@@ -238,6 +238,69 @@ export const paletaGlass: ColorTokens = {
+   infoSurface: '#21374A',
+ };
+ 
++/**
++ * VIDRIO CLARO: las tarjetas sobre un fondo claro (Blanco con carros, Perla),
++ * los mismos valores de la web (`apariencia-fondos.css`, tono «claro», en el
++ * teléfono). Letra oscura y todo a 4.5:1 o más sobre la superficie. El azul de
++ * marca #3D9BF5 no llega a AA sobre blanco: en claro la acción va en #1769C2
++ * (lo fija `createTheme`).
++ */
++export const paletaFondoClaro: ColorTokens = {
++  background: '#EEF1F5',
++  surface: 'rgba(255, 255, 255, 0.9)',
++  surfaceElevated: '#FFFFFF',
++  surfaceSunken: 'rgba(244, 246, 249, 0.9)',
++  text: '#0F141B',
++  textSecondary: '#3D4654',
++  textMuted: '#555F6D',
++  textInverted: '#FFFFFF',
++  border: 'rgba(15, 20, 27, 0.10)',
++  borderStrong: 'rgba(15, 20, 27, 0.20)',
++  primary: '#1769C2',
++  onPrimary: '#FFFFFF',
++  activeSurface: '#DCEBFC',
++  onActive: '#0D4D8F',
++  activeBorder: '#A8CDF3',
++  success: '#12784A',
++  onSuccess: '#FFFFFF',
++  successSurface: '#E3F5EC',
++  warning: '#8A5A00',
++  onWarning: '#FFFFFF',
++  warningSurface: '#FDF3D6',
++  danger: '#C42B33',
++  onDanger: '#FFFFFF',
++  dangerSurface: '#FDEBEC',
++  info: '#1769C2',
++  onInfo: '#FFFFFF',
++  infoSurface: '#E5F1FD',
++  accent: '#6B3FE0',
++  onAccent: '#FFFFFF',
++  accentSurface: '#F0EAFF',
++};
++
++/**
++ * VIDRIO AZUL NOCHE: las tarjetas sobre un fondo oscuro (Patio al anochecer,
++ * Carretera, Noche azul). Translúcidas al 90 %, sin desenfoque en vivo.
++ */
++export const paletaFondoOscuro: ColorTokens = {
++  ...dark,
++  background: '#0A0D12',
++  surface: 'rgba(20, 26, 34, 0.9)',
++  surfaceElevated: 'rgba(29, 37, 48, 0.94)',
++  surfaceSunken: 'rgba(15, 20, 27, 0.86)',
++  text: '#F3F5F8',
++  textSecondary: '#C3CAD4',
++  textMuted: '#9AA4B2',
++  border: 'rgba(255, 255, 255, 0.10)',
++  borderStrong: 'rgba(255, 255, 255, 0.20)',
++};
++
++/** Con «Reducir transparencia»: las mismas superficies, opacas. */
++export const superficiesOpacas: Record<'claro' | 'oscuro', Pick<ColorTokens, 'surface' | 'surfaceElevated' | 'surfaceSunken'>> = {
++  claro: { surface: '#FFFFFF', surfaceElevated: '#FFFFFF', surfaceSunken: '#F1F4F7' },
++  oscuro: { surface: '#141A22', surfaceElevated: '#1D2530', surfaceSunken: '#0F141B' },
++};
++
+ /** Paletas indexadas por esquema. */
+ export const colorSchemes: Record<ColorScheme, ColorTokens> = { light, dark };
+ 
+diff --git a/src/theme/types.ts b/src/theme/types.ts
+index c9affc5..0361543 100644
+--- a/src/theme/types.ts
++++ b/src/theme/types.ts
+@@ -7,6 +7,8 @@
+ 
+ import type { ImageSourcePropType, TextStyle, ViewStyle } from 'react-native';
+ 
++import type { FondoId, TonoFondo } from './fondos';
++
+ /** Esquema de color resuelto que realmente se pinta en pantalla. */
+ export type ColorScheme = 'light' | 'dark';
+ 
+@@ -288,6 +290,12 @@ export interface Theme {
+   colorScheme: ColorScheme;
+   /** Apariencia personal en uso (solo cambia algo en oscuro). */
+   apariencia: Apariencia;
++  /**
++   * Fondo elegido detrás de las pantallas (`fondos.ts`) y el material de las
++   * tarjetas encima: «claro» o «oscuro»; `null` = sin fondo.
++   */
++  fondo: FondoId;
++  fondoTono: TonoFondo | null;
+   /** Colores ya combinados con la marca. */
+   colors: ColorTokens;
+   spacing: SpacingScale;
 diff --git a/src/types/index.ts b/src/types/index.ts
 index 6f8105e..e128db5 100644
 --- a/src/types/index.ts
@@ -11545,6 +12605,119 @@ index 0000000..1114763
 +  assert.doesNotMatch(pantalla, /estado\s*===\s*'en_marcha'\)\.length/u);
 +  // Ya no se usa el camión para abrir la lista.
 +  assert.match(pantalla, /accessibilityLabel="Lista de unidades"/u);
++});
+diff --git a/test/fondos.test.mjs b/test/fondos.test.mjs
+new file mode 100644
+index 0000000..d97b6d7
+--- /dev/null
++++ b/test/fondos.test.mjs
+@@ -0,0 +1,107 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { existsSync, readFileSync, statSync } from 'node:fs';
++import { fileURLToPath, pathToFileURL } from 'node:url';
++
++// ============================================================
++// FONDOS DEL PANEL (docs/FONDOS.md de la web)
++// ------------------------------------------------------------
++// Espejo de `test/apariencia-fondos.test.js` del panel web: el mismo catálogo
++// (ids y nombres), las imágenes existen y «Sin fondo» va por defecto, también
++// cuando lo guardado no sirve. Se corre con `node --test "test/**/*.test.mjs"`.
++// ============================================================
++
++const { FONDOS, FONDO_POR_DEFECTO, fondoPorId, claveFondo, leerFondoDe, guardarFondoDe } = await import('../src/theme/fondos.ts');
++
++const raiz = new URL('..', import.meta.url);
++const leer = (ruta) => readFileSync(new URL(ruta, raiz), 'utf8');
++
++/** El catálogo de la web (`src/panel/apariencia-store.js` › FONDOS), en su orden. */
++const CATALOGO_WEB = [
++  ['ninguno', 'Sin fondo'],
++  ['blanco-carros', 'Blanco con carros'],
++  ['perla', 'Perla'],
++  ['patio-noche', 'Patio al anochecer'],
++  ['carretera', 'Carretera'],
++  ['noche-azul', 'Noche azul'],
++];
++
++test('el catálogo coincide con el de la web: ids, nombres y orden', () => {
++  assert.deepEqual(
++    FONDOS.map((f) => [f.id, f.nombre]),
++    CATALOGO_WEB,
++  );
++  assert.equal(new Set(FONDOS.map((f) => f.id)).size, FONDOS.length);
++  for (const f of FONDOS) {
++    assert.ok(f.descripcion?.trim(), `descripción de ${f.id}`);
++    assert.ok(f.tono === null || f.tono === 'claro' || f.tono === 'oscuro', `tono de ${f.id}`);
++    assert.ok(f.degradado.length >= 2, `degradado de ${f.id}`);
++  }
++});
++
++// Si la web está al lado (Downloads/fom-juntar), se compara contra su archivo
++// de verdad: ids, nombres, descripciones y tono.
++const storeWeb = fileURLToPath(new URL('../fom-juntar/src/panel/apariencia-store.js', raiz));
++test('y es el mismo que el archivo de la web, si está a mano', { skip: !existsSync(storeWeb) && 'la web no está al lado' }, async () => {
++  const web = await import(pathToFileURL(storeWeb).href);
++  assert.deepEqual(
++    FONDOS.map(({ id, nombre, descripcion, tono }) => ({ id, nombre, descripcion, tono })),
++    web.FONDOS.map(({ id, nombre, descripcion, tono }) => ({ id, nombre, descripcion, tono })),
++  );
++  assert.equal(FONDO_POR_DEFECTO, web.FONDO_POR_DEFECTO);
++  assert.equal(claveFondo('a@b'), web.claveFondo('a@b'));
++});
++
++test('cada foto tiene su versión de teléfono y su miniatura, webp y livianas; los demás no traen foto', () => {
++  const imagenes = leer('src/theme/fondos-imagenes.ts');
++  for (const f of FONDOS) {
++    if (!f.foto) {
++      assert.ok(!imagenes.includes(`'${f.id}'`) && !imagenes.includes(`${f.id}:`), `${f.id} no trae foto`);
++      continue;
++    }
++    assert.ok(f.tono, `${f.id} con foto tiene tono`);
++    for (const sufijo of ['movil', 'mini']) {
++      const ruta = fileURLToPath(new URL(`assets/fondos/${f.foto}-${sufijo}.webp`, raiz));
++      assert.ok(existsSync(ruta), `existe ${ruta}`);
++      assert.ok(statSync(ruta).size < 80_000, `${ruta} pesa menos de 80 KB`);
++      assert.ok(imagenes.includes(`require('../../assets/fondos/${f.foto}-${sufijo}.webp')`), `${f.id} usa ${f.foto}-${sufijo}.webp`);
++    }
++  }
++});
++
++test('«Sin fondo» va por defecto: sin cuenta, sin nada guardado, con datos raros o si falla el teléfono', async () => {
++  assert.equal(FONDO_POR_DEFECTO, 'ninguno');
++  assert.equal(FONDOS[0].id, 'ninguno');
++  assert.equal(FONDOS[0].nombre, 'Sin fondo');
++  assert.equal(FONDOS[0].tono, null);
++  assert.equal(fondoPorId('inventado').id, 'ninguno');
++  assert.equal(fondoPorId(undefined).id, 'ninguno');
++
++  const datos = new Map([[claveFondo('b'), 'inventado'], [claveFondo('c'), 'perla']]);
++  const almacen = { getItem: async (k) => datos.get(k) ?? null, setItem: async (k, v) => void datos.set(k, v) };
++  assert.equal(await leerFondoDe(almacen, ''), 'ninguno');
++  assert.equal(await leerFondoDe(almacen, 'a'), 'ninguno');
++  assert.equal(await leerFondoDe(almacen, 'b'), 'ninguno');
++  assert.equal(await leerFondoDe(almacen, 'c'), 'perla');
++
++  const roto = { getItem: async () => { throw new Error('sin almacenamiento'); }, setItem: async () => { throw new Error('lleno'); } };
++  assert.equal(await leerFondoDe(roto, 'c'), 'ninguno');
++  assert.equal(await guardarFondoDe(roto, 'c', 'perla'), false);
++});
++
++test('se guarda por cuenta, con la clave de la web, y no acepta ids inventados', async () => {
++  const datos = new Map();
++  const almacen = { getItem: async (k) => datos.get(k) ?? null, setItem: async (k, v) => void datos.set(k, v) };
++  assert.equal(await guardarFondoDe(almacen, 'a', 'carretera'), true);
++  assert.equal(await guardarFondoDe(almacen, 'a', 'inventado'), false);
++  assert.equal(await guardarFondoDe(almacen, '', 'perla'), false);
++  assert.equal(await leerFondoDe(almacen, 'a'), 'carretera');
++  assert.equal(await leerFondoDe(almacen, 'b'), 'ninguno');
++  assert.deepEqual([...datos.keys()], ['fom.fondo.v1:a']);
++});
++
++test('el Centro de control y los mapas quedan sin fondo', () => {
++  assert.match(leer('src/app/mapa-flota.tsx'), /<TemaSinFondo>\s*<MapaFlotaContenido \/>/u);
++  assert.match(leer('src/components/map-vehiculo.tsx'), /<TemaSinFondo>/u);
++  assert.match(leer('src/components/map-vehiculo.web.tsx'), /<TemaSinFondo>/u);
 +});
 diff --git a/test/regla-conteos.test.mjs b/test/regla-conteos.test.mjs
 new file mode 100644
