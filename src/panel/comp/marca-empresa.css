@@ -17,16 +17,17 @@
   .marca-empresa-nota { display: none; }
 }
 
-/* Compacta: logo de 20 px + nombre en 12 px, en una línea, para ir bajo un título
-   (barra del teléfono en Centro de control). La nota «Gestionando…» queda para el lector de
-   pantalla; a la vista lo dice el aro azul del logo. */
+/* Compacta: logo chico + nombre en 12 px, en una línea, para ir bajo un título (la barra de
+   arriba del teléfono). La nota «Gestionando…» queda para el lector de pantalla y el `title`; a
+   la vista lo dicen el aro azul de 1 px del logo y la etiqueta corta «Admin FOM». */
 .marca-empresa.compacta { --marca-tam: 20px; gap: 6px; }
 .marca-empresa.compacta .marca-empresa-logo { border-radius: 6px; }
+.marca-empresa.compacta .marca-empresa-monograma { font-size: 8px; }
 .marca-empresa.compacta .marca-empresa-nombre { font-size: 12px; font-weight: 500; line-height: 16px; color: var(--e-texto-2, #abb3bf); }
 .marca-empresa.compacta .marca-empresa-nota { display: block; position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.marca-empresa.compacta.gestionando .marca-empresa-logo { box-shadow: 0 0 0 1px var(--e-primario, #3d9bf5); }
-
-/* Título de dos líneas en la barra del teléfono: el nombre de la pantalla y, debajo, la empresa. */
-.mv-titulo-doble { display: grid; gap: 1px; min-width: 0; }
-.mv-titulo-doble .mv-titulo-linea { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 18px; }
-.mv-capsula:has(.mv-titulo-doble) { padding-top: 6px; padding-bottom: 6px; }
+.marca-empresa.compacta.gestionando .marca-empresa-logo { border-color: transparent; box-shadow: 0 0 0 1px var(--e-primario, #3d9bf5); }
+.marca-empresa-etiqueta {
+  flex: none; display: inline-flex; align-items: center; height: 16px; padding: 0 6px; border-radius: 999px;
+  background: color-mix(in srgb, var(--e-primario, #3d9bf5) 16%, transparent); color: var(--e-activo-texto, #8bc6ff);
+  font: 600 10px/1 var(--e-fuente, inherit); font-style: normal; letter-spacing: .02em; white-space: nowrap;
+}

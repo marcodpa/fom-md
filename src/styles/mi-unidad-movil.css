@@ -62,9 +62,8 @@
 
   /* ---- Encabezado flotando sobre el mapa ---- */
   .mvu-encabezado { position: absolute; top: 0; left: 0; right: 0; z-index: 30; pointer-events: none; }
-  .mvu-encabezado .mv-barra { position: static; background: none; }
-  .mvu-encabezado .mv-barra > * { pointer-events: auto; }
-  .pnl.fom-dark[data-diseno="azul"] .mvu-encabezado :is(.mv-capsula, .mv-circulo:not(.mv-avatar)) { background: rgb(20 26 34 / .94); }
+  /* La barra va .flotante (movil-app.css): aquí solo deja de ser absoluta dentro de su caja. */
+  .mvu-encabezado .mv-barra { position: static; }
 
   /* ---- La hoja de tres estados (T-170) ---- */
   .mvu-hmarco { position: absolute; top: 0; left: 0; right: 0; bottom: var(--mvu-dock); z-index: 20; overflow: hidden; pointer-events: none; }

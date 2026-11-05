@@ -914,7 +914,7 @@ export default function MiUnidadMovil({ perfil, unidad: asignada, enMapa: enMapa
           nombre={perfil?.nombre}
           sinLeer={sinLeer}
           etiquetaCampana={`Alertas: ${sinLeer} sin leer`}
-          iniciales={perfil?.iniciales}
+          flotante
         />
       </div>
 

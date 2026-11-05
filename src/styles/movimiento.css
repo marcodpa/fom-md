@@ -279,8 +279,8 @@ html.mov-vt-tema::view-transition-new(root) {
   transition-duration: var(--mov-rapido);
   transition-timing-function: var(--mov-curva-salida);
 }
-.mv-circulo { transition: transform var(--mov-lento) var(--mov-resorte-toque); }
-.mv-circulo:active { transition: transform var(--mov-rapido) var(--mov-curva-salida); }
+.mv-barra-boton { transition: background-color var(--mov-rapido) var(--mov-curva-salida), transform var(--mov-lento) var(--mov-resorte-toque); }
+.mv-barra-boton:active { transition: transform var(--mov-rapido) var(--mov-curva-salida); }
 
 /* ============================================================
    7. REDUCIR MOVIMIENTO: todo se apaga

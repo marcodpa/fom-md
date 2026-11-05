@@ -16,9 +16,9 @@ import './marca-empresa.css'
  *
  * `global`: la pantalla es de administración global (sin empresa elegida).
  * `nota`: mostrar la línea «Gestionando como administrador FOM» si aplica.
- * `compacta`: una sola línea chica (logo de 20 px + nombre), para ir bajo un título, como en la
- *   barra del teléfono de Centro de control. La nota no se ve, la lee el lector de pantalla; el
- *   aro azul del logo dice que se está gestionando.
+ * `compacta`: una sola línea chica (logo de 18–20 px + nombre), para ir bajo un título, como en la
+ *   barra de arriba del teléfono. La nota no se ve, la lee el lector de pantalla y va en el
+ *   `title`; a la vista lo dicen el aro azul de 1 px del logo y la etiqueta «Admin FOM».
  */
 export default function MarcaEmpresa({ global = false, nota = true, compacta = false, className = '' }) {
   const sesion = useSesion()
@@ -36,6 +36,8 @@ export default function MarcaEmpresa({ global = false, nota = true, compacta = f
         <b className="marca-empresa-nombre">{marca.nombre}</b>
         {nota && marca.nota && <small className="marca-empresa-nota">{marca.nota}</small>}
       </span>
+      {/* A la vista, corto: el texto entero ya lo lee el lector de pantalla en la nota. */}
+      {compacta && marca.nota && <em className="marca-empresa-etiqueta" aria-hidden="true">Admin FOM</em>}
     </span>
   )
 }

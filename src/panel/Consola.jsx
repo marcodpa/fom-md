@@ -455,7 +455,11 @@ export default function Consola() {
   const volver = () => (window.history.state?.idx > 0 ? navegacionSuave.navigator.go(-1) : conTransicion(() => navegar(inicioDe(area))))
   // Lo que es solo de la computadora (el SOS del menú) no va a «Accesos» del teléfono.
   const menuTelefono = menu.map((g) => ({ ...g, items: g.items.filter((it) => !it.soloEscritorio) }))
-  const movil = { esMovil, accesos: accesosDe(menuTelefono, pestanas), sinLeer: avisos, perfil }
+  const movil = { esMovil, accesos: accesosDe(menuTelefono, pestanas), sinLeer: avisos, perfil, menuAbierto, abrirMenu: () => setMenuAbierto(true) }
+  // La barra del teléfono: la empresa bajo el título (el conductor no: su empresa está en Mi
+  // perfil). El administrador FOM sin empresa elegida ve la marca FOM global.
+  const marcaMovil = area === 'conductor' ? null : <MarcaEmpresa compacta global={esAdminFom(perfil) && !perfil.empresaGestion} />
+  const sobreMapa = pathname.replace(/\/+$/u, '') === '/panel/mapa'
 
   return (
     <UNSAFE_NavigationContext.Provider value={navegacionSuave}>
@@ -500,20 +504,18 @@ export default function Consola() {
         {esMovil && (enPestana
           ? <MovilEncabezado
               seccion={titulo}
-              // Como encabezado-fom de la app: el conductor ve solo la sección
-              // (su empresa ya está en Mi perfil); los demás, la empresa.
-              nombre={area === 'conductor' ? '' : perfil.empresaGestion?.nombre || (esAdminFom(perfil) ? '' : perfil.empresa)}
+              marca={marcaMovil}
               sinLeer={avisos}
               etiquetaCampana={etiquetaCampana}
-              iniciales={perfil.iniciales}
+              flotante={sobreMapa}
             />
           : <MovilPantalla
-              // En Centro de control la empresa va aquí, bajo el título y con su logo, en vez de
-              // una tarjeta aparte sobre el mapa (el administrador FOM ve en cuál entró).
-              titulo={pathname.replace(/\/+$/u, '') === '/panel/mapa' && area !== 'conductor'
-                ? <span className="mv-titulo-doble"><span className="mv-titulo-linea">{titulo}</span><MarcaEmpresa compacta /></span>
-                : titulo}
+              // También en Centro de control: la empresa va aquí, bajo el título y con su logo, en
+              // vez de una tarjeta aparte sobre el mapa (el administrador FOM ve en cuál entró).
+              titulo={titulo}
+              marca={marcaMovil}
               alVolver={volver}
+              flotante={sobreMapa}
             />)}
 
         {/* Cada pantalla llega en su propio trozo; mientras baja, el esqueleto de siempre

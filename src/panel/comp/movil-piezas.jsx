@@ -1,10 +1,11 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useContext, useLayoutEffect, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import LogoFom from '../../components/LogoFom'
 import { Icono } from '../Iconos'
 import { useSesion } from '../useSesion'
 import { areaDe } from '../roles'
 import { useAvisosConductor } from '../datos/useAvisosConductor'
+import { MovilContexto } from './movil-navegacion'
 
 /**
  * Las piezas de la app para la web en el teléfono (encabezado-fom.tsx,
@@ -38,15 +39,49 @@ export function IconoMovil({ nombre, tam = 20 }) {
 }
 
 /**
- * EL ENCABEZADO DE LAS PESTAÑAS: la cápsula (logo, la sección en mayúsculas
- * chicas y la empresa), la campana con su globo y el avatar redondo. Se queda
- * fijo arriba y el contenido pasa por detrás.
+ * LA BARRA DE ARRIBA DEL TELÉFONO: una sola pieza de 52 px en todas las
+ * pantallas. A la izquierda un botón de 44 (menú o atrás); en medio el nombre
+ * de la pantalla y, debajo, la empresa (logo de 18 + nombre, en una línea);
+ * a la derecha la campana o el logo FOM. Pegada arriba en todas las pantallas;
+ * sobre un mapa (`flotante`) flota como el buscador. Estilos: movil-app.css.
+ */
+function BarraMovil({ izquierda, titulo, linea, derecha, flotante = false, clase = '' }) {
+  return (
+    <header className={`mv-barra${flotante ? ' flotante' : ''}${clase ? ` ${clase}` : ''}`}>
+      <div className="mv-barra-caja">
+        {izquierda}
+        <div className="mv-barra-centro">
+          <b className="mv-barra-titulo">{titulo}</b>
+          {linea && <span className="mv-barra-linea">{linea}</span>}
+        </div>
+        {derecha}
+      </div>
+    </header>
+  )
+}
+
+/** ☰: abre el menú completo (el lateral de la computadora, como hoja desde la izquierda). */
+function BotonMenu() {
+  const movil = useContext(MovilContexto)
+  if (!movil?.abrirMenu) return null
+  return (
+    <button type="button" className="mv-barra-boton" aria-label="Abrir menú" aria-expanded={!!movil.menuAbierto}
+      aria-controls="panel-navigation" onClick={movil.abrirMenu}>
+      <Icono nombre="menu" tam={22} />
+    </button>
+  )
+}
+
+/**
+ * EL ENCABEZADO DE LAS PESTAÑAS: ☰, el nombre de la pestaña con la empresa
+ * debajo (`marca`, o el texto `nombre` si no hay marca) y la campana con su
+ * globo. Mi perfil ya está en la barra de abajo: aquí no se repite el avatar.
  *
  * Al conductor la campana le cuenta SUS avisos (su unidad, las órdenes que
  * reportó y sus papeles), como encabezado-fom de la app, y no los de toda la
  * empresa que llegan en `sinLeer`. Los demás roles, sin cambios.
  */
-export function MovilEncabezado({ seccion, nombre, sinLeer, etiquetaCampana, iniciales }) {
+export function MovilEncabezado({ seccion, nombre, marca = null, sinLeer, etiquetaCampana, flotante = false }) {
   const sesion = useSesion()
   const { pathname } = useLocation()
   const esConductor = areaDe(sesion?.perfil) === 'conductor'
@@ -54,40 +89,40 @@ export function MovilEncabezado({ seccion, nombre, sinLeer, etiquetaCampana, ini
   const avisos = esConductor ? suyos.noLeidas : sinLeer
   const etiqueta = esConductor ? (avisos > 0 ? `Alertas: ${avisos} sin leer` : 'Alertas') : etiquetaCampana
   return (
-    <header className="mv-barra">
-      <div className="mv-capsula">
-        <LogoFom className="mv-logo" />
-        <i className="mv-divisor" aria-hidden="true" />
-        <span className="mv-textos">
-          <small className="mv-ceja">{seccion}</small>
-          {nombre && <b className="mv-nombre">{nombre}</b>}
-        </span>
-      </div>
-      <Link to="/panel/alertas" className="mv-circulo" aria-label={etiqueta}>
-        <Icono nombre="campana" tam={20} />
-        {avisos > 0 && <span className="mv-insignia" aria-hidden="true">{avisos > 99 ? '99+' : avisos}</span>}
-      </Link>
-      <Link to="/panel/mi-perfil" className="mv-circulo mv-avatar" aria-label="Mi perfil">{iniciales}</Link>
-    </header>
+    <BarraMovil
+      flotante={flotante}
+      izquierda={<BotonMenu />}
+      titulo={seccion}
+      linea={marca || (nombre ? <span className="mv-barra-texto">{nombre}</span> : null)}
+      derecha={(
+        <Link to="/panel/alertas" className="mv-barra-boton" aria-label={etiqueta}>
+          <Icono nombre="campana" tam={21} />
+          {avisos > 0 && <span className="mv-insignia" aria-hidden="true">{avisos > 99 ? '99+' : avisos}</span>}
+        </Link>
+      )}
+    />
   )
 }
 
 /**
- * EL ENCABEZADO DE LAS PANTALLAS EMPUJADAS (fichas, Inspecciones, Reportes…):
- * el botón atrás en un círculo y el título corto en la cápsula, con el logo a
- * la derecha como adorno.
+ * EL ENCABEZADO DE LAS PANTALLAS EMPUJADAS (fichas, Centro de control,
+ * Reportes…): atrás, el título con la empresa debajo y el logo FOM pequeño a
+ * la derecha como firma.
  */
-export function MovilPantalla({ titulo, alVolver }) {
+export function MovilPantalla({ titulo, marca = null, alVolver, flotante = false }) {
   return (
-    <header className="mv-barra mv-pila">
-      <button type="button" className="mv-circulo" aria-label="Volver" onClick={alVolver}>
-        <Icono nombre="volver" tam={22} />
-      </button>
-      <div className="mv-capsula">
-        <b className="mv-titulo">{titulo}</b>
-        <LogoFom decorativo className="mv-logo" />
-      </div>
-    </header>
+    <BarraMovil
+      clase="mv-pila"
+      flotante={flotante}
+      izquierda={(
+        <button type="button" className="mv-barra-boton" aria-label="Volver" onClick={alVolver}>
+          <Icono nombre="volver" tam={22} />
+        </button>
+      )}
+      titulo={titulo}
+      linea={marca}
+      derecha={<LogoFom decorativo className="mv-barra-logo" />}
+    />
   )
 }
 
