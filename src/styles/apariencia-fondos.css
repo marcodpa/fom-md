@@ -59,11 +59,11 @@
     linear-gradient(180deg, rgb(10 13 18 / .30), rgb(10 13 18 / .55)),
     var(--fondo-foto, none) center / cover no-repeat;
 }
-/* Sobre la foto clara, un lavado blanco: los carros más oscuros (L 0,15) suben a L ≥ 0,45, así
-   la letra suelta en tinta pasa AA aunque caiga encima de un carro. */
+/* Sobre la foto clara, un lavado blanco al 70 %: los carros quedan como sombras suaves (no
+   manchas grises detrás de las tarjetas) y la letra suelta en tinta pasa AA encima de un carro. */
 .pnl-fondo[data-fondo="blanco-carros"]::after {
   background:
-    linear-gradient(rgb(250 251 252 / .5), rgb(250 251 252 / .5)),
+    linear-gradient(rgb(250 251 252 / .7), rgb(250 251 252 / .7)),
     var(--fondo-foto, none) center / cover no-repeat;
 }
 .pnl-fondo[data-fondo="noche-azul"]::before {

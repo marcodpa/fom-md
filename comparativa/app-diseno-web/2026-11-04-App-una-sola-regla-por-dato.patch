@@ -4698,10 +4698,10 @@ index d4fe55f..b527a7d 100644
  export type OpcionTipo = { id: string; label: string; cuenta: number };
 diff --git a/src/components/fondo-pantalla.tsx b/src/components/fondo-pantalla.tsx
 new file mode 100644
-index 0000000..194a25b
+index 0000000..52e3986
 --- /dev/null
 +++ b/src/components/fondo-pantalla.tsx
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,124 @@
 +import { Image } from 'expo-image';
 +import { LinearGradient } from 'expo-linear-gradient';
 +import { useState } from 'react';
@@ -4765,6 +4765,10 @@ index 0000000..194a25b
 +      {oscura ? (
 +        <LinearGradient colors={['rgba(10, 13, 18, 0.30)', 'rgba(10, 13, 18, 0.55)']} style={StyleSheet.absoluteFill} />
 +      ) : null}
++      {f.id === 'blanco-carros' && imagen != null ? (
++        // Lavado blanco al 70 %, como la web: los carros quedan como sombras suaves y no manchas grises.
++        <View style={[StyleSheet.absoluteFill, styles.lavado]} />
++      ) : null}
 +    </View>
 +  );
 +}
@@ -4820,6 +4824,7 @@ index 0000000..194a25b
 +
 +const styles = StyleSheet.create({
 +  recorte: { overflow: 'hidden' },
++  lavado: { backgroundColor: 'rgba(250, 251, 252, 0.7)' },
 +});
 diff --git a/src/components/gps-instalar-form.tsx b/src/components/gps-instalar-form.tsx
 index c4cd5d8..0fd3f0e 100644
